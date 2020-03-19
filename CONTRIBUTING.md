@@ -134,6 +134,7 @@ GE core team members use this checklist to ship releases.
     - [ ] ensure you have a clean master
     - [ ] run `git tag -a 0.9.3 -m "0.9.3"` with the correct new version
     - [ ] push the tag up by running `git push origin 0.9.3` with the correct new version
+    - [ ] merge `master` into `develop` so that the tagged commit becomes part of the history for `develop`.
 - [ ] [Create the release on GitHub](https://github.com/great-expectations/great_expectations/releases) with the version number. Copy the changelog notes into the release notes.
 - [ ] Verify RTD builds new release version
 - [ ] Socialize the relase on GE slack by copying the changelog with an optional nice personal message (thank people if you can)
