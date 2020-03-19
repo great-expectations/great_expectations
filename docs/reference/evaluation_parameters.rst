@@ -103,3 +103,17 @@ Replace names in ``<>`` with the desired name. For example:
   urn:great_expectations:validations:dickens_data:expect_column_proportion_of_unique_values_to_be_between.result.observed_value:column=Title
 
 *last updated*: |lastupdate|
+
+4. Proposed API:
+>>>context.run_validation_operator{"$PARAMETER_EXPRESSION":"using api 2"}
+
+*****************************************
+Context around api 4
+*****************************************
+results = context.run_validation_operator(
+    "action_list_operator",
+    assets_to_validate=[batch], evaluation_parameters={"upstream_row_count":37689352554},
+    run_id=run_id)
+
+Poor man's version takes key,value pair of runid,count
+Better than poor man, runid,count,{greater than, less than, same as, within x%}
