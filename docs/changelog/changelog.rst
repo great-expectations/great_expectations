@@ -7,6 +7,7 @@ develop
     key in expectation suite json. It is safe to remove.
   - Similarly, datasource configuration must now adhere strictly to the required schema, including having any
     required credentials stored in the "credentials" dictionary.
+* Docs: update Usage Statistics section with info on new anonymous usage data collection```
 
 0.9.6
 -----------------
@@ -653,4 +654,3 @@ to top-level names.
 * API and examples for custom expectations are available
 * New output formats are available for all expectations
 * Significant improvements to test suite and compatibility
-
