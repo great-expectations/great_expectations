@@ -283,7 +283,7 @@ def test_validate_with_invalid_result(validate_result_dict):
         results = my_df.validate()  # catch_exceptions=True is default
 
     with open(file_relative_path(__file__, './test_sets/titanic_expected_data_asset_validate_results_with_exceptions.json')) as f:
-        expected_results = expectationSuiteValidationResultSchema.loads(f.read()).data
+        expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
     del results.meta["great_expectations.__version__"]
 
