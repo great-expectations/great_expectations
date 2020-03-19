@@ -13,8 +13,9 @@ env:
 stages:
   - name: test
   - name: deploy
-    if: branch = master
+    if: branch = master AND type != pull_request
   - name: experimental
+    if: branch != master
 jobs:
   allow_failures:
     - if: os = windows

@@ -2,7 +2,7 @@ name: stalebot
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "5 * * * *"
   issues:
     types: [opened, reopened]
 
@@ -11,13 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 #    - uses: actions/stale@v1.1.0
-    - uses: Dolibarr/stale@69ff45d
+    - uses: DeMoorJasper/stale@v2.0.1
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        stale-issue-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
-        stale-pr-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis PR has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
-        stale-issue-label: 'stale'
-        stale-pr-label: 'stale'
+        stale-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
+        stale-label: 'stale'
+        exempt-labels: 'awaiting-approval, security, stalebot-exempt'
         days-before-stale: 120
         days-before-close: 7
-        exempt-issue-label: 'stalebot-exempt'
