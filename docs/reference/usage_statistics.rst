@@ -179,7 +179,7 @@ Great Expectations currently emits usage statistics for the following methods:
                 {"parent_class": "PandasDatasource"}
              ]
         }
-
+We may periodically update messages or add messages for additional methods as necessary to improve the library, but we will include information about such changes here.
 Other than standard web request data, we don’t collect any data data that could be used to identify individual users.
 You can suppress the images by changing ``static_images_dir`` in ``great_expectations/render/view/templates/top_navbar.j2``.
 
