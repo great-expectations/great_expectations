@@ -19,6 +19,6 @@ cases, it could be easily readable, such as `column=Age`, but when there are mul
 values, it will most likely be an md5 hash of key/value pairs. It can also be None in the case that there are no
 kwargs required to identify the metric.
 
-See the :ref:`metrics_reference` or :ref:`metrics_tutorial <tutorial on saving metrics>` for more information.
+See the :ref:`metrics_reference` or :ref:`Saving Metrics Tutorial <saving_metrics>` for more information.
 
 *Last updated:* |lastupdate|
