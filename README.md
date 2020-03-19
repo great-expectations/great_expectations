@@ -33,7 +33,7 @@ See [Down with Pipeline Debt!](https://medium.com/@expectgreatdata/down-with-pip
 Key features
 --------------------------------------------------
 
-###**Expectations**
+###Expectations
 
 Expectations are assertions for data. They are the workhorse abstraction in Great Expectations, covering all kinds of common data issues, including:
 - `expect_column_values_to_not_be_null`
