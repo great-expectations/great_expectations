@@ -49,6 +49,7 @@ Commands:
   init        Initialize a new Great Expectations project.
   project     project operations
   suite       expectation suite operations
+  tap         tap operations
 """
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)

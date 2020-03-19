@@ -177,11 +177,10 @@ def test_base_class_expectation():
     assert df.expect_column_values_to_be_between("aaa", min_value=1, max_value=5).success is True
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_validate():
 
     with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read()).data
+        my_expectation_suite = expectationSuiteSchema.loads(f.read())
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
@@ -196,7 +195,7 @@ def test_validate():
         results = my_df.validate(catch_exceptions=False)
 
     with open(file_relative_path(__file__, './test_sets/titanic_expected_data_asset_validate_results.json')) as f:
-        expected_results = expectationSuiteValidationResultSchema.loads(f.read()).data
+        expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
     del results.meta["great_expectations.__version__"]
 
@@ -248,11 +247,10 @@ def test_validate():
 
 
 @mock.patch('great_expectations.core.ExpectationValidationResult.validate_result_dict', return_value=False)
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dict):
 
     with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read()).data
+        my_expectation_suite = expectationSuiteSchema.loads(f.read())
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
@@ -267,11 +265,10 @@ def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dic
 
 
 @mock.patch('great_expectations.core.ExpectationValidationResult.validate_result_dict', return_value=False)
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_validate_with_invalid_result(validate_result_dict):
 
     with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read()).data
+        my_expectation_suite = expectationSuiteSchema.loads(f.read())
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
@@ -286,7 +283,7 @@ def test_validate_with_invalid_result(validate_result_dict):
         results = my_df.validate()  # catch_exceptions=True is default
 
     with open(file_relative_path(__file__, './test_sets/titanic_expected_data_asset_validate_results_with_exceptions.json')) as f:
-        expected_results = expectationSuiteValidationResultSchema.loads(f.read()).data
+        expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
     del results.meta["great_expectations.__version__"]
 
@@ -432,7 +429,7 @@ class TestIO(unittest.TestCase):
         # Note that pandas changed the parameter name from sheetname to sheet_name.
         # We will test with both options to ensure that the versions are correct.
         pandas_version = pd.__version__
-        if re.match('0\.2[012]\.', pandas_version) is not None:
+        if re.match(r'0\.2[012]\.', pandas_version) is not None:
             dfs_dict = ge.read_excel(
                 script_path+'/test_sets/Titanic_multi_sheet.xlsx',
                 sheetname=None
@@ -470,7 +467,7 @@ class TestIO(unittest.TestCase):
 
         # Pass this test if the available version of pandas is less than 0.21.0, because prior
         # versions of pandas did not include the read_parquet function.
-        pandas_version = re.match('(\d+)\.(\d+)\..+', pd.__version__)
+        pandas_version = re.match(r'(\d+)\.(\d+)\..+', pd.__version__)
         if pandas_version is None:
             raise ValueError("Unrecognized pandas version!")
         else:

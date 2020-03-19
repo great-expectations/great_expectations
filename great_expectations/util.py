@@ -3,6 +3,7 @@ import importlib
 import json
 import logging
 
+import black
 from six import string_types
 
 from great_expectations.core import expectationSuiteSchema
@@ -422,7 +423,7 @@ def validate(
         )
     else:
         if isinstance(expectation_suite, dict):
-            expectation_suite = expectationSuiteSchema.load(expectation_suite).data
+            expectation_suite = expectationSuiteSchema.load(expectation_suite)
         if data_asset_name is not None:
             raise ValueError("When providing an expectation suite, data_asset_name cannot also be provided.")
         if expectation_suite_name is not None:
@@ -499,3 +500,17 @@ def gen_directory_tree_str(startpath):
             output_str += '{}{}\n'.format(subindent, f)
     
     return output_str
+
+
+def lint_code(code):
+    """Lint strings of code passed in."""
+    black_file_mode = black.FileMode()
+    if not isinstance(code, str):
+        raise TypeError
+    try:
+        linted_code = black.format_file_contents(
+            code, fast=True, mode=black_file_mode
+        )
+        return linted_code
+    except (black.NothingChanged, RuntimeError):
+        return code
