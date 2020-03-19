@@ -2,13 +2,20 @@
 
 develop
 -----------------
-* Update marshmallow dependency to >3. NOTE: as of this release, you MUST use marshamllow >3.0, which REQUIRES python 3.
+
+
+0.9.7
+-----------------
+* Update marshmallow dependency to >3. NOTE: as of this release, you MUST use marshamllow >3.0, which REQUIRES python 3. (`#1187 <https://github.com/great-expectations/great_expectations/issues/1187>`_) @jcampbell
   - Schema checking is now stricter for expectation suites, and data_asset_name must not be present as a top-level
     key in expectation suite json. It is safe to remove.
   - Similarly, datasource configuration must now adhere strictly to the required schema, including having any
     required credentials stored in the "credentials" dictionary.
-* New CLI command: `tap new` that generates an executable python file to expedite deployments.
+* New beta CLI command: `tap new` that generates an executable python file to expedite deployments. (`#1193 <https://github.com/great-expectations/great_expectations/issues/1193>`_) @Aylr
 * bugfix in TableBatchKwargsGenerator docs
+* Added feature maturity in README (`#1203 <https://github.com/great-expectations/great_expectations/issues/1203>`_) @kyleaton
+* Fix failing test that should skip if postgresql not running (`#1199 <https://github.com/great-expectations/great_expectations/issues/1199>`_) @cicdw
+
 
 0.9.6
 -----------------
