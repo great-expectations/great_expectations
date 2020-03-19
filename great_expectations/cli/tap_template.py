@@ -17,10 +17,11 @@ Usage:
 pipeline.
 """
 import sys
-import great_expectations as ge
+
+from great_expectations import DataContext
 
 # tap configuration
-context = ge.DataContext("{1}")
+context = DataContext("{1}")
 suite = context.get_expectation_suite("{2}")
 # You can modify your BatchKwargs to select different data
 batch_kwargs = {3}
