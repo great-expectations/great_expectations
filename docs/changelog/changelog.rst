@@ -4,6 +4,11 @@ develop
 -----------------
 
 
+0.9.8
+-----------------
+* Remove the "project new" option from the command line (since it is not implemented; users can only run "init" to create a new project).
+
+
 0.9.7
 -----------------
 * Update marshmallow dependency to >3. NOTE: as of this release, you MUST use marshamllow >3.0, which REQUIRES python 3. (`#1187 <https://github.com/great-expectations/great_expectations/issues/1187>`_) @jcampbell
