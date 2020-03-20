@@ -5,7 +5,6 @@ from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource.generator.manual_generator import ManualBatchKwargsGenerator
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_manual_generator(basic_pandas_datasource):
     generator = ManualBatchKwargsGenerator(datasource=basic_pandas_datasource, assets={
         "asset1": [

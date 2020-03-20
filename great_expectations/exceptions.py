@@ -11,10 +11,6 @@ class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
     def __init__(self, message, validation_error):
         self.message = message
         self.messages = validation_error.messages
-        self.data = validation_error.data
-        self.field_names = validation_error.field_names
-        self.fields = validation_error.fields
-        self.kwargs = validation_error.kwargs
 
 
 class DataContextError(GreatExpectationsError):

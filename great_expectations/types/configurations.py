@@ -19,3 +19,5 @@ class ClassConfig(object):
 class ClassConfigSchema(Schema):
     class_name = fields.Str()
     module_name = fields.Str(allow_none=True)
+
+classConfigSchema = ClassConfigSchema()
