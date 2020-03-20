@@ -6,10 +6,7 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_logging import logger
-from great_expectations.cli.util import (
-    _offer_to_install_new_template,
-    cli_message,
-)
+from great_expectations.cli.util import cli_message
 
 
 @click.group()
@@ -43,9 +40,6 @@ def docs_build(directory, site_name, view=True):
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
-        return
     except ge_exceptions.PluginModuleNotFoundError as err:
         cli_message(err.cli_colored_message)
         sys.exit(1)

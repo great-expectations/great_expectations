@@ -15,7 +15,6 @@ from tests.cli.utils import (
 )
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
@@ -52,17 +51,9 @@ def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
     )
 
     stdout = result.output.strip()
-    if PY2:
-        # deal with legacy python dictionary sorting
-        assert (
-            "'name': 'wow_a_datasource'"
-            and "'class_name': 'PandasDatasource'" in stdout
-        )
-        assert len(stdout) >= 60 and len(stdout) <= 70
-    else:
-        assert (
-            "[{'name': 'wow_a_datasource', 'class_name': 'PandasDatasource'}]" in stdout
-        )
+    assert (
+        "[{'name': 'wow_a_datasource', 'class_name': 'PandasDatasource'}]" in stdout
+    )
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
@@ -131,12 +122,12 @@ def test_cli_datasource_profile_answering_no(
 
     stdout = result.stdout
     assert result.exit_code == 0
+    assert "Warning - this is a BETA feature." in stdout
     assert "Profiling 'my_datasource'" in stdout
     assert "Skipping profiling for now." in stdout
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_cli_datasource_profile_with_datasource_arg(
     caplog, empty_data_context, filesystem_csv_2
 ):
@@ -201,7 +192,6 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert_no_tracebacks(result)
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_cli_datasource_profile_with_no_datasource_args(
     caplog, empty_data_context, filesystem_csv_2
 ):
@@ -269,7 +259,6 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert_no_tracebacks(result)
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_cli_datasource_profile_with_additional_batch_kwargs(
     caplog, empty_data_context, filesystem_csv_2
 ):

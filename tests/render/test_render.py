@@ -31,25 +31,25 @@ from tests.test_utils import expectationSuiteValidationResultSchema
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs():
     with open(file_relative_path(__file__, './fixtures/BasicDatasetProfiler_evrs.json'), 'r') as infile:
-        return expectationSuiteValidationResultSchema.load(json.load(infile, object_pairs_hook=OrderedDict)).data
+        return expectationSuiteValidationResultSchema.load(json.load(infile, object_pairs_hook=OrderedDict))
 
 
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs_with_exception():
     with open(file_relative_path(__file__, './fixtures/BasicDatasetProfiler_evrs_with_exception.json'), 'r') as infile:
-        return expectationSuiteValidationResultSchema.load(json.load(infile)).data
+        return expectationSuiteValidationResultSchema.load(json.load(infile))
 
 
 @pytest.fixture(scope="module")
 def titanic_dataset_profiler_expectations():
     with open(file_relative_path(__file__, './fixtures/BasicDatasetProfiler_expectations.json'), 'r') as infile:
-        return expectationSuiteSchema.load(json.load(infile, object_pairs_hook=OrderedDict)).data
+        return expectationSuiteSchema.load(json.load(infile, object_pairs_hook=OrderedDict))
 
 
 @pytest.fixture(scope="module")
 def titanic_dataset_profiler_expectations_with_distribution():
     with open(file_relative_path(__file__, './fixtures/BasicDatasetProfiler_expectations_with_distribution.json'), 'r') as infile:
-        return expectationSuiteSchema.load(json.load(infile, encoding="utf-8", object_pairs_hook=OrderedDict)).data
+        return expectationSuiteSchema.load(json.load(infile, encoding="utf-8", object_pairs_hook=OrderedDict))
 
 
 @pytest.mark.smoketest

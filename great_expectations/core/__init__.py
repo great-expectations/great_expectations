@@ -8,6 +8,7 @@ import datetime
 from dateutil import parser
 from six import string_types
 
+from IPython import get_ipython
 from marshmallow import Schema, fields, ValidationError, post_load, pre_dump
 
 from great_expectations import __version__ as ge_version
@@ -16,7 +17,7 @@ from great_expectations.core.util import nested_update
 from great_expectations.types import DictDot
 
 from great_expectations.exceptions import InvalidExpectationConfigurationError, InvalidExpectationKwargsError, \
-    UnavailableMetricError, ParserError
+    UnavailableMetricError, ParserError, InvalidCacheValueError
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,20 @@ RESULT_FORMATS = [
 
 EvaluationParameterIdentifier = namedtuple("EvaluationParameterIdentifier", ["expectation_suite_name", "metric_name",
                                                                              "metric_kwargs_id"])
+
+
+# function to determine if code is being run from a Jupyter notebook
+def in_jupyter_notebook():
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == 'ZMQInteractiveShell':
+            return True   # Jupyter notebook or qtconsole
+        elif shell == 'TerminalInteractiveShell':
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except NameError:
+        return False      # Probably standard Python interpreter
 
 
 def get_metric_kwargs_id(metric_name, metric_kwargs):
@@ -347,7 +362,7 @@ class ExpectationConfiguration(DictDot):
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
-                    other = expectationConfigurationSchema.load(other).data
+                    other = expectationConfigurationSchema.load(other)
                 except ValidationError:
                     logger.debug("Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
                                  "dict other could not be instantiated as an ExpectationConfiguration")
@@ -382,7 +397,7 @@ class ExpectationConfiguration(DictDot):
         return json.dumps(self.to_json_dict(), indent=2)
 
     def to_json_dict(self):
-        myself = expectationConfigurationSchema.dump(self).data
+        myself = expectationConfigurationSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
         myself['kwargs'] = convert_to_json_serializable(myself['kwargs'])
@@ -496,7 +511,7 @@ class ExpectationSuite(object):
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
-                    other = expectationSuiteSchema.load(other).data
+                    other = expectationSuiteSchema.load(other)
                 except ValidationError:
                     logger.debug("Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
                                  "dict other could not be instantiated as an ExpectationConfiguration")
@@ -532,7 +547,7 @@ class ExpectationSuite(object):
         return json.dumps(self.to_json_dict(), indent=2)
 
     def to_json_dict(self):
-        myself = expectationSuiteSchema.dump(self).data
+        myself = expectationSuiteSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
         myself['expectations'] = convert_to_json_serializable(myself['expectations'])
@@ -608,6 +623,8 @@ class ExpectationSuiteSchema(Schema):
 
 class ExpectationValidationResult(object):
     def __init__(self, success=None, expectation_config=None, result=None, meta=None, exception_info=None):
+        if result and not self.validate_result_dict(result):
+            raise InvalidCacheValueError(result)
         self.success = success
         self.expectation_config = expectation_config
         # TODO: re-add
@@ -652,13 +669,31 @@ class ExpectationValidationResult(object):
             return False
 
     def __repr__(self):
+        if in_jupyter_notebook():
+            json_dict = self.to_json_dict()
+            json_dict.pop("expectation_config")
+            return json.dumps(json_dict, indent=2)
         return json.dumps(self.to_json_dict(), indent=2)
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
+    def validate_result_dict(self, result):
+        if result.get("unexpected_count") and result["unexpected_count"] < 0:
+            return False
+        if result.get("unexpected_percent") and (result["unexpected_percent"] < 0 or result["unexpected_percent"] > 100):
+            return False
+        if result.get("missing_percent") and (result["missing_percent"] < 0 or result["missing_percent"] > 100):
+            return False
+        if result.get("unexpected_percent_nonmissing") and (
+                result["unexpected_percent_nonmissing"] < 0 or result["unexpected_percent_nonmissing"] > 100):
+            return False
+        if result.get("missing_count") and result["missing_count"] < 0:
+            return False
+        return True
+
     def to_json_dict(self):
-        myself = expectationValidationResultSchema.dump(self).data
+        myself = expectationValidationResultSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
         if 'result' in myself:
@@ -777,7 +812,7 @@ class ExpectationSuiteValidationResult(DictDot):
         myself['evaluation_parameters'] = convert_to_json_serializable(myself['evaluation_parameters'])
         myself['statistics'] = convert_to_json_serializable(myself['statistics'])
         myself['meta'] = convert_to_json_serializable(myself['meta'])
-        myself = expectationSuiteValidationResultSchema.dump(myself).data
+        myself = expectationSuiteValidationResultSchema.dump(myself)
         return myself
 
     def get_metric(self, metric_name, **kwargs):
@@ -833,7 +868,7 @@ class ExpectationSuiteValidationResultSchema(Schema):
         return ExpectationSuiteValidationResult(**data)
 
 
-expectationConfigurationSchema = ExpectationConfigurationSchema(strict=True)
-expectationSuiteSchema = ExpectationSuiteSchema(strict=True)
-expectationValidationResultSchema = ExpectationValidationResultSchema(strict=True)
-expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema(strict=True)
+expectationConfigurationSchema = ExpectationConfigurationSchema()
+expectationSuiteSchema = ExpectationSuiteSchema()
+expectationValidationResultSchema = ExpectationValidationResultSchema()
+expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()

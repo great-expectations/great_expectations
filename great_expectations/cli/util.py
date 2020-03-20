@@ -1,16 +1,10 @@
-import os
 import re
-import shutil
 import sys
 
-import click
 import six
 
-from great_expectations import DataContext
-from great_expectations.cli.init_messages import (
-    NEW_TEMPLATE_INSTALLED,
-    NEW_TEMPLATE_PROMPT,
-)
+from great_expectations import exceptions as ge_exceptions
+from great_expectations.cli.cli_logging import logger
 
 try:
     from termcolor import colored
@@ -48,26 +42,21 @@ def is_sane_slack_webhook(url):
     return "https://hooks.slack.com/" in url.strip()
 
 
-def _offer_to_install_new_template(err, ge_dir):
-    ge_dir = os.path.abspath(ge_dir)
-    cli_message("<red>{}</red>".format(err.message))
-    ge_yml = os.path.join(ge_dir, DataContext.GE_YML)
-    archived_yml = ge_yml + ".archive"
+def load_expectation_suite(context, suite_name):
+    """
+    Load an expectation suite from a given context.
 
-    if click.confirm(NEW_TEMPLATE_PROMPT.format(ge_yml, archived_yml), default=True):
-        # archive existing project config
-        shutil.move(ge_yml, archived_yml)
-        DataContext.write_project_template_to_disk(ge_dir)
-
+    Handles a suite name with or without `.json`
+    """
+    if suite_name.endswith(".json"):
+        suite_name = suite_name[:-5]
+    try:
+        suite = context.get_expectation_suite(suite_name)
+        return suite
+    except ge_exceptions.DataContextError as e:
         cli_message(
-            NEW_TEMPLATE_INSTALLED.format("file://" + ge_yml, "file://" + archived_yml)
+            f"<red>Could not find a suite named `{suite_name}`.</red> Please check "
+            "the name by running `great_expectations suite list` and try again."
         )
-    else:
-        cli_message(
-            """\nOK. To continue, you will need to upgrade your config file to the latest format.
-  - Please see the docs here: <blue>https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html</blue>
-  - We are super sorry about this breaking change! :]
-  - If you are running into any problems, please reach out on Slack and we can
-    help you in realtime: https://greatexpectations.io/slack"""
-        )
-    sys.exit(0)
+        logger.info(e)
+        sys.exit(1)

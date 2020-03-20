@@ -8,6 +8,7 @@ from ruamel.yaml import YAML
 
 from great_expectations.core import (
     ExpectationConfiguration,
+    ExpectationSuite,
     expectationSuiteSchema,
 )
 from great_expectations.data_context import (
@@ -24,9 +25,14 @@ from great_expectations.data_context.util import (
     file_relative_path,
     safe_mmkdir,
 )
+from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.exceptions import DataContextError, ProfilerError, ConfigNotFoundError
+from great_expectations.exceptions import (
+    BatchKwargsError,
+    ConfigNotFoundError,
+    DataContextError,
+)
 from great_expectations.util import gen_directory_tree_str
 from tests.test_utils import safe_remove
 
@@ -98,7 +104,7 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
 ):
     """Test datasources with and without generators."""
     context = empty_data_context
-    connection_kwargs = {"drivername": "sqlite"}
+    connection_kwargs = {"credentials": {"drivername": "sqlite"}}
 
     context.add_datasource(
         "first",
@@ -339,7 +345,6 @@ project_path/
         uncommitted/
             config_variables.yml
             data_docs/
-            samples/
             validations/
                 titanic/
                     subdir_reader/
@@ -595,7 +600,7 @@ def test_data_context_updates_expectation_suite_names(data_context):
                 "expectations",
                 "a_new_new_suite_name.json"
                 ), 'r') as suite_file:
-        loaded_suite = expectationSuiteSchema.load(json.load(suite_file)).data
+        loaded_suite = expectationSuiteSchema.load(json.load(suite_file))
         assert loaded_suite.expectation_suite_name == 'a_new_new_suite_name'
 
     #   3. Using the new name but having the context draw that from the suite
@@ -741,14 +746,6 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_vali
     assert DataContext.is_project_initialized(ge_dir) == False
 
 
-def test_data_context_is_project_initialized_returns_false_when_uncommitted_samples_dir_is_missing(empty_context):
-    ge_dir = empty_context.root_directory
-    # mangle project
-    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "samples"))
-
-    assert DataContext.is_project_initialized(ge_dir) == False
-
-
 def test_data_context_is_project_initialized_returns_false_when_config_variable_yml_is_missing(empty_context):
     ge_dir = empty_context.root_directory
     # mangle project
@@ -784,10 +781,10 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(tmp_pat
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
     shutil.rmtree(uncommitted_dir)
 
-    # re-run create to simulate onboarding
-    DataContext.create(project_path)
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        # re-run create to simulate onboarding
+        DataContext.create(project_path)
     obs = gen_directory_tree_str(ge_dir)
-    print(obs)
 
     assert os.path.isdir(uncommitted_dir), "No uncommitted directory created"
     assert obs == """\
@@ -811,7 +808,6 @@ great_expectations/
     uncommitted/
         config_variables.yml
         data_docs/
-        samples/
         validations/
 """
 
@@ -838,7 +834,6 @@ great_expectations/
     uncommitted/
         config_variables.yml
         data_docs/
-        samples/
         validations/
 """
     project_path = str(tmp_path_factory.mktemp('stuff'))
@@ -846,12 +841,12 @@ great_expectations/
 
     DataContext.create(project_path)
     fixture = gen_directory_tree_str(ge_dir)
-    print(fixture)
 
     assert fixture == expected
 
-    # re-run create to simulate onboarding
-    DataContext.create(project_path)
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        # re-run create to simulate onboarding
+        DataContext.create(project_path)
 
     obs = gen_directory_tree_str(ge_dir)
     assert obs == expected
@@ -862,7 +857,6 @@ def test_data_context_do_all_uncommitted_dirs_exist(tmp_path_factory):
 uncommitted/
     config_variables.yml
     data_docs/
-    samples/
     validations/
 """
     project_path = str(tmp_path_factory.mktemp('stuff'))
@@ -918,7 +912,6 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
         'notebooks'
     }
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == {
-        'samples',
         'data_docs',
         'validations'
     }
@@ -1057,16 +1050,19 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
         # Make sure we unset the environment variable we're using
         del os.environ["TEST_CONFIG_FILE_ENV"]
 
+
 def test_list_expectation_suite_with_no_suites(titanic_data_context):
     observed = titanic_data_context.list_expectation_suite_names()
     assert isinstance(observed, list)
     assert observed == []
+
 
 def test_list_expectation_suite_with_one_suite(titanic_data_context):
     titanic_data_context.create_expectation_suite('warning')
     observed = titanic_data_context.list_expectation_suite_names()
     assert isinstance(observed, list)
     assert observed == ['warning']
+
 
 def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
     titanic_data_context.create_expectation_suite('a.warning')
@@ -1077,3 +1073,47 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
     assert isinstance(observed, list)
     assert observed == ['a.warning', 'b.warning', 'c.warning']
     assert len(observed) == 3
+
+
+def test_get_batch_raises_error_when_passed_a_non_string_type_for_suite_parameter(
+    titanic_data_context,
+):
+    with pytest.raises(DataContextError):
+        titanic_data_context.get_batch({}, 99)
+
+
+def test_get_batch_raises_error_when_passed_a_non_dict_or_batch_kwarg_type_for_batch_kwarg_parameter(
+    titanic_data_context,
+):
+    with pytest.raises(BatchKwargsError):
+        titanic_data_context.get_batch(99, "foo")
+
+
+def test_get_batch_when_passed_a_suite_name(titanic_data_context):
+    context = titanic_data_context
+    root_dir = context.root_directory
+    batch_kwargs = {
+        "datasource": "mydatasource",
+        "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),
+    }
+    context.create_expectation_suite("foo")
+    assert context.list_expectation_suite_names() == ["foo"]
+    batch = context.get_batch(batch_kwargs, "foo")
+    assert isinstance(batch, Dataset)
+    assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
+
+
+def test_get_batch_when_passed_a_suite(titanic_data_context):
+    context = titanic_data_context
+    root_dir = context.root_directory
+    batch_kwargs = {
+        "datasource": "mydatasource",
+        "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),
+    }
+    context.create_expectation_suite("foo")
+    assert context.list_expectation_suite_names() == ["foo"]
+    suite = context.get_expectation_suite("foo")
+
+    batch = context.get_batch(batch_kwargs, suite)
+    assert isinstance(batch, Dataset)
+    assert isinstance(batch.get_expectation_suite(), ExpectationSuite)

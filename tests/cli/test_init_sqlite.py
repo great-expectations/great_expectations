@@ -163,7 +163,6 @@ great_expectations/
                     warning/
                         9999.9999/
                             foobarbazguid.html
-        samples/
         validations/
             warning/
                 9999.9999/
@@ -177,6 +176,74 @@ great_expectations/
     assert mock_webbrowser.call_count == 1
     assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
 
+
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_cli_init_on_new_project_extra_whitespace_in_url(
+    mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file
+):
+    project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
+    ge_dir = os.path.join(project_dir, "great_expectations")
+
+    database_path = os.path.join(project_dir, "titanic.db")
+    shutil.copy(titanic_sqlite_db_file, database_path)
+    engine = create_engine("sqlite:///{}".format(database_path))
+    engine_url_with_added_whitespace = "    " + str(engine.url) + "  "
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["init", "-d", project_dir],
+        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(
+            engine_url_with_added_whitespace, catch_exceptions=False
+        ),
+    )
+    stdout = result.output
+    assert len(stdout) < 3000, "CLI output is unreasonably long."
+
+    assert "Always know what to expect from your data" in stdout
+    assert "What data would you like Great Expectations to connect to" in stdout
+    assert "Which database backend are you using" in stdout
+    assert "Give your new data source a short name" in stdout
+    assert "What is the url/connection string for the sqlalchemy connection" in stdout
+    assert "Attempting to connect to your database." in stdout
+    assert "Great Expectations connected to your database" in stdout
+    assert "Which table would you like to use?" in stdout
+    assert "Name the new expectation suite [main.titanic.warning]" in stdout
+    assert (
+        "Great Expectations will choose a couple of columns and generate expectations about them"
+        in stdout
+    )
+    assert "Generating example Expectation Suite..." in stdout
+    assert "Building" in stdout
+    assert "Data Docs" in stdout
+    assert "A new Expectation suite 'warning' was added to your project" in stdout
+    assert "Great Expectations is now set up" in stdout
+
+    context = DataContext(ge_dir)
+    assert len(context.list_datasources()) == 1
+    assert context.list_datasources() == [
+        {"class_name": "SqlAlchemyDatasource", "name": "titanic"}
+    ]
+
+    first_suite = context.list_expectation_suites()[0]
+    suite = context.get_expectation_suite(first_suite.expectation_suite_name)
+    assert len(suite.expectations) == 13
+
+    assert os.path.isdir(ge_dir)
+    config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
+    assert os.path.isfile(config_path)
+
+    config = yaml.load(open(config_path, "r"))
+    data_source_class = config["datasources"]["titanic"]["data_asset_type"][
+        "class_name"
+    ]
+    assert data_source_class == "SqlAlchemyDataset"
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+    assert result.exit_code == 0
+    assert mock_webbrowser.call_count == 1
+    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
@@ -192,14 +259,15 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert not context.list_expectation_suites()
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["init", "-d", project_dir],
-        input="2\n5\nsqlite\nsqlite:///{}\n1\nmy_suite\n\n".format(
-            titanic_sqlite_db_file
-        ),
-        catch_exceptions=False,
-    )
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        result = runner.invoke(
+            cli,
+            ["init", "-d", project_dir],
+            input="2\n5\nsqlite\nsqlite:///{}\n1\nmy_suite\n\n".format(
+                titanic_sqlite_db_file
+            ),
+            catch_exceptions=False,
+        )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -307,9 +375,10 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert len(context.list_datasources()) == 2
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
-    )
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        result = runner.invoke(
+            cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
+        )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -332,9 +401,10 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     project_dir = initialized_sqlite_project
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
-    )
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        result = runner.invoke(
+            cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
+        )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -357,9 +427,10 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     project_dir = initialized_sqlite_project
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli, ["init", "-d", project_dir], input="Y\n", catch_exceptions=False,
-    )
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        result = runner.invoke(
+            cli, ["init", "-d", project_dir], input="Y\n", catch_exceptions=False,
+        )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -397,12 +468,13 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert context.list_expectation_suites() == []
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["init", "-d", project_dir],
-        input="1\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
-        catch_exceptions=False,
-    )
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        result = runner.invoke(
+            cli,
+            ["init", "-d", project_dir],
+            input="1\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
+            catch_exceptions=False,
+        )
     stdout = result.stdout
 
     assert result.exit_code == 0

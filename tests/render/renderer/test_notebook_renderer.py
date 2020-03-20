@@ -13,7 +13,7 @@ def critical_suite_with_citations():
     This hand made fixture has a wide range of expectations, and has a mix of
     metadata including an SampleExpectationsDatasetProfiler entry, and citations.
     """
-    schema = ExpectationSuiteSchema(strict=True)
+    schema = ExpectationSuiteSchema()
     critical_suite = {
         "expectation_suite_name": "critical",
         "meta": {
@@ -77,7 +77,7 @@ def critical_suite_with_citations():
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(critical_suite)).data
+    return schema.loads(json.dumps(critical_suite))
 
 
 @pytest.fixture
@@ -87,7 +87,7 @@ def suite_with_multiple_citations():
 
     The most recent citation does not have batch_kwargs
     """
-    schema = ExpectationSuiteSchema(strict=True)
+    schema = ExpectationSuiteSchema()
     critical_suite = {
         "expectation_suite_name": "critical",
         "meta": {
@@ -121,7 +121,7 @@ def suite_with_multiple_citations():
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(critical_suite)).data
+    return schema.loads(json.dumps(critical_suite))
 
 
 @pytest.fixture
@@ -130,7 +130,7 @@ def warning_suite():
     This hand made fixture has a wide range of expectations, and has a mix of
     metadata including SampleExpectationsDatasetProfiler entries.
     """
-    schema = ExpectationSuiteSchema(strict=True)
+    schema = ExpectationSuiteSchema()
     warning_suite = {
         "expectation_suite_name": "warning",
         "meta": {
@@ -367,10 +367,9 @@ def warning_suite():
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(warning_suite)).data
+    return schema.loads(json.dumps(warning_suite))
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
     critical_suite_with_citations,
 ):
@@ -407,7 +406,7 @@ suite.expectations = []
 batch_kwargs = {
     'path': '/home/foo/data/10k.csv',
     'datasource': 'files_datasource'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -423,7 +422,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. The all begin with `batch.expect_table_...`.",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
                 "metadata": {},
             },
             {
@@ -449,7 +448,108 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectaton method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "metadata": {},
+            },
+            {
+                "cell_type": "code",
+                "metadata": {},
+                "execution_count": None,
+                "source": """\
+batch.save_expectation_suite(discard_failed_expectations=False)
+
+# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
+run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+
+results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
+expectation_suite_identifier = list(results["details"].keys())[0]
+validation_result_identifier = ValidationResultIdentifier(
+    expectation_suite_identifier=expectation_suite_identifier,
+    batch_identifier=batch.batch_kwargs.to_id(),
+    run_id=run_id
+)
+context.build_data_docs()
+context.open_data_docs(validation_result_identifier)""",
+                "outputs": [],
+            },
+        ],
+    }
+    del expected["nbformat_minor"]
+    del obs["nbformat_minor"]
+    for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        assert obs_cell == expected_cell
+    assert obs == expected
+
+
+def test_render_with_no_column_cells(
+    critical_suite_with_citations,
+):
+    critical_suite_with_citations.expectations = []
+    obs = NotebookRenderer().render(critical_suite_with_citations)
+    assert isinstance(obs, dict)
+    expected = {
+        "nbformat": 4,
+        "nbformat_minor": 4,
+        "metadata": {},
+        "cells": [
+            {
+                "cell_type": "markdown",
+                "source": "# Edit Your Expectation Suite\nUse this notebook to recreate and modify your expectation suite:\n\n**Expectation Suite Name**: `critical`\n\nWe'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)",
+                "metadata": {},
+            },
+            {
+                "cell_type": "code",
+                "metadata": {},
+                "execution_count": None,
+                "source": """\
+from datetime import datetime
+import great_expectations as ge
+import great_expectations.jupyter_ux
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
+
+context = ge.data_context.DataContext()
+
+# Feel free to change the name of your suite here. Renaming this will not
+# remove the other one.
+expectation_suite_name = "critical"
+suite = context.get_expectation_suite(expectation_suite_name)
+suite.expectations = []
+
+batch_kwargs = {
+    'path': '/home/foo/data/10k.csv',
+    'datasource': 'files_datasource'}
+batch = context.get_batch(batch_kwargs, suite)
+batch.head()""",
+                "outputs": [],
+            },
+            {
+                "cell_type": "markdown",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "metadata": {},
+            },
+            {
+                "cell_type": "markdown",
+                "source": "### Table Expectation(s)",
+                "metadata": {},
+            },
+            {
+                "cell_type": "markdown",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
+                "metadata": {},
+            },
+            {
+                "cell_type": "markdown",
+                "source": "### Column Expectation(s)",
+                "metadata": {},
+            },
+            {
+                "cell_type": "markdown",
+                "source": "No column level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_column_...`.",
+                "metadata": {},
+            },
+            {
+                "cell_type": "markdown",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -518,7 +618,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -534,7 +634,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. The all begin with `batch.expect_table_...`.",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
                 "metadata": {},
             },
             {
@@ -560,7 +660,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectaton method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -630,7 +730,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {'foo': 'bar', 'datasource': 'things'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -646,7 +746,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. The all begin with `batch.expect_table_...`.",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
                 "metadata": {},
             },
             {
@@ -672,7 +772,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectaton method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -739,7 +839,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -755,7 +855,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. The all begin with `batch.expect_table_...`.",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
                 "metadata": {},
             },
             {
@@ -781,7 +881,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectaton method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -849,7 +949,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {'foo': 'bar', 'datasource': 'things'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -865,7 +965,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. The all begin with `batch.expect_table_...`.",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
                 "metadata": {},
             },
             {
@@ -891,7 +991,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectaton method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -958,7 +1058,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {'path': '../../3.csv', 'datasource': '3'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -974,7 +1074,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. The all begin with `batch.expect_table_...`.",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
                 "metadata": {},
             },
             {
@@ -1000,7 +1100,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectaton method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -1088,7 +1188,6 @@ def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
     assert found_expected
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_complex_suite(warning_suite):
     obs = NotebookRenderer().render(warning_suite, {"path": "foo/data"})
     assert isinstance(obs, dict)
@@ -1121,7 +1220,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {'path': '../../foo/data'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -1365,7 +1464,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectaton method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {

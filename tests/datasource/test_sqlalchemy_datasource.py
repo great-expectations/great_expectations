@@ -47,7 +47,7 @@ def test_sqlalchemy_datasource_custom_data_asset(data_context, test_db_connectio
     }
     data_context.add_datasource(name,
                                 class_name=class_name,
-                                connection_string=test_db_connection_string,
+                                credentials={"connection_string": test_db_connection_string},
                                 data_asset_type=data_asset_type_config,
                                 generators={
                                     "default": {
@@ -93,16 +93,10 @@ def test_create_sqlalchemy_datasource(data_context):
 
     # Use sqlite so we don't require postgres for this test.
     connection_kwargs = {
-        "drivername": "sqlite"
+        "credentials": {
+            "drivername": "sqlite"
+        }
     }
-    # connection_kwargs = {
-    #     "drivername": "postgresql",
-    #     "username": "postgres",
-    #     "password": "",
-    #     "host": "localhost",
-    #     "port": 5432,
-    #     "database": "test_ci",
-    # }
 
     # It should be possible to create a sqlalchemy source using these params without
     # saving substitution variables
@@ -117,7 +111,7 @@ def test_create_sqlalchemy_datasource(data_context):
 
     var_name = "test_sqlalchemy_datasource"
 
-    data_context.save_config_variable(var_name, connection_kwargs)
+    data_context.save_config_variable(var_name, connection_kwargs["credentials"])
 
 
     # But we should be able to add a source using a substitution variable
@@ -137,7 +131,7 @@ def test_create_sqlalchemy_datasource(data_context):
         substitution_variables = yaml.load(credentials_file)
 
     assert substitution_variables == {
-        var_name: dict(**connection_kwargs)
+        var_name: dict(**connection_kwargs["credentials"])
     }
 
 
@@ -193,13 +187,13 @@ def test_sqlalchemy_datasource_query_and_table_handling(sqlitedb_engine):
         })
     mock_batch.assert_called_once_with(engine=sqlitedb_engine, schema=None, query="select * from foo;", table_name=None)
 
-    # Snowflake should allow *both* query *and* table_name
+    # Snowflake should require query *and* snowflake_transient_table
     sqlitedb_engine.dialect.name = "snowflake"
     with mock.patch("great_expectations.dataset.sqlalchemy_dataset.SqlAlchemyBatchReference.__init__",
                     return_value=None) as mock_batch:
         datasource.get_batch({
             "query": "select * from foo;",
-            "table_name": "bar"
+            "snowflake_transient_table": "bar"
         })
     mock_batch.assert_called_once_with(engine=sqlitedb_engine, schema=None, query="select * from foo;",
                                        table_name="bar")

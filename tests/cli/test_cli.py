@@ -17,6 +17,7 @@ def test_cli_command_entrance(caplog):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, catch_exceptions=False)
     assert result.exit_code == 0
+    print(result.output)
     assert (
         result.output
         == """Usage: cli [OPTIONS] COMMAND [ARGS]...
@@ -48,6 +49,7 @@ Commands:
   init        Initialize a new Great Expectations project.
   project     project operations
   suite       expectation suite operations
+  tap         tap operations
 """
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -57,14 +59,8 @@ def test_cli_command_invalid_command(caplog,):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, ["blarg"])
     assert result.exit_code == 2
-    assert (
-        result.stderr
-        == """Usage: cli [OPTIONS] COMMAND [ARGS]...
-Try "cli --help" for help.
-
-Error: No such command "blarg".
-"""
-    )
+    assert "Error: No such command" in result.stderr
+    assert ("'blarg'" in result.stderr) or ('"blarg"' in result.stderr)
 
 
 def test_cli_version(caplog,):

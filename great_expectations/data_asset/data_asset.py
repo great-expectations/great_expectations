@@ -11,7 +11,11 @@ import datetime
 
 from marshmallow import ValidationError
 from six import PY3, string_types
-from collections import namedtuple, Hashable, Counter, defaultdict
+from collections import namedtuple, Counter, defaultdict
+try:
+    from collections.abc import Hashable
+except ImportError:  # Python 2.7
+    from collections import Hashable
 
 from great_expectations import __version__ as ge_version
 from great_expectations.data_asset.util import (
@@ -305,7 +309,7 @@ class DataAsset(object):
         """
         if expectation_suite is not None:
             if isinstance(expectation_suite, dict):
-                expectation_suite = expectationSuiteSchema.load(expectation_suite).data
+                expectation_suite = expectationSuiteSchema.load(expectation_suite)
             else:
                 expectation_suite = copy.deepcopy(expectation_suite)
             self._expectation_suite = expectation_suite
@@ -832,7 +836,7 @@ class DataAsset(object):
             self._data_context.save_expectation_suite(expectation_suite)
         elif filepath is not None:
             with open(filepath, 'w') as outfile:
-                json.dump(expectationSuiteSchema.dump(expectation_suite).data, outfile, indent=2)
+                json.dump(expectationSuiteSchema.dump(expectation_suite), outfile, indent=2)
         else:
             raise ValueError("Unable to save config: filepath or data_context must be available.")
 

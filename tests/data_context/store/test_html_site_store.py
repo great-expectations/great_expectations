@@ -33,7 +33,7 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
         my_store.get("not_a_ValidationResultIdentifier")
 
     with pytest.raises(ValidationError):
-        my_store.get(validationResultIdentifierSchema.load({}).data)
+        my_store.get(validationResultIdentifierSchema.load({}))
     
     ns_1 = SiteSectionIdentifier(
         site_section_name="validations",

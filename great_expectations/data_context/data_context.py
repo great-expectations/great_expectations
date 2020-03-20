@@ -21,7 +21,7 @@ from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     dataContextConfigSchema,
-)
+    datasourceConfigSchema, DatasourceConfig)
 from great_expectations.data_context.util import (
     file_relative_path,
     substitute_config_variable,
@@ -83,7 +83,7 @@ class BaseDataContext(object):
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
     PROFILING_ERROR_CODE_NO_GENERATOR_FOUND = 4
     PROFILING_ERROR_CODE_MULTIPLE_GENERATORS_FOUND = 5
-    UNCOMMITTED_DIRECTORIES = ["data_docs", "samples", "validations"]
+    UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
         "expectations",
@@ -276,7 +276,6 @@ class BaseDataContext(object):
         return site_urls
 
     def open_data_docs(self, resource_identifier=None):
-
         """
         A stdlib cross-platform way to open a file in a browser.
 
@@ -465,7 +464,7 @@ class BaseDataContext(object):
 
         Args:
             batch_kwargs: the batch_kwargs to use; must include a datasource key
-            expectation_suite_name: the name of the expectation_suite to get
+            expectation_suite_name: The ExpectationSuite or the name of the expectation_suite to get
             data_asset_type: the type of data_asset to build, with associated expectation implementations. This can
                 generally be inferred from the datasource.
             batch_parameters: optional parameters to store as the reference description of the batch. They should
@@ -473,7 +472,6 @@ class BaseDataContext(object):
 
         Returns:
             DataAsset
-
         """
         if isinstance(batch_kwargs, dict):
             batch_kwargs = BatchKwargs(batch_kwargs)
@@ -481,16 +479,26 @@ class BaseDataContext(object):
         if not isinstance(batch_kwargs, BatchKwargs):
             raise ge_exceptions.BatchKwargsError("BatchKwargs must be a BatchKwargs object or dictionary.")
 
-        if not isinstance(expectation_suite_name, (ExpectationSuiteIdentifier, string_types)):
-            raise ge_exceptions.DataContextError("expectation_suite_name must be an ExpectationSuiteIdentifier or "
-                                                 "string.")
+        if not isinstance(expectation_suite_name, (ExpectationSuite, ExpectationSuiteIdentifier, string_types)):
+            raise ge_exceptions.DataContextError(
+                "expectation_suite_name must be an ExpectationSuite, "
+                "ExpectationSuiteIdentifier or string."
+            )
+
+        if isinstance(expectation_suite_name, ExpectationSuite):
+            expectation_suite = expectation_suite_name
+        else:
+            expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
         datasource = self.get_datasource(batch_kwargs.get("datasource"))
-        expectation_suite = self.get_expectation_suite(expectation_suite_name)
         batch = datasource.get_batch(batch_kwargs=batch_kwargs, batch_parameters=batch_parameters)
         if data_asset_type is None:
             data_asset_type = datasource.config.get("data_asset_type")
-        validator = Validator(batch=batch, expectation_suite=expectation_suite, expectation_engine=data_asset_type)
+        validator = Validator(
+            batch=batch,
+            expectation_suite=expectation_suite,
+            expectation_engine=data_asset_type
+        )
         return validator.get_dataset()
 
     def run_validation_operator(
@@ -549,6 +557,7 @@ class BaseDataContext(object):
         else:
             config = kwargs
 
+        config = datasourceConfigSchema.load(config)
         self._project_config["datasources"][name] = config
 
         # We perform variable substitution in the datasource's config here before using the config
@@ -583,13 +592,9 @@ class BaseDataContext(object):
         return self._project_config
 
     def _build_datasource_from_config(self, name, config):
-        if "type" in config:
-            warnings.warn("Using type configuration to build datasource. Please update to using class_name.")
-            type_ = config.pop("type")
-            datasource_class = self._get_datasource_class_from_type(type_)
-            config.update({
-                "class_name": datasource_class.__name__
-            })
+        # We convert from the type back to a dictionary for purposes of instantiation
+        if isinstance(config, DatasourceConfig):
+            config = datasourceConfigSchema.dump(config)
         config.update({
             "name": name
         })
@@ -1601,7 +1606,7 @@ class DataContext(BaseDataContext):
             ge_exceptions.DataContextError,
             ge_exceptions.InvalidDataContextConfigError
         ) as e:
-            logger.warning(e)
+            logger.debug(e)
 
 
 class ExplorerDataContext(DataContext):

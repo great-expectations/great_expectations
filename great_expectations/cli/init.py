@@ -63,7 +63,6 @@ def init(target_directory, view):
     """
     target_directory = os.path.abspath(target_directory)
     ge_dir = _get_full_path_to_ge_dir(target_directory)
-
     cli_message(GREETING)
 
     if DataContext.does_config_exist_on_disk(ge_dir):
@@ -74,17 +73,17 @@ def init(target_directory, view):
         except (DataContextError, DatasourceInitializationError) as e:
             cli_message("<red>{}</red>".format(e.message))
             sys.exit(1)
-        else:
-            try:
-                context = DataContext.create(target_directory)
-                cli_message(ONBOARDING_COMPLETE)
-                # TODO if this is correct, ensure this is covered by a test
-                # cli_message(SETUP_SUCCESS)
-                # exit(0)
-            except DataContextError as e:
-                cli_message("<red>{}</red>".format(e.message))
-                # TODO ensure this is covered by a test
-                exit(5)
+
+        try:
+            context = DataContext.create(target_directory)
+            cli_message(ONBOARDING_COMPLETE)
+            # TODO if this is correct, ensure this is covered by a test
+            # cli_message(SETUP_SUCCESS)
+            # exit(0)
+        except DataContextError as e:
+            cli_message("<red>{}</red>".format(e.message))
+            # TODO ensure this is covered by a test
+            exit(5)
     else:
         if not click.confirm(LETS_BEGIN_PROMPT, default=True):
             cli_message(RUN_INIT_AGAIN)

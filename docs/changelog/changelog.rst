@@ -4,6 +4,51 @@ develop
 -----------------
 
 
+0.9.7
+-----------------
+* Update marshmallow dependency to >3. NOTE: as of this release, you MUST use marshamllow >3.0, which REQUIRES python 3. (`#1187 <https://github.com/great-expectations/great_expectations/issues/1187>`_) @jcampbell
+  - Schema checking is now stricter for expectation suites, and data_asset_name must not be present as a top-level
+    key in expectation suite json. It is safe to remove.
+  - Similarly, datasource configuration must now adhere strictly to the required schema, including having any
+    required credentials stored in the "credentials" dictionary.
+* New beta CLI command: `tap new` that generates an executable python file to expedite deployments. (`#1193 <https://github.com/great-expectations/great_expectations/issues/1193>`_) @Aylr
+* bugfix in TableBatchKwargsGenerator docs
+* Added feature maturity in README (`#1203 <https://github.com/great-expectations/great_expectations/issues/1203>`_) @kyleaton
+* Fix failing test that should skip if postgresql not running (`#1199 <https://github.com/great-expectations/great_expectations/issues/1199>`_) @cicdw
+
+
+0.9.6
+-----------------
+* validate result dict when instantiating an ExpectationValidationResult (`#1133 <https://github.com/great-expectations/great_expectations/issues/1133>`_)
+* DataDocs: Expectation Suite name on Validation Result pages now link to Expectation Suite page
+* `great_expectations init`: cli now asks user if csv has header when adding a Spark Datasource with csv file
+* Improve support for using GCP Storage Bucket as a Data Docs Site backend (thanks @hammadzz)
+* fix notebook renderer handling for expectations with no column kwarg and table not in their name (`#1194 <https://github.com/great-expectations/great_expectations/issues/1194>`_)
+
+
+0.9.5
+-----------------
+* Fixed unexpected behavior with suite edit, data docs and jupyter
+* pytest pinned to 5.3.5
+
+
+0.9.4
+-----------------
+* Update CLI `init` flow to support snowflake transient tables
+* Use filename for default expectation suite name in CLI `init`
+* Tables created by SqlAlchemyDataset use a shorter name with 8 hex characters of randomness instead of a full uuid
+* Better error message when config substitution variable is missing
+* removed an unused directory in the GE folder
+* removed obsolete config error handling
+* Docs typo fixes
+* Jupyter notebook improvements
+* `great_expectations init` improvements
+* Simpler messaging in valiation notebooks
+* replaced hacky loop with suite list call in notebooks
+* CLI suite new now supports `--empty` flag that generates an empty suite and opens a notebook
+* add error handling to `init` flow for cases where user tries using a broken file
+
+
 0.9.3
 -----------------
 * Add support for transient table creation in snowflake (#1012)
@@ -618,5 +663,3 @@ to top-level names.
 * API and examples for custom expectations are available
 * New output formats are available for all expectations
 * Significant improvements to test suite and compatibility
-
-*Last updated*: |lastupdate|

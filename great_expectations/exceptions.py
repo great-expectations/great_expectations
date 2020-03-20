@@ -1,4 +1,5 @@
 from marshmallow import ValidationError
+import json
 
 
 class GreatExpectationsError(Exception):
@@ -10,10 +11,6 @@ class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
     def __init__(self, message, validation_error):
         self.message = message
         self.messages = validation_error.messages
-        self.data = validation_error.data
-        self.field_names = validation_error.field_names
-        self.fields = validation_error.fields
-        self.kwargs = validation_error.kwargs
 
 
 class DataContextError(GreatExpectationsError):
@@ -64,10 +61,6 @@ class UnsupportedConfigVersionError(GreatExpectationsError):
     pass
 
 
-class ZeroDotSevenConfigVersionError(GreatExpectationsError):
-    pass
-
-
 class ProfilerError(GreatExpectationsError):
     pass
 
@@ -75,6 +68,14 @@ class ProfilerError(GreatExpectationsError):
 class InvalidConfigError(DataContextError):
     def __init__(self, message):
         self.message = message
+
+
+class MissingConfigVariableError(InvalidConfigError):
+    def __init__(self, message, missing_config_variable=None):
+        if not missing_config_variable:
+            missing_config_variable = []
+        self.message = message
+        self.missing_config_variable = missing_config_variable
 
 
 class AmbiguousDataAssetNameError(DataContextError):
@@ -101,6 +102,18 @@ class InvalidValidationResultError(GreatExpectationsError):
 
 class GreatExpectationsTypeError(TypeError):
     pass
+
+
+class InvalidCacheValueError(GreatExpectationsError):
+    def __init__(self, result_dict):
+        template = """\
+Error: Invalid result values were found when trying to instantiate an ExpectationValidationResult.
+- Invalid result values are likely caused by inconsistent cache values.
+- Great Expectations enables caching by default.
+- Please ensure that caching behavior is consistent between the underlying Dataset (e.g. Spark) and Great Expectations. 
+Result: {}
+"""
+        self.message = template.format(json.dumps(result_dict, indent=2))
 
 
 class ConfigNotFoundError(DataContextError):
