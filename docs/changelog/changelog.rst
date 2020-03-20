@@ -9,6 +9,10 @@ develop
 * CLI: improve look/consistency of `docs list`, `suite list`, and `datasource list` output; add `store list` and `validation-operator list` commands great_expectations/core/logging/usage_statistics.py
 * Fix AttributeError when validating expectations from a JSON file
 
+**Breaking**
+
+* Renamed all ``generator`` parameters and methods to the more correct ``batch_kwargs_generator`` language
+
 0.9.7
 -----------------
 * Update marshmallow dependency to >3. NOTE: as of this release, you MUST use marshamllow >3.0, which REQUIRES python 3. (`#1187 <https://github.com/great-expectations/great_expectations/issues/1187>`_) @jcampbell

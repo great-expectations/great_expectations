@@ -5,7 +5,7 @@ import uuid
 PROJECT_HELP_COMMENT = """
 # Welcome to Great Expectations! Always know what to expect from your data.
 # 
-# Here you can define datasources, batch kwarg generators, integrations and
+# Here you can define datasources, batch kwargs generators, integrations and
 # more. This file is intended to be committed to your repo. For help with
 # configuration please:
 #   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#configuration

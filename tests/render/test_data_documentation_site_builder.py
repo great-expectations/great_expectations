@@ -51,7 +51,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     # the profiling and the validation sections.
     batch_kwargs = context.build_batch_kwargs(
         datasource=datasource_name,
-        generator=generator_name,
+        batch_kwargs_generator=generator_name,
         name=data_asset_name
     )
 

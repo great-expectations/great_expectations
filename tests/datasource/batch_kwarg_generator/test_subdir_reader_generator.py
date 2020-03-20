@@ -4,7 +4,7 @@ import os
 
 from great_expectations.data_context.util import safe_mmkdir
 
-from great_expectations.datasource.generator import SubdirReaderBatchKwargsGenerator
+from great_expectations.datasource.batch_kwargs_generator import SubdirReaderBatchKwargsGenerator
 from great_expectations.exceptions import BatchKwargsError
 
 

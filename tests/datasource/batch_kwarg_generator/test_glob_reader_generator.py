@@ -5,7 +5,7 @@ try:
 except ImportError:
     import mock
 
-from great_expectations.datasource.generator import GlobReaderBatchKwargsGenerator
+from great_expectations.datasource.batch_kwargs_generator import GlobReaderBatchKwargsGenerator
 from great_expectations.datasource.types import (
     PathBatchKwargs,
     PandasDatasourceBatchKwargs,

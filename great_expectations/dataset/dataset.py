@@ -8,12 +8,8 @@ from numbers import Number
 from dateutil.parser import parse
 from datetime import datetime, timedelta
 
-if sys.version_info.major == 2:  # If python 2
-    from itertools import izip_longest as zip_longest
-    from backports.functools_lru_cache import lru_cache
-elif sys.version_info.major == 3:  # If python 3
-    from itertools import zip_longest
-    from functools import lru_cache
+from itertools import zip_longest
+from functools import lru_cache
 
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format

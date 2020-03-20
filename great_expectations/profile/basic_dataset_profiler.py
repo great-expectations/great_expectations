@@ -1,11 +1,5 @@
 import logging
 
-# Gross legacy python 2 hacks
-try:
-    ModuleNotFoundError
-except NameError:
-    ModuleNotFoundError = ImportError
-
 try:
     from sqlalchemy.exc import OperationalError
 except ModuleNotFoundError:

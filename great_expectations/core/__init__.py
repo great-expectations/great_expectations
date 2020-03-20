@@ -5,7 +5,6 @@ from collections import namedtuple
 from copy import deepcopy
 import datetime
 
-from dateutil import parser
 from six import string_types
 
 from IPython import get_ipython

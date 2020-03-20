@@ -1,7 +1,7 @@
 import logging
 from copy import deepcopy
 
-from great_expectations.datasource.generator.batch_kwargs_generator import BatchKwargsGenerator
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.exceptions import BatchKwargsError, InvalidBatchKwargsError
 
 logger = logging.getLogger(__name__)
@@ -10,13 +10,13 @@ logger = logging.getLogger(__name__)
 class ManualBatchKwargsGenerator(BatchKwargsGenerator):
     """ManualBatchKwargsGenerator returns manually-configured batch_kwargs for named data assets. It provides a
     convenient way to capture complete batch definitions without requiring the configuration of a more
-    fully-featured generator.
+    fully-featured batch kwargs generator.
 
     A fully configured ManualBatchKwargsGenerator in yml might look like the following::
 
         my_datasource:
           class_name: PandasDatasource
-          generators:
+          batch_kwargs_generators:
             my_generator:
               class_name: ManualBatchKwargsGenerator
               assets:

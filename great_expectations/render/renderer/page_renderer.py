@@ -48,7 +48,7 @@ class ValidationResultsPageRenderer(Renderer):
 
         # add datasource key to batch_kwargs if missing
         if 'datasource' not in validation_results.meta.get("batch_kwargs", {}):
-            # check if expectation_suite_name follows datasource.generator.data_asset_name.suite_name pattern
+            # check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
             if len(expectation_suite_name.split('.')) == 4:
                 batch_kwargs['datasource'] = expectation_suite_name.split('.')[0]
 
@@ -635,7 +635,7 @@ class ProfilingResultsPageRenderer(Renderer):
 
         # add datasource key to batch_kwargs if missing
         if 'datasource' not in validation_results.meta.get("batch_kwargs", {}):
-            # check if expectation_suite_name follows datasource.generator.data_asset_name.suite_name pattern
+            # check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
             if len(expectation_suite_name.split('.')) == 4:
                 batch_kwargs['datasource'] = expectation_suite_name.split('.')[0]
 

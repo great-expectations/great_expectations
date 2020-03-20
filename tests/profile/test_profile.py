@@ -3,7 +3,6 @@ import os
 from collections import OrderedDict
 
 import pytest
-from six import PY2
 
 import great_expectations as ge
 from great_expectations.data_context.util import file_relative_path
@@ -21,7 +20,7 @@ def not_empty_datacontext(empty_data_context, filesystem_csv_2):
         "rad_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        generators={
+        batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
@@ -270,7 +269,7 @@ def test_BasicDatasetProfiler_with_context(not_empty_datacontext):
 
     context.create_expectation_suite("default")
     datasource = context.datasources["rad_datasource"]
-    base_dir = datasource.config["generators"]["subdir_reader"]["base_directory"]
+    base_dir = datasource.config["batch_kwargs_generators"]["subdir_reader"]["base_directory"]
     batch_kwargs = {
         "datasource": "rad_datasource",
         "path": os.path.join(base_dir, "f1.csv"),
@@ -371,7 +370,7 @@ in the generator_name argument, the profiling method must raise an exception.
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
     assert context.list_expectation_suites() == []
     with pytest.raises(ge_exceptions.ProfilerError):
-        profiling_result = context.profile_datasource("rad_datasource", data_assets=["this_asset_doesnot_exist"], profiler=BasicDatasetProfiler, generator_name="this_gen_does_not_exist")
+        profiling_result = context.profile_datasource("rad_datasource", data_assets=["this_asset_doesnot_exist"], profiler=BasicDatasetProfiler, batch_kwargs_generator_name="this_gen_does_not_exist")
 
 
 def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple_generators(not_empty_datacontext, filesystem_csv_2):
@@ -380,7 +379,7 @@ def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple
     generators configured, the profiling method must return an error code in the result
     """
     context = not_empty_datacontext
-    context.add_generator("rad_datasource", "second_generator", "SubdirReaderBatchKwargsGenerator", **{
+    context.add_batch_kwargs_generator("rad_datasource", "second_generator", "SubdirReaderBatchKwargsGenerator", **{
                 "base_directory": str(filesystem_csv_2),
             })
 
