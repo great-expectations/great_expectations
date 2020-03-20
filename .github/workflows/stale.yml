@@ -1,8 +1,8 @@
 name: stalebot
 
 on:
-#  schedule:
-#    - cron: "5 * * * *"
+  schedule:
+    - cron: "5 * * * *"
   issues:
     types: [opened, reopened]
 
@@ -20,3 +20,4 @@ jobs:
         days-before-close: 7
         dry-run: false
         main: 'dist/index.js'
+
