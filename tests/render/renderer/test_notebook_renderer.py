@@ -13,7 +13,7 @@ def critical_suite_with_citations():
     This hand made fixture has a wide range of expectations, and has a mix of
     metadata including an SampleExpectationsDatasetProfiler entry, and citations.
     """
-    schema = ExpectationSuiteSchema(strict=True)
+    schema = ExpectationSuiteSchema()
     critical_suite = {
         "expectation_suite_name": "critical",
         "meta": {
@@ -77,7 +77,7 @@ def critical_suite_with_citations():
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(critical_suite)).data
+    return schema.loads(json.dumps(critical_suite))
 
 
 @pytest.fixture
@@ -87,7 +87,7 @@ def suite_with_multiple_citations():
 
     The most recent citation does not have batch_kwargs
     """
-    schema = ExpectationSuiteSchema(strict=True)
+    schema = ExpectationSuiteSchema()
     critical_suite = {
         "expectation_suite_name": "critical",
         "meta": {
@@ -121,7 +121,7 @@ def suite_with_multiple_citations():
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(critical_suite)).data
+    return schema.loads(json.dumps(critical_suite))
 
 
 @pytest.fixture
@@ -130,7 +130,7 @@ def warning_suite():
     This hand made fixture has a wide range of expectations, and has a mix of
     metadata including SampleExpectationsDatasetProfiler entries.
     """
-    schema = ExpectationSuiteSchema(strict=True)
+    schema = ExpectationSuiteSchema()
     warning_suite = {
         "expectation_suite_name": "warning",
         "meta": {
@@ -367,7 +367,7 @@ def warning_suite():
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(warning_suite)).data
+    return schema.loads(json.dumps(warning_suite))
 
 
 def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
@@ -1188,7 +1188,6 @@ def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
     assert found_expected
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_complex_suite(warning_suite):
     obs = NotebookRenderer().render(warning_suite, {"path": "foo/data"})
     assert isinstance(obs, dict)

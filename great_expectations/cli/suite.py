@@ -7,7 +7,6 @@ import click
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.datasource import (
     create_expectation_suite as create_expectation_suite_impl,
 )
@@ -15,7 +14,7 @@ from great_expectations.cli.datasource import (
     get_batch_kwargs,
     select_datasource,
 )
-from great_expectations.cli.util import cli_message
+from great_expectations.cli.util import cli_message, load_expectation_suite
 from great_expectations.data_asset import DataAsset
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 
@@ -91,7 +90,7 @@ def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
         cli_message("<red>{}</red>".format(err.message))
         return
 
-    suite = _load_suite(context, suite)
+    suite = load_expectation_suite(context, suite)
     citations = suite.get_citations(sort=True, require_batch_kwargs=True)
 
     if batch_kwargs_json:
@@ -168,21 +167,6 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
     if jupyter:
         subprocess.call(["jupyter", "notebook", notebook_path])
-
-
-def _load_suite(context, suite_name):
-    if suite_name.endswith(".json"):
-        suite_name = suite_name[:-5]
-    try:
-        suite = context.get_expectation_suite(suite_name)
-        return suite
-    except ge_exceptions.DataContextError as e:
-        cli_message(
-            f"<red>Could not find a suite named `{suite_name}`.</red> Please check "
-            "the name by running `great_expectations suite list` and try again."
-        )
-        logger.info(e)
-        sys.exit(1)
 
 
 @suite.command(name="new")
