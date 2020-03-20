@@ -35,6 +35,15 @@ QueryBatchKwargsGenerator
     :show-inheritance:
 
 
+TableBatchKwargsGenerator
+------------------------------------------------------------------------
+
+.. autoclass:: great_expectations.datasource.generator.table_generator.TableBatchKwargsGenerator
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 SubdirReaderBatchKwargsGenerator
 ----------------------------------------------------------------------------------------
 
@@ -69,5 +78,3 @@ DatabricksTableBatchKwargsGenerator
     :members:
     :undoc-members:
     :show-inheritance:
-
-*last updated*: |lastupdate|

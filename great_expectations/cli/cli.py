@@ -13,6 +13,9 @@ from great_expectations.cli.suite import suite
 
 
 # TODO: consider using a specified-order supporting class for help (but wasn't working with python 2)
+from great_expectations.cli.tap import tap
+
+
 @click.group()
 @click.version_option(version=ge_version)
 @click.option(
@@ -52,6 +55,7 @@ cli.add_command(docs)
 cli.add_command(init)
 cli.add_command(project)
 cli.add_command(suite)
+cli.add_command(tap)
 
 
 def main():

@@ -128,7 +128,7 @@ def test_expectation_decorator_summary_mode():
             "partial_unexpected_list": [6.0, 7.0, 7.0],
             "partial_unexpected_index_list": [5, 6, 7],
         }
-    }).data
+    })
     assert df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY")\
         == exp_output
 
@@ -140,7 +140,7 @@ def test_expectation_decorator_summary_mode():
             'missing_count': 2,
             'missing_percent': 20.0
         },
-    }).data
+    })
 
     assert df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY")\
         == exp_output
@@ -160,7 +160,7 @@ def test_result_format_argument_in_decorators():
                                                                                  'element_count': 5,
                                               'missing_count': 0,
                                               'missing_percent': 0.0
-                                              }}).data
+                                              }})
     assert df.expect_column_mean_to_be_between('x', 4, 6, result_format=None)\
         == exp_output
 
@@ -176,7 +176,7 @@ def test_result_format_argument_in_decorators():
                              'unexpected_list': [8, 10],
                              'unexpected_percent': 40.0,
                              'unexpected_percent_nonmissing': 40.0},
-                  'success': False}).data
+                  'success': False})
 
     assert df.expect_column_values_to_be_between('y', 1, 6, result_format=None)\
         == exp_output
@@ -363,7 +363,7 @@ def test_ge_pandas_sampling():
     # in the sample.
     df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'x'])
     samp1 = df.sample(n=2)
-    exp1 = expectationSuiteSchema.load({'data_asset_name': 'test', 'expectation_suite_name': 'test', "expectations": [
+    exp1 = expectationSuiteSchema.load({'expectation_suite_name': 'test', "expectations": [
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'A'}},
         {'expectation_type': 'expect_column_to_exist',
@@ -380,7 +380,7 @@ def test_ge_pandas_sampling():
          'kwargs': {'column': 'C', 'value_set': ['a', 'b', 'c', 'd']}},
         {'expectation_type': 'expect_column_values_to_be_in_set',
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'x']}}
-    ]}).data
+    ]})
     assert samp1.find_expectations() == exp1.expectations
 
 

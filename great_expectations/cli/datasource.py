@@ -659,7 +659,6 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
 }
 )
 
-
     context.add_datasource(name=datasource_name, class_name='SparkDFDatasource', **configuration)
     return datasource_name
 
@@ -803,7 +802,6 @@ def create_expectation_suite(
     show_intro_message=False,
     open_docs=False
 ):
-
     """
     Create a new expectation suite.
 
@@ -822,9 +820,6 @@ Press Enter to continue
 
     msg_prompt_expectation_suite_name = """
 Name the new expectation suite"""
-
-    msg_data_doc_intro = """
-<cyan>========== Data Docs ==========</cyan>"""
 
     msg_suite_already_exists = "<red>An expectation suite named `{}` already exists. If you intend to edit the suite please use `great_expectations suite edit {}`.</red>"
 
@@ -1049,11 +1044,28 @@ We could not determine the format of the file. What is it?
 
                 if reader_method is not None:
                     batch_kwargs["reader_method"] = reader_method
+                    if isinstance(datasource, SparkDFDatasource) and reader_method == "csv":
+                        header_row = click.confirm(
+                            "\nDoes this file contain a header row?",
+                            default=True
+                        )
+                        batch_kwargs["reader_options"] = {
+                            "header": header_row
+                        }
                     batch = datasource.get_batch(batch_kwargs=batch_kwargs)
                     break
         else:
             # TODO: read the file and confirm with user that we read it correctly (headers, columns, etc.)
             try:
+                batch_kwargs["reader_method"] = reader_method
+                if isinstance(datasource, SparkDFDatasource) and reader_method == "csv":
+                    header_row = click.confirm(
+                        "\nDoes this file contain a header row?",
+                        default=True
+                    )
+                    batch_kwargs["reader_options"] = {
+                        "header": header_row
+                    }
                 batch = datasource.get_batch(batch_kwargs=batch_kwargs)
                 break
             except Exception as e:
@@ -1063,7 +1075,7 @@ We could not determine the format of the file. What is it?
   - Error: {0:s}"""
                 cli_message(file_load_error_message.format(str(e)))
                 if not click.confirm(
-                    "Try again?",
+                    "\nTry again?",
                     default=True
                 ):
                     cli_message("""
