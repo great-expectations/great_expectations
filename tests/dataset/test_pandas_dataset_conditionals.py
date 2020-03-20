@@ -63,7 +63,7 @@ def test_expectation_decorator_summary_mode():
             "partial_unexpected_list": [6.0, 7.0, 7.0],
             "partial_unexpected_index_list": [5, 6, 7],
         }
-    }).data
+    })
 
     assert df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY", condition="group=='a'")\
         == exp_output
@@ -79,7 +79,7 @@ def test_expectation_decorator_summary_mode():
             'missing_count': 2,
             'missing_percent': 20.0
         },
-    }).data
+    })
 
     assert df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY", condition="group=='a'")\
         == exp_output
@@ -106,7 +106,7 @@ def test_positional_arguments():
             'missing_count': 0,
             'missing_percent': 0.0
         }
-    }).data
+    })
 
     assert df.expect_column_mean_to_be_between('x', 4, 6, condition='group=="a"') == exp_output
     assert df.expect_column_mean_to_be_between('x', 4, 6) != exp_output
@@ -170,7 +170,7 @@ def test_result_format_argument_in_decorators():
             'missing_count': 0,
             'missing_percent': 0.0
         }
-    }).data
+    })
 
     assert df.expect_column_mean_to_be_between('x', 4, 6, result_format=None, condition="group=='a'")\
         == exp_output
@@ -190,7 +190,7 @@ def test_result_format_argument_in_decorators():
                                 'unexpected_list': [8, 10],
                                 'unexpected_percent': 40.0,
                                 'unexpected_percent_nonmissing': 40.0},
-                    'success': False}).data
+                    'success': False})
 
     assert df.expect_column_values_to_be_between('y', 1, 6, result_format=None, condition="group=='a'")\
         == exp_output
