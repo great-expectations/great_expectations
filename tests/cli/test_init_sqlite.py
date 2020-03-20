@@ -3,10 +3,6 @@ from __future__ import unicode_literals
 import os
 import re
 import shutil
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 import pytest
 from click.testing import CliRunner
@@ -20,6 +16,11 @@ from tests.cli.test_cli import yaml
 from tests.cli.test_datasource_sqlite import _add_datasource_and_credentials_to_context
 from tests.cli.test_init_pandas import _delete_and_recreate_dir
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 
 @pytest.fixture
@@ -182,7 +183,12 @@ great_expectations/
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
@@ -259,7 +265,12 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
@@ -289,7 +300,12 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/my_suite/".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/my_suite/".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
     assert "Error: invalid input" not in stdout
     assert "Always know what to expect from your data" in stdout
@@ -368,7 +384,12 @@ def initialized_sqlite_project(
     )
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -408,7 +429,9 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert len(context.list_datasources()) == 2
 
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
         )
@@ -434,7 +457,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     project_dir = initialized_sqlite_project
 
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
         )
@@ -460,7 +485,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     project_dir = initialized_sqlite_project
 
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli, ["init", "-d", project_dir], input="Y\n", catch_exceptions=False,
         )
@@ -468,7 +495,12 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/index.html".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/index.html".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
     assert "Error: invalid input" not in stdout
 
@@ -501,18 +533,27 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert context.list_expectation_suites() == []
 
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli,
             ["init", "-d", project_dir],
-            input="1\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
+            input="1\nsink_me\n\n\n".format(
+                os.path.join(project_dir, "data/Titanic.csv")
+            ),
             catch_exceptions=False,
         )
     stdout = result.stdout
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/sink_me/".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/sink_me/".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
     assert "Always know what to expect from your data" in stdout
     assert "Which table would you like to use?" in stdout

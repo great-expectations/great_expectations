@@ -7,7 +7,7 @@ from great_expectations.data_context.util import safe_mmkdir, file_relative_path
 from great_expectations.datasource import Datasource
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
-from great_expectations.datasource.generator import QueryBatchKwargsGenerator
+from great_expectations.datasource.batch_kwargs_generator import QueryBatchKwargsGenerator
 
 
 def test_basic_operation(basic_sqlalchemy_datasource):

@@ -3,7 +3,7 @@ import pytest
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
-from great_expectations.datasource.generator import TableBatchKwargsGenerator
+from great_expectations.datasource.batch_kwargs_generator import TableBatchKwargsGenerator
 
 
 def test_basic_operation(basic_sqlalchemy_datasource):
@@ -88,7 +88,7 @@ def test_db_introspection(postgresql_sqlalchemy_datasource, caplog):
 
 
 def test_query_generator_view(sqlite_view_engine):
-    datasource = SqlAlchemyDatasource(engine=sqlite_view_engine, generators={
+    datasource = SqlAlchemyDatasource(engine=sqlite_view_engine, batch_kwargs_generators={
         "table": {
             "class_name": "TableBatchKwargsGenerator"
         }

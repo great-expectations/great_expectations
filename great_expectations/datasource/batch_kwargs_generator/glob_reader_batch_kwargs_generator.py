@@ -5,7 +5,7 @@ import datetime
 import logging
 
 
-from great_expectations.datasource.generator.batch_kwargs_generator import BatchKwargsGenerator
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
@@ -31,7 +31,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
         my_datasource:
           class_name: PandasDatasource
-          generators:
+          batch_kwargs_generators:
             my_generator:
               class_name: GlobReaderBatchKwargsGenerator
               base_directory: /var/log

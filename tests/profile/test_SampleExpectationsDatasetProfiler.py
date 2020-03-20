@@ -3,7 +3,6 @@ import os
 from collections import OrderedDict
 
 import pytest
-from six import PY2
 
 import great_expectations as ge
 from great_expectations.data_context.util import file_relative_path
@@ -19,7 +18,7 @@ def not_empty_datacontext(empty_data_context, filesystem_csv_2):
         "rad_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        generators={
+        batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
@@ -319,7 +318,7 @@ def test_SampleExpectationsDatasetProfiler_with_context(not_empty_datacontext):
 
     context.create_expectation_suite("default")
     datasource = context.datasources["rad_datasource"]
-    base_dir = datasource.config["generators"]["subdir_reader"]["base_directory"]
+    base_dir = datasource.config["batch_kwargs_generators"]["subdir_reader"]["base_directory"]
     batch_kwargs = {
         "datasource": "rad_datasource",
         "path": os.path.join(base_dir, "f1.csv"),
@@ -472,6 +471,4 @@ def test_snapshot_SampleExpectationsDatasetProfiler_on_titanic():
     del evrs.meta["run_id"]
     del evrs.meta["batch_kwargs"]["ge_batch_id"]
 
-    # DISABLE TEST IN PY2 BECAUSE OF ORDER ISSUE AND NEAR-EOL
-    if not PY2:
-        assert expected_evrs == evrs
+    assert expected_evrs == evrs

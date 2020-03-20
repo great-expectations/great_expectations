@@ -19,10 +19,7 @@ from great_expectations.core.logging.usage_statistics import send_usage_message
 from great_expectations.data_asset import DataAsset
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 
-try:
-    json_parse_exception = json.decoder.JSONDecodeError
-except AttributeError:  # Python 2
-    json_parse_exception = ValueError
+json_parse_exception = json.decoder.JSONDecodeError
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -170,13 +167,13 @@ A batch of data is required to edit the suite - let's help you to specify it."""
             if batch_kwargs is None:
                 (
                     datasource_name,
-                    batch_kwarg_generator,
+                    batch_kwargs_generator,
                     data_asset,
                     batch_kwargs,
                 ) = get_batch_kwargs(
                     context,
                     datasource_name=data_source.name,
-                    generator_name=None,
+                    batch_kwargs_generator_name=None,
                     generator_asset=None,
                     additional_batch_kwargs=additional_batch_kwargs,
                 )
@@ -260,7 +257,7 @@ def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
         success, suite_name = create_expectation_suite_impl(
             context,
             datasource_name=datasource_name,
-            generator_name=generator_name,
+            batch_kwargs_generator_name=generator_name,
             generator_asset=generator_asset,
             batch_kwargs=batch_kwargs,
             expectation_suite_name=suite,

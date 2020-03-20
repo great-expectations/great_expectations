@@ -251,13 +251,13 @@ Let's help you specify the batch of data your want the validation operator to va
             if batch_kwargs is None:
                 (
                     datasource_name,
-                    batch_kwarg_generator,
+                    batch_kwargs_generator,
                     data_asset,
                     batch_kwargs,
                 ) = get_batch_kwargs(
                     context,
                     datasource_name=data_source.name,
-                    generator_name=None,
+                    batch_kwargs_generator=None,
                     generator_asset=None,
                     additional_batch_kwargs=None,
                 )

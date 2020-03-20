@@ -4,12 +4,8 @@ import boto3
 from moto import mock_s3
 from mock import patch
 
-import six
 
 from great_expectations.exceptions import StoreBackendError
-
-if six.PY2:
-    FileNotFoundError = IOError
 
 
 from great_expectations.data_context.store import (
@@ -185,13 +181,11 @@ def test_TupleS3StoreBackend():
 
 
 def test_TupleGCSStoreBackend():
-
     """
     What does this test test and why?
 
     Since no package like moto exists for GCP services, we mock the GCS client
     and assert that the store backend makes the right calls for set, get, and list.
-
     """
     bucket = "leakybucket"
     prefix = "this_is_a_test_prefix"

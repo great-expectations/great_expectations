@@ -2,18 +2,17 @@
 from __future__ import unicode_literals
 
 import os
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
-import pytest
 from click.testing import CliRunner
-from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 
 def test_docs_help_output(caplog):
