@@ -86,20 +86,32 @@ def validation_operator_run(name, run_id, validation_config_file, suite, directo
 
         Learn how to create a validation config file here:
         https://great-expectations.readthedocs.io/en/latest/command_line.html#great-expectations-validation-operator-run-validation-config-file-validation-config-file-path
+
+        The command exits with 0 if the validation operator ran and the "success" attribue in its return object is true.
+        Otherwise, the command exits with 1.
     """
 
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        return
+        cli_message("Failed to process <red>{}</red>".format(err.message))
+        sys.exit(1)
 
     if validation_config_file is not None:
         try:
             with open(validation_config_file) as f:
                 validation_config = json.load(f)
-        except IOError:
-            raise ge_exceptions.ConfigNotFoundError()
+        except (
+            IOError,
+            json_parse_exception
+        ) as e:
+            cli_message("Failed to process the --validation_config_file argument: <red>{}</red>".format(e))
+            sys.exit(1)
+
+        validation_config_error_message = _validate_valdiation_config(validation_config)
+        if validation_config_error_message is not None:
+            cli_message("<red>The validation config in {0:s} is misconfigured: {1:s}</red>".format(validation_config_file, validation_config_error_message))
+            sys.exit(1)
 
     else:
         if suite is None:
@@ -117,7 +129,7 @@ Call `suite list` command to list the expectation suites in your project.
             suite = context.get_expectation_suite(suite)
         except ge_exceptions.DataContextError as e:
             cli_message(
-                f"<red>Could not find a suite named `{suite_name}`.</red> Please check "
+                f"<red>Could not find a suite named `{suite}`.</red> Please check "
                 "the name by running `great_expectations suite list` and try again."
             )
             logger.info(e)
@@ -130,16 +142,16 @@ Please use --name argument to specify the name of the validation operator.
 Call `validation-operator list` command to list the operators in your project.
 """
             )
-            sys.exit(0)
+            sys.exit(1)
         else:
-            if name not in context.list_validation_operators():
+            if name not in context.list_validation_operator_names():
                 cli_message(
 """
 Could not find a validation operator {0:s}.
 Call `validation-operator list` command to list the operators in your project.
 """.format(name)
                 )
-                sys.exit(0)
+                sys.exit(1)
 
         batch_kwargs = None
 
@@ -183,20 +195,29 @@ Let's help you specify the batch of data your want the validation operator to va
             ]
         }
 
-    validation_operator_name = validation_config["validation_operator_name"]
-    batches_to_validate = []
-    for entry in validation_config["batches"]:
-        for expectation_suite_name in entry["expectation_suite_names"]:
-            batch = context.get_batch(entry["batch_kwargs"], expectation_suite_name)
-            batches_to_validate.append(batch)
+    try:
+        validation_operator_name = validation_config["validation_operator_name"]
+        batches_to_validate = []
+        for entry in validation_config["batches"]:
+            for expectation_suite_name in entry["expectation_suite_names"]:
+                batch = context.get_batch(entry["batch_kwargs"], expectation_suite_name)
+                batches_to_validate.append(batch)
 
-    if run_id is None:
-        run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+        if run_id is None:
+            run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
 
-    results = context.run_validation_operator(
-        validation_operator_name,
-        assets_to_validate=[batch],
-        run_id=run_id)  # e.g., Airflow run id or some run identifier that your pipeline uses.
+        results = context.run_validation_operator(
+            validation_operator_name,
+            assets_to_validate=[batch],
+            run_id=run_id)
+
+    except (
+        ge_exceptions.DataContextError,
+        IOError,
+        SQLAlchemyError,
+    ) as e:
+        cli_message("<red>{}</red>".format(e))
+        sys.exit(1)
 
     if not results["success"]:
         cli_message("Validation Failed!")
@@ -205,31 +226,45 @@ Let's help you specify the batch of data your want the validation operator to va
         cli_message("Validation Succeeded!")
         sys.exit(0)
 
-# @validation_operator.command(name="list")
-# @click.option(
-#     "--directory",
-#     "-d",
-#     default=None,
-#     help="The project's great_expectations directory.",
-# )
-# def suite_list(directory):
-#     """Lists available expectation suites."""
-#     try:
-#         context = DataContext(directory)
-#     except ge_exceptions.ConfigNotFoundError as err:
-#         cli_message("<red>{}</red>".format(err.message))
-#         return
-#
-#     suite_names = context.list_expectation_suite_names()
-#     if len(suite_names) == 0:
-#         cli_message("No expectation suites found")
-#         return
-#
-#     if len(suite_names) == 1:
-#         cli_message("1 expectation suite found:")
-#
-#     if len(suite_names) > 1:
-#         cli_message("{} expectation suites found:".format(len(suite_names)))
-#
-#     for name in suite_names:
-#         cli_message("\t{}".format(name))
+@validation_operator.command(name="list")
+@click.option(
+    "--directory",
+    "-d",
+    default=None,
+    help="The project's great_expectations directory.",
+)
+def validation_operator_list(directory):
+    """Lists the names of the validation operators configured in the project."""
+    try:
+        context = DataContext(directory)
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+
+    suite_names = context.list_validation_operator_names()
+    if len(suite_names) == 0:
+        cli_message("No validation operators are configured in the project")
+        return
+
+    if len(suite_names) == 1:
+        cli_message("1 validation operator found:")
+
+    if len(suite_names) > 1:
+        cli_message("{} validation operators found:".format(len(suite_names)))
+
+    for name in suite_names:
+        cli_message("\t{}".format(name))
+
+def _validate_valdiation_config(valdiation_config):
+    if "validation_operator_name" not in valdiation_config:
+        return "validation_operator_name attribute is missing"
+    if "batches" not in valdiation_config:
+        return "batches attribute is missing"
+
+    for batch in valdiation_config["batches"]:
+        if "batch_kwargs" not in batch:
+            return "Each batch must have a BatchKwargs dictionary in batch_kwargs attribute"
+        if "expectation_suite_names" not in batch:
+            return "Each batch must have a list of expectation suite names in expectation_suite_names attribute"
+
+    return None
