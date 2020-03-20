@@ -31,4 +31,4 @@ consuming. As a rule of thumb, we recommend starting with small batches of data.
 
 See the :ref:`profiling_reference` for more information.
 
-*last updated*: |lastupdate|
+

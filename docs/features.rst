@@ -12,15 +12,14 @@ and our `blog <https://greatexpectations.io/blog>`__ for more information on how
    :maxdepth: 2
 
    /features/expectations
-   /features/validation
-   /features/profiling
-   /features/data_docs
-   /features/custom_expectations
-   /features/data_context
    /features/validation_operators_and_actions
-   /features/profilers
+   /features/data_docs
+   /features/data_context
    /features/datasource
+   /features/validation
+   /features/metrics
+   /features/custom_expectations
    /features/batch_kwargs_generator
    /features/ge_on_teams
-
-*last updated*: |lastupdate|
+   /features/profiling
+   /features/profilers
