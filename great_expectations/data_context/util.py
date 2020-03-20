@@ -8,7 +8,7 @@ import re
 import inspect
 from collections import OrderedDict
 
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.base import DataContextConfig, DataContextConfigSchema
 from great_expectations.exceptions import (
     PluginModuleNotFoundError,
     PluginClassNotFoundError,
@@ -188,7 +188,7 @@ def substitute_all_config_variables(data, replace_variables_dict):
     :return: a dictionary with all the variables replaced with their values
     """
     if isinstance(data, DataContextConfig):
-        data = data.as_dict()
+        data = DataContextConfigSchema().dump(data)
 
     if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {k: substitute_all_config_variables(v, replace_variables_dict) for

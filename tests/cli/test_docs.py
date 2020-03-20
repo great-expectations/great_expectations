@@ -24,7 +24,6 @@ def test_docs_help_output(caplog):
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_docs_build_view(
     mock_webbrowser, caplog, site_builder_data_context_with_html_store_titanic_random
@@ -59,7 +58,6 @@ def test_docs_build_view(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_docs_build_no_view(
     mock_webbrowser, caplog, site_builder_data_context_with_html_store_titanic_random

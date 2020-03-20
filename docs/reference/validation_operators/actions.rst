@@ -96,4 +96,4 @@ Dependencies
 When configured inside action_list of an operator, StoreValidationResultAction action has to be configured before this action,
 since the building of data docs fetches validation results from the store.
 
-*last updated*: |lastupdate|
+

@@ -1,4 +1,3 @@
-.. _reference:
 
 #############
 Reference
@@ -29,6 +28,7 @@ Core GE Types
    /reference/standard_arguments
    /reference/result_format
    /reference/validation_result
+   /reference/datasource_reference
    /reference/batch_kwargs
 
 ************************
@@ -67,6 +67,7 @@ Advanced Features
    /reference/batch_identification
    /reference/validation_operators
    /reference/usage_statistics
+   /reference/metric_reference
 
 *****************************
 Extending Great Expectations
@@ -88,5 +89,4 @@ Supporting Resources
    :maxdepth: 2
 
    /reference/supporting_resources
-
-*last updated*: |lastupdate|
+   /reference/glossary
