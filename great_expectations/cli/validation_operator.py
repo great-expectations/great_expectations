@@ -9,15 +9,10 @@ from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.datasource import (
-    create_expectation_suite as create_expectation_suite_impl,
-)
-from great_expectations.cli.datasource import (
     get_batch_kwargs,
     select_datasource,
 )
 from great_expectations.cli.util import cli_message
-from great_expectations.data_asset import DataAsset
-from ruamel.yaml import YAML, YAMLError
 
 try:
     json_parse_exception = json.decoder.JSONDecodeError
@@ -61,20 +56,7 @@ def validation_operator():
     "--run_id",
     "-r",
     default=None,
-    help="""Run id """,
-)
-@click.option(
-    "--datasource",
-    "-ds",
-    default=None,
-    help="""The name of the datasource. The datasource must contain a single BatchKwargGenerator that can list data assets in the datasource """,
-)
-@click.option(
-    "--batch-kwargs",
-    default=None,
-    help="""Batch_kwargs that specify the batch of data to be used a sample when editing the suite. Must be a valid JSON dictionary.
-Make sure to escape quotes. Example: "{\"datasource\": \"my_db\", \"query\": \"select * from my_table\"}"    
-""",
+    help="""Run id. If not specified, a timestamp-based run id will be automatically generated. """,
 )
 @click.option(
     "--directory",
@@ -82,25 +64,28 @@ Make sure to escape quotes. Example: "{\"datasource\": \"my_db\", \"query\": \"s
     default=None,
     help="The project's great_expectations directory.",
 )
-@click.option(
-    "--jupyter/--no-jupyter",
-    is_flag=True,
-    help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
-    default=True,
-)
-def validation_operator_run(name, run_id, validation_config_file, suite, datasource, directory, jupyter, batch_kwargs):
+def validation_operator_run(name, run_id, validation_config_file, suite, directory):
     """
-    Run validation operator
+    Run a validation operator.
 
-    The SUITE argument is required. This is the name you gave to the suite
-    when you created it.
+    If you are not familiar with validation operators, start here:
+    https://great-expectations.readthedocs.io/en/latest/features/validation.html#validation-operators
 
-    A batch of data is required to edit the suite, which is used as a sample.
+    There are two modes to run this command:
 
-    The edit command will help you specify a batch interactively. Or you can
-    specify them manually by providing --batch-kwargs in valid JSON format.
+    1. Interactive:
+        Specify the name of the validation operator using the --name argument
+        and the name of the expectation suite using the --suite argument.
 
-    Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
+        The command will help you specify the batch of data that you want the
+        validation operator to validate interactively.
+
+    2. Non-interactive:
+        Use the `--validation_config_file` argument to specify the path of the validation configuration JSON file.
+        The file can be used to instruct a validation operator to validate multiple batches of data and use multiple expectation suites to validate each batch.
+
+        Learn how to create a validation config file here:
+        https://great-expectations.readthedocs.io/en/latest/command_line.html#great-expectations-validation-operator-run-validation-config-file-validation-config-file-path
     """
 
     try:
@@ -117,6 +102,14 @@ def validation_operator_run(name, run_id, validation_config_file, suite, datasou
             raise ge_exceptions.ConfigNotFoundError()
 
     else:
+        if suite is None:
+            cli_message(
+"""
+Please use --suite argument to specify the name of the expectation suite.
+Call `suite list` command to list the expectation suites in your project.
+"""
+            )
+            sys.exit(0)
 
         if suite.endswith(".json"):
             suite = suite[:-5]
@@ -130,65 +123,54 @@ def validation_operator_run(name, run_id, validation_config_file, suite, datasou
             logger.info(e)
             sys.exit(1)
 
-        batch_kwargs_json = batch_kwargs
-        batch_kwargs = None
-        if batch_kwargs_json:
-            try:
-                batch_kwargs = json.loads(batch_kwargs_json)
-                if datasource:
-                    batch_kwargs["datasource"] = datasource
-                _batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
-                assert isinstance(_batch, DataAsset)
-            except json_parse_exception as je:
-                cli_message(
-                    "<red>Please check that your batch_kwargs are valid JSON.\n{}</red>".format(
-                        je
-                    )
-                )
-                sys.exit(1)
-            except ge_exceptions.DataContextError:
-                cli_message(
-                    "<red>Please check that your batch_kwargs are able to load a batch.</red>"
-                )
-                sys.exit(1)
-            except ValueError as ve:
-                cli_message(
-                    "<red>Please check that your batch_kwargs are able to load a batch.\n{}</red>".format(
-                        ve
-                    )
-                )
-                sys.exit(1)
-
-        if not batch_kwargs:
+        if name is None:
             cli_message(
-                """
-    A batch of data is required - let's help you to specify it."""
+"""
+Please use --name argument to specify the name of the validation operator.
+Call `validation-operator list` command to list the operators in your project.
+"""
             )
-
-            additional_batch_kwargs = None
-            try:
-                data_source = select_datasource(context, datasource_name=datasource)
-            except ValueError as ve:
-                cli_message("<red>{}</red>".format(ve))
-                sys.exit(1)
-
-            if not data_source:
-                cli_message("<red>No datasources found in the context.</red>")
-                sys.exit(1)
-
-            if batch_kwargs is None:
-                (
-                    datasource_name,
-                    batch_kwarg_generator,
-                    data_asset,
-                    batch_kwargs,
-                ) = get_batch_kwargs(
-                    context,
-                    datasource_name=data_source.name,
-                    generator_name=None,
-                    generator_asset=None,
-                    additional_batch_kwargs=additional_batch_kwargs,
+            sys.exit(0)
+        else:
+            if name not in context.list_validation_operators():
+                cli_message(
+"""
+Could not find a validation operator {0:s}.
+Call `validation-operator list` command to list the operators in your project.
+""".format(name)
                 )
+                sys.exit(0)
+
+        batch_kwargs = None
+
+        cli_message(
+            """
+Let's help you specify the batch of data your want the validation operator to validate."""
+        )
+
+        try:
+            data_source = select_datasource(context)
+        except ValueError as ve:
+            cli_message("<red>{}</red>".format(ve))
+            sys.exit(1)
+
+        if not data_source:
+            cli_message("<red>No datasources found in the context.</red>")
+            sys.exit(1)
+
+        if batch_kwargs is None:
+            (
+                datasource_name,
+                batch_kwarg_generator,
+                data_asset,
+                batch_kwargs,
+            ) = get_batch_kwargs(
+                context,
+                datasource_name=data_source.name,
+                generator_name=None,
+                generator_asset=None,
+                additional_batch_kwargs=None,
+            )
 
 
         validation_config = {

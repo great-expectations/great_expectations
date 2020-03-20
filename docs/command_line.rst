@@ -28,6 +28,7 @@ This is a list of the most common commands you'll use in order of how much you'l
 * ``great_expectations suite list``
 * ``great_expectations docs build``
 * ``great_expectations tap new``
+* ``great_expectations validation-operator run``
 * ``great_expectations datasource list``
 * ``great_expectations datasource new``
 * ``great_expectations datasource profile``
@@ -275,6 +276,97 @@ If you prefer to disable Great Expectations from automatically opening the gener
     To continue editing this suite, run jupyter notebook /Users/dickens/Desktop/great_expectations/uncommitted/npi.warning.ipynb
 
 You can then run jupyter.
+
+
+great_expectations validation-operator
+=====================================
+
+All command line operations for working with validation operators are here.
+
+``great_expectations validation-operator list``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Running ``great_expectations validation-operator list`` gives a list of validation operators configured in your project:
+
+.. code-block:: bash
+
+    $ great_expectations validation-operator list
+    ...
+    ...
+    ...
+
+``great_expectations validation-operator run --name <VALIDATION_OPERATOR_NAME> --suite <SUITE_NAME>``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you want to call a validation operator to validate one batch of data against one expectation suite,
+you can invoke this command.
+
+Use the `--name` argument to specify the name of the validation operator you want to run. This has to be the name
+of one of the valdiation operators configured in your project. You can look up the names by calling
+the `validation-operator list` command or by examining the `validation_operators` section in your project's
+``great_expectations.yml`` config file.
+
+Use the `--suite` argument to specify the name of the expectation suite you want the validation operator to validate the
+batch of data against. This has to be the name of one of the expectation suites that exist in your project. You can look up the names by calling
+the `suite list` command.
+
+The command will help you specify the batch of data that you want the validation operator to validate interactively.
+
+
+.. code-block:: bash
+
+    $ great_expectations validation-operator --name action_list_operator --suite npi.warning
+    ...
+    ...
+    ...
+
+
+``great_expectations validation-operator run ----validation_config_file <VALIDATION_CONFIG_FILE_PATH>``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you want run a validation operator non-interactively, use the `--validation_config_file` argument to specify the path of the validation configuration JSON file.
+
+.. note::
+    A validation operator can validate multiple batches of data and use multiple expectation suites to validate each batch.
+
+A validation config file specifies the name of the validation operator in your project and
+the list of batches of data that you want the operator to validate.
+Each batch is defined using "batch_kwargs".
+The "expectation_suite_names" attribute for each batch specifies the list of the names of expectation suites that the validation o
+operator should use to validate the batch.
+
+Here is an example of a validation config file:
+
+.. code-block:: json
+
+    {
+      "validation_operator_name": "action_list_operator",
+      "batches": [
+        {
+          "batch_kwargs": {
+            "path": "/Users/me/projects/my_project/data/data.csv",
+            "datasource": "my_filesystem_datasource",
+            "reader_method": "read_csv"
+          },
+          "expectation_suite_names": ["suite_one", "suite_two"]
+        },
+        {
+          "batch_kwargs": {
+            "query": "select * from users where status = 1",
+            "datasource": "my_redshift_datasource",
+          },
+          "expectation_suite_names": ["suite_three"]
+        }
+      ]
+    }
+
+.. code-block:: bash
+
+    $ great_expectations validation-operator run ----validation_config_file my_val_config.json
+    ...
+    ...
+    ...
+
 
 
 great_expectations datasource
