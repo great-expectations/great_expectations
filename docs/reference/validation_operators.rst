@@ -12,4 +12,4 @@ Validation Operators
    /reference/validation_operators/warning_and_failure_expectation_suites_validation_operator
    /reference/validation_operators/actions
 
-*last updated*: |lastupdate|
+

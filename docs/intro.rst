@@ -121,4 +121,4 @@ If you'd like to contribute to Great Expectations, please head to the :ref:`comm
 
 If you'd like hands-on assistance setting up Great Expectations, establishing a healthy practice of data testing, or adding functionality to Great Expectations, please see options for consulting help `here <https://greatexpectations.io/consulting/>`__.
 
-*last updated*: |lastupdate|
+

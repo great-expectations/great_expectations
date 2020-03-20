@@ -100,4 +100,4 @@ out the missing implementations!
 |`expect_multicolumn_values_to_be_unique`                                      | Y          | N       | N         |
 +------------------------------------------------------------------------------+------------+---------+-----------+
 
-*last updated*: |lastupdate|
+

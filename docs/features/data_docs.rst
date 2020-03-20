@@ -65,4 +65,4 @@ of these pages or create your own, see :ref:`customizing_data_docs`.
 
 See the :ref:`data_docs_reference` for more information.
 
-*last updated*: |lastupdate|
+

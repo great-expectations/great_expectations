@@ -5,6 +5,7 @@ from six import PY2
 
 import great_expectations as ge
 from great_expectations.core.util import nested_update
+from great_expectations.util import lint_code
 
 
 def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
@@ -12,7 +13,6 @@ def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
         ge.validate(file_data_asset, empty_expectation_suite, data_asset_class=ge.data_asset.FileDataAsset)
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_validate_dataset(dataset, basic_expectation_suite):
     res = ge.validate(dataset, basic_expectation_suite)
     assert res.success is True
@@ -152,3 +152,18 @@ def test_nested_update_lists():
             "metric.blarg": [""]
         }
     }
+
+
+def test_linter_raises_error_on_non_string_input():
+    with pytest.raises(TypeError):
+        lint_code(99)
+
+
+def test_linter_changes_dirty_code():
+    code = "foo = [1,2,3]"
+    assert lint_code(code) == "foo = [1, 2, 3]\n"
+
+
+def test_linter_leaves_clean_code():
+    code = "foo = [1, 2, 3]\n"
+    assert lint_code(code) == "foo = [1, 2, 3]\n"

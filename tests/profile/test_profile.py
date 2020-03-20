@@ -425,10 +425,10 @@ def test_snapshot_BasicDatasetProfiler_on_titanic():
 
     # THIS IS NOT DEAD CODE. UNCOMMENT TO SAVE A SNAPSHOT WHEN UPDATING THIS TEST
     # with open('tests/test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json', 'w+') as file:
-    #     json.dump(expectationSuiteValidationResultSchema.dump(evrs).data, file, indent=2)
+    #     json.dump(expectationSuiteValidationResultSchema.dump(evrs), file, indent=2)
     #
     # with open('tests/render/fixtures/BasicDatasetProfiler_evrs.json', 'w+') as file:
-    #     json.dump(expectationSuiteValidationResultSchema.dump(evrs).data, file, indent=2)
+    #     json.dump(expectationSuiteValidationResultSchema.dump(evrs), file, indent=2)
 
     with open(
         file_relative_path(
@@ -438,7 +438,7 @@ def test_snapshot_BasicDatasetProfiler_on_titanic():
     ) as file:
         expected_evrs = expectationSuiteValidationResultSchema.load(
             json.load(file, object_pairs_hook=OrderedDict)
-        ).data
+        )
 
     # We know that python 2 does not guarantee the order of value_counts, which causes a different
     # order for items in the partial_unexpected_value_counts list

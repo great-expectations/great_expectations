@@ -59,7 +59,7 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
 
     df.save_expectation_suite(directory_name + '/temp1.json')
     with open(directory_name + '/temp1.json') as infile:
-        loaded_config = expectationSuiteSchema.loads(infile.read()).data
+        loaded_config = expectationSuiteSchema.loads(infile.read())
     assert output_config == loaded_config
 
     ### Second test set ###
@@ -109,7 +109,7 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         discard_failed_expectations=False
     )
     with open(directory_name + '/temp2.json') as infile:
-        loaded_suite = expectationSuiteSchema.loads(infile.read()).data
+        loaded_suite = expectationSuiteSchema.loads(infile.read())
     assert output_config == loaded_suite
 
     ### Third test set ###
@@ -155,7 +155,7 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         discard_catch_exceptions_kwargs=False,
     )
     with open(directory_name + '/temp3.json') as infile:
-        loaded_suite = expectationSuiteSchema.loads(infile.read()).data
+        loaded_suite = expectationSuiteSchema.loads(infile.read())
     assert output_config == loaded_suite
 
 
@@ -901,7 +901,8 @@ def test_discard_failing_expectations():
             kwargs={'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}
         )
     ]
-    sub1.discard_failing_expectations()
+    with pytest.warns(UserWarning, match=r"Removed \d expectations that were 'False'"):
+        sub1.discard_failing_expectations()
     assert sub1.find_expectations() == exp1
 
     sub1 = df[['A']]
@@ -915,7 +916,8 @@ def test_discard_failing_expectations():
             kwargs={'column': 'A', 'value_set': [1, 2, 3, 4]}
         ),
     ]
-    sub1.discard_failing_expectations()
+    with pytest.warns(UserWarning, match=r"Removed \d expectations that were 'False'"):
+        sub1.discard_failing_expectations()
     assert sub1.find_expectations() == exp1
 
     sub1 = df.iloc[:3, 1:4]
@@ -945,7 +947,8 @@ def test_discard_failing_expectations():
             kwargs={'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}
         )
     ]
-    sub1.discard_failing_expectations()
+    with pytest.warns(UserWarning, match=r"Removed \d expectations that were 'False'"):
+        sub1.discard_failing_expectations()
     assert sub1.find_expectations() == exp1
 
     sub1 = df.loc[0:, 'A':'B']
@@ -967,7 +970,8 @@ def test_discard_failing_expectations():
             kwargs={'column': 'B', 'value_set': [5, 6, 7, 8]}
         ),
     ]
-    sub1.discard_failing_expectations()
+    with pytest.warns(UserWarning, match=r"Removed \d expectations that were 'False'"):
+        sub1.discard_failing_expectations()
     assert sub1.find_expectations() == exp1
 
 

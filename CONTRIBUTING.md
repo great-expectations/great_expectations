@@ -118,21 +118,21 @@ These guidelines should be followed consistently for methods and variables expos
 GE core team members use this checklist to ship releases.
 
 - [ ] merge all approved PRs into `develop`
-- [ ] make a new branch from `develop` called something  like `release-prep`
+- [ ] make a new branch from `develop` called something like `release-prep`
 - [ ] in this branch update the version number in the `.travis.yml` file (look in the deploy section)
-- [ ] update the changelog.rst: move all things under `develop` under a new heading w/ the new release number. Leave the develop header for the next release
+    - This sed snippet is handy if you change the numbers `sed -i '' 's/0\.9\.6/0\.9\.7/g' .travis.yml  `
+- [ ] update the changelog.rst: move all things under `develop` under a new heading w/ the new release number.
 - [ ] Submit this as a PR against `develop`
-- [ ] After successful checks, get it approved and merged
-- [ ] Create a PR from `develop` into `master`
-- [ ] After successful checks, merge the PR
+- [ ] After successful checks, get it approved and merged.
+- [ ] Update your local branches and switch to master: `git fetch --all; git checkout master; git pull`. 
+- [ ] Merge the now-updated `develop` branch into `master` and trigger the release: `git merge origin/develop; git push`
 - [ ] Wait for all the builds to complete (including the deploy job)
 - [ ] Check [PyPI](https://pypi.org/project/great-expectations/#history) for the new release
 - [ ] Create an annotated git tag by
-    - [ ] check out master
-    - [ ] pull down master
-    - [ ] ensure you have a clean master
-    - [ ] run `git tag -a 0.9.3 -m "0.9.3"` with the correct new version
-    - [ ] push the tag up by running `git push origin 0.9.3` with the correct new version
-- [ ] [Create the release on GitHub](https://github.com/great-expectations/great_expectations/releases) with the version number. Copy the changelog notes into the release notes.
-- [ ] Verify RTD builds new release version
+    - [ ] run `git tag -a <<VERSION>> -m "<<VERSION>>"` with the correct new version
+    - [ ] push the tag up by running `git push origin <<VERSION>>` with the correct new version
+    - [ ] merge `master` into `develop` so that the tagged commit becomes part of the history for `develop`: `git checkout develop; git pull; git merge master`
+    - [ ] On develop, add a new "develop" section header to changelog.rst, and push the updated file with message "Update changelog for develop"
+- [ ] [Create the release on GitHub](https://github.com/great-expectations/great_expectations/releases) with the version number. Copy the changelog notes into the release notes, and update any rst-specific links to use github issue numbers.
+- [ ] Notify kyle@superconductivehealth.com about any community-contributed PRs that should be celebrated.
 - [ ] Socialize the relase on GE slack by copying the changelog with an optional nice personal message (thank people if you can)
