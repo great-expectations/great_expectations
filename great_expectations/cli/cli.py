@@ -32,7 +32,7 @@ Welcome to the great_expectations CLI!
 
 Most commands follow this format: great_expectations <NOUN> <VERB>
 
-The nouns are: datasource, docs, project, suite
+The nouns are: datasource, docs, project, suite, validation-operator
 
 Most nouns accept the following verbs: new, list, edit
 
