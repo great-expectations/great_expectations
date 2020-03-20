@@ -120,6 +120,7 @@ GE core team members use this checklist to ship releases.
 - [ ] merge all approved PRs into `develop`
 - [ ] make a new branch from `develop` called something  like `release-prep`
 - [ ] in this branch update the version number in the `.travis.yml` file (look in the deploy section)
+    - This sed snippet is handy if you change the numbers `sed -i '' 's/0\.9\.6/0\.9\.7/g' .travis.yml  `
 - [ ] update the changelog.rst: move all things under `develop` under a new heading w/ the new release number. Leave the develop header for the next release
 - [ ] Submit this as a PR against `develop`
 - [ ] After successful checks, get it approved and merged
@@ -133,6 +134,7 @@ GE core team members use this checklist to ship releases.
     - [ ] ensure you have a clean master
     - [ ] run `git tag -a 0.9.3 -m "0.9.3"` with the correct new version
     - [ ] push the tag up by running `git push origin 0.9.3` with the correct new version
+    - [ ] merge `master` into `develop` so that the tagged commit becomes part of the history for `develop`.
 - [ ] [Create the release on GitHub](https://github.com/great-expectations/great_expectations/releases) with the version number. Copy the changelog notes into the release notes.
 - [ ] Verify RTD builds new release version
 - [ ] Socialize the relase on GE slack by copying the changelog with an optional nice personal message (thank people if you can)
