@@ -533,7 +533,7 @@ class BaseDataContext(object):
             **kwargs
         )
 
-    def list_validation_operators(self):
+    def list_validation_operator_names(self):
         if self.validation_operators:
             return self.validation_operators.keys()
         else:
