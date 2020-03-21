@@ -175,17 +175,14 @@ def test_tap_new_on_context_builds_runnable_tap_file(
 
     tap_file = os.path.abspath(os.path.join(root_dir, "..", "tap.py"))
     # In travis on osx, python may not execute from the build dir
-    curdir = os.path.abspath(os.getcwd())
-    build_dir = os.environ.get("TRAVIS_BUILD_DIR", None) or curdir
-    try:
-        os.chdir(build_dir)
-        status, output = subprocess.getstatusoutput(f"python {tap_file}")
-        assert status == 0
-        assert output == "Validation Succeeded!"
-    except:
-        raise
-    finally:
-        os.chdir(curdir)
+    cmdstring = f"python {tap_file}"
+    if os.environ.get("TRAVIS_OS_NAME") == "osx":
+        print("HERE!!!")
+        build_dir = os.environ.get("TRAVIS_BUILD_DIR")
+        cmdstring = f"PYTHONPATH={build_dir} " + cmdstring
+    status, output = subprocess.getstatusoutput(cmdstring)
+    assert status == 0
+    assert output == "Validation Succeeded!"
 
 
 def test_tap_new_on_context_builds_runnable_tap_file_that_fails_validation(
@@ -236,22 +233,16 @@ def test_tap_new_on_context_builds_runnable_tap_file_that_fails_validation(
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
     # In travis on osx, python may not execute from the build dir
-    curdir = os.path.abspath(os.getcwd())
-    build_dir = os.environ.get("TRAVIS_BUILD_DIR", None) or curdir
-    print(os.environ.get("TRAVIS_BUILD_DIR"))
-    print(curdir)
-    print(build_dir)
-    print(os.listdir(build_dir))
-    try:
-        os.chdir(build_dir)
-        tap_file = os.path.abspath(os.path.join(root_dir, "..", "tap.py"))
-        status, output = subprocess.getstatusoutput(f"python {tap_file}")
-        assert status == 1
-        assert output == "Validation Failed!"
-    except:
-        raise
-    finally:
-        os.chdir(curdir)
+    tap_file = os.path.abspath(os.path.join(root_dir, "..", "tap.py"))
+    cmdstring = f"python {tap_file}"
+    if os.environ.get("TRAVIS_OS_NAME") == "osx":
+        build_dir = os.environ.get("TRAVIS_BUILD_DIR")
+        cmdstring = f"PYTHONPATH={build_dir} " + cmdstring
+
+    status, output = subprocess.getstatusoutput(f"python {tap_file}")
+    assert status == 1
+    assert output == "Validation Failed!"
+
 
 def test_tap_new_on_context_with_1_datasources_with_no_datasource_option_prompts_user_and_generates_runnable_tap_file(
     caplog, empty_data_context, filesystem_csv
