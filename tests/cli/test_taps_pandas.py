@@ -177,13 +177,15 @@ def test_tap_new_on_context_builds_runnable_tap_file(
     # In travis on osx, python may not execute from the build dir
     cmdstring = f"python {tap_file}"
     if os.environ.get("TRAVIS_OS_NAME") == "osx":
-        print("HERE!!!")
         build_dir = os.environ.get("TRAVIS_BUILD_DIR")
         cmdstring = f"PYTHONPATH={build_dir} " + cmdstring
+    print("about to run: " + cmdstring)
+    print(os.listdir(os.path.abspath(os.path.join(root_dir, ".."))))
+    print(os.listdir(build_dir))
     status, output = subprocess.getstatusoutput(cmdstring)
     assert status == 0
     assert output == "Validation Succeeded!"
-
+    assert False
 
 def test_tap_new_on_context_builds_runnable_tap_file_that_fails_validation(
     caplog, empty_data_context, filesystem_csv
