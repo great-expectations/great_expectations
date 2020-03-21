@@ -174,9 +174,18 @@ def test_tap_new_on_context_builds_runnable_tap_file(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
     tap_file = os.path.abspath(os.path.join(root_dir, "..", "tap.py"))
-    status, output = subprocess.getstatusoutput(f"python {tap_file}")
-    assert status == 0
-    assert output == "Validation Succeeded!"
+    # In travis on osx, python may not execute from the build dir
+    curdir = os.path.abspath(os.getcwd())
+    build_dir = os.environ.get("TRAVIS_BUILD_DIR", None) or curdir
+    try:
+        os.chdir(build_dir)
+        status, output = subprocess.getstatusoutput(f"python {tap_file}")
+        assert status == 0
+        assert output == "Validation Succeeded!"
+    except:
+        raise
+    finally:
+        os.chdir(curdir)
 
 
 def test_tap_new_on_context_builds_runnable_tap_file_that_fails_validation(
