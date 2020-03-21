@@ -48,7 +48,8 @@ The following instructions provide a step-by-step overview of how to contribute 
     * Run: `git remote add upstream git@github.com:great-expectations/great_expectations.git`
     * This sets up a remote called `upstream` to track changes to the main branch.
 * Install all relevant libraries:
-    * Make a new virtual environment (e.g. using virtualenv or conda), name it "great_expectations_dev" or similar.
+    * Make a new virtual environment (e.g. using virtualenv or conda), name it "great_expectations_dev" or similar, and then activate it, e.g.:
+        * `source great_expectations_dev/bin/activate`
     * Install dependencies from requirements-dev.txt to make sure you have the right libraries, then install great_expectations from the version you just forked:
         * `pip install -r requirements-dev.txt`
         * `pip install .`
