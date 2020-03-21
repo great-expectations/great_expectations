@@ -455,7 +455,8 @@ class BaseDataContext(object):
 
         """
         datasource_obj = self.get_datasource(datasource)
-        batch_kwargs = datasource_obj.build_batch_kwargs(generator=generator, name=name, **kwargs)
+        batch_kwargs = datasource_obj.build_batch_kwargs(generator=generator, name=name, partition_id=partition_id,
+                                                         **kwargs)
         return batch_kwargs
 
     def get_batch(self, batch_kwargs, expectation_suite_name, data_asset_type=None, batch_parameters=None):
