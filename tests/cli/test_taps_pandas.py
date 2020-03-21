@@ -178,10 +178,12 @@ def test_tap_new_on_context_builds_runnable_tap_file(
     cmdstring = f"python {tap_file}"
     if os.environ.get("TRAVIS_OS_NAME") == "osx":
         build_dir = os.environ.get("TRAVIS_BUILD_DIR")
+        print(os.listdir(build_dir))
         cmdstring = f"PYTHONPATH={build_dir} " + cmdstring
     print("about to run: " + cmdstring)
+    print(os.curdir)
+    print(os.listdir(os.curdir))
     print(os.listdir(os.path.abspath(os.path.join(root_dir, ".."))))
-    print(os.listdir(build_dir))
     status, output = subprocess.getstatusoutput(cmdstring)
     assert status == 0
     assert output == "Validation Succeeded!"
