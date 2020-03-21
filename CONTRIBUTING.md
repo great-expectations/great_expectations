@@ -23,7 +23,7 @@ We suggest simply editing the docs using the GitHub markdown editor, which means
 * Click the "Create Pull Request" button.
     * Optionally: Add comment to explain your change, if it’s not already in the commit message.
 * Click the next "Create Pull Request" button to create the actual PR.
-* You will see a comment from the "CLA Bot" that asks you to complete the Contributor Licence Agreement form.
+* You will see a comment from the "CLA Bot" that asks you to complete the Contributor License Agreement form.
     * Please complete the form and comment on the PR to say that you’ve signed the form.
 * Wait for the other Continuous Integration (CI) checks to go green and watch out for a comment from the automated linter that checks for syntax and formatting issues.
     * Fix any issues that are flagged.
@@ -66,7 +66,7 @@ The following instructions provide a step-by-step overview of how to contribute 
     * Push to the remote fork of your repo
     * Follow [these instructions](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork) to create a PR from your commit.
     *  In the PR, choose a short title which sums up the changes that you have made, and in the body provide more details about what your changes do. Also mention the number of the issue where discussion has taken place, e.g. "Closes #123".
-* You will see a comment from the "CLA Bot" that asks you to complete the Contributor Licence Agreement form. See details in the section below if you want to learn more.
+* You will see a comment from the "CLA Bot" that asks you to complete the Contributor License Agreement form. See details in the section below if you want to learn more.
     * Please complete the form and comment on the PR to say that you’ve signed the form.
 * Wait for the other Continuous Integration (CI) checks to go green and watch out for a comment from the automated linter that checks for syntax and formatting issues.
     * Fix any issues that are flagged.
