@@ -88,7 +88,7 @@ jobs:
     # - psql --version
     - dpkg -l | grep postgres
     - sudo apt-get --purge remove pgdg-keyring postgresql*
-    - psql --version
+    # - psql --version
     install:
     # - pip install --only-binary=numpy,scipy numpy scipy
     # - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
