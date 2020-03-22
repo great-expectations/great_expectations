@@ -86,6 +86,8 @@ jobs:
     # addons:
     before_script:
     - psql --version
+    - sudo apt-get —-purge remove postgresql
+    - psql --version
     install:
     # - pip install --only-binary=numpy,scipy numpy scipy
     # - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
