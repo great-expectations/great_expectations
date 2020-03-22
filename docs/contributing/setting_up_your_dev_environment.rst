@@ -13,8 +13,8 @@ Prerequisites
 In order to contribute to Great Expectations, you will need the following:
 
 * A GitHub account - this is sufficient if you only want to contribute to the documentation.
-* If you want to contribute code, you will also need a working version of Git on your computer. Please refer to the [Git setup instructions](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) for your environment.
-* We also recommend going through the [SSH key setup process on GitHub](https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) for easier authentication.
+* If you want to contribute code, you will also need a working version of Git on your computer. Please refer to the `Git setup instructions <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`__ for your environment.
+* We also recommend going through the `SSH key setup process on GitHub <https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent>`__ for easier authentication.
 
 
 Fork and clone the repository
@@ -65,11 +65,6 @@ Install python dependencies
     * ``pip install -e .``
     * ``-e`` will install in "editable" mode. This is not required, but is often very convenient as a developer.
 
-**8. Make sure you have GCC and Java installed and working on your machine.**
-
-    * #FIXME: I'm not sure how to do this or why it's important.
-
-
 (Optional) Configure resources for testing and documentation
 ---------------------------------------------------------------
 
@@ -77,9 +72,9 @@ Note that you will have the option to enable different backends for local testin
 
 **If you want to build documentation locally:**
 
-    * ``pip install -r docs/requirements.txt`
-    * To build documentation, the command is `cd docs; make html;`
-    * Documentation will be generated in `docs/build/html/index.html`
+    * ``pip install -r docs/requirements.txt``
+    * To build documentation, the command is ``cd docs; make html``
+    * Documentation will be generated in ``docs/build/html/`` with the ``index.html`` as the index page.
 
 **If you want to develop against local postgresql:**
 
@@ -88,6 +83,7 @@ Note that you will have the option to enable different backends for local testin
 **If you want to develop against local Spark:**
 
     * #FIXME
+    * Probably (?): Make sure you have GCC and Java installed and working on your machine
 
 **If you want to develop against a remote backend:**
 
