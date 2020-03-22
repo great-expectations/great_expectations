@@ -85,7 +85,7 @@ jobs:
     # env: PANDAS=0.23.4
     # addons:
     before_script:
-    - psql --version
+    # - psql --version
     - sudo apt-get —-purge remove postgresql
     - psql --version
     install:
