@@ -74,7 +74,7 @@ Check out [The Era of DIY Data Validation is Over]() for more details.
 ### Tests are docs and docs are tests
 
 ```diff 
-- This feature is in alpha
+- This feature is experimental
 ```
 
 
@@ -95,7 +95,7 @@ Check out [Down with Documentation Rot!]() for more details.
 ### Automated data profiling
 
 ```diff 
-- This feature is in alpha
+- This feature is experimental
 ```
 
 
