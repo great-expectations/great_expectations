@@ -80,7 +80,8 @@ jobs:
   - stage: contributor
     # This stage exactly replicates the contributor instructions in `setting_up_your_dev_environment.rst`
     # Do NOT change it without making a corresponding change in those docs.
-    os: osx
+    os:
+    - osx
     # dist: trusty
     python: 3.6
     # env: PANDAS=0.23.4
