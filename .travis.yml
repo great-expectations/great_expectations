@@ -83,6 +83,8 @@ jobs:
     dist: trusty
     python: 3.6
     # env: PANDAS=0.23.4
+    addons:
+    before_script:
     install:
     # - pip install --only-binary=numpy,scipy numpy scipy
     # - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
