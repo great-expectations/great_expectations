@@ -95,8 +95,8 @@ jobs:
     - pip install -r requirements-dev.txt
     - pip install -e .
     script:
-    - pytest --no-sqlalchemy --no-spark
-    
+    - pytest --no-spark #--no-sqlalchemy 
+
 # addons:
 #   postgresql: '9.4'
 # services:
