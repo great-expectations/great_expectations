@@ -87,7 +87,7 @@ jobs:
     before_install:
     # - psql --version
     - dpkg -l | grep postgres
-    - sudo apt-get --purge remove pgdg-keyring postgresql-9.2 postgresql-9.2-postgis-2.3-scripts postgresql-9.3 postgresql-9.3-postgis-2.3-scripts postgresql-9. postgresql-9.4-postgis-2.3-scripts postgresql-9. postgresql-9.5-postgis-2.3-scripts postgresql-9. postgresql-9.6-postgis-2.3-scripts postgresql-client postgresql-client-9.2 postgresql-client-9.3 postgresql-client-9.4 postgresql-client-9.5 postgresql-client-9.6 postgresql-client-common postgresql-common postgresql-contrib-9.2 postgresql-contrib-9.3 postgresql-contrib-9.4 postgresql-contrib-9.5 postgresql-contrib-9.6
+    - sudo apt-get --purge remove pgdg-keyring postgresql*
     - psql --version
     install:
     # - pip install --only-binary=numpy,scipy numpy scipy
