@@ -3,7 +3,7 @@ branches:
   - master
   - develop
   - "/^\\d.*/"
-language: python
+language: generic
 cache: pip
 os:
 # - linux
@@ -82,7 +82,7 @@ jobs:
     # This stage exactly replicates the contributor instructions in `setting_up_your_dev_environment.rst`
     # Do NOT change it without making a corresponding change in those docs.
     # dist: trusty
-    python: 3.6
+    # python: 3.6
     # env: PANDAS=0.23.4
     addons:
     before_script:
