@@ -24,13 +24,13 @@ jobs:
     dist: trusty
     python: 3.6
     env: PANDAS=0.22.0
-  - stage: test
-    dist: trusty
-    python: 3.6
-    env: PANDAS=0.23.4
-  - stage: test
-    dist: trusty
-    python: 3.6
+  # - stage: test
+  #   dist: trusty
+  #   python: 3.6
+  #   env: PANDAS=0.23.4
+  # - stage: test
+  #   dist: trusty
+  #   python: 3.6
 #  - stage: test
 #    dist: xenial
 #    env: PANDAS=0.25.3
@@ -38,30 +38,30 @@ jobs:
 #  - stage: test
 #    dist: bionic
 #    python: 3.8
-  - stage: experimental
-    os: windows
-    name: "Python 3.6.7 on Windows"
-    language: bash
-    python: "3.6.7"
-    before_install:
-      - choco install python --version=3.6.7
-      - export PATH="/c/Python36:/c/Python36/Scripts:$PATH"
-      - python --version
-#      - choco install postgresql10 --params '/Password:' --paramsglobal
-    install:
-      - pip install numpy scipy
-      - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
-      - pip install --upgrade pytest
-      - pip install -r requirements-dev.txt
-      - pip install pytest-slack
-    before_script:
-      - python --version
-#    - psql -c 'create database test_ci;' -U postgres
-    script:
-      - pytest --no-sqlalchemy --no-postgresql --no-spark --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL
-        --slack_channel=notifications-great_expectations tests/
-    after_success:
-      - python --version
+#   - stage: experimental
+#     os: windows
+#     name: "Python 3.6.7 on Windows"
+#     language: bash
+#     python: "3.6.7"
+#     before_install:
+#       - choco install python --version=3.6.7
+#       - export PATH="/c/Python36:/c/Python36/Scripts:$PATH"
+#       - python --version
+# #      - choco install postgresql10 --params '/Password:' --paramsglobal
+#     install:
+#       - pip install numpy scipy
+#       - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
+#       - pip install --upgrade pytest
+#       - pip install -r requirements-dev.txt
+#       - pip install pytest-slack
+#     before_script:
+#       - python --version
+# #    - psql -c 'create database test_ci;' -U postgres
+#     script:
+#       - pytest --no-sqlalchemy --no-postgresql --no-spark --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL
+#         --slack_channel=notifications-great_expectations tests/
+#     after_success:
+#       - python --version
   - stage: experimental
     os: osx
     osx_image: xcode9.4
