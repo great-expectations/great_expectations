@@ -1,7 +1,6 @@
 .. _contributing_types_of_contributions:
 
 
-
 Types of contributions
 ==========================================
 

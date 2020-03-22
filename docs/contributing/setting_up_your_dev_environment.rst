@@ -58,7 +58,7 @@ Install python dependencies
 **6. Install dependencies from requirements-dev.txt**
 
     *  to make sure you have the right libraries, then install great_expectations from the version you just forked:
-    * `pip install -r requirements-dev.txt`
+    * ``pip install -r requirements-dev.txt``
 
 **7. Install great_expectations from your cloned repo**
 
@@ -70,10 +70,16 @@ Install python dependencies
     * #FIXME: I'm not sure how to do this or why it's important.
 
 
-(Optional) Configure backends for testing
--------------------------------------------
+(Optional) Configure resources for testing and documentation
+---------------------------------------------------------------
 
 Note that you will have the option to enable different backends for local testing, such as postgresql and Spark. 
+
+**If you want to build documentation locally:**
+
+    * ``pip install -r docs/requirements.txt`
+    * To build documentation, the command is `cd docs; make html;`
+    * Documentation will be generated in `docs/build/html/index.html`
 
 **If you want to develop against local postgresql:**
 
