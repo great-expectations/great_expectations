@@ -85,6 +85,7 @@ jobs:
     # env: PANDAS=0.23.4
     addons:
     before_script:
+    - echo `psql --version`
     install:
     # - pip install --only-binary=numpy,scipy numpy scipy
     # - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
@@ -110,4 +111,3 @@ jobs:
 after_success:
 - coveralls
 - bash <(curl -s https://codecov.io/bash)
-- psql --version
