@@ -86,7 +86,7 @@ jobs:
     # addons:
     before_script:
     # - psql --version
-    - sudo apt-get —-purge remove postgresql
+    - sudo apt-get --purge remove postgresql
     - psql --version
     install:
     # - pip install --only-binary=numpy,scipy numpy scipy
