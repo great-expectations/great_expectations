@@ -87,6 +87,7 @@ jobs:
     before_install:
     # - psql --version
     - sudo apt-get --purge remove postgresql
+    - dpkg -l | grep postgres
     - psql --version
     install:
     # - pip install --only-binary=numpy,scipy numpy scipy
