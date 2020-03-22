@@ -83,7 +83,7 @@ jobs:
     dist: trusty
     python: 3.6
     # env: PANDAS=0.23.4
-    addons:
+    # addons:
     before_script:
     - echo `psql --version`
     install:
