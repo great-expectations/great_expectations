@@ -84,7 +84,7 @@ jobs:
     python: 3.6
     # env: PANDAS=0.23.4
     # addons:
-    before_script:
+    before_install:
     # - psql --version
     - sudo apt-get --purge remove postgresql
     - psql --version
