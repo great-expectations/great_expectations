@@ -82,18 +82,28 @@ jobs:
     # Do NOT change it without making a corresponding change in those docs.
     os: osx
     osx_image: xcode9.4
-    # dist: trusty
-    python: 3.6
-    # env: PANDAS=0.23.4
-    # addons:
-    # before_script:
+    name: "Python 3.7.5 on macOS"
+    language: bash
+    before_install:
+      - python3 --version
+      - which postgres
+      # - brew update
+      # - brew services start postgresql
+      # - brew services
+      # # TODO This seems to fail when running outside a debugging mode build so allow it to pass
+      # - /usr/local/opt/postgres/bin/createuser --superuser postgres --host=127.0.0.1 || echo 'no postgres for you'
     install:
-    # - pip install --only-binary=numpy,scipy numpy scipy
-    # - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
-    - pip install -r requirements-dev.txt
-    - pip install -e .
+      # - pip3 install numpy scipy
+      # - if [ -z "$PANDAS" ]; then pip3 install pandas; else pip3 install pandas==$PANDAS; fi
+      - pip3 install --upgrade pytest
+      - pip3 install -r requirements-dev.txt
+    before_script:
+      - python3 --version
     script:
-    - pytest --no-sqlalchemy --no-spark
+      - pytest --no-sqlalchemy --no-spark
+    after_success:
+      - python3 --version
+
 addons:
   postgresql: '9.4'
 services:
