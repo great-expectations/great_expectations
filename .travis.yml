@@ -76,6 +76,19 @@ jobs:
       username: __token__
       password:
         secure: "NFZm1JoTtstDCeiJ8HyHH4CPfnaXewL++ZB2251AmVFq8UmlCghzjKKgN6lUp6OGrIkgPINga/0yKhTluoSlD8Jxv/aZeyb2z3DhDenTubBbiVegQYmQbbC4ID9eXXUqx4pPvF1keq/cV7N7CZ5dV6Ru3IdAsz+cS3TixjbzUp6bBnuAWLtAJ2bRYuBlX6WJUtbmK02AvQ3I9vAeGX3Xiiab+cGQmXoKQ/FHYxc31PdffrrSAWBxmOlevBOINT+wli1U/MJVQJgw1MhYAEKGDRfsgLt6Jo4hkPRXBmHx4Jmc4VoIM+zz886yvfBUZjXLCpSJwiV9qDjoiZtuEHOdjmOZbcvCsN56a+hdc9/aF1vCv5pm1JRdaSalQEeyfRAgs/SQy24/rPSmAeGUsnGQL18w7EFTdXaG4yJLkKUHEOCZzMe0CSVkf74YbPJXBLbuVTDoD8ZehAlyyEFjau1DXAM1/EdSOBssVKWzwQbfq7EwplDDqxeQ6F+Yj7VXQPTeY4Bcn4Z7Zbn5GNimwWzaxu1Ow4eh0VIMWrjgvBUFm+PXh/V60N530cX+yavo5RPhtkhCFlGYXlVaESYtDQa3R+eovo2PORQCa4jgpXLpeyuLczgeL2hH+rIFPBmu18/KTcZtRkDhBXnSZCtKZS0UMrp8q9LIwRqmv4SXYDrceT8="
+  - stage: contributor
+    # This stage exactly replicates the contributor instructions in `setting_up_your_dev_environment.rst`
+    # Do NOT change it without making a corresponding change in those docs.
+    dist: trusty
+    python: 3.6
+    # env: PANDAS=0.23.4
+    install:
+    # - pip install --only-binary=numpy,scipy numpy scipy
+    # - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
+    - pip install -r requirements-dev.txt
+    - pip install -e .
+    script:
+    - pytest --no-sqlalchemy --no-spark
 addons:
   postgresql: '9.4'
 services:
