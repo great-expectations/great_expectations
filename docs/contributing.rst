@@ -46,7 +46,7 @@ Our goal is to make your experience as great as possible. Please follow these st
 
    Follow :ref:`those instructions <contributing_setting_up_your_dev_environment>` to set up your dev environment.
    
-   Alternatively, for small changes that don't need to be tested locally (e.g. documentation changes), you can `make changes directly through Github <contributing_make_changes_through_github>`_.
+   Alternatively, for small changes that don't need to be tested locally (e.g. documentation changes), you can :ref:`make changes directly through Github <contributing_make_changes_through_github>`.
 
 .. raw:: html
 
@@ -80,7 +80,7 @@ Our goal is to make your experience as great as possible. Please follow these st
 
 .. container:: custom-indented-paragraph
 
-   Each `type of contribution <_contributing_types_of_contributions>`_ has its own development flow and testing requirements. When your changes are ready, run through our :ref:`contributing_contribution_checklist` for pull requests.
+   Each :ref:`type of contribution <contributing_types_of_contributions>` has its own development flow and testing requirements. When your changes are ready, run through our :ref:`contributing_contribution_checklist` for pull requests.
    
    Note that if it’s your first contribution, there is a standard :ref:`Contributor license agreement (CLA)` to sign.
 
