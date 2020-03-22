@@ -63,7 +63,7 @@ Install python dependencies
 **7. Install great_expectations from your cloned repo**
 
     * ``pip install -e .``
-    * ``-e`` will install in "editable" mode. This is not required, but is often very convenient as a developer.
+    * ``-e`` will install in "`editable <https://pip.pypa.io/en/stable/reference/pip_install/#editable-installs>`__" mode. This is not required, but is often very convenient as a developer.
 
 (Optional) Configure resources for testing and documentation
 ---------------------------------------------------------------
@@ -102,6 +102,7 @@ If you did not configure optional backends for testing, tests against these back
 #FIXME: Insert animated gif of breaking tests.
 
 You can suppress these tests by adding the following flags:
+
 - ``--no-postgresql`` will skip postgres tests
 - ``--no-spark`` will skip spark tests 
 - ``--no-sqlalchemy`` will skip all tests using sqlalchemy (i.e. all database backends)
