@@ -40,6 +40,13 @@ def cli_message(string):
     six.print_(colored(mod_string))
 
 
+def cli_message_list(string_list, list_intro_string=None):
+    if list_intro_string:
+        cli_message(list_intro_string)
+    for string in string_list:
+        cli_message(string)
+
+
 def is_sane_slack_webhook(url):
     """Really basic sanity checking."""
     if url is None:

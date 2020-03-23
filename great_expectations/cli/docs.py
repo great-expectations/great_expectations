@@ -6,7 +6,7 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_logging import logger
-from great_expectations.cli.util import cli_message
+from great_expectations.cli.util import cli_message, cli_message_list
 
 
 @click.group()
