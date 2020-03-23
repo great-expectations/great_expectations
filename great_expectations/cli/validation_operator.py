@@ -7,7 +7,7 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_logging import logger
-from great_expectations.cli.util import cli_message, cli_message_list
+from great_expectations.cli.util import cli_message, cli_message_list, cli_message_dict
 
 
 @click.group()
@@ -42,28 +42,10 @@ def validation_operator_list(directory):
         cli_message(list_intro_string)
         for validation_operator in validation_operators:
             cli_message("")
-            cli_message(" - <cyan>name:</cyan> {}".format(validation_operator.pop("name")))
-            if validation_operator.get("class_name"):
-                class_name = validation_operator.pop("class_name")
-                cli_message("   <cyan>class_name:</cyan> {}".format(class_name))
-            if validation_operator.get("action_list"):
-                action_list = validation_operator.pop("action_list")
-                cli_message("   <cyan>action_list:</cyan> {}".format(action_list_to_string(action_list)))
-            for key, val in validation_operator.items():
-                if key == "credentials":
-                    continue
-                cli_message("   <cyan>{}:</cyan> {}".format(key, str(val)))
+            cli_message_dict(validation_operator)
 
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         return
 
 
-def action_list_to_string(action_list):
-    action_list_string = ""
-    for idx, action in enumerate(action_list):
-        action_list_string += "{} ({})".format(action["name"], action["action"]["class_name"])
-        if idx == len(action_list) - 1:
-            continue
-        action_list_string += " => "
-    return action_list_string
