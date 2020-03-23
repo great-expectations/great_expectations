@@ -15,7 +15,7 @@ from great_expectations.cli.datasource import (
     get_batch_kwargs,
     select_datasource,
 )
-from great_expectations.cli.util import cli_message
+from great_expectations.cli.util import cli_message, cli_message_list
 from great_expectations.data_asset import DataAsset
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 
@@ -274,23 +274,25 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n""")
     help="The project's great_expectations directory.",
 )
 def suite_list(directory):
-    """Lists available expectation suites."""
+    """Lists available Expectation Suites."""
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         return
 
-    suite_names = context.list_expectation_suite_names()
+    suite_names = [
+        " - <cyan>{}</cyan>".format(suite_name)
+        for suite_name in context.list_expectation_suite_names()
+    ]
     if len(suite_names) == 0:
-        cli_message("No expectation suites found")
+        cli_message("No Expectation Suites found")
         return
 
     if len(suite_names) == 1:
-        cli_message("1 expectation suite found:")
+        list_intro_string = "1 Expectation Suite found:"
 
     if len(suite_names) > 1:
-        cli_message("{} expectation suites found:".format(len(suite_names)))
+        list_intro_string = "{} Expectation Suites found:".format(len(suite_names))
 
-    for name in suite_names:
-        cli_message("\t{}".format(name))
+    cli_message_list(suite_names, list_intro_string)
