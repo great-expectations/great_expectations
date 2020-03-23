@@ -353,7 +353,7 @@ def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
 
     assert len(obs_urls) == 1
     assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]
+        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]["site_url"]
     )
 
     expected_index_path = os.path.join(
@@ -428,7 +428,7 @@ def test_suite_new_multiple_datasources_with_generator_without_suite_name_argume
 
     assert len(obs_urls) == 1
     assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]
+        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]["site_url"]
     )
 
     expected_index_path = os.path.join(
@@ -490,7 +490,7 @@ def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
 
     assert len(obs_urls) == 1
     assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]
+        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]["site_url"]
     )
 
     expected_index_path = os.path.join(
