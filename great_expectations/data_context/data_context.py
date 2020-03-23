@@ -706,6 +706,15 @@ class BaseDataContext(object):
             })
         return datasources
 
+    def list_validation_operators(self):
+        """List currently-configured Validation Operators on this context"""
+
+        validation_operators = []
+        for name, value in self._project_config_with_variables_substituted.validation_operators.items():
+            value["name"] = name
+            validation_operators.append(value)
+        return validation_operators
+
     def create_expectation_suite(self, expectation_suite_name, overwrite_existing=False):
         """Build a new expectation suite and save it into the data_context expectation store.
 
