@@ -16,8 +16,8 @@ from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.util import (
     cli_message,
-    cli_message_list
-)
+    cli_message_list,
+    cli_message_dict)
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
@@ -129,26 +129,7 @@ def datasource_list(directory):
         cli_message(list_intro_string)
         for datasource in datasources:
             cli_message("")
-            cli_message(" - <cyan>name:</cyan> {}".format(datasource.pop("name")))
-            if datasource.get("module_name"):
-                module_name = datasource.pop("module_name")
-                cli_message("   <cyan>module_name:</cyan> {}".format(module_name))
-            if datasource.get("class_name"):
-                class_name = datasource.pop("class_name")
-                cli_message("   <cyan>class_name:</cyan> {}".format(class_name))
-            if datasource.get("data_asset_type"):
-                data_asset_type = datasource.pop("data_asset_type")
-                cli_message("   <cyan>data_asset_type</cyan>:")
-                cli_message("     <cyan>module_name:</cyan>: {}".format(
-                    data_asset_type.get("module_name")))
-                cli_message("     <cyan>class_name:</cyan>: {}".format(
-                    data_asset_type.get("class_name")
-                ))
-            for key, val in datasource.items():
-                if key == "credentials":
-                    continue
-                cli_message("   <cyan>{}:</cyan> {}".format(key, str(val)))
-
+            cli_message_dict(datasource)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         return
