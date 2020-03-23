@@ -191,7 +191,7 @@ class DatasourceConfigSchema(Schema):
         unknown = INCLUDE
 
     class_name = fields.String(required=True)
-    module_name = fields.String(allow_none=True)
+    module_name = fields.String(allow_none=True, missing="great_expectations.datasource")
     data_asset_type = fields.Nested(ClassConfigSchema)
     # TODO: Update to generator-specific
     # generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))
