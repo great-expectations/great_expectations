@@ -128,13 +128,26 @@ def datasource_list(directory):
             list_intro_string = "{} Datasources found:".format(len(datasources))
         cli_message(list_intro_string)
         for datasource in datasources:
+            cli_message("")
             cli_message(" - <cyan>name:</cyan> {}".format(datasource.pop("name")))
-            if datasource.get("class_name"):
-                class_name = datasource.pop("class_name")
-                cli_message("    <cyan>class_name:</cyan> {}".format(class_name))
             if datasource.get("module_name"):
                 module_name = datasource.pop("module_name")
-                cli_message("    <cyan>module_name:</cyan> {}".format(module_name))
+                cli_message("   <cyan>module_name:</cyan> {}".format(module_name))
+            if datasource.get("class_name"):
+                class_name = datasource.pop("class_name")
+                cli_message("   <cyan>class_name:</cyan> {}".format(class_name))
+            if datasource.get("data_asset_type"):
+                data_asset_type = datasource.pop("data_asset_type")
+                cli_message("   <cyan>data_asset_type</cyan>:")
+                cli_message("     <cyan>module_name:</cyan>: {}".format(
+                    data_asset_type.get("module_name")))
+                cli_message("     <cyan>class_name:</cyan>: {}".format(
+                    data_asset_type.get("class_name")
+                ))
+            for key, val in datasource.items():
+                if key == "credentials":
+                    continue
+                cli_message("   <cyan>{}:</cyan> {}".format(key, str(val)))
 
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
