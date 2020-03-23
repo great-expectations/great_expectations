@@ -36,9 +36,9 @@ The nouns are: datasource, docs, project, suite, validation-operator
 
 Most nouns accept the following verbs: new, list, edit
 
-In addition, the CLI supports the following special commands:
+In particular, the CLI supports the following special commands:
 
-- great_expectations init : same as `project new`
+- great_expectations init : create a new great_expectations project
 
 - great_expectations datasource profile : profile a  datasource
 
