@@ -48,6 +48,39 @@ def docs_build(directory, site_name, view=True):
         sys.exit(1)
 
 
+@docs.command(name="list")
+@click.option(
+    '--directory',
+    '-d',
+    default=None,
+    help="The project's great_expectations directory."
+)
+def docs_list(directory):
+    """List known Data Docs Sites."""
+    try:
+        context = DataContext(directory)
+        docs_sites_url_dicts = context.get_docs_sites_urls()
+        docs_sites_strings = [
+            " - <cyan>{}</cyan>: {}".format(docs_site_dict["site_name"], docs_site_dict["site_url"])\
+            for docs_site_dict in docs_sites_url_dicts
+        ]
+
+        if len(docs_sites_strings) == 0:
+            cli_message("No Data Docs sites found")
+            return
+
+        if len(docs_sites_strings) == 1:
+            list_intro_string = "1 Data Docs site found:"
+
+        if len(docs_sites_strings) > 1:
+            list_intro_string = "{} Data Docs sites found:".format(len(docs_sites_strings))
+        cli_message_list(docs_sites_strings, list_intro_string)
+
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+
+
 def build_docs(context, site_name=None, view=True):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
