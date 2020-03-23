@@ -67,7 +67,7 @@ Make sure to escape quotes. Example: "{\"datasource\": \"my_db\", \"query\": \"s
 )
 def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
     """
-    Generate a Jupyter notebook for editing an existing expectation suite.
+    Generate a Jupyter notebook for editing an existing Expectation Suite.
 
     The SUITE argument is required. This is the name you gave to the suite
     when you created it.
@@ -212,7 +212,7 @@ def _load_suite(context, suite_name):
 )
 def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
     """
-    Create a new expectation suite.
+    Create a new Expectation Suite.
 
     Great Expectations will choose a couple of columns and generate expectations about them
     to demonstrate some examples of assertions you can make about your data.
