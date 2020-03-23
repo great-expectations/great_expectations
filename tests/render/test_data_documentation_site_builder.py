@@ -122,7 +122,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     index_links_dict = res[1]
 
     print(json.dumps(index_page_locator_info, indent=2))
-    assert index_page_locator_info == context.root_directory + '/uncommitted/data_docs/local_site/index.html'
+    assert index_page_locator_info == "file://" + context.root_directory + '/uncommitted/data_docs/local_site/index.html'
 
     print(json.dumps(index_links_dict, indent=2))
 
@@ -245,7 +245,7 @@ def test_site_builder_usage_statistics_enabled(site_builder_data_context_with_ht
     expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=2019-09-24T23:18:36&dataContextId=f43d4897-385f-4366-82b0-1a8eda2bf79c"
 
     for page_path in page_paths_to_check:
-        with open(page_path) as f:
+        with open(page_path[7:]) as f:
             page_contents = f.read()
             assert expected_logo_url in page_contents
 
@@ -287,7 +287,7 @@ def test_site_builder_usage_statistics_disabled(site_builder_data_context_with_h
     expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=2019-09-24T23:18:36"
 
     for page_path in page_paths_to_check:
-        with open(page_path) as f:
+        with open(page_path[7:]) as f:
             page_contents = f.read()
             assert expected_logo_url in page_contents
             assert data_context_id not in page_contents
