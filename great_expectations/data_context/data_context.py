@@ -295,7 +295,10 @@ class BaseDataContext(object):
 
                     url = site_builder.get_resource_url(resource_identifier=resource_identifier)
 
-                    site_urls.append(url)
+                    site_urls.append({
+                        "site_name": site_name,
+                        "site_url": url
+                    })
 
         return site_urls
 
@@ -308,9 +311,9 @@ class BaseDataContext(object):
                 not supplied, the method returns the URL of the index page.
         """
         data_docs_urls = self.get_docs_sites_urls(resource_identifier=resource_identifier)
-        for url in data_docs_urls:
-            logger.debug("Opening Data Docs found here: {}".format(url))
-            webbrowser.open(url)
+        for site_dict in data_docs_urls:
+            logger.debug("Opening Data Docs found here: {}".format(site_dict["site_url"]))
+            webbrowser.open(site_dict["site_url"])
 
     @property
     def root_directory(self):
