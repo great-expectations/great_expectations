@@ -4,6 +4,17 @@ from _pytest.logging import LogCaptureFixture
 from click.testing import Result
 
 
+def assert_dict_key_and_val_in_stdout(dict_, stdout):
+    """Use when stdout contains color info and command chars"""
+    for key, val in dict_.items():
+        if isinstance(val, dict):
+            assert key in stdout
+            assert_dict_key_and_val_in_stdout(val, stdout)
+        else:
+            assert key in stdout
+            assert val in stdout
+
+
 def assert_no_logging_messages_or_tracebacks(my_caplog, click_result):
     """
     Use this assertion in all CLI tests unless you have a very good reason.
