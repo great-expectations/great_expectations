@@ -380,7 +380,7 @@ class DataAsset(object):
 
         elif 'column' in expectation_config.kwargs:
             column = expectation_config.kwargs['column']
-            
+
             self._expectation_suite.expectations = [f for f in filter(
                 lambda exp: (exp.expectation_type != expectation_type) or
                             ('column' in exp.kwargs and exp.kwargs['column'] != column) or

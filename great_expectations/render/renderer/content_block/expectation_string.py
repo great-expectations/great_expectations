@@ -43,9 +43,10 @@ def parse_condition_string(condition_string):
     template_str = "if "
     params = dict()
 
-    condition_string = condition_string.replace("&", " AND ").replace(" and ", " AND ").\
-                                        replace("|", " OR ").replace(" or ", " OR ").\
-                                        replace("~", " NOT ").replace(" not ", " NOT ")
+    condition_string = condition_string.\
+        replace("&", " AND ").replace(" and ", " AND ").\
+        replace("|", " OR ").replace(" or ", " OR ").\
+        replace("~", " NOT ").replace(" not ", " NOT ")
     condition_string = " ".join(condition_string.split())
 
     # replace tuples of values by lists of values
@@ -156,7 +157,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -205,7 +206,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -247,7 +248,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -282,7 +283,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -341,7 +342,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -412,7 +413,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -434,7 +435,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -475,7 +476,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -509,7 +510,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -540,7 +541,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -571,7 +572,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -590,9 +591,9 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         if params["type_list"] is not None:
             for i, v in enumerate(params["type_list"]):
-                params["v__"+str(i)] = v
+                params["v__" + str(i)] = v
             values_string = " ".join(
-                ["$v__"+str(i) for i, v in enumerate(params["type_list"])]
+                ["$v__" + str(i) for i, v in enumerate(params["type_list"])]
             )
 
             if params["mostly"] is not None:
@@ -604,9 +605,9 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     template_str = "value types must belong to this set: " + values_string + ", at least $mostly_pct % of the time."
             else:
                 if include_column_name:
-                    template_str = "$column value types must belong to this set: "+values_string+"."
+                    template_str = "$column value types must belong to this set: " + values_string + "."
                 else:
-                    template_str = "value types must belong to this set: "+values_string+"."
+                    template_str = "value types must belong to this set: " + values_string + "."
         else:
             if include_column_name:
                 template_str = "$column value types may be any value, but observed value will be reported"
@@ -663,7 +664,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -747,7 +748,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -787,7 +788,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -827,7 +828,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -875,7 +876,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -910,7 +911,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -945,7 +946,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -982,7 +983,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1027,7 +1028,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1069,7 +1070,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1104,7 +1105,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1137,7 +1138,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1170,7 +1171,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1205,7 +1206,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1251,7 +1252,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1290,7 +1291,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1324,7 +1325,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1358,7 +1359,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-    
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1392,7 +1393,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-    
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1429,7 +1430,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-    
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1466,7 +1467,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1500,7 +1501,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1539,7 +1540,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1844,7 +1845,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {

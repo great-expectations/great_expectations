@@ -35,15 +35,16 @@ def duplicate_and_obfuscuate(df):
 def test_expectation_decorator_summary_mode():
     df = duplicate_and_obfuscuate(
         ge.dataset.PandasDataset({
-        'x': [1, 2, 3, 4, 5, 6, 7, 7, None, None]
+            'x': [1, 2, 3, 4, 5, 6, 7, 7, None, None]
         })
     )
 
     df.set_default_expectation_argument("result_format", "COMPLETE")
     df.set_default_expectation_argument("include_config", False)
 
-    # print '&'*80
-    # print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY"), indent=2)
+    # print('&'*80)
+    # print(json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY"),
+    #                  indent=2))
 
     exp_output = expectationValidationResultSchema.load({
         "success": False,
@@ -65,7 +66,8 @@ def test_expectation_decorator_summary_mode():
         }
     })
 
-    assert df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY", condition="group=='a'")\
+    assert df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY",
+                                                 condition="group=='a'")\
         == exp_output
 
     assert df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY")\
@@ -179,18 +181,19 @@ def test_result_format_argument_in_decorators():
         != exp_output
 
     exp_output = expectationValidationResultSchema.load({'result': {'element_count': 5,
-                                'missing_count': 0,
-                                'missing_percent': 0.0,
-                                'partial_unexpected_counts': [{'count': 1, 'value': 8},
-                                                            {'count': 1, 'value': 10}],
-                                'partial_unexpected_index_list': [3, 4],
-                                'partial_unexpected_list': [8, 10],
-                                'unexpected_count': 2,
-                                'unexpected_index_list': [3, 4],
-                                'unexpected_list': [8, 10],
-                                'unexpected_percent': 40.0,
-                                'unexpected_percent_nonmissing': 40.0},
-                    'success': False})
+                                                                    'missing_count': 0,
+                                                                    'missing_percent': 0.0,
+                                                                    'partial_unexpected_counts': [
+                                                                        {'count': 1, 'value': 8},
+                                                                        {'count': 1, 'value': 10}],
+                                                                    'partial_unexpected_index_list': [3, 4],
+                                                                    'partial_unexpected_list': [8, 10],
+                                                                    'unexpected_count': 2,
+                                                                    'unexpected_index_list': [3, 4],
+                                                                    'unexpected_list': [8, 10],
+                                                                    'unexpected_percent': 40.0,
+                                                                    'unexpected_percent_nonmissing': 40.0},
+                                                         'success': False})
 
     assert df.expect_column_values_to_be_between('y', 1, 6, result_format=None, condition="group=='a'")\
         == exp_output
@@ -281,11 +284,13 @@ def test_condition_in_expectation_config():
         "expectation_type": "expect_column_values_to_be_between"
     })
 
-    assert "condition" in df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY", condition="group=='a'").expectation_config["kwargs"]
+    assert "condition" in df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY",
+                                                                condition="group=='a'").expectation_config["kwargs"]
 
     assert "group=='a'" ==\
         df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY",
                                               condition="group=='a'").expectation_config["kwargs"]["condition"]
 
     assert df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY",
-                                              condition="group=='a'").expectation_config.isEquivalentTo(exp_expectation_config)
+                                                 condition="group=='a'").expectation_config.\
+        isEquivalentTo(exp_expectation_config)
