@@ -34,7 +34,7 @@ except ImportError:
 
 @click.group()
 def suite():
-    """expectation suite operations"""
+    """Expectation Suite operations"""
     pass
 
 

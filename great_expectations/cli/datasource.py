@@ -77,7 +77,7 @@ class SupportedDatabases(enum.Enum):
 
 @click.group()
 def datasource():
-    """datasource operations"""
+    """Datasource operations"""
     pass
 
 
