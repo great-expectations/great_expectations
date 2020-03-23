@@ -97,10 +97,10 @@ def build_docs(context, site_name=None, view=True):
     msg = "The following Data Docs sites were built:\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
         if os.path.isfile(index_page_locator_info):
-            msg += " - <cyan>{}</cyan>: ".format(site_name)
+            msg += " - <cyan>{}:</cyan> ".format(site_name)
             msg += "file://{}\n".format(index_page_locator_info)
         else:
-            msg += " - <cyan>{}</cyan>: ".format(site_name)
+            msg += " - <cyan>{}:</cyan> ".format(site_name)
             msg += "{}\n".format(index_page_locator_info)
 
     msg = msg.rstrip("\n")

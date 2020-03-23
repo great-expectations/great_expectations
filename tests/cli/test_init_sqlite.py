@@ -84,7 +84,11 @@ def test_cli_init_on_new_project(
         {
             "class_name": "SqlAlchemyDatasource",
             "name": "titanic",
-            "module_name": "great_expectations.datasource"
+            "module_name": "great_expectations.datasource",
+            'credentials': {
+                'url': str(engine.url)},
+            'data_asset_type': {'class_name': 'SqlAlchemyDataset',
+                                'module_name': 'great_expectations.dataset'},
         }
     ]
 
@@ -230,6 +234,10 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
             "class_name": "SqlAlchemyDatasource",
             "name": "titanic",
             "module_name": "great_expectations.datasource",
+            'credentials': {
+                'url': str(engine.url)},
+            'data_asset_type': {'class_name': 'SqlAlchemyDataset',
+                                'module_name': 'great_expectations.dataset'},
         }
     ]
 
@@ -267,11 +275,12 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert not context.list_expectation_suites()
 
     runner = CliRunner(mix_stderr=False)
+    url = "sqlite:///{}".format(titanic_sqlite_db_file)
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="2\n5\nsqlite\nsqlite:///{}\n1\nmy_suite\n\n".format(
-            titanic_sqlite_db_file
+        input="2\n5\nsqlite\n{}\n1\nmy_suite\n\n".format(
+            url
         ),
         catch_exceptions=False,
     )
@@ -302,7 +311,11 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
         {
             "class_name": "SqlAlchemyDatasource",
             "name": "sqlite",
-            "module_name": "great_expectations.datasource"
+            "module_name": "great_expectations.datasource",
+            'credentials': {
+                'url': url},
+            'data_asset_type': {'class_name': 'SqlAlchemyDataset',
+                                'module_name': 'great_expectations.dataset'},
         }
     ]
     assert context.list_expectation_suites()[0].expectation_suite_name == "my_suite"
@@ -365,7 +378,11 @@ def initialized_sqlite_project(
         {
             "class_name": "SqlAlchemyDatasource",
             "name": "titanic",
-            "module_name": "great_expectations.datasource"
+            "module_name": "great_expectations.datasource",
+            'credentials': {
+                'url': str(engine.url)},
+            'data_asset_type': {'class_name': 'SqlAlchemyDataset',
+                                'module_name': 'great_expectations.dataset'},
         }
     ]
     return project_dir

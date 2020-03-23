@@ -5,6 +5,9 @@ datasources:
   # For example, this one.
   mydatasource:
     class_name: PandasDatasource
+    data_asset_type:
+      module_name: great_expectations.dataset
+      class_name: PandasDataset
     generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
