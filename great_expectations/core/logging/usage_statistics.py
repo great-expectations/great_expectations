@@ -128,7 +128,7 @@ class UsageStatisticsHandler(object):
         """Adds information that may be available only after full data context construction, but is useful to
         calculate only one time (for example, anonymization)."""
         self._anonymized_datasources = [
-            self._datasource_anonymizer.anonymize_datasource_class_name(datasource["class_name"], datasource["module_name"])
+            self._datasource_anonymizer.anonymize_datasource_class_name(datasource["class_name"], datasource.get("module_name"))
             for datasource in self._data_context.list_datasources()
         ]
 
