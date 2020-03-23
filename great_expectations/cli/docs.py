@@ -11,7 +11,7 @@ from great_expectations.cli.util import cli_message, cli_message_list
 
 @click.group()
 def docs():
-    """data docs operations"""
+    """Data Docs operations"""
     pass
 
 
