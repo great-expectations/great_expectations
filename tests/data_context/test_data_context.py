@@ -188,6 +188,11 @@ def test_list_datasources(data_context):
             'name': 'mydatasource',
             'class_name': 'PandasDatasource',
             'module_name': 'great_expectations.datasource',
+            'data_asset_type': {'class_name': 'PandasDataset'},
+            'generators': {'mygenerator': {'base_directory': '../data',
+                                           'class_name': 'SubdirReaderBatchKwargsGenerator',
+                                           'reader_options': {'engine': 'python',
+                                                              'sep': None}}},
         }
     ]
 
@@ -203,11 +208,18 @@ def test_list_datasources(data_context):
             'name': 'mydatasource',
             'class_name': 'PandasDatasource',
             'module_name': 'great_expectations.datasource',
+            'data_asset_type': {'class_name': 'PandasDataset'},
+            'generators': {'mygenerator': {'base_directory': '../data',
+                                           'class_name': 'SubdirReaderBatchKwargsGenerator',
+                                           'reader_options': {'engine': 'python',
+                                                              'sep': None}}},
         },
         {
             'name': 'second_pandas_source',
             'class_name': 'PandasDatasource',
             'module_name': 'great_expectations.datasource',
+            'data_asset_type': {'class_name': 'PandasDataset',
+                                'module_name': 'great_expectations.dataset'},
         }
     ]
 
@@ -959,7 +971,7 @@ def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasource
 
     obs = context.get_docs_sites_urls()
     assert len(obs) == 1
-    assert obs[0].endswith("great_expectations/uncommitted/data_docs/local_site/index.html")
+    assert obs[0]["site_url"].endswith("great_expectations/uncommitted/data_docs/local_site/index.html")
 
 
 def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_site(tmp_path_factory):
@@ -988,7 +1000,8 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     assert os.path.isfile(expected_path)
 
     obs = context.get_docs_sites_urls()
-    assert obs == ["file://{}".format(expected_path)]
+    print(obs)
+    assert obs == [{'site_name': 'my_rad_site', 'site_url': "file://{}".format(expected_path)}]
 
 
 def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_local_site(tmp_path_factory):
@@ -1027,10 +1040,14 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
         assert os.path.isfile(expected_path)
 
     obs = context.get_docs_sites_urls()
-    assert set(obs) == set([
-        "file://{}".format(path_1),
-        "file://{}".format(path_2),
-    ])
+
+    assert obs == [
+        {'site_name': 'my_rad_site',
+         'site_url': "file://{}".format(path_1)},
+        {
+            'site_name': 'another_just_amazing_site',
+            'site_url': "file://{}".format(path_2)}
+    ]
 
 
 def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
