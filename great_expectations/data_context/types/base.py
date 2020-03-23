@@ -178,11 +178,10 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
     # noinspection PyUnusedLocal
     @post_dump()
     def filter_implicit(self, data, **kwargs):
-        if data["_explicit_url"]:
-            del data["_explicit_url"]
-        else:
-            del data["_explicit_url"]
+        if not data.get("_explicit_url") and "usage_statistics_url" in data:
             del data["usage_statistics_url"]
+        if "_explicit_url" in data:
+            del data["_explicit_url"]
         return data
 
 
