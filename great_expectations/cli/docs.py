@@ -98,10 +98,10 @@ def build_docs(context, site_name=None, view=True):
     for site_name, index_page_locator_info in index_page_locator_infos.items():
         if os.path.isfile(index_page_locator_info):
             msg += " - <cyan>{}</cyan>: ".format(site_name)
-            msg += "<green>file://{}</green>\n".format(index_page_locator_info)
+            msg += "file://{}\n".format(index_page_locator_info)
         else:
             msg += " - <cyan>{}</cyan>: ".format(site_name)
-            msg += "<green>{}</green>\n".format(index_page_locator_info)
+            msg += "{}\n".format(index_page_locator_info)
 
     msg = msg.rstrip("\n")
     cli_message(msg)
