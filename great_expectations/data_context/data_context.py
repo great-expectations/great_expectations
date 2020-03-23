@@ -706,6 +706,15 @@ class BaseDataContext(object):
             })
         return datasources
 
+    def list_stores(self):
+        """List currently-configured Stores on this context"""
+
+        stores = []
+        for name, value in self._project_config_with_variables_substituted.stores.items():
+            value["name"] = name
+            stores.append(value)
+        return stores
+
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
 
