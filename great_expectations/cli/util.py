@@ -81,7 +81,9 @@ def cli_message_dict(dict_, indent=3, bullet_char="-", message_list=None, recurs
         message = "{}<cyan>action_list:</cyan> {}".format(" " * indent, action_list_string)
         message_list.append(message)
     for key, val in dict_.items():
-        if key == "credentials":
+        if key == "password":
+            message = "{}<cyan>password:</cyan> ******".format(" " * indent)
+            message_list.append(message)
             continue
         if isinstance(val, dict):
             message = "{}<cyan>{}:</cyan>".format(" " * indent, key)
