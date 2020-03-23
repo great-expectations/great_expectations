@@ -41,6 +41,7 @@ def cli_message(string):
 
 
 def cli_message_list(string_list, list_intro_string=None):
+    """Simple util function for displaying simple lists in cli"""
     if list_intro_string:
         cli_message(list_intro_string)
     for string in string_list:
@@ -48,6 +49,7 @@ def cli_message_list(string_list, list_intro_string=None):
 
 
 def action_list_to_string(action_list):
+    """Util function for turning an action list into pretty string"""
     action_list_string = ""
     for idx, action in enumerate(action_list):
         action_list_string += "{} ({})".format(action["name"], action["action"]["class_name"])
@@ -58,6 +60,7 @@ def action_list_to_string(action_list):
 
 
 def cli_message_dict(dict_, indent=3, bullet_char="-", message_list=None, recursion_flag=False):
+    """Util function for displaying nested dicts representing ge objects in cli"""
     if message_list is None:
         message_list = []
     if dict_.get("name"):
