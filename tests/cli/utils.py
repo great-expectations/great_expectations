@@ -12,7 +12,7 @@ def assert_dict_key_and_val_in_stdout(dict_, stdout):
             assert_dict_key_and_val_in_stdout(val, stdout)
         else:
             assert key in stdout
-            assert val in stdout
+            assert str(val) in stdout
 
 
 def assert_no_logging_messages_or_tracebacks(my_caplog, click_result):

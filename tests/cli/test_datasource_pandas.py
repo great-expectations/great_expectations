@@ -12,6 +12,7 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import (
     assert_no_logging_messages_or_tracebacks,
     assert_no_tracebacks,
+    assert_dict_key_and_val_in_stdout
 )
 
 
@@ -26,8 +27,10 @@ def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
     )
 
     stdout = result.output.strip()
-    assert "[]" in stdout
+    assert "No Datasources found" in stdout
     assert context.list_datasources() == []
+
+    base_directory = str(filesystem_csv_2)
 
     context.add_datasource(
         "wow_a_datasource",
@@ -36,29 +39,36 @@ def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
         generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv_2),
+                "base_directory": base_directory,
             }
         },
     )
 
-    assert context.list_datasources() == [
+    datasources = context.list_datasources()
+
+    assert datasources == [
         {
             "name": "wow_a_datasource",
             "class_name": "PandasDatasource",
+            "data_asset_type": {"class_name": "PandasDataset",
+                                "module_name": "great_expectations.dataset"},
+            "generators": {"subdir_reader": {
+                "base_directory": base_directory,
+                "class_name": "SubdirReaderBatchKwargsGenerator"}},
             "module_name": "great_expectations.datasource",
         }
     ]
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
+        cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False, color=False
     )
 
     stdout = result.output.strip()
-    assert (
-        "[{'name': 'wow_a_datasource', 'class_name': 'PandasDatasource', 'module_name': 'great_expectations.datasource'}]" in stdout
-    )
+    for datasource in datasources:
+        assert_dict_key_and_val_in_stdout(datasource, stdout)
     assert_no_logging_messages_or_tracebacks(caplog, result)
+
 
 
 def test_cli_datasorce_new(caplog, empty_data_context, filesystem_csv_2):
@@ -377,7 +387,8 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     assert result.exit_code == 0
     stdout = result.stdout
     assert "Profiling 'my_datasource'" in stdout
-    assert "The following Data Docs sites were built:\n- local_site:" in stdout
+    assert "The following Data Docs sites were built:\n" in stdout
+    assert "local_site:" in stdout
 
     context = DataContext(project_root_dir)
     assert len(context.list_datasources()) == 1
