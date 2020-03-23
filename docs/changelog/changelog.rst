@@ -2,6 +2,7 @@
 
 develop
 -----------------
+* Remove the "project new" option from the command line (since it is not implemented; users can only run "init" to create a new project).
 
 
 0.9.7
