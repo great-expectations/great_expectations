@@ -699,11 +699,8 @@ class BaseDataContext(object):
         """
         datasources = []
         for key, value in self._project_config_with_variables_substituted.datasources.items():
-            datasources.append({
-                "name": key,
-                "class_name": value["class_name"],
-                "module_name": value.get("module_name", "great_expectations.datasource")
-            })
+            value["name"] = key
+            datasources.append(value)
         return datasources
 
     def list_stores(self):
