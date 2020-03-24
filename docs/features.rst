@@ -12,6 +12,7 @@ and our `blog <https://greatexpectations.io/blog>`__ for more information on how
    :maxdepth: 2
 
    /features/expectations
+   /features/conditional_expectations
    /features/validation_operators_and_actions
    /features/data_docs
    /features/data_context
