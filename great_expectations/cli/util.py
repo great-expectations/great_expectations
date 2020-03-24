@@ -93,7 +93,7 @@ def cli_message_dict(dict_, indent=3, bullet_char="-", message_list=None, recurs
         else:
             message = "{}<cyan>{}:</cyan> {}".format(" " * indent, key, str(dict_[key]))
             message_list.append(message)
-    if recursion_flag == False:
+    if not recursion_flag:
         if bullet_char and indent > 1:
             first = message_list[0]
             new_first = first[:1] + bullet_char + first[2:]
