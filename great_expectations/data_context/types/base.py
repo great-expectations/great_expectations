@@ -16,7 +16,7 @@ yaml = YAML()
 
 CURRENT_CONFIG_VERSION = 1
 MINIMUM_SUPPORTED_CONFIG_VERSION = 1
-DEFAULT_USAGE_STATISTICS_URL = "https://4tdy72oi8f.execute-api.us-east-1.amazonaws.com/prod/great_expectations/v1/usage_statistics"
+DEFAULT_USAGE_STATISTICS_URL = "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 
 class DataContextConfig(DictDot):
