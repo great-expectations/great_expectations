@@ -51,6 +51,7 @@ try:
         BigQueryTypes = namedtuple('BigQueryTypes', sorted(pybigquery.sqlalchemy_bigquery._type_map))
         bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
 except ImportError:
+    bigquery_types_tuple = None
     pybigquery = None
 
 
