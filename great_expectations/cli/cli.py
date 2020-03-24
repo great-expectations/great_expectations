@@ -15,6 +15,9 @@ from great_expectations.cli.store import store
 
 
 # TODO: consider using a specified-order supporting class for help (but wasn't working with python 2)
+from great_expectations.cli.tap import tap
+
+
 @click.group()
 @click.version_option(version=ge_version)
 @click.option(
@@ -30,13 +33,13 @@ Welcome to the great_expectations CLI!
 
 Most commands follow this format: great_expectations <NOUN> <VERB>
 
-The nouns are: datasource, docs, project, suite
+The nouns are: datasource, docs, project, suite, validation-operator
 
 Most nouns accept the following verbs: new, list, edit
 
-In addition, the CLI supports the following special commands:
+In particular, the CLI supports the following special commands:
 
-- great_expectations init : same as `project new`
+- great_expectations init : create a new great_expectations project
 
 - great_expectations datasource profile : profile a  datasource
 
@@ -56,6 +59,7 @@ cli.add_command(project)
 cli.add_command(suite)
 cli.add_command(validation_operator)
 cli.add_command(store)
+cli.add_command(tap)
 
 
 def main():

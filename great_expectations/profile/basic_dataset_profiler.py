@@ -21,11 +21,14 @@ class BasicDatasetProfilerBase(DatasetProfiler):
     that is used by the dataset profiler classes that extend this class.
     """
 
+    # Future support possibility: JSON (RECORD)
+    # Future support possibility: BINARY (BYTES)
     INT_TYPE_NAMES = {"INTEGER", "int", "INT", "TINYINT", "BYTEINT", "SMALLINT", "BIGINT", "IntegerType", "LongType", "DECIMAL"}
     FLOAT_TYPE_NAMES = {"FLOAT", "FLOAT4", "FLOAT8", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"}
-    STRING_TYPE_NAMES = {"CHAR", "VARCHAR", "TEXT", "StringType", "string", "str"}
+    STRING_TYPE_NAMES = {"CHAR", "VARCHAR", "TEXT", "STRING", "StringType", "string", "str"}
     BOOLEAN_TYPE_NAMES = {"BOOLEAN", "BOOL", "bool", "BooleanType"}
-    DATETIME_TYPE_NAMES = {"DATETIME", "DATE", "TIMESTAMP", "DateType", "TimestampType", "datetime64", "Timestamp"}
+    DATETIME_TYPE_NAMES = {"DATETIME", "DATE", "TIME", "TIMESTAMP", "DateType", "TimestampType", "datetime64",
+                           "Timestamp"}
 
     @classmethod
     def _get_column_type(cls, df, column):

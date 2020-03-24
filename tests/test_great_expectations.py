@@ -247,7 +247,6 @@ def test_validate():
 
 
 @mock.patch('great_expectations.core.ExpectationValidationResult.validate_result_dict', return_value=False)
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dict):
 
     with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
@@ -266,7 +265,6 @@ def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dic
 
 
 @mock.patch('great_expectations.core.ExpectationValidationResult.validate_result_dict', return_value=False)
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_validate_with_invalid_result(validate_result_dict):
 
     with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
@@ -431,7 +429,7 @@ class TestIO(unittest.TestCase):
         # Note that pandas changed the parameter name from sheetname to sheet_name.
         # We will test with both options to ensure that the versions are correct.
         pandas_version = pd.__version__
-        if re.match('0\.2[012]\.', pandas_version) is not None:
+        if re.match(r'0\.2[012]\.', pandas_version) is not None:
             dfs_dict = ge.read_excel(
                 script_path+'/test_sets/Titanic_multi_sheet.xlsx',
                 sheetname=None
@@ -469,7 +467,7 @@ class TestIO(unittest.TestCase):
 
         # Pass this test if the available version of pandas is less than 0.21.0, because prior
         # versions of pandas did not include the read_parquet function.
-        pandas_version = re.match('(\d+)\.(\d+)\..+', pd.__version__)
+        pandas_version = re.match(r'(\d+)\.(\d+)\..+', pd.__version__)
         if pandas_version is None:
             raise ValueError("Unrecognized pandas version!")
         else:
