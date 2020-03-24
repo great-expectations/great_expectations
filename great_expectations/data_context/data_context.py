@@ -682,6 +682,7 @@ class BaseDataContext(object):
             raise ValueError(
                 "Unable to load datasource `%s` -- no configuration found or invalid configuration." % datasource_name
             )
+        datasource_config = datasourceConfigSchema.load(datasource_config)
         datasource = self._build_datasource_from_config(datasource_name, datasource_config)
         self._datasources[datasource_name] = datasource
         return datasource
