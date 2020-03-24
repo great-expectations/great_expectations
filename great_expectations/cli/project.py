@@ -9,7 +9,7 @@ from great_expectations.cli.util import cli_message
 
 @click.group()
 def project():
-    """project operations"""
+    """Project operations"""
     pass
 
 

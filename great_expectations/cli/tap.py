@@ -16,7 +16,7 @@ from great_expectations.util import lint_code
 
 @click.group()
 def tap():
-    """tap operations"""
+    """Tap operations"""
     pass
 
 
