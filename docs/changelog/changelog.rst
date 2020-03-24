@@ -8,6 +8,7 @@ develop
   - Similarly, datasource configuration must now adhere strictly to the required schema, including having any
     required credentials stored in the "credentials" dictionary.
 * Docs: update Usage Statistics section with info on new anonymous usage data collection```
+* CLI: improve look/consistency of `docs list`, `suite list`, and `datasource list` output; add `store list` and `validation-operator list` commands
 
 0.9.6
 -----------------

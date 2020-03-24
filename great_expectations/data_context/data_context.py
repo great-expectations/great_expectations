@@ -295,7 +295,10 @@ class BaseDataContext(object):
 
                     url = site_builder.get_resource_url(resource_identifier=resource_identifier)
 
-                    site_urls.append(url)
+                    site_urls.append({
+                        "site_name": site_name,
+                        "site_url": url
+                    })
 
         return site_urls
 
@@ -308,9 +311,9 @@ class BaseDataContext(object):
                 not supplied, the method returns the URL of the index page.
         """
         data_docs_urls = self.get_docs_sites_urls(resource_identifier=resource_identifier)
-        for url in data_docs_urls:
-            logger.debug("Opening Data Docs found here: {}".format(url))
-            webbrowser.open(url)
+        for site_dict in data_docs_urls:
+            logger.debug("Opening Data Docs found here: {}".format(site_dict["site_url"]))
+            webbrowser.open(site_dict["site_url"])
 
     @property
     def root_directory(self):
@@ -652,9 +655,6 @@ class BaseDataContext(object):
             runtime_environment={
                 "data_context": self
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource"
-            }
         )
         return datasource
 
@@ -696,12 +696,27 @@ class BaseDataContext(object):
         """
         datasources = []
         for key, value in self._project_config_with_variables_substituted.datasources.items():
-            datasources.append({
-                "name": key,
-                "class_name": value["class_name"],
-                "module_name": value.get("module_name", "great_expectations.datasource")
-            })
+            value["name"] = key
+            datasources.append(value)
         return datasources
+
+    def list_stores(self):
+        """List currently-configured Stores on this context"""
+
+        stores = []
+        for name, value in self._project_config_with_variables_substituted.stores.items():
+            value["name"] = name
+            stores.append(value)
+        return stores
+
+    def list_validation_operators(self):
+        """List currently-configured Validation Operators on this context"""
+
+        validation_operators = []
+        for name, value in self._project_config_with_variables_substituted.validation_operators.items():
+            value["name"] = name
+            validation_operators.append(value)
+        return validation_operators
 
     def create_expectation_suite(self, expectation_suite_name, overwrite_existing=False):
         """Build a new expectation suite and save it into the data_context expectation store.

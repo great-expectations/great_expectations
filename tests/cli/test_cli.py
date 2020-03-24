@@ -44,11 +44,13 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  datasource  datasource operations
-  docs        data docs operations
-  init        Initialize a new Great Expectations project.
-  project     project operations
-  suite       expectation suite operations
+  datasource           Datasource operations
+  docs                 Data Docs operations
+  init                 Initialize a new Great Expectations project.
+  project              project operations
+  store                Store operations
+  suite                Expectation Suite operations
+  validation-operator  Validation Operator operations
 """
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)
