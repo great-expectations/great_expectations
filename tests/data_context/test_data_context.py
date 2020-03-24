@@ -42,11 +42,6 @@ try:
 except ImportError:
     import mock
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
 yaml = YAML()
 
 
@@ -802,10 +797,10 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(tmp_pat
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
     shutil.rmtree(uncommitted_dir)
 
-    # re-run create to simulate onboarding
-    DataContext.create(project_path)
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        # re-run create to simulate onboarding
+        DataContext.create(project_path)
     obs = gen_directory_tree_str(ge_dir)
-    print(obs)
 
     assert os.path.isdir(uncommitted_dir), "No uncommitted directory created"
     assert obs == """\
@@ -862,12 +857,12 @@ great_expectations/
 
     DataContext.create(project_path)
     fixture = gen_directory_tree_str(ge_dir)
-    print(fixture)
 
     assert fixture == expected
 
-    # re-run create to simulate onboarding
-    DataContext.create(project_path)
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        # re-run create to simulate onboarding
+        DataContext.create(project_path)
 
     obs = gen_directory_tree_str(ge_dir)
     assert obs == expected
@@ -1143,3 +1138,12 @@ def test_get_batch_when_passed_a_suite(titanic_data_context):
     batch = context.get_batch(batch_kwargs, suite)
     assert isinstance(batch, Dataset)
     assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
+
+
+def test_list_validation_operators_data_context_with_none_returns_empty_list(titanic_data_context):
+    titanic_data_context.validation_operators = {}
+    assert titanic_data_context.list_validation_operator_names() == []
+
+
+def test_list_validation_operators_data_context_with_one(titanic_data_context):
+    assert titanic_data_context.list_validation_operator_names() == ["default"]

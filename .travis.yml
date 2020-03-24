@@ -15,8 +15,9 @@ env:
 stages:
   - name: test
   - name: deploy
-    if: branch = master
+    if: branch = master AND type != pull_request
   - name: experimental
+    if: branch != master
 jobs:
   allow_failures:
     - if: os = windows
@@ -66,7 +67,7 @@ jobs:
   - stage: deploy
     python: 3.6
     script:
-      - git tag --annotate 0.9.6 -m 0.9.6 || echo "tag exists, skipping"
+      - git tag --annotate 0.9.7 -m 0.9.7 || echo "tag exists, skipping"
     deploy:
       provider: pypi
       edge: true
@@ -85,11 +86,12 @@ install:
 - pip install --only-binary=numpy,scipy numpy scipy
 - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
 - pip install -r requirements-dev.txt
+- pip install -e .
 - pip install pytest-slack
 before_script:
 - psql -c 'create database test_ci;' -U postgres
 script:
-- pytest --cov=great_expectations --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL
+- pytest -rxXs --cov=great_expectations --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL
   --slack_channel=notifications-great_expectations tests/
 after_success:
 - coveralls
