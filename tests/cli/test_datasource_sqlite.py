@@ -36,15 +36,29 @@ def test_cli_datasorce_list(empty_data_context, empty_sqlite_db, caplog):
         context, datasource_name, empty_sqlite_db
     )
 
-    datasources = context.list_datasources()
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
     )
+    url = str(empty_sqlite_db.engine.url)
+    expected_output = """\
+1 Datasource found:[0m
+[0m
+ - [36mname:[0m wow_a_datasource[0m
+   [36mmodule_name:[0m great_expectations.datasource[0m
+   [36mclass_name:[0m SqlAlchemyDatasource[0m
+   [36mcredentials:[0m[0m
+     [36murl:[0m {}[0m
+   [36mdata_asset_type:[0m[0m
+     [36mclass_name:[0m SqlAlchemyDataset[0m
+     [36mmodule_name:[0m None[0m
+   [36mgenerators:[0m[0m
+     [36mdefault:[0m[0m
+       [36mclass_name:[0m TableBatchKwargsGenerator[0m
+""".format(url).strip()
     stdout = result.output.strip()
 
-    for datasource in datasources:
-        assert_dict_key_and_val_in_stdout(datasource, stdout)
+    assert stdout == expected_output
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
