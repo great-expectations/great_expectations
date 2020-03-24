@@ -80,17 +80,18 @@ def cli_message_dict(dict_, indent=3, bullet_char="-", message_list=None, recurs
         action_list_string = action_list_to_string(action_list)
         message = "{}<cyan>action_list:</cyan> {}".format(" " * indent, action_list_string)
         message_list.append(message)
-    for key, val in dict_.items():
+    sorted_keys = sorted(dict_.keys())
+    for key in sorted_keys:
         if key == "password":
             message = "{}<cyan>password:</cyan> ******".format(" " * indent)
             message_list.append(message)
             continue
-        if isinstance(val, dict):
+        if isinstance(dict_[key], dict):
             message = "{}<cyan>{}:</cyan>".format(" " * indent, key)
             message_list.append(message)
-            cli_message_dict(val, indent=indent + 2, message_list=message_list, recursion_flag=True)
+            cli_message_dict(dict_[key], indent=indent + 2, message_list=message_list, recursion_flag=True)
         else:
-            message = "{}<cyan>{}:</cyan> {}".format(" " * indent, key, str(val))
+            message = "{}<cyan>{}:</cyan> {}".format(" " * indent, key, str(dict_[key]))
             message_list.append(message)
     if recursion_flag == False:
         if bullet_char and indent > 1:
