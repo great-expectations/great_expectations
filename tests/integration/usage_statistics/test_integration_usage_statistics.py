@@ -10,7 +10,7 @@ import boto3
 
 from great_expectations.data_context.util import file_relative_path
 
-USAGE_STATISTICS_QA_URL = "https://2j6l8hs162.execute-api.us-east-1.amazonaws.com/qa/great_expectations/v1/usage_statistics"
+USAGE_STATISTICS_QA_URL = "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 logGroupName = "/great_expectations/usage_statistics/qa"
 
