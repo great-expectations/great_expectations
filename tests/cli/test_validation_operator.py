@@ -131,8 +131,6 @@ def test_validation_operator_run_noninteractive_validation_config_file_does_not_
     root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(root_dir, "uncommitted"))
 
-    csv_path = os.path.join(filesystem_csv_2, "f1.csv")
-
     validation_config_file_path = os.path.join(root_dir, "uncommitted", "validation_config_1.json")
 
     runner = CliRunner(mix_stderr=False)
