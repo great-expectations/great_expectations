@@ -47,7 +47,7 @@ Commands:
   datasource           Datasource operations
   docs                 Data Docs operations
   init                 Initialize a new Great Expectations project.
-  project              project operations
+  project              Project operations
   store                Store operations
   suite                Expectation Suite operations
   tap                  Tap operations
