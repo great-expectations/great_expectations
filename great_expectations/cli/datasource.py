@@ -14,7 +14,10 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext, rtd_url_ge_version
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
-from great_expectations.cli.util import cli_message
+from great_expectations.cli.util import (
+    cli_message,
+    cli_message_list,
+    cli_message_dict)
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
@@ -74,7 +77,7 @@ class SupportedDatabases(enum.Enum):
 
 @click.group()
 def datasource():
-    """datasource operations"""
+    """Datasource operations"""
     pass
 
 
@@ -113,8 +116,20 @@ def datasource_list(directory):
     try:
         context = DataContext(directory)
         datasources = context.list_datasources()
-        # TODO Pretty up this console output
-        cli_message(str([d for d in datasources]))
+
+        if len(datasources) == 0:
+            cli_message("No Datasources found")
+            return
+
+        if len(datasources) == 1:
+            list_intro_string = "1 Datasource found:"
+
+        if len(datasources) > 1:
+            list_intro_string = "{} Datasources found:".format(len(datasources))
+        cli_message(list_intro_string)
+        for datasource in datasources:
+            cli_message("")
+            cli_message_dict(datasource)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         return

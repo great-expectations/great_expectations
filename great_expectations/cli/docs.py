@@ -6,12 +6,12 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_logging import logger
-from great_expectations.cli.util import cli_message
+from great_expectations.cli.util import cli_message, cli_message_list
 
 
 @click.group()
 def docs():
-    """data docs operations"""
+    """Data Docs operations"""
     pass
 
 
@@ -48,6 +48,39 @@ def docs_build(directory, site_name, view=True):
         sys.exit(1)
 
 
+@docs.command(name="list")
+@click.option(
+    '--directory',
+    '-d',
+    default=None,
+    help="The project's great_expectations directory."
+)
+def docs_list(directory):
+    """List known Data Docs Sites."""
+    try:
+        context = DataContext(directory)
+        docs_sites_url_dicts = context.get_docs_sites_urls()
+        docs_sites_strings = [
+            " - <cyan>{}</cyan>: {}".format(docs_site_dict["site_name"], docs_site_dict["site_url"])\
+            for docs_site_dict in docs_sites_url_dicts
+        ]
+
+        if len(docs_sites_strings) == 0:
+            cli_message("No Data Docs sites found")
+            return
+
+        if len(docs_sites_strings) == 1:
+            list_intro_string = "1 Data Docs site found:"
+
+        if len(docs_sites_strings) > 1:
+            list_intro_string = "{} Data Docs sites found:".format(len(docs_sites_strings))
+        cli_message_list(docs_sites_strings, list_intro_string)
+
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+
+
 def build_docs(context, site_name=None, view=True):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
@@ -64,10 +97,11 @@ def build_docs(context, site_name=None, view=True):
     msg = "The following Data Docs sites were built:\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
         if os.path.isfile(index_page_locator_info):
-            msg += "- " + site_name + ":\n"
-            msg += "   <green>file://" + index_page_locator_info + "</green>\n"
+            msg += " - <cyan>{}:</cyan> ".format(site_name)
+            msg += "file://{}\n".format(index_page_locator_info)
         else:
-            msg += site_name + "\n"
+            msg += " - <cyan>{}:</cyan> ".format(site_name)
+            msg += "{}\n".format(index_page_locator_info)
 
     msg = msg.rstrip("\n")
     cli_message(msg)

@@ -55,7 +55,10 @@ class PandasDatasource(Datasource):
         """
 
         if data_asset_type is None:
-            data_asset_type = {"class_name": "PandasDataset"}
+            data_asset_type = {
+                "class_name": "PandasDataset",
+                "module_name": "great_expectations.dataset"
+            }
         else:
             data_asset_type = classConfigSchema.dump(ClassConfig(**data_asset_type))
 

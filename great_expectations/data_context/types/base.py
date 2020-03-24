@@ -178,11 +178,10 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
     # noinspection PyUnusedLocal
     @post_dump()
     def filter_implicit(self, data, **kwargs):
-        if data["_explicit_url"]:
-            del data["_explicit_url"]
-        else:
-            del data["_explicit_url"]
+        if not data.get("_explicit_url") and "usage_statistics_url" in data:
             del data["usage_statistics_url"]
+        if "_explicit_url" in data:
+            del data["_explicit_url"]
         return data
 
 
@@ -191,7 +190,7 @@ class DatasourceConfigSchema(Schema):
         unknown = INCLUDE
 
     class_name = fields.String(required=True)
-    module_name = fields.String(allow_none=True)
+    module_name = fields.String(missing="great_expectations.datasource")
     data_asset_type = fields.Nested(ClassConfigSchema)
     # TODO: Update to generator-specific
     # generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))
