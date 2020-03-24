@@ -18,7 +18,7 @@ stages:
     if: branch != master
 jobs:
   allow_failures:
-    - if: os = windows
+    - if: os = windows OR os = osx
   include:
   - stage: test
     dist: trusty
