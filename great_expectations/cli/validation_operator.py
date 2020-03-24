@@ -1,23 +1,20 @@
 import json
-import os
-import subprocess
 import sys
 
 import click
 from datetime import datetime
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.datasource import (
     get_batch_kwargs,
     select_datasource,
 )
-from great_expectations.cli.util import cli_message
+from great_expectations.cli.util import (
+    cli_message,
+    load_expectation_suite,
+)
 
-try:
-    json_parse_exception = json.decoder.JSONDecodeError
-except AttributeError:  # Python 2
-    json_parse_exception = ValueError
+json_parse_exception = json.decoder.JSONDecodeError
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -65,30 +62,32 @@ def validation_operator():
     help="The project's great_expectations directory.",
 )
 def validation_operator_run(name, run_id, validation_config_file, suite, directory):
+    # Note though the long lines here aren't pythonic, they look best if Click does the line wraps.
     """
-    Run a validation operator.
-
-    If you are not familiar with validation operators, start here:
-    https://great-expectations.readthedocs.io/en/latest/features/validation.html#validation-operators
+    Run a validation operator against some data.
 
     There are two modes to run this command:
 
-    1. Interactive:
+    1. Interactive (good for development):
+
         Specify the name of the validation operator using the --name argument
         and the name of the expectation suite using the --suite argument.
 
-        The command will help you specify the batch of data that you want the
-        validation operator to validate interactively.
+        The cli will help you specify the batch of data that you want to
+        validate interactively.
 
-    2. Non-interactive:
-        Use the `--validation_config_file` argument to specify the path of the validation configuration JSON file.
-        The file can be used to instruct a validation operator to validate multiple batches of data and use multiple expectation suites to validate each batch.
+
+    2. Non-interactive (good for production):
+
+        Use the `--validation_config_file` argument to specify the path of the validation configuration JSON file. This file can be used to instruct a validation operator to validate multiple batches of data and use multiple expectation suites to validate each batch.
 
         Learn how to create a validation config file here:
         https://great-expectations.readthedocs.io/en/latest/command_line.html#great-expectations-validation-operator-run-validation-config-file-validation-config-file-path
 
-        The command exits with 0 if the validation operator ran and the "success" attribue in its return object is true.
-        Otherwise, the command exits with 1.
+        This command exits with 0 if the validation operator ran and the "success" attribute in its return object is True. Otherwise, the command exits with 1.
+
+    To learn more about validation operators, go here:
+    https://great-expectations.readthedocs.io/en/latest/features/validation.html#validation-operators
     """
 
     try:
@@ -105,7 +104,7 @@ def validation_operator_run(name, run_id, validation_config_file, suite, directo
             IOError,
             json_parse_exception
         ) as e:
-            cli_message("Failed to process the --validation_config_file argument: <red>{}</red>".format(e))
+            cli_message(f"Failed to process the --validation_config_file argument: <red>{e}</red>")
             sys.exit(1)
 
         validation_config_error_message = _validate_valdiation_config(validation_config)
@@ -118,38 +117,28 @@ def validation_operator_run(name, run_id, validation_config_file, suite, directo
             cli_message(
 """
 Please use --suite argument to specify the name of the expectation suite.
-Call `suite list` command to list the expectation suites in your project.
+Call `great_expectation suite list` command to list the expectation suites in your project.
 """
             )
             sys.exit(0)
 
-        if suite.endswith(".json"):
-            suite = suite[:-5]
-        try:
-            suite = context.get_expectation_suite(suite)
-        except ge_exceptions.DataContextError as e:
-            cli_message(
-                f"<red>Could not find a suite named `{suite}`.</red> Please check "
-                "the name by running `great_expectations suite list` and try again."
-            )
-            logger.info(e)
-            sys.exit(1)
+        suite = load_expectation_suite(context, suite)
 
         if name is None:
             cli_message(
 """
 Please use --name argument to specify the name of the validation operator.
-Call `validation-operator list` command to list the operators in your project.
+Call `great_expectation validation-operator list` command to list the operators in your project.
 """
             )
             sys.exit(1)
         else:
             if name not in context.list_validation_operator_names():
                 cli_message(
+                    f"""
+Could not find a validation operator {name}.
+Call `great_expectation validation-operator list` command to list the operators in your project.
 """
-Could not find a validation operator {0:s}.
-Call `validation-operator list` command to list the operators in your project.
-""".format(name)
                 )
                 sys.exit(1)
 
@@ -183,7 +172,6 @@ Let's help you specify the batch of data your want the validation operator to va
                 generator_asset=None,
                 additional_batch_kwargs=None,
             )
-
 
         validation_config = {
             "validation_operator_name": name,
@@ -226,6 +214,7 @@ Let's help you specify the batch of data your want the validation operator to va
         cli_message("Validation Succeeded!")
         sys.exit(0)
 
+
 @validation_operator.command(name="list")
 @click.option(
     "--directory",
@@ -254,6 +243,7 @@ def validation_operator_list(directory):
 
     for name in suite_names:
         cli_message("\t{}".format(name))
+
 
 def _validate_valdiation_config(valdiation_config):
     if "validation_operator_name" not in valdiation_config:
