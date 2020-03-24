@@ -41,11 +41,6 @@ try:
 except ImportError:
     import mock
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
 yaml = YAML()
 
 
@@ -1117,3 +1112,12 @@ def test_get_batch_when_passed_a_suite(titanic_data_context):
     batch = context.get_batch(batch_kwargs, suite)
     assert isinstance(batch, Dataset)
     assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
+
+
+def test_list_validation_operators_data_context_with_none_returns_empty_list(titanic_data_context):
+    titanic_data_context.validation_operators = {}
+    assert titanic_data_context.list_validation_operator_names() == []
+
+
+def test_list_validation_operators_data_context_with_one(titanic_data_context):
+    assert titanic_data_context.list_validation_operator_names() == ["default"]
