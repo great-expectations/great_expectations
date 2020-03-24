@@ -655,9 +655,6 @@ class BaseDataContext(object):
             runtime_environment={
                 "data_context": self
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource"
-            }
         )
         return datasource
 
