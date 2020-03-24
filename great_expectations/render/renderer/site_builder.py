@@ -205,8 +205,8 @@ class SiteBuilder(object):
         for site_section, site_section_builder in self.site_section_builders.items():
             site_section_builder.build(resource_identifiers=resource_identifiers)
 
-        index_page_resource_idrentifie_tuple = self.site_index_builder.build()
-        return self.get_resource_url(), index_page_resource_idrentifie_tuple[1]
+        index_page_resource_identifier_tuple = self.site_index_builder.build()
+        return self.get_resource_url(), index_page_resource_identifier_tuple[1]
 
     def get_resource_url(self, resource_identifier=None):
         """
