@@ -534,10 +534,9 @@ class BaseDataContext(object):
         )
 
     def list_validation_operator_names(self):
-        if self.validation_operators:
-            return self.validation_operators.keys()
-        else:
+        if not self.validation_operators:
             return []
+        return list(self.validation_operators.keys())
 
     def add_datasource(self, name, initialize=True, **kwargs):
         """Add a new datasource to the data context, with configuration provided as kwargs.
