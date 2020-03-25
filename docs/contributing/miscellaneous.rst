@@ -7,6 +7,7 @@ Miscellaneous
 Core committers
 ------------------------
 
+.. _community_cla:
 
 Contributor license agreement (CLA)
 ---------------------------------------
