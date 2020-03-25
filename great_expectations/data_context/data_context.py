@@ -34,8 +34,12 @@ from great_expectations.profile.basic_dataset_profiler import (
 )
 
 import great_expectations.exceptions as ge_exceptions
-from ..core.logging.usage_statistics import usage_statistics_enabled_method, \
-    run_validation_operator_usage_statistics, UsageStatisticsHandler
+from ..core.logging.usage_statistics import (
+    run_validation_operator_usage_statistics,
+    UsageStatisticsHandler,
+    usage_statistics_enabled_method,
+    usage_statistics_record_schema,
+)
 
 from ..validator.validator import Validator
 from .templates import (
@@ -109,7 +113,7 @@ class BaseDataContext(object):
             raise
         return True
 
-    @usage_statistics_enabled_method(method_name="data_context.__init__")
+    @usage_statistics_enabled_method(method_name="data_context.__init__", schema=usage_statistics_record_schema)
     def __init__(self, project_config, context_root_dir=None):
         """DataContext constructor
 
@@ -552,8 +556,11 @@ class BaseDataContext(object):
         )
         return validator.get_dataset()
 
-    @usage_statistics_enabled_method(method_name="data_context.run_validation_operator",
-                                     args_payload_fn=run_validation_operator_usage_statistics)
+    @usage_statistics_enabled_method(
+        method_name="data_context.run_validation_operator",
+        args_payload_fn=run_validation_operator_usage_statistics,
+        schema = usage_statistics_record_schema
+    )
     def run_validation_operator(
             self,
             validation_operator_name,
@@ -960,7 +967,7 @@ class BaseDataContext(object):
         """
         return return_obj
 
-    @usage_statistics_enabled_method(method_name="data_context.build_data_docs")
+    @usage_statistics_enabled_method(method_name="data_context.build_data_docs", schema=usage_statistics_record_schema)
     def build_data_docs(self, site_names=None, resource_identifiers=None):
         """
         Build Data Docs for your project.
