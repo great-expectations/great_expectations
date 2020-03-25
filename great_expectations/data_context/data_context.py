@@ -38,8 +38,8 @@ from ..core.logging.usage_statistics import (
     run_validation_operator_usage_statistics,
     UsageStatisticsHandler,
     usage_statistics_enabled_method,
-    usage_statistics_record_schema,
 )
+from ..core.logging.schemas import usage_statistics_record_schema
 
 from ..validator.validator import Validator
 from .templates import (
