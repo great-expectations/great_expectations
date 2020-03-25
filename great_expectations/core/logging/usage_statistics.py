@@ -108,6 +108,51 @@ usage_statistics_record_schema = {
    }
 }
 
+usage_statistics_mini_record_schema = {
+   "schema": {
+      "type": "object",
+      "properties": {
+         "event_time": {
+            "type": "string",
+            "format": "date-time"
+         },
+         "data_context_id": {
+            "type": "string",
+            "format": "uuid"
+         },
+         "data_context_instance_id": {
+            "type": "string",
+            "format": "uuid"
+         },
+         "ge_version": {
+            "type": "string",
+            "maxLength": 32
+         },
+         "method": {
+            "type": "string",
+            "maxLength": 256
+         },
+         "success": {
+            "type": "boolean"
+         },
+         "event_payload": {
+            "type": "object",
+            "maxProperties": 100
+         }
+      },
+      "required": [
+         "event_time",
+         "data_context_id",
+         "data_context_instance_id",
+         "ge_version",
+         "method",
+         "success",
+         "event_payload"
+      ]
+   }
+}
+
+
 
 class UsageStatisticsHandler(object):
 
@@ -144,22 +189,22 @@ class UsageStatisticsHandler(object):
         message["anonymized_datasources"] = self._anonymized_datasources
         return message
 
-    def validate_record(self, record):
+    def validate_record(self, record, schema):
         try:
-            jsonschema.validate(record, schema=usage_statistics_record_schema)
+            jsonschema.validate(record, schema=schema)
             return True
         except jsonschema.ValidationError as e:
             logger.debug("invalid record: " + str(e))
             return False
 
-    def emit(self, record):
+    def emit(self, record, schema):
         """
         Emit a record.
         """
         if not self._enabled:
             return
 
-        if not self.validate_record(record):
+        if not self.validate_record(record, schema):
             return
 
         try:
@@ -191,7 +236,7 @@ def get_usage_statistics_handler(args_array):
     return handler
 
 
-def usage_statistics_enabled_method(func=None, method_name=None, args_payload_fn=None, result_payload_fn=None):
+def usage_statistics_enabled_method(func=None, method_name=None, args_payload_fn=None, result_payload_fn=None, schema=usage_statistics_record_schema):
     if callable(func):
         if method_name is None:
             method_name = func.__name__
@@ -213,11 +258,11 @@ def usage_statistics_enabled_method(func=None, method_name=None, args_payload_fn
                     nested_update(event_payload, result_payload_fn(res))
                 record["success"] = True
                 if handler is not None:
-                    handler.emit(record)
+                    handler.emit(record, schema)
             except Exception:
                 record["success"] = False
                 if handler:
-                    handler.emit(record)
+                    handler.emit(record, schema)
                 raise
 
             return res
@@ -225,10 +270,13 @@ def usage_statistics_enabled_method(func=None, method_name=None, args_payload_fn
         return usage_statistics_wrapped_method
     else:
         def usage_statistics_wrapped_method_partial(func):
-            return usage_statistics_enabled_method(func,
-                                                   method_name=method_name,
-                                                   args_payload_fn=args_payload_fn,
-                                                   result_payload_fn=result_payload_fn)
+            return usage_statistics_enabled_method(
+                func,
+                method_name=method_name,
+                args_payload_fn=args_payload_fn,
+                result_payload_fn=result_payload_fn,
+                schema=schema
+            )
         return usage_statistics_wrapped_method_partial
 
 
