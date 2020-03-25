@@ -3,7 +3,7 @@
 develop
 -----------------
 * Remove the "project new" option from the command line (since it is not implemented; users can only run "init" to create a new project).
-
+* fixed bug where expect_column_values_to_not_be_null fails if user does not have bigquery libray installed
 
 0.9.7
 -----------------
