@@ -62,10 +62,11 @@ Our goal is to make your experience as great as possible. Please follow these st
 .. container:: custom-indented-paragraph
 
    Issues in GitHub are a great place to start. Check out the `help wanted <https://github.com/great-expectations/great_expectations/labels/help%20wanted>`__ and `good first issue <https://github.com/great-expectations/great_expectations/labels/good%20first%20issue>`__ labels. Comment to let everyone know you’re working on it. 
-   
-   The `public test grid <https://grid.greatexpectations.io>`__ is another good entry point. If there's an element in the test grid that you want to work on, please create an issue in Github to let others know that you're taking it on. (#FIXME: This can't go live until the test grid is real.)
 
    If there’s no ticket for what you want to work on, please see :ref:`Contributions without an issue`.
+
+..
+   The `public test grid <https://grid.greatexpectations.io>`__ is another good entry point. If there's an element in the test grid that you want to work on, please create an issue in Github to let others know that you're taking it on. (#FIXME: This can't go live until the test grid is real.)
 
 .. raw:: html
 
@@ -87,12 +88,10 @@ Our goal is to make your experience as great as possible. Please follow these st
 
 -----
 
-Table of contents for Contributing
-
-#FIXME: Reduce maxdepth to 1. During development, it's helpful to keep this at depth 2.
+Table of contents for Contributing:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    /contributing/setting_up_your_dev_environment
    /contributing/contribution_checklist
