@@ -1,4 +1,4 @@
-.. _community_style_guide:
+.. _contributing_style_guide:
 
 
 

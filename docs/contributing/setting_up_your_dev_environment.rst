@@ -5,8 +5,6 @@
 Setting up your dev environment
 ==========================================
 
-#FIXME: Walk through these instructions at least once to verify success.
-
 Prerequisites
 -------------------
 
@@ -31,7 +29,7 @@ Fork and clone the repository
 
     * Click the green ``Clone`` button and choose the SSH or HTTPS URL depending on your setup. 
     * Copy the URL and run ``git clone <url>`` in your local terminal.
-    * Note: This will clone the ``develop`` branch of the great_expectations repo by default, not ``master``. (#FIXME: Which branch should I clone??)
+    * This will clone the ``develop`` branch of the great_expectations repo. This is the right place branch from.
 
 
 **3. Add the upstream remote**
@@ -43,7 +41,7 @@ Fork and clone the repository
 **4. Create a feature branch to start working on your changes.**
 
     * Ex: ``git checkout -b feature/my-feature-name``
-    * Your branch should be named {#FIXME: agree on a convention}. Please see Style guide for details.
+    * Your branch should be named {#FIXME: agree on a convention}. Please see :ref:`contributing_style_guide` for details.
 
 
 Install python dependencies
@@ -52,13 +50,14 @@ Install python dependencies
 **5. Create a new virtual environment**
 
     * Make a new virtual environment (e.g. using virtualenv or conda), name it "great_expectations_dev" or similar.
-    * Ex: ``virtualenv great_expectations_dev``
+    * Ex: ``virtualenv great_expectations_dev; source great_expectations_dev/bin/activate``
     * This is not required, but highly recommended.
 
 **6. Install dependencies from requirements-dev.txt**
 
-    *  to make sure you have the right libraries, then install great_expectations from the version you just forked:
     * ``pip install -r requirements-dev.txt``
+    *  This will ensure that sure you have the right libraries.
+
 
 **7. Install great_expectations from your cloned repo**
 
