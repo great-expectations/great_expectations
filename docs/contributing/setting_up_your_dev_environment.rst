@@ -67,13 +67,7 @@ Install python dependencies
 (Optional) Configure resources for testing and documentation
 ---------------------------------------------------------------
 
-Note that you will have the option to enable different backends for local testing, such as postgresql and Spark. 
-
-**If you want to build documentation locally:**
-
-    * ``pip install -r docs/requirements.txt``
-    * To build documentation, the command is ``cd docs; make html``
-    * Documentation will be generated in ``docs/build/html/`` with the ``index.html`` as the index page.
+Depending on which features of Great Expectations you want to work on, you may want to configure different backends for local testing, such as postgresql and Spark. Also, there are a couple of extra steps if you want to build documentation locally.
 
 **If you want to develop against local postgresql:**
 
@@ -88,6 +82,11 @@ Note that you will have the option to enable different backends for local testin
 
     * #FIXME
 
+**If you want to build documentation locally:**
+
+    * ``pip install -r docs/requirements.txt``
+    * To build documentation, the command is ``cd docs; make html``
+    * Documentation will be generated in ``docs/build/html/`` with the ``index.html`` as the index page.
 
 Run tests to confirm that everything is working
 -----------------------------------------
