@@ -181,7 +181,7 @@ context.open_data_docs(validation_result_identifier)"""
         if not meta:
             return ""
 
-        profiler = "SampleExpectationsDatasetProfiler"
+        profiler = "BasicSuiteBuilderProfiler"
         if profiler in meta.keys():
             meta.pop(profiler)
 

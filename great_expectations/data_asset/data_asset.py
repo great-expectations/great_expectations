@@ -103,17 +103,18 @@ class DataAsset(object):
         expectation_suite, validation_results = profiler.profile(self)
         return expectation_suite, validation_results
 
-    def profile(self, profiler):
+    def profile(self, profiler, profiler_configuration=None):
         """Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
 
         Args:
             profiler: The profiler to use
+            profiler_configuration: Optional profiler configuration dict
 
         Returns:
             tuple(expectation_suite, validation_results)
 
         """
-        expectation_suite, validation_results = profiler.profile(self)
+        expectation_suite, validation_results = profiler.profile(self, profiler_configuration)
         return expectation_suite, validation_results
 
     #TODO: add warning if no expectation_explorer_manager and how to turn on
