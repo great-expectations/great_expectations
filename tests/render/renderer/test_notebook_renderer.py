@@ -1516,7 +1516,7 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     - execute that notebook (Note this will raise various errors like
     CellExecutionError if any cell in the notebook fails
     - create a new context from disk
-    - a validation has been run with our expectation suite
+    - verify that a validation has been run with our expectation suite
     """
     context = titanic_data_context
     root_dir = context.root_directory
@@ -1534,6 +1534,7 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
 
     # Sanity check test setup
     suite = context.get_expectation_suite(suite_name)
+    original_suite = suite
     assert len(suite.expectations) == 3
     assert context.list_expectation_suite_names() == [suite_name]
     assert context.list_datasources() == [
@@ -1573,3 +1574,5 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
         "unsuccessful_expectations": 1,
         "success_percent": 66.66666666666666,
     }
+    suite = context.get_expectation_suite(suite_name)
+    assert suite == original_suite
