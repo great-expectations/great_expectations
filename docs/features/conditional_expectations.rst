@@ -4,21 +4,17 @@
 Conditional Expectations
 ########################
 
-Great Expectations offers an extension for the standard Expectations, namely, the Conditional Expectations. The main
-difference is the :code:`condition` argument, which is passed to all Dataset Expectations in the :ref:`expectation_glossary`.
+Sometimes one may hold an Expectation not for a dataset in its entirety but only for a particular subset. Alternatively, what one expects of some variable may depend on the value of another.
+One may, for example, expect a column that holds the country of origin to not be null only for people of foreign descent.
 
-Conditional Expectations can be used to narrow the scope of data where expectation is applied, e.g. you can expect
-values in particular column to not be null, but only if other column or columns take on certain values.
+Great Expectations allows you to express such Conditional Expectations via a :code:`condition` argument that can be passed to all Dataset Expectations.
 
-*************************************
-How to build conditional expectations
-*************************************
+Conditional Expectations are available only for the Pandas but not for the Spark and SQLAlchemy backends.
 
-So far Conditional Expectations are only implemented for Pandas backend, thus, the feature does not work with Spark and
-SQLAlchemy platforms yet. For Pandas, the value passed to the :code:`condition` argument should be a valid boolean
-expression string, which is then forwarded to :code:`pandas.DataFrame.query()` before Expectation Validation (see `pandas docs <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_).
+For Pandas, the :code:`condition` argument should be a boolean
+expression string, which can be passed to :code:`pandas.DataFrame.query()` before Expectation Validation (see `pandas docs <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_).
 
-For example, you can test if depending columns in your data are consistent (e.g. encodings):
+The feature can be used, e.g., to test if different encodings of identical pieces of information are consistent with each other:
 
 .. code-block:: bash
 
@@ -42,8 +38,7 @@ For example, you can test if depending columns in your data are consistent (e.g.
         }
     }
 
-This feature makes it also possible to add two Expectations of the same type and for the same column, whereby one of
-them is conditional and the other one is not. They will be stored in Expectation Suite as two different Expectations.
+It is also possible to add multiple Expectations of the same type to the Expectation Suite for a single column. At most one Expectation can be unconditional while an arbitrary number of Expectations -- each with a different condition -- can be conditional.
 
 .. code-block:: bash
 
@@ -86,19 +81,22 @@ them is conditional and the other one is not. They will be stored in Expectation
 Data Docs
 *********
 
-Conditional Expectations are also shown differently from standard Expectations in Data Docs. Each Conditional Expectation
-has the following appearance: *if 'condition_string', then values must be...*
+Conditional Expectations are displayed differently from standard Expectations in the Data Docs. Each Conditional Expectation is qualified with *if 'condition_string', then values must be...*
 
 .. image:: ../images/conditional_data_docs_screenshot.png
 
-If *'condition_string'* is a complex expression, it will be divided into several chunks to enhance readability.
+If *'condition_string'* is a complex expression, it will be split into several components for better readability.
 
-The following Expectations are not meant to be shown as conditional ones, since it is not reasonable and not intended
-to use conditions with them:
+
+*********************
+Scope and Limitations
+*********************
+
+While conditions can be attached to most Expectations, the following Expectations cannot be conditioned by their very nature and therefore do not take the :code:`condition` argument:
 
 * :func:`expect_column_to_exist <great_expectations.dataset.dataset.Dataset.expect_column_to_exist>`
 * :func:`expect_table_columns_to_match_ordered_list <great_expectations.dataset.dataset.Dataset.expect_table_columns_to_match_ordered_list>`
 * :func:`expect_table_column_count_to_be_between <great_expectations.dataset.dataset.Dataset.expect_table_column_count_to_be_between>`
 * :func:`expect_table_column_count_to_equal <great_expectations.dataset.dataset.Dataset.expect_table_column_count_to_equal>`
 
-You can find further information in the :ref:`data_docs` feature guide.
+For more information, see the :ref:`data_docs` feature guide.

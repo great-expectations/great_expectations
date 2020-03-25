@@ -14,7 +14,7 @@ Basic Functionality
    :maxdepth: 2
 
    /reference/creating_expectations
-   /reference/using_conditional_expectations
+   /reference/conditional_expectations
    /reference/distributional_expectations
    /reference/custom_expectations
    /reference/implemented_expectations
