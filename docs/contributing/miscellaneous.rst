@@ -1,4 +1,4 @@
-.. _community_miscellaneous:
+.. _contributing_miscellaneous:
 
 Miscellaneous
 ==============
@@ -7,7 +7,7 @@ Miscellaneous
 Core committers
 ------------------------
 
-.. _community_cla:
+.. _contributing_cla:
 
 Contributor license agreement (CLA)
 ---------------------------------------
