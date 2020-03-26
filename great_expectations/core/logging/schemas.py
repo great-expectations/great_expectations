@@ -1,31 +1,35 @@
+anonymized_name_schema = {
+   "type": "string",
+   "minLength": 32,
+   "maxLength": 32,
+}
+
+anonymized_datasource_schema = {
+   "type": "object",
+   "properties": {
+      "anonymized_name": {
+         "$ref": "#/definitions/anonymized_name"
+      },
+      "parent_class": {
+         "type": "string",
+         "maxLength": 32
+      },
+      "anonymized_class": {
+         "$ref": "#/definitions/anonymized_name"
+      }
+   },
+   "additionalProperties": False,
+   "required": [
+      "anonymized_name",
+      "parent_class"
+   ]
+}
+
 usage_statistics_record_schema = {
    "schema": {
       "definitions": {
-         "anonymized_name": {
-            "type": "string",
-            "minLength": 32,
-            "maxLength": 32,
-         },
-         "anonymized_datasource": {
-            "type": "object",
-            "properties": {
-               "anonymized_name": {
-                  "$ref": "#/definitions/anonymized_name"
-               },
-               "parent_class": {
-                  "type": "string",
-                  "maxLength": 32
-               },
-               "anonymized_class": {
-                  "$ref": "#/definitions/anonymized_name"
-               }
-            },
-            "additionalProperties": False,
-            "required": [
-               "anonymized_name",
-               "parent_class"
-            ]
-         },
+         "anonymized_name": anonymized_name_schema,
+         "anonymized_datasource": anonymized_datasource_schema,
          "init_payload": {
             "type": "object",
             "properties": {
