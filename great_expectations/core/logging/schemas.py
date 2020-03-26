@@ -76,6 +76,10 @@ init_payload_schema = {
             "items": {
                "type": "object",
                "properties": {
+                  "anonymized_name": {
+                     "type": "string",
+                     "maxLength": 32
+                  },
                   "parent_class": {
                      "type": "string",
                      "maxLength": 32
@@ -83,9 +87,14 @@ init_payload_schema = {
                   "custom_class": {
                      "type": "string",
                      "maxLength": 32
-                  }
+                  },
+                  "sqlalchemy_dialect": {
+                     "type": "string",
+                     "maxLength": 256
+                  },
                },
                "required": [
+                  "anonymized_name",
                   "parent_class"
                ]
             }
@@ -96,6 +105,10 @@ init_payload_schema = {
             "items": {
                "type": "object",
                "properties": {
+                  "anonymized_name": {
+                     "type": "string",
+                     "maxLength": 256
+                  },
                   "parent_class": {
                      "type": "string",
                      "maxLength": 32
@@ -155,7 +168,8 @@ init_payload_schema = {
          "platform.release",
          "version_info",
          "anonymized_datasources",
-      ]
+      ],
+      "additionalProperties": False
    }
 }
 
@@ -194,8 +208,8 @@ run_validation_operator_payload_schema = {
          },
       },
       "required": [
-         "operator_name_hash",
-         "datasource_name_hash",
+         "anonymized_operator_name",
+         "anonymized_datasource_name",
          "anonymized_batch_kwargs"
       ],
       "additionalProperties": False
