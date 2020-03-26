@@ -201,6 +201,25 @@ class BaseDataContext(object):
         for store_name, store_config in store_configs.items():
             self._build_store(store_name, store_config)
 
+    def _get_global_config_value(
+            self,
+            environment_variable=None,
+            conf_file_section=None,
+            conf_file_option=None
+    ):
+        assert (conf_file_section and conf_file_option) or (not conf_file_section and not conf_file_option), \
+            "Must pass both 'conf_file_section' and 'conf_file_option' or neither."
+        if environment_variable and os.environ.get(environment_variable, False):
+            return os.environ.get(environment_variable)
+        if conf_file_section and conf_file_option:
+            for config_path in GLOBAL_CONFIG_PATHS:
+                config = configparser.ConfigParser()
+                config.read(config_path)
+                config_value = config.get(conf_file_section, conf_file_option, fallback=None)
+                if config_value:
+                    return config_value
+        return None
+
     def _check_global_usage_statistics_opt_out(self):
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
