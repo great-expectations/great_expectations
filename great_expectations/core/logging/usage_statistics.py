@@ -102,17 +102,13 @@ class UsageStatisticsHandler(object):
             logger.debug("invalid message: " + str(e))
             return False
 
-    def emit(self, message, payload_schema):
+    def emit(self, message):
         """
         Emit a message.
         """
         try:
-            if payload_schema == init_payload_schema:
+            if message["action"] == "data_context.__init__":
                 message["event_payload"] = self.build_init_payload()
-
-            if not self.validate_message(message["event_payload"], payload_schema):
-                return
-
             message = self.build_envelope(message)
             if not self.validate_message(message, schema=usage_statistics_record_schema):
                 return
@@ -149,8 +145,7 @@ def usage_statistics_enabled_method(
         func=None,
         method_name=None,
         args_payload_fn=None,
-        result_payload_fn=None,
-        payload_schema=None,
+        result_payload_fn=None
 ):
     """
     A decorator for usage statistics which defaults to the less detailed payload schema.
@@ -158,10 +153,6 @@ def usage_statistics_enabled_method(
     if callable(func):
         if method_name is None:
             method_name = func.__name__
-
-        if payload_schema is None:
-            # TESTING/DEV ONLY
-            payload_schema = {"schema": {}}
 
         @wraps(func)
         def usage_statistics_wrapped_method(*args, **kwargs):
@@ -180,13 +171,12 @@ def usage_statistics_enabled_method(
                     nested_update(event_payload, result_payload_fn(result))
                 message["success"] = True
                 if handler is not None:
-                    handler.emit(message, payload_schema)
+                    handler.emit(message)
             except Exception:
                 message["success"] = False
                 if handler:
-                    handler.emit(message, payload_schema)
+                    handler.emit(message)
                 raise
-
             return result
 
         return usage_statistics_wrapped_method
@@ -197,7 +187,6 @@ def usage_statistics_enabled_method(
                 method_name=method_name,
                 args_payload_fn=args_payload_fn,
                 result_payload_fn=result_payload_fn,
-                payload_schema=payload_schema
             )
         return usage_statistics_wrapped_method_partial
 
