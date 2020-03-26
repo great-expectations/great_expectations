@@ -75,3 +75,19 @@ def test_payload_validation():
         "event_payload": payload
     }
     jsonschema.validate(message, usage_statistics_record_schema)
+
+
+def test_val_op_message():
+    message = {
+      "event_payload": {
+        "anonymized_operator_name": "50daa62a8739db21009f452f7e36153b",
+      },
+      "event": "data_context.run_validation_operator",
+      "success": True,
+      "version": "1.0.0",
+      "event_time": "2020-03-26T23:02:17.932Z",
+      "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
+      "data_context_instance_id": "4f6deb55-8fbd-4131-9f97-b42b0902eae5",
+      "ge_version": "0.9.7+203.ge3a97f44.dirty"
+    }
+    jsonschema.validate(message, usage_statistics_record_schema)
