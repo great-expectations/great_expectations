@@ -44,6 +44,10 @@ class Store(object):
         if not isinstance(key, self._key_class):
             raise TypeError("key must be an instance of %s, not %s" % (self._key_class.__name__, type(key)))
 
+    @property
+    def store_backend(self):
+        return self._store_backend
+
     # noinspection PyMethodMayBeStatic
     def serialize(self, key, value):
         return value
