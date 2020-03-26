@@ -505,8 +505,8 @@ class BaseDataContext(object):
             self,
             validation_operator_name,
             assets_to_validate,
-            evaluation_parameters=None,
             run_id=None,
+            evaluation_parameters=None,
             **kwargs
     ):
         """
@@ -527,13 +527,18 @@ class BaseDataContext(object):
         if run_id is None:
             run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
             logger.info("Setting run_id to: {}".format(run_id))
-
-        return self.validation_operators[validation_operator_name].run(
-            assets_to_validate=assets_to_validate,
-            evaluation_parameters=evaluation_parameters,
-            run_id=run_id,
-            **kwargs
-        )
+        if evaluation_parameters is not None:
+            return self.validation_operators[validation_operator_name].run(
+                assets_to_validate=assets_to_validate,
+                run_id=run_id,
+                **kwargs,
+            )
+        else:
+            return self.validation_operators[validation_operator_name].run(
+                assets_to_validate=assets_to_validate,
+                run_id=run_id,
+                **kwargs
+            )
 
     def add_datasource(self, name, initialize=True, **kwargs):
         """Add a new datasource to the data context, with configuration provided as kwargs.
@@ -718,7 +723,7 @@ class BaseDataContext(object):
             key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
         self.stores[self.expectations_store_name].set(key, expectation_suite)
-        self._evaluation_parameter_dependencies_compiled = False
+        self._evaluation_parameter_dependencies_compiled = True
 
     def _store_metrics(self, requested_metrics, validation_results, target_store_name):
         """

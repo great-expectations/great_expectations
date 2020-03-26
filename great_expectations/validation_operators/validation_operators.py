@@ -28,7 +28,7 @@ class ValidationOperator(object):
     of validation operator classes that will be the descendants of this base class.
     """
 
-    def run(self, assets_to_validate, run_id):
+    def run(self, assets_to_validate, run_id, evaluation_parameters=None):
         raise NotImplementedError
 
 
@@ -115,7 +115,7 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch
 
-    def run(self, assets_to_validate, run_id):
+    def run(self, assets_to_validate, run_id, evaluation_parameters=None):
         result_object = {
             "success": None,
             "details": {}
