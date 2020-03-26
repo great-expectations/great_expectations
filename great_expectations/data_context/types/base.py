@@ -267,3 +267,4 @@ class DataContextConfigSchema(Schema):
 
 dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
+anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
