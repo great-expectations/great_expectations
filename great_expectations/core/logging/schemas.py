@@ -1,4 +1,5 @@
 anonymized_name_schema = {
+   "$schema": "http://json-schema.org/schema#",
    "type": "string",
    "minLength": 32,
    "maxLength": 32,
@@ -6,144 +7,182 @@ anonymized_name_schema = {
 
 anonymized_datasource_schema = {
    "$schema": "http://json-schema.org/schema#",
-   "title": "anonymized_datasource_2020-03",
-   "type": "object",
+   "title": "anonymized-datasource",
    "definitions": {
       "anonymized_name": anonymized_name_schema
    },
-   "properties": {
-      "anonymized_name": {
-         "$ref": "#/definitions/anonymized_name"
-      },
-      "parent_class": {
-         "type": "string",
-         "maxLength": 32
-      },
-      "anonymized_class": {
-         "$ref": "#/definitions/anonymized_name"
+   "oneOf": [
+      {
+         "type": "object",
+         "properties": {
+            "anonymized_name": {
+               "$ref": "#/definitions/anonymized_name"
+            },
+            "parent_class": {
+               "type": "string",
+               "maxLength": 256
+            },
+            "anonymized_class": {
+               "$ref": "#/definitions/anonymized_name"
+            },
+            "engine": {
+               "type": "string",
+               "maxLength": 256,
+            }
+         },
+         "additionalProperties": False,
+         "required": [
+            "parent_class"
+         ]
       }
+   ]
+}
+
+
+anonymized_store_schema = {
+   "$schema": "http://json-schema.org/schema#",
+   "title": "anonymized-store",
+   "definitions": {
+      "anonymized_name": anonymized_name_schema
    },
-   "additionalProperties": False,
-   "required": [
-      "anonymized_name",
-      "parent_class"
+   "oneOf": [
+      {
+         "type": "object",
+         "properties": {
+            "anonymized_name": {
+               "$ref": "#/definitions/anonymized_name"
+            },
+            "parent_class": {
+               "type": "string",
+               "maxLength": 256
+            },
+            "anonymized_class": {
+               "$ref": "#/definitions/anonymized_name"
+            },
+            "parent_backend": {
+               "type": "string",
+               "maxLength": 256
+            },
+            "anonymized_backend": {
+               "$ref": "#/definitions/anonymized_name"
+            }
+         },
+         "additionalProperties": False,
+         "required": [
+            "parent_class"
+         ]
+      }
    ]
 }
 
 
 init_payload_schema = {
-   "$schema": "https://json-schema.org/draft/2019-09/schema",
-   "$id": "https://greatexpectations.io/tree",
+   "$schema": "https://json-schema.org/schema#",
    "definitions": {
       "anonymized_datasource": anonymized_datasource_schema,
+      "anonymized_store": anonymized_store_schema,
    },
-   "type": "object",
-   "properties": {
-      "platform.system": {
-         "type": "string",
-         "maxLength": 256
-      },
-      "platform.release": {
-         "type": "string",
-         "maxLength": 256
-      },
-      "version_info": {
-         "type": "array",
-         "items": {
-            "anyOf": [
-               {
-                  "type": "string",
-                  "maxLength": 20
-               },
-               {
-                  "type": "number",
-                  "minimum": 0
+   "oneOf": [
+      {
+         "type": "object",
+         "properties": {
+            "version": {
+               "enum": ["1.0.0"]
+            },
+            "platform.system": {
+               "type": "string",
+               "maxLength": 256
+            },
+            "platform.release": {
+               "type": "string",
+               "maxLength": 256
+            },
+            "version_info": {
+               "type": "string",
+               "maxLength": 256
+            },
+            "anonymized_datasources": {
+               "type": "array",
+               "maxItems": 1000,
+               "items": {
+                  "$ref": "#/definitions/anonymized_datasource"
                }
-            ]
+            },
+            "anonymized_stores": {
+               "type": "array",
+               "maxItems": 1000,
+               "items": {
+                  "$ref": "#/definitions/anonymized_store"
+               }
+            },
+            "anonymized_validation_operators": {
+               "type": "array",
+               "maxItems": 1000,
+               "items": {
+                  "type": "object"
+               },
+            },
          },
-         "maxItems": 6
-      },
-      "anonymized_datasources": {
-         "type": "array",
-         "maxItems": 1000,
-         "items": {
-            "$ref": "#/definitions/anonymized_datasource"
-         }
-      },
-      "anonymized_stores": {
-         "type": "array",
-         "maxItems": 1000,
-         "items": {
-            "type": "object",
-            "properties": {
-               "parent_class": {
+         "required": [
+            "platform.system",
+            "platform.release",
+            "version_info",
+            "anonymized_datasources",
+         ],
+         "additionalProperties": False
+      }
+   ]
+}
+
+run_validation_operator_payload_schema = {
+   "oneOf": [
+      {
+         "type": "object",
+         "properties": {
+            "version": {
+              "enum": ["1.0.0"]
+            },
+            "operator_name_hash": {
+               "type": "string",
+               "maxLength": 256,
+            },
+            "datasource_name_hash": {
+               "type": "string",
+               "maxLength": 256,
+            },
+            "anonymized_batch_kwargs": {
+               "type": "array",
+               "maxItems": 10,
+               "items": {
                   "type": "string",
-                  "maxLength": 32
-               },
-               "custom_class": {
-                  "type": "string",
-                  "maxLength": 32
-               },
-               "store_backend_parent_class": {
-                  "type": "string",
-                  "maxLength": 32
-               },
-               "store_backend_custom_class": {
-                  "type": "string",
-                  "maxLength": 32
+                  "maxLength": 256,
                }
             },
-            "required": [
-               "parent_class",
-               "store_backend_parent_class"
-            ]
-         }
-      },
-      "anonymized_validation_operators": {
-         "type": "array",
-         "maxItems": 1000,
-         "items": {
-            "type": "object",
-            "properties": {
-               "parent_class": {
-                  "type": "string",
-                  "maxLength": 32
-               },
-               "custom_class": {
-                  "type": "string",
-                  "maxLength": 32
-               },
-               "action_list": {
-                  "type": "array",
-                  "items": {
-                     "type": "object",
-                     "properties": {
-                        "parent_class"
-                     }
-                  }
-               },
-            },
-            "required": [
-               "parent_class",
-               "store_backend_parent_class"
-            ]
-         }
-      },
-   },
-   "required": [
-      "platform.system",
-      "platform.release",
-      "version_info",
-      "anonymized_datasources",
-   ],
-   "additionalProperties": False
+         },
+         "required": [
+            "anonymized_operator_name",
+            "anonymized_datasource_name",
+            "anonymized_batch_kwargs"
+         ],
+         "additionalProperties": False
+      }
+   ]
 }
 
 usage_statistics_record_schema = {
-   "$schema": "http://json-schema.org/draft-04/schema#",
-
+   "$schema": "http://json-schema.org/schema#",
+   "definitions": {
+      "anonymized_name": anonymized_name_schema,
+      "anonymized_datasource": anonymized_datasource_schema,
+      "anonymized_store": anonymized_store_schema,
+      "init_payload": init_payload_schema,
+      "run_validation_operator_payload": run_validation_operator_payload_schema,
+   },
    "type": "object",
    "properties": {
+      "version": {
+         "enum": ["1.0.0"]
+      },
       "event_time": {
          "type": "string",
          "format": "date-time"
@@ -160,56 +199,42 @@ usage_statistics_record_schema = {
          "type": "string",
          "maxLength": 32
       },
-      "method": {
-         "type": "string",
-         "maxLength": 256
-      },
       "success": {
          "type": ["boolean", "null"]
       },
-      "event_payload": {
-         "type": "object",
-         "maxProperties": 100
-      }
    },
-   "additionalProperties": False,
+   "oneOf": [
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["data_context.__init__"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/init_payload"
+            }
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["data_context.run_validation_operator"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/run_validation_operator_payload"
+            },
+         }
+      }
+   ],
    "required": [
+      "version",
       "event_time",
       "data_context_id",
       "data_context_instance_id",
       "ge_version",
-      "method",
+      "event",
       "success",
       "event_payload"
    ]
 }
-
-
-run_validation_operator_payload_schema = {
-   "type": "object",
-   "properties": {
-      "operator_name_hash": {
-         "type": "string",
-         "maxLength": 256,
-      },
-      "datasource_name_hash": {
-         "type": "string",
-         "maxLength": 256,
-      },
-      "anonymized_batch_kwargs": {
-         "type": "array",
-         "maxItems": 10,
-         "items": {
-            "type": "string",
-            "maxLength": 256,
-         }
-      },
-   },
-   "required": [
-      "anonymized_operator_name",
-      "anonymized_datasource_name",
-      "anonymized_batch_kwargs"
-   ],
-   "additionalProperties": False
-}
-
