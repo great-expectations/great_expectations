@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+import configparser
 import copy
 import datetime
 import errno
 import glob
+import json
 import logging
 import os
 import shutil
@@ -23,7 +25,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     dataContextConfigSchema,
     AnonymizedUsageStatisticsConfig,
-    datasourceConfigSchema, DatasourceConfig)
+    datasourceConfigSchema, DatasourceConfig, anonymizedUsageStatisticsSchema)
 from great_expectations.data_context.util import (
     file_relative_path,
     substitute_config_variable,
