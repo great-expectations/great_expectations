@@ -197,6 +197,23 @@ class BaseDataContext(object):
         for store_name, store_config in store_configs.items():
             self._build_store(store_name, store_config)
 
+    def _check_global_usage_statistics_opt_out(self):
+        if os.environ.get("GE_USAGE_STATS", False):
+            ge_usage_stats = os.environ.get("GE_USAGE_STATS")
+            if ge_usage_stats in FALSEY_STRINGS:
+                return True
+            else:
+                logger.warning("GE_USAGE_STATS environment variable must be one of: {}".format(FALSEY_STRINGS))
+        for config_path in CONFIG_PATHS:
+            config = configparser.ConfigParser()
+            config.read(config_path)
+            try:
+                if not config.getboolean("anonymous_usage_statistics", "enabled"):
+                    return True
+            except Exception:
+                pass
+        return False
+
     def _initialize_usage_statistics(self, usage_statistics_config: AnonymizedUsageStatisticsConfig):
         """Initialize the usage statistics system."""
         if not usage_statistics_config.enabled:
