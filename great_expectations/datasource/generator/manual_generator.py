@@ -8,8 +8,9 @@ logger = logging.getLogger(__name__)
 
 
 class ManualBatchKwargsGenerator(BatchKwargsGenerator):
-    """ManualBatchKwargsGenerator returns manually-configured batch_kwargs for named data assets. It provides a convenient way to
-    capture complete batch definitions without requiring the configuration of a more fully-featured generator.
+    """ManualBatchKwargsGenerator returns manually-configured batch_kwargs for named data assets. It provides a
+    convenient way to capture complete batch definitions without requiring the configuration of a more
+    fully-featured generator.
 
     A fully configured ManualBatchKwargsGenerator in yml might look like the following::
 
