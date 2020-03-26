@@ -75,7 +75,7 @@ class ActionListValidationOperator(ValidationOperator):
         self.actions = {}
         for action_config in action_list:
             assert isinstance(action_config, dict)
-            #NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
+            # NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
             if not set(action_config.keys()) == {"name", "action"}:
                 raise KeyError('Action config keys must be ("name", "action"). Instead got {}'.format(action_config.keys()))
 

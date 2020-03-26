@@ -11,7 +11,20 @@ from great_expectations.core import expectationSuiteSchema
 logger = logging.getLogger(__name__)
 
 
+def verify_dynamic_loading_support(module_name, package_name=None):
+    module_spec = importlib.util.find_spec(module_name, package=package_name)
+    if not module_spec:
+        if not package_name:
+            package_name = ''
+        message = f'''No module named "{package_name + module_name}" could be found in the repository. Please \
+make sure that the file corresponding to this package and module exists and that dynamic loading of code modules, \
+templates, and assets is supported in your execution environment.  This error is unrecoverable.
+        '''
+        raise FileNotFoundError(message)
+
+
 def load_class(class_name, module_name):
+    verify_dynamic_loading_support(module_name=module_name, package_name=None)
     # Get the class object itself from strings.
     loaded_module = importlib.import_module(module_name)
     try:
