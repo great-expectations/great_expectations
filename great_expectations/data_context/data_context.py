@@ -1620,11 +1620,15 @@ class DataContext(BaseDataContext):
         self._context_root_directory = context_root_directory
 
         project_config = self._load_project_config()
+        project_config_dict = dataContextConfigSchema.dump(project_config)
         super(DataContext, self).__init__(
             project_config,
             context_root_directory
         )
-        if project_config.anonymous_usage_statistics.explicit_id is False:
+
+        # save project config if data_context_id auto-generated or global config values applied
+        if project_config.anonymous_usage_statistics.explicit_id is False or \
+            project_config_dict != dataContextConfigSchema.dump(self._project_config):
             self._save_project_config()
 
     def _load_project_config(self):
