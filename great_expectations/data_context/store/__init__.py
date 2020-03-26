@@ -8,6 +8,7 @@ from .store_backend import StoreBackend, InMemoryStoreBackend
 from .tuple_store_backend import (
     TupleFilesystemStoreBackend,
     TupleS3StoreBackend,
-    TupleGCSStoreBackend
+    TupleGCSStoreBackend,
+    TupleStoreBackend
 )
 from .database_store_backend import DatabaseStoreBackend
