@@ -42,7 +42,7 @@ from great_expectations.core.logging.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.core.logging.schemas import (
-    usage_statistics_detailed_payload_schema,
+    init_payload_schema,
 )
 
 from great_expectations.validator.validator import Validator
@@ -118,7 +118,7 @@ class BaseDataContext(object):
 
     @usage_statistics_enabled_method(
         method_name="data_context.__init__",
-        payload_schema=usage_statistics_detailed_payload_schema
+        payload_schema=init_payload_schema
     )
     def __init__(self, project_config, context_root_dir=None):
         """DataContext constructor
