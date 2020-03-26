@@ -1,6 +1,5 @@
 from great_expectations.core.logging.anonymizer import Anonymizer
 from great_expectations.datasource import Datasource, PandasDatasource, SqlAlchemyDatasource, SparkDFDatasource
-from great_expectations.util import load_class
 
 
 class DatasourceAnonymizer(Anonymizer):
