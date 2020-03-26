@@ -11,11 +11,7 @@ class DatasourceAnonymizer(Anonymizer):
 
         # Get a baseline:
         anonymized_datasource_info = dict()
-        if issubclass(class_, Datasource):
-            anonymized_datasource_info["parent_class"] = "Datasource"
-        else:
-            anonymized_datasource_info["parent_class"] = "__not_datasource__"
-            anonymized_datasource_info["anonymized_class"] = self.anonymize(class_name)
+        anonymized_datasource_info["anonymized_name"] = self.anonymize(datasource_name)
 
         if issubclass(class_, PandasDatasource):
             anonymized_datasource_info["parent_class"] = "PandasDatasource"
@@ -32,9 +28,13 @@ class DatasourceAnonymizer(Anonymizer):
             if not class_ == SparkDFDatasource:
                 anonymized_datasource_info["anonymized_class"] = self.anonymize(class_name)
 
-        anonymized_datasource_info["anonymized_name"] = self.anonymize(datasource_name)
         if not anonymized_datasource_info.get("parent_class"):
-            anonymized_datasource_info["parent_class"] = "__unrecognized__"
-            anonymized_datasource_info["anonymized_class"] = self.anonymize(class_name)
+            if issubclass(class_, Datasource):
+                anonymized_datasource_info["parent_class"] = "Datasource"
+                if not class_ == Datasource:
+                    anonymized_datasource_info["anonymized_class"] = self.anonymize(class_name)
+            else:
+                anonymized_datasource_info["parent_class"] = "__not_recognized__"
+                anonymized_datasource_info["anonymized_class"] = self.anonymize(class_name)
 
         return anonymized_datasource_info
