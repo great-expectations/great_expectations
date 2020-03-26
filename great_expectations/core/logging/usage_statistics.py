@@ -15,7 +15,7 @@ from functools import wraps
 from great_expectations import __version__ as ge_version
 from great_expectations.core import nested_update
 from great_expectations.core.logging.anonymizer import Anonymizer
-from great_expectations.core.logging.schemas import usage_statistics_mini_payload_schema
+from great_expectations.core.logging.schemas import usage_statistics_record_schema, init_payload_schema
 from great_expectations.datasource.datasource_anonymizer import DatasourceAnonymizer
 
 STOP_SIGNAL = object()
@@ -88,7 +88,7 @@ class UsageStatisticsHandler(object):
         message["ge_version"] = self._ge_version
         return message
 
-    def validate_payload(self, payload, schema):
+    def validate_message(self, payload, schema):
         try:
             jsonschema.validate(payload, schema=schema)
             return True
@@ -101,16 +101,16 @@ class UsageStatisticsHandler(object):
         Emit a message.
         """
         try:
-            # At this point, a message should have exactly three fields: method, success, and event_payload
-            if not len(message) == 3:
-                return
-            if message["method"] == "data_context.__init__":
+            if payload_schema == init_payload_schema:
                 message["event_payload"] = self.build_init_payload()
 
-            if not self.validate_payload(message["event_payload"], payload_schema):
+            if not self.validate_message(message["event_payload"], payload_schema):
                 return
 
             message = self.build_envelope(message)
+            if not self.validate_message(message, schema=usage_statistics_record_schema):
+                return
+
             self._message_queue.put(message)
         # noinspection PyBroadException
         except Exception:
@@ -126,8 +126,8 @@ def get_usage_statistics_handler(args_array):
             logger.debug("Invalid UsageStatisticsHandler found on object.")
             handler = None
     except IndexError:
-        # TODO this implementation is very focused on objects
-        # A wrapped method that is not an object
+        # A wrapped method that is not an object; this would be erroneous usage
+        logger.debug("usage_statistics enabled decorator should only be used on data context methods")
         handler = None
     except AttributeError:
         # A wrapped method that is not usage_statistics capable
@@ -154,8 +154,8 @@ def usage_statistics_enabled_method(
             method_name = func.__name__
 
         if payload_schema is None:
-            # TODO: this schema needs to be guessed based on the method name if it's not specified
-            payload_schema = usage_statistics_mini_payload_schema
+            # TESTING/DEV ONLY
+            payload_schema = {"schema": {}}
 
         @wraps(func)
         def usage_statistics_wrapped_method(*args, **kwargs):
@@ -221,3 +221,18 @@ def run_validation_operator_usage_statistics(
     except TypeError as e:
         logger.debug("run_validation_operator_usage_statistics: Unable to create n_assets payload field")
     return payload
+
+
+def send_usage_message(data_context, method, event_payload=None, success=None, payload_schema=None):
+    """send a usage statistics message."""
+    try:
+        handler = getattr(data_context, "_usage_statistics_handler", None)
+        message = {
+            "method": method,
+            "event_payload": event_payload or {},
+            "success": success,
+        }
+        if handler is not None:
+            handler.emit(message, payload_schema)
+    except Exception:
+        pass
