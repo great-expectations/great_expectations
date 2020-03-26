@@ -43,6 +43,7 @@ from great_expectations.core.logging.usage_statistics import (
 )
 from great_expectations.core.logging.schemas import (
     init_payload_schema,
+    run_validation_operator_payload_schema
 )
 
 from great_expectations.validator.validator import Validator
@@ -639,6 +640,7 @@ class BaseDataContext(object):
     @usage_statistics_enabled_method(
         method_name="data_context.run_validation_operator",
         args_payload_fn=run_validation_operator_usage_statistics,
+        payload_schema=run_validation_operator_payload_schema,
     )
     def run_validation_operator(
             self,
