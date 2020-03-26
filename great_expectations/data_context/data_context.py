@@ -73,6 +73,8 @@ logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
+FALSEY_STRINGS = ["FALSE", "False", "f", "F", "0"]
+GLOBAL_CONFIG_PATHS = ["/etc/great_expectations.conf", os.path.expanduser("~/.great_expectations/great_expectations.conf")]
 
 
 class BaseDataContext(object):
