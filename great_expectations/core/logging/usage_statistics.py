@@ -5,6 +5,8 @@ import sys
 import platform
 import threading
 from queue import Queue
+import atexit
+import signal
 
 import jsonschema
 
@@ -15,6 +17,8 @@ from great_expectations.core import nested_update
 from great_expectations.core.logging.anonymizer import Anonymizer
 from great_expectations.core.logging.schemas import usage_statistics_mini_payload_schema
 from great_expectations.datasource.datasource_anonymizer import DatasourceAnonymizer
+
+STOP_SIGNAL = object()
 
 logger = logging.getLogger(__name__)
 
@@ -31,15 +35,35 @@ class UsageStatisticsHandler(object):
         self._data_context = data_context
         self._ge_version = ge_version
 
-        self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
-
         self._message_queue = Queue()
-        threading.Thread(target=self._requests_worker, daemon=True).start()
+        self._worker = threading.Thread(target=self._requests_worker, daemon=True)
+        self._worker.start()
+        self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
+        self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
+        self._sigint_handler = signal.signal(signal.SIGINT, self._teardown)
+        self._sigquit_handler = signal.signal(signal.SIGQUIT, self._teardown)
+        atexit.register(self._close_worker)
+
+    def _teardown(self, signum: int, frame):
+        self._close_worker()
+        if signum == signal.SIGTERM:
+            self._sigterm_handler(signum, frame)
+        elif signum == signal.SIGINT:
+            self._sigint_handler(signum, frame)
+        elif signum == signal.SIGQUIT:
+            self._sigquit_handler(signum, frame)
+
+    def _close_worker(self):
+        self._message_queue.put(STOP_SIGNAL)
+        self._worker.join()
 
     def _requests_worker(self):
         session = requests.Session()
         while True:
             message = self._message_queue.get()
+            if message == STOP_SIGNAL:
+                self._message_queue.task_done()
+                return
             res = session.post(self._url, json=message)
             logger.debug("usage stats message status: " + str(res.status_code))
             self._message_queue.task_done()
