@@ -285,6 +285,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     # get an attribute error when trying to access them (I think this could be done in __finalize__?)
     _internal_names = pd.DataFrame._internal_names + [
         '_batch_kwargs',
+        '_batch_markers',
         '_batch_id',
         '_expectation_suite',
         '_config',
