@@ -58,6 +58,7 @@ def test_action_list_operator(validation_operators_data_context):
     operator_result = data_context.run_validation_operator(
         assets_to_validate=[batch, (validator_batch_kwargs, "f1.warning")],
         run_id="test-100",
+        evaluation_parameters={},
         validation_operator_name="store_val_res_and_extract_eval_params",
     )
     # results = data_context.run_validation_operator(my_ge_df)
