@@ -10,7 +10,8 @@ import pandas as pd
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
+
 
 def guard(*args, **kwargs):
     raise ConnectionError("Internet Access is Blocked!")
@@ -54,7 +55,8 @@ def main(nap_duration=1, block_network=False, enable_usage_statistics=True):
                     "enabled": enable_usage_statistics,
                     # Leaving data_context_id as none would cause a new id to be generated
                     "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
-                    "usage_statistics_url": "https://stats.greatexpectations.io/qa/great_expectations/v1/usage_statistics",
+                    "usage_statistics_url":
+                        "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics",
                 },
                 commented_map=None,
             )
@@ -110,4 +112,6 @@ if __name__ == '__main__':
         print("Unrecognized value for usage_statistics_enabled. Setting to True.")
         enable_usage_statistics = True
 
+    ge_logger = logging.getLogger("great_expectations")
+    ge_logger.setLevel(logging.DEBUG)
     main(nap_duration, block_network=block_network, enable_usage_statistics=enable_usage_statistics)

@@ -118,7 +118,7 @@ class BaseDataContext(object):
 
     @usage_statistics_enabled_method(
         method_name="data_context.__init__",
-        payload_schema=init_payload_schema
+        payload_schema=init_payload_schema,
     )
     def __init__(self, project_config, context_root_dir=None):
         """DataContext constructor
@@ -166,8 +166,6 @@ class BaseDataContext(object):
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
-
-        self._register_usage_statistics_details()
 
     def _build_store(self, store_name, store_config):
         new_store = instantiate_class_from_config(
@@ -291,10 +289,6 @@ class BaseDataContext(object):
             data_context=self,
             data_context_id=usage_statistics_config.data_context_id,
             usage_statistics_url=usage_statistics_config.usage_statistics_url)
-
-    def _register_usage_statistics_details(self):
-        if self._usage_statistics_handler:
-            self._usage_statistics_handler.register_usage_statistics_details()
 
     def add_store(self, store_name, store_config):
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.

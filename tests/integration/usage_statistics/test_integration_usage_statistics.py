@@ -24,15 +24,16 @@ def valid_usage_statistics_message():
         "ge_version": "0.9.4",
         "method": "data_context.__init__",
         "success": True,
-        "platform.system": "Darwin",
-        "platform.release": "19.3",
-        "version_info": [0, 1, "final", 4],
-        "anonymized_datasources": [
-            {
-                "parent_class": "PandasDatasource"
-            }
-        ],
-        "event_payload": {}
+        "event_payload": {
+            "platform.system": "Darwin",
+            "platform.release": "19.3",
+            "version_info": "sys.version_info(major=3, minor=7, micro=5, releaselevel='final', serial=0)",
+            "anonymized_datasources": [
+                {
+                    "parent_class": "PandasDatasource"
+                }
+            ]
+        }
     }
 
 
@@ -81,6 +82,9 @@ def test_usage_statistics_transmission(logstream):
         logStreamName=logStreamName,
         limit=100,
     )
+    assert len(pre_events) < 100, "This test assumed small logstream sizes in the qa stream. Consider changing " \
+                                  "fetch limit."
+
     p = subprocess.Popen(
         ["python", file_relative_path(__file__, "./instantiate_context_with_usage_statistics.py"), "0"],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE
