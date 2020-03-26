@@ -208,7 +208,7 @@ class BaseDataContext(object):
                 return True
             else:
                 logger.warning("GE_USAGE_STATS environment variable must be one of: {}".format(FALSEY_STRINGS))
-        for config_path in CONFIG_PATHS:
+        for config_path in GLOBAL_CONFIG_PATHS:
             config = configparser.ConfigParser()
             config.read(config_path)
             try:
