@@ -2,8 +2,6 @@ import os
 
 import autopep8
 import nbformat
-from dateutil import parser
-from datetime import datetime
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.render.renderer.renderer import Renderer

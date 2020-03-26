@@ -455,7 +455,8 @@ class BaseDataContext(object):
 
         """
         datasource_obj = self.get_datasource(datasource)
-        batch_kwargs = datasource_obj.build_batch_kwargs(generator=generator, name=name, **kwargs)
+        batch_kwargs = datasource_obj.build_batch_kwargs(generator=generator, name=name, partition_id=partition_id,
+                                                         **kwargs)
         return batch_kwargs
 
     def get_batch(self, batch_kwargs, expectation_suite_name, data_asset_type=None, batch_parameters=None):
@@ -532,6 +533,11 @@ class BaseDataContext(object):
             run_id=run_id,
             **kwargs
         )
+
+    def list_validation_operator_names(self):
+        if not self.validation_operators:
+            return []
+        return list(self.validation_operators.keys())
 
     def add_datasource(self, name, initialize=True, **kwargs):
         """Add a new datasource to the data context, with configuration provided as kwargs.
