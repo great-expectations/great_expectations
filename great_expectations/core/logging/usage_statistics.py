@@ -15,7 +15,7 @@ from functools import wraps
 from great_expectations import __version__ as ge_version
 from great_expectations.core import nested_update
 from great_expectations.core.logging.anonymizer import Anonymizer
-from great_expectations.core.logging.schemas import usage_statistics_record_schema, init_payload_schema
+from great_expectations.core.logging.schemas import usage_statistics_record_schema
 from great_expectations.datasource.datasource_anonymizer import DatasourceAnonymizer
 
 STOP_SIGNAL = object()
