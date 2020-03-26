@@ -29,7 +29,7 @@ The example uses Airflow to orchestrate the pipeline and dbt to perform the SQL 
 
 The purpose of this example is simply to show how the individual components work together. Therefore, both the dbt and the Great Expectations components are kept fairly trivial, but hopefully realistic.
 
-Watch this walkthrough of the pipeline:
+Watch this walkthrough of the pipeline (the videos in this article are best viewed in full screen mode):
 
 
 .. raw:: html
@@ -48,7 +48,7 @@ How Great Expectations protects this pipeline
 The example uses Great Expectations at 3 points of the pipeline. Each demonstrates a distinct use case:
 
 1. Validate the input CSV files before loading them into the database
-2. Validate the data loaded into the database in
+2. Validate the data loaded into the database
 3. Validate the analytical result that dbt produced in the database
 
 This video provides the overview:
