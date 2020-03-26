@@ -176,30 +176,6 @@ run_validation_operator_payload_schema = {
    "schema": {
       "type": "object",
       "properties": {
-         "platform.system": {
-            "type": "string",
-            "maxLength": 256
-         },
-         "platform.release": {
-            "type": "string",
-            "maxLength": 256
-         },
-         "version_info": {
-            "type": "array",
-            "items": {
-               "anyOf": [
-                  {
-                     "type": "string",
-                     "maxLength": 20
-                  },
-                  {
-                     "type": "number",
-                     "minimum": 0
-                  }
-               ]
-            },
-            "maxItems": 6
-         },
          "operator_name_hash": {
             "type": "string",
             "maxLength": 256
@@ -218,13 +194,11 @@ run_validation_operator_payload_schema = {
          },
       },
       "required": [
-         "platform.system",
-         "platform.release",
-         "version_info",
          "operator_name_hash",
          "datasource_name_hash",
          "anonymized_batch_kwargs"
-      ]
+      ],
+      "additionalProperties": False
    }
 }
 
