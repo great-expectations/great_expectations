@@ -202,6 +202,7 @@ class BaseDataContext(object):
         if not usage_statistics_config.enabled:
             logger.info("Usage statistics is disabled; skipping initialization.")
             self._usage_statistics_handler = None
+            return
 
         self._usage_statistics_handler = UsageStatisticsHandler(
             data_context=self,
