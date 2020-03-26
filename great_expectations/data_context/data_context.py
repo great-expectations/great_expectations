@@ -34,29 +34,31 @@ from great_expectations.profile.basic_dataset_profiler import (
 )
 
 import great_expectations.exceptions as ge_exceptions
-from ..core.logging.usage_statistics import usage_statistics_enabled_method, \
-    run_validation_operator_usage_statistics, UsageStatisticsHandler
+from great_expectations.core.logging.usage_statistics import (
+    run_validation_operator_usage_statistics,
+    UsageStatisticsHandler,
+    usage_statistics_enabled_method,
+)
+from great_expectations.core.logging.schemas import (
+    usage_statistics_detailed_payload_schema,
+)
 
-from ..validator.validator import Validator
-from .templates import (
+from great_expectations.validator.validator import Validator
+from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE,
 )
-from .types.resource_identifiers import (
+from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from .util import (
+from great_expectations.data_context.util import (
     instantiate_class_from_config,
     load_class,
     safe_mmkdir,
     substitute_all_config_variables,
 )
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -109,7 +111,10 @@ class BaseDataContext(object):
             raise
         return True
 
-    @usage_statistics_enabled_method(method_name="data_context.__init__")
+    @usage_statistics_enabled_method(
+        method_name="data_context.__init__",
+        payload_schema=usage_statistics_detailed_payload_schema
+    )
     def __init__(self, project_config, context_root_dir=None):
         """DataContext constructor
 
@@ -302,6 +307,7 @@ class BaseDataContext(object):
 
         return site_urls
 
+    @usage_statistics_enabled_method(method_name="data_context.open_data_docs",)
     def open_data_docs(self, resource_identifier=None):
         """
         A stdlib cross-platform way to open a file in a browser.
@@ -552,8 +558,10 @@ class BaseDataContext(object):
         )
         return validator.get_dataset()
 
-    @usage_statistics_enabled_method(method_name="data_context.run_validation_operator",
-                                     args_payload_fn=run_validation_operator_usage_statistics)
+    @usage_statistics_enabled_method(
+        method_name="data_context.run_validation_operator",
+        args_payload_fn=run_validation_operator_usage_statistics,
+    )
     def run_validation_operator(
             self,
             validation_operator_name,
@@ -960,7 +968,7 @@ class BaseDataContext(object):
         """
         return return_obj
 
-    @usage_statistics_enabled_method(method_name="data_context.build_data_docs")
+    @usage_statistics_enabled_method(method_name="data_context.build_data_docs",)
     def build_data_docs(self, site_names=None, resource_identifiers=None):
         """
         Build Data Docs for your project.
