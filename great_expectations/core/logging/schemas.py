@@ -42,7 +42,7 @@ usage_statistics_record_schema = {
    }
 }
 
-usage_statistics_detailed_payload_schema = {
+init_payload_schema = {
    "schema": {
       "type": "object",
       "properties": {
@@ -87,6 +87,65 @@ usage_statistics_detailed_payload_schema = {
                },
                "required": [
                   "parent_class"
+               ]
+            }
+         },
+         "anonymized_stores": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+               "type": "object",
+               "properties": {
+                  "parent_class": {
+                     "type": "string",
+                     "maxLength": 32
+                  },
+                  "custom_class": {
+                     "type": "string",
+                     "maxLength": 32
+                  },
+                  "store_backend_parent_class": {
+                     "type": "string",
+                     "maxLength": 32
+                  },
+                  "store_backend_custom_class": {
+                     "type": "string",
+                     "maxLength": 32
+                  }
+               },
+               "required": [
+                  "parent_class",
+                  "store_backend_parent_class"
+               ]
+            }
+         },
+         "anonymized_validation_operators": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+               "type": "object",
+               "properties": {
+                  "parent_class": {
+                     "type": "string",
+                     "maxLength": 32
+                  },
+                  "custom_class": {
+                     "type": "string",
+                     "maxLength": 32
+                  },
+                  "action_list": {
+                     "type": "array",
+                     "items": {
+                        "type": "object",
+                        "properties": {
+                           "parent_class"
+                        }
+                     }
+                  },
+               },
+               "required": [
+                  "parent_class",
+                  "store_backend_parent_class"
                ]
             }
          },
