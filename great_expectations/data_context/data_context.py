@@ -1048,7 +1048,7 @@ class BaseDataContext(object):
         """
         return return_obj
 
-    @usage_statistics_enabled_method(method_name="data_context.build_data_docs",)
+    @usage_statistics_enabled_method(method_name="data_context.build_data_docs")
     def build_data_docs(self, site_names=None, resource_identifiers=None):
         """
         Build Data Docs for your project.
