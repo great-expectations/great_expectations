@@ -41,10 +41,6 @@ from great_expectations.core.logging.usage_statistics import (
     UsageStatisticsHandler,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.logging.schemas import (
-    init_payload_schema,
-    run_validation_operator_payload_schema
-)
 
 from great_expectations.validator.validator import Validator
 from great_expectations.data_context.templates import (
@@ -118,8 +114,7 @@ class BaseDataContext(object):
         return True
 
     @usage_statistics_enabled_method(
-        method_name="data_context.__init__",
-        payload_schema=init_payload_schema,
+        event_name="data_context.__init__",
     )
     def __init__(self, project_config, context_root_dir=None):
         """DataContext constructor
@@ -386,7 +381,7 @@ class BaseDataContext(object):
 
         return site_urls
 
-    @usage_statistics_enabled_method(method_name="data_context.open_data_docs",)
+    @usage_statistics_enabled_method(event_name="data_context.open_data_docs",)
     def open_data_docs(self, resource_identifier=None):
         """
         A stdlib cross-platform way to open a file in a browser.
@@ -638,9 +633,8 @@ class BaseDataContext(object):
         return validator.get_dataset()
 
     @usage_statistics_enabled_method(
-        method_name="data_context.run_validation_operator",
+        event_name="data_context.run_validation_operator",
         args_payload_fn=run_validation_operator_usage_statistics,
-        payload_schema=run_validation_operator_payload_schema,
     )
     def run_validation_operator(
             self,
@@ -1048,7 +1042,7 @@ class BaseDataContext(object):
         """
         return return_obj
 
-    @usage_statistics_enabled_method(method_name="data_context.build_data_docs")
+    @usage_statistics_enabled_method(event_name="data_context.build_data_docs")
     def build_data_docs(self, site_names=None, resource_identifiers=None):
         """
         Build Data Docs for your project.
