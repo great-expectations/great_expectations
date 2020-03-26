@@ -84,7 +84,7 @@ One can also test whether name prefixes are consistent with gender:
     }
 
 
-Example 2:
+Example 3:
 ==========
 
 Conditional Expectations can also be used to test for alternative non-missingness. In the NPI dataset, for example, a provider can either be a person with a last name or an organization, in which case the last name column should be missing:
