@@ -48,7 +48,8 @@ from great_expectations.core.logging.schemas import (
 from great_expectations.validator.validator import Validator
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
-    PROJECT_TEMPLATE,
+    PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
+    PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -1466,7 +1467,7 @@ class DataContext(BaseDataContext):
     Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
     """
     @classmethod
-    def create(cls, project_root_dir=None):
+    def create(cls, project_root_dir=None, usage_statistics_enabled=True):
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
@@ -1495,7 +1496,7 @@ class DataContext(BaseDataContext):
     - No action was taken.""".format(cls.GE_YML, ge_dir)
             warnings.warn(message)
         else:
-            cls.write_project_template_to_disk(ge_dir)
+            cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
 
         if os.path.isfile(os.path.join(ge_dir, "notebooks")):
             message = """Warning. An existing `notebooks` directory was found here: {}.
@@ -1544,10 +1545,13 @@ class DataContext(BaseDataContext):
             template.write(CONFIG_VARIABLES_TEMPLATE)
 
     @classmethod
-    def write_project_template_to_disk(cls, ge_dir):
+    def write_project_template_to_disk(cls, ge_dir, usage_statistics_enabled=True):
         file_path = os.path.join(ge_dir, cls.GE_YML)
         with open(file_path, "w") as template:
-            template.write(PROJECT_TEMPLATE)
+            if usage_statistics_enabled:
+                template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
+            else:
+                template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED)
 
     @classmethod
     def scaffold_directories(cls, base_dir):
