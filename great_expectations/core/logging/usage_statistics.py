@@ -76,8 +76,8 @@ class UsageStatisticsHandler(object):
             "platform.release": platform.release(),
             "version_info": str(sys.version_info),
             "anonymized_datasources": [
-                self._datasource_anonymizer.anonymize_datasource_class_name(datasource["class_name"], datasource.get("module_name"))
-                for datasource in self._data_context.list_datasources()
+                self._datasource_anonymizer.anonymize_datasource_info(datasource)
+                for datasource in self._data_context.datasources.values()
             ],
         }
 

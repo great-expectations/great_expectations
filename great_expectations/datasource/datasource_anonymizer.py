@@ -4,11 +4,11 @@ from great_expectations.util import load_class
 
 
 class DatasourceAnonymizer(Anonymizer):
-    def anonymize_datasource_class_name(self, class_name, module_name):
+    def anonymize_datasource_info(self, datasource_obj):
         try:
-            if module_name is None:
-                module_name = "great_expectations.datasource"
-            class_ = load_class(class_name=class_name, module_name=module_name)
+            datasource_config = datasource_obj.config
+            class_name = datasource_config.get("class_name")
+            class_ = datasource_obj.__class__
 
             # Get a baseline:
             anonymized_class_info = dict()
