@@ -75,98 +75,90 @@ anonymized_store_schema = {
    ]
 }
 
-
 init_payload_schema = {
    "$schema": "https://json-schema.org/schema#",
    "definitions": {
       "anonymized_datasource": anonymized_datasource_schema,
       "anonymized_store": anonymized_store_schema,
    },
-   "oneOf": [
-      {
-         "type": "object",
-         "properties": {
-            "version": {
-               "enum": ["1.0.0"]
-            },
-            "platform.system": {
-               "type": "string",
-               "maxLength": 256
-            },
-            "platform.release": {
-               "type": "string",
-               "maxLength": 256
-            },
-            "version_info": {
-               "type": "string",
-               "maxLength": 256
-            },
-            "anonymized_datasources": {
-               "type": "array",
-               "maxItems": 1000,
-               "items": {
-                  "$ref": "#/definitions/anonymized_datasource"
-               }
-            },
-            "anonymized_stores": {
-               "type": "array",
-               "maxItems": 1000,
-               "items": {
-                  "$ref": "#/definitions/anonymized_store"
-               }
-            },
-            "anonymized_validation_operators": {
-               "type": "array",
-               "maxItems": 1000,
-               "items": {
-                  "type": "object"
-               },
-            },
+   "type": "object",
+   "properties": {
+      "version": {
+         "enum": ["1.0.0"]
+      },
+      "platform.system": {
+         "type": "string",
+         "maxLength": 256
+      },
+      "platform.release": {
+         "type": "string",
+         "maxLength": 256
+      },
+      "version_info": {
+         "type": "string",
+         "maxLength": 256
+      },
+      "anonymized_datasources": {
+         "type": "array",
+         "maxItems": 1000,
+         "items": {
+            "$ref": "#/definitions/anonymized_datasource"
+         }
+      },
+      "anonymized_stores": {
+         "type": "array",
+         "maxItems": 1000,
+         "items": {
+            "$ref": "#/definitions/anonymized_store"
+         }
+      },
+      "anonymized_validation_operators": {
+         "type": "array",
+         "maxItems": 1000,
+         "items": {
+            "type": "object"
          },
-         "required": [
-            "platform.system",
-            "platform.release",
-            "version_info",
-            "anonymized_datasources",
-         ],
-         "additionalProperties": False
-      }
-   ]
+      },
+   },
+   "required": [
+      "platform.system",
+      "platform.release",
+      "version_info",
+      "anonymized_datasources",
+   ],
+   "additionalProperties": False
 }
 
 run_validation_operator_payload_schema = {
-   "oneOf": [
-      {
-         "type": "object",
-         "properties": {
-            "version": {
-              "enum": ["1.0.0"]
-            },
-            "operator_name_hash": {
-               "type": "string",
-               "maxLength": 256,
-            },
-            "datasource_name_hash": {
-               "type": "string",
-               "maxLength": 256,
-            },
-            "anonymized_batch_kwargs": {
-               "type": "array",
-               "maxItems": 10,
-               "items": {
-                  "type": "string",
-                  "maxLength": 256,
-               }
-            },
-         },
-         "required": [
-            "anonymized_operator_name",
-            "anonymized_datasource_name",
-            "anonymized_batch_kwargs"
-         ],
-         "additionalProperties": False
+   "$schema": "http://json-schema.org/schema#",
+   "type": "object",
+   "properties": {
+      "anonymized_operator_name": {
+         "type": "string",
+         "maxLength": 256,
+      },
+      "anonymized_datasource_name": {
+         "type": "string",
+         "maxLength": 256,
+      },
+      "anonymized_batch_kwargs": {
+         "type": "array",
+         "maxItems": 10,
+         "items": {
+            "type": "string",
+            "maxLength": 256,
+         }
+      },
+      "n_assets": {
+         "type": "number"
       }
-   ]
+   },
+   "required": [
+      "anonymized_operator_name",
+      # "anonymized_datasource_name",
+      # "anonymized_batch_kwargs"
+   ],
+   "additionalProperties": False
 }
 
 usage_statistics_record_schema = {

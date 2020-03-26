@@ -88,15 +88,16 @@ class UsageStatisticsHandler(object):
         }
 
     def build_envelope(self, message):
+        message["version"] = "1.0.0"
         message["event_time"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
         message["data_context_id"] = self._data_context_id
         message["data_context_instance_id"] = self._data_context_instance_id
         message["ge_version"] = self._ge_version
         return message
 
-    def validate_message(self, payload, schema):
+    def validate_message(self, message, schema):
         try:
-            jsonschema.validate(payload, schema=schema)
+            jsonschema.validate(message, schema=schema)
             return True
         except jsonschema.ValidationError as e:
             logger.debug("invalid message: " + str(e))
@@ -107,7 +108,7 @@ class UsageStatisticsHandler(object):
         Emit a message.
         """
         try:
-            if message["action"] == "data_context.__init__":
+            if message["event"] == "data_context.__init__":
                 message["event_payload"] = self.build_init_payload()
             message = self.build_envelope(message)
             if not self.validate_message(message, schema=usage_statistics_record_schema):
@@ -143,7 +144,7 @@ def get_usage_statistics_handler(args_array):
 
 def usage_statistics_enabled_method(
         func=None,
-        method_name=None,
+        event_name=None,
         args_payload_fn=None,
         result_payload_fn=None
 ):
@@ -151,14 +152,14 @@ def usage_statistics_enabled_method(
     A decorator for usage statistics which defaults to the less detailed payload schema.
     """
     if callable(func):
-        if method_name is None:
-            method_name = func.__name__
+        if event_name is None:
+            event_name = func.__name__
 
         @wraps(func)
         def usage_statistics_wrapped_method(*args, **kwargs):
             # Set event_payload now so it can be updated below
             event_payload = {}
-            message = {"event_payload": event_payload, "method": method_name}
+            message = {"event_payload": event_payload, "event": event_name}
             handler = None
             try:
                 if args_payload_fn is not None:
@@ -184,7 +185,7 @@ def usage_statistics_enabled_method(
         def usage_statistics_wrapped_method_partial(func):
             return usage_statistics_enabled_method(
                 func,
-                method_name=method_name,
+                event_name=event_name,
                 args_payload_fn=args_payload_fn,
                 result_payload_fn=result_payload_fn,
             )
@@ -208,7 +209,7 @@ def run_validation_operator_usage_statistics(
         _anonymizers[data_context_id] = anonymizer
     payload = {}
     try:
-        payload["validation_operator_name"] = anonymizer.anonymize(validation_operator_name)
+        payload["anonymized_operator_name"] = anonymizer.anonymize(validation_operator_name)
     except TypeError as e:
         logger.warning("run_validation_operator_usage_statistics: Unable to create validation_operator_name hash")
     try:
@@ -218,12 +219,12 @@ def run_validation_operator_usage_statistics(
     return payload
 
 
-def send_usage_message(data_context, method, event_payload=None, success=None, payload_schema=None):
+def send_usage_message(data_context, event, event_payload=None, success=None, payload_schema=None):
     """send a usage statistics message."""
     try:
         handler = getattr(data_context, "_usage_statistics_handler", None)
         message = {
-            "method": method,
+            "event": event,
             "event_payload": event_payload or {},
             "success": success,
         }
