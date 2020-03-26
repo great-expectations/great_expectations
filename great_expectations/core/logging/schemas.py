@@ -164,8 +164,6 @@ usage_statistics_mini_payload_schema = {
       "type": "object",
       "properties": {
          "event_payload": {
-            "type": "object",
-            "maxProperties": 100
          }
       },
       "required": [
@@ -173,3 +171,60 @@ usage_statistics_mini_payload_schema = {
       ]
    }
 }
+
+run_validation_operator_payload_schema = {
+   "schema": {
+      "type": "object",
+      "properties": {
+         "platform.system": {
+            "type": "string",
+            "maxLength": 256
+         },
+         "platform.release": {
+            "type": "string",
+            "maxLength": 256
+         },
+         "version_info": {
+            "type": "array",
+            "items": {
+               "anyOf": [
+                  {
+                     "type": "string",
+                     "maxLength": 20
+                  },
+                  {
+                     "type": "number",
+                     "minimum": 0
+                  }
+               ]
+            },
+            "maxItems": 6
+         },
+         "operator_name_hash": {
+            "type": "string",
+            "maxLength": 256
+         },
+         "datasource_name_hash": {
+            "type": "string",
+            "maxLength": 256
+         },
+         "anonymized_batch_kwargs": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+               "type": "string",
+               "maxLength": 256
+            }
+         },
+      },
+      "required": [
+         "platform.system",
+         "platform.release",
+         "version_info",
+         "operator_name_hash",
+         "datasource_name_hash",
+         "anonymized_batch_kwargs"
+      ]
+   }
+}
+
