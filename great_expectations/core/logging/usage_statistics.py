@@ -4,13 +4,15 @@ import logging
 import requests
 import sys
 import platform
-from functools import wraps
+
 import jsonschema
+
+from functools import wraps
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core import nested_update
 from great_expectations.core.logging.anonymizer import Anonymizer
-from great_expectations.core.logging.schemas import usage_statistics_record_schema
+from great_expectations.core.logging.schemas import usage_statistics_mini_payload_schema
 from great_expectations.datasource.datasource_anonymizer import DatasourceAnonymizer
 
 logger = logging.getLogger(__name__)
@@ -41,16 +43,21 @@ class UsageStatisticsHandler(object):
             for datasource in self._data_context.list_datasources()
         ]
 
-    def build_message(self, record):
+    def build_detailed_payload(self):
+        return {
+            "platform.system": self._platform_system,
+            "platform.release": self._platform_release,
+            "version_info": self._version_info,
+            "anonymized_datasources": self._anonymized_datasources,
+        }
+
+    def build_message(self, record, payload):
         message = copy.deepcopy(record)
         message["event_time"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
         message["data_context_id"] = self._data_context_id
         message["data_context_instance_id"] = self._data_context_instance_id
         message["ge_version"] = self._ge_version
-        message["platform.system"] = self._platform_system
-        message["platform.release"] = self._platform_release
-        message["version_info"] = self._version_info
-        message["anonymized_datasources"] = self._anonymized_datasources
+        message["event_payload"] = payload
         return message
 
     def validate_record(self, record, schema):
@@ -61,18 +68,22 @@ class UsageStatisticsHandler(object):
             logger.debug("invalid record: " + str(e))
             return False
 
-    def emit(self, record, schema):
+    def emit(self, record, payload_schema):
         """
         Emit a record.
         """
         if not self._enabled:
             return
 
-        if not self.validate_record(record, schema):
+        if not self.validate_record(record, payload_schema):
             return
 
         try:
-            message = self.build_message(record)
+            if payload_schema == usage_statistics_mini_payload_schema:
+                payload = None
+            else:
+                payload = self.build_detailed_payload()
+            message = self.build_message(record, payload)
             requests.post(self._url, json=message)
         # noinspection PyBroadException
         except Exception:
@@ -88,6 +99,7 @@ def get_usage_statistics_handler(args_array):
             logger.debug("Invalid UsageStatisticsHandler found on object.")
             handler = None
     except IndexError:
+        # TODO this implementation is very focused on objects
         # A wrapped method that is not an object
         handler = None
     except AttributeError:
@@ -100,7 +112,16 @@ def get_usage_statistics_handler(args_array):
     return handler
 
 
-def usage_statistics_enabled_method(func=None, method_name=None, args_payload_fn=None, result_payload_fn=None, schema=usage_statistics_record_schema):
+def usage_statistics_enabled_method(
+        func=None,
+        method_name=None,
+        args_payload_fn=None,
+        result_payload_fn=None,
+        payload_schema=usage_statistics_mini_payload_schema
+):
+    """
+    A decorator for usage statistics which defaults to the less detailed payload schema.
+    """
     if callable(func):
         if method_name is None:
             method_name = func.__name__
@@ -114,22 +135,22 @@ def usage_statistics_enabled_method(func=None, method_name=None, args_payload_fn
             try:
                 if args_payload_fn is not None:
                     nested_update(event_payload, args_payload_fn(*args, **kwargs))
-                res = func(*args, **kwargs)
+                result = func(*args, **kwargs)
                 # We try to get the handler only now, so that it *could* be initialized in func, e.g. if it is an
                 # __init__ method
                 handler = get_usage_statistics_handler(args)
                 if result_payload_fn is not None:
-                    nested_update(event_payload, result_payload_fn(res))
+                    nested_update(event_payload, result_payload_fn(result))
                 record["success"] = True
                 if handler is not None:
-                    handler.emit(record, schema)
+                    handler.emit(record, payload_schema)
             except Exception:
                 record["success"] = False
                 if handler:
-                    handler.emit(record, schema)
+                    handler.emit(record, payload_schema)
                 raise
 
-            return res
+            return result
 
         return usage_statistics_wrapped_method
     else:
@@ -139,7 +160,7 @@ def usage_statistics_enabled_method(func=None, method_name=None, args_payload_fn
                 method_name=method_name,
                 args_payload_fn=args_payload_fn,
                 result_payload_fn=result_payload_fn,
-                schema=schema
+                payload_schema=payload_schema
             )
         return usage_statistics_wrapped_method_partial
 
