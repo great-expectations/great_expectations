@@ -39,6 +39,7 @@ class UsageStatisticsHandler(object):
         self._worker = threading.Thread(target=self._requests_worker, daemon=True)
         self._worker.start()
         self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
+        self._store_anonymizer = StoreAnonymizer(data_context_id)
         self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
         self._sigint_handler = signal.signal(signal.SIGINT, self._teardown)
         self._sigquit_handler = signal.signal(signal.SIGQUIT, self._teardown)
@@ -79,6 +80,10 @@ class UsageStatisticsHandler(object):
                 self._datasource_anonymizer.anonymize_datasource_info(datasource)
                 for datasource in self._data_context.datasources.values()
             ],
+            "anonymized_stores": [
+                self._store_anonymizer.anonymize_store_info(store_name, store_obj)
+                for store_name, store_obj in self._data_context.stores.items()
+            ]
         }
 
     def build_envelope(self, message):
