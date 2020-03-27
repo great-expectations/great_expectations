@@ -7,6 +7,7 @@ from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.util import cli_message, cli_message_list
+from great_expectations.core.logging.usage_statistics import send_usage_message
 
 
 @click.group()
@@ -35,8 +36,15 @@ def docs():
 def docs_build(directory, site_name, view=True):
     """Build Data Docs for a project."""
     try:
+        failed = True
         context = DataContext(directory)
         build_docs(context, site_name=site_name, view=view)
+        failed = False
+        send_usage_message(
+            data_context=context,
+            event="cli.docs.build",
+            success=True
+        )
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)
@@ -46,6 +54,13 @@ def docs_build(directory, site_name, view=True):
     except ge_exceptions.PluginClassNotFoundError as err:
         cli_message(err.cli_colored_message)
         sys.exit(1)
+    finally:
+        if failed and context is not None:
+            send_usage_message(
+                data_context=context,
+                event="cli.docs.build",
+                success=False
+            )
 
 
 @docs.command(name="list")
@@ -58,6 +73,7 @@ def docs_build(directory, site_name, view=True):
 def docs_list(directory):
     """List known Data Docs Sites."""
     try:
+        failed = True
         context = DataContext(directory)
         docs_sites_url_dicts = context.get_docs_sites_urls()
         docs_sites_strings = [
@@ -67,6 +83,12 @@ def docs_list(directory):
 
         if len(docs_sites_strings) == 0:
             cli_message("No Data Docs sites found")
+            failed = False
+            send_usage_message(
+                data_context=context,
+                event="cli.docs.list",
+                success=True
+            )
             return
 
         if len(docs_sites_strings) == 1:
@@ -75,10 +97,21 @@ def docs_list(directory):
         if len(docs_sites_strings) > 1:
             list_intro_string = "{} Data Docs sites found:".format(len(docs_sites_strings))
         cli_message_list(docs_sites_strings, list_intro_string)
-
+        failed = False
+        send_usage_message(
+            data_context=context,
+            event="cli.docs.list",
+            success=True
+        )
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
-        return
+    finally:
+        if failed and context is not None:
+            send_usage_message(
+                data_context=context,
+                event="cli.docs.list",
+                success=False
+            )
 
 
 def build_docs(context, site_name=None, view=True):
