@@ -1,4 +1,4 @@
-from great_expectations.core.logging.anonymizer import Anonymizer
+from great_expectations.core.logging.anonymizers.anonymizer import Anonymizer
 from great_expectations.datasource import Datasource, PandasDatasource, SqlAlchemyDatasource, SparkDFDatasource
 
 
