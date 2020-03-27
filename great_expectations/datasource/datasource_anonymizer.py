@@ -7,7 +7,7 @@ class DatasourceAnonymizer(Anonymizer):
         super(DatasourceAnonymizer, self).__init__(salt=salt)
 
         # ordered bottom up in terms of inheritance order
-        self.ge_datasource_classes = [
+        self._ge_classes = [
             PandasDatasource,
             SqlAlchemyDatasource,
             SparkDFDatasource,
@@ -15,27 +15,18 @@ class DatasourceAnonymizer(Anonymizer):
         ]
 
     def anonymize_datasource_info(self, datasource_obj):
-        datasource_config = datasource_obj.config
-        datasource_name = datasource_obj.name
-        class_name = datasource_config.get("class_name")
-        class_ = datasource_obj.__class__
+        anonymized_info_dict = dict()
+        name = datasource_obj.name
+        anonymized_info_dict["anonymized_name"] = self.anonymize(name)
 
-        # Get a baseline:
-        anonymized_datasource_info = dict()
-        anonymized_datasource_info["anonymized_name"] = self.anonymize(datasource_name)
+        self.anonymize_object_info(
+            object_=datasource_obj,
+            anonymized_info_dict=anonymized_info_dict,
+            ge_classes=self._ge_classes
+        )
 
-        for ge_datasource_class in self.ge_datasource_classes:
-            if issubclass(class_, ge_datasource_class):
-                anonymized_datasource_info["parent_class"] = ge_datasource_class.__name__
-                if ge_datasource_class == SqlAlchemyDatasource:
-                    sqlalchemy_dialect = datasource_obj.engine.name
-                    anonymized_datasource_info["sqlalchemy_dialect"] = sqlalchemy_dialect
-                if not class_ == ge_datasource_class:
-                    anonymized_datasource_info["anonymized_class"] = self.anonymize(class_name)
-                break
+        if anonymized_info_dict.get("parent_class") == "SqlAlchemyDatasource":
+            sqlalchemy_dialect = datasource_obj.engine.name
+            anonymized_info_dict["sqlalchemy_dialect"] = sqlalchemy_dialect
 
-        if not anonymized_datasource_info.get("parent_class"):
-            anonymized_datasource_info["parent_class"] = "__not_recognized__"
-            anonymized_datasource_info["anonymized_class"] = self.anonymize(class_name)
-
-        return anonymized_datasource_info
+        return anonymized_info_dict

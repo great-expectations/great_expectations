@@ -23,3 +23,20 @@ class Anonymizer(object):
     def anonymize(self, string_):
         salted = self._salt + string_
         return md5(salted.encode('utf-8')).hexdigest()
+
+    def anonymize_object_info(self, object_, anonymized_info_dict, ge_classes):
+        object_class = object_.__class__
+        object_class_name = object_class.__name__
+
+        for ge_class in ge_classes:
+            if issubclass(object_class, ge_class):
+                anonymized_info_dict["parent_class"] = ge_class.__name__
+                if not object_class == ge_class:
+                    anonymized_info_dict["anonymized_class"] = self.anonymize(object_class_name)
+                break
+
+        if not anonymized_info_dict.get("parent_class"):
+            anonymized_info_dict["parent_class"] = "__not_recognized__"
+            anonymized_info_dict["anonymized_class"] = self.anonymize(object_class_name)
+
+        return anonymized_info_dict

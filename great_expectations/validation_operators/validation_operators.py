@@ -1,5 +1,6 @@
 import datetime
 import logging
+from collections import OrderedDict
 
 from ..data_context.types.resource_identifiers import BatchIdentifier, ExpectationSuiteIdentifier, \
     ValidationResultIdentifier
@@ -16,7 +17,7 @@ from great_expectations.data_asset import (
 )
 from .util import send_slack_notification
 
-# NOTE: Abe 2019/08/24 : This is first implementation of all these classes. Consider them UNSTABLE for now. 
+# NOTE: Abe 2019/08/24 : This is first implementation of all these classes. Consider them UNSTABLE for now.
 
 
 class ValidationOperator(object):
@@ -72,7 +73,7 @@ class ActionListValidationOperator(ValidationOperator):
         self.data_context = data_context
 
         self.action_list = action_list
-        self.actions = {}
+        self.actions = OrderedDict()
         for action_config in action_list:
             assert isinstance(action_config, dict)
             #NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
@@ -293,7 +294,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         for suffix in expectation_suite_name_suffixes:
             assert isinstance(suffix, string_types)
         self.expectation_suite_name_suffixes = expectation_suite_name_suffixes
-        
+
         self.slack_webhook = slack_webhook
         self.notify_on = notify_on
 
@@ -313,7 +314,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                 validation_result_identifier, value in run_return_obj.get("failure").items()
                 if not value["validation_result"].success
             ]
-    
+
         title_block = {
             "type": "section",
             "text": {
@@ -334,7 +335,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                 "text": "*Status*: {}".format(status_text)},
         }
         query["blocks"].append(status_element)
-        
+
         batch_identifiers_element = {
             "type": "section",
             "text": {
@@ -343,7 +344,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             }
         }
         query["blocks"].append(batch_identifiers_element)
-    
+
         if not success:
             failed_data_assets_element = {
                 "type": "section",
@@ -353,7 +354,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                 }
             }
             query["blocks"].append(failed_data_assets_element)
-    
+
         run_id_element = {
             "type": "section",
             "text":
@@ -364,7 +365,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             ,
         }
         query["blocks"].append(run_id_element)
-        
+
         timestamp_element = {
             "type": "section",
             "text":
@@ -388,7 +389,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             ],
         }
         query["blocks"].append(footer_section)
-        
+
         return query
 
     def run(self, assets_to_validate, run_id, base_expectation_suite_name=None):

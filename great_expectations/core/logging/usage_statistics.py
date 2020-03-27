@@ -18,6 +18,7 @@ from great_expectations.core.logging.anonymizer import Anonymizer
 from great_expectations.core.logging.schemas import usage_statistics_record_schema, init_payload_schema
 from great_expectations.data_context.store.store_anonymizer import StoreAnonymizer
 from great_expectations.datasource.datasource_anonymizer import DatasourceAnonymizer
+from great_expectations.validation_operators.validation_operator_anonymizer import ValidationOperatorAnonymizer
 
 STOP_SIGNAL = object()
 
@@ -41,6 +42,7 @@ class UsageStatisticsHandler(object):
         self._worker.start()
         self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
         self._store_anonymizer = StoreAnonymizer(data_context_id)
+        self._validation_operator_anonymizer = ValidationOperatorAnonymizer(data_context_id)
         self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
         self._sigint_handler = signal.signal(signal.SIGINT, self._teardown)
         self._sigquit_handler = signal.signal(signal.SIGQUIT, self._teardown)
@@ -84,6 +86,12 @@ class UsageStatisticsHandler(object):
             "anonymized_stores": [
                 self._store_anonymizer.anonymize_store_info(store_name, store_obj)
                 for store_name, store_obj in self._data_context.stores.items()
+            ],
+            "anonymized_validation_operators": [
+                self._validation_operator_anonymizer.anonymize_validation_operator_info(
+                    validation_operator_name=validation_operator_name,
+                    validation_operator_obj=validation_operator_obj
+                ) for validation_operator_name, validation_operator_obj in self._data_context.validation_operators.items()
             ]
         }
 
