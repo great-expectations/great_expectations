@@ -19,7 +19,9 @@ class BatchKwargsAnonymizer(Anonymizer):
             "SparkDFRef",
             "limit",
             "query_parameters",
-            "offset"
+            "offset",
+            "snowflake_transient_table",
+            "bigquery_temp_table"
         ]
 
     def anonymize_batch_kwargs(self, batch_kwargs):
