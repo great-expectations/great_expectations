@@ -19,6 +19,7 @@ from great_expectations.cli.util import (
     cli_message_list,
     cli_message_dict)
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.logging.usage_statistics import send_usage_message
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -39,6 +40,7 @@ from great_expectations.profile.sample_expectations_dataset_profiler import (
     SampleExpectationsDatasetProfiler,
 )
 from great_expectations.validator.validator import Validator
+
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +102,17 @@ def datasource_new(directory):
 
     if datasource_name:
         cli_message("A new datasource '{}' was added to your project.".format(datasource_name))
+        send_usage_message(
+            data_context=context,
+            event="cli.datasource.new",
+            success=True
+        )
     else:  # no datasource was created
+        send_usage_message(
+            data_context=context,
+            event="cli.datasource.new",
+            success=False
+        )
         sys.exit(1)
 
 
@@ -114,11 +126,18 @@ def datasource_new(directory):
 def datasource_list(directory):
     """List known datasources."""
     try:
+        failed = True
         context = DataContext(directory)
         datasources = context.list_datasources()
 
         if len(datasources) == 0:
             cli_message("No Datasources found")
+            failed=False
+            send_usage_message(
+                data_context=context,
+                event="cli.datasource.list",
+                success=True
+            )
             return
 
         if len(datasources) == 1:
@@ -130,9 +149,21 @@ def datasource_list(directory):
         for datasource in datasources:
             cli_message("")
             cli_message_dict(datasource)
+        failed = False
+        send_usage_message(
+            data_context=context,
+            event="cli.datasource.list",
+            success=True
+        )
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
-        return
+    finally:
+        if failed and context is not None:
+            send_usage_message(
+                data_context=context,
+                event="cli.datasource.list",
+                success=False
+            )
 
 
 @datasource.command(name="profile")
@@ -185,42 +216,70 @@ def datasource_profile(datasource, generator_name, data_assets, profile_all_data
         cli_message("<red>{}</red>".format(err.message))
         return
 
-    if additional_batch_kwargs is not None:
-        # TODO refactor out json load check in suite edit and add here
-        additional_batch_kwargs = json.loads(additional_batch_kwargs)
-        # TODO refactor batch load check in suite edit and add here
+    try:
+        if additional_batch_kwargs is not None:
+            # TODO refactor out json load check in suite edit and add here
+            additional_batch_kwargs = json.loads(additional_batch_kwargs)
+            # TODO refactor batch load check in suite edit and add here
 
-    if datasource is None:
-        datasources = [_datasource["name"] for _datasource in context.list_datasources()]
-        if not datasources:
-            cli_message(NO_DATASOURCES_FOUND)
-            sys.exit(1)
-        elif len(datasources) > 1:
-            cli_message(
-                "<red>Error: please specify the datasource to profile. "\
-                "Available datasources: " + ", ".join(datasources) + "</red>"
-            )
-            sys.exit(1)
+        if datasource is None:
+            datasources = [_datasource["name"] for _datasource in context.list_datasources()]
+            if not datasources:
+                cli_message(NO_DATASOURCES_FOUND)
+                send_usage_message(
+                    data_context=context,
+                    event="cli.datasource.profile",
+                    success=False
+                )
+                sys.exit(1)
+            elif len(datasources) > 1:
+                cli_message(
+                    "<red>Error: please specify the datasource to profile. "\
+                    "Available datasources: " + ", ".join(datasources) + "</red>"
+                )
+                send_usage_message(
+                    data_context=context,
+                    event="cli.datasource.profile",
+                    success=False
+                )
+                sys.exit(1)
+            else:
+                profile_datasource(
+                    context,
+                    datasources[0],
+                    generator_name=generator_name,
+                    data_assets=data_assets,
+                    profile_all_data_assets=profile_all_data_assets,
+                    open_docs=view,
+                    additional_batch_kwargs=additional_batch_kwargs
+                )
+                send_usage_message(
+                    data_context=context,
+                    event="cli.datasource.profile",
+                    success=True
+                )
         else:
             profile_datasource(
                 context,
-                datasources[0],
+                datasource,
                 generator_name=generator_name,
                 data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 open_docs=view,
                 additional_batch_kwargs=additional_batch_kwargs
             )
-    else:
-        profile_datasource(
-            context,
-            datasource,
-            generator_name=generator_name,
-            data_assets=data_assets,
-            profile_all_data_assets=profile_all_data_assets,
-            open_docs=view,
-            additional_batch_kwargs=additional_batch_kwargs
+            send_usage_message(
+                data_context=context,
+                event="cli.datasource.profile",
+                success=True
+            )
+    except Exception as e:
+        send_usage_message(
+            data_context=context,
+            event="cli.datasource.profile",
+            success=False
         )
+        raise e
 
 
 def add_datasource(context, choose_one_data_asset=False):

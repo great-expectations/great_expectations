@@ -496,6 +496,149 @@ usage_statistics_record_schema = {
                "$ref": "#/definitions/empty_payload"
             },
          }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.datasource.new"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.datasource.list"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.datasource.profile"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.docs.build"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.docs.list"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.tap.new"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.validation_operator.list"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.validation_operator.run"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.project.check_config"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.store.list"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.suite.new"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.suite.edit"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+   {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.suite.list"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
       }
 
    ],
