@@ -19,7 +19,7 @@ class BatchAnonymizer(Anonymizer):
         if isinstance(batch, DataAsset):
             batch_kwargs = batch.batch_kwargs
             expectation_suite_name = batch.expectation_suite_name
-            datasource_name = batch.get("datasource")
+            datasource_name = batch_kwargs.get("datasource")
 
         anonymized_info_dict = dict()
 
