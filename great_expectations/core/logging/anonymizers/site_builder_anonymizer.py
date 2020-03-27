@@ -1,15 +1,15 @@
 from great_expectations.core.logging.anonymizers.anonymizer import Anonymizer
-# from great_expectations.render.renderer.site_builder import SiteBuilder, DefaultSiteSectionBuilder, \
-#     DefaultSiteIndexBuilder
+from great_expectations.render.renderer.site_builder import SiteBuilder, DefaultSiteSectionBuilder, \
+    DefaultSiteIndexBuilder
 
 
 class SiteBuilderAnonymizer(Anonymizer):
     def __init__(self, salt=None):
         super(SiteBuilderAnonymizer, self).__init__(salt=salt)
         self._ge_classes = [
-            # SiteBuilder,
-            # DefaultSiteSectionBuilder,
-            # DefaultSiteIndexBuilder
+            SiteBuilder,
+            DefaultSiteSectionBuilder,
+            DefaultSiteIndexBuilder,
         ]
 
     def anonymize_site_builder_info(self, site_builder_config):

@@ -36,7 +36,6 @@ CONFIG_VARIABLES_INTRO = """# This config file supports variable substitution wh
 
 """
 
-# This junky fake key keeps ruaml.yml from nuking the important comment block
 CONFIG_VARIABLES_TEMPLATE = CONFIG_VARIABLES_INTRO + "instance_id: " + str(uuid.uuid4()) + os.linesep
 
 PROJECT_OPTIONAL_CONFIG_COMMENT = CONFIG_VARIABLES_INTRO + """
