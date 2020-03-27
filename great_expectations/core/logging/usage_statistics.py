@@ -232,10 +232,6 @@ def run_validation_operator_usage_statistics(
     except TypeError as e:
         logger.warning("run_validation_operator_usage_statistics: Unable to create validation_operator_name hash")
     try:
-        payload["n_assets"] = len(assets_to_validate)
-    except TypeError as e:
-        logger.debug("run_validation_operator_usage_statistics: Unable to create n_assets payload field")
-    try:
         batch_anonymizer = data_context._usage_statistics_handler._batch_anonymizer
         payload["anonymized_batches"] = [
             batch_anonymizer.anonymize_batch_info(batch) for batch in assets_to_validate
