@@ -40,9 +40,9 @@ anonymized_datasource_schema = {
 }
 
 
-anonymized_store_backend_schema = {
+anonymized_class_info_schema = {
    "$schema": "http://json-schema.org/schema#",
-   "title": "anonymized-store-backend",
+   "title": "anonymized-class-info",
    "definitions": {
       "anonymized_name": anonymized_name_schema
    },
@@ -61,7 +61,7 @@ anonymized_store_backend_schema = {
                "$ref": "#/definitions/anonymized_name"
             },
          },
-         "additionalProperties": False,
+         "additionalProperties": True,
          "required": [
             "parent_class",
          ]
@@ -75,7 +75,7 @@ anonymized_store_schema = {
    "title": "anonymized-store",
    "definitions": {
       "anonymized_name": anonymized_name_schema,
-      "anonymized_store_backend": anonymized_store_backend_schema
+      "anonymized_class_info": anonymized_class_info_schema
    },
    "oneOf": [
       {
@@ -92,7 +92,7 @@ anonymized_store_schema = {
                "$ref": "#/definitions/anonymized_name"
             },
             "anonymized_store_backend": {
-               "$ref": "#/definitions/anonymized_store_backend"
+               "$ref": "#/definitions/anonymized_class_info"
             }
          },
          "additionalProperties": False,
@@ -190,7 +190,7 @@ anonymized_data_docs_site_schema = {
    "title": "anonymized-validation-operator",
    "definitions": {
       "anonymized_name": anonymized_name_schema,
-      "anonymized_store_backend": anonymized_store_backend_schema
+      "anonymized_class_info": anonymized_class_info_schema
    },
    "oneOf": [
       {
@@ -207,10 +207,25 @@ anonymized_data_docs_site_schema = {
                "$ref": "#/definitions/anonymized_name"
             },
             "anonymized_store_backend": {
-               "$ref": "#/definitions/anonymized_store_backend"
+               "$ref": "#/definitions/anonymized_class_info"
+            },
+            "anonymized_site_index_builder": {
+               "allOf": [
+                  {
+                     "type": "object",
+                     "properties": {
+                        "show_cta_footer": {
+                           "type": "boolean"
+                        }
+                     }
+                  },
+                  {
+                     "$ref": "#/definitions/anonymized_class_info"
+                  }
+               ]
             },
          },
-         "additionalProperties": False,
+         "additionalProperties": True, # we don't want this to be true, but this is required to allow show_cta_footer
          "required": [
             "parent_class",
             "anonymized_name"
@@ -320,12 +335,13 @@ usage_statistics_record_schema = {
       "anonymized_name": anonymized_name_schema,
       "anonymized_datasource": anonymized_datasource_schema,
       "anonymized_store": anonymized_store_schema,
-      "anonymized_store_backend": anonymized_store_backend_schema,
+      "anonymized_class_info": anonymized_class_info_schema,
       "anonymized_validation_operator": anonymized_validation_operator_schema,
       "anonymized_action": anonymized_action_schema,
       "empty_payload": empty_payload_schema,
       "init_payload": init_payload_schema,
-      "run_validation_operator_payload": run_validation_operator_payload_schema
+      "run_validation_operator_payload": run_validation_operator_payload_schema,
+      "anonymized_data_docs_site": anonymized_data_docs_site_schema
    },
    "type": "object",
    "properties": {
@@ -380,6 +396,17 @@ usage_statistics_record_schema = {
          "properties": {
             "event": {
                "enum": ["data_context.build_data_docs"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["data_context.open_data_docs"],
             },
             "event_payload": {
                "$ref": "#/definitions/empty_payload"
