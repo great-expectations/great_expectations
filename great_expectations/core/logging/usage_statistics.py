@@ -7,6 +7,7 @@ import threading
 from queue import Queue
 import atexit
 import signal
+import json
 
 import jsonschema
 
@@ -75,7 +76,9 @@ class UsageStatisticsHandler(object):
                 self._message_queue.task_done()
                 return
             res = session.post(self._url, json=message)
-            logger.debug("usage stats message status: " + str(res.status_code))
+            logger.debug("Posted usage stats: message status " + str(res.status_code))
+            if res.status_code != 201:
+                logger.debug("Server rejected message: ", json.dumps(message, indent=2))
             self._message_queue.task_done()
 
     def build_init_payload(self):
