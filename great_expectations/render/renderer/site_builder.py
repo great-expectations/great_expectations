@@ -3,7 +3,7 @@ import logging
 from collections import OrderedDict
 import os
 
-from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLASS
+# from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLASS
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
@@ -429,27 +429,29 @@ class DefaultSiteIndexBuilder(object):
 
     def get_calls_to_action(self):
         usage_statistics = None
-        db_driver = None
-        datasource_classes_by_name = self.data_context.list_datasources()
-
-        if datasource_classes_by_name:
-            last_datasource_class_by_name = datasource_classes_by_name[-1]
-            last_datasource_class_name = last_datasource_class_by_name["class_name"]
-            last_datasource_name = last_datasource_class_by_name["name"]
-            last_datasource = self.data_context.datasources[last_datasource_name]
-
-            if last_datasource_class_name == "SqlAlchemyDatasource":
-                try:
-                    db_driver = last_datasource.drivername
-                except AttributeError:
-                    pass
-
-            datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
-            usage_statistics = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
-                "ge-init-datadocs-v2",
-                datasource_type,
-                db_driver,
-            )
+        # db_driver = None
+        # datasource_classes_by_name = self.data_context.list_datasources()
+        #
+        # if datasource_classes_by_name:
+        #     last_datasource_class_by_name = datasource_classes_by_name[-1]
+        #     last_datasource_class_name = last_datasource_class_by_name["class_name"]
+        #     last_datasource_name = last_datasource_class_by_name["name"]
+        #     last_datasource = self.data_context.datasources[last_datasource_name]
+        #
+        #     if last_datasource_class_name == "SqlAlchemyDatasource":
+        #         try:
+        #                # NOTE: JPC - 20200327 - I do not believe datasource will *ever* have a drivername property
+        #                (it's in credentials). Suspect this isn't working.
+        #             db_driver = last_datasource.drivername
+        #         except AttributeError:
+        #             pass
+        #
+        #     datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
+        #     usage_statistics = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
+        #         "ge-init-datadocs-v2",
+        #         datasource_type,
+        #         db_driver,
+        #     )
 
         return {
             "header": "To continue exploring Great Expectations check out one of these tutorials...",
