@@ -75,6 +75,16 @@ anonymized_store_schema = {
    ]
 }
 
+empty_payload_schema = {
+   "$schema": "http://json-schema.org/schema#",
+   "type": "object",
+   "properties": {
+   },
+   "required": [
+   ],
+   "additionalProperties": False
+}
+
 init_payload_schema = {
    "$schema": "https://json-schema.org/schema#",
    "definitions": {
@@ -167,6 +177,7 @@ usage_statistics_record_schema = {
       "anonymized_name": anonymized_name_schema,
       "anonymized_datasource": anonymized_datasource_schema,
       "anonymized_store": anonymized_store_schema,
+      "empty_payload": empty_payload_schema,
       "init_payload": init_payload_schema,
       "run_validation_operator_payload": run_validation_operator_payload_schema,
    },
@@ -217,7 +228,41 @@ usage_statistics_record_schema = {
                "$ref": "#/definitions/run_validation_operator_payload"
             },
          }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["data_context.build_data_docs"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.suite.new"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
+               "enum": ["cli.suite.edit"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/empty_payload"
+            },
+         }
       }
+
    ],
    "required": [
       "version",
