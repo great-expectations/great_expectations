@@ -1,4 +1,4 @@
-anonymized_name_schema = {
+anonymized_string_schema = {
    "$schema": "http://json-schema.org/schema#",
    "type": "string",
    "minLength": 32,
@@ -9,21 +9,21 @@ anonymized_datasource_schema = {
    "$schema": "http://json-schema.org/schema#",
    "title": "anonymized-datasource",
    "definitions": {
-      "anonymized_name": anonymized_name_schema
+      "anonymized_string": anonymized_string_schema
    },
    "oneOf": [
       {
          "type": "object",
          "properties": {
             "anonymized_name": {
-               "$ref": "#/definitions/anonymized_name"
+               "$ref": "#/definitions/anonymized_string"
             },
             "parent_class": {
                "type": "string",
                "maxLength": 256
             },
             "anonymized_class": {
-               "$ref": "#/definitions/anonymized_name"
+               "$ref": "#/definitions/anonymized_string"
             },
             "sqlalchemy_dialect": {
                "type": "string",
@@ -44,21 +44,21 @@ anonymized_class_info_schema = {
    "$schema": "http://json-schema.org/schema#",
    "title": "anonymized-class-info",
    "definitions": {
-      "anonymized_name": anonymized_name_schema
+      "anonymized_string": anonymized_string_schema
    },
    "oneOf": [
       {
          "type": "object",
          "properties": {
             "anonymized_name": {
-               "$ref": "#/definitions/anonymized_name"
+               "$ref": "#/definitions/anonymized_string"
             },
             "parent_class": {
                "type": "string",
                "maxLength": 256
             },
             "anonymized_class": {
-               "$ref": "#/definitions/anonymized_name"
+               "$ref": "#/definitions/anonymized_string"
             },
          },
          "additionalProperties": True,
@@ -74,7 +74,7 @@ anonymized_store_schema = {
    "$schema": "http://json-schema.org/schema#",
    "title": "anonymized-store",
    "definitions": {
-      "anonymized_name": anonymized_name_schema,
+      "anonymized_string": anonymized_string_schema,
       "anonymized_class_info": anonymized_class_info_schema
    },
    "oneOf": [
@@ -82,14 +82,14 @@ anonymized_store_schema = {
          "type": "object",
          "properties": {
             "anonymized_name": {
-               "$ref": "#/definitions/anonymized_name"
+               "$ref": "#/definitions/anonymized_string"
             },
             "parent_class": {
                "type": "string",
                "maxLength": 256
             },
             "anonymized_class": {
-               "$ref": "#/definitions/anonymized_name"
+               "$ref": "#/definitions/anonymized_string"
             },
             "anonymized_store_backend": {
                "$ref": "#/definitions/anonymized_class_info"
@@ -109,21 +109,21 @@ anonymized_action_schema = {
    "$schema": "http://json-schema.org/schema#",
    "title": "anonymized-action",
    "definitions": {
-      "anonymized_name": anonymized_name_schema,
+      "anonymized_string": anonymized_string_schema,
    },
    "oneOf": [
       {
          "type": "object",
          "properties": {
             "anonymized_name": {
-               "$ref": "#/definitions/anonymized_name"
+               "$ref": "#/definitions/anonymized_string"
             },
             "parent_class": {
                "type": "string",
                "maxLength": 256
             },
             "anonymized_class": {
-               "$ref": "#/definitions/anonymized_name"
+               "$ref": "#/definitions/anonymized_string"
             },
          },
          "additionalProperties": False,
@@ -140,7 +140,7 @@ anonymized_validation_operator_schema = {
    "$schema": "http://json-schema.org/schema#",
    "title": "anonymized-validation-operator",
    "definitions": {
-      "anonymized_name": anonymized_name_schema,
+      "anonymized_string": anonymized_string_schema,
       "anonymized_action": anonymized_action_schema
    },
    "oneOf": [
@@ -148,14 +148,14 @@ anonymized_validation_operator_schema = {
          "type": "object",
          "properties": {
             "anonymized_name": {
-               "$ref": "#/definitions/anonymized_name"
+               "$ref": "#/definitions/anonymized_string"
             },
             "parent_class": {
                "type": "string",
                "maxLength": 256
             },
             "anonymized_class": {
-               "$ref": "#/definitions/anonymized_name"
+               "$ref": "#/definitions/anonymized_string"
             },
             "anonymized_action_list": {
                "type": "array",
@@ -189,7 +189,7 @@ anonymized_data_docs_site_schema = {
    "$schema": "http://json-schema.org/schema#",
    "title": "anonymized-validation-operator",
    "definitions": {
-      "anonymized_name": anonymized_name_schema,
+      "anonymized_string": anonymized_string_schema,
       "anonymized_class_info": anonymized_class_info_schema
    },
    "oneOf": [
@@ -197,14 +197,14 @@ anonymized_data_docs_site_schema = {
          "type": "object",
          "properties": {
             "anonymized_name": {
-               "$ref": "#/definitions/anonymized_name"
+               "$ref": "#/definitions/anonymized_string"
             },
             "parent_class": {
                "type": "string",
                "maxLength": 256
             },
             "anonymized_class": {
-               "$ref": "#/definitions/anonymized_name"
+               "$ref": "#/definitions/anonymized_string"
             },
             "anonymized_store_backend": {
                "$ref": "#/definitions/anonymized_class_info"
@@ -297,28 +297,63 @@ init_payload_schema = {
    "additionalProperties": False
 }
 
+anonymized_batch_schema = {
+   "$schema": "http://json-schema.org/schema#",
+   "title": "anonymized-batch",
+   "definitions": {
+      "anonymized_string": anonymized_string_schema,
+   },
+   "oneOf": [
+      {
+         "type": "object",
+         "properties": {
+            "anonymized_batch_kwarg_keys": {
+               "type": "array",
+               "maxItems": 1000,
+               "items": {
+                  "oneOf": [
+                     {"$ref": "#/definitions/anonymized_string"},
+                     {
+                        "type": "string",
+                        "maxLength": 256
+                     }
+                  ]
+               },
+            },
+            "anonymized_expectation_suite_name": {
+               "$ref": "#/definitions/anonymized_string"
+            },
+            "anonymized_datasource_name": {
+               "$ref": "#/definitions/anonymized_string"
+            }
+         },
+         "additionalProperties": False,
+         "required": [
+            "parent_class",
+            "anonymized_name"
+         ]
+      }
+   ]
+}
+
 run_validation_operator_payload_schema = {
    "$schema": "http://json-schema.org/schema#",
+   "definitions": {
+      "anonymized_string": anonymized_string_schema,
+      "anonymized_batch": anonymized_batch_schema
+   },
    "type": "object",
    "properties": {
       "anonymized_operator_name": {
          "type": "string",
          "maxLength": 256,
       },
-      "anonymized_datasource_name": {
-         "type": "string",
-         "maxLength": 256,
-      },
-      "anonymized_batch_kwargs": {
+      "anonymized_batches": {
          "type": "array",
-         "maxItems": 10,
+         "maxItems": 1000,
          "items": {
-            "type": "string",
-            "maxLength": 256,
+            "$ref": "#/definitions/anonymized_batch"
          }
-      },
-      "n_assets": {
-         "type": "number"
       }
    },
    "required": [
@@ -332,7 +367,7 @@ run_validation_operator_payload_schema = {
 usage_statistics_record_schema = {
    "$schema": "http://json-schema.org/schema#",
    "definitions": {
-      "anonymized_name": anonymized_name_schema,
+      "anonymized_string": anonymized_string_schema,
       "anonymized_datasource": anonymized_datasource_schema,
       "anonymized_store": anonymized_store_schema,
       "anonymized_class_info": anonymized_class_info_schema,
@@ -341,7 +376,8 @@ usage_statistics_record_schema = {
       "empty_payload": empty_payload_schema,
       "init_payload": init_payload_schema,
       "run_validation_operator_payload": run_validation_operator_payload_schema,
-      "anonymized_data_docs_site": anonymized_data_docs_site_schema
+      "anonymized_data_docs_site": anonymized_data_docs_site_schema,
+      "anonymized_batch": anonymized_batch_schema
    },
    "type": "object",
    "properties": {
