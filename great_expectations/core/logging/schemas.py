@@ -61,7 +61,7 @@ anonymized_class_info_schema = {
                "$ref": "#/definitions/anonymized_string"
             },
          },
-         "additionalProperties": True,
+         "additionalProperties": True, # we don't want this to be true, but this is required to allow show_cta_footer
          "required": [
             "parent_class",
          ]
@@ -210,25 +210,40 @@ anonymized_data_docs_site_schema = {
                "$ref": "#/definitions/anonymized_class_info"
             },
             "anonymized_site_index_builder": {
-               "allOf": [
-                  {
-                     "type": "object",
-                     "properties": {
-                        "show_cta_footer": {
-                           "type": "boolean"
-                        }
-                     }
-                  },
-                  {
                      "$ref": "#/definitions/anonymized_class_info"
-                  }
-               ]
-            },
+            }
          },
-         "additionalProperties": True, # we don't want this to be true, but this is required to allow show_cta_footer
+         "additionalProperties": False,
          "required": [
             "parent_class",
             "anonymized_name"
+         ]
+      }
+   ]
+}
+
+anonymized_expectation_suite_schema = {
+   "$schema": "http://json-schema.org/schema#",
+   "title": "anonymized-expectation_suite_schema",
+   "definitions": {
+      "anonymized_string": anonymized_string_schema,
+   },
+   "oneOf": [
+      {
+         "type": "object",
+         "properties": {
+            "anonymized_name": {
+               "$ref": "#/definitions/anonymized_string"
+            },
+            "expectation_count": {
+              "type": "number"
+            },
+            "anonymized_expectation_type_counts": {
+               "type": "object"
+            },
+         },
+         "additionalProperties": False,
+         "required": [
          ]
       }
    ]
@@ -240,7 +255,8 @@ init_payload_schema = {
       "anonymized_datasource": anonymized_datasource_schema,
       "anonymized_store": anonymized_store_schema,
       "anonymized_validation_operator": anonymized_validation_operator_schema,
-      "anonymized_data_docs_site": anonymized_data_docs_site_schema
+      "anonymized_data_docs_site": anonymized_data_docs_site_schema,
+      "anonymized_expectation_suite": anonymized_expectation_suite_schema
    },
    "type": "object",
    "properties": {
@@ -287,12 +303,22 @@ init_payload_schema = {
             "$ref": "#/definitions/anonymized_data_docs_site"
          },
       },
+      "anonymized_expectation_suites": {
+         "type": "array",
+         "items": {
+            "$ref": "#/definitions/anonymized_expectation_suite"
+         }
+      }
    },
    "required": [
       "platform.system",
       "platform.release",
       "version_info",
       "anonymized_datasources",
+      "anonymized_stores",
+      "anonymized_validation_operators",
+      "anonymized_data_docs_sites",
+      "anonymized_expectation_suites"
    ],
    "additionalProperties": False
 }
@@ -376,7 +402,8 @@ usage_statistics_record_schema = {
       "init_payload": init_payload_schema,
       "run_validation_operator_payload": run_validation_operator_payload_schema,
       "anonymized_data_docs_site": anonymized_data_docs_site_schema,
-      "anonymized_batch": anonymized_batch_schema
+      "anonymized_batch": anonymized_batch_schema,
+      "anonymized_expectation_suite": anonymized_expectation_suite_schema
    },
    "type": "object",
    "properties": {
