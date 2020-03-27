@@ -16,6 +16,7 @@ from great_expectations import __version__ as ge_version
 from great_expectations.core import nested_update
 from great_expectations.core.logging.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.logging.anonymizers.batch_anonymizer import BatchAnonymizer
+from great_expectations.core.logging.anonymizers.expectation_suite_anonymizer import ExpectationSuiteAnonymizer
 from great_expectations.core.logging.schemas import usage_statistics_record_schema
 from great_expectations.core.logging.anonymizers.store_anonymizer import StoreAnonymizer
 from great_expectations.core.logging.anonymizers.datasource_anonymizer import DatasourceAnonymizer
@@ -47,6 +48,7 @@ class UsageStatisticsHandler(object):
         self._validation_operator_anonymizer = ValidationOperatorAnonymizer(data_context_id)
         self._data_docs_sites_anonymizer = DataDocsSiteAnonymizer(data_context_id)
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
+        self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
         self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
         self._sigint_handler = signal.signal(signal.SIGINT, self._teardown)
         self._sigquit_handler = signal.signal(signal.SIGQUIT, self._teardown)
@@ -79,6 +81,10 @@ class UsageStatisticsHandler(object):
     def build_init_payload(self):
         """Adds information that may be available only after full data context construction, but is useful to
         calculate only one time (for example, anonymization)."""
+        expectation_suites = [
+            self._data_context.get_expectation_suite(expectation_suite_name) for expectation_suite_name in
+            self._data_context.list_expectation_suite_names()
+        ]
         return {
             "platform.system": platform.system(),
             "platform.release": platform.release(),
@@ -103,6 +109,10 @@ class UsageStatisticsHandler(object):
                     site_config=site_config
                 ) for site_name, site_config in
                 self._data_context._project_config_with_variables_substituted.data_docs_sites.items()
+            ],
+            "anonymized_expectation_suites": [
+              self._expectation_suite_anonymizer.anonymize_expectation_suite_info(expectation_suite) for
+              expectation_suite in expectation_suites
             ]
         }
 
