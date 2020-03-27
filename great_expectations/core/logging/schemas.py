@@ -185,12 +185,47 @@ empty_payload_schema = {
    "additionalProperties": False
 }
 
+anonymized_data_docs_site_schema = {
+   "$schema": "http://json-schema.org/schema#",
+   "title": "anonymized-validation-operator",
+   "definitions": {
+      "anonymized_name": anonymized_name_schema,
+      "anonymized_store_backend": anonymized_store_backend_schema
+   },
+   "oneOf": [
+      {
+         "type": "object",
+         "properties": {
+            "anonymized_name": {
+               "$ref": "#/definitions/anonymized_name"
+            },
+            "parent_class": {
+               "type": "string",
+               "maxLength": 256
+            },
+            "anonymized_class": {
+               "$ref": "#/definitions/anonymized_name"
+            },
+            "anonymized_store_backend": {
+               "$ref": "#/definitions/anonymized_store_backend"
+            },
+         },
+         "additionalProperties": False,
+         "required": [
+            "parent_class",
+            "anonymized_name"
+         ]
+      }
+   ]
+}
+
 init_payload_schema = {
    "$schema": "https://json-schema.org/schema#",
    "definitions": {
       "anonymized_datasource": anonymized_datasource_schema,
       "anonymized_store": anonymized_store_schema,
-      "anonymized_validation_operator": anonymized_validation_operator_schema
+      "anonymized_validation_operator": anonymized_validation_operator_schema,
+      "anonymized_data_docs_site": anonymized_data_docs_site_schema
    },
    "type": "object",
    "properties": {
@@ -228,6 +263,13 @@ init_payload_schema = {
          "maxItems": 1000,
          "items": {
             "$ref": "#/definitions/anonymized_validation_operator"
+         },
+      },
+      "anonymized_data_docs_sites": {
+         "type": "array",
+         "maxItems": 1000,
+         "items": {
+            "$ref": "#/definitions/anonymized_data_docs_site"
          },
       },
    },
