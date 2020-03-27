@@ -272,16 +272,6 @@ run_validation_operator_payload_schema = {
    "additionalProperties": False
 }
 
-build_data_docs_payload_schema = {
-   "$schema": "http://json-schema.org/schema#",
-   "type": "object",
-   "properties": {
-   },
-   "required": [
-   ],
-   "additionalProperties": False
-}
-
 usage_statistics_record_schema = {
    "$schema": "http://json-schema.org/schema#",
    "definitions": {
@@ -290,8 +280,7 @@ usage_statistics_record_schema = {
       "anonymized_store": anonymized_store_schema,
       "empty_payload": empty_payload_schema,
       "init_payload": init_payload_schema,
-      "run_validation_operator_payload": run_validation_operator_payload_schema,
-      "build_data_docs_payload": build_data_docs_payload_schema
+      "run_validation_operator_payload": run_validation_operator_payload_schema
    },
    "type": "object",
    "properties": {
