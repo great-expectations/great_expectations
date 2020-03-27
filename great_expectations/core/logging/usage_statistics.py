@@ -15,6 +15,7 @@ from functools import wraps
 from great_expectations import __version__ as ge_version
 from great_expectations.core import nested_update
 from great_expectations.core.logging.anonymizers.anonymizer import Anonymizer
+from great_expectations.core.logging.anonymizers.batch_anonymizer import BatchAnonymizer
 from great_expectations.core.logging.schemas import usage_statistics_record_schema
 from great_expectations.core.logging.anonymizers.store_anonymizer import StoreAnonymizer
 from great_expectations.core.logging.anonymizers.datasource_anonymizer import DatasourceAnonymizer
@@ -45,6 +46,7 @@ class UsageStatisticsHandler(object):
         self._store_anonymizer = StoreAnonymizer(data_context_id)
         self._validation_operator_anonymizer = ValidationOperatorAnonymizer(data_context_id)
         self._data_docs_sites_anonymizer = DataDocsSiteAnonymizer(data_context_id)
+        self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
         self._sigint_handler = signal.signal(signal.SIGINT, self._teardown)
         self._sigquit_handler = signal.signal(signal.SIGQUIT, self._teardown)
@@ -233,6 +235,13 @@ def run_validation_operator_usage_statistics(
         payload["n_assets"] = len(assets_to_validate)
     except TypeError as e:
         logger.debug("run_validation_operator_usage_statistics: Unable to create n_assets payload field")
+    try:
+        batch_anonymizer = data_context._usage_statistics_handler._batch_anonymizer
+        payload["anonymized_batches"] = [
+            batch_anonymizer.anonymize_batch_info(batch) for batch in assets_to_validate
+        ]
+    except Exception:
+        logger.debug("run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field")
     return payload
 
 
