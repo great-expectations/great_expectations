@@ -278,6 +278,9 @@ usage_statistics_record_schema = {
       "anonymized_name": anonymized_name_schema,
       "anonymized_datasource": anonymized_datasource_schema,
       "anonymized_store": anonymized_store_schema,
+      "anonymized_store_backend": anonymized_store_backend_schema,
+      "anonymized_validation_operator": anonymized_validation_operator_schema,
+      "anonymized_action": anonymized_action_schema,
       "empty_payload": empty_payload_schema,
       "init_payload": init_payload_schema,
       "run_validation_operator_payload": run_validation_operator_payload_schema
