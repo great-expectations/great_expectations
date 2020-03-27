@@ -329,8 +329,9 @@ anonymized_batch_schema = {
          },
          "additionalProperties": False,
          "required": [
-            "parent_class",
-            "anonymized_name"
+            "anonymized_batch_kwarg_keys",
+            "anonymized_expectation_suite_name",
+            "anonymized_datasource_name"
          ]
       }
    ]
