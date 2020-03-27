@@ -25,23 +25,24 @@ anonymized_datasource_schema = {
             "anonymized_class": {
                "$ref": "#/definitions/anonymized_name"
             },
-            "engine": {
+            "sqlalchemy_dialect": {
                "type": "string",
                "maxLength": 256,
             }
          },
          "additionalProperties": False,
          "required": [
-            "parent_class"
+            "parent_class",
+            "anonymized_name"
          ]
       }
    ]
 }
 
 
-anonymized_store_schema = {
+anonymized_store_backend_schema = {
    "$schema": "http://json-schema.org/schema#",
-   "title": "anonymized-store",
+   "title": "anonymized-store-backend",
    "definitions": {
       "anonymized_name": anonymized_name_schema
    },
@@ -59,21 +60,120 @@ anonymized_store_schema = {
             "anonymized_class": {
                "$ref": "#/definitions/anonymized_name"
             },
-            "parent_backend": {
-               "type": "string",
-               "maxLength": 256
-            },
-            "anonymized_backend": {
-               "$ref": "#/definitions/anonymized_name"
-            }
          },
          "additionalProperties": False,
          "required": [
-            "parent_class"
+            "parent_class",
          ]
       }
    ]
 }
+
+
+anonymized_store_schema = {
+   "$schema": "http://json-schema.org/schema#",
+   "title": "anonymized-store",
+   "definitions": {
+      "anonymized_name": anonymized_name_schema,
+      "anonymized_store_backend": anonymized_store_backend_schema
+   },
+   "oneOf": [
+      {
+         "type": "object",
+         "properties": {
+            "anonymized_name": {
+               "$ref": "#/definitions/anonymized_name"
+            },
+            "parent_class": {
+               "type": "string",
+               "maxLength": 256
+            },
+            "anonymized_class": {
+               "$ref": "#/definitions/anonymized_name"
+            },
+            "anonymized_store_backend": {
+               "$ref": "#/definitions/anonymized_store_backend"
+            }
+         },
+         "additionalProperties": False,
+         "required": [
+            "parent_class",
+            "anonymized_name"
+         ]
+      }
+   ]
+}
+
+
+anonymized_action_schema = {
+   "$schema": "http://json-schema.org/schema#",
+   "title": "anonymized-action",
+   "definitions": {
+      "anonymized_name": anonymized_name_schema,
+   },
+   "oneOf": [
+      {
+         "type": "object",
+         "properties": {
+            "anonymized_name": {
+               "$ref": "#/definitions/anonymized_name"
+            },
+            "parent_class": {
+               "type": "string",
+               "maxLength": 256
+            },
+            "anonymized_class": {
+               "$ref": "#/definitions/anonymized_name"
+            },
+         },
+         "additionalProperties": False,
+         "required": [
+            "parent_class",
+            "anonymized_name"
+         ]
+      }
+   ]
+}
+
+
+anonymized_validation_operator_schema = {
+   "$schema": "http://json-schema.org/schema#",
+   "title": "anonymized-validation-operator",
+   "definitions": {
+      "anonymized_name": anonymized_name_schema,
+      "anonymized_action": anonymized_action_schema
+   },
+   "oneOf": [
+      {
+         "type": "object",
+         "properties": {
+            "anonymized_name": {
+               "$ref": "#/definitions/anonymized_name"
+            },
+            "parent_class": {
+               "type": "string",
+               "maxLength": 256
+            },
+            "anonymized_class": {
+               "$ref": "#/definitions/anonymized_name"
+            },
+            "anonymized_action_list": {
+               "type": "array",
+               "maxItems": 1000,
+               "items": {
+                  "$ref": "#/definitions/anonymized_action"
+               },
+            }
+         },
+         "additionalProperties": False,
+         "required": [
+            "parent_class",
+            "anonymized_name"
+         ]
+      }
+   ]
+}
+
 
 empty_payload_schema = {
    "$schema": "http://json-schema.org/schema#",
@@ -90,6 +190,7 @@ init_payload_schema = {
    "definitions": {
       "anonymized_datasource": anonymized_datasource_schema,
       "anonymized_store": anonymized_store_schema,
+      "anonymized_validation_operator": anonymized_validation_operator_schema
    },
    "type": "object",
    "properties": {
@@ -126,7 +227,7 @@ init_payload_schema = {
          "type": "array",
          "maxItems": 1000,
          "items": {
-            "type": "object"
+            "$ref": "#/definitions/anonymized_validation_operator"
          },
       },
    },
@@ -171,6 +272,16 @@ run_validation_operator_payload_schema = {
    "additionalProperties": False
 }
 
+build_data_docs_payload_schema = {
+   "$schema": "http://json-schema.org/schema#",
+   "type": "object",
+   "properties": {
+   },
+   "required": [
+   ],
+   "additionalProperties": False
+}
+
 usage_statistics_record_schema = {
    "$schema": "http://json-schema.org/schema#",
    "definitions": {
@@ -180,6 +291,7 @@ usage_statistics_record_schema = {
       "empty_payload": empty_payload_schema,
       "init_payload": init_payload_schema,
       "run_validation_operator_payload": run_validation_operator_payload_schema,
+      "build_data_docs_payload": build_data_docs_payload_schema
    },
    "type": "object",
    "properties": {
