@@ -40,9 +40,9 @@ anonymized_datasource_schema = {
 }
 
 
-anonymized_store_schema = {
+anonymized_store_backend_schema = {
    "$schema": "http://json-schema.org/schema#",
-   "title": "anonymized-store",
+   "title": "anonymized-store-backend",
    "definitions": {
       "anonymized_name": anonymized_name_schema
    },
@@ -60,12 +60,39 @@ anonymized_store_schema = {
             "anonymized_class": {
                "$ref": "#/definitions/anonymized_name"
             },
-            "store_backend_parent_class": {
+         },
+         "additionalProperties": False,
+         "required": [
+            "parent_class",
+         ]
+      }
+   ]
+}
+
+
+anonymized_store_schema = {
+   "$schema": "http://json-schema.org/schema#",
+   "title": "anonymized-store",
+   "definitions": {
+      "anonymized_name": anonymized_name_schema,
+      "anonymized_store_backend": anonymized_store_backend_schema
+   },
+   "oneOf": [
+      {
+         "type": "object",
+         "properties": {
+            "anonymized_name": {
+               "$ref": "#/definitions/anonymized_name"
+            },
+            "parent_class": {
                "type": "string",
                "maxLength": 256
             },
-            "anonymized_store_backend_class": {
+            "anonymized_class": {
                "$ref": "#/definitions/anonymized_name"
+            },
+            "anonymized_store_backend": {
+               "$ref": "#/definitions/anonymized_store_backend"
             }
          },
          "additionalProperties": False,
@@ -130,7 +157,7 @@ anonymized_validation_operator_schema = {
             "anonymized_class": {
                "$ref": "#/definitions/anonymized_name"
             },
-            "action_list": {
+            "anonymized_action_list": {
                "type": "array",
                "maxItems": 1000,
                "items": {
