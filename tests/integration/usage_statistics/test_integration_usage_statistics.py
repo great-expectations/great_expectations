@@ -22,7 +22,7 @@ def valid_usage_statistics_message():
         "data_context_id": "51ff737e-33af-455a-8a11-0dc923dcbfb5",
         "data_context_instance_id": "2d24776c-abef-4521-b182-4b18375b7259",
         "ge_version": "0.9.4",
-        "method": "data_context.__init__",
+        "event": "data_context.__init__",
         "success": True,
         "event_payload": {
             "platform.system": "Darwin",
@@ -43,7 +43,7 @@ def logstream(valid_usage_statistics_message):
     # Warm up a logstream
     logStreamName = None
     message = copy.deepcopy(valid_usage_statistics_message)
-    message["method"] = "logstream.__warmup__"
+    message["event"] = "logstream.__warmup__"
     requests.post(USAGE_STATISTICS_QA_URL, json=message)
     attempts = 0
     while attempts < 3:
