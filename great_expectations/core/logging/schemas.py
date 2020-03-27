@@ -357,9 +357,7 @@ run_validation_operator_payload_schema = {
       }
    },
    "required": [
-      "anonymized_operator_name",
-      # "anonymized_datasource_name",
-      # "anonymized_batch_kwargs"
+      "anonymized_operator_name"
    ],
    "additionalProperties": False
 }
