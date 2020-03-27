@@ -14,11 +14,12 @@ from functools import wraps
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core import nested_update
-from great_expectations.core.logging.anonymizer import Anonymizer
-from great_expectations.core.logging.schemas import usage_statistics_record_schema, init_payload_schema
-from great_expectations.data_context.store.store_anonymizer import StoreAnonymizer
-from great_expectations.datasource.datasource_anonymizer import DatasourceAnonymizer
-from great_expectations.validation_operators.validation_operator_anonymizer import ValidationOperatorAnonymizer
+from great_expectations.core.logging.anonymizers.anonymizer import Anonymizer
+from great_expectations.core.logging.schemas import usage_statistics_record_schema
+from great_expectations.core.logging.anonymizers.store_anonymizer import StoreAnonymizer
+from great_expectations.core.logging.anonymizers.datasource_anonymizer import DatasourceAnonymizer
+from great_expectations.core.logging.anonymizers.validation_operator_anonymizer import ValidationOperatorAnonymizer
+from great_expectations.core.logging.anonymizers.data_docs_site_anonymizer import DataDocsSiteAnonymizer
 
 STOP_SIGNAL = object()
 
@@ -43,6 +44,7 @@ class UsageStatisticsHandler(object):
         self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
         self._store_anonymizer = StoreAnonymizer(data_context_id)
         self._validation_operator_anonymizer = ValidationOperatorAnonymizer(data_context_id)
+        self._data_docs_sites_anonymizer = DataDocsSiteAnonymizer(data_context_id)
         self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
         self._sigint_handler = signal.signal(signal.SIGINT, self._teardown)
         self._sigquit_handler = signal.signal(signal.SIGQUIT, self._teardown)
@@ -92,6 +94,13 @@ class UsageStatisticsHandler(object):
                     validation_operator_name=validation_operator_name,
                     validation_operator_obj=validation_operator_obj
                 ) for validation_operator_name, validation_operator_obj in self._data_context.validation_operators.items()
+            ],
+            "anonymized_data_docs_sites": [
+                self._data_docs_sites_anonymizer.anonymize_data_docs_site_info(
+                    site_name=site_name,
+                    site_config=site_config
+                ) for site_name, site_config in
+                self._data_context._project_config_with_variables_substituted.data_docs_sites.items()
             ]
         }
 

@@ -1,6 +1,6 @@
 import uuid
 
-from great_expectations.core.logging.anonymizer import Anonymizer
+from great_expectations.core.logging.anonymizers.anonymizer import Anonymizer
 
 
 def test_anonymizer_no_salt():
