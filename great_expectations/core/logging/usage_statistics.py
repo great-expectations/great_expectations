@@ -133,9 +133,9 @@ class UsageStatisticsHandler(object):
 
             self._message_queue.put(message)
         # noinspection PyBroadException
-        except Exception:
+        except Exception as e:
             # We *always* tolerate *any* error in usage statistics
-            pass
+            logger.debug(e)
 
 
 def get_usage_statistics_handler(args_array):
