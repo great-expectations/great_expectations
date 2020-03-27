@@ -251,7 +251,7 @@ def run_validation_operator_usage_statistics(
     return payload
 
 
-def send_usage_message(data_context, event, event_payload=None, success=None, payload_schema=None):
+def send_usage_message(data_context, event, event_payload=None, success=None):
     """send a usage statistics message."""
     try:
         handler = getattr(data_context, "_usage_statistics_handler", None)
@@ -261,6 +261,6 @@ def send_usage_message(data_context, event, event_payload=None, success=None, pa
             "success": success,
         }
         if handler is not None:
-            handler.emit(message, payload_schema)
+            handler.emit(message)
     except Exception:
         pass
