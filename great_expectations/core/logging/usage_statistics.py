@@ -81,6 +81,19 @@ class UsageStatisticsHandler(object):
                 logger.debug("Server rejected message: ", json.dumps(message, indent=2))
             self._message_queue.task_done()
 
+    def send_usage_message(self, event, event_payload=None, success=None):
+        """send a usage statistics message."""
+        try:
+            message = {
+                "event": event,
+                "event_payload": event_payload or {},
+                "success": success,
+            }
+
+            self.emit(message)
+        except Exception:
+            pass
+
     def build_init_payload(self):
         """Adds information that may be available only after full data context construction, but is useful to
         calculate only one time (for example, anonymization)."""
