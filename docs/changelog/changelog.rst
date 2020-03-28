@@ -3,7 +3,7 @@
 develop
 -----------------
 * Remove the "project new" option from the command line (since it is not implemented; users can only run "init" to create a new project).
-* fixed bug where expect_column_values_to_not_be_null fails if user does not have bigquery libray installed
+* Update type detection for bigquery based on driver changes in pybigquery driver 0.4.14. Added a warning for users who are running an older pybigquery driver
 * added execution tests to the NotebookRenderer to mitigate codegen risks
 
 0.9.7
