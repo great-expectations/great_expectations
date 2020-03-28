@@ -51,7 +51,6 @@ def test_consistent_name_anonymization(in_memory_data_context_config):
     payload = run_validation_operator_usage_statistics(
         context, "action_list_operator",
         assets_to_validate=[({"__fake_batch_kwargs": "mydatasource"}, "__fake_expectation_suite_name")], run_id="foo")
-    assert payload["n_assets"] == 1
     # For a *specific* data_context_id, all names will be consistently anonymized
     assert payload["validation_operator_name"] == '5bb011891aa7d41401e57759d5f5cb01'
 
