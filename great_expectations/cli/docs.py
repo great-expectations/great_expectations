@@ -35,6 +35,7 @@ def docs():
 )
 def docs_build(directory, site_name, view=True):
     """Build Data Docs for a project."""
+    context = None
     try:
         failed = True
         context = DataContext(directory)
@@ -72,6 +73,7 @@ def docs_build(directory, site_name, view=True):
 )
 def docs_list(directory):
     """List known Data Docs Sites."""
+    context = None
     try:
         failed = True
         context = DataContext(directory)

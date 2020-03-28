@@ -125,6 +125,7 @@ def datasource_new(directory):
 )
 def datasource_list(directory):
     """List known datasources."""
+    context = None
     try:
         failed = True
         context = DataContext(directory)
