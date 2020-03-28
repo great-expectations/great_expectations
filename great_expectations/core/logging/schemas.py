@@ -457,6 +457,17 @@ usage_statistics_record_schema = {
          "type": "object",
          "properties": {
             "event": {
+               "enum": ["data_asset.validate"],
+            },
+            "event_payload": {
+               "$ref": "#/definitions/anonymized_batch"
+            },
+         }
+      },
+      {
+         "type": "object",
+         "properties": {
+            "event": {
                "enum": ["data_context.build_data_docs"],
             },
             "event_payload": {
