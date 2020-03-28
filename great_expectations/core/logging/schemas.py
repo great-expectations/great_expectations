@@ -252,10 +252,13 @@ anonymized_expectation_suite_schema = {
 init_payload_schema = {
    "$schema": "https://json-schema.org/schema#",
    "definitions": {
+      "anonymized_string": anonymized_string_schema,
+      "anonymized_class_info": anonymized_class_info_schema,
       "anonymized_datasource": anonymized_datasource_schema,
-      "anonymized_store": anonymized_store_schema,
       "anonymized_validation_operator": anonymized_validation_operator_schema,
       "anonymized_data_docs_site": anonymized_data_docs_site_schema,
+      "anonymized_store": anonymized_store_schema,
+      "anonymized_action": anonymized_action_schema,
       "anonymized_expectation_suite": anonymized_expectation_suite_schema
    },
    "type": "object",
