@@ -2,7 +2,7 @@ import pytest
 import jsonschema
 
 from great_expectations.core.logging.schemas import (
-    anonymized_name_schema,
+    anonymized_string_schema,
     anonymized_datasource_schema,
     init_payload_schema,
     usage_statistics_record_schema,
@@ -11,10 +11,10 @@ from great_expectations.core.logging.schemas import (
 
 def test_anonymized_name_validation():
     string = "aa41efe0a1b3eeb9bf303e4561ff8392"
-    jsonschema.validate(string, anonymized_name_schema)
+    jsonschema.validate(string, anonymized_string_schema)
 
     with pytest.raises(jsonschema.ValidationError):
-        jsonschema.validate(string[:5], anonymized_name_schema)
+        jsonschema.validate(string[:5], anonymized_string_schema)
 
 
 def test_anonymized_datasource_validation():
