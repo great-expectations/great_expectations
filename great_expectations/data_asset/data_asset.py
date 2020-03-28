@@ -948,7 +948,7 @@ class DataAsset(object):
                 logger.error("Unable to validate using the provided value for expectation suite; does it need to be "
                              "loaded from a dictionary?")
                 if getattr(data_context, "_usage_statistics_handler", None):
-                    handler = data_context.__usage_statistics_handler
+                    handler = data_context._usage_statistics_handler
                     handler.send_usage_message(
                         event="data_asset.validate",
                         event_payload=handler._batch_anonymizer.anonymize_batch_info(self),
@@ -1097,7 +1097,7 @@ class DataAsset(object):
             self._data_context = validate__data_context
         except Exception:
             if getattr(data_context, "_usage_statistics_handler", None):
-                handler = data_context.__usage_statistics_handler
+                handler = data_context._usage_statistics_handler
                 handler.send_usage_message(
                     event="data_asset.validate",
                     event_payload=handler._batch_anonymizer.anonymize_batch_info(self),
@@ -1108,7 +1108,7 @@ class DataAsset(object):
             self._active_validation = False
 
         if getattr(data_context, "_usage_statistics_handler", None):
-            handler = data_context.__usage_statistics_handler
+            handler = data_context._usage_statistics_handler
             handler.send_usage_message(
                 event="data_asset.validate",
                 event_payload=handler._batch_anonymizer.anonymize_batch_info(self),
