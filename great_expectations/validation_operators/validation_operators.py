@@ -1,20 +1,19 @@
 import datetime
 import logging
 
-from ..data_context.types.resource_identifiers import BatchIdentifier, ExpectationSuiteIdentifier, \
-    ValidationResultIdentifier
+from ..data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 
 logger = logging.getLogger(__name__)
 
 from six import string_types
 
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-)
-from great_expectations.data_asset import (
-    DataAsset,
-)
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.data_asset import DataAsset
 from .util import send_slack_notification
+from great_expectations.exceptions import ClassInstantiationError
 
 # NOTE: Abe 2019/08/24 : This is first implementation of all these classes. Consider them UNSTABLE for now. 
 
@@ -77,17 +76,27 @@ class ActionListValidationOperator(ValidationOperator):
             assert isinstance(action_config, dict)
             # NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
             if not set(action_config.keys()) == {"name", "action"}:
-                raise KeyError('Action config keys must be ("name", "action"). Instead got {}'.format(action_config.keys()))
+                raise KeyError(
+                    'Action config keys must be ("name", "action"). Instead got {}'.format(action_config.keys())
+                )
 
+            config = action_config["action"]
+            module_name = 'great_expectations.validation_operators'
             new_action = instantiate_class_from_config(
-                config=action_config["action"],
+                config=config,
                 runtime_environment={
                     "data_context": self.data_context,
                 },
                 config_defaults={
-                    "module_name": "great_expectations.validation_operators"
+                    "module_name": module_name
                 }
             )
+            if not new_action:
+                raise ClassInstantiationError(
+                    module_name=module_name,
+                    package_name=None,
+                    class_name=config['class_name']
+                )
             self.actions[action_config["name"]] = new_action
 
     def _build_batch_from_item(self, item):

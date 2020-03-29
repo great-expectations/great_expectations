@@ -1,16 +1,23 @@
-from collections import OrderedDict
 import logging
+from collections import OrderedDict
+
+import traceback
 
 from .renderer import Renderer
 from great_expectations.render.types import (
     RenderedSectionContent,
     RenderedDocumentContent,
-    RenderedHeaderContent, RenderedStringTemplateContent, RenderedTableContent, RenderedBulletListContent
+    RenderedHeaderContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+    RenderedBulletListContent,
 )
+from great_expectations.exceptions import GreatExpectationsError
 
 from .call_to_action_renderer import CallToActionRenderer
 
 logger = logging.getLogger(__name__)
+
 
 # FIXME : This class needs to be rebuilt to accept SiteSectionIdentifiers as input.
 # FIXME : This class needs tests.
@@ -310,6 +317,6 @@ class SiteIndexPageRenderer(Renderer):
 
         except Exception as e:
             logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
-
-
-
+            exception_traceback = traceback.format_exc()
+            exception_message = f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+            raise GreatExpectationsError(exception_message)

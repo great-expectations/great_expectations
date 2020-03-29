@@ -7,10 +7,11 @@ from ...types import (
     RenderedMarkdownContent,
     RenderedStringTemplateContent,
     CollapseContent,
-    TextContent)
+    TextContent,
+)
 from ....core import (
     ExpectationValidationResult,
-    ExpectationConfiguration
+    ExpectationConfiguration,
 )
 
 logger = logging.getLogger(__name__)

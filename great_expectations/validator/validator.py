@@ -2,7 +2,10 @@
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.types import ClassConfig
-from great_expectations.util import load_class
+from great_expectations.util import (
+    load_class,
+    verify_dynamic_loading_support,
+)
 
 
 class Validator(object):
@@ -15,9 +18,11 @@ class Validator(object):
             expectation_engine = ClassConfig(**expectation_engine)
 
         if isinstance(expectation_engine, ClassConfig):
+            module_name = expectation_engine.module_name or "great_expectations.dataset"
+            verify_dynamic_loading_support(module_name=module_name, package_name=None)
             expectation_engine = load_class(
                 class_name=expectation_engine.class_name,
-                module_name=expectation_engine.module_name or "great_expectations.dataset"
+                module_name=module_name
             )
 
         self.expectation_engine = expectation_engine
