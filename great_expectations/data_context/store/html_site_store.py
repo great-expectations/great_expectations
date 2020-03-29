@@ -2,6 +2,7 @@ import os
 import logging
 from mimetypes import guess_type
 
+from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -13,7 +14,10 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
     file_relative_path
 )
-from great_expectations.exceptions import DataContextError
+from great_expectations.exceptions import (
+    DataContextError,
+    ClassInstantiationError,
+)
 from ...core.data_context_key import DataContextKey
 
 logger = logging.getLogger(__name__)
@@ -25,6 +29,7 @@ class HtmlSiteStore(object):
     def __init__(self, store_backend=None, runtime_environment=None):
         store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
         store_backend_class_name = store_backend.get("class_name", "TupleFilesystemStoreBackend")
+        verify_dynamic_loading_support(module_name=store_backend_module_name, package_name=None)
         store_class = load_class(store_backend_class_name, store_backend_module_name)
 
         if not issubclass(store_class, TupleStoreBackend):
@@ -36,41 +41,79 @@ class HtmlSiteStore(object):
 
         # One thing to watch for is reversibility of keys.
         # If several types are being written to overlapping directories, we could get collisions.
+        module_name = 'great_expectations.data_context.store'
+        filepath_prefix = 'expectations'
+        filepath_suffix = '.html'
+        expectation_suite_identifier_obj = instantiate_class_from_config(
+            config=store_backend,
+            runtime_environment=runtime_environment,
+            config_defaults={
+                "module_name": module_name,
+                "filepath_prefix": filepath_prefix,
+                "filepath_suffix": filepath_suffix,
+            }
+        )
+        if not expectation_suite_identifier_obj:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=store_backend['class_name']
+            )
+
+        filepath_prefix = 'validations'
+        validation_result_idendifier_obj = instantiate_class_from_config(
+            config=store_backend,
+            runtime_environment=runtime_environment,
+            config_defaults={
+                "module_name": module_name,
+                "filepath_prefix": filepath_prefix,
+                "filepath_suffix": filepath_suffix,
+            }
+        )
+        if not validation_result_idendifier_obj:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=store_backend['class_name']
+            )
+
+        filepath_template = 'index.html'
+        index_page_obj = instantiate_class_from_config(
+            config=store_backend,
+            runtime_environment=runtime_environment,
+            config_defaults={
+                "module_name": module_name,
+                "filepath_template": filepath_template,
+            }
+        )
+        if not index_page_obj:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=store_backend['class_name']
+            )
+
+        filepath_template = None
+        static_assets_obj = instantiate_class_from_config(
+            config=store_backend,
+            runtime_environment=runtime_environment,
+            config_defaults={
+                "module_name": module_name,
+                "filepath_template": filepath_template,
+            }
+        )
+        if not static_assets_obj:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=store_backend['class_name']
+            )
+
         self.store_backends = {
-            ExpectationSuiteIdentifier: instantiate_class_from_config(
-                config=store_backend,
-                runtime_environment=runtime_environment,
-                config_defaults={
-                    "module_name": "great_expectations.data_context.store",
-                    "filepath_prefix": "expectations",
-                    "filepath_suffix": ".html"
-                }
-            ),
-            ValidationResultIdentifier: instantiate_class_from_config(
-                config=store_backend,
-                runtime_environment=runtime_environment,
-                config_defaults={
-                    "module_name": "great_expectations.data_context.store",
-                    "filepath_prefix": "validations",
-                    "filepath_suffix": ".html"
-                }
-            ),
-            "index_page": instantiate_class_from_config(
-                config=store_backend,
-                runtime_environment=runtime_environment,
-                config_defaults={
-                    "module_name": "great_expectations.data_context.store",
-                    "filepath_template": 'index.html',
-                }
-            ),
-            "static_assets": instantiate_class_from_config(
-                config=store_backend,
-                runtime_environment=runtime_environment,
-                config_defaults={
-                    "module_name": "great_expectations.data_context.store",
-                    "filepath_template": None,
-                }
-            ),
+            ExpectationSuiteIdentifier: expectation_suite_identifier_obj,
+            ValidationResultIdentifier: validation_result_idendifier_obj,
+            "index_page": index_page_obj,
+            "static_assets": static_assets_obj,
         }
 
         # NOTE: Instead of using the filesystem as the source of record for keys,

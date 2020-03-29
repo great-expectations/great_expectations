@@ -1,5 +1,6 @@
 from marshmallow import ValidationError
 import json
+import importlib
 
 
 class GreatExpectationsError(Exception):
@@ -179,7 +180,7 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             )
         else:
             template = """The module: `{}` does not contain the class: `{}`.
-        - Please verify this class name `{}`."""
+        - Please verify that the class named `{}` exists."""
             self.message = template.format(module_name, class_name, class_name)
 
         colored_template = "<red>" + template + "</red>"
@@ -200,6 +201,24 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
                 class_snippet,
             )
         super(PluginClassNotFoundError, self).__init__(self.message)
+
+
+class ClassInstantiationError(GreatExpectationsError):
+    def __init__(self, module_name, package_name, class_name):
+        module_spec = importlib.util.find_spec(module_name, package=package_name)
+        if not module_spec:
+            if not package_name:
+                package_name = ''
+            self.message = f'''No module named "{package_name + module_name}" could be found in the repository.  \
+Please make sure that the file, corresponding to this package and module, exists and that dynamic loading of code \
+modules, templates, and assets is supported in your execution environment.  This error is unrecoverable.
+            '''
+        else:
+            self.message = f'''The module "{module_name}" exists; however, the system is unable to create an instance \
+of the class "{class_name}", searched for inside this module.  Please make sure that the class named "{class_name}" is \
+properly defined inside its intended module and declared correctly by the calling entity.  This error is unrecoverable.
+            '''
+        super(ClassInstantiationError, self).__init__(self.message)
 
 
 class ExpectationSuiteNotFoundError(GreatExpectationsError):
