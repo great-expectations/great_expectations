@@ -228,21 +228,28 @@ class Datasource(object):
             })
         return generators
 
-    def process_batch_parameters(self, limit=None):
+    def process_batch_parameters(self, limit=None, dataset_options=None):
         """Use datasource-specific configuration to translate any batch parameters into batch kwargs at the datasource
         level.
 
         Args:
             limit (int): a parameter all datasources must accept to allow limiting a batch to a smaller number of rows.
+            dataset_options (dict): a set of kwargs that will be passed to the constructor of a dataset built using
+                these batch_kwargs
 
         Returns:
-            batch_parameters, batch_kwargs: a tuple containing all defined batch_parameters and batch_kwargs. Result
-            will include both parameters passed via argument and configured parameters.
+            batch_kwargs: Result will include both parameters passed via argument and configured parameters.
         """
         batch_kwargs = self._datasource_config.get("batch_kwargs", {})
 
         if limit is not None:
             batch_kwargs["limit"] = limit
+
+        if dataset_options is not None:
+            # Then update with any locally-specified reader options
+            if not batch_kwargs.get("dataset_options"):
+                batch_kwargs["dataset_options"] = dict()
+            batch_kwargs["dataset_options"].update(dataset_options)
 
         return batch_kwargs
 
