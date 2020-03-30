@@ -197,7 +197,8 @@ Let's help you specify the batch of data your want the validation operator to va
         results = context.run_validation_operator(
             validation_operator_name,
             assets_to_validate=[batch],
-            run_id=run_id)
+            run_id=run_id,
+            evaluation_parameters=None)
 
     except (
         ge_exceptions.DataContextError,
