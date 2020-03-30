@@ -471,190 +471,29 @@ usage_statistics_record_schema = {
          "type": "object",
          "properties": {
             "event": {
-               "enum": ["data_context.build_data_docs"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["data_context.open_data_docs"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.suite.new"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.suite.edit"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.datasource.new"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.datasource.list"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.datasource.profile"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.docs.build"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.docs.list"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.tap.new"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.validation_operator.list"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.validation_operator.run"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.project.check_config"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.store.list"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.suite.new"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-      {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.suite.edit"],
-            },
-            "event_payload": {
-               "$ref": "#/definitions/empty_payload"
-            },
-         }
-      },
-   {
-         "type": "object",
-         "properties": {
-            "event": {
-               "enum": ["cli.suite.list"],
+               "enum": [
+                  "cli.suite.list",
+                  "cli.suite.edit",
+                  "cli.suite.new",
+                  "cli.store.list",
+                  "cli.project.check_config",
+                  "cli.validation_operator.run",
+                  "cli.validation_operator.list",
+                  "cli.tap.new",
+                  "cli.docs.list",
+                  "cli.docs.build",
+                  "cli.datasource.profile",
+                  "cli.datasource.list",
+                  "cli.datasource.new",
+                  "data_context.open_data_docs",
+                  "data_context.build_data_docs"
+               ],
             },
             "event_payload": {
                "$ref": "#/definitions/empty_payload"
             },
          }
       }
-
    ],
    "required": [
       "version",
