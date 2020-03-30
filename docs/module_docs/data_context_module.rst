@@ -15,6 +15,11 @@ DataContext Module
 DataContext
 --------------------------------------------
 
+    .. autoclass:: great_expectations.data_context.BaseDataContext
+        :members:
+        :undoc-members:
+        :show-inheritance:
+
     .. autoclass:: great_expectations.data_context.DataContext
         :members:
         :undoc-members:

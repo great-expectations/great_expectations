@@ -2,7 +2,10 @@
 
 develop
 -----------------
-
+* Remove the "project new" option from the command line (since it is not implemented; users can only run "init" to create a new project).
+* Update type detection for bigquery based on driver changes in pybigquery driver 0.4.14. Added a warning for users who are running an older pybigquery driver
+* added execution tests to the NotebookRenderer to mitigate codegen risks
+* Fix AttributeError when validating expectations from a JSON file
 
 0.9.7
 -----------------

@@ -389,6 +389,7 @@ def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple
 
     assert profiling_result == {'success': False, 'error': {'code': 5}}
 
+
 def test_context_profiler_without_generator_name_arg_on_datasource_with_no_generators(not_empty_datacontext):
     """
     If a no generator_name is passed to the profiling method and the datasource has no
@@ -404,6 +405,7 @@ def test_context_profiler_without_generator_name_arg_on_datasource_with_no_gener
     profiling_result = context.profile_datasource("datasource_without_generators", profiler=BasicDatasetProfiler)
 
     assert profiling_result == {'success': False, 'error': {'code': 4}}
+
 
 def test_snapshot_BasicDatasetProfiler_on_titanic():
     """
@@ -422,12 +424,21 @@ def test_snapshot_BasicDatasetProfiler_on_titanic():
 
     # Note: the above already produces an EVR; rerunning isn't strictly necessary just for EVRs
     evrs = df.validate(result_format="SUMMARY")
+    # remove
 
     # THIS IS NOT DEAD CODE. UNCOMMENT TO SAVE A SNAPSHOT WHEN UPDATING THIS TEST
-    # with open('tests/test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json', 'w+') as file:
+    # with open(
+    #     file_relative_path(
+    #         __file__, '../test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json'
+    #     ), 'w+'
+    # ) as file:
     #     json.dump(expectationSuiteValidationResultSchema.dump(evrs), file, indent=2)
     #
-    # with open('tests/render/fixtures/BasicDatasetProfiler_evrs.json', 'w+') as file:
+    # with open(
+    #     file_relative_path(
+    #         __file__, '../render/fixtures/BasicDatasetProfiler_evrs.json')
+    #     , 'w+'
+    # ) as file:
     #     json.dump(expectationSuiteValidationResultSchema.dump(evrs), file, indent=2)
 
     with open(
@@ -437,7 +448,7 @@ def test_snapshot_BasicDatasetProfiler_on_titanic():
         "r",
     ) as file:
         expected_evrs = expectationSuiteValidationResultSchema.load(
-            json.load(file, object_pairs_hook=OrderedDict)
+            json.load(file)
         )
 
     # We know that python 2 does not guarantee the order of value_counts, which causes a different
@@ -457,7 +468,6 @@ def test_snapshot_BasicDatasetProfiler_on_titanic():
     del expected_evrs.meta["run_id"]
     del evrs.meta["run_id"]
     del evrs.meta["batch_kwargs"]["ge_batch_id"]
+    del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
 
-    # DISABLE TEST IN PY2 BECAUSE OF ORDER ISSUE AND NEAR-EOL
-    if not PY2:
-        assert expected_evrs == evrs
+    assert expected_evrs == evrs
