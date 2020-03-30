@@ -174,10 +174,19 @@ def test_tap_new_on_context_builds_runnable_tap_file(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
     tap_file = os.path.abspath(os.path.join(root_dir, "..", "tap.py"))
-    status, output = subprocess.getstatusoutput(f"python {tap_file}")
+    # In travis on osx, python may not execute from the build dir
+    cmdstring = f"python {tap_file}"
+    if os.environ.get("TRAVIS_OS_NAME") == "osx":
+        build_dir = os.environ.get("TRAVIS_BUILD_DIR")
+        print(os.listdir(build_dir))
+        cmdstring = f"python3 {tap_file}"
+    print("about to run: " + cmdstring)
+    print(os.curdir)
+    print(os.listdir(os.curdir))
+    print(os.listdir(os.path.abspath(os.path.join(root_dir, ".."))))
+    status, output = subprocess.getstatusoutput(cmdstring)
     assert status == 0
     assert output == "Validation Succeeded!"
-
 
 def test_tap_new_on_context_builds_runnable_tap_file_that_fails_validation(
     caplog, empty_data_context, filesystem_csv
@@ -226,8 +235,13 @@ def test_tap_new_on_context_builds_runnable_tap_file_that_fails_validation(
     assert result.exit_code == 0
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
-
+    # In travis on osx, python may not execute from the build dir
     tap_file = os.path.abspath(os.path.join(root_dir, "..", "tap.py"))
+    cmdstring = f"python {tap_file}"
+    if os.environ.get("TRAVIS_OS_NAME") == "osx":
+        build_dir = os.environ.get("TRAVIS_BUILD_DIR")
+        cmdstring = f"PYTHONPATH={build_dir} " + cmdstring
+
     status, output = subprocess.getstatusoutput(f"python {tap_file}")
     assert status == 1
     assert output == "Validation Failed!"
