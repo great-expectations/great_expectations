@@ -1146,4 +1146,4 @@ def test_list_validation_operators_data_context_with_none_returns_empty_list(tit
 
 
 def test_list_validation_operators_data_context_with_one(titanic_data_context):
-    assert titanic_data_context.list_validation_operator_names() == ["default"]
+    assert titanic_data_context.list_validation_operator_names() == ["action_list_operator"]
