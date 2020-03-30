@@ -938,7 +938,7 @@ class DataAsset(object):
             elif isinstance(expectation_suite, string_types):
                 try:
                     with open(expectation_suite, 'r') as infile:
-                        expectation_suite = expectationSuiteSchema.loads(infile.read()).data
+                        expectation_suite = expectationSuiteSchema.loads(infile.read())
                 except ValidationError:
                     raise
                 except IOError:
