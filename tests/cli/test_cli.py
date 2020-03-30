@@ -26,13 +26,13 @@ def test_cli_command_entrance(caplog):
 
   Most commands follow this format: great_expectations <NOUN> <VERB>
 
-  The nouns are: datasource, docs, project, suite
+  The nouns are: datasource, docs, project, suite, validation-operator
 
   Most nouns accept the following verbs: new, list, edit
 
-  In addition, the CLI supports the following special commands:
+  In particular, the CLI supports the following special commands:
 
-  - great_expectations init : same as `project new`
+  - great_expectations init : create a new great_expectations project
 
   - great_expectations datasource profile : profile a  datasource
 
@@ -44,12 +44,13 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  datasource  datasource operations
-  docs        data docs operations
-  init        Initialize a new Great Expectations project.
-  project     project operations
-  suite       expectation suite operations
-  tap         tap operations
+  datasource           datasource operations
+  docs                 data docs operations
+  init                 Initialize a new Great Expectations project.
+  project              project operations
+  suite                expectation suite operations
+  tap                  tap operations
+  validation-operator  validation operator operations
 """
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)

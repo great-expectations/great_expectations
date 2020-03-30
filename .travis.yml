@@ -18,7 +18,7 @@ stages:
     if: branch != master
 jobs:
   allow_failures:
-    - if: os = windows
+    - if: os = windows OR os = osx
   include:
   - stage: test
     dist: trusty
@@ -62,6 +62,35 @@ jobs:
         --slack_channel=notifications-great_expectations tests/
     after_success:
       - python --version
+  - stage: experimental
+    os: osx
+    osx_image: xcode9.4
+    name: "Python 3.7.5 on macOS"
+    language: bash
+    before_install:
+      - python3 --version
+      - which postgres
+      - brew update
+      - brew services start postgresql
+      - brew services
+      # TODO This seems to fail when running outside a debugging mode build so allow it to pass
+      - /usr/local/opt/postgres/bin/createuser --superuser postgres --host=127.0.0.1 || echo 'no postgres for you'
+    install:
+      - pip3 install numpy scipy
+      - if [ -z "$PANDAS" ]; then pip3 install pandas; else pip3 install pandas==$PANDAS; fi
+      - pip3 install --upgrade pytest
+      - pip3 install -r requirements-dev.txt
+      - pip3 install pytest-slack
+    before_script:
+      - python3 --version
+      # TODO enable postgres for mac builds (see above todo)
+      - psql -c 'create database test_ci;' -U postgres --host=127.0.0.1 || echo 'no postgres for you'
+    script:
+      # TODO enable postgres for mac builds (see above todos)
+      - pytest --no-postgresql --no-spark --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL
+        --slack_channel=notifications-great_expectations tests/
+    after_success:
+      - python3 --version
   - stage: deploy
     python: 3.6
     script:
