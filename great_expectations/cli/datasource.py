@@ -285,7 +285,7 @@ def add_datasource(context, choose_one_data_asset=False):
     :param context:
     :param choose_one_data_asset: optional - if True, this signals the method that the intent
             is to let user choose just one data asset (e.g., a file) and there is no need
-            to configure a batch kwargsgenerator that comprehensively scans the datasource for data assets
+            to configure a batch kwargs generator that comprehensively scans the datasource for data assets
     :return: a tuple: datasource_name, data_source_type
     """
 
@@ -826,7 +826,7 @@ def get_batch_kwargs(context,
         batch_kwargs_generator_name = select_batch_kwargs_generator(context, datasource_name,
                                                                   available_data_assets_dict=available_data_assets_dict)
 
-    # if the user provided us with the batch kwargsgenerator name and the generator asset, we have everything we need -
+    # if the user provided us with the batch kwargs generator name and the generator asset, we have everything we need -
     # let's ask the generator to build batch kwargs for this asset - we are done.
     if batch_kwargs_generator_name is not None and generator_asset is not None:
         generator = datasource.get_batch_kwargs_generator(batch_kwargs_generator_name)
@@ -1271,8 +1271,8 @@ def profile_datasource(
 Specify the one you want the profiler to use in batch_kwargs_generator_name argument.</red>      
 """
 
-    msg_error_no_generators_found = """<red>No batch kwargsgenerators can list available data assets in datasource {0:s}.
-The datasource might be empty or a batch kwargsgenerator not configured in the config file.</red>    
+    msg_error_no_generators_found = """<red>No batch kwargs generators can list available data assets in datasource 
+    {0:s}. The datasource might be empty or a batch kwargs generator not configured in the config file.</red>    
 """
 
     msg_prompt_enter_data_asset_list = """Enter comma-separated list of data asset names (e.g., {0:s})   
@@ -1326,11 +1326,11 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 cli_message(msg_some_data_assets_not_found.format("," .join(profiling_results['error']['not_found_data_assets'])))
             elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS:
                 cli_message(msg_too_many_data_assets.format(profiling_results['error']['num_data_assets'], datasource_name))
-            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_MULTIPLE_batch_kwargs_generatorS_FOUND:
+            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND:
                 cli_message(
                     msg_error_multiple_generators_found.format(datasource_name))
                 sys.exit(1)
-            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_NO_batch_kwargs_generator_FOUND:
+            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND:
                 cli_message(
                     msg_error_no_generators_found.format(datasource_name))
                 sys.exit(1)

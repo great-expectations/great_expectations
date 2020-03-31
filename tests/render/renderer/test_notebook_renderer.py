@@ -1540,7 +1540,7 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     assert context.list_datasources() == [
         {'module_name': 'great_expectations.datasource', 'class_name': 'PandasDatasource',
          'data_asset_type': {'module_name': 'great_expectations.dataset', 'class_name': 'PandasDataset'},
-         'generators': {'mygenerator': {'class_name': 'SubdirReaderBatchKwargsGenerator', 'base_directory': '../data'}},
+         'batch_kwargs_generators': {'mygenerator': {'class_name': 'SubdirReaderBatchKwargsGenerator', 'base_directory': '../data'}},
          'name': 'mydatasource'}]
     assert context.get_validation_result("warning") == {}
 
