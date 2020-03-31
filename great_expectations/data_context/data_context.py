@@ -40,7 +40,7 @@ from great_expectations.core.logging.usage_statistics import (
     run_validation_operator_usage_statistics,
     UsageStatisticsHandler,
     usage_statistics_enabled_method,
-)
+    save_expectation_suite_usage_statistics)
 
 from great_expectations.validator.validator import Validator
 from great_expectations.data_context.templates import (
@@ -862,6 +862,10 @@ class BaseDataContext(object):
                 "expectation_suite %s not found" % expectation_suite_name
             )
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.save_expectation_suite",
+        args_payload_fn=save_expectation_suite_usage_statistics,
+    )
     def save_expectation_suite(self, expectation_suite, expectation_suite_name=None):
         """Save the provided expectation suite into the DataContext.
 
