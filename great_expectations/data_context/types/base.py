@@ -197,12 +197,17 @@ class DatasourceConfigSchema(Schema):
     batch_kwargs_generators = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     credentials = fields.Raw(allow_none=True)
 
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        if 'generators' in data:
+            raise ge_exceptions.InvalidConfigError(
+                "Your current configuration uses the 'generators' key in a datasource, but in version 0.10 of "
+                "GE, that key is renamed to 'batch_kwargs_generators'. Please update your config to continue."
+            )
+
     # noinspection PyUnusedLocal
     @post_load
     def make_datasource_config(self, data, **kwargs):
-        # Why this validation isn't working natively, I don't know
-        if "class_name" not in data:
-            raise ValidationError("missing field: class_name")
         return DatasourceConfig(**data)
 
 

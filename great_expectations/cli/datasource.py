@@ -150,7 +150,7 @@ def datasource_list(directory):
             event="cli.datasource.list",
             success=True
         )
-    except ge_exceptions.ConfigNotFoundError as err:
+    except (ge_exceptions.ConfigNotFoundError, ge_exceptions.InvalidConfigError) as err:
         cli_message("<red>{}</red>".format(err.message))
     finally:
         if failed and context is not None:
