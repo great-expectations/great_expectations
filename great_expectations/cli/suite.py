@@ -192,7 +192,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
         payload = edit_expectation_suite_usage_statistics(
             data_context=context,
-            expectation_suite_name=suite
+            expectation_suite_name=suite.expectation_suite_name
         )
 
         send_usage_message(
