@@ -366,6 +366,7 @@ new directory or use this template:
           base_directory: uncommitted/data_docs/local_site/
 
 
+.. _Usage Statistics:
 ****************************************************
 Usage Statistics
 ****************************************************
