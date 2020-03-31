@@ -321,7 +321,6 @@ def load_library(library_name, install_instructions_string=None):
             are different from 'pip install library_name'
     :return: True if the library was loaded successfully, False otherwise
     """
-    verify_dynamic_loading_support(module_name=library_name, package_name=None)
     try:
         loaded_module = importlib.import_module(library_name)
         return True
