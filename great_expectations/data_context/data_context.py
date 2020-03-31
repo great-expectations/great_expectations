@@ -71,8 +71,6 @@ logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
-FALSEY_STRINGS = ["FALSE", "False", "f", "F", "0"]
-GLOBAL_CONFIG_PATHS = ["/etc/great_expectations.conf", os.path.expanduser("~/.great_expectations/great_expectations.conf")]
 
 
 class BaseDataContext(object):
@@ -102,6 +100,11 @@ class BaseDataContext(object):
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
     GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
+    FALSEY_STRINGS = ["FALSE", "False", "f", "F", "0"]
+    GLOBAL_CONFIG_PATHS = [
+        os.path.expanduser("~/.great_expectations/great_expectations.conf"),
+        "/etc/great_expectations.conf"
+    ]
 
     @classmethod
     def validate_config(cls, project_config):
@@ -249,7 +252,7 @@ class BaseDataContext(object):
         if environment_variable and os.environ.get(environment_variable, False):
             return os.environ.get(environment_variable)
         if conf_file_section and conf_file_option:
-            for config_path in GLOBAL_CONFIG_PATHS:
+            for config_path in BaseDataContext.GLOBAL_CONFIG_PATHS:
                 config = configparser.ConfigParser()
                 config.read(config_path)
                 config_value = config.get(conf_file_section, conf_file_option, fallback=None)
@@ -260,11 +263,11 @@ class BaseDataContext(object):
     def _check_global_usage_statistics_opt_out(self):
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
-            if ge_usage_stats in FALSEY_STRINGS:
+            if ge_usage_stats in BaseDataContext.FALSEY_STRINGS:
                 return True
             else:
-                logger.warning("GE_USAGE_STATS environment variable must be one of: {}".format(FALSEY_STRINGS))
-        for config_path in GLOBAL_CONFIG_PATHS:
+                logger.warning("GE_USAGE_STATS environment variable must be one of: {}".format(BaseDataContext.FALSEY_STRINGS))
+        for config_path in BaseDataContext.GLOBAL_CONFIG_PATHS:
             config = configparser.ConfigParser()
             config.read(config_path)
             try:
