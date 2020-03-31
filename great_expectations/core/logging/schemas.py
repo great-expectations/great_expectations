@@ -370,8 +370,7 @@ run_validation_operator_payload_schema = {
     "type": "object",
     "properties": {
         "anonymized_operator_name": {
-            "type": "string",
-            "maxLength": 256,
+            "$ref": "#/definitions/anonymized_string"
         },
         "anonymized_batches": {
             "type": "array",
@@ -383,6 +382,23 @@ run_validation_operator_payload_schema = {
     },
     "required": [
         "anonymized_operator_name"
+    ],
+    "additionalProperties": False
+}
+
+save_or_edit_expectation_suite_payload_schema = {
+    "$schema": "http://json-schema.org/schema#",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+    },
+    "type": "object",
+    "properties": {
+        "anonymized_expectation_suite_name": {
+            "$ref": "#/definitions/anonymized_string"
+        },
+    },
+    "required": [
+        "anonymized_expectation_suite_name"
     ],
     "additionalProperties": False
 }
@@ -401,7 +417,8 @@ usage_statistics_record_schema = {
         "run_validation_operator_payload": run_validation_operator_payload_schema,
         "anonymized_data_docs_site": anonymized_data_docs_site_schema,
         "anonymized_batch": anonymized_batch_schema,
-        "anonymized_expectation_suite": anonymized_expectation_suite_schema
+        "anonymized_expectation_suite": anonymized_expectation_suite_schema,
+        "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
     },
     "type": "object",
     "properties": {
@@ -444,6 +461,20 @@ usage_statistics_record_schema = {
             "type": "object",
             "properties": {
                 "event": {
+                    "enum": [
+                        "data_context.save_expectation_suite",
+                        "cli.suite.edit",
+                    ]
+                },
+                "event_payload": {
+                    "$ref": "#/definitions/save_or_edit_expectation_suite_payload"
+                }
+            }
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
                     "enum": ["data_context.run_validation_operator"],
                 },
                 "event_payload": {
@@ -468,7 +499,6 @@ usage_statistics_record_schema = {
                 "event": {
                     "enum": [
                         "cli.suite.list",
-                        "cli.suite.edit",
                         "cli.suite.new",
                         "cli.store.list",
                         "cli.project.check_config",
