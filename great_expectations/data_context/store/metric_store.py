@@ -32,7 +32,7 @@ class MetricStore(Store):
                     ]
                 )
 
-        super(MetricStore, self).__init__(store_backend=store_backend)
+        super().__init__(store_backend=store_backend)
 
     # noinspection PyMethodMayBeStatic
     def _validate_value(self, value):
@@ -56,10 +56,11 @@ class EvaluationParameterStore(MetricStore):
             verify_dynamic_loading_support(module_name=store_backend_module_name, package_name=None)
             store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
 
+            # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
                 store_backend["table_name"] = store_backend.get("table_name", "ge_evaluation_parameters")
-        super(EvaluationParameterStore, self).__init__(store_backend=store_backend)
+        super().__init__(store_backend=store_backend)
 
     def get_bind_params(self, run_id):
         params = {}
