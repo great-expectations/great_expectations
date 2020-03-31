@@ -32,6 +32,7 @@ class HtmlSiteStore(object):
         verify_dynamic_loading_support(module_name=store_backend_module_name, package_name=None)
         store_class = load_class(store_backend_class_name, store_backend_module_name)
 
+        # Store Class was loaded successfully; verify that it is of a correct subclass.
         if not issubclass(store_class, TupleStoreBackend):
             raise DataContextError("Invalid configuration: HtmlSiteStore needs a TupleStoreBackend")
         if "filepath_template" in store_backend or ("fixed_length_key" in store_backend and

@@ -19,6 +19,7 @@ class ValidationsStore(Store):
             verify_dynamic_loading_support(module_name=store_backend_module_name, package_name=None)
             store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
 
+            # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, TupleStoreBackend):
                 # Provide defaults for this common case
                 store_backend["filepath_suffix"] = store_backend.get("filepath_suffix", ".json")
