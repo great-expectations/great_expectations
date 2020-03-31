@@ -11,7 +11,7 @@ from tests.integration.usage_statistics.test_integration_usage_statistics import
 
 
 @pytest.fixture
-def in_memory_data_context_config():
+def in_memory_data_context_config_usage_stats_enabled():
     return DataContextConfig(**{
         "commented_map": {},
         "config_version": 1,
@@ -47,8 +47,8 @@ def in_memory_data_context_config():
     })
 
 
-def test_consistent_name_anonymization(in_memory_data_context_config):
-    context = BaseDataContext(in_memory_data_context_config)
+def test_consistent_name_anonymization(in_memory_data_context_config_usage_stats_enabled):
+    context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
     assert context.data_context_id == "6a52bdfa-e182-455b-a825-e69f076e67d6"
     payload = run_validation_operator_usage_statistics(
         context, "action_list_operator",
@@ -61,13 +61,14 @@ def test_consistent_name_anonymization(in_memory_data_context_config):
 @mock.patch("great_expectations.DataContext.build_data_docs")
 @mock.patch("requests.Response")
 @mock.patch("requests.Session")
-def test_usage_statistics_sent(mock_build_data_docs, mock_response, mock_session, in_memory_data_context_config):
+def test_usage_statistics_sent(mock_build_data_docs, mock_response, mock_session,
+                               in_memory_data_context_config_usage_stats_enabled):
     # TODO this isn't working because messages are being refactored.
     mock_build_data_docs.return_value = {"local_site": "file:///data_docs"}
     mock_session.post.return_value = True
     mock_response.status_code = 200
 
-    context = BaseDataContext(in_memory_data_context_config)
+    context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
     assert context.anonymous_usage_statistics.enabled == True
     assert mock_session.post.call_count == 1
 
@@ -84,26 +85,26 @@ def test_usage_statistics_sent(mock_build_data_docs, mock_response, mock_session
 
 # Test opt outs
 # TODO parameterize this test for 3-4 types of False's
-def test_opt_out_environment_variable(in_memory_data_context_config):
+def test_opt_out_environment_variable(in_memory_data_context_config_usage_stats_enabled):
     """Set the env variable GE_USAGE_STATS value to any of the following: FALSE, False, false, 0"""
     assert False
 
 
 # TODO parameterize this test for 3-4 types of False's
-def test_opt_out_etc(in_memory_data_context_config, tmp_path_factory):
+def test_opt_out_etc(in_memory_data_context_config_usage_stats_enabled, tmp_path_factory):
     """Create /etc/great_expectations.conf file and set the ‘enabled’ option in the [anonymous_usage_statistics] section to any of the following: FALSE, False, false, 0"""
     assert False
 
 
 # TODO parameterize this test for 3-4 types of False's
-def test_opt_out_home_folder(in_memory_data_context_config):
+def test_opt_out_home_folder(in_memory_data_context_config_usage_stats_enabled):
     """Create ~/.great_expectations/great_expectations.conf file and set the ‘enabled’ option in the [anonymous_usage_statistics] section to any of the following: FALSE, False, false, 0"""
     assert False
 
 
 # TODO parameterize this test for 3-4 types of False's
 @mock.patch("DataContext.build_data_docs")
-def test_opt_out_yml(in_memory_data_context_config):
+def test_opt_out_yml(in_memory_data_context_config_usage_stats_enabled):
     """
     The feature is turned on for a particular Data Context when the property
     anonymous_usage_statistics.enabled in the DataContextConfig file is:
@@ -113,7 +114,7 @@ def test_opt_out_yml(in_memory_data_context_config):
 
 
 # Test precedence: environment variable > /etc > home folder > yml
-def test_opt_out_env_var_overrides_home_folder(in_memory_data_context_config, tmp_path_factory, monkeypatch):
+def test_opt_out_env_var_overrides_home_folder(in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch):
     home_config_dir = tmp_path_factory.mktemp("home_dir")
     home_config_dir = str(home_config_dir)
     etc_config_dir = tmp_path_factory.mktemp("etc")
@@ -132,13 +133,13 @@ def test_opt_out_env_var_overrides_home_folder(in_memory_data_context_config, tm
     monkeypatch.setenv("GE_USAGE_STATS", "False")
 
     with mock.patch("great_expectations.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS", config_dirs):
-        assert in_memory_data_context_config.anonymous_usage_statistics.enabled is True
-        context = BaseDataContext(in_memory_data_context_config)
+        assert in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled is True
+        context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
         project_config = context._project_config
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_env_var_overrides_etc(in_memory_data_context_config, tmp_path_factory, monkeypatch):
+def test_opt_out_env_var_overrides_etc(in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch):
     home_config_dir = tmp_path_factory.mktemp("home_dir")
     home_config_dir = str(home_config_dir)
     etc_config_dir = tmp_path_factory.mktemp("etc")
@@ -157,21 +158,21 @@ def test_opt_out_env_var_overrides_etc(in_memory_data_context_config, tmp_path_f
     monkeypatch.setenv("GE_USAGE_STATS", "False")
 
     with mock.patch("great_expectations.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS", config_dirs):
-        assert in_memory_data_context_config.anonymous_usage_statistics.enabled is True
-        context = BaseDataContext(in_memory_data_context_config)
+        assert in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled is True
+        context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
         project_config = context._project_config
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_env_var_overrides_yml(in_memory_data_context_config, monkeypatch):
+def test_opt_out_env_var_overrides_yml(in_memory_data_context_config_usage_stats_enabled, monkeypatch):
     monkeypatch.setenv("GE_USAGE_STATS", "False")
-    assert in_memory_data_context_config.anonymous_usage_statistics.enabled is True
-    context = BaseDataContext(in_memory_data_context_config)
+    assert in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled is True
+    context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
     project_config = context._project_config
     assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_home_folder_overrides_etc(in_memory_data_context_config, tmp_path_factory):
+def test_opt_out_home_folder_overrides_etc(in_memory_data_context_config_usage_stats_enabled, tmp_path_factory):
     home_config_dir = tmp_path_factory.mktemp("home_dir")
     home_config_dir = str(home_config_dir)
     etc_config_dir = tmp_path_factory.mktemp("etc")
@@ -193,13 +194,13 @@ def test_opt_out_home_folder_overrides_etc(in_memory_data_context_config, tmp_pa
         enabled_config.write(configfile)
 
     with mock.patch("great_expectations.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS", config_dirs):
-        assert in_memory_data_context_config.anonymous_usage_statistics.enabled is True
-        context = BaseDataContext(in_memory_data_context_config)
+        assert in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled is True
+        context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
         project_config = context._project_config
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_home_folder_overrides_yml(in_memory_data_context_config, tmp_path_factory):
+def test_opt_out_home_folder_overrides_yml(in_memory_data_context_config_usage_stats_enabled, tmp_path_factory):
     home_config_dir = tmp_path_factory.mktemp("home_dir")
     home_config_dir = str(home_config_dir)
     etc_config_dir = tmp_path_factory.mktemp("etc")
@@ -221,13 +222,13 @@ def test_opt_out_home_folder_overrides_yml(in_memory_data_context_config, tmp_pa
         enabled_config.write(configfile)
 
     with mock.patch("great_expectations.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS", config_dirs):
-        assert in_memory_data_context_config.anonymous_usage_statistics.enabled is True
-        context = BaseDataContext(in_memory_data_context_config)
+        assert in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled is True
+        context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
         project_config = context._project_config
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_etc_overrides_yml(in_memory_data_context_config, tmp_path_factory):
+def test_opt_out_etc_overrides_yml(in_memory_data_context_config_usage_stats_enabled, tmp_path_factory):
     home_config_dir = tmp_path_factory.mktemp("home_dir")
     home_config_dir = str(home_config_dir)
     etc_config_dir = tmp_path_factory.mktemp("etc")
@@ -249,8 +250,8 @@ def test_opt_out_etc_overrides_yml(in_memory_data_context_config, tmp_path_facto
         disabled_config.write(configfile)
 
     with mock.patch("great_expectations.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS", config_dirs):
-        assert in_memory_data_context_config.anonymous_usage_statistics.enabled is True
-        context = BaseDataContext(in_memory_data_context_config)
+        assert in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled is True
+        context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
         project_config = context._project_config
         assert project_config.anonymous_usage_statistics.enabled is False
 
