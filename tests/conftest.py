@@ -655,7 +655,7 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
     context.add_datasource(
         "titanic",
         class_name="PandasDatasource",
-        generators={
+        batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": os.path.join(project_dir, "data/titanic/")
@@ -665,7 +665,7 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
     context.add_datasource(
         "random",
         class_name="PandasDatasource",
-        generators={
+        batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": os.path.join(project_dir, "data/random/")

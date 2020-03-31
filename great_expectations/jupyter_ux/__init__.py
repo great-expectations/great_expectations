@@ -146,10 +146,10 @@ def show_available_data_asset_names(context, data_source_name=None):
             continue
         html += "<h2 style='margin: 0'>Datasource: {0:s} ({1:s})</h2>".format(datasource['name'], datasource['class_name'])
         ds = context.get_datasource(datasource['name'])
-        generators = ds.list_generators()
+        generators = ds.list_batch_kwargs_generators()
         for generator_info in generators:
-            html += "generator: {0:s} ({1:s})".format(generator_info['name'], generator_info['class_name'])
-            generator = ds.get_generator(generator_info['name'])
+            html += "batch_kwargs_generator: {0:s} ({1:s})".format(generator_info['name'], generator_info['class_name'])
+            generator = ds.get_batch_kwargs_generator(generator_info['name'])
 
             # TODO hacks to deal w/ inconsistent return types. Remove urgently
             mystery_object = generator.get_available_data_asset_names()
@@ -176,7 +176,7 @@ def show_available_data_asset_names(context, data_source_name=None):
                 html += "</ul>"
             else:
                 display(HTML("""<p>No data assets found in this data source.</p>
-<p>Read about how generators derive data assets from data sources:
+<p>Read about how batch kwargs generators derive data assets from data sources:
 <a href="https://great-expectations.readthedocs.io/en/latest/how_to_add_data_source.html">Data assets</a>
 </p>"""))
         display(HTML(html))

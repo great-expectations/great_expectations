@@ -8,7 +8,7 @@ except ImportError:
     boto3 = None
 
 from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.datasource.generator.batch_kwargs_generator import BatchKwargsGenerator
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.datasource.types import S3BatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
     """
-    S3 Generator provides support for generating batches of data from an S3 bucket. For the S3 generator, assets must
+    S3 BatchKwargGenerator provides support for generating batches of data from an S3 bucket. For the S3 batch kwargs generator, assets must
     be individually defined using a prefix and glob, although several additional configuration parameters are available
     for assets (see below).
 
@@ -26,7 +26,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         datasources:
           my_datasource:
             ...
-            generators:
+            batch_kwargs_generator:
               my_s3_generator:
                 class_name: S3GlobReaderBatchKwargsGenerator
                 bucket: my_bucket.my_organization.priv
@@ -63,7 +63,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         """Initialize a new S3GlobReaderBatchKwargsGenerator
 
         Args:
-            name: the name of the generator
+            name: the name of the batch kwargs generator
             datasource: the datasource to which it is attached
             bucket: the name of the s3 bucket from which it generates batch_kwargs
             reader_options: options passed to the datasource reader method
@@ -97,7 +97,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         try:
             self._s3 = boto3.client('s3', **boto3_options)
         except TypeError:
-            raise(ImportError("Unable to load boto3, which is required for S3 generator"))
+            raise(ImportError("Unable to load boto3, which is required for S3 batch kwargs generator"))
 
     @property
     def reader_options(self):

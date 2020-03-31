@@ -35,14 +35,14 @@ class PandasDatasource(Datasource):
     recognized_batch_parameters = {'reader_method', 'reader_options', 'limit'}
 
     @classmethod
-    def build_configuration(cls, data_asset_type=None, generators=None, boto3_options=None, reader_method=None,
+    def build_configuration(cls, data_asset_type=None, batch_kwargs_generators=None, boto3_options=None, reader_method=None,
                             reader_options=None, limit=None, **kwargs):
         """
         Build a full configuration object for a datasource, potentially including generators with defaults.
 
         Args:
             data_asset_type: A ClassConfig dictionary
-            generators: Generator configuration dictionary
+            batch_kwargs_generators: Generator configuration dictionary
             boto3_options: Optional dictionary with key-value pairs to pass to boto3 during instantiation.
             reader_method: Optional default reader_method for generated batches
             reader_options: Optional default reader_options for generated batches
@@ -64,8 +64,8 @@ class PandasDatasource(Datasource):
 
         configuration = kwargs
         configuration["data_asset_type"] = data_asset_type
-        if generators:
-            configuration["generators"] = generators
+        if batch_kwargs_generators:
+            configuration["batch_kwargs_generators"] = batch_kwargs_generators
 
         if boto3_options is not None:
             if isinstance(boto3_options, dict):
@@ -89,9 +89,9 @@ class PandasDatasource(Datasource):
 
         return configuration
 
-    def __init__(self, name="pandas", data_context=None, data_asset_type=None, generators=None,
+    def __init__(self, name="pandas", data_context=None, data_asset_type=None, batch_kwargs_generators=None,
                  boto3_options=None, reader_method=None, reader_options=None, limit=None, **kwargs):
-        configuration_with_defaults = PandasDatasource.build_configuration(data_asset_type, generators,
+        configuration_with_defaults = PandasDatasource.build_configuration(data_asset_type, batch_kwargs_generators,
                                                                            boto3_options,
                                                                            reader_method=reader_method,
                                                                            reader_options=reader_options,
@@ -99,11 +99,11 @@ class PandasDatasource(Datasource):
                                                                            **kwargs)
 
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
-        generators = configuration_with_defaults.pop("generators", None)
+        batch_kwargs_generators = configuration_with_defaults.pop("batch_kwargs_generators", None)
         super(PandasDatasource, self).__init__(name,
                                                data_context=data_context,
                                                data_asset_type=data_asset_type,
-                                               generators=generators,
+                                               batch_kwargs_generators=batch_kwargs_generators,
                                                **configuration_with_defaults)
 
         self._build_generators()

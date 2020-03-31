@@ -211,7 +211,11 @@ def test_suite_new_empty_suite_creates_empty_suite(
     citations = suite.get_citations()
     citations[0].pop("citation_date")
     assert citations[0] == {
-        "batch_kwargs": {"datasource": "mydatasource", "path": csv, 'reader_method': 'read_csv'},
+        "batch_kwargs": {
+            "datasource": "mydatasource",
+            "path": csv,
+            "reader_method": "read_csv",
+        },
         "batch_markers": None,
         "batch_parameters": None,
         "comment": "New suite added via CLI",
@@ -278,14 +282,15 @@ def test_suite_new_empty_suite_creates_empty_suite_with_no_jupyter(
     citations = suite.get_citations()
     citations[0].pop("citation_date")
     assert citations[0] == {
-        'batch_kwargs': {
-            'datasource': 'mydatasource',
-            'path': csv,
-            'reader_method': 'read_csv'
+        "batch_kwargs": {
+            "datasource": "mydatasource",
+            "path": csv,
+            "reader_method": "read_csv",
         },
-        'batch_markers': None,
-        'batch_parameters': None,
-        'comment': 'New suite added via CLI'}
+        "batch_markers": None,
+        "batch_parameters": None,
+        "comment": "New suite added via CLI",
+    }
 
     assert mock_subprocess.call_count == 0
     assert mock_webbroser.call_count == 0

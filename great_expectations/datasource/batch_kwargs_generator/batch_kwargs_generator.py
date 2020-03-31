@@ -16,7 +16,7 @@ class BatchKwargsGenerator(object):
     such as with time-based partitioning, downsampling, or other techniques appropriate 
     for the datasource.
 
-    For example, a generator could produce a SQL query that logically represents "rows in 
+    For example, a batch kwargs generator could produce a SQL query that logically represents "rows in
     the Events table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource 
     could use to materialize a SqlAlchemyDataset corresponding to that batch of data and 
     ready for validation.
@@ -26,7 +26,7 @@ class BatchKwargsGenerator(object):
     
     A Batch is the primary unit of validation in the Great Expectations DataContext. 
     Batches include metadata that identifies how they were constructed--the same “batch_kwargs”
-    assembled by the generator, While not every datasource will enable re-fetching a
+    assembled by the batch kwargs generator, While not every datasource will enable re-fetching a
     specific batch of data, GE can store snapshots of batches or store metadata from an
     external data version control system.
 
@@ -34,7 +34,7 @@ class BatchKwargsGenerator(object):
 
         my_datasource_1:
           class_name: PandasDatasource
-          generators:
+          batch_kwargs_generators:
             # This generator will provide two data assets, corresponding to the globs defined under the "file_logs"
             # and "data_asset_2" keys. The file_logs asset will be partitioned according to the match group
             # defined in partition_regex
@@ -52,7 +52,7 @@ class BatchKwargsGenerator(object):
 
         my_datasource_2:
           class_name: PandasDatasource
-          generators:
+          batch_kwargs_generators:
             # This generator will create one data asset per subdirectory in /data
             # Each asset will have partitions corresponding to the filenames in that subdirectory
             default:
@@ -63,7 +63,7 @@ class BatchKwargsGenerator(object):
 
         my_datasource_3:
           class_name: SqlalchemyDatasource
-          generators:
+          batch_kwargs_generators:
             # This generator will search for a file named with the name of the requested generator asset and the
             # .sql suffix to open with a query to use to generate data
              default:
@@ -93,7 +93,7 @@ class BatchKwargsGenerator(object):
         raise NotImplementedError
 
     def get_available_data_asset_names(self):
-        """Return the list of asset names known by this generator.
+        """Return the list of asset names known by this batch kwargs generator.
 
         Returns:
             A list of available names

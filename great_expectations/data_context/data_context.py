@@ -86,8 +86,8 @@ class BaseDataContext(object):
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
-    PROFILING_ERROR_CODE_NO_GENERATOR_FOUND = 4
-    PROFILING_ERROR_CODE_MULTIPLE_GENERATORS_FOUND = 5
+    PROFILING_ERROR_CODE_NO_batch_kwargs_generator_FOUND = 4
+    PROFILING_ERROR_CODE_MULTIPLE_batch_kwargs_generatorS_FOUND = 5
     UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
@@ -514,13 +514,13 @@ class BaseDataContext(object):
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def get_available_data_asset_names(self, datasource_names=None, generator_names=None):
-        """Inspect datasource and generators to provide available data_asset objects.
+    def get_available_data_asset_names(self, datasource_names=None, batch_kwargs_generator_names=None):
+        """Inspect datasource and batch kwargsgenerators to provide available data_asset objects.
 
         Args:
             datasource_names: list of datasources for which to provide available data_asset_name objects. If None, \
             return available data assets for all datasources.
-            generator_names: list of generators for which to provide available data_asset_name objects.
+            batch_kwargs_generator_names: list of batch kwargsgenerators for which to provide available data_asset_name objects.
 
         Returns:
             data_asset_names (dict): Dictionary describing available data assets
@@ -528,7 +528,7 @@ class BaseDataContext(object):
 
                 {
                   datasource_name: {
-                    generator_name: [ data_asset_1, data_asset_2, ... ]
+                    batch_kwargs_generator_name: [ data_asset_1, data_asset_2, ... ]
                     ...
                   }
                   ...
@@ -545,22 +545,22 @@ class BaseDataContext(object):
                 "Datasource names must be a datasource name, list of datasource names or None (to list all datasources)"
             )
 
-        if generator_names is not None:
-            if isinstance(generator_names, string_types):
-                generator_names = [generator_names]
-            if len(generator_names) == len(datasource_names):  # Iterate over both together
+        if batch_kwargs_generator_names is not None:
+            if isinstance(batch_kwargs_generator_names, string_types):
+                batch_kwargs_generator_names = [batch_kwargs_generator_names]
+            if len(batch_kwargs_generator_names) == len(datasource_names):  # Iterate over both together
                 for idx, datasource_name in enumerate(datasource_names):
                     datasource = self.get_datasource(datasource_name)
                     data_asset_names[datasource_name] = \
-                        datasource.get_available_data_asset_names(generator_names[idx])
+                        datasource.get_available_data_asset_names(batch_kwargs_generator_names[idx])
 
-            elif len(generator_names) == 1:
+            elif len(batch_kwargs_generator_names) == 1:
                 datasource = self.get_datasource(datasource_names[0])
-                datasource_names[datasource_names[0]] = datasource.get_available_data_asset_names(generator_names)
+                datasource_names[datasource_names[0]] = datasource.get_available_data_asset_names(batch_kwargs_generator_names)
 
             else:
                 raise ValueError(
-                    "If providing generators, you must either specify one generator for each datasource or only "
+                    "If providing batch kwargsgenerator, you must either specify one for each datasource or only "
                     "one datasource."
                 )
         else:  # generator_names is None
@@ -574,12 +574,12 @@ class BaseDataContext(object):
 
         return data_asset_names
 
-    def build_batch_kwargs(self, datasource, generator, name=None, partition_id=None, **kwargs):
-        """Builds batch kwargs using the provided datasource, generator, and batch_parameters.
+    def build_batch_kwargs(self, datasource, batch_kwargs_generator, name=None, partition_id=None, **kwargs):
+        """Builds batch kwargs using the provided datasource, batch kwargsgenerator, and batch_parameters.
 
         Args:
             datasource (str): the name of the datasource for which to build batch_kwargs
-            generator (str): the name of the generator to use to build batch_kwargs
+            batch_kwargs_generator (str): the name of the batch kwargsgenerator to use to build batch_kwargs
             name (str): an optional name batch_parameter
             **kwargs: additional batch_parameters
 
@@ -588,8 +588,12 @@ class BaseDataContext(object):
 
         """
         datasource_obj = self.get_datasource(datasource)
-        batch_kwargs = datasource_obj.build_batch_kwargs(generator=generator, name=name, partition_id=partition_id,
-                                                         **kwargs)
+        batch_kwargs = datasource_obj.build_batch_kwargs(
+            batch_kwargs_generator=batch_kwargs_generator,
+            name=name,
+            partition_id=partition_id,
+            **kwargs
+        )
         return batch_kwargs
 
     def get_batch(self, batch_kwargs, expectation_suite_name, data_asset_type=None, batch_parameters=None):
@@ -715,20 +719,22 @@ class BaseDataContext(object):
 
         return datasource
 
-    def add_generator(self, datasource_name, generator_name, class_name, **kwargs):
-        """Add a generator to the named datasource, using the provided configuration.
+    def add_batch_kwargs_generator(self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs):
+        """
+        Add a batch kwargsgenerator to the named datasource, using the provided
+        configuration.
 
         Args:
-            datasource_name: name of datasource to which to add the new generator
-            generator_name: name of the generator to add
-            class_name: class of the generator to add
-            **kwargs: generator configuration, provided as kwargs
+            datasource_name: name of datasource to which to add the new batch kwargs generator
+            batch_kwargs_generator_name: name of the generator to add
+            class_name: class of the batch kwargs generator to add
+            **kwargs: batch kwargs generator configuration, provided as kwargs
 
         Returns:
 
         """
         datasource_obj = self.get_datasource(datasource_name)
-        generator = datasource_obj.add_generator(name=generator_name, class_name=class_name, **kwargs)
+        generator = datasource_obj.add_batch_kwargs_generator(name=batch_kwargs_generator_name, class_name=class_name, **kwargs)
         return generator
 
     def get_config(self):
@@ -1103,7 +1109,7 @@ class BaseDataContext(object):
 
     def profile_datasource(self,
                            datasource_name,
-                           generator_name=None,
+                           batch_kwargs_generator_name=None,
                            data_assets=None,
                            max_data_assets=20,
                            profile_all_data_assets=True,
@@ -1115,9 +1121,9 @@ class BaseDataContext(object):
 
         Args:
             datasource_name: the name of the datasource for which to profile data_assets
-            generator_name: the name of the generator to use to get batches
+            batch_kwargs_generator_name: the name of the batch kwargs generator to use to get batches
             data_assets: list of data asset names to profile
-            max_data_assets: if the number of data assets the generator yields is greater than this max_data_assets,
+            max_data_assets: if the number of data assets the batch kwargs generator yields is greater than this max_data_assets,
                 profile_all_data_assets=True is required to profile all
             profile_all_data_assets: when True, all data assets are profiled, regardless of their number
             profiler: the profiler class to use
@@ -1155,47 +1161,47 @@ class BaseDataContext(object):
             raise ge_exceptions.ProfilerError(
                 "No datasource {} found.".format(datasource_name))
 
-        if generator_name is None:
+        if batch_kwargs_generator_name is None:
             # if no generator name is passed as an arg and the datasource has only
             # one generator with data asset names, use it.
             # if ambiguous, raise an exception
             for name in datasource_data_asset_names_dict.keys():
-                if generator_name is not None:
+                if batch_kwargs_generator_name is not None:
                     profiling_results = {
                         'success': False,
                         'error': {
-                            'code': DataContext.PROFILING_ERROR_CODE_MULTIPLE_GENERATORS_FOUND
+                            'code': DataContext.PROFILING_ERROR_CODE_MULTIPLE_batch_kwargs_generatorS_FOUND
                         }
                     }
                     return profiling_results
 
                 if len(datasource_data_asset_names_dict[name]["names"]) > 0:
                     available_data_asset_name_list = datasource_data_asset_names_dict[name]["names"]
-                    generator_name = name
+                    batch_kwargs_generator_name = name
 
-            if generator_name is None:
+            if batch_kwargs_generator_name is None:
                 profiling_results = {
                     'success': False,
                     'error': {
-                        'code': DataContext.PROFILING_ERROR_CODE_NO_GENERATOR_FOUND
+                        'code': DataContext.PROFILING_ERROR_CODE_NO_batch_kwargs_generator_FOUND
                     }
                 }
                 return profiling_results
         else:
             # if the generator name is passed as an arg, get this generator's available data asset names
             try:
-                available_data_asset_name_list = datasource_data_asset_names_dict[generator_name]["names"]
+                available_data_asset_name_list = datasource_data_asset_names_dict[batch_kwargs_generator_name]["names"]
             except KeyError:
                 raise ge_exceptions.ProfilerError(
-                    "Batch Kwarg Generator {} not found. Specify the name of a generator configured in this datasource".format(generator_name))
+                    "batch kwargs Generator {} not found. Specify the name of a generator configured in this datasource".format(batch_kwargs_generator_name))
 
         available_data_asset_name_list = sorted(available_data_asset_name_list, key=lambda x: x[0])
 
         if len(available_data_asset_name_list) == 0:
             raise ge_exceptions.ProfilerError(
-                "No Data Assets found in Datasource {}. Used generator: {}.".format(
+                "No Data Assets found in Datasource {}. Used batch kwargs generator: {}.".format(
                     datasource_name,
-                    generator_name)
+                    batch_kwargs_generator_name)
             )
         total_data_assets = len(available_data_asset_name_list)
 
@@ -1234,9 +1240,9 @@ class BaseDataContext(object):
 
             data_asset_names_to_profiled = [name[0] for name in available_data_asset_name_list]
         if not dry_run:
-            logger.info("Profiling all %d data assets from generator %s" % (len(available_data_asset_name_list), generator_name))
+            logger.info("Profiling all %d data assets from batch kwargs generator %s" % (len(available_data_asset_name_list), batch_kwargs_generator_name))
         else:
-            logger.info("Found %d data assets from generator %s" % (len(available_data_asset_name_list), generator_name))
+            logger.info("Found %d data assets from batch kwargs generator %s" % (len(available_data_asset_name_list), batch_kwargs_generator_name))
 
         profiling_results['success'] = True
 
@@ -1251,7 +1257,7 @@ class BaseDataContext(object):
                     profiling_results['results'].append(
                         self.profile_data_asset(
                             datasource_name=datasource_name,
-                            generator_name=generator_name,
+                            batch_kwargs_generator_name=batch_kwargs_generator_name,
                             data_asset_name=name,
                             profiler=profiler,
                             run_id=run_id,
@@ -1289,7 +1295,7 @@ class BaseDataContext(object):
 
     def profile_data_asset(self,
                            datasource_name,
-                           generator_name=None,
+                           batch_kwargs_generator_name=None,
                            data_asset_name=None,
                            batch_kwargs=None,
                            expectation_suite_name=None,
@@ -1300,9 +1306,9 @@ class BaseDataContext(object):
         Profile a data asset
 
         :param datasource_name: the name of the datasource to which the profiled data asset belongs
-        :param generator_name: the name of the generator to use to get batches (only if batch_kwargs are not provided)
+        :param batch_kwargs_generator_name: the name of the batch kwargs generator to use to get batches (only if batch_kwargs are not provided)
         :param data_asset_name: the name of the profiled data asset
-        :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the generator (generator_name arg) will choose a batch
+        :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the batch kwargs generator (generator_name arg) will choose a batch
         :param profiler: the profiler class to use
         :param run_id: optional - if set, the validation result created by the profiler will be under the provided run_id
         :param additional_batch_kwargs:
@@ -1324,18 +1330,19 @@ class BaseDataContext(object):
 
         if batch_kwargs is None:
             try:
-                generator = self.get_datasource(datasource_name=datasource_name).get_generator(generator_name=generator_name)
+                generator = self.get_datasource(datasource_name=datasource_name).get_batch_kwargs_generator(
+                    name=batch_kwargs_generator_name)
                 batch_kwargs = generator.build_batch_kwargs(data_asset_name, **additional_batch_kwargs)
             except ge_exceptions.BatchKwargsError:
                 raise ge_exceptions.ProfilerError(
-                    "Unable to build batch_kwargs for datasource {}, using generator {} for name {}".format(
+                    "Unable to build batch_kwargs for datasource {}, using batch kwargs generator {} for name {}".format(
                         datasource_name,
-                        generator_name,
+                        batch_kwargs_generator_name,
                         data_asset_name
                     ))
             except ValueError:
                 raise ge_exceptions.ProfilerError(
-                    "Unable to find datasource {} or generator {}.".format(datasource_name, generator_name)
+                    "Unable to find datasource {} or batch kwargs generator {}.".format(datasource_name, batch_kwargs_generator_name)
                 )
         else:
             batch_kwargs.update(additional_batch_kwargs)
@@ -1354,11 +1361,11 @@ class BaseDataContext(object):
         start_time = datetime.datetime.now()
 
         if expectation_suite_name is None:
-            if generator_name is None and data_asset_name is None:
+            if batch_kwargs_generator_name is None and data_asset_name is None:
                 expectation_suite_name = datasource_name + "." + profiler.__name__ + "." + BatchKwargs(
                     batch_kwargs).to_id()
             else:
-                expectation_suite_name = datasource_name + "." + generator_name + "." + data_asset_name + "." + \
+                expectation_suite_name = datasource_name + "." + batch_kwargs_generator_name + "." + data_asset_name + "." + \
                                          profiler.__name__
 
         self.create_expectation_suite(
@@ -1432,7 +1439,7 @@ class DataContext(BaseDataContext):
     Use the `create` classmethod to create a new empty config, or instantiate the DataContext
     by passing the path to an existing data context root directory.
 
-    DataContexts use data sources you're already familiar with. Generators help introspect data stores and data execution
+    DataContexts use data sources you're already familiar with. BatchKwargGenerators help introspect data stores and data execution
     frameworks (such as airflow, Nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. This
     enables fetching, validation, profiling, and documentation of  your data in a way that is meaningful within your
     existing infrastructure and work environment.
@@ -1443,18 +1450,18 @@ class DataContext(BaseDataContext):
     - The datasource actually connects to a source of materialized data and returns Great Expectations DataAssets \
       connected to a compute environment and ready for validation.
 
-    - The Generator knows how to introspect datasources and produce identifying "batch_kwargs" that define \
+    - The BatchKwargGenerator knows how to introspect datasources and produce identifying "batch_kwargs" that define \
       particular slices of data.
 
     - The generator_asset is a specific name -- often a table name or other name familiar to users -- that \
-      generators can slice into batches.
+      batch kwargs generators can slice into batches.
 
     An expectation suite is a collection of expectations ready to be applied to a batch of data. Since
     in many projects it is useful to have different expectations evaluate in different contexts--profiling
     vs. testing; warning vs. error; high vs. low compute; ML model or dashboard--suites provide a namespace
     option for selecting which expectations a DataContext returns.
 
-    In many simple projects, the datasource or generator name may be omitted and the DataContext will infer
+    In many simple projects, the datasource or batch kwargs generator name may be omitted and the DataContext will infer
     the correct name when there is no ambiguity.
 
     Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".

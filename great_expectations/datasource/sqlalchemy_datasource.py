@@ -38,13 +38,13 @@ class SqlAlchemyDatasource(Datasource):
     recognized_batch_parameters = {'query_parameters', 'limit'}
 
     @classmethod
-    def build_configuration(cls, data_asset_type=None, generators=None, **kwargs):
+    def build_configuration(cls, data_asset_type=None, batch_kwargs_generators=None, **kwargs):
         """
         Build a full configuration object for a datasource, potentially including generators with defaults.
 
         Args:
             data_asset_type: A ClassConfig dictionary
-            generators: Generator configuration dictionary
+            batch_kwargs_generators: Generator configuration dictionary
             **kwargs: Additional kwargs to be part of the datasource constructor's initialization
 
         Returns:
@@ -62,23 +62,23 @@ class SqlAlchemyDatasource(Datasource):
 
         configuration = kwargs
         configuration["data_asset_type"] = data_asset_type
-        if generators is not None:
-            configuration["generators"] = generators
+        if batch_kwargs_generators is not None:
+            configuration["batch_kwargs_generators"] = batch_kwargs_generators
 
         return configuration
 
-    def __init__(self, name="default", data_context=None, data_asset_type=None, credentials=None, generators=None, **kwargs):
+    def __init__(self, name="default", data_context=None, data_asset_type=None, credentials=None, batch_kwargs_generators=None, **kwargs):
         if not sqlalchemy:
             raise DatasourceInitializationError(name, "ModuleNotFoundError: No module named 'sqlalchemy'")
 
-        configuration_with_defaults = SqlAlchemyDatasource.build_configuration(data_asset_type, generators, **kwargs)
+        configuration_with_defaults = SqlAlchemyDatasource.build_configuration(data_asset_type, batch_kwargs_generators, **kwargs)
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
-        generators = configuration_with_defaults.pop("generators", None)
+        batch_kwargs_generators = configuration_with_defaults.pop("batch_kwargs_generators", None)
         super(SqlAlchemyDatasource, self).__init__(
             name,
             data_context=data_context,
             data_asset_type=data_asset_type,
-            generators=generators,
+            batch_kwargs_generators=batch_kwargs_generators,
             **configuration_with_defaults)
 
         if credentials is not None:

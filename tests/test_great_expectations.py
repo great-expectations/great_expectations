@@ -6,7 +6,6 @@ from datetime import datetime
 
 import pandas as pd
 import pytest
-from six import PY2
 
 import great_expectations as ge
 from great_expectations.core import (
