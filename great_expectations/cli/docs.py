@@ -37,7 +37,7 @@ def docs_build(directory, site_name, view=True):
     Build Data Docs for a project.
 
     :param directory:
-    :param site_name: ne of the first-level keys in the "data_docs_sites" section of the configuration
+    :param site_name: name for the first-level keys in the "data_docs_sites" section of the configuration
     :param view:
     """
     try:
