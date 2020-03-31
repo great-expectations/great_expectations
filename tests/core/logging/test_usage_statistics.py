@@ -1,4 +1,6 @@
 import mock
+import configparser
+import os
 import pytest
 
 from great_expectations.core.logging.usage_statistics import run_validation_operator_usage_statistics
@@ -52,7 +54,7 @@ def test_consistent_name_anonymization(in_memory_data_context_config):
         context, "action_list_operator",
         assets_to_validate=[({"__fake_batch_kwargs": "mydatasource"}, "__fake_expectation_suite_name")], run_id="foo")
     # For a *specific* data_context_id, all names will be consistently anonymized
-    assert payload["validation_operator_name"] == '5bb011891aa7d41401e57759d5f5cb01'
+    assert payload["anonymized_operator_name"] == '5bb011891aa7d41401e57759d5f5cb01'
 
 
 # TODO lots more tests like this for various events and payloads
@@ -88,7 +90,7 @@ def test_opt_out_environment_variable(in_memory_data_context_config):
 
 
 # TODO parameterize this test for 3-4 types of False's
-def test_opt_out_etc(in_memory_data_context_config):
+def test_opt_out_etc(in_memory_data_context_config, tmp_path_factory):
     """Create /etc/great_expectations.conf file and set the ‘enabled’ option in the [anonymous_usage_statistics] section to any of the following: FALSE, False, false, 0"""
     assert False
 
@@ -111,25 +113,144 @@ def test_opt_out_yml(in_memory_data_context_config):
 
 
 # Test precedence: environment variable > /etc > home folder > yml
-def test_opt_out_env_var_overrides_home_folder(in_memory_data_context_config):
-    assert False
+def test_opt_out_env_var_overrides_home_folder(in_memory_data_context_config, tmp_path_factory, monkeypatch):
+    home_config_dir = tmp_path_factory.mktemp("home_dir")
+    home_config_dir = str(home_config_dir)
+    etc_config_dir = tmp_path_factory.mktemp("etc")
+    etc_config_dir = str(etc_config_dir)
+    config_dirs = [home_config_dir, etc_config_dir]
+    config_dirs = [
+        os.path.join(config_dir, "great_expectations.conf") for config_dir in config_dirs
+    ]
+
+    enabled_config = configparser.ConfigParser()
+    enabled_config["anonymous_usage_statistics"] = {"enabled": True}
+
+    with open(os.path.join(home_config_dir, "great_expectations.conf"), 'w') as configfile:
+        enabled_config.write(configfile)
+
+    monkeypatch.setenv("GE_USAGE_STATS", "False")
+
+    with mock.patch("great_expectations.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS", config_dirs):
+        assert in_memory_data_context_config.anonymous_usage_statistics.enabled is True
+        context = BaseDataContext(in_memory_data_context_config)
+        project_config = context._project_config
+        assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_env_var_overrides_etc(in_memory_data_context_config):
-    assert False
+def test_opt_out_env_var_overrides_etc(in_memory_data_context_config, tmp_path_factory, monkeypatch):
+    home_config_dir = tmp_path_factory.mktemp("home_dir")
+    home_config_dir = str(home_config_dir)
+    etc_config_dir = tmp_path_factory.mktemp("etc")
+    etc_config_dir = str(etc_config_dir)
+    config_dirs = [home_config_dir, etc_config_dir]
+    config_dirs = [
+        os.path.join(config_dir, "great_expectations.conf") for config_dir in config_dirs
+    ]
+
+    enabled_config = configparser.ConfigParser()
+    enabled_config["anonymous_usage_statistics"] = {"enabled": True}
+
+    with open(os.path.join(etc_config_dir, "great_expectations.conf"), 'w') as configfile:
+        enabled_config.write(configfile)
+
+    monkeypatch.setenv("GE_USAGE_STATS", "False")
+
+    with mock.patch("great_expectations.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS", config_dirs):
+        assert in_memory_data_context_config.anonymous_usage_statistics.enabled is True
+        context = BaseDataContext(in_memory_data_context_config)
+        project_config = context._project_config
+        assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_env_var_overrides_yml(in_memory_data_context_config):
-    assert False
+def test_opt_out_env_var_overrides_yml(in_memory_data_context_config, monkeypatch):
+    monkeypatch.setenv("GE_USAGE_STATS", "False")
+    assert in_memory_data_context_config.anonymous_usage_statistics.enabled is True
+    context = BaseDataContext(in_memory_data_context_config)
+    project_config = context._project_config
+    assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_home_folder_overrides_etc(in_memory_data_context_config):
-    assert False
+def test_opt_out_home_folder_overrides_etc(in_memory_data_context_config, tmp_path_factory):
+    home_config_dir = tmp_path_factory.mktemp("home_dir")
+    home_config_dir = str(home_config_dir)
+    etc_config_dir = tmp_path_factory.mktemp("etc")
+    etc_config_dir = str(etc_config_dir)
+    config_dirs = [home_config_dir, etc_config_dir]
+    config_dirs = [
+        os.path.join(config_dir, "great_expectations.conf") for config_dir in config_dirs
+    ]
+
+    enabled_config = configparser.ConfigParser()
+    enabled_config["anonymous_usage_statistics"] = {"enabled": True}
+
+    disabled_config = configparser.ConfigParser()
+    disabled_config["anonymous_usage_statistics"] = {"enabled": False}
+
+    with open(os.path.join(home_config_dir, "great_expectations.conf"), 'w') as configfile:
+        disabled_config.write(configfile)
+    with open(os.path.join(etc_config_dir, "great_expectations.conf"), 'w') as configfile:
+        enabled_config.write(configfile)
+
+    with mock.patch("great_expectations.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS", config_dirs):
+        assert in_memory_data_context_config.anonymous_usage_statistics.enabled is True
+        context = BaseDataContext(in_memory_data_context_config)
+        project_config = context._project_config
+        assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_home_folder_overrides_yml(in_memory_data_context_config):
-    assert False
+def test_opt_out_home_folder_overrides_yml(in_memory_data_context_config, tmp_path_factory):
+    home_config_dir = tmp_path_factory.mktemp("home_dir")
+    home_config_dir = str(home_config_dir)
+    etc_config_dir = tmp_path_factory.mktemp("etc")
+    etc_config_dir = str(etc_config_dir)
+    config_dirs = [home_config_dir, etc_config_dir]
+    config_dirs = [
+        os.path.join(config_dir, "great_expectations.conf") for config_dir in config_dirs
+    ]
+
+    enabled_config = configparser.ConfigParser()
+    enabled_config["anonymous_usage_statistics"] = {"enabled": True}
+
+    disabled_config = configparser.ConfigParser()
+    disabled_config["anonymous_usage_statistics"] = {"enabled": False}
+
+    with open(os.path.join(home_config_dir, "great_expectations.conf"), 'w') as configfile:
+        disabled_config.write(configfile)
+    with open(os.path.join(etc_config_dir, "great_expectations.conf"), 'w') as configfile:
+        enabled_config.write(configfile)
+
+    with mock.patch("great_expectations.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS", config_dirs):
+        assert in_memory_data_context_config.anonymous_usage_statistics.enabled is True
+        context = BaseDataContext(in_memory_data_context_config)
+        project_config = context._project_config
+        assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_etc_overrides_yml(in_memory_data_context_config):
-    assert False
+def test_opt_out_etc_overrides_yml(in_memory_data_context_config, tmp_path_factory):
+    home_config_dir = tmp_path_factory.mktemp("home_dir")
+    home_config_dir = str(home_config_dir)
+    etc_config_dir = tmp_path_factory.mktemp("etc")
+    etc_config_dir = str(etc_config_dir)
+    config_dirs = [home_config_dir, etc_config_dir]
+    config_dirs = [
+        os.path.join(config_dir, "great_expectations.conf") for config_dir in config_dirs
+    ]
+
+    enabled_config = configparser.ConfigParser()
+    enabled_config["anonymous_usage_statistics"] = {"enabled": True}
+
+    disabled_config = configparser.ConfigParser()
+    disabled_config["anonymous_usage_statistics"] = {"enabled": False}
+
+    with open(os.path.join(home_config_dir, "great_expectations.conf"), 'w') as configfile:
+        enabled_config.write(configfile)
+    with open(os.path.join(etc_config_dir, "great_expectations.conf"), 'w') as configfile:
+        disabled_config.write(configfile)
+
+    with mock.patch("great_expectations.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS", config_dirs):
+        assert in_memory_data_context_config.anonymous_usage_statistics.enabled is True
+        context = BaseDataContext(in_memory_data_context_config)
+        project_config = context._project_config
+        assert project_config.anonymous_usage_statistics.enabled is False
+
