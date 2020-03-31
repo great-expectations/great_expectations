@@ -538,6 +538,7 @@ class BaseDataContext(object):
             return self.validation_operators[validation_operator_name].run(
                 assets_to_validate=assets_to_validate,
                 run_id=run_id,
+                evaluation_parameters=evaluation_parameters
                 **kwargs
             )
 
@@ -729,7 +730,7 @@ class BaseDataContext(object):
             key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
         self.stores[self.expectations_store_name].set(key, expectation_suite)
-        self._evaluation_parameter_dependencies_compiled = True
+        self._evaluation_parameter_dependencies_compiled = False
 
     def _store_metrics(self, requested_metrics, validation_results, target_store_name):
         """
