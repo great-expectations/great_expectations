@@ -50,7 +50,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
        [36mclass_name:[0m TableBatchKwargsGenerator[0m
    [36mcredentials:[0m[0m
      [36murl:[0m {}[0m
-    [36mdata_asset_type:[0m[0m
+   [36mdata_asset_type:[0m[0m
      [36mclass_name:[0m SqlAlchemyDataset[0m
      [36mmodule_name:[0m None[0m
 """.format(url).strip()
