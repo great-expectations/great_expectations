@@ -85,7 +85,7 @@ class InMemoryStoreBackend(StoreBackend):
 
     # noinspection PyUnusedLocal
     def __init__(self, runtime_environment=None, fixed_length_key=False):
-        super(InMemoryStoreBackend, self).__init__(fixed_length_key=fixed_length_key)
+        super().__init__(fixed_length_key=fixed_length_key)
         self._store = {}
 
     def _get(self, key):

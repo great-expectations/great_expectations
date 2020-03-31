@@ -19,6 +19,7 @@ class ExpectationsStore(Store):
             verify_dynamic_loading_support(module_name=store_backend_module_name, package_name=None)
             store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
 
+            # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, TupleStoreBackend):
                 # Provide defaults for this common case
                 store_backend["filepath_suffix"] = store_backend.get("filepath_suffix", ".json")
@@ -29,7 +30,7 @@ class ExpectationsStore(Store):
                     "key_columns", ["expectation_suite_name"]
                 )
 
-        super(ExpectationsStore, self).__init__(store_backend=store_backend, runtime_environment=runtime_environment)
+        super().__init__(store_backend=store_backend, runtime_environment=runtime_environment)
 
     def serialize(self, key, value):
         return self._expectationSuiteSchema.dumps(value)

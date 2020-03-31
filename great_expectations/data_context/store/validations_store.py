@@ -32,7 +32,7 @@ class ValidationsStore(Store):
                         "batch_identifier"
                     ]
                 )
-        super(ValidationsStore, self).__init__(store_backend=store_backend, runtime_environment=runtime_environment)
+        super().__init__(store_backend=store_backend, runtime_environment=runtime_environment)
 
     def serialize(self, key, value):
         return self._expectationSuiteValidationResultSchema.dumps(value)
