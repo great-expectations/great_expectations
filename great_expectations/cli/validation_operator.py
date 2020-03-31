@@ -257,7 +257,7 @@ Let's help you specify the batch of data your want the validation operator to va
                 ) = get_batch_kwargs(
                     context,
                     datasource_name=data_source.name,
-                    batch_kwargs_generator=None,
+                    batch_kwargs_generator_name=None,
                     generator_asset=None,
                     additional_batch_kwargs=None,
                 )
