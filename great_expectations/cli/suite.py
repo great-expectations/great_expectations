@@ -192,14 +192,15 @@ A batch of data is required to edit the suite - let's help you to specify it."""
             cli_message("To continue editing this suite, run <green>jupyter "
                         f"notebook {notebook_path}</green>")
 
-        if jupyter:
-            subprocess.call(["jupyter", "notebook", notebook_path])
-
         send_usage_message(
             data_context=context,
             event="cli.suite.edit",
             success=True
         )
+
+        if jupyter:
+            subprocess.call(["jupyter", "notebook", notebook_path])
+
     except Exception as e:
         send_usage_message(
             data_context=context,
