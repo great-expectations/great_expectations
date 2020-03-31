@@ -24,7 +24,7 @@ from great_expectations.render.renderer.content_block import (
 @pytest.fixture(scope="module")
 def titanic_expectations():
     with open(file_relative_path(__file__, "../test_sets/titanic_expectations.json"), "r") as infile:
-        return expectationSuiteSchema.load(json.load(infile, object_pairs_hook=OrderedDict)).data
+        return expectationSuiteSchema.load(json.load(infile, object_pairs_hook=OrderedDict))
 
 
 @pytest.mark.smoketest
@@ -834,7 +834,7 @@ def test_ValidationResultsColumnSectionRenderer_render_table(titanic_profiled_na
     assert content_block.content_block_type == "table"
     assert len(content_block.table) == 6
     assert content_block_stringified.count("$icon") == 6
-    assert "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5." in content_block_stringified
+    assert "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6" in content_block_stringified
     assert "may have any number of unique values." in content_block_stringified
     assert "may have any fraction of unique values." in content_block_stringified
     assert "values must not be null, at least $mostly_pct % of the time." in content_block_stringified

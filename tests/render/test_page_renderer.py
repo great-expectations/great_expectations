@@ -161,20 +161,27 @@ def test_ProfilingResultsPageRenderer(titanic_profiled_evrs_1):
 
 def test_ValidationResultsPageRenderer_render_validation_header(titanic_profiled_evrs_1):
     validation_header = ValidationResultsPageRenderer._render_validation_header(titanic_profiled_evrs_1).to_json_dict()
+
     expected_validation_header = {
-        'content_block_type': 'header', 'styling': {'classes': ['col-12', 'p-0'], 'header': {
-            'classes': ['alert', 'alert-secondary']}}, 'header': {'content_block_type': 'string_template',
-                                                                  'string_template': {'template': 'Overview',
-                                                                                      'tag': 'h5',
-                                                                                      'styling': {'classes': ['m-0']}}},
+        'content_block_type': 'header',
+        'styling': {
+            'classes': ['col-12', 'p-0'], 'header': {
+                'classes': ['alert', 'alert-secondary']}}, 'header': {'content_block_type': 'string_template',
+                                                                      'string_template': {'template': 'Overview',
+                                                                                          'tag': 'h5',
+                                                                                          'styling': {
+                                                                                              'classes': ['m-0']}}},
         'subheader': {'content_block_type': 'string_template', 'string_template': {
             'template': '${suite_title} ${expectation_suite_name}\n${status_title} ${success}',
             'params': {'suite_title': 'Expectation Suite:', 'status_title': 'Status:',
                        'expectation_suite_name': 'default',
                        'success': '<i class="fas fa-times text-danger" aria-hidden="true"></i> Failed'},
             'styling': {'params': {'suite_title': {'classes': ['h6']},
-                                   'status_title': {'classes': ['h6']}},
+                                   'status_title': {'classes': ['h6']},
+                                   'expectation_suite_name': {'tag': 'a', 'attributes': {
+                                       'href': '../../../expectations/default.html'}}},
                         'classes': ['mb-0', 'mt-1']}}}}
+
     # print(validation_header)
     assert validation_header == expected_validation_header
 
@@ -189,8 +196,8 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
                                 'header': {'content_block_type': 'string_template',
                                            'string_template': {'template': 'Info', 'tag': 'h6',
                                                                'styling': {'classes': ['m-0']}}},
-                                'table': [['Great Expectations Version', "0.9.0b1+310.g05637d48.dirty"],
-                                          ['Run ID', "20200130T171315.316592Z"]]}
+                                'table': [['Great Expectations Version', "0.9.7+17.g02805059.dirty"],
+                                          ['Run ID', "20200322T170247.671855Z"]]}
 
     assert validation_info == expected_validation_info
 

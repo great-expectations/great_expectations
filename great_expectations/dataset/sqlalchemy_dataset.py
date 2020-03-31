@@ -41,13 +41,17 @@ except ImportError:
 
 try:
     import pybigquery.sqlalchemy_bigquery
-    from collections import namedtuple
-    # NOTE: pybigquery does not export its type map, so we are accessing a protected member.
-    # This is potentially error-prone, and should be fixed pending response from pybigquery maintainers
-    # https://github.com/mxmzdlv/pybigquery/issues/46
-    BigQueryTypes = namedtuple('BigQueryTypes', sorted(pybigquery.sqlalchemy_bigquery._type_map))
-    bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
+    try:
+        getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
+        bigquery_types_tuple = None
+    except AttributeError:
+        # In older versions of the pybigquery driver, types were not exported, so we use a hack
+        logger.warning("Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later.")
+        from collections import namedtuple
+        BigQueryTypes = namedtuple('BigQueryTypes', sorted(pybigquery.sqlalchemy_bigquery._type_map))
+        bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
 except ImportError:
+    bigquery_types_tuple = None
     pybigquery = None
 
 
@@ -713,15 +717,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         except (TypeError, AttributeError):
             pass
 
-        try:
-            # Bigquery
-            if isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
-                # NOTE: pybigquery does not export its type map, so we are accessing a protected member.
-                # This is potentially error-prone, and should be fixed pending response from pybigquery maintainers
-                # https://github.com/mxmzdlv/pybigquery/issues/46
-                return bigquery_types_tuple
-        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
-            pass
+        # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
+        if (isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect) and
+                bigquery_types_tuple is not None):
+            return bigquery_types_tuple
+
         return self.dialect
 
     @DocInherit
@@ -769,7 +769,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 }
 
         except AttributeError:
-            raise ValueError("Unrecognized sqlalchemy type: %s" % type_)
+            raise ValueError("Type not recognized by current driver: %s" % type_)
 
     @DocInherit
     @DataAsset.expectation(['column', 'type_', 'mostly'])
@@ -812,8 +812,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 except AttributeError:
                     logger.debug("Unrecognized type: %s" % type_)
             if len(types) == 0:
-                logger.warning("No recognized sqlalchemy types in type_list for dialect %s" %
-                               type_module.__name__)
+                logger.warning("No recognized sqlalchemy types in type_list for current dialect.")
             types = tuple(types)
             success = issubclass(col_type, types)
 

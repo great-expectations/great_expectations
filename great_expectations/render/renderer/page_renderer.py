@@ -1,4 +1,5 @@
 import logging
+import os
 
 from marshmallow import ValidationError
 from six import string_types
@@ -142,6 +143,9 @@ class ValidationResultsPageRenderer(Renderer):
     def _render_validation_header(cls, validation_results):
         success = validation_results.success
         expectation_suite_name = validation_results.meta['expectation_suite_name']
+        expectation_suite_path_components = ['..' for _ in range(len(expectation_suite_name.split('.')) + 2)] \
+            + ["expectations"] + expectation_suite_name.split(".")
+        expectation_suite_path = os.path.join(*expectation_suite_path_components) + ".html"
         if success:
             success = '<i class="fas fa-check-circle text-success" aria-hidden="true"></i> Succeeded'
         else:
@@ -175,6 +179,12 @@ class ValidationResultsPageRenderer(Renderer):
                             },
                             "status_title": {
                                 "classes": ["h6"]
+                            },
+                            "expectation_suite_name": {
+                                "tag": "a",
+                                "attributes": {
+                                    "href": expectation_suite_path
+                                }
                             }
                         },
                         "classes": ["mb-0", "mt-1"]

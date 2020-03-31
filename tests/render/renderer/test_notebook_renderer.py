@@ -1,8 +1,13 @@
 import json
+import os
 
 import pytest
-from six import PY2
+import nbformat
 
+from nbconvert.preprocessors import ExecutePreprocessor
+
+from great_expectations import DataContext
+from great_expectations.cli.suite import _suite_edit
 from great_expectations.core import ExpectationSuiteSchema
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 
@@ -13,7 +18,7 @@ def critical_suite_with_citations():
     This hand made fixture has a wide range of expectations, and has a mix of
     metadata including an SampleExpectationsDatasetProfiler entry, and citations.
     """
-    schema = ExpectationSuiteSchema(strict=True)
+    schema = ExpectationSuiteSchema()
     critical_suite = {
         "expectation_suite_name": "critical",
         "meta": {
@@ -77,7 +82,7 @@ def critical_suite_with_citations():
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(critical_suite)).data
+    return schema.loads(json.dumps(critical_suite))
 
 
 @pytest.fixture
@@ -87,7 +92,7 @@ def suite_with_multiple_citations():
 
     The most recent citation does not have batch_kwargs
     """
-    schema = ExpectationSuiteSchema(strict=True)
+    schema = ExpectationSuiteSchema()
     critical_suite = {
         "expectation_suite_name": "critical",
         "meta": {
@@ -121,7 +126,7 @@ def suite_with_multiple_citations():
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(critical_suite)).data
+    return schema.loads(json.dumps(critical_suite))
 
 
 @pytest.fixture
@@ -130,7 +135,7 @@ def warning_suite():
     This hand made fixture has a wide range of expectations, and has a mix of
     metadata including SampleExpectationsDatasetProfiler entries.
     """
-    schema = ExpectationSuiteSchema(strict=True)
+    schema = ExpectationSuiteSchema()
     warning_suite = {
         "expectation_suite_name": "warning",
         "meta": {
@@ -367,7 +372,7 @@ def warning_suite():
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(warning_suite)).data
+    return schema.loads(json.dumps(warning_suite))
 
 
 def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
@@ -406,7 +411,7 @@ suite.expectations = []
 batch_kwargs = {
     'path': '/home/foo/data/10k.csv',
     'datasource': 'files_datasource'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -518,7 +523,7 @@ suite.expectations = []
 batch_kwargs = {
     'path': '/home/foo/data/10k.csv',
     'datasource': 'files_datasource'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -618,7 +623,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -730,7 +735,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {'foo': 'bar', 'datasource': 'things'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -839,7 +844,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -949,7 +954,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {'foo': 'bar', 'datasource': 'things'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -1058,7 +1063,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {'path': '../../3.csv', 'datasource': '3'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -1188,7 +1193,6 @@ def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
     assert found_expected
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_complex_suite(warning_suite):
     obs = NotebookRenderer().render(warning_suite, {"path": "foo/data"})
     assert isinstance(obs, dict)
@@ -1221,7 +1225,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {'path': '../../foo/data'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -1496,3 +1500,79 @@ context.open_data_docs(validation_result_identifier)""",
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
         assert obs_cell == expected_cell
     assert obs == expected
+
+
+def test_notebook_execution_with_pandas_backend(titanic_data_context):
+    """
+    To set this test up we:
+
+    - create a suite
+    - add a few expectations (both table and column level)
+    - verify that no validations have happened
+    - create the suite edit notebook by hijacking the private cli method
+
+
+    We then:
+    - execute that notebook (Note this will raise various errors like
+    CellExecutionError if any cell in the notebook fails
+    - create a new context from disk
+    - verify that a validation has been run with our expectation suite
+    """
+    context = titanic_data_context
+    root_dir = context.root_directory
+    uncommitted_dir = os.path.join(root_dir, "uncommitted")
+    suite_name = "warning"
+
+    context.create_expectation_suite(suite_name)
+    csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
+    batch_kwargs = {"datasource": "mydatasource", "path": csv_path}
+    batch = context.get_batch(batch_kwargs, suite_name)
+    batch.expect_table_column_count_to_equal(1)
+    batch.expect_table_row_count_to_equal(1313)
+    batch.expect_column_values_to_be_in_set("Sex", ["female", "male"])
+    batch.save_expectation_suite(discard_failed_expectations=False)
+
+    # Sanity check test setup
+    suite = context.get_expectation_suite(suite_name)
+    original_suite = suite
+    assert len(suite.expectations) == 3
+    assert context.list_expectation_suite_names() == [suite_name]
+    assert context.list_datasources() == [
+        {"class_name": "PandasDatasource", "name": "mydatasource"}
+    ]
+    assert context.get_validation_result("warning") == {}
+
+    # Create notebook
+    json_batch_kwargs = json.dumps(batch_kwargs)
+    _suite_edit(
+        suite_name,
+        "mydatasource",
+        directory=root_dir,
+        jupyter=False,
+        batch_kwargs=json_batch_kwargs,
+    )
+    edit_notebook_path = os.path.join(uncommitted_dir, "warning.ipynb")
+    assert os.path.isfile(edit_notebook_path)
+
+    with open(edit_notebook_path, "r") as f:
+        nb = nbformat.read(f, as_version=4)
+
+    # Run notebook
+    ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
+
+    # Useful to inspect executed notebook
+    with open(os.path.join(uncommitted_dir, "output.ipynb"), "w") as f:
+        nbformat.write(nb, f)
+
+    # Assertions about output
+    context = DataContext(root_dir)
+    obs_validation_result = context.get_validation_result("warning")
+    assert obs_validation_result.statistics == {
+        "evaluated_expectations": 3,
+        "successful_expectations": 2,
+        "unsuccessful_expectations": 1,
+        "success_percent": 66.66666666666666,
+    }
+    suite = context.get_expectation_suite(suite_name)
+    assert suite == original_suite

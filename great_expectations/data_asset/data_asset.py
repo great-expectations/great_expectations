@@ -309,7 +309,7 @@ class DataAsset(object):
         """
         if expectation_suite is not None:
             if isinstance(expectation_suite, dict):
-                expectation_suite = expectationSuiteSchema.load(expectation_suite).data
+                expectation_suite = expectationSuiteSchema.load(expectation_suite)
             else:
                 expectation_suite = copy.deepcopy(expectation_suite)
             self._expectation_suite = expectation_suite
@@ -836,7 +836,7 @@ class DataAsset(object):
             self._data_context.save_expectation_suite(expectation_suite)
         elif filepath is not None:
             with open(filepath, 'w') as outfile:
-                json.dump(expectationSuiteSchema.dump(expectation_suite).data, outfile, indent=2)
+                json.dump(expectationSuiteSchema.dump(expectation_suite), outfile, indent=2)
         else:
             raise ValueError("Unable to save config: filepath or data_context must be available.")
 
@@ -936,7 +936,7 @@ class DataAsset(object):
             elif isinstance(expectation_suite, string_types):
                 try:
                     with open(expectation_suite, 'r') as infile:
-                        expectation_suite = expectationSuiteSchema.loads(infile.read()).data
+                        expectation_suite = expectationSuiteSchema.loads(infile.read())
                 except ValidationError:
                     raise
                 except IOError:
