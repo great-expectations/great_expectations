@@ -45,17 +45,14 @@ def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
     datasources = context.list_datasources()
 
     assert datasources == [
-        {
-            "name": "wow_a_datasource",
-            "class_name": "PandasDatasource",
-            "data_asset_type": {"class_name": "PandasDataset",
-                                "module_name": "great_expectations.dataset"},
-            "generators": {"subdir_reader": {
-                "base_directory": base_directory,
-                "class_name": "SubdirReaderBatchKwargsGenerator"}},
-            "module_name": "great_expectations.datasource",
-        }
-    ]
+        {'batch_kwargs_generators': {'subdir_reader': {
+            'base_directory': base_directory,
+            'class_name': 'SubdirReaderBatchKwargsGenerator'}},
+         'class_name': 'PandasDatasource',
+         'data_asset_type': {'class_name': 'PandasDataset',
+                             'module_name': 'great_expectations.dataset'},
+         'module_name': 'great_expectations.datasource',
+         'name': 'wow_a_datasource'}]
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -67,13 +64,13 @@ def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
  - [36mname:[0m wow_a_datasource[0m
    [36mmodule_name:[0m great_expectations.datasource[0m
    [36mclass_name:[0m PandasDatasource[0m
-   [36mdata_asset_type:[0m[0m
-     [36mmodule_name:[0m great_expectations.dataset[0m
-     [36mclass_name:[0m PandasDataset[0m
-   [36mgenerators:[0m[0m
+   [36mbatch_kwargs_generators:[0m[0m
      [36msubdir_reader:[0m[0m
        [36mclass_name:[0m SubdirReaderBatchKwargsGenerator[0m
-       [36mbase_directory:[0m {}[0m""".format(base_directory).strip()
+       [36mbase_directory:[0m {}[0m
+   [36mdata_asset_type:[0m[0m
+     [36mmodule_name:[0m great_expectations.dataset[0m
+     [36mclass_name:[0m PandasDataset[0m""".format(base_directory).strip()
     stdout = result.output.strip()
     assert stdout == expected_output
     assert_no_logging_messages_or_tracebacks(caplog, result)
