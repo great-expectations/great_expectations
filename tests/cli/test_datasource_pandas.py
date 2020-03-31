@@ -2,9 +2,7 @@ from __future__ import unicode_literals
 
 import os
 
-import pytest
 from click.testing import CliRunner
-from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -36,7 +34,7 @@ def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
         "wow_a_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        generators={
+        batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": base_directory,
@@ -118,7 +116,7 @@ def test_cli_datasource_profile_answering_no(
         "my_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        generators={
+        batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
@@ -145,6 +143,7 @@ def test_cli_datasource_profile_answering_no(
     )
 
     stdout = result.stdout
+    print(stdout)
     assert result.exit_code == 0
     assert "Warning - this is a BETA feature." in stdout
     assert "Profiling 'my_datasource'" in stdout
@@ -159,7 +158,7 @@ def test_cli_datasource_profile_with_datasource_arg(
         "my_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        generators={
+        batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
@@ -223,7 +222,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
         "my_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        generators={
+        batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
@@ -289,7 +288,7 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
     empty_data_context.add_datasource(
         "my_datasource",
         class_name="PandasDatasource",
-        generators={
+        batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
@@ -367,7 +366,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
         "my_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        generators={
+        batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
@@ -433,7 +432,7 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
         "my_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        generators={
+        batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),

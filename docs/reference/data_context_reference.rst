@@ -260,7 +260,7 @@ new directory or use this template:
 
     # Welcome to Great Expectations! Always know what to expect from your data.
     #
-    # Here you can define datasources, batch kwarg generators, integrations and
+    # Here you can define datasources, batch kwargsgenerators, integrations and
     # more. This file is intended to be committed to your repo. For help with
     # configuration please:
     #   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#configuration
