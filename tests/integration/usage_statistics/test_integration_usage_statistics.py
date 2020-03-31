@@ -115,21 +115,24 @@ def logstream(valid_usage_statistics_message):
     # Warm up a logstream
     logStreamName = None
     message = copy.deepcopy(valid_usage_statistics_message)
-    message["event"] = "logstream.__warmup__"
-    requests.post(USAGE_STATISTICS_QA_URL, json=message)
+    message["data_context_id"] = "00000000-0000-0000-0000-000000000000"
+    res = requests.post(USAGE_STATISTICS_QA_URL, json=message)
+    assert res.status_code == 201
     attempts = 0
     while attempts < 3:
         attempts += 1
         time.sleep(2)
         logStreams = client.describe_log_streams(
             logGroupName=logGroupName,
-            orderBy='LastEventTime'
+            orderBy='LastEventTime',
+            descending=True,
+            limit=2,
         )
-        lastEventTimestamp = logStreams["logStreams"][-1].get("lastEventTimestamp")
+        lastEventTimestamp = logStreams["logStreams"][0].get("lastEventTimestamp")
         if lastEventTimestamp is not None:
             lastEvent = datetime.datetime.fromtimestamp(lastEventTimestamp / 1000)
             if (lastEvent - datetime.datetime.now()) < datetime.timedelta(seconds=30):
-                logStreamName = logStreams["logStreams"][-1]["logStreamName"]
+                logStreamName = logStreams["logStreams"][0]["logStreamName"]
                 break
     if logStreamName is None:
         assert False, "Unable to warm up a log stream for integration testing."
