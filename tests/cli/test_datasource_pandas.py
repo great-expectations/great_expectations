@@ -71,7 +71,7 @@ def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
      [36msubdir_reader:[0m[0m
        [36mclass_name:[0m SubdirReaderBatchKwargsGenerator[0m
        [36mbase_directory:[0m {}[0m
-    [36mdata_asset_type:[0m[0m
+   [36mdata_asset_type:[0m[0m
      [36mmodule_name:[0m great_expectations.dataset[0m
      [36mclass_name:[0m PandasDataset[0m""".format(base_directory).strip()
     stdout = result.output.strip()
