@@ -86,8 +86,8 @@ class BaseDataContext(object):
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
-    PROFILING_ERROR_CODE_NO_batch_kwargs_generator_FOUND = 4
-    PROFILING_ERROR_CODE_MULTIPLE_batch_kwargs_generatorS_FOUND = 5
+    PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND = 4
+    PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
     UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
@@ -515,12 +515,13 @@ class BaseDataContext(object):
             yaml.dump(config_variables, config_variables_file)
 
     def get_available_data_asset_names(self, datasource_names=None, batch_kwargs_generator_names=None):
-        """Inspect datasource and batch kwargsgenerators to provide available data_asset objects.
+        """Inspect datasource and batch kwargs generators to provide available data_asset objects.
 
         Args:
             datasource_names: list of datasources for which to provide available data_asset_name objects. If None, \
             return available data assets for all datasources.
-            batch_kwargs_generator_names: list of batch kwargsgenerators for which to provide available data_asset_name objects.
+            batch_kwargs_generator_names: list of batch kwargs generators for which to provide available
+            data_asset_name objects.
 
         Returns:
             data_asset_names (dict): Dictionary describing available data assets
@@ -560,7 +561,7 @@ class BaseDataContext(object):
 
             else:
                 raise ValueError(
-                    "If providing batch kwargsgenerator, you must either specify one for each datasource or only "
+                    "If providing batch kwargs generator, you must either specify one for each datasource or only "
                     "one datasource."
                 )
         else:  # generator_names is None
@@ -575,11 +576,11 @@ class BaseDataContext(object):
         return data_asset_names
 
     def build_batch_kwargs(self, datasource, batch_kwargs_generator, name=None, partition_id=None, **kwargs):
-        """Builds batch kwargs using the provided datasource, batch kwargsgenerator, and batch_parameters.
+        """Builds batch kwargs using the provided datasource, batch kwargs generator, and batch_parameters.
 
         Args:
             datasource (str): the name of the datasource for which to build batch_kwargs
-            batch_kwargs_generator (str): the name of the batch kwargsgenerator to use to build batch_kwargs
+            batch_kwargs_generator (str): the name of the batch kwargs generator to use to build batch_kwargs
             name (str): an optional name batch_parameter
             **kwargs: additional batch_parameters
 
@@ -721,7 +722,7 @@ class BaseDataContext(object):
 
     def add_batch_kwargs_generator(self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs):
         """
-        Add a batch kwargsgenerator to the named datasource, using the provided
+        Add a batch kwargs generator to the named datasource, using the provided
         configuration.
 
         Args:
@@ -1170,7 +1171,7 @@ class BaseDataContext(object):
                     profiling_results = {
                         'success': False,
                         'error': {
-                            'code': DataContext.PROFILING_ERROR_CODE_MULTIPLE_batch_kwargs_generatorS_FOUND
+                            'code': DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
                         }
                     }
                     return profiling_results
@@ -1183,7 +1184,7 @@ class BaseDataContext(object):
                 profiling_results = {
                     'success': False,
                     'error': {
-                        'code': DataContext.PROFILING_ERROR_CODE_NO_batch_kwargs_generator_FOUND
+                        'code': DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
                     }
                 }
                 return profiling_results

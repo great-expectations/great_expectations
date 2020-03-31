@@ -15,7 +15,7 @@ from tests.cli.utils import (
 )
 
 
-def test_cli_datasorce_list(empty_data_context, empty_sqlite_db, caplog):
+def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
@@ -45,14 +45,14 @@ def test_cli_datasorce_list(empty_data_context, empty_sqlite_db, caplog):
  - [36mname:[0m wow_a_datasource[0m
    [36mmodule_name:[0m great_expectations.datasource[0m
    [36mclass_name:[0m SqlAlchemyDatasource[0m
-   [36mcredentials:[0m[0m
-     [36murl:[0m {}[0m
-   [36mdata_asset_type:[0m[0m
-     [36mclass_name:[0m SqlAlchemyDataset[0m
-     [36mmodule_name:[0m None[0m
-   [36mgenerators:[0m[0m
+   [36mbatch_kwargs_generators:[0m[0m
      [36mdefault:[0m[0m
        [36mclass_name:[0m TableBatchKwargsGenerator[0m
+   [36mcredentials:[0m[0m
+     [36murl:[0m {}[0m
+    [36mdata_asset_type:[0m[0m
+     [36mclass_name:[0m SqlAlchemyDataset[0m
+     [36mmodule_name:[0m None[0m
 """.format(url).strip()
     stdout = result.output.strip()
 
@@ -85,7 +85,7 @@ def _add_datasource_and_credentials_to_context(context, datasource_name, sqlite_
             "module_name": "great_expectations.datasource",
             'credentials': OrderedDict([('url', url)]),
             'data_asset_type': {'class_name': 'SqlAlchemyDataset', 'module_name': None},
-            'generators': {'default': {'class_name': 'TableBatchKwargsGenerator'}},
+            'batch_kwargs_generators': {'default': {'class_name': 'TableBatchKwargsGenerator'}},
         }
     )
 
@@ -130,7 +130,7 @@ def _add_datasource__with_two_generators_and_credentials_to_context(
             'credentials': {
                 'url': url},
             'data_asset_type': {'class_name': 'SqlAlchemyDataset', 'module_name': None},
-            'generators': {'default': {'class_name': 'TableBatchKwargsGenerator'},
+            'batch_kwargs_generators': {'default': {'class_name': 'TableBatchKwargsGenerator'},
                            'second_generator': {'assets': {'asset_one': [{'partition_id': 1,
                                                                           'query': 'select '
                                                                                    '* '
