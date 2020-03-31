@@ -263,7 +263,55 @@ def run_validation_operator_usage_statistics(
             batch_anonymizer.anonymize_batch_info(batch) for batch in assets_to_validate
         ]
     except Exception:
-        logger.debug("run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field")
+        logger.warning("run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field")
+    return payload
+
+
+def save_expectation_suite_usage_statistics(
+        data_context,  # self
+        expectation_suite,
+        expectation_suite_name=None
+):
+    try:
+        data_context_id = data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+    anonymizer = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
+    payload = {}
+
+    if expectation_suite_name is None:
+        expectation_suite_name = expectation_suite.expectation_suite_name
+
+    try:
+        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(expectation_suite_name)
+    except Exception:
+        logger.warning(
+            "save_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field")
+    return payload
+
+
+def edit_expectation_suite_usage_statistics(
+        data_context,
+        expectation_suite_name
+):
+    try:
+        data_context_id = data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+    anonymizer = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
+    payload = {}
+
+    try:
+        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(expectation_suite_name)
+    except Exception:
+        logger.warning(
+            "edit_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field")
     return payload
 
 
