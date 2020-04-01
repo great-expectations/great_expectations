@@ -357,38 +357,31 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             unexpected_table = None
             observed_value = ["--"]
 
-            try:
-                unexpected_statement = cls._get_unexpected_statement(evr)
-            except Exception as e:
-                exception_message = f'''\
+            data_docs_exception_message = f'''\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:  
-                '''
+            '''
+            try:
+                unexpected_statement = cls._get_unexpected_statement(evr)
+            except Exception as e:
                 exception_traceback = traceback.format_exc()
-                exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                exception_message = data_docs_exception_message \
+                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 logger.error(exception_message, e, exc_info=True)
             try:
                 unexpected_table = cls._get_unexpected_table(evr)
             except Exception as e:
-                exception_message = f'''\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
-diagnose and repair the underlying issue.  Detailed information follows:  
-                '''
                 exception_traceback = traceback.format_exc()
-                exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                exception_message = data_docs_exception_message \
+                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 logger.error(exception_message, e, exc_info=True)
             try:
                 observed_value = [cls._get_observed_value(evr)]
             except Exception as e:
-                exception_message = f'''\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
-diagnose and repair the underlying issue.  Detailed information follows:  
-                '''
                 exception_traceback = traceback.format_exc()
-                exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                exception_message = data_docs_exception_message \
+                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 logger.error(exception_message, e, exc_info=True)
 
             # If the expectation has some unexpected values...:

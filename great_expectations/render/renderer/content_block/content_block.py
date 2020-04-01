@@ -39,6 +39,12 @@ class ContentBlockRenderer(Renderer):
     def render(cls, render_object, **kwargs):
         cls.validate_input(render_object)
 
+        data_docs_exception_message = f'''\
+An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
+not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
+diagnose and repair the underlying issue.  Detailed information follows:  
+        '''
+
         if isinstance(render_object, list):
             blocks = []
             has_failed_evr = False if isinstance(render_object[0], ExpectationValidationResult) else None
@@ -58,13 +64,9 @@ class ContentBlockRenderer(Renderer):
                             **kwargs
                         )
                     except Exception as e:
-                        exception_message = f'''\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
-diagnose and repair the underlying issue.  Detailed information follows:  
-                        '''
                         exception_traceback = traceback.format_exc()
-                        exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                        exception_message = data_docs_exception_message \
+                            + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                         logger.error(exception_message, e, exc_info=True)
 
                         if isinstance(obj_, ExpectationValidationResult):
@@ -133,13 +135,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         **kwargs
                     )
                 except Exception as e:
-                    exception_message = f'''\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
-diagnose and repair the underlying issue.  Detailed information follows:  
-                    '''
                     exception_traceback = traceback.format_exc()
-                    exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                    exception_message = data_docs_exception_message \
+                        + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                     logger.error(exception_message, e, exc_info=True)
 
                     if isinstance(render_object, ExpectationValidationResult):
