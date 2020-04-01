@@ -538,7 +538,7 @@ class BaseDataContext(object):
             return self.validation_operators[validation_operator_name].run(
                 assets_to_validate=assets_to_validate,
                 run_id=run_id,
-                evaluation_parameters=evaluation_parameters
+                evaluation_parameters=evaluation_parameters,
                 **kwargs
             )
 
