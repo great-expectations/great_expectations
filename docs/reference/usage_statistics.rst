@@ -17,6 +17,7 @@ Great Expectations currently emits usage statistics for the following methods:
 * ``data_context.run_validation_operator``
 * ``data_context.open_data_docs``
 * ``data_context.build_data_docs``
+* ``data_context.save_expectation_suite``
 * ``data_asset.validate``
 * ``cli.suite.list``
 * ``cli.suite.edit``
@@ -61,7 +62,8 @@ Click the "Message Examples" button to see message examples.
                     "run_validation_operator_payload": run_validation_operator_payload_schema,
                     "anonymized_data_docs_site": anonymized_data_docs_site_schema,
                     "anonymized_batch": anonymized_batch_schema,
-                    "anonymized_expectation_suite": anonymized_expectation_suite_schema
+                    "anonymized_expectation_suite": anonymized_expectation_suite_schema,
+                    "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema
                 },
                 "type": "object",
                 "properties": {
@@ -97,6 +99,20 @@ Click the "Message Examples" button to see message examples.
                             },
                             "event_payload": {
                                 "$ref": "#/definitions/init_payload"
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "event": {
+                                "enum": [
+                                    "data_context.save_expectation_suite",
+                                    "cli.suite.edit",
+                                ]
+                            },
+                            "event_payload": {
+                                "$ref": "#/definitions/save_or_edit_expectation_suite_payload"
                             }
                         }
                     },
@@ -556,6 +572,23 @@ Click the "Message Examples" button to see message examples.
                 "additionalProperties": False
             }
 
+            save_or_edit_expectation_suite_payload_schema = {
+                "$schema": "http://json-schema.org/schema#",
+                "definitions": {
+                    "anonymized_string": anonymized_string_schema,
+                },
+                "type": "object",
+                "properties": {
+                    "anonymized_expectation_suite_name": {
+                        "$ref": "#/definitions/anonymized_string"
+                    },
+                },
+                "required": [
+                    "anonymized_expectation_suite_name"
+                ],
+                "additionalProperties": False
+            }
+
     .. tab-container:: tab2
         :title: Message Examples
 
@@ -653,7 +686,7 @@ Click the "Message Examples" button to see message examples.
                     'ge_version': '0.9.7+244.g56d67e51d.dirty'
                 }
 
-        * ``data_context.open_data_docs``, ``data_context.build_data_docs``, ``cli.suite.list``, ``cli.suite.edit``, ``cli.suite.new``, ``cli.store.list``, ``cli.project.check_config``, ``cli.validation_operator.run``, ``cli.validation_operator.list``, ``cli.tap.new``, ``cli.docs.list``, ``cli.docs.build``, ``cli.datasource.profile``, ``cli.datasource.list``, ``cli.datasource.new``
+        * ``data_context.open_data_docs``, ``data_context.build_data_docs``, ``cli.suite.list``, ``cli.suite.new``, ``cli.store.list``, ``cli.project.check_config``, ``cli.validation_operator.run``, ``cli.validation_operator.list``, ``cli.tap.new``, ``cli.docs.list``, ``cli.docs.build``, ``cli.datasource.profile``, ``cli.datasource.list``, ``cli.datasource.new``
             .. code-block:: python
 
                 message = {
@@ -699,6 +732,21 @@ Click the "Message Examples" button to see message examples.
                         'anonymized_batch_kwarg_keys': ['datasource', 'PandasInMemoryDF', 'ge_batch_id'],
                         'anonymized_expectation_suite_name': '6722fe57bb1146340c0ab6d9851cd93a',
                         'anonymized_datasource_name': '760a442fb42732d75528ebdd8696499d'
+                    },
+                    'success': True,
+                    'version': '1.0.0', 'event_time': '2020-03-31T02:22:10.284Z',
+                    'data_context_id': '705dd2a2-27f8-470f-9ebe-e7058fd7a534',
+                    'data_context_instance_id': '3424349a-35ce-4eda-a48f-0281543854a1',
+                    'ge_version': '0.9.7+282.g9bbc2ad81.dirty'
+                }
+
+        * ``cli.suite.edit``, ``data_context.save_expectation_suite``
+            .. code-block:: python
+
+                message = {
+                    'event': 'cli.suite.edit',
+                    'event_payload': {
+                        'anonymized_expectation_suite_name': '6722fe57bb1146340c0ab6d9851cd93a',
                     },
                     'success': True,
                     'version': '1.0.0', 'event_time': '2020-03-31T02:22:10.284Z',
