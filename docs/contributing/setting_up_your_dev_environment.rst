@@ -71,11 +71,25 @@ Depending on which features of Great Expectations you want to work on, you may w
 
 **If you want to develop against local postgresql:**
 
-    * #FIXME
+    * Navigate to ``assets/docker/postgresql`` in  your ``great_expectations`` repo.
+    * Run ``docker-compose up -d``
+    * Navigate back to the root ``great_expectations`` directory and run ``pytest``. (If you haven’t configured Spark, you may want to set the ``--no-spark`` flag.
+    * Once you’re done testing, you can shut down your postgesql container by running ``docker-compose down`` from ``assets/docker/postgresql/``.
+    * You can run ``docker-compose ps`` from ``assets/docker/postgresql/`` to verify that your postgresql docker container is running. If it's running, you should see something like:
+
+.. code-block::
+
+             Name                       Command              State           Ports         
+    ———————————————————————————————————————————
+    postgresql_travis_db_1   docker-entrypoint.sh postgres   Up      0.0.0.0:5432->5432/tcp
+
 
 **If you want to develop against local Spark:**
 
-    * #FIXME
+    * In most cases, ``pip install requirements-dev.txt` should set up pyspark for you.
+    * However, if you have previously installed/uninstalled spark, things could be more complicated.
+    * #FIXME: Find official instructions
+    * In that case, please see the official instructions at 
     * Probably (?): Make sure you have GCC and Java installed and working on your machine
 
 **If you want to develop against a remote backend:**
