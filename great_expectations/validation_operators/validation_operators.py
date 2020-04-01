@@ -132,7 +132,7 @@ class ActionListValidationOperator(ValidationOperator):
             #     run_id=run_id,
             # )
             result_object["details"][expectation_suite_identifier] = {}
-            batch_validation_result = batch.validate(run_id=run_id, result_format="SUMMARY")
+            batch_validation_result = batch.validate(run_id=run_id, result_format="SUMMARY",evaluation_parameters=evaluation_parameters)
             result_object["details"][expectation_suite_identifier]["validation_result"] = batch_validation_result
             batch_actions_results = self._run_actions(batch, expectation_suite_identifier, batch._expectation_suite, batch_validation_result, run_id)
             result_object["details"][expectation_suite_identifier]["actions_results"] = batch_actions_results
