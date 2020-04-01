@@ -1,7 +1,9 @@
 <div class="col-lg-2 col-md-2 col-sm-12 d-sm-block px-0">
   {% include 'ge_info.j2' %}
   <div class="sticky">
-    {% include 'page_action_card.j2' %}
+    {% if (renderer_type == "ExpectationSuitePageRenderer" and show_how_to_buttons | default(True)) or (renderer_type != "ExpectationSuitePageRenderer") %}
+      {% include 'page_action_card.j2' %}
+    {% endif %}
     {% if renderer_type != "SiteIndexPageRenderer" %}
       {% include 'table_of_contents.j2' %}
     {% endif %}

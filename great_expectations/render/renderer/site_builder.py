@@ -92,12 +92,14 @@ class SiteBuilder(object):
                  store_backend,
                  site_name=None,
                  site_index_builder=None,
+                 show_how_to_buttons=True,
                  site_section_builders=None,
                  runtime_environment=None
                  ):
         self.site_name = site_name
         self.data_context = data_context
         self.store_backend = store_backend
+        self.show_how_to_buttons = show_how_to_buttons
 
         # set custom_styles_directory if present
         custom_styles_directory = None
@@ -122,6 +124,7 @@ class SiteBuilder(object):
             runtime_environment={
                 "data_context": data_context,
                 "custom_styles_directory": custom_styles_directory,
+                "show_how_to_buttons": self.show_how_to_buttons,
                 "target_store": self.target_store,
                 "site_name": self.site_name
             },
@@ -170,7 +173,8 @@ class SiteBuilder(object):
                 runtime_environment={
                     "data_context": data_context,
                     "target_store": self.target_store,
-                    "custom_styles_directory": custom_styles_directory
+                    "custom_styles_directory": custom_styles_directory,
+                    "show_how_to_buttons": self.show_how_to_buttons,
                 },
                 config_defaults={
                     "name": site_section_name,
@@ -221,6 +225,7 @@ class DefaultSiteSectionBuilder(object):
             target_store,
             source_store_name,
             custom_styles_directory=None,
+            show_how_to_buttons=True,
             run_id_filter=None,
             validation_results_limit=None,
             renderer=None,
@@ -231,6 +236,7 @@ class DefaultSiteSectionBuilder(object):
         self.target_store = target_store
         self.run_id_filter = run_id_filter
         self.validation_results_limit = validation_results_limit
+        self.show_how_to_buttons = show_how_to_buttons
 
         if renderer is None:
             raise exceptions.InvalidConfigError(
@@ -297,7 +303,10 @@ class DefaultSiteSectionBuilder(object):
 
             try:
                 rendered_content = self.renderer_class.render(resource)
-                viewable_content = self.view_class.render(rendered_content)
+                viewable_content = self.view_class.render(
+                    rendered_content,
+                    show_how_to_buttons=self.show_how_to_buttons
+                )
             except Exception as e:
                 logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
                 continue
@@ -333,6 +342,7 @@ class DefaultSiteIndexBuilder(object):
             target_store,
             custom_styles_directory=None,
             show_cta_footer=True,
+            show_how_to_buttons=True,
             validation_results_limit=None,
             renderer=None,
             view=None,
@@ -344,6 +354,7 @@ class DefaultSiteIndexBuilder(object):
         self.target_store = target_store
         self.show_cta_footer = show_cta_footer
         self.validation_results_limit = validation_results_limit
+        self.show_how_to_buttons = show_how_to_buttons
 
         if renderer is None:
             renderer = {
@@ -571,7 +582,10 @@ class DefaultSiteIndexBuilder(object):
 
         try:
             rendered_content = self.renderer_class.render(index_links_dict)
-            viewable_content = self.view_class.render(rendered_content)
+            viewable_content = self.view_class.render(
+                rendered_content,
+                show_how_to_buttons=self.show_how_to_buttons
+            )
         except Exception as e:
             logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
             return None
