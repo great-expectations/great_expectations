@@ -6,7 +6,7 @@ import configparser
 import os
 import pytest
 
-from great_expectations.core.logging.usage_statistics import run_validation_operator_usage_statistics
+from great_expectations.core.usage_statistics.usage_statistics import run_validation_operator_usage_statistics
 from great_expectations.data_context import BaseDataContext, DataContext
 from great_expectations.data_context.types.base import DataContextConfig, \
     DEFAULT_USAGE_STATISTICS_URL

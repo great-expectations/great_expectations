@@ -1,4 +1,4 @@
-from great_expectations.core.logging.anonymizers.anonymizer import Anonymizer
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.data_context.store import (
     Store,
     ValidationsStore,
@@ -7,7 +7,7 @@ from great_expectations.data_context.store import (
     MetricStore,
     EvaluationParameterStore,
 )
-from great_expectations.core.logging.anonymizers.store_backend_anonymizer import StoreBackendAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymizer import StoreBackendAnonymizer
 
 
 class StoreAnonymizer(Anonymizer):

@@ -36,7 +36,7 @@ from great_expectations.profile.basic_dataset_profiler import (
 )
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.logging.usage_statistics import (
+from great_expectations.core.usage_statistics.usage_statistics import (
     run_validation_operator_usage_statistics,
     UsageStatisticsHandler,
     usage_statistics_enabled_method,

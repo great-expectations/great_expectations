@@ -1,5 +1,5 @@
-from great_expectations.core.logging.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.logging.anonymizers.batch_kwargs_anonymizer import BatchKwargsAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
+from great_expectations.core.usage_statistics.anonymizers.batch_kwargs_anonymizer import BatchKwargsAnonymizer
 from great_expectations.data_asset import DataAsset
 
 

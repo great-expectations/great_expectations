@@ -10,7 +10,7 @@ from great_expectations.cli.datasource import (
     select_datasource,
 )
 from great_expectations.cli.util import cli_message, load_expectation_suite
-from great_expectations.core.logging.usage_statistics import send_usage_message
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import lint_code
 

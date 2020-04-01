@@ -1,5 +1,5 @@
 from great_expectations.datasource import PandasDatasource
-from great_expectations.core.logging.anonymizers.datasource_anonymizer import DatasourceAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import DatasourceAnonymizer
 
 
 class CustomDatasource(PandasDatasource):
