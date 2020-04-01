@@ -1,7 +1,7 @@
 import pytest
 import jsonschema
 
-from great_expectations.core.logging.schemas import (
+from great_expectations.core.usage_statistics.schemas import (
     anonymized_string_schema,
     anonymized_datasource_schema,
     init_payload_schema,

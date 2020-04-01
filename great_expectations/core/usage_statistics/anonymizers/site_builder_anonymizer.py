@@ -1,4 +1,4 @@
-from great_expectations.core.logging.anonymizers.anonymizer import Anonymizer
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.render.renderer.site_builder import SiteBuilder, DefaultSiteSectionBuilder, \
     DefaultSiteIndexBuilder
 

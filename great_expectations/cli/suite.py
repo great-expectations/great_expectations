@@ -15,7 +15,7 @@ from great_expectations.cli.datasource import (
     select_datasource,
 )
 from great_expectations.cli.util import cli_message, load_expectation_suite, cli_message_list
-from great_expectations.core.logging.usage_statistics import send_usage_message, _anonymizers, \
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message, _anonymizers, \
     edit_expectation_suite_usage_statistics
 from great_expectations.data_asset import DataAsset
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer

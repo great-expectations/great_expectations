@@ -8,7 +8,7 @@ from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.util import cli_message, cli_message_list, cli_message_dict
-from great_expectations.core.logging.usage_statistics import send_usage_message
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 
 @click.group()

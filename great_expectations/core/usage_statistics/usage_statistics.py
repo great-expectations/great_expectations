@@ -15,14 +15,14 @@ from functools import wraps
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core import nested_update
-from great_expectations.core.logging.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.logging.anonymizers.batch_anonymizer import BatchAnonymizer
-from great_expectations.core.logging.anonymizers.expectation_suite_anonymizer import ExpectationSuiteAnonymizer
-from great_expectations.core.logging.schemas import usage_statistics_record_schema
-from great_expectations.core.logging.anonymizers.store_anonymizer import StoreAnonymizer
-from great_expectations.core.logging.anonymizers.datasource_anonymizer import DatasourceAnonymizer
-from great_expectations.core.logging.anonymizers.validation_operator_anonymizer import ValidationOperatorAnonymizer
-from great_expectations.core.logging.anonymizers.data_docs_site_anonymizer import DataDocsSiteAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
+from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import BatchAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import ExpectationSuiteAnonymizer
+from great_expectations.core.usage_statistics.schemas import usage_statistics_record_schema
+from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import StoreAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import DatasourceAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import ValidationOperatorAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import DataDocsSiteAnonymizer
 
 STOP_SIGNAL = object()
 
