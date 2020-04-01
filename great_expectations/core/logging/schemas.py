@@ -1,3 +1,10 @@
+###
+# These schemas are used to ensure that we *never* take unexpected usage stats message and provide full transparency
+# about usage statistics. Please reach out to the Great Expectations with any questions!
+###
+
+
+# An anonymized string *must* be an md5 hash, so must have exactly 32 characters
 anonymized_string_schema = {
     "$schema": "http://json-schema.org/schema#",
     "type": "string",
