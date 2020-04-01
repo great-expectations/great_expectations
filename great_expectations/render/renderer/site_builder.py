@@ -337,10 +337,14 @@ class DefaultSiteSectionBuilder(object):
                 rendered_content = self.renderer_class.render(resource)
                 viewable_content = self.view_class.render(rendered_content)
             except Exception as e:
-                logger.error('Exception occurred during data docs rendering: ', e, exc_info=True)
+                exception_message = f'''\
+An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
+not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
+diagnose and repair the underlying issue.  Detailed information follows:  
+                '''
                 exception_traceback = traceback.format_exc()
-                exception_message = f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
-                raise exceptions.GreatExpectationsError(exception_message)
+                exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                logger.error(exception_message, e, exc_info=True)
 
             self.target_store.set(
                 SiteSectionIdentifier(
@@ -628,10 +632,14 @@ class DefaultSiteIndexBuilder(object):
             rendered_content = self.renderer_class.render(index_links_dict)
             viewable_content = self.view_class.render(rendered_content)
         except Exception as e:
-            logger.error('Exception occurred during data docs rendering: ', e, exc_info=True)
+            exception_message = f'''\
+An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
+not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
+diagnose and repair the underlying issue.  Detailed information follows:  
+            '''
             exception_traceback = traceback.format_exc()
-            exception_message = f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
-            raise exceptions.GreatExpectationsError(exception_message)
+            exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+            logger.error(exception_message, e, exc_info=True)
 
         return (
             self.target_store.write_index_page(viewable_content),
