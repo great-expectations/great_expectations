@@ -373,8 +373,7 @@ Usage Statistics
 
 To help us improve the tool, by default we track event data when certain Data Context-enabled commands are run. The
 usage statistics include things like the OS and python version, and which GE features are used. You can see the exact
-schemas for all of our messages
-`here <https://github.com/great-expectations/great_expectationst/tree/development/great_expectations/core/usage_statistics/schemas.py>`_.
+schemas for all of our messages `here <https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/core/usage_statistics/schemas.py>`_.
 
 While we hope you'll leave them on, you can easily disable usage statistics for a Data Context by adding the
 following to your data context configuration:
