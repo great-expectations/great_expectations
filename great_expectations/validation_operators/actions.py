@@ -4,7 +4,10 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from ..data_context.store.metric_store import MetricStore
 from ..data_context.types.resource_identifiers import ValidationResultIdentifier
 from .util import send_slack_notification
-from ..exceptions import DataContextError
+from ..exceptions import (
+    DataContextError,
+    ClassInstantiationError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +86,13 @@ class SlackNotificationAction(ValidationAction):
             runtime_environment={},
             config_defaults={},
         )
+        module_name = renderer['module_name']
+        if not self.renderer:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=renderer['class_name']
+            )
         self.slack_webhook = slack_webhook
         assert slack_webhook, "No Slack webhook found in action config."
         self.notify_on = notify_on
