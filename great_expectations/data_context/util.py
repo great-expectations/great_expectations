@@ -8,6 +8,7 @@ import re
 import inspect
 from collections import OrderedDict
 
+from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.data_context.types.base import DataContextConfig, DataContextConfigSchema
 from great_expectations.exceptions import (
     PluginModuleNotFoundError,
@@ -37,18 +38,11 @@ def safe_mmkdir(directory, exist_ok=True):
 
 def load_class(class_name, module_name):
     """Dynamically load a class from strings or raise a helpful error."""
-
-    # TODO remove this nasty python 2 hack
-    try:
-        ModuleNotFoundError
-    except NameError:
-        ModuleNotFoundError = ImportError
-
     try:
         loaded_module = importlib.import_module(module_name)
         class_ = getattr(loaded_module, class_name)
     except ModuleNotFoundError as e:
-        raise PluginModuleNotFoundError(module_name=module_name)
+        raise PluginModuleNotFoundError(module_name)
     except AttributeError as e:
         raise PluginClassNotFoundError(
             module_name=module_name,
@@ -78,6 +72,8 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     else:
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
         config_defaults.pop("module_name", None)
+
+    verify_dynamic_loading_support(module_name=module_name, package_name=None)
 
     class_name = config.pop("class_name", None)
     if class_name is None:

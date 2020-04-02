@@ -33,7 +33,13 @@ def docs():
     default=True,
 )
 def docs_build(directory, site_name, view=True):
-    """Build Data Docs for a project."""
+    """
+    Build Data Docs for a project.
+
+    :param directory:
+    :param site_name: name for the first-level keys in the "data_docs_sites" section of the configuration
+    :param view:
+    """
     try:
         context = DataContext(directory)
         build_docs(context, site_name=site_name, view=view)

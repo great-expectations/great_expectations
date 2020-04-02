@@ -11,7 +11,23 @@ from great_expectations.core import expectationSuiteSchema
 logger = logging.getLogger(__name__)
 
 
+def verify_dynamic_loading_support(module_name, package_name=None):
+    try:
+        module_spec = importlib.util.find_spec(module_name, package=package_name)
+    except ModuleNotFoundError as e:
+        module_spec = None
+    if not module_spec:
+        if not package_name:
+            package_name = ''
+        message = f'''No module named "{package_name + module_name}" could be found in the repository. Please \
+make sure that the file, corresponding to this package and module, exists and that dynamic loading of code modules, \
+templates, and assets is supported in your execution environment.  This error is unrecoverable.
+        '''
+        raise FileNotFoundError(message)
+
+
 def load_class(class_name, module_name):
+    verify_dynamic_loading_support(module_name=module_name, package_name=None)
     # Get the class object itself from strings.
     loaded_module = importlib.import_module(module_name)
     try:
@@ -70,6 +86,7 @@ def _load_and_convert_to_dataset_class(df, class_name, module_name, expectation_
     Returns:
         A new Dataset object
     """
+    verify_dynamic_loading_support(module_name=module_name, package_name=None)
     dataset_class = load_class(class_name, module_name)
     return _convert_to_dataset_class(df, dataset_class, expectation_suite, profiler)
 
@@ -195,6 +212,7 @@ def read_excel(
 
     df = pd.read_excel(filename, *args, **kwargs)
     if dataset_class is None:
+        verify_dynamic_loading_support(module_name=module_name, package_name=None)
         dataset_class = load_class(class_name=class_name, module_name=module_name)
     if isinstance(df, dict):
         for key in df:
@@ -440,6 +458,7 @@ def validate(
 
     # Otherwise, try to convert and validate the dataset
     if data_asset_class is None:
+        verify_dynamic_loading_support(module_name=data_asset_module_name, package_name=None)
         data_asset_class = load_class(data_asset_class_name, data_asset_module_name)
 
     import pandas as pd
