@@ -5,10 +5,12 @@ Testing
 ==============
 
 
-Unit tests
+.. _contributing_testing__running_tests:
+
+Running tests
 ------------------------
 
-You can run all tests by running ``pytest`` in the ``great_expectations`` directory root.
+You can run all unit tests by running ``pytest`` in the ``great_expectations`` directory root.
 
 #FIXME: Insert animated gif of normal behavior.
 
@@ -31,12 +33,16 @@ Note: as of early 2020, the tests generate many warnings. Most of these are gene
 #FIXME: Insert animated gif with warnings suppressed.
 
 
-Expectation tests
----------------------------
+.. _contributing_testing__writing_unit_tests:
+
+Writing unit tests
+------------------------
 
 
-Integration tests
--------------------------------------------
+_Writing unit tests for Expectations_
+
+
+.. Configuring integration tests
 
 
 Manual testing

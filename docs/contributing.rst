@@ -63,7 +63,7 @@ Our goal is to make your experience as great as possible. Please follow these st
 
    Issues in GitHub are a great place to start. Check out the `help wanted <https://github.com/great-expectations/great_expectations/labels/help%20wanted>`__ and `good first issue <https://github.com/great-expectations/great_expectations/labels/good%20first%20issue>`__ labels. Comment to let everyone know you’re working on it. 
 
-   If there’s no ticket for what you want to work on, please see :ref:`Contributions without an issue`.
+   If there’s no issue for what you want to work on, please create one. Add a comment to let everyone know that you're working on it. We prefer small, incremental commits, because it makes the thought process behind changes easier to review.
 
 ..
    The `public test grid <https://grid.greatexpectations.io>`__ is another good entry point. If there's an element in the test grid that you want to work on, please create an issue in Github to let others know that you're taking it on. (#FIXME: This can't go live until the test grid is real.)
@@ -98,7 +98,6 @@ Table of contents for Contributing:
    /contributing/submitting_your_contribution
    /contributing/make_changes_through_github
    /contributing/types_of_contributions
-   /contributing/contributions_without_an_issue
    /contributing/testing
    /contributing/style_guide
    /contributing/miscellaneous
