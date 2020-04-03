@@ -26,7 +26,7 @@ class TupleStoreBackend(StoreBackend):
 
     def __init__(self, filepath_template=None, filepath_prefix=None, filepath_suffix=None, forbidden_substrings=None,
                  platform_specific_separator=True, fixed_length_key=False):
-        super(TupleStoreBackend, self).__init__(fixed_length_key=fixed_length_key)
+        super().__init__(fixed_length_key=fixed_length_key)
         if forbidden_substrings is None:
             forbidden_substrings = ["/", "\\"]
         self.forbidden_substrings = forbidden_substrings
@@ -57,7 +57,7 @@ class TupleStoreBackend(StoreBackend):
             self._fixed_length_key = True
 
     def _validate_key(self, key):
-        super(TupleStoreBackend, self)._validate_key(key)
+        super()._validate_key(key)
 
         for key_element in key:
             for substring in self.forbidden_substrings:
@@ -188,7 +188,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                  platform_specific_separator=True,
                  root_directory=None,
                  fixed_length_key=False):
-        super(TupleFilesystemStoreBackend, self).__init__(
+        super().__init__(
             filepath_template=filepath_template,
             filepath_prefix=filepath_prefix,
             filepath_suffix=filepath_suffix,
@@ -297,7 +297,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             platform_specific_separator=False,
             fixed_length_key=False
     ):
-        super(TupleS3StoreBackend, self).__init__(
+        super().__init__(
             filepath_template=filepath_template,
             filepath_prefix=filepath_prefix,
             filepath_suffix=filepath_suffix,
@@ -409,7 +409,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             platform_specific_separator=False,
             fixed_length_key=False
     ):
-        super(TupleGCSStoreBackend, self).__init__(
+        super().__init__(
             filepath_template=filepath_template,
             filepath_prefix=filepath_prefix,
             filepath_suffix=filepath_suffix,
