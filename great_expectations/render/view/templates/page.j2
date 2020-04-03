@@ -24,8 +24,9 @@
     >
     {% if show_how_to_buttons | default(True) %}
       {% include 'carousel_modal.j2' %}
+      {% include 'edit_expectations_instructions_modal.j2' %}
     {% endif %}
-    {% include 'edit_expectations_instructions_modal.j2' %}
+
     {% include 'top_navbar.j2' %}
     {% if renderer_type == "ValidationResultsPageRenderer" and show_how_to_buttons | default(True) %}
       <script>
