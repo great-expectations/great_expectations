@@ -385,7 +385,6 @@ class DefaultSiteIndexBuilder(object):
             data_context,
             target_store,
             custom_styles_directory=None,
-            show_cta_footer=True,
             show_how_to_buttons=True,
             validation_results_limit=None,
             renderer=None,
@@ -396,7 +395,6 @@ class DefaultSiteIndexBuilder(object):
         self.site_name = site_name
         self.data_context = data_context
         self.target_store = target_store
-        self.show_cta_footer = show_cta_footer
         self.validation_results_limit = validation_results_limit
         self.show_how_to_buttons = show_how_to_buttons
 
@@ -585,7 +583,7 @@ class DefaultSiteIndexBuilder(object):
         index_links_dict = OrderedDict()
         index_links_dict["site_name"] = self.site_name
 
-        if self.show_cta_footer:
+        if self.show_how_to_buttons:
             index_links_dict["cta_object"] = self.get_calls_to_action()
 
         for expectation_suite_key in expectation_suite_keys:
