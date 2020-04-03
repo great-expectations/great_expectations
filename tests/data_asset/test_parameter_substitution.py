@@ -9,6 +9,7 @@ import json
 import numpy as np
 
 from great_expectations.data_asset import DataAsset
+from great_expectations.exceptions import EvaluationParameterError
 from tests.test_utils import expectationSuiteValidationResultSchema
 
 
@@ -81,10 +82,9 @@ def test_exploratory_parameter_substitution(single_expectation_custom_data_asset
         "expectation_argument": {"$PARAMETER": "upstream_dag_key"}}
 
     # Evaluating the expectation without the parameter should now fail, because no parameters were set
-    with pytest.raises(KeyError) as excinfo:
+    with pytest.raises(EvaluationParameterError) as excinfo:
         single_expectation_custom_data_asset.validate(catch_exceptions=False)
-        assert str(
-            excinfo.message) == "No value found for $PARAMETER upstream_dag_key"
+    assert str(excinfo.value) == "No value found for $PARAMETER upstream_dag_key"
 
     # Setting a parameter value should allow it to succeed
     single_expectation_custom_data_asset.set_evaluation_parameter(
