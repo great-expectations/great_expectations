@@ -3,7 +3,10 @@ import logging
 
 from .batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
-from great_expectations.exceptions import BatchKwargsError
+from great_expectations.exceptions import (
+    BatchKwargsError,
+    ClassInstantiationError,
+)
 from ...data_context.util import instantiate_class_from_config
 
 logger = logging.getLogger(__name__)
@@ -42,16 +45,22 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
                 query_store_backend = {
                     "class_name": "InMemoryStoreBackend"
                 }
+        module_name = 'great_expectations.data_context.store'
         self._store_backend = instantiate_class_from_config(
             config=query_store_backend,
             runtime_environment={
                 "root_directory": root_directory
             },
             config_defaults={
-                "module_name": "great_expectations.data_context.store"
+                "module_name": module_name
             }
-
         )
+        if not self._store_backend:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=query_store_backend['class_name']
+            )
         if queries is not None:
             for query_name, query in queries.items():
                 self.add_query(query_name, query)
