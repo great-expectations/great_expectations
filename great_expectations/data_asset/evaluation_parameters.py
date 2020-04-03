@@ -145,17 +145,14 @@ class EvaluationParameterParser:
             return self.fn[op](*args)
         else:
             # try to evaluate as int first, then as float if int fails
+            # NOTE: JPC - 20200403 - Originally I considered returning the raw op here if parsing as float also
+            # fails, but I decided against it to instead require that the *entire* expression evaluates
+            # numerically UNLESS there is *exactly one* expression to substitute (see cases where len(L) == 1 in the
+            # parse_evaluation_parameter method
             try:
                 return int(op)
             except ValueError:
-                pass
-            try:
                 return float(op)
-            except ValueError:
-                pass
-
-            # Finally, this *may* just not be an integer or float, in which case a string is okay.
-            return op
 
 
 def build_evaluation_parameters(expectation_args, evaluation_parameters=None, interactive_evaluation=True):
