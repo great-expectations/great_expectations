@@ -81,9 +81,12 @@ Our goal is to make your experience as great as possible. Please follow these st
 
 .. container:: custom-indented-paragraph
 
-   Each :ref:`type of contribution <contributing_types_of_contributions>` has its own development flow and testing requirements. When your changes are ready, run through our :ref:`contributing_contribution_checklist` for pull requests.
+   When your changes are ready, run through our :ref:`contributing_contribution_checklist` for pull requests.
    
    Note that if it’s your first contribution, there is a standard :ref:`Contributor license agreement (CLA)` to sign.
+
+..
+   Each :ref:`type of contribution <contributing_types_of_contributions>` has its own development flow and testing requirements.
 
 
 -----
@@ -97,7 +100,6 @@ Table of contents for Contributing:
    /contributing/contribution_checklist
    /contributing/submitting_your_contribution
    /contributing/make_changes_through_github
-   /contributing/types_of_contributions
    /contributing/testing
    /contributing/style_guide
    /contributing/miscellaneous
