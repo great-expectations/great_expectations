@@ -24,7 +24,7 @@ We prefer small, incremental commits, because it makes the thought process behin
 
     * :ref:`contributing_style_guide`
 
-**3. Is your branch up to date with ``develop``?**
+**3. Is your branch up to date with upstream/develop?**
 
     * Update your local repository with the most recent code from the main Great Expectations repository.
     * For changes with few or no merge conflicts, you can do this by creating a draft pull request in GitHub and clicking `Update branch`.

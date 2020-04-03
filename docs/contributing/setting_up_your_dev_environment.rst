@@ -109,10 +109,6 @@ Depending on which features of Great Expectations you want to work on, you may w
     * If you don't have Java installed, you will probably need to install it and set your ``PATH`` or ``JAVA_HOME`` environment variables appropriately.
     * You can find official installation instructions for spark `here <https://spark.apache.org/docs/latest/index.html#downloading>`__.
 
-**If you want to develop against a remote backend:**
-
-    * #FIXME
-
 **If you want to build documentation locally:**
 
     * ``pip install -r docs/requirements.txt``
