@@ -77,7 +77,7 @@ When you’re done with your work...
 
 **4. Wait for a core team member to approve and merge your PR**
 
-    * Once all checks pass, a GE team member will approve your PR and merge it.
+    * Once all checks pass, a Great Expectations team member will approve your PR and merge it.
     * GitHub will notify you of comments or a successful merge according to your notification settings.
 
 **5. Resolve any issues**
