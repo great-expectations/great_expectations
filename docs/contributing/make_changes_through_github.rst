@@ -1,33 +1,28 @@
 .. _contributing_make_changes_through_github:
 
 
-
 Making changes directly through Github
 ==========================================
 
-#FIXME: Rev once more on text
-#FIXME: Verify that links exist and work.
-
-
-We suggest simply editing the docs using the GitHub markdown editor, which means you don’t have to fork the repo at all. Here’s how you do this:
+If you want to change documentation, but not code, we suggest using the GitHub markdown editor, which means you don’t have to fork the repo at all. Here’s how you do this:
 
 Start editing
 ---------------------
 
 **1A. Edit from docs.greatexpecations.io**
 
-    * Go to the [Great Expectations (GE) docs](http://docs.greatexpectations.io/en/latest/).
-    * On each page, you’ll see an "Edit on GitHub" button in the top right. Click this to go to the source file in the Great Expectations GitHub repo.
+    * Go to the `Great Expectations docs <http://docs.greatexpectations.io/en/latest/>`__.
+    * On each page, you’ll see an ``Edit on GitHub`` button in the top right. Click this to go to the source file in the Great Expectations GitHub repo.
     
 **1B. Edit from Github**
 
-    * If you’re already on GitHub, the docs are located in great_expectations > docs. You can directly navigate to the respective page you want to edit (but getting there from the docs is a little easier).
+    * If you’re already on GitHub, the docs are located in ``great_expectations > docs``. You can directly navigate to the respective page you want to edit (but getting there from `docs.great_expectations.io <http://docs.greatexpectations.io/en/latest/>`__ is a little easier).
     * In the top right of the grey header bar of the actual file, click the pencil icon to get into edit mode on GitHub.
 
 **2. Make edits**
 
     * Make your edits and use the Preview tab to preview changes.
-    * Please pay close attention to the Style Guide.
+    * Please pay close attention to the :ref:`contributing_style_guide`.
 
 Submit a pull request
 -------------------------
@@ -35,11 +30,11 @@ Submit a pull request
 
 **3. Submit your edits as a PR**
 
-    * When you’re done, add a meaningful commit message at the bottom. Use a short title and a meaningful explanation of what you changed and why. {#FIXME: How strict are we being about commit messages?}
-    * Click the "Propose File Change" button at the bottom of the page.
-    * Click the "Create Pull Request" button.
+    * When you’re done, add a meaningful commit message at the bottom. Use a short title and a meaningful explanation of what you changed and why.
+    * Click the ``Propose File Change`` button at the bottom of the page.
+    * Click the ``Create Pull Request`` button.
     * Optionally: Add comment to explain your change, if it’s not already in the commit message.
-    * Click the next "Create Pull Request" button to create the actual PR.
+    * Click the next ``Create Pull Request`` button to create the actual PR.
 
 
 **4. Sign the CLA**
@@ -54,7 +49,7 @@ Submit a pull request
 
 **6. Wait for a core team member to approve and merge your PR**
 
-    * Once all checks pass, a GE team member will approve your PR and merge it. 
+    * Once all checks pass, a Great Expectations team member will approve your PR and merge it. 
     * GitHub will notify you of comments or a successful merge according to your notification settings.
     * If there are any issues, please address them promptly.
 
