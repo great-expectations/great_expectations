@@ -73,3 +73,4 @@ When you’re done with your work...
 
     * Congratulations! You’ve just contributed to Great Expectations!
 
+        .. image:: great_expectations_happy.gif

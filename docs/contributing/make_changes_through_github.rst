@@ -62,6 +62,8 @@ Submit a pull request
 
     * Congratulations! You’ve just contributed to Great Expectations!
 
+        .. image:: great_expectations_running.gif
+
 Video instructions
 ------------------
 
