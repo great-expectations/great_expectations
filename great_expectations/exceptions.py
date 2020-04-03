@@ -63,6 +63,10 @@ class UnsupportedConfigVersionError(GreatExpectationsError):
     pass
 
 
+class EvaluationParameterError(GreatExpectationsError):
+    pass
+
+
 class ProfilerError(GreatExpectationsError):
     pass
 

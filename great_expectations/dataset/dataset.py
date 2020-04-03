@@ -3392,7 +3392,6 @@ class Dataset(MetaDataset):
 
             success = above_min and below_max
 
-
         if parse_strings_as_datetimes:
             if output_strftime_format:
                 column_max = datetime.strftime(column_max, output_strftime_format)
