@@ -3,13 +3,17 @@ import logging
 from collections import OrderedDict
 import os
 
+import traceback
+
 from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLASS
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
 )
-from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier, \
-    ValidationResultIdentifier
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 
 from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as exceptions
@@ -119,6 +123,8 @@ class SiteBuilder(object):
             site_index_builder = {
                 "class_name": "DefaultSiteIndexBuilder"
             }
+        module_name = site_index_builder.get('module_name') or 'great_expectations.render.renderer.site_builder'
+        class_name = site_index_builder.get('class_name') or 'DefaultSiteIndexBuilder'
         self.site_index_builder = instantiate_class_from_config(
             config=site_index_builder,
             runtime_environment={
@@ -130,10 +136,16 @@ class SiteBuilder(object):
             },
             config_defaults={
                 "name": "site_index_builder",
-                "module_name": "great_expectations.render.renderer.site_builder",
-                "class_name": "DefaultSiteIndexBuilder"
+                "module_name": module_name,
+                "class_name": class_name
             }
         )
+        if not self.site_index_builder:
+            raise exceptions.ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=site_index_builder['class_name']
+            )
 
         if site_section_builders is None:
             site_section_builders = {
@@ -168,6 +180,7 @@ class SiteBuilder(object):
             }
         self.site_section_builders = {}
         for site_section_name, site_section_config in site_section_builders.items():
+            module_name = site_section_config.get('module_name') or 'great_expectations.render.renderer.site_builder'
             self.site_section_builders[site_section_name] = instantiate_class_from_config(
                 config=site_section_config,
                 runtime_environment={
@@ -178,9 +191,15 @@ class SiteBuilder(object):
                 },
                 config_defaults={
                     "name": site_section_name,
-                    "module_name": "great_expectations.render.renderer.site_builder"
+                    "module_name": module_name
                 }
             )
+            if not self.site_section_builders[site_section_name]:
+                raise exceptions.ClassInstantiationError(
+                    module_name=module_name,
+                    package_name=None,
+                    class_name=site_section_config['class_name']
+                )
 
     def build(self, resource_identifiers=None):
         """
@@ -242,30 +261,45 @@ class DefaultSiteSectionBuilder(object):
             raise exceptions.InvalidConfigError(
                 "SiteSectionBuilder requires a renderer configuration with a class_name key."
             )
+        module_name = renderer.get('module_name') or 'great_expectations.render.renderer'
         self.renderer_class = instantiate_class_from_config(
             config=renderer,
             runtime_environment={
                 "data_context": data_context
             },
             config_defaults={
-                "module_name": "great_expectations.render.renderer"
+                "module_name": module_name
             }
         )
+        if not self.renderer_class:
+            raise exceptions.ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=renderer['class_name']
+            )
+
+        module_name = 'great_expectations.render.view'
         if view is None:
             view = {
-                "module_name": "great_expectations.render.view",
+                "module_name": module_name,
                 "class_name": "DefaultJinjaPageView",
             }
-
+        module_name = view.get('module_name') or module_name
         self.view_class = instantiate_class_from_config(
             config=view,
             runtime_environment={
                 "custom_styles_directory": custom_styles_directory
             },
             config_defaults={
-                "module_name": "great_expectations.render.view"
+                "module_name": module_name
             }
         )
+        if not self.view_class:
+            raise exceptions.ClassInstantiationError(
+                module_name=view['module_name'],
+                package_name=None,
+                class_name=view['class_name']
+            )
 
     def build(self, resource_identifiers=None):
         source_store_keys = self.source_store.list_keys()
@@ -297,9 +331,13 @@ class DefaultSiteSectionBuilder(object):
                     logger.debug("        Rendering profiling for batch {}".format(resource_key.batch_identifier))
                 else:
 
-                    logger.debug("        Rendering validation: run id: {}, suite {} for batch {}".format(run_id,
-                                                                                                              expectation_suite_name,
-                                                                                                              resource_key.batch_identifier))
+                    logger.debug(
+                        "        Rendering validation: run id: {}, suite {} for batch {}".format(
+                            run_id,
+                            expectation_suite_name,
+                            resource_key.batch_identifier
+                        )
+                    )
 
             try:
                 rendered_content = self.renderer_class.render(resource)
@@ -308,8 +346,14 @@ class DefaultSiteSectionBuilder(object):
                     show_how_to_buttons=self.show_how_to_buttons
                 )
             except Exception as e:
-                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
-                continue
+                exception_message = f'''\
+An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
+not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
+diagnose and repair the underlying issue.  Detailed information follows:  
+                '''
+                exception_traceback = traceback.format_exc()
+                exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                logger.error(exception_message, e, exc_info=True)
 
             self.target_store.set(
                 SiteSectionIdentifier(
@@ -361,30 +405,45 @@ class DefaultSiteIndexBuilder(object):
                 "module_name": "great_expectations.render.renderer",
                 "class_name": "SiteIndexPageRenderer",
             }
+        module_name = renderer.get('module_name') or 'great_expectations.render.renderer'
         self.renderer_class = instantiate_class_from_config(
             config=renderer,
             runtime_environment={
                 "data_context": data_context
             },
             config_defaults={
-                "module_name": "great_expectations.render.renderer"
+                "module_name": module_name
             }
         )
+        if not self.renderer_class:
+            raise exceptions.ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=renderer['class_name']
+            )
 
+        module_name = 'great_expectations.render.view'
         if view is None:
             view = {
-                "module_name": "great_expectations.render.view",
+                "module_name": module_name,
                 "class_name": "DefaultJinjaIndexPageView",
             }
+        module_name = view.get('module_name') or module_name
         self.view_class = instantiate_class_from_config(
             config=view,
             runtime_environment={
                 "custom_styles_directory": custom_styles_directory
             },
             config_defaults={
-                "module_name": "great_expectations.render.view"
+                "module_name": module_name
             }
         )
+        if not self.view_class:
+            raise exceptions.ClassInstantiationError(
+                module_name=view['module_name'],
+                package_name=None,
+                class_name=view['class_name']
+            )
 
     def add_resource_info_to_index_links_dict(self,
                                               index_links_dict,
@@ -587,8 +646,14 @@ class DefaultSiteIndexBuilder(object):
                 show_how_to_buttons=self.show_how_to_buttons
             )
         except Exception as e:
-            logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
-            return None
+            exception_message = f'''\
+An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
+not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
+diagnose and repair the underlying issue.  Detailed information follows:  
+            '''
+            exception_traceback = traceback.format_exc()
+            exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+            logger.error(exception_message, e, exc_info=True)
 
         return (
             self.target_store.write_index_page(viewable_content),

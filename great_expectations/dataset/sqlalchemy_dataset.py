@@ -718,9 +718,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             pass
 
         # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
-        if (isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect) and
-                bigquery_types_tuple is not None):
-            return bigquery_types_tuple
+        try:
+            if (isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect) and
+                    bigquery_types_tuple is not None):
+                return bigquery_types_tuple
+        except (TypeError, AttributeError):
+            pass
 
         return self.dialect
 
