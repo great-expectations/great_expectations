@@ -4,7 +4,7 @@ except ImportError:
     import mock
 import pytest
 import pandas as pd
-from ..test_utils import get_dataset
+from tests.test_utils import get_dataset
 
 from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
 
