@@ -836,7 +836,12 @@ class DataAsset(object):
             self._data_context.save_expectation_suite(expectation_suite)
         elif filepath is not None:
             with open(filepath, 'w') as outfile:
-                json.dump(expectationSuiteSchema.dump(expectation_suite), outfile, indent=2)
+                json.dump(
+                    expectationSuiteSchema.dump(expectation_suite),
+                    outfile,
+                    indent=2,
+                    sort_keys=True,
+                )
         else:
             raise ValueError("Unable to save config: filepath or data_context must be available.")
 
