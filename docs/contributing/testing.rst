@@ -43,4 +43,3 @@ Manual testing
 ---------------------------------------------
 
 
-*last updated*: |lastupdate|

@@ -112,5 +112,3 @@ Start coding!
 
 At this point, you have everything you need to start coding!
 
-
-*last updated*: |lastupdate|

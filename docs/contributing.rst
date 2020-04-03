@@ -104,5 +104,3 @@ Table of contents for Contributing:
    /contributing/miscellaneous
 
 
-
-*last updated*: |lastupdate|

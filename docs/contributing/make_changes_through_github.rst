@@ -69,4 +69,3 @@ Video instructions
 
 
 
-*last updated*: |lastupdate|

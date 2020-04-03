@@ -129,4 +129,3 @@ Core code changes
 
 
 
-*last updated*: |lastupdate|

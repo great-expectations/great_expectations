@@ -73,5 +73,3 @@ When you’re done with your work...
 
     * Congratulations! You’ve just contributed to Great Expectations!
 
-
-*last updated*: |lastupdate|

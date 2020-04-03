@@ -20,4 +20,3 @@ Please make sure you have signed our Contributor License Agreement (either [Indi
 Stale issues
 ------------------------
 
-*last updated*: |lastupdate|
