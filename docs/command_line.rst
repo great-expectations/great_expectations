@@ -527,7 +527,7 @@ This tap can then be run nightly before your model makes churn predictions!
 Miscellaneous
 ======================
 
-* ``great_expectations project check`` checks your ``great_expectations/great_expectations.yml`` for validity. This is handy for occasional Great Expectations version migrations.
+* ``great_expectations project check-config`` checks your ``great_expectations/great_expectations.yml`` for validity. This is handy for occasional Great Expectations version migrations.
 
 Acknowledgements
 ======================

@@ -16,8 +16,13 @@ from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import nested_update
 from great_expectations.types import DictDot
 
-from great_expectations.exceptions import InvalidExpectationConfigurationError, InvalidExpectationKwargsError, \
-    UnavailableMetricError, ParserError, InvalidCacheValueError
+from great_expectations.exceptions import (
+    InvalidExpectationConfigurationError,
+    InvalidExpectationKwargsError,
+    UnavailableMetricError,
+    ParserError,
+    InvalidCacheValueError,
+)
 
 logger = logging.getLogger(__name__)
 
