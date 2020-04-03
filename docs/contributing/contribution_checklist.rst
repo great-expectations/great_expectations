@@ -10,20 +10,40 @@ Contribution checklist
 Before submitting a pull request
 ------------
 
-Once your code is ready and you want to submit a pull request, please go through the following checklist before submitting the PR to make sure the code review and merge process go smoothly:
+Once your code is ready, please go through the following checklist before submitting a pull request. to make sure the code review and merge process go smoothly:
 
-**1. You’ve signed the :ref:`contributing_cla` ?**
+We prefer small, incremental commits, because it makes the thought process behind changes easier to review.
+
+
+**1. Have you signed the CLA?**
 
     * :ref:`contributing_cla`
     * If you’ve included your (physical) mailing address in the CLA, we’ll send you a personalized Great Expectations mug once your first PR is merged!
 
-**2. You’ve followed our :ref:`contributing_style_guide` for code and comments.**
+**2. Have you followed the Style Guide for code and comments?**
 
-**3. You’ve followed our guidelines on :ref:`contributing_testing`.**
+    * :ref:`contributing_style_guide`
 
+**3. Is your branch up to date with ``develop``?**
+
+    * Update your local repository with the most recent code from the main Great Expectations repository.
+    * For changes with few or no merge conflicts, you can do this by creating a draft pull request in GitHub and clicking `Update branch`.
+    * You can also rebase your branch from ``upstream/develop`` branch. Atlassian and Github both have good tutorials for rebasing: `Atlassian's tutorial <https://www.atlassian.com/git/tutorials/git-forks-and-upstreams>`__, `Github's tutorial <https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/syncing-a-fork>`__.
+    * In general, the steps are:
+
+        1. Run ``git fetch upstream`` then ``git rebase upstream/develop``.
+        2. Fix any merge conflicts that arise from the rebase.
+        3. Make sure to add and commit all your changes in this step.
+        4. Re-run tests to ensure the rebase did not introduce any new issues.
+
+**4. Have you written and run all the tests you need?**
+
+    * :ref:`contributing_testing`.
     * ...meaning you have run all existing tests locally and you have added new tests where appropriate.
 
-**4. You have added a bullet with your changes under the “develop” heading in the :ref:`changelog`.**
+**5. Have you added a bullet with your changes under the "develop" heading in the Changelog?**
+
+    * :ref:`changelog`
 
 If you’ve checked off all these items, you’re now ready to submit a pull request! Check out the next section :ref:`contributing_submitting_a_pr` for step-by-step instructions.
 
@@ -34,14 +54,6 @@ How to submit a pull request
 --------------
 
 When you’re done with your work...
-
-**1. Make sure that your branch is up to date with the develop branch**
-
-    * Update your local repository with the most recent code from the main Great Expectations repository, and rebase your branch on top of the latest ``develop`` branch. {#FIXME: Is develop correct here?}
-    * We prefer small, incremental commits, because it makes the thought process behind changes easier to review. [Here's some more info on how to keep your forks up-to-date](https://www.atlassian.com/git/tutorials/git-forks-and-upstreams).
-    * Fix any merge conflicts that arise from the rebase.
-    * Make sure to add and commit all your changes in this step.
-    * Re-run tests to ensure the rebase did not introduce any new issues.
 
 **2. Create a PR**
 

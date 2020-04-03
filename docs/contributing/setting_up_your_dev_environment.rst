@@ -29,7 +29,8 @@ Fork and clone the repository
 
     * Click the green ``Clone`` button and choose the SSH or HTTPS URL depending on your setup. 
     * Copy the URL and run ``git clone <url>`` in your local terminal.
-    * This will clone the ``develop`` branch of the great_expectations repo. Please use `develop` (not `master`!) as the starting point for your work.
+    * This will clone the ``develop`` branch of the great_expectations repo. Please use ``develop`` (not ``master``!) as the starting point for your work.
+    * Atlassian has a `nice tutorial for developing on a fork `<https://www.atlassian.com/git/tutorials/git-forks-and-upstreams>`__.
 
 
 **3. Add the upstream remote**
