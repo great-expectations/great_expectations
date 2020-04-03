@@ -55,33 +55,33 @@ How to submit a pull request
 
 When you’re done with your work...
 
-**2. Create a PR**
+**1. Create a PR**
 
     * Push to the remote fork of your repo.
-    * Follow [these instructions](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork) to create a PR from your commit.
+    * Follow `these instructions <https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork>`__` to create a PR from your commit.
     *  In the PR, choose a short title which sums up the changes that you have made, and in the body provide more details about what your changes do. Also mention the number of the issue where discussion has taken place, e.g. "Closes #123".
 
-**3. Confirm the contributor license agreement (CLA)**
+**2. Confirm the contributor license agreement (CLA)**
 
     * If you've followed the checklist above, you will have already signed the CLA and won't see the CLA bot.
     * Otherwise, you will see a comment from the "CLA Bot" on the PR that asks you to complete the CLA form. Please do so.
     * Once you've signed the form, add a new comment to the PR with the line ``@cla-bot check``. This will trigger the CLA bot to refresh.
 
-**4. Verify continuous integration checks**
+**3. Verify continuous integration checks**
 
     * Wait for the other continuous integration (CI) checks to go green and watch out for a comment from the automated linter that checks for syntax and formatting issues.
     * Fix any issues that are flagged.
 
-**5. Wait for a core team member to approve and merge your PR**
+**4. Wait for a core team member to approve and merge your PR**
 
     * Once all checks pass, a GE team member will approve your PR and merge it.
     * GitHub will notify you of comments or a successful merge according to your notification settings.
 
-**6. Resolve any issues**
+**5. Resolve any issues**
 
     * There will probably be discussion about the pull request. It's normal for a request to require some changes before merging it into the main Great Expectations project. We enjoy working with contributors to help them get their code accepted. There are many approaches to fixing a problem and it is important to find the best approach before writing too much code!
 
-**7. Do a victory dance**
+**6. Do a victory dance**
 
     * Congratulations! You’ve just contributed to Great Expectations!
 
