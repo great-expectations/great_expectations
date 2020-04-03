@@ -8,15 +8,24 @@ from great_expectations.data_context import (
     BaseDataContext,
     DataContext,
 )
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    expectationSuiteSchema,
+)
 from great_expectations.util import (
     gen_directory_tree_str
+)
+from great_expectations.data_context.util import (
+    file_relative_path,
+    safe_mmkdir,
 )
 
 @pytest.fixture()
 def parameterized_expectation_suite():
     fixture_path = file_relative_path(
         __file__,
-        "../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
+        "../../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
     )
     with open(fixture_path, "r",) as suite:
         return json.load(suite)
@@ -35,8 +44,8 @@ def validation_operators_data_context(basic_data_context_config_for_validation_o
                                         "base_directory": str(filesystem_csv_4)
                                     }
                                 })
-
     data_context.create_expectation_suite("f1.foo")
+
     df = data_context.get_batch(batch_kwargs=data_context.build_batch_kwargs("my_datasource",
                                                                              "subdir_reader", "f1"),
                                 expectation_suite_name="f1.foo")
@@ -83,6 +92,16 @@ def test_action_list_operator(validation_operators_data_context):
 
 def test_compile_evaluation_parameter_dependencies(validation_operators_data_context):
     data_context = validation_operators_data_context
+    f1 = file_relative_path(
+        __file__,
+        "../test_fixtures/expectation_suites/f1.json",
+    )
+    with open(f1, 'r') as infile:
+            expectation_suite = expectationSuiteSchema.loads(infile.read())
+            data_context.save_expectation_suite(
+                expectation_suite=expectation_suite
+            )
+    validator_batch_kwargs = data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1")
     assert data_context._evaluation_parameter_dependencies == {}
     data_context._compile_evaluation_parameter_dependencies()
     assert data_context._evaluation_parameter_dependencies == {
