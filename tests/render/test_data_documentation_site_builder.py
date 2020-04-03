@@ -11,6 +11,72 @@ from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.data_context.util import safe_mmkdir
 
 
+def assert_how_to_buttons(context, index_page_locator_info: str, index_links_dict: dict, show_how_to_buttons=True):
+    """Helper function to assert presence or non-presence of how-to buttons and related content in various
+        Data Docs pages.
+    """
+
+    # these are simple checks for presence of certain page elements
+    show_walkthrough_button = "Show Walkthrough"
+    walkthrough_modal = "Great Expectations Walkthrough"
+    cta_footer = "To continue exploring Great Expectations check out one of these tutorials..."
+    how_to_edit_suite_button = "How to Edit This Suite"
+    how_to_edit_suite_modal = "How to Edit This Expectation Suite"
+    action_card = "Actions"
+
+    how_to_page_elements_dict = {
+        "index_pages": [show_walkthrough_button, walkthrough_modal, cta_footer],
+        "expectation_suites": [
+            how_to_edit_suite_button,
+            how_to_edit_suite_modal,
+            show_walkthrough_button,
+            walkthrough_modal
+        ],
+        "validation_results": [
+            how_to_edit_suite_button,
+            how_to_edit_suite_modal,
+            show_walkthrough_button,
+            walkthrough_modal
+        ],
+        "profiling_results": [
+            action_card,
+            show_walkthrough_button,
+            walkthrough_modal
+        ]
+    }
+
+    data_docs_site_dir = os.path.join(
+        context._context_root_directory,
+        context._project_config.data_docs_sites["local_site"]["store_backend"]["base_directory"]
+    )
+
+    page_paths_dict = {
+        "index_pages": [index_page_locator_info],
+        "expectation_suites": [
+            os.path.join(data_docs_site_dir, link_dict["filepath"])
+            for link_dict in index_links_dict.get("expectations_links", [])
+        ],
+        "validation_results": [
+            os.path.join(data_docs_site_dir, link_dict["filepath"])
+            for link_dict in index_links_dict.get("validations_links", [])
+        ],
+        "profiling_results": [
+            os.path.join(data_docs_site_dir, link_dict["filepath"])
+            for link_dict in index_links_dict.get("profiling_links", [])
+        ]
+    }
+
+    for page_type, page_paths in page_paths_dict.items():
+        for page_path in page_paths:
+            with open(page_path, 'r') as f:
+                page = f.read()
+                for how_to_element in how_to_page_elements_dict[page_type]:
+                    if show_how_to_buttons:
+                        assert how_to_element in page
+                    else:
+                        assert how_to_element not in page
+
+
 @pytest.mark.rendered_output
 def test_configuration_driven_site_builder(site_builder_data_context_with_html_store_titanic_random):
     context = site_builder_data_context_with_html_store_titanic_random
@@ -119,6 +185,8 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     index_page_locator_info = res[0]
     index_links_dict = res[1]
 
+    # assert that how-to buttons and related elements are rendered (default behavior)
+    assert_how_to_buttons(context, index_page_locator_info, index_links_dict)
     print(json.dumps(index_page_locator_info, indent=2))
     assert index_page_locator_info == context.root_directory + '/uncommitted/data_docs/local_site/index.html'
 
@@ -211,3 +279,82 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
                                         "index.html") == html_url
 
 
+@pytest.mark.rendered_output
+def test_configuration_driven_site_builder_without_how_to_buttons(site_builder_data_context_with_html_store_titanic_random):
+    context = site_builder_data_context_with_html_store_titanic_random
+
+    context.add_validation_operator(
+        "validate_and_store",
+        {
+            "class_name": "ActionListValidationOperator",
+            "action_list": [{
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                    "target_store_name": "validations_store",
+                }
+            }, {
+                "name": "extract_and_store_eval_parameters",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                    "target_store_name": "evaluation_parameter_store",
+                }
+            }]
+            }
+    )
+
+    # profiling the Titanic datasource will generate one expectation suite and one validation
+    # that is a profiling result
+    datasource_name = 'titanic'
+    data_asset_name = "Titanic"
+    profiler_name = 'BasicDatasetProfiler'
+    generator_name = "subdir_reader"
+    context.profile_datasource(datasource_name)
+
+    # creating another validation result using the profiler's suite (no need to use a new expectation suite
+    # for this test). having two validation results - one with run id "profiling" - allows us to test
+    # the logic of run_id_filter that helps filtering validation results to be included in
+    # the profiling and the validation sections.
+    batch_kwargs = context.build_batch_kwargs(
+        datasource=datasource_name,
+        generator=generator_name,
+        name=data_asset_name
+    )
+
+    expectation_suite_name = "{}.{}.{}.{}".format(
+            datasource_name,
+            generator_name,
+            data_asset_name,
+            profiler_name
+        )
+
+    batch = context.get_batch(
+        batch_kwargs=batch_kwargs,
+        expectation_suite_name=expectation_suite_name,
+    )
+    run_id = "test_run_id_12345"
+    context.run_validation_operator(
+        assets_to_validate=[batch],
+        run_id=run_id,
+        validation_operator_name="validate_and_store",
+    )
+
+    data_docs_config = context._project_config.data_docs_sites
+    local_site_config = data_docs_config['local_site']
+    local_site_config.pop('class_name')
+    # set this flag to false in config to hide how-to buttons and related elements
+    local_site_config["show_how_to_buttons"] = False
+
+    site_builder = SiteBuilder(
+            data_context=context,
+            runtime_environment={
+                "root_directory": context.root_directory
+            },
+            **local_site_config
+        )
+    res = site_builder.build()
+
+    index_page_locator_info = res[0]
+    index_links_dict = res[1]
+
+    assert_how_to_buttons(context, index_page_locator_info, index_links_dict, show_how_to_buttons=False)
