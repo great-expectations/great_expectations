@@ -506,7 +506,7 @@ class BaseDataContext(object):
         if not isinstance(batch_kwargs, BatchKwargs):
             raise ge_exceptions.BatchKwargsError("BatchKwargs must be a BatchKwargs object or dictionary.")
 
-        if not isinstance(expectation_suite_name, (ExpectationSuite, ExpectationSuiteIdentifier, string_types)):
+        if not isinstance(expectation_suite_name, (ExpectationSuite, ExpectationSuiteIdentifier, str)):
             raise ge_exceptions.DataContextError(
                 "expectation_suite_name must be an ExpectationSuite, "
                 "ExpectationSuiteIdentifier or string."
@@ -514,6 +514,8 @@ class BaseDataContext(object):
 
         if isinstance(expectation_suite_name, ExpectationSuite):
             expectation_suite = expectation_suite_name
+        elif isinstance(expectation_suite_name, ExpectationSuiteIdentifier):
+            expectation_suite = self.get_expectation_suite(expectation_suite_name.expectation_suite_name)
         else:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 

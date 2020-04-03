@@ -30,7 +30,7 @@ class SparkDFDatasource(Datasource):
         - InMemoryBatchKwargs ("dataset" key)
         - QueryBatchKwargs ("query" key)
     """
-    recognized_batch_parameters = {'reader_method', 'reader_options', 'limit'}
+    recognized_batch_parameters = {'reader_method', 'reader_options', 'limit', 'dataset_options'}
 
     @classmethod
     def build_configuration(cls, data_asset_type=None, generators=None, spark_config=None, **kwargs):
@@ -100,8 +100,11 @@ class SparkDFDatasource(Datasource):
 
         self._build_generators()
 
-    def process_batch_parameters(self, reader_method=None, reader_options=None, limit=None):
-        batch_kwargs = super(SparkDFDatasource, self).process_batch_parameters(limit=limit)
+    def process_batch_parameters(self, reader_method=None, reader_options=None, limit=None, dataset_options=None):
+        batch_kwargs = super(SparkDFDatasource, self).process_batch_parameters(
+            limit=limit,
+            dataset_options=dataset_options,
+        )
 
         # Apply globally-configured reader options first
         if reader_options:
