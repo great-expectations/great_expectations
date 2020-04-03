@@ -8,6 +8,7 @@ develop
 * added execution tests to the NotebookRenderer to mitigate codegen risks
 * Fix AttributeError when validating expectations from a JSON file
 * Data Docs: fix bug that was causing erratic scrolling behavior when table of contents contains many columns
+* Data Docs: add ability to hide how-to buttons and related content in Data Docs
 
 0.9.7
 -----------------
