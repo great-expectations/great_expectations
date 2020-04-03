@@ -2,6 +2,11 @@
 
 develop
 -----------------
+* Allow basic operations in evaluation parameters, with or without evaluation parameters.
+
+
+develop
+-----------------
 * When unexpected exceptions occur (e.g., during data docs rendering), the user will see detailed error messages, providing information about the specific issue as well as the stack trace.
 * Remove the "project new" option from the command line (since it is not implemented; users can only run "init" to create a new project).
 * Update type detection for bigquery based on driver changes in pybigquery driver 0.4.14. Added a warning for users who are running an older pybigquery driver
