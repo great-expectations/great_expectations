@@ -71,26 +71,42 @@ Depending on which features of Great Expectations you want to work on, you may w
 
 **If you want to develop against local postgresql:**
 
-    * Navigate to ``assets/docker/postgresql`` in  your ``great_expectations`` repo.
-    * Run ``docker-compose up -d``
-    * Navigate back to the root ``great_expectations`` directory and run ``pytest``. (If you haven’t configured Spark, you may want to set the ``--no-spark`` flag.
-    * Once you’re done testing, you can shut down your postgesql container by running ``docker-compose down`` from ``assets/docker/postgresql/``.
-    * You can run ``docker-compose ps`` from ``assets/docker/postgresql/`` to verify that your postgresql docker container is running. If it's running, you should see something like:
+    * To simplify setup, the repository includes a docker-compose file that can stand up a local postgresql container. To use it, you'll need to have `docker installed <https://docs.docker.com/install/>`__.
+    * Navigate to ``assets/docker/postgresql`` in  your ``great_expectations`` repo and run ``docker-compose up -d``
+    * Within the same directory, you can run ``docker-compose ps`` to verify that the container is running. You should see something like:
 
-.. code-block::
+        .. code-block::
 
-             Name                       Command              State           Ports         
-    ———————————————————————————————————————————
-    postgresql_travis_db_1   docker-entrypoint.sh postgres   Up      0.0.0.0:5432->5432/tcp
+                    Name                       Command              State           Ports         
+            ———————————————————————————————————————————
+            postgresql_travis_db_1   docker-entrypoint.sh postgres   Up      0.0.0.0:5432->5432/tcp
 
+..
+
+    * Once you’re done testing, you can shut down your postgesql container by running ``docker-compose down`` from the same directory.
+    * Caution: If another service is using port 5432, docker may start the container but silently fail to set up the port. In that case, you will probably see errors like this:
+
+        .. code-block::
+
+            psycopg2.OperationalError: could not connect to server: Connection refused
+            	Is the server running on host "localhost" (::1) and accepting
+            	TCP/IP connections on port 5432?
+            could not connect to server: Connection refused
+            	Is the server running on host "localhost" (127.0.0.1) and accepting
+            	TCP/IP connections on port 5432?            
+        
+    * Or this...
+
+        .. code-block::
+
+            sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) FATAL:  database "test_ci" does not exist
+            (Background on this error at: http://sqlalche.me/e/e3q8)
 
 **If you want to develop against local Spark:**
 
-    * In most cases, ``pip install requirements-dev.txt` should set up pyspark for you.
-    * However, if you have previously installed/uninstalled spark, things could be more complicated.
-    * #FIXME: Find official instructions
-    * In that case, please see the official instructions at 
-    * Probably (?): Make sure you have GCC and Java installed and working on your machine
+    * In most cases, ``pip install requirements-dev.txt`` should set up pyspark for you.
+    * If you don't have Java installed, you will probably need to install it and set your ``PATH`` or ``JAVA_HOME`` environment variables appropriately.
+    * You can find official installation instructions for spark `here <https://spark.apache.org/docs/latest/index.html#downloading>`__.
 
 **If you want to develop against a remote backend:**
 
