@@ -3146,7 +3146,7 @@ class Dataset(MetaDataset):
         result_format=None, include_config=True, catch_exceptions=None,
         meta=None
     ):
-        """Expect the column to sum to be between an min and max value
+        """Expect the column minimum to be between an min and max value
 
         expect_column_min_to_be_between is a \
         :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
@@ -3391,7 +3391,6 @@ class Dataset(MetaDataset):
                 below_max = True
 
             success = above_min and below_max
-
 
         if parse_strings_as_datetimes:
             if output_strftime_format:
