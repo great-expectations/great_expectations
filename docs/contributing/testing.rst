@@ -49,6 +49,110 @@ Note: we do not currently test Great Expectations against all types of SQL datab
 Unit tests for Expectations
 ---------------------------------------
 
+One of Great Expectations' important promises is that the same Expectation will produce the same result across all supported execution environments: pandas, sqlalchemy, and Spark.
+
+To accomplish this, Great Expectations encapsulates unit tests for Expectations as JSON files. These files are used as fixtures and executed using a specialized test runner that executes tests against all execution environments.
+
+Test fixture files are structured as follows:
+
+.. code-block:: json
+
+    {
+        "expectation_type" : "expect_column_max_to_be_between",
+        "datasets" : [{
+            "data" : {...},
+            "schemas" : {...},
+            "tests" : [...]
+        }]
+    }
+
+Each item under ``datasets`` includes three entries: ``data``, ``schemas``, and ``tests``.
+
+
+**data**
+
+    ...defines a dataframe of sample data to apply Expectations against. The dataframe is defined as a dictionary of lists, with keys containing column names and values containing lists of data entries. All lists within a dataset must have the same length.
+
+    .. code-block:: json
+
+        "data" : {
+            "w" : [1, 2, 3, 4, 5, 5, 4, 3, 2, 1],
+            "x" : [2, 3, 4, 5, 6, 7, 8, 9, null, null],
+            "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
+            "z" : ["a", "b", "c", "d", "e", null, null, null, null, null],
+            "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", "2/1/2017", null, null, null, null],
+            "a" : [null, 0, null, null, 1, null, null, 2, null, null],
+        },
+
+
+**schemas**
+
+    ...define the types to be used when instantiating tests against different execution environments, including different SQL dialects. Each schema is defined as dictionary with column names and types as key-value pairs. If the schema isn't specified for a given execution environment, Great Expectations will introspect values and attempt to guess the schema.
+
+    .. code-block:: json
+
+        "schemas": {
+            "sqlite": {
+                "w" : "INTEGER",
+                "x" : "INTEGER",
+                "y" : "INTEGER",
+                "z" : "VARCHAR",
+                "zz" : "DATETIME",
+                "a" : "INTEGER",
+            },
+            "postgresql": {
+                "w" : "INTEGER",
+                "x" : "INTEGER",
+                "y" : "INTEGER",
+                "z" : "TEXT",
+                "zz" : "TIMESTAMP",
+                "a" : "INTEGER",
+            }
+        },
+
+**tests**
+
+    ...define the tests to be executed against the dataframe. Each item in ``tests`` must have ``title``, ``exact_match_out``, ``in``, and ``out``. The test runner will execute the named Expectation once for each item, with the values in ``in`` supplied as kwargs.
+    
+    The test passes if the values in the expectation validation result correspond with the values in ``out``. If ``exact_match_out`` is true, then every field in the Expectation output must have a corresponding, matching field in ``out``. If it's false, then only the fields specified in ``out`` need to match. For most use cases, false is a better fit, because it allows narrower targeting of the relevant output.
+
+    ``suppress_test_for`` is an optional parameter to disable an Expectation for a specific list of backends.
+
+    See an example below. For other examples
+
+    .. code-block:: json
+
+        "tests" : [{
+            "title": "Basic negative test case",
+            "exact_match_out" : false,
+            "in": {
+                "column": "w",
+                "result_format": "BASIC",
+                "min_value": null,
+                "max_value": 4
+            },
+            "out": {
+                "success": false,
+                "observed_value": 5
+            },
+            "suppress_test_for": ["sqlite"]
+        },
+        ...
+        ]
+
+The test fixture files are stored in subdirectories of ``tests/test_definitions/`` corresponding to the class of Expectation:
+
+    * column_map_expectations
+    * column_aggregate_expectations
+    * column_pair_map_expectations
+    * column_distributional_expectations
+    * multicolumn_map_expectations
+    * other_expectations
+
+By convention, the name of the the file is the name of the Expectation, with a ``.json`` suffix. {{#FIXME: besides creating the file, what else do I need to do for the test to be picked up as part of the test suite?}}
+
+You can run a specific Expectation test by running ``pytest ---some_option expect_something`` {{#FIXME}}.
+
 
 .. Configuring integration tests
 
