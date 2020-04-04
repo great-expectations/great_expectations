@@ -239,6 +239,25 @@ cooltip_style_element = """<style type="text/css">
 </style>
 """
 
+# NOTE: Abe 2020/04/04: display_column_expectations_as_section, display_profiled_column_evrs_as_section, and display_column_evrs_as_section
+# all follow a very similar pattern, with quite a bit of redundant code.
+# 
+
+def _render_for_jupyter(
+    view,
+    include_styling,
+    return_without_displaying,
+):
+    if include_styling:
+        html_to_display = bootstrap_link_element+cooltip_style_element+view
+    else:
+        html_to_display = view
+
+    if return_without_displaying:
+        return html_to_display
+    else:
+        display(HTML(html_to_display))
+
 
 def display_column_expectations_as_section(
     expectation_suite,
@@ -264,15 +283,11 @@ def display_column_expectations_as_section(
     document = ExpectationSuiteColumnSectionRenderer().render(column_expectation_list).to_json_dict()
     view = DefaultJinjaSectionView().render({"section": document, "section_loop": 1})
 
-    if include_styling:
-        html_to_display = bootstrap_link_element+cooltip_style_element+view
-    else:
-        html_to_display = view
-
-    if return_without_displaying:
-        return html_to_display
-    else:
-        display(HTML(html_to_display))
+    return _render_for_jupyter(
+        view,
+        include_styling,
+        return_without_displaying,
+    )
 
 
 def display_profiled_column_evrs_as_section(
@@ -303,16 +318,11 @@ def display_profiled_column_evrs_as_section(
         }
     )
 
-    if include_styling:
-        html_to_display = bootstrap_link_element+cooltip_style_element+view
-    else:
-        html_to_display = view
-
-    if return_without_displaying:
-        return html_to_display
-    else:
-        display(HTML(html_to_display))
-
+    return _render_for_jupyter(
+        view,
+        include_styling,
+        return_without_displaying,
+    )
 
 def display_column_evrs_as_section(
     evrs,
@@ -334,15 +344,11 @@ def display_column_evrs_as_section(
         }
     )
 
-    if include_styling:
-        html_to_display = bootstrap_link_element+cooltip_style_element+view
-    else:
-        html_to_display = view
-
-    if return_without_displaying:
-        return html_to_display
-    else:
-        display(HTML(html_to_display))
+    return _render_for_jupyter(
+        view,
+        include_styling,
+        return_without_displaying,
+    )
 
 
 # When importing the jupyter_ux module, we set up a preferred logging configuration
