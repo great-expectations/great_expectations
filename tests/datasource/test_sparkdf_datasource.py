@@ -7,11 +7,13 @@ import os
 
 import pandas as pd
 
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource import SparkDFDatasource
 from great_expectations.dataset import SparkDFDataset
 from great_expectations.datasource.types import InMemoryBatchKwargs
+from great_expectations.validator.validator import Validator
 
 yaml = YAML()
 
@@ -280,3 +282,20 @@ def test_spark_config():
     assert ("spark.app.name", "great_expectations") in conf
     assert ("spark.sql.catalogImplementation", "hive") in conf
     assert ("spark.executor.memory", "128m") in conf
+
+
+def test_pandas_datasource_processes_dataset_options(test_folder_connection_path):
+    datasource = SparkDFDatasource('PandasCSV', generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": test_folder_connection_path
+            }
+        }
+    )
+    batch_kwargs = datasource.build_batch_kwargs("subdir_reader", name="test")
+    batch_kwargs["dataset_options"] = {"caching": False, "persist": False}
+    batch = datasource.get_batch(batch_kwargs)
+    validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    dataset = validator.get_dataset()
+    assert dataset.caching is False
+    assert dataset._persist is False

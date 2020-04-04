@@ -2,7 +2,10 @@
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.types import ClassConfig
-from great_expectations.util import load_class
+from great_expectations.util import (
+    load_class,
+    verify_dynamic_loading_support,
+)
 
 
 class Validator(object):
@@ -15,9 +18,11 @@ class Validator(object):
             expectation_engine = ClassConfig(**expectation_engine)
 
         if isinstance(expectation_engine, ClassConfig):
+            module_name = expectation_engine.module_name or "great_expectations.dataset"
+            verify_dynamic_loading_support(module_name=module_name, package_name=None)
             expectation_engine = load_class(
                 class_name=expectation_engine.class_name,
-                module_name=expectation_engine.module_name or "great_expectations.dataset"
+                module_name=module_name
             )
 
         self.expectation_engine = expectation_engine
@@ -59,7 +64,8 @@ class Validator(object):
                 batch_parameters=self.batch.batch_parameters,
                 batch_markers=self.batch.batch_markers,
                 data_context=self.batch.data_context,
-                **self.init_kwargs
+                **self.init_kwargs,
+                **self.batch.batch_kwargs.get("dataset_options", {}),
             )
 
         elif issubclass(self.expectation_engine, SqlAlchemyDataset):
@@ -73,12 +79,12 @@ class Validator(object):
                 batch_markers=self.batch.batch_markers,
                 data_context=self.batch.data_context,
                 expectation_suite=self.expectation_suite,
-                **init_kwargs
+                **init_kwargs,
+                **self.batch.batch_kwargs.get("dataset_options", {}),
             )
 
         elif issubclass(self.expectation_engine, SparkDFDataset):
             import pyspark
-            caching = self.init_kwargs.pop("caching", True)
 
             if not isinstance(self.batch.data, pyspark.sql.DataFrame):
                 raise ValueError("SparkDFDataset expectation_engine requires a spark DataFrame for its batch")
@@ -89,6 +95,6 @@ class Validator(object):
                 batch_parameters=self.batch.batch_parameters,
                 batch_markers=self.batch.batch_markers,
                 data_context=self.batch.data_context,
-                caching=caching,
-                **self.init_kwargs
+                **self.init_kwargs,
+                **self.batch.batch_kwargs.get("dataset_options", {}),
             )
