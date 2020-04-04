@@ -3,6 +3,8 @@ from abc import ABCMeta, abstractmethod
 
 from six import string_types
 
+from great_expectations.exceptions import StoreError
+
 
 class StoreBackend(object):
     __metaclass__ = ABCMeta
@@ -39,7 +41,7 @@ class StoreBackend(object):
         return self._has_key(key)
 
     def get_url_for_key(self, key, protocol=None):
-        raise NotImplementedError(
+        raise StoreError(
             "Store backend of type {0:s} does not have an implementation of get_url_for_key".format(
                 type(self).__name__))
 

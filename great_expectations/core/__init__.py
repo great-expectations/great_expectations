@@ -24,6 +24,8 @@ from great_expectations.exceptions import (
     InvalidCacheValueError,
 )
 
+from .urn import ge_urn
+
 logger = logging.getLogger(__name__)
 
 RESULT_FORMATS = [

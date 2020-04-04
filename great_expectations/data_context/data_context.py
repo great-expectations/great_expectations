@@ -54,10 +54,7 @@ from .util import (
     substitute_all_config_variables,
 )
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
+from urllib.parse import urlparse
 
 try:
     from sqlalchemy.exc import SQLAlchemyError

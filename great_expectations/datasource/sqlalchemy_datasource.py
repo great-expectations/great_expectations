@@ -2,6 +2,8 @@ import logging
 import datetime
 from string import Template
 
+from urllib.parse import urlparse
+
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.types import (
     SqlAlchemyDatasourceQueryBatchKwargs,
@@ -97,9 +99,7 @@ class SqlAlchemyDatasource(Datasource):
                 self.engine.connect()
             elif "url" in credentials:
                 url = credentials.pop("url")
-                # TODO perhaps we could carefully regex out the driver from the
-                #  url. It would need to be cautious to avoid leaking secrets.
-                self.drivername = "other"
+                self.drivername = urlparse(url).scheme
                 self.engine = create_engine(url, **kwargs)
                 self.engine.connect()
 
