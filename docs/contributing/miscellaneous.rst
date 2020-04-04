@@ -3,8 +3,21 @@
 Miscellaneous
 ==============
 
-Core committers
+Core team
 ------------------------
+
+* `James Campbell <https://github.com/jcampbell>`__
+* `Abe Gong <https://github.com/abegong>`__
+* `Eugene Mandel <https://github.com/eugmandel>`__
+* `Rob Lim <https://github.com/roblim>`__
+* `Taylor Miller <https://github.com/Aylr>`__
+* `Alex Shertinsky <https://github.com/alexsherstinsky>`__
+* `Tal Gluck <https://github.com/talagluck>`__
+* `Kyle Eaton <https://github.com/kyleaton>`__
+* `Sam Bail <https://github.com/spbail>`__
+* `Priya Joseph <https://github.com/ayirplm>`__
+* `Ben Castleton <https://github.com/bhcastleton>`__
+
 
 .. _contributing_cla:
 
