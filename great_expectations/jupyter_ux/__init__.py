@@ -239,10 +239,6 @@ cooltip_style_element = """<style type="text/css">
 </style>
 """
 
-# NOTE: Abe 2020/04/04: display_column_expectations_as_section, display_profiled_column_evrs_as_section, and display_column_evrs_as_section
-# all follow a very similar pattern, with quite a bit of redundant code.
-# 
-
 def _render_for_jupyter(
     view,
     include_styling,
@@ -303,6 +299,8 @@ def display_profiled_column_evrs_as_section(
 
     Example usage:
     display_column_evrs_as_section(exp, "my_column")
+
+    WARNING: This method is experimental.
     """
 
     #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
@@ -330,6 +328,11 @@ def display_column_evrs_as_section(
     include_styling=True,
     return_without_displaying=False,
 ):
+    """
+    Display validation results for a single column as a section.
+
+    WARNING: This method is experimental.
+    """
 
     #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
     column_evr_list = [ e for e in evrs.results if "column" in e.expectation_config.kwargs and e.expectation_config.kwargs["column"] == column ]
