@@ -592,6 +592,41 @@ class ExpectationSuite(object):
         return sorted(citations, key=lambda x: x["citation_date"])
 
 
+    ### CRUD methods ###
+
+    def append_expectation(self, expectation_config):
+        pass
+
+    def _append_expectation(self, expectation_config):
+        return self.append_expectation(expectation_config)
+
+    def find_expectation_indexes(self,
+                                 expectation_type=None,
+                                 column=None,
+                                 expectation_kwargs=None
+                                 ):
+        pass
+
+    def find_expectations(self,
+                          expectation_type=None,
+                          column=None,
+                          expectation_kwargs=None,
+                          discard_result_format_kwargs=True,
+                          discard_include_config_kwargs=True,
+                          discard_catch_exceptions_kwargs=True,
+                          ):
+        pass
+
+    def remove_expectation(self,
+                           expectation_type=None,
+                           column=None,
+                           expectation_kwargs=None,
+                           remove_multiple_matches=False,
+                           dry_run=False,
+                           ):
+        pass
+
+
 class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
     expectations = fields.List(fields.Nested(ExpectationConfigurationSchema))
