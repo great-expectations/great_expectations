@@ -683,62 +683,23 @@ class ExpectationSuite(object):
     ### CRUD methods ###
 
     def append_expectation(self, expectation_config):
-        """Appends an expectation to `DataAsset._expectation_suite` and drops existing expectations of the same type.
-
-           If `expectation_config` is a column expectation, this drops existing expectations that are specific to \
-           that column and only if it is the same expectation type as `expectation_config`. Otherwise, if it's not a \
-           column expectation, this drops existing expectations of the same type as `expectation config`. \
-           After expectations of the same type are dropped, `expectation_config` is appended to \
-           `DataAsset._expectation_suite`.
+        """Appends an expectation.
 
            Args:
-               expectation_config (json): \
-                   The JSON-serializable expectation to be added to the DataAsset expectations in `_expectation_suite`.
+               expectation_config (ExpectationConfiguration): \
+                   The expectation to be added to the list.
 
            Notes:
-               May raise future errors once json-serializable tests are implemented to check for correct arg formatting
-
+               May want to add type-checking in the future.
         """
-        expectation_type = expectation_config.expectation_type
-
-        # Test to ensure the new expectation is serializable.
-        # FIXME: If it's not, are we sure we want to raise an error?
-        # FIXME: Should we allow users to override the error?
-        # FIXME: Should we try to convert the object using something like recursively_convert_to_json_serializable?
-        # json.dumps(expectation_config)
-
-        # Drop existing expectations with the same expectation_type.
-        # For column_expectations, _append_expectation should only replace expectations
-        # where the expectation_type AND the column match
-        # !!! This is good default behavior, but
-        # !!!    it needs to be documented, and
-        # !!!    we need to provide syntax to override it.
-
-        if 'column' in expectation_config.kwargs:
-            column = expectation_config.kwargs['column']
-
-            self.expectations = [f for f in filter(
-                lambda exp: (exp.expectation_type != expectation_type) or (
-                    'column' in exp.kwargs and exp.kwargs['column'] != column),
-                self.expectations
-            )]
-        else:
-            self.expectations = [f for f in filter(
-                lambda exp: exp.expectation_type != expectation_type,
-                self.expectations
-            )]
-
         self.expectations.append(expectation_config)
-
-    def _append_expectation(self, expectation_config):
-        return self.append_expectation(expectation_config)
 
     def find_expectation_indexes(self,
         expectation_type=None,
         column=None,
         expectation_kwargs=None
     ):
-        """Find matching expectations within _expectation_config.
+        """Find matching expectations and return their indexes.
         Args:
             expectation_type=None                : The name of the expectation type to be matched.
             column=None                          : The name of the column to be matched.
@@ -784,7 +745,7 @@ class ExpectationSuite(object):
         discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
     ):
-        """Find matching expectations within _expectation_config.
+        """Find matching expectations and return them.
         Args:
             expectation_type=None                : The name of the expectation type to be matched.
             column=None                          : The name of the column to be matched.
@@ -821,7 +782,7 @@ class ExpectationSuite(object):
         remove_multiple_matches=False,
         dry_run=False,
     ):
-        """Remove matching expectation(s) from _expectation_config.
+        """Remove matching expectation(s).
         Args:
             expectation_type=None                : The name of the expectation type to be matched.
             column=None                          : The name of the column to be matched.

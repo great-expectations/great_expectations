@@ -343,8 +343,58 @@ class DataAsset(object):
         self._expectation_suite.append_expectation(expectation_config)
 
     def _append_expectation(self, expectation_config):
-        """This method is a thin wrapper for ExpectationSuite._append_expectation"""
-        self._expectation_suite._append_expectation(expectation_config)
+        """This method
+        
+        This method should become a thin wrapper for ExpectationSuite.append_expectation
+
+        Included for backwards compatibility.
+        """
+        """Appends an expectation to `DataAsset._expectation_suite` and drops existing expectations of the same type.
+
+           If `expectation_config` is a column expectation, this drops existing expectations that are specific to \
+           that column and only if it is the same expectation type as `expectation_config`. Otherwise, if it's not a \
+           column expectation, this drops existing expectations of the same type as `expectation config`. \
+           After expectations of the same type are dropped, `expectation_config` is appended to \
+           `DataAsset._expectation_suite`.
+
+           Args:
+               expectation_config (json): \
+                   The JSON-serializable expectation to be added to the DataAsset expectations in `_expectation_suite`.
+
+           Notes:
+               May raise future errors once json-serializable tests are implemented to check for correct arg formatting
+
+        """
+        expectation_type = expectation_config.expectation_type
+
+        # Test to ensure the new expectation is serializable.
+        # FIXME: If it's not, are we sure we want to raise an error?
+        # FIXME: Should we allow users to override the error?
+        # FIXME: Should we try to convert the object using something like recursively_convert_to_json_serializable?
+        # json.dumps(expectation_config)
+
+        # Drop existing expectations with the same expectation_type.
+        # For column_expectations, _append_expectation should only replace expectations
+        # where the expectation_type AND the column match
+        # !!! This is good default behavior, but
+        # !!!    it needs to be documented, and
+        # !!!    we need to provide syntax to override it.
+
+        if 'column' in expectation_config.kwargs:
+            column = expectation_config.kwargs['column']
+
+            self._expectation_suite.expectations = [f for f in filter(
+                lambda exp: (exp.expectation_type != expectation_type) or (
+                    'column' in exp.kwargs and exp.kwargs['column'] != column),
+                self._expectation_suite.expectations
+            )]
+        else:
+            self.expectations = [f for f in filter(
+                lambda exp: exp.expectation_type != expectation_type,
+                self._expectation_suite.expectations
+            )]
+
+        self._expectation_suite.append_expectation(expectation_config)
 
     def _copy_and_clean_up_expectation(self,
         expectation,
