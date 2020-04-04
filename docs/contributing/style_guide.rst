@@ -1,14 +1,14 @@
 .. _contributing_style_guide:
 
 
-
 Style Guide
 ==============
 
-* Ensure any new features or behavioral differences introduced by your changes are documented in the docs, and ensure you have docstrings on your contributions. We use the Sphinx's Napoleon extension to build documentation from Google-style docstrings (see http://www.sphinx-doc.org/en/master/ext/napoleon.html).
+* Ensure any new features or behavioral differences introduced by your changes are documented in the docs, and ensure you have docstrings on your contributions. We use the Sphinx's `Napoleon extension <http://www.sphinx-doc.org/en/master/ext/napoleon.html>`__ to build documentation from Google-style docstrings.
 * Avoid abbreviations, e.g. use `column_index` instead of `column_idx`.
 * Use unambiguous expectation names, even if they're a bit longer, e.g. use `expect_columns_to_match_ordered_list` instead of `expect_columns_to_be`.
 * Expectation names should reflect their decorators:
+
     * `expect_table_...` for methods decorated directly with `@expectation`
     * `expect_column_values_...` for `@column_map_expectation`
     * `expect_column_...` for `@column_aggregate_expectation`
