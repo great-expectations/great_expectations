@@ -9,6 +9,7 @@ import pandas as pd
 from six import PY2, PY3
 import shutil
 
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.data_context.types.base import DataContextConfigSchema
 from great_expectations.data_context.util import file_relative_path
@@ -19,6 +20,7 @@ from great_expectations.datasource.types.batch_kwargs import (
     BatchMarkers
 )
 from great_expectations.core.util import nested_update
+from great_expectations.validator.validator import Validator
 
 yaml = YAML()
 
@@ -289,3 +291,26 @@ def test_process_batch_parameters():
             "nrows": 1
         }
     }
+
+    batch_kwargs = PandasDatasource("test").process_batch_parameters(dataset_options={"caching": False})
+    assert batch_kwargs == {
+        "dataset_options": {
+            "caching": False
+        }
+    }
+
+
+def test_pandas_datasource_processes_dataset_options(test_folder_connection_path):
+    datasource = PandasDatasource('PandasCSV', generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": test_folder_connection_path
+            }
+        }
+    )
+    batch_kwargs = datasource.build_batch_kwargs("subdir_reader", name="test")
+    batch_kwargs["dataset_options"] = {"caching": False}
+    batch = datasource.get_batch(batch_kwargs)
+    validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    dataset = validator.get_dataset()
+    assert dataset.caching is False
