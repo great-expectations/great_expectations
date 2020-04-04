@@ -338,6 +338,10 @@ class DataAsset(object):
             "result_format": 'BASIC',
         }
 
+    def append_expectation(self, expectation_config):
+        """This method is a thin wrapper for ExpectationSuite.append_expectation"""
+        self._expectation_suite.append_expectation(expectation_config)
+
     def _append_expectation(self, expectation_config):
         """This method is a thin wrapper for ExpectationSuite._append_expectation"""
         self._expectation_suite._append_expectation(expectation_config)
