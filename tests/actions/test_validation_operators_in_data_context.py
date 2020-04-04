@@ -77,9 +77,22 @@ def test_validation_operator_evaluation_parameters(validation_operators_data_con
             ".observed_value": 3
         }
     )
-    print(res)
-    assert False
+    assert res["success"] is True
 
+    res = validation_operators_data_context.run_validation_operator(
+        "store_val_res_and_extract_eval_params",
+        assets_to_validate=[
+            (
+                validation_operators_data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1"),
+                "param_suite"
+            )
+        ],
+        evaluation_parameters={
+            "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
+            ".observed_value": 10
+        }
+    )
+    assert res["success"] is False
 
 def test_action_list_operator(validation_operators_data_context):
     data_context = validation_operators_data_context
