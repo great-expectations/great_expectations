@@ -339,6 +339,7 @@ class DataAsset(object):
         }
 
     def _append_expectation(self, expectation_config):
+        """This method is a thin wrapper for ExpectationSuite._append_expectation"""
         self._expectation_suite._append_expectation(expectation_config)
 
     def _copy_and_clean_up_expectation(self,
@@ -347,7 +348,7 @@ class DataAsset(object):
         discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
     ):
-        """Thin wrapper for ExpectationSuite._copy_and_clean_up_expectation"""
+        """This method is a thin wrapper for ExpectationSuite._copy_and_clean_up_expectation"""
         return self._expectation_suite._copy_and_clean_up_expectation(
             expectation=expectation,
             discard_result_format_kwargs=discard_result_format_kwargs,
@@ -362,7 +363,7 @@ class DataAsset(object):
         discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
     ):
-        """Thin wrapper for ExpectationSuite._copy_and_clean_up_expectations_from_indexes"""
+        """This method is a thin wrapper for ExpectationSuite._copy_and_clean_up_expectations_from_indexes"""
         return self._expectation_suite._copy_and_clean_up_expectations_from_indexes(
             match_indexes=match_indexes,
             discard_result_format_kwargs=discard_result_format_kwargs,
@@ -375,7 +376,7 @@ class DataAsset(object):
         column=None,
         expectation_kwargs=None
     ):
-        """Thin wrapper for ExpectationSuite.find_expectation_indexes"""
+        """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
         return self._expectation_suite.find_expectation_indexes(
             expectation_type=expectation_type,
             column=column,
