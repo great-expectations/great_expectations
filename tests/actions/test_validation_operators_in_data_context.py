@@ -3,6 +3,7 @@ import os
 import shutil
 
 import pandas as pd
+import json
 
 from great_expectations.data_context import (
     BaseDataContext,
@@ -25,10 +26,10 @@ from great_expectations.data_context.util import (
 def parameterized_expectation_suite():
     fixture_path = file_relative_path(
         __file__,
-        "../../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
+        "../test_fixtures/expectation_suites/parameterized_expression_expectation_suite_fixture.json",
     )
     with open(fixture_path, "r",) as suite:
-        return json.load(suite)
+        return expectationSuiteSchema.load(json.load(suite))
 
 @pytest.fixture
 def validation_operators_data_context(basic_data_context_config_for_validation_operator, filesystem_csv_4):
@@ -59,6 +60,25 @@ def validation_operators_data_context(basic_data_context_config_for_validation_o
     data_context.save_expectation_suite(warning_expectations, expectation_suite_name="f1.warning")
 
     return data_context
+
+
+def test_validation_operator_evaluation_parameters(validation_operators_data_context, parameterized_expectation_suite):
+    validation_operators_data_context.save_expectation_suite(parameterized_expectation_suite, "param_suite")
+    res = validation_operators_data_context.run_validation_operator(
+        "store_val_res_and_extract_eval_params",
+        assets_to_validate=[
+            (
+                validation_operators_data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1"),
+                "param_suite"
+            )
+        ],
+        evaluation_parameters={
+            "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
+            ".observed_value": 3
+        }
+    )
+    print(res)
+    assert False
 
 
 def test_action_list_operator(validation_operators_data_context):
