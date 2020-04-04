@@ -2,6 +2,7 @@
 
 develop
 -----------------
+* Add log_level parameter to jupyter_ux.setup_notebook_logging.
 
 0.9.8
 -----------------
