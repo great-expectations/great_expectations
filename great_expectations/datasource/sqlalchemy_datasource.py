@@ -35,7 +35,7 @@ class SqlAlchemyDatasource(Datasource):
         that query. The query can be parameterized according to the standard python Template engine, which
         uses $parameter, with additional kwargs passed to the get_batch method.
     """
-    recognized_batch_parameters = {'query_parameters', 'limit'}
+    recognized_batch_parameters = {'query_parameters', 'limit', 'dataset_options'}
 
     @classmethod
     def build_configuration(cls, data_asset_type=None, generators=None, **kwargs):
@@ -189,7 +189,10 @@ class SqlAlchemyDatasource(Datasource):
             data_context=self._data_context
         )
 
-    def process_batch_parameters(self, query_parameters=None, limit=None):
-        batch_kwargs = super(SqlAlchemyDatasource, self).process_batch_parameters(limit=limit)
+    def process_batch_parameters(self, query_parameters=None, limit=None, dataset_options=None):
+        batch_kwargs = super(SqlAlchemyDatasource, self).process_batch_parameters(
+            limit=limit,
+            dataset_options=dataset_options,
+        )
         nested_update(batch_kwargs, {"query_parameters": query_parameters})
         return batch_kwargs

@@ -717,9 +717,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         except (TypeError, AttributeError):
             pass
 
-        # Bigquery
-        if bigquery_types_tuple is not None:
-            return bigquery_types_tuple
+        # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
+        try:
+            if (isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect) and
+                    bigquery_types_tuple is not None):
+                return bigquery_types_tuple
+        except (TypeError, AttributeError):
+            pass
 
         return self.dialect
 
@@ -768,7 +772,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 }
 
         except AttributeError:
-            raise ValueError("Unrecognized sqlalchemy type: %s" % type_)
+            raise ValueError("Type not recognized by current driver: %s" % type_)
 
     @DocInherit
     @DataAsset.expectation(['column', 'type_', 'mostly'])

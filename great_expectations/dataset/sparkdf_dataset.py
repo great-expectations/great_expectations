@@ -332,6 +332,9 @@ class SparkDFDataset(MetaSparkDFDataset):
     def __init__(self, spark_df, *args, **kwargs):
         # Creation of the Spark DataFrame is done outside this class
         self.spark_df = spark_df
+        self._persist = kwargs.pop("persist", True)
+        if self._persist:
+            self.spark_df.persist()
         super(SparkDFDataset, self).__init__(*args, **kwargs)
 
     def head(self, n=5):

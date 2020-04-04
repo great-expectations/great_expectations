@@ -12,6 +12,9 @@ import datetime
 from marshmallow import ValidationError
 from six import PY3, string_types
 from collections import namedtuple, Counter, defaultdict
+
+from great_expectations.data_asset.evaluation_parameters import build_evaluation_parameters
+
 try:
     from collections.abc import Hashable
 except ImportError:  # Python 2.7
@@ -204,13 +207,14 @@ class DataAsset(object):
                 expectation_args = copy.deepcopy(all_args)
 
                 if self._expectation_suite.evaluation_parameters:
-                    evaluation_args = self._build_evaluation_parameters(
+                    evaluation_args = build_evaluation_parameters(
                         expectation_args,
-                        self._expectation_suite.evaluation_parameters
+                        self._expectation_suite.evaluation_parameters,
+                        self._config.get("interactive_evaluation", True)
                     )
                 else:
-                    evaluation_args = self._build_evaluation_parameters(
-                        expectation_args, None)
+                    evaluation_args = build_evaluation_parameters(
+                        expectation_args, None, self._config.get("interactive_evaluation", True))
 
                 # Construct the expectation_config object
                 expectation_config = ExpectationConfiguration(
@@ -836,7 +840,12 @@ class DataAsset(object):
             self._data_context.save_expectation_suite(expectation_suite)
         elif filepath is not None:
             with open(filepath, 'w') as outfile:
-                json.dump(expectationSuiteSchema.dump(expectation_suite), outfile, indent=2)
+                json.dump(
+                    expectationSuiteSchema.dump(expectation_suite),
+                    outfile,
+                    indent=2,
+                    sort_keys=True,
+                )
         else:
             raise ValueError("Unable to save config: filepath or data_context must be available.")
 
@@ -1011,9 +1020,12 @@ class DataAsset(object):
                     if result_format is not None:
                         expectation.kwargs.update({'result_format': result_format})
 
-                    # A missing parameter should raise a KeyError
-                    evaluation_args = self._build_evaluation_parameters(
-                        expectation.kwargs, runtime_evaluation_parameters)
+                    # A missing parameter will raise an EvaluationParameterError
+                    evaluation_args = build_evaluation_parameters(
+                        expectation.kwargs,
+                        runtime_evaluation_parameters,
+                        self._config.get("interactive_evaluation", True)
+                    )
 
                     result = expectation_method(
                         catch_exceptions=catch_exceptions,
@@ -1151,35 +1163,6 @@ class DataAsset(object):
     def expectation_suite_name(self, expectation_suite_name):
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
         self._expectation_suite.expectation_suite_name = expectation_suite_name
-
-    def _build_evaluation_parameters(self, expectation_args, evaluation_parameters):
-        """Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,
-        AND mutate expectation_args by removing any parameter values passed in as temporary values during
-        exploratory work.
-        """
-
-        evaluation_args = copy.deepcopy(expectation_args)
-
-        # Iterate over arguments, and replace $PARAMETER-defined args with their
-        # specified parameters.
-        for key, value in evaluation_args.items():
-            if isinstance(value, dict) and '$PARAMETER' in value:
-                # First, check to see whether an argument was supplied at runtime
-                # If it was, use that one, but remove it from the stored config
-                if "$PARAMETER." + value["$PARAMETER"] in value:
-                    evaluation_args[key] = evaluation_args[key]["$PARAMETER." +
-                                                                value["$PARAMETER"]]
-                    del expectation_args[key]["$PARAMETER." +
-                                              value["$PARAMETER"]]
-                elif evaluation_parameters is not None and value["$PARAMETER"] in evaluation_parameters:
-                    evaluation_args[key] = evaluation_parameters[value['$PARAMETER']]
-                elif not self._config.get("interactive_evaluation", True):
-                    pass
-                else:
-                    raise KeyError(
-                        "No value found for $PARAMETER " + value["$PARAMETER"])
-
-        return evaluation_args
 
     ###
     #
