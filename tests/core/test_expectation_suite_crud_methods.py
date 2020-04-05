@@ -231,3 +231,37 @@ def test_find_expectations(baseline_suite, exp1, exp2):
         },
         meta={}
     )
+
+def test_remove_expectation(baseline_suite):
+    # ValueError: Multiple expectations matched arguments. No expectations removed.
+    with pytest.raises(ValueError):
+        baseline_suite.remove_expectation()
+
+    # ValueError: No matching expectation found.
+    with pytest.raises(ValueError):
+        baseline_suite.remove_expectation(
+            column="does_not_exist"
+        )
+
+    # ValueError: Multiple expectations matched arguments. No expectations removed.
+    with pytest.raises(ValueError):
+        baseline_suite.remove_expectation(
+            expectation_type="expect_column_values_to_be_in_set"
+        )
+
+    assert len(baseline_suite.expectations) == 2
+    assert baseline_suite.remove_expectation(
+        column="a"
+    ) == None
+    assert len(baseline_suite.expectations) == 1
+
+    baseline_suite.remove_expectation(
+        expectation_type="expect_column_values_to_be_in_set"
+    )
+    assert len(baseline_suite.expectations) == 0
+
+    # ValueError: No matching expectation found.
+    with pytest.raises(ValueError):
+        baseline_suite.remove_expectation(
+            expectation_type="expect_column_values_to_be_in_set"
+        )
