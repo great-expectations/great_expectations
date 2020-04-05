@@ -246,11 +246,12 @@ class UpdateDataDocsAction(ValidationAction):
     that a validation result should be added to the data docs.
     """
 
-    def __init__(self, data_context):
+    def __init__(self, data_context, target_site_names=None):
         """
         :param data_context: data context
         """
         super(UpdateDataDocsAction, self).__init__(data_context)
+        self._target_site_names = target_site_names
 
     def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
         logger.debug("UpdateDataDocsAction.run")
@@ -264,5 +265,6 @@ class UpdateDataDocsAction(ValidationAction):
             ))
 
         self.data_context.build_data_docs(
+            site_names=self._target_site_names,
             resource_identifiers=[validation_result_suite_identifier]
         )
