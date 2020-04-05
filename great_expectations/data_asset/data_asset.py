@@ -389,7 +389,7 @@ class DataAsset(object):
                 self._expectation_suite.expectations
             )]
         else:
-            self.expectations = [f for f in filter(
+            self._expectation_suite.expectations = [f for f in filter(
                 lambda exp: exp.expectation_type != expectation_type,
                 self._expectation_suite.expectations
             )]
