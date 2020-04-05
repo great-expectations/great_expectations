@@ -615,6 +615,9 @@ class ExpectationSuite(object):
 
           Returns:
               A copy of the provided expectation with `success_on_last_run` and other specified key-value pairs removed
+
+          Note: 
+              This method may move to ExpectationConfiguration, minus the "copy" part.
         """
         new_expectation = deepcopy(expectation)
 
