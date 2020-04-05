@@ -158,3 +158,76 @@ def test_find_expectation_indexes_on_empty_suite(empty_suite):
         expectation_kwargs={}
     ) == []
 
+def test_find_expectations(baseline_suite, exp1, exp2):
+    # Note: most of the logic in this method is based on
+    # find_expectation_indexes and _copy_and_clean_up_expectations_from_indexes
+    # These tests do not thoroughly cover that logic.
+    # Instead, they focus on the behavior of the discard_* methods
+
+    assert baseline_suite.find_expectations(
+        column="a",
+        expectation_type="expect_column_values_to_be_between",
+    ) == []
+
+    result = baseline_suite.find_expectations(
+        column="a",
+        expectation_type="expect_column_values_to_be_in_set",
+    )
+    assert len(result) == 1
+    assert result[0] == ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "a",
+            "value_set": [1, 2, 3],
+            # "result_format": "BASIC"
+        },
+        meta={
+            "notes": "This is an expectation."
+        }
+    )
+
+    exp_with_all_the_params = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_null",
+        kwargs={
+            "column": "a",
+            "result_format": "BASIC",
+            "include_config": True,
+            "catch_exceptions": True,
+        },
+        meta={}
+    )
+    baseline_suite.append_expectation(exp_with_all_the_params)
+
+    assert baseline_suite.find_expectations(
+        column="a",
+        expectation_type="expect_column_values_to_not_be_null",
+    )[0] == ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_null",
+        kwargs={
+            "column": "a",
+        },
+        meta={}
+    )
+
+    assert baseline_suite.find_expectations(
+        column="a",
+        expectation_type="expect_column_values_to_not_be_null",
+        discard_result_format_kwargs=False,
+        discard_include_config_kwargs=False,
+        discard_catch_exceptions_kwargs=False,
+    )[0] == exp_with_all_the_params
+
+    assert baseline_suite.find_expectations(
+        column="a",
+        expectation_type="expect_column_values_to_not_be_null",
+        discard_result_format_kwargs=False,
+        discard_catch_exceptions_kwargs=False,
+    )[0] == ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_null",
+        kwargs={
+            "column": "a",
+            "result_format": "BASIC",
+            "catch_exceptions": True,
+        },
+        meta={}
+    )
