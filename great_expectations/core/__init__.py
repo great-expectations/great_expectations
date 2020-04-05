@@ -713,7 +713,7 @@ class ExpectationSuite(object):
             expectation_kwargs = {}
 
         if "column" in expectation_kwargs and column is not None and column is not expectation_kwargs["column"]:
-            raise ValueError("Conflicting column names in remove_expectation: %s and %s" % (
+            raise ValueError("Conflicting column names in find_expectation_indexes: %s and %s" % (
                 column, expectation_kwargs["column"]))
 
         if column is not None:
