@@ -5,7 +5,7 @@ from great_expectations.data_context.store.query_store import SqlAlchemyQuerySto
 
 @pytest.fixture()
 def basic_sqlalchemy_query_store(titanic_sqlite_db):
-    # We just steal the engine from a dataset
+    # For the purpose of this test, just steal the engine from a dataset
     credentials = {"engine": titanic_sqlite_db.engine}
     return SqlAlchemyQueryStore(credentials=credentials, queries={"q1": "SELECT count(*) FROM titanic;"})
 
