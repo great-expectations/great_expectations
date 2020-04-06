@@ -82,7 +82,7 @@ Uncomment the next cell and set data_source_name to one of these names.
     return data_source_name
 
 
-def setup_notebook_logging(logger=None):
+def setup_notebook_logging(logger=None, log_level=logging.INFO):
     """Set up the provided logger for the GE default logging configuration.
 
     Args:
@@ -114,8 +114,8 @@ def setup_notebook_logging(logger=None):
     # chandler.setFormatter(Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
     chandler.setFormatter(Formatter("%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
     logger.addHandler(chandler)
-    logger.setLevel(logging.INFO)
-    logger.info("Great Expectations logging enabled at INFO level by JupyterUX module.")
+    logger.setLevel(log_level)
+    logger.info("Great Expectations logging enabled at %s level by JupyterUX module." % (log_level,) )
     #
     # # Filter warnings
     # import warnings
