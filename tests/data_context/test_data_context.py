@@ -165,7 +165,6 @@ def test_save_expectation_suite(data_context):
 def test_compile_evaluation_parameter_dependencies(data_context):
     assert data_context._evaluation_parameter_dependencies == {}
     data_context._compile_evaluation_parameter_dependencies()
-    print(data_context._evaluation_parameter_dependencies)
     assert data_context._evaluation_parameter_dependencies == {
         'source_diabetes_data.default': [{
             "metric_kwargs_id": {
@@ -174,6 +173,7 @@ def test_compile_evaluation_parameter_dependencies(data_context):
         }],
         'source_patient_data.default': ["expect_table_row_count_to_equal.result.observed_value"]
     }
+
 
 def test_list_datasources(data_context):
     datasources = data_context.list_datasources()

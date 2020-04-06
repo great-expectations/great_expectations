@@ -127,7 +127,7 @@ def test_compile_evaluation_parameter_dependencies(validation_operators_data_con
     data_context = validation_operators_data_context
     f1 = file_relative_path(
         __file__,
-        "../test_fixtures/expectation_suites/f1.json",
+        "../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
     )
     with open(f1, 'r') as infile:
             expectation_suite = expectationSuiteSchema.loads(infile.read())
@@ -145,6 +145,7 @@ def test_compile_evaluation_parameter_dependencies(validation_operators_data_con
         }],
         'source_patient_data.default': ["expect_table_row_count_to_equal.result.observed_value"]
     }
+
 
 def test_warning_and_failure_validation_operator(validation_operators_data_context):
     data_context = validation_operators_data_context
