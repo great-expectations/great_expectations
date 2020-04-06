@@ -9,8 +9,11 @@ from datetime import datetime
 import tzlocal
 from IPython.core.display import display, HTML
 
-from great_expectations.render.renderer import ProfilingResultsColumnSectionRenderer, \
-    ExpectationSuiteColumnSectionRenderer
+from great_expectations.render.renderer import (
+    ExpectationSuiteColumnSectionRenderer,
+    ProfilingResultsColumnSectionRenderer,
+    ValidationResultsColumnSectionRenderer,
+)
 from great_expectations.render.types import RenderedSectionContent
 from great_expectations.render.view import DefaultJinjaSectionView
 
@@ -236,6 +239,21 @@ cooltip_style_element = """<style type="text/css">
 </style>
 """
 
+def _render_for_jupyter(
+    view,
+    include_styling,
+    return_without_displaying,
+):
+    if include_styling:
+        html_to_display = bootstrap_link_element+cooltip_style_element+view
+    else:
+        html_to_display = view
+
+    if return_without_displaying:
+        return html_to_display
+    else:
+        display(HTML(html_to_display))
+
 
 def display_column_expectations_as_section(
     expectation_suite,
@@ -261,54 +279,79 @@ def display_column_expectations_as_section(
     document = ExpectationSuiteColumnSectionRenderer().render(column_expectation_list).to_json_dict()
     view = DefaultJinjaSectionView().render({"section": document, "section_loop": 1})
 
-    if include_styling:
-        html_to_display = bootstrap_link_element+cooltip_style_element+view
-    else:
-        html_to_display = view
-
-    if return_without_displaying:
-        return html_to_display
-    else:
-        display(HTML(html_to_display))
+    return _render_for_jupyter(
+        view,
+        include_styling,
+        return_without_displaying,
+    )
 
 
-# def display_column_evrs_as_section(
-#     evrs,
-#     column,
-#     include_styling=True,
-#     return_without_displaying=False,
-# ):
-#     """This is a utility function to render all of the EVRs in an ExpectationSuite with the same column name as an HTML block.
-#
-#     By default, the HTML block is rendered using ExpectationSuiteColumnSectionRenderer and the view is rendered using DefaultJinjaSectionView.
-#     Therefore, it should look exactly the same as the default renderer for build_docs.
-#
-#     Example usage:
-#     display_column_evrs_as_section(exp, "my_column")
-#     """
-#
-#     #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
-#     column_evr_list = [ e for e in evrs.results if "column" in e.expectation_config.kwargs and e.expectation_config.kwargs["column"] == column ]
-#
-#     #TODO: Handle the case where zero evrs match the column name
-#
-#     document = ProfilingResultsColumnSectionRenderer().render(column_evr_list)
-#     view = DefaultJinjaSectionView().render(
-#         {
-#             "section": document,
-#             "section_loop": {"index": 1},
-#         }
-#     )
-#
-#     if include_styling:
-#         html_to_display = bootstrap_link_element+cooltip_style_element+view
-#     else:
-#         html_to_display = view
-#
-#     if return_without_displaying:
-#         return html_to_display
-#     else:
-#         display(HTML(html_to_display))
+def display_profiled_column_evrs_as_section(
+    evrs,
+    column,
+    include_styling=True,
+    return_without_displaying=False,
+):
+    """This is a utility function to render all of the EVRs in an ExpectationSuite with the same column name as an HTML block.
+
+    By default, the HTML block is rendered using ExpectationSuiteColumnSectionRenderer and the view is rendered using DefaultJinjaSectionView.
+    Therefore, it should look exactly the same as the default renderer for build_docs.
+
+    Example usage:
+    display_column_evrs_as_section(exp, "my_column")
+
+    WARNING: This method is experimental.
+    """
+
+    #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
+    column_evr_list = [ e for e in evrs.results if "column" in e.expectation_config.kwargs and e.expectation_config.kwargs["column"] == column ]
+
+    #TODO: Handle the case where zero evrs match the column name
+
+    document = ProfilingResultsColumnSectionRenderer().render(column_evr_list).to_json_dict()
+    view = DefaultJinjaSectionView().render(
+        {
+            "section": document,
+            "section_loop": {"index": 1},
+        }
+    )
+
+    return _render_for_jupyter(
+        view,
+        include_styling,
+        return_without_displaying,
+    )
+
+def display_column_evrs_as_section(
+    evrs,
+    column,
+    include_styling=True,
+    return_without_displaying=False,
+):
+    """
+    Display validation results for a single column as a section.
+
+    WARNING: This method is experimental.
+    """
+
+    #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
+    column_evr_list = [ e for e in evrs.results if "column" in e.expectation_config.kwargs and e.expectation_config.kwargs["column"] == column ]
+
+    #TODO: Handle the case where zero evrs match the column name
+
+    document = ValidationResultsColumnSectionRenderer().render(column_evr_list).to_json_dict()
+    view = DefaultJinjaSectionView().render(
+        {
+            "section": document,
+            "section_loop": {"index": 1},
+        }
+    )
+
+    return _render_for_jupyter(
+        view,
+        include_styling,
+        return_without_displaying,
+    )
 
 
 # When importing the jupyter_ux module, we set up a preferred logging configuration

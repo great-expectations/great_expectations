@@ -1,4 +1,5 @@
 import logging
+import pytest
 
 import great_expectations as ge
 import great_expectations.jupyter_ux as jux
@@ -10,6 +11,7 @@ def test_styling_elements_exist():
 
     assert jux.cooltip_style_element[:23] == '<style type="text/css">'
     assert ".cooltip" in jux.cooltip_style_element
+
 
 
 def test_display_column_expectations_as_section(basic_expectation_suite):
@@ -150,6 +152,24 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
     </div>
 </div>
 """.replace(" ", "").replace("\t", "").replace("\n", "")
+
+@pytest.mark.smoketest
+def test_display_profiled_column_evrs_as_section(titanic_profiled_evrs_1):
+    section_html = jux.display_profiled_column_evrs_as_section(
+        titanic_profiled_evrs_1,
+        "SexCode",
+        include_styling=False,
+        return_without_displaying=True
+    )
+
+@pytest.mark.smoketest
+def test_display_column_evrs_as_section(titanic_profiled_evrs_1):
+    section_html = jux.display_column_evrs_as_section(
+        titanic_profiled_evrs_1,
+        "SexCode",
+        include_styling=False,
+        return_without_displaying=True
+    )
 
 
 def test_configure_logging(caplog):
