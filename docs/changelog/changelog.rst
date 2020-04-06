@@ -3,6 +3,7 @@
 develop
 -----------------
 * Data Docs: improve configurability of site_section_builders
+* TupleFilesystemStoreBackend now ignore `.ipynb_checkpoints` directories `#1203 <https://github.com/great-expectations/great_expectations/issues/1203>`_
 
 0.9.9
 -----------------
