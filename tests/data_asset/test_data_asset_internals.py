@@ -682,7 +682,7 @@ def test_find_expectations():
     with pytest.raises(ValueError) as exc:
         my_df.find_expectations("expect_column_to_exist", "x", {"column": "y"})
 
-    assert 'Conflicting column names in remove_expectation:' in str(exc.value)
+    assert 'Conflicting column names in find_expectation_indexes:' in str(exc.value)
 
     exp1 = [
         ExpectationConfiguration(
@@ -767,7 +767,7 @@ def test_remove_expectation():
         my_df.remove_expectation("expect_column_to_exist", "x", {
                                  "column": "y"}, dry_run=True)
 
-    assert 'Conflicting column names in remove_expectation' in str(exc.value)
+    assert 'Conflicting column names in find_expectation_indexes' in str(exc.value)
 
     exp1 = [
         ExpectationConfiguration(
