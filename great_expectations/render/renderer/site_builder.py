@@ -6,6 +6,7 @@ import os
 import traceback
 
 from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLASS
+from great_expectations.core import nested_update
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
@@ -147,37 +148,41 @@ class SiteBuilder(object):
                 class_name=site_index_builder['class_name']
             )
 
-        if site_section_builders is None:
-            site_section_builders = {
-                "expectations": {
-                    "class_name": "DefaultSiteSectionBuilder",
-                    "source_store_name":  data_context.expectations_store_name,
-                    "renderer": {
-                        "class_name": "ExpectationSuitePageRenderer"
-                    }
+        default_site_section_builders_config = {
+            "expectations": {
+                "class_name": "DefaultSiteSectionBuilder",
+                "source_store_name":  data_context.expectations_store_name,
+                "renderer": {
+                    "class_name": "ExpectationSuitePageRenderer"
+                }
+            },
+            "validations": {
+                "class_name": "DefaultSiteSectionBuilder",
+                "source_store_name": data_context.validations_store_name,
+                "run_id_filter": {
+                    "ne": "profiling"
                 },
-                "validations": {
-                    "class_name": "DefaultSiteSectionBuilder",
-                    "source_store_name": data_context.validations_store_name,
-                    "run_id_filter": {
-                        "ne": "profiling"
-                    },
-                    "renderer": {
-                        "class_name": "ValidationResultsPageRenderer"
-                    },
-                    "validation_results_limit": site_index_builder.get("validation_results_limit")
+                "renderer": {
+                    "class_name": "ValidationResultsPageRenderer"
                 },
-                "profiling": {
-                    "class_name": "DefaultSiteSectionBuilder",
-                    "source_store_name":  data_context.validations_store_name,
-                    "run_id_filter": {
-                        "eq": "profiling"
-                    },
-                    "renderer": {
-                        "class_name": "ProfilingResultsPageRenderer"
-                    }
+                "validation_results_limit": site_index_builder.get("validation_results_limit")
+            },
+            "profiling": {
+                "class_name": "DefaultSiteSectionBuilder",
+                "source_store_name":  data_context.validations_store_name,
+                "run_id_filter": {
+                    "eq": "profiling"
+                },
+                "renderer": {
+                    "class_name": "ProfilingResultsPageRenderer"
                 }
             }
+        }
+
+        if site_section_builders is None:
+            site_section_builders = default_site_section_builders_config
+        else:
+            site_section_builders = nested_update(default_site_section_builders_config, site_section_builders)
         self.site_section_builders = {}
         for site_section_name, site_section_config in site_section_builders.items():
             module_name = site_section_config.get('module_name') or 'great_expectations.render.renderer.site_builder'
