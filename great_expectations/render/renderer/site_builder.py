@@ -329,7 +329,11 @@ class DefaultSiteSectionBuilder(object):
                 if not self._resource_key_passes_run_id_filter(resource_key):
                     continue
 
-            resource = self.source_store.get(resource_key)
+            try:
+                resource = self.source_store.get(resource_key)
+            except FileNotFoundError as e:
+                logger.warning(f"File {resource_key.to_fixed_length_tuple()} could not be found. Skipping.")
+                continue
 
             if isinstance(resource_key, ExpectationSuiteIdentifier):
                 expectation_suite_name = resource_key.expectation_suite_name
