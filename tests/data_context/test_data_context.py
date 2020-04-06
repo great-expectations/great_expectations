@@ -165,6 +165,7 @@ def test_save_expectation_suite(data_context):
 def test_compile_evaluation_parameter_dependencies(data_context):
     assert data_context._evaluation_parameter_dependencies == {}
     data_context._compile_evaluation_parameter_dependencies()
+    print(data_context._evaluation_parameter_dependencies)
     assert data_context._evaluation_parameter_dependencies == {
         'source_diabetes_data.default': [{
             "metric_kwargs_id": {
