@@ -2,6 +2,8 @@
 
 develop
 -----------------
+* Add log_level parameter to jupyter_ux.setup_notebook_logging.
+* Add experimental display_profiled_column_evrs_as_section and display_column_evrs_as_section methods, with a minor (nonbreaking) refactor to create a new _render_for_jupyter method.
 
 0.9.8
 -----------------
@@ -17,6 +19,7 @@ dataset is too large to persist but *computations are guaranteed to be stable ac
 * Enable passing dataset kwargs through datasource via dataset_options batch_kwarg.
 * Fix AttributeError when validating expectations from a JSON file
 * Data Docs: fix bug that was causing erratic scrolling behavior when table of contents contains many columns
+* Data Docs: add ability to hide how-to buttons and related content in Data Docs
 
 0.9.7
 -----------------
