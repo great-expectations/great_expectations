@@ -114,6 +114,7 @@ data_docs_sites:
 
     module_name: great_expectations.render.renderer.site_builder
     class_name: SiteBuilder
+    show_how_to_buttons: true
     target_store_name: team_site_html_store
 
     site_index_builder:

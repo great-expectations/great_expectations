@@ -19,6 +19,7 @@ dataset is too large to persist but *computations are guaranteed to be stable ac
 * Enable passing dataset kwargs through datasource via dataset_options batch_kwarg.
 * Fix AttributeError when validating expectations from a JSON file
 * Data Docs: fix bug that was causing erratic scrolling behavior when table of contents contains many columns
+* Data Docs: add ability to hide how-to buttons and related content in Data Docs
 
 0.9.7
 -----------------
