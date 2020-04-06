@@ -1255,6 +1255,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
