@@ -122,31 +122,6 @@ def test_action_list_operator(validation_operators_data_context):
     first_validation_result = data_context.stores["validation_result_store"].get(validation_result_store_keys[0])
     assert data_context.stores["validation_result_store"].get(validation_result_store_keys[0]).success is True
 
-
-def test_compile_evaluation_parameter_dependencies(validation_operators_data_context):
-    data_context = validation_operators_data_context
-    f1 = file_relative_path(
-        __file__,
-        "../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
-    )
-    with open(f1, 'r') as infile:
-            expectation_suite = expectationSuiteSchema.loads(infile.read())
-            data_context.save_expectation_suite(
-                expectation_suite=expectation_suite
-            )
-    validator_batch_kwargs = data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1")
-    assert data_context._evaluation_parameter_dependencies == {}
-    data_context._compile_evaluation_parameter_dependencies()
-    assert data_context._evaluation_parameter_dependencies == {
-        'source_diabetes_data.default': [{
-            "metric_kwargs_id": {
-                "column=patient_nbr": ["expect_column_unique_value_count_to_be_between.result.observed_value"]
-            }
-        }],
-        'source_patient_data.default': ["expect_table_row_count_to_equal.result.observed_value"]
-    }
-
-
 def test_warning_and_failure_validation_operator(validation_operators_data_context):
     data_context = validation_operators_data_context
     validator_batch_kwargs = data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1")
