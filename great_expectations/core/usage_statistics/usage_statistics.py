@@ -75,7 +75,7 @@ class UsageStatisticsHandler(object):
             if message == STOP_SIGNAL:
                 self._message_queue.task_done()
                 return
-            res = session.post(self._url, json=message)
+            res = session.post(self._url, json=message, timeout=2)
             logger.debug("Posted usage stats: message status " + str(res.status_code))
             if res.status_code != 201:
                 logger.debug("Server rejected message: ", json.dumps(message, indent=2))
