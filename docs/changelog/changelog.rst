@@ -2,6 +2,7 @@
 
 develop
 -----------------
+* Allow selection of site in UpdateDataDocsAction with new arg target_site_names in great_expectations.yml
 
 0.9.8
 -----------------
