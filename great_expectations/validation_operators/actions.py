@@ -249,7 +249,7 @@ class UpdateDataDocsAction(ValidationAction):
     def __init__(self, data_context, target_site_names=None):
         """
         :param data_context: data context
-        :param target_site_names: *optional* List of site names for building data docs 
+        :param target_site_names: *optional* List of site names for building data docs
         """
         super(UpdateDataDocsAction, self).__init__(data_context)
         self._target_site_names = target_site_names
