@@ -684,7 +684,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 table_name=table_name, custom_sql=custom_sql)
         elif self.engine.dialect.name == "mssql":
             # Insert "into #{table_name}" in the custom sql query right before the "from" clause
-            custom_sqlmod = custom_sql.split('from')
+            custom_sqlmod = custom_sql.split('from', maxsplit = 1)
             stmt = (custom_sqlmod[0] + "into {table_name} from" + custom_sqlmod[1]).format(table_name=table_name)
         else:
             stmt = "CREATE TEMPORARY TABLE \"{table_name}\" AS {custom_sql}".format(
