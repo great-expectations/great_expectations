@@ -27,7 +27,7 @@ class ValidationOperator(object):
     of validation operator classes that will be the descendants of this base class.
     """
 
-    def run(self, assets_to_validate, run_id):
+    def run(self, assets_to_validate, run_id, evaluation_parameters=None):
         raise NotImplementedError
 
 
@@ -124,7 +124,7 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch
 
-    def run(self, assets_to_validate, run_id):
+    def run(self, assets_to_validate, run_id, evaluation_parameters=None):
         result_object = {
             "success": None,
             "details": {}
@@ -141,9 +141,11 @@ class ActionListValidationOperator(ValidationOperator):
             #     run_id=run_id,
             # )
             result_object["details"][expectation_suite_identifier] = {}
-            batch_validation_result = batch.validate(run_id=run_id, result_format="SUMMARY")
+            batch_validation_result = batch.validate(run_id=run_id, result_format="SUMMARY",
+                                                     evaluation_parameters=evaluation_parameters)
             result_object["details"][expectation_suite_identifier]["validation_result"] = batch_validation_result
-            batch_actions_results = self._run_actions(batch, expectation_suite_identifier, batch._expectation_suite, batch_validation_result, run_id)
+            batch_actions_results = self._run_actions(batch, expectation_suite_identifier, batch._expectation_suite,
+                                                      batch_validation_result, run_id)
             result_object["details"][expectation_suite_identifier]["actions_results"] = batch_actions_results
 
         result_object["success"] = all([val["validation_result"].success for val in result_object["details"].values()])
