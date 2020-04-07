@@ -356,7 +356,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
             # Limit is unknown in mssql! Use top instead!
             if self.engine.dialect.name.lower() == "mssql":
-                head_sql_str = "select top({n}) * from {table}".format(n = n, table = self._table.name)
+                head_sql_str = "select top({n}) * from {table}".format(n=n, table=self._table.name)
 
             df = pd.read_sql(head_sql_str, con=self.engine)
 
