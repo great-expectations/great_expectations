@@ -253,6 +253,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             #was used for a temp table and raising an error
             schema = None
             table_name = "ge_tmp_" + str(uuid.uuid4())[:8]
+            # mssql expects all temporary table names to have a prefix '#'
+            if engine.dialect.name.lower() == "mssql":
+                table_name = "#" + table_name
             generated_table_name = table_name
         else:
             generated_table_name = None
@@ -279,8 +282,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_module("sqlalchemy.dialects." + self.engine.dialect.name)
 
-            if engine and engine.dialect.name.lower() == "sqlite":
-                # sqlite temp tables only persist within a connection so override the engine
+            if engine and engine.dialect.name.lower() in ["sqlite", "mssql"]:
+                # sqlite/mssql temp tables only persist within a connection so override the engine
                 self.engine = engine.connect()
         elif self.engine.dialect.name.lower() == "snowflake":
             self.dialect = import_module("snowflake.sqlalchemy.snowdialect")
@@ -350,6 +353,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             else:
                 head_sql_str += self._table.name
             head_sql_str += " limit {0:d}".format(n)
+
+            # Limit is unknown in mssql! Use top instead!
+            if self.engine.dialect.name.lower() == "mssql":
+                head_sql_str = "select top({n}) * from {table}".format(n = n, table = self._table.name)
 
             df = pd.read_sql(head_sql_str, con=self.engine)
 
@@ -482,8 +489,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return column_median
 
     def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
-        selects = [sa.func.percentile_disc(quantile).within_group(
-            sa.column(column).asc()) for quantile in quantiles]
+        if self.engine.dialect.name.lower() != "mssql":
+            selects = [sa.func.percentile_disc(quantile).within_group(
+                sa.column(column).asc()) for quantile in quantiles]
+        else:
+            # mssql requires over(), so we add an empty over() clause
+            selects = [sa.func.percentile_disc(quantile).within_group(
+                sa.column(column).asc()).over() for quantile in quantiles]
         try:
             if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
                 # Redshift does not have a percentile_disc method, but does support an approximate version
@@ -501,9 +513,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return list(quantiles)
 
     def get_column_stdev(self, column):
-        res = self.engine.execute(sa.select([
-                sa.func.stddev_samp(sa.column(column))
-            ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
+        if self.engine.dialect.name.lower() != "mssql":
+            res = self.engine.execute(sa.select([
+                    sa.func.stddev_samp(sa.column(column))
+                ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
+        else:
+            # stdev_samp is not a recognized built-in function name but stdevp does exist for mssql!
+            res = self.engine.execute(sa.select([
+                    sa.func.stdevp(sa.column(column))
+                ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
         return float(res[0])
 
     def get_column_hist(self, column, bins):
@@ -664,6 +682,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif self.engine.dialect.name == "mysql":
             stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql)
+        elif self.engine.dialect.name == "mssql":
+            # Insert "into #{table_name}" in the custom sql query right before the "from" clause
+            custom_sqlmod = custom_sql.split('from')
+            stmt = (custom_sqlmod[0] + "into {table_name} from" + custom_sqlmod[1]).format(table_name=table_name)
         else:
             stmt = "CREATE TEMPORARY TABLE \"{table_name}\" AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql)
