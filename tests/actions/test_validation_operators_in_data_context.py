@@ -1,26 +1,17 @@
 import pytest
-import os
-import shutil
-
-import pandas as pd
 import json
 
 from great_expectations.data_context import (
     BaseDataContext,
-    DataContext,
 )
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuite,
     expectationSuiteSchema,
 )
-from great_expectations.util import (
-    gen_directory_tree_str
-)
+
 from great_expectations.data_context.util import (
     file_relative_path,
-    safe_mmkdir,
 )
+
 
 @pytest.fixture()
 def parameterized_expectation_suite():
@@ -30,6 +21,7 @@ def parameterized_expectation_suite():
     )
     with open(fixture_path, "r",) as suite:
         return expectationSuiteSchema.load(json.load(suite))
+
 
 @pytest.fixture
 def validation_operators_data_context(basic_data_context_config_for_validation_operator, filesystem_csv_4):
@@ -94,6 +86,7 @@ def test_validation_operator_evaluation_parameters(validation_operators_data_con
     )
     assert res["success"] is False
 
+
 def test_action_list_operator(validation_operators_data_context):
     data_context = validation_operators_data_context
     validator_batch_kwargs = data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1")
@@ -121,6 +114,7 @@ def test_action_list_operator(validation_operators_data_context):
 
     first_validation_result = data_context.stores["validation_result_store"].get(validation_result_store_keys[0])
     assert data_context.stores["validation_result_store"].get(validation_result_store_keys[0]).success is True
+
 
 def test_warning_and_failure_validation_operator(validation_operators_data_context):
     data_context = validation_operators_data_context

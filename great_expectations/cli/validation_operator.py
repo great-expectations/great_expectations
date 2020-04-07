@@ -1,8 +1,9 @@
 import json
 import sys
+from datetime import datetime
 
 import click
-from datetime import datetime
+
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.datasource import (
@@ -196,23 +197,24 @@ Let's help you specify the batch of data your want the validation operator to va
 
         if suite is None:
             results = context.run_validation_operator(
-            validation_operator_name,
-            assets_to_validate=[batches_to_validate],
-            run_id=run_id,
-            evaluation_parameters=None)
+                validation_operator_name,
+                assets_to_validate=batches_to_validate,
+                run_id=run_id
+            )
         else:
             if suite.evaluation_parameters is None:
                 results = context.run_validation_operator(
-                validation_operator_name,
-                assets_to_validate=[batches_to_validate],
-                run_id=run_id,
-                evaluation_parameters=None)
+                    validation_operator_name,
+                    assets_to_validate=batches_to_validate,
+                    run_id=run_id
+                )
             else:
                 results = context.run_validation_operator(
-                validation_operator_name,
-                assets_to_validate=[batches_to_validate],
-                run_id=run_id,
-                evaluation_parameters=suite.evaluation_parameters)
+                    validation_operator_name,
+                    assets_to_validate=batches_to_validate,
+                    run_id=run_id,
+                    evaluation_parameters=suite.evaluation_parameters
+                )
 
     except (
         ge_exceptions.DataContextError,
