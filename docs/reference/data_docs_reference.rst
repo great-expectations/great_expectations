@@ -89,12 +89,12 @@ do so by setting the `validation_results_limit` key in your Data Docs configurat
   data_docs_sites:
     local_site:
       class_name: SiteBuilder
+      show_how_to_buttons: true
       store_backend:
         class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
       site_index_builder:
         class_name: DefaultSiteIndexBuilder
-        show_cta_footer: true
         validation_results_limit: 5
 
 Automatically Publishing Data Docs
