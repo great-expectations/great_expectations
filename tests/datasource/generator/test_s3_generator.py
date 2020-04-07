@@ -1,9 +1,9 @@
 import pytest
-from moto import mock_s3
 
 import logging
 import pandas as pd
 import boto3
+from moto import mock_s3
 
 from great_expectations.datasource.generator.s3_generator import S3GlobReaderBatchKwargsGenerator
 from great_expectations.exceptions import BatchKwargsError
