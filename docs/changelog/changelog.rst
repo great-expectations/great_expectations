@@ -3,7 +3,7 @@
 develop
 -----------------
 * Remove the "project new" option from the command line (since it is not implemented; users can only run "init" to create a new project).
-* Add support for conditional expectations (works only for pandas dataset so far `#1217 <https://github.com/great-expectations/great_expectations/pull/1217>`_)
+* Add experimental support for conditional expectations (works only for pandas dataset so far `#1217 <https://github.com/great-expectations/great_expectations/pull/1217>`_)
 
 
 0.9.7

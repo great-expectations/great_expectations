@@ -9,7 +9,7 @@ One may, for example, expect a column that holds the country of origin to not be
 
 Great Expectations allows you to express such Conditional Expectations via a :code:`condition` argument that can be passed to all Dataset Expectations.
 
-Conditional Expectations are available only for the Pandas but not for the Spark and SQLAlchemy backends.
+Today, conditional Expectations are available only for the Pandas but not for the Spark and SQLAlchemy backends. The feature is **experimental**. Please expect changes to API as additional backends are supported.
 
 For Pandas, the :code:`condition` argument should be a boolean
 expression string, which can be passed to :code:`pandas.DataFrame.query()` before Expectation Validation (see `pandas docs <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_).
