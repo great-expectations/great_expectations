@@ -4,6 +4,7 @@ develop
 -----------------
 * Add log_level parameter to jupyter_ux.setup_notebook_logging.
 * Add experimental display_profiled_column_evrs_as_section and display_column_evrs_as_section methods, with a minor (nonbreaking) refactor to create a new _render_for_jupyter method.
+* Data Docs: improve configurability of site_section_builders
 
 0.9.8
 -----------------
