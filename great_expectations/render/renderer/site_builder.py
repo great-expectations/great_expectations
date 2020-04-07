@@ -185,6 +185,9 @@ class SiteBuilder(object):
             site_section_builders = nested_update(default_site_section_builders_config, site_section_builders)
         self.site_section_builders = {}
         for site_section_name, site_section_config in site_section_builders.items():
+            if not site_section_config or site_section_config in \
+                    ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE']:
+                continue
             module_name = site_section_config.get('module_name') or 'great_expectations.render.renderer.site_builder'
             self.site_section_builders[site_section_name] = instantiate_class_from_config(
                 config=site_section_config,
