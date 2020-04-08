@@ -2,12 +2,15 @@
 
 develop
 -----------------
+
+0.9.10
+-----------------
 * Data Docs: improve configurability of site_section_builders
 * TupleFilesystemStoreBackend now ignore `.ipynb_checkpoints` directories `#1203 <https://github.com/great-expectations/great_expectations/issues/1203>`_
 
 0.9.9
 -----------------
-* Allow eveluation parameters support in run_validation_operator
+* Allow evaluation parameters support in run_validation_operator
 * Add log_level parameter to jupyter_ux.setup_notebook_logging.
 * Add experimental display_profiled_column_evrs_as_section and display_column_evrs_as_section methods, with a minor (nonbreaking) refactor to create a new _render_for_jupyter method.
 * Allow selection of site in UpdateDataDocsAction with new arg target_site_names in great_expectations.yml
