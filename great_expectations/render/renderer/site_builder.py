@@ -99,7 +99,8 @@ class SiteBuilder(object):
                  site_index_builder=None,
                  show_how_to_buttons=True,
                  site_section_builders=None,
-                 runtime_environment=None
+                 runtime_environment=None,
+                 **kwargs
                  ):
         self.site_name = site_name
         self.data_context = data_context
