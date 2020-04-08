@@ -4,11 +4,13 @@ import os
 import json
 import shutil
 
+from great_expectations import DataContext
+from great_expectations.data_context.store import ExpectationsStore, ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier, \
     ExpectationSuiteIdentifier
 from great_expectations.render.renderer.site_builder import SiteBuilder
 
-from great_expectations.data_context.util import safe_mmkdir
+from great_expectations.data_context.util import safe_mmkdir, file_relative_path, instantiate_class_from_config
 
 
 def assert_how_to_buttons(context, index_page_locator_info: str, index_links_dict: dict, show_how_to_buttons=True):
@@ -358,3 +360,50 @@ def test_configuration_driven_site_builder_without_how_to_buttons(site_builder_d
     index_links_dict = res[1]
 
     assert_how_to_buttons(context, index_page_locator_info, index_links_dict, show_how_to_buttons=False)
+
+
+def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory):
+    """Test that site builder can handle partially specified custom site_section_builders config"""
+    base_dir = str(tmp_path_factory.mktemp("project_dir"))
+    project_dir = os.path.join(base_dir, "project_path")
+    os.mkdir(project_dir)
+
+    # fixture config swaps site section builder source stores and specifies custom run_id_filters
+    shutil.copy(file_relative_path(__file__, "../test_fixtures/great_expectations_custom_local_site_config.yml"),
+                str(os.path.join(project_dir, "great_expectations.yml")))
+    context = DataContext(context_root_dir=project_dir)
+    local_site_config = context._project_config.data_docs_sites.get("local_site")
+
+    module_name = 'great_expectations.render.renderer.site_builder'
+    site_builder = instantiate_class_from_config(
+        config=local_site_config,
+        runtime_environment={
+            "data_context": context,
+            "root_directory": context.root_directory,
+            "site_name": 'local_site'
+        },
+        config_defaults={
+            "module_name": module_name
+        }
+    )
+    site_section_builders = site_builder.site_section_builders
+
+    expectations_site_section_builder = site_section_builders["expectations"]
+    assert isinstance(
+        expectations_site_section_builder.source_store,
+        ValidationsStore
+    )
+
+    validations_site_section_builder = site_section_builders["validations"]
+    assert isinstance(
+        validations_site_section_builder.source_store,
+        ExpectationsStore
+    )
+    assert validations_site_section_builder.run_id_filter == {"ne": "custom_validations_filter"}
+
+    profiling_site_section_builder = site_section_builders["profiling"]
+    assert isinstance(
+        validations_site_section_builder.source_store,
+        ExpectationsStore
+    )
+    assert profiling_site_section_builder.run_id_filter == {"eq": "custom_profiling_filter"}

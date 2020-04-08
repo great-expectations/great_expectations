@@ -2,6 +2,7 @@
 
 develop
 -----------------
+* Data Docs: improve configurability of site_section_builders
 
 0.9.9
 -----------------
