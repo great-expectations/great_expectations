@@ -328,6 +328,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # reflection will not find the temporary schema
             self.columns = self.column_reflection_fallback()
 
+        # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
+        if len(self.columns) == 0:
+            self.columns = self.column_reflection_fallback()
+
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
 
