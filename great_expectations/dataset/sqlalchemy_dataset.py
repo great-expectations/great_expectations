@@ -1002,38 +1002,53 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         return sa.column(column).notin_(dup_query)
 
-    def _get_dialect_regex_fn(self, positive=True):
+    def _get_dialect_regex_expression(self, column, regex, positive=True):
         try:
             # postgres
             if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
-                return "~" if positive else "!~"
+                if positive:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("~"))
+                else:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("!~"))
         except AttributeError:
             pass
 
         try:
             # redshift
             if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
-                return "~" if positive else "!~"
+                if positive:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("~"))
+                else:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("!~"))
         except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
             pass
         try:
             # Mysql
             if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
-                return "REGEXP" if positive else "NOT REGEXP"
+                if positive:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("REGEXP"))
+                else:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("NOT REGEXP"))
         except AttributeError:
             pass
 
         try:
             # Snowflake
             if isinstance(self.engine.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect):
-                return "RLIKE" if positive else "NOT RLIKE"
+                if positive:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("RLIKE"))
+                else:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("NOT RLIKE"))
         except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
             pass
 
         try:
             # Bigquery
             if isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
-                return "REGEXP_CONTAINS" if positive else "NOT REGEXP_CONTAINS"
+                if positive:
+                    return sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex))
+                else:
+                    return sa.not_(sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex)))
         except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
             pass
 
@@ -1045,13 +1060,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             mostly=None,
             result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
-
-        regex_fn = self._get_dialect_regex_fn(positive=True)
-        if regex_fn is None:
+        regex_expression = self._get_dialect_regex_expression(column, regex, positive=True)
+        if regex_expression is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
-        return BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn))
+        return regex_expression
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_not_match_regex(
@@ -1061,12 +1075,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             mostly=None,
             result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
-        regex_fn = self._get_dialect_regex_fn(positive=False)
-        if regex_fn is None:
+        regex_expression = self._get_dialect_regex_expression(column, regex, positive=False)
+        if regex_expression is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
-        return BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn))
+        return regex_expression
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_match_regex_list(self,
@@ -1080,20 +1094,23 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if match_on not in ["any", "all"]:
             raise ValueError("match_on must be any or all")
 
-        regex_fn = self._get_dialect_regex_fn(positive=True)
-        if regex_fn is None:
+        if len(regex_list) == 0:
+            raise ValueError("At least one regex must be supplied in the regex_list.")
+
+        regex_expression = self._get_dialect_regex_expression(column, regex_list[0], positive=True)
+        if regex_expression is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
         if match_on == "any":
             condition = \
                 sa.or_(
-                    *[BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn)) for regex in regex_list]
+                    *[self._get_dialect_regex_expression(column, regex, positive=True) for regex in regex_list]
                 )
         else:
             condition = \
                 sa.and_(
-                    *[BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn)) for regex in regex_list]
+                    *[self._get_dialect_regex_expression(column, regex, positive=True) for regex in regex_list]
                 )
         return condition
 
@@ -1101,12 +1118,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def expect_column_values_to_not_match_regex_list(self, column, regex_list,
                                                      mostly=None,
                                                      result_format=None, include_config=True, catch_exceptions=None, meta=None):
+        if len(regex_list) == 0:
+            raise ValueError("At least one regex must be supplied in the regex_list.")
 
-        regex_fn = self._get_dialect_regex_fn(positive=False)
-        if regex_fn is None:
+        regex_expression = self._get_dialect_regex_expression(column, regex_list[0], positive=False)
+        if regex_expression is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
         return sa.and_(
-            *[BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn)) for regex in regex_list]
+            *[self._get_dialect_regex_expression(column, regex, positive=False) for regex in regex_list]
         )

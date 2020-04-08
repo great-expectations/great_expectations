@@ -2,10 +2,15 @@
 
 develop
 -----------------
+* Data Docs: improve configurability of site_section_builders
+
+0.9.9
+-----------------
+* Allow eveluation parameters support in run_validation_operator
 * Add log_level parameter to jupyter_ux.setup_notebook_logging.
 * Add experimental display_profiled_column_evrs_as_section and display_column_evrs_as_section methods, with a minor (nonbreaking) refactor to create a new _render_for_jupyter method.
 * Allow selection of site in UpdateDataDocsAction with new arg target_site_names in great_expectations.yml
-
+* Fix issue with regular expression support in BigQuery (#1244)
 
 0.9.8
 -----------------
