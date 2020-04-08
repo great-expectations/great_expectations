@@ -15,6 +15,7 @@ class StoreBackend(object):
       - list_keys
       - _has_key
     """
+    IGNORED_FILES = [".ipynb_checkpoints"]
 
     def __init__(self, fixed_length_key=False):
         self._fixed_length_key = fixed_length_key
@@ -77,6 +78,13 @@ class StoreBackend(object):
 
     def _has_key(self, key):
         raise NotImplementedError
+
+    def is_ignored_key(self, key):
+        for ignored in self.IGNORED_FILES:
+            if ignored in key:
+                return True
+
+        return False
 
 
 class InMemoryStoreBackend(StoreBackend):

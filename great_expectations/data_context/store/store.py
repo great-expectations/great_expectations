@@ -75,7 +75,9 @@ class Store(object):
 
     def get(self, key):
         self._validate_key(key)
-        return self.deserialize(key, self._store_backend.get(self.key_to_tuple(key)))
+        value = self._store_backend.get(self.key_to_tuple(key))
+        if value:
+            return self.deserialize(key, value)
 
     def set(self, key, value):
         self._validate_key(key)
