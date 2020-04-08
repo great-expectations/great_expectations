@@ -99,7 +99,8 @@ class SiteBuilder(object):
                  site_index_builder=None,
                  show_how_to_buttons=True,
                  site_section_builders=None,
-                 runtime_environment=None
+                 runtime_environment=None,
+                 **kwargs
                  ):
         self.site_name = site_name
         self.data_context = data_context
@@ -257,6 +258,7 @@ class DefaultSiteSectionBuilder(object):
             validation_results_limit=None,
             renderer=None,
             view=None,
+            **kwargs
     ):
         self.name = name
         self.source_store = data_context.stores[source_store_name]
@@ -397,6 +399,7 @@ class DefaultSiteIndexBuilder(object):
             validation_results_limit=None,
             renderer=None,
             view=None,
+            **kwargs
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
         self.name = name
