@@ -259,7 +259,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 elif self.filepath_suffix and not filepath.endswith(self.filepath_suffix):
                     continue
                 key = self._convert_filepath_to_key(filepath)
-                if key:
+                if key and not self.is_ignored_key(key):
                     key_list.append(key)
 
         return key_list
