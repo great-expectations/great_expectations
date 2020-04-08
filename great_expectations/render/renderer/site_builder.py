@@ -257,6 +257,7 @@ class DefaultSiteSectionBuilder(object):
             validation_results_limit=None,
             renderer=None,
             view=None,
+            **kwargs
     ):
         self.name = name
         self.source_store = data_context.stores[source_store_name]
@@ -397,6 +398,7 @@ class DefaultSiteIndexBuilder(object):
             validation_results_limit=None,
             renderer=None,
             view=None,
+            **kwargs
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
         self.name = name
