@@ -155,14 +155,6 @@ def datasource_profile(datasource, generator_name, data_assets, profile_all_data
     if the number of data assets in the datasource exceeds the internally defined limit. If it does, it will
     prompt the user to either specify the list of data assets to profile or to profile all.
     If the limit is not exceeded, the profiler will profile all data assets in the datasource.
-
-    :param datasource: name of the datasource to profile
-    :param data_assets: if this comma-separated list of data asset names is provided, only the specified data assets will be profiled
-    :param profile_all_data_assets: if provided, all data assets will be profiled
-    :param directory:
-    :param view: Open the docs in a browser
-    :param additional_batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
-    :return:
     """
     cli_message("<yellow>Warning - this is a BETA feature.</yellow>")
     try:

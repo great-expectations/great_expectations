@@ -4,13 +4,7 @@ import boto3
 from moto import mock_s3
 from mock import patch
 
-import six
-
 from great_expectations.exceptions import StoreBackendError
-
-if six.PY2:
-    FileNotFoundError = IOError
-
 
 from great_expectations.data_context.store import (
     InMemoryStoreBackend,
@@ -139,6 +133,36 @@ test_TupleFilesystemStoreBackend__dir0/
 """
 
 
+def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp('things'))
+
+    checkpoint_dir = os.path.join(project_path, ".ipynb_checkpoints")
+    os.mkdir(checkpoint_dir)
+    assert os.path.isdir(checkpoint_dir)
+    nb_file = os.path.join(checkpoint_dir, "foo.json")
+
+    with open(nb_file, "w") as f:
+        f.write("")
+    assert os.path.isfile(nb_file)
+    my_store = TupleFilesystemStoreBackend(
+        root_directory=os.path.abspath("dummy_str"),
+        base_directory=project_path,
+    )
+
+    my_store.set(("AAA",), "aaa")
+    assert my_store.get(("AAA",)) == "aaa"
+
+    assert gen_directory_tree_str(project_path) == """\
+things0/
+    AAA
+    .ipynb_checkpoints/
+        foo.json
+"""
+
+    print(my_store.list_keys())
+    assert set(my_store.list_keys()) == {("AAA", )}
+
+
 @mock_s3
 def test_TupleS3StoreBackend():
     """
@@ -185,7 +209,7 @@ def test_TupleS3StoreBackend():
 
 
 def test_TupleGCSStoreBackend():
-
+    pytest.importorskip("google-cloud-storage")
     """
     What does this test test and why?
 
