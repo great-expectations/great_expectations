@@ -121,7 +121,11 @@ class DefaultJinjaView(object):
             for idx, content_block_el in enumerate(content_block):
                 if (isinstance(content_block_el, RenderedComponentContent) or
                         isinstance(content_block_el, dict) and "content_block_type" in content_block_el):
-                    rendered_block += self.render_content_block(context, content_block_el, idx)
+                    new_content_block_id = None
+                    if content_block_id:
+                        new_content_block_id = content_block_id + "-" + idx
+                    rendered_block += self.render_content_block(
+                        context, content_block_el, idx, content_block_id=new_content_block_id)
                 else:
                     rendered_block += "<span>" + str(content_block_el) + "</span>"
             return rendered_block
