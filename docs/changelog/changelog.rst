@@ -2,6 +2,7 @@
 
 develop
 -----------------
+* bugfix for Data Docs links encoding on S3 `#1235 <https://github.com/great-expectations/great_expectations/issues/1235>`_
 
 0.9.10
 -----------------

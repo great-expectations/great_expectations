@@ -266,6 +266,7 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
 
 
 def test_spark_config():
+    pytest.importorskip("pyspark")
     source = SparkDFDatasource()
     conf = source.spark.sparkContext.getConf().getAll()
     # Without specifying any spark_config values we get defaults
@@ -285,6 +286,7 @@ def test_spark_config():
 
 
 def test_pandas_datasource_processes_dataset_options(test_folder_connection_path):
+    pytest.importorskip("pyspark")
     datasource = SparkDFDatasource('PandasCSV', generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",

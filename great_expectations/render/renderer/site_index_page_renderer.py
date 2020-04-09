@@ -1,9 +1,11 @@
 import logging
+import urllib
 from collections import OrderedDict
 
 import traceback
 
-from .renderer import Renderer
+from great_expectations.render.renderer.call_to_action_renderer import CallToActionRenderer
+from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
     RenderedSectionContent,
     RenderedDocumentContent,
@@ -12,9 +14,6 @@ from great_expectations.render.types import (
     RenderedTableContent,
     RenderedBulletListContent,
 )
-from great_expectations.exceptions import GreatExpectationsError
-
-from .call_to_action_renderer import CallToActionRenderer
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +48,7 @@ class SiteIndexPageRenderer(Renderer):
                         "tag": "a",
                         "styling": {
                             "attributes": {
-                                "href": expectation_suite_link_dict["filepath"]
+                                "href": urllib.parse.quote(expectation_suite_link_dict["filepath"])
                             },
                             "classes": ["ge-index-page-table-expectation-suite-link"]
                         }
@@ -81,7 +80,7 @@ class SiteIndexPageRenderer(Renderer):
                                 "tag": "a",
                                 "styling": {
                                     "attributes": {
-                                        "href": link_dict["filepath"]
+                                        "href": urllib.parse.quote(link_dict["filepath"])
                                     },
                                     "params": {
                                         "validation_success": {
@@ -135,7 +134,7 @@ class SiteIndexPageRenderer(Renderer):
                         "tag": "a",
                         "styling": {
                             "attributes": {
-                                "href": link_dict["filepath"]
+                                "href": urllib.parse.quote(link_dict["filepath"])
                             },
                             "params": {
                                 "validation_success": {
@@ -175,7 +174,6 @@ class SiteIndexPageRenderer(Renderer):
 
     @classmethod
     def render(cls, index_links_dict):
-
         sections = []
         cta_object = index_links_dict.pop("cta_object", None)
 
@@ -272,7 +270,7 @@ class SiteIndexPageRenderer(Renderer):
                                     "tag": "a",
                                     "styling": {
                                         "attributes": {
-                                            "href": profiling_link_dict["filepath"]
+                                            "href": urllib.parse.quote(profiling_link_dict["filepath"])
                                         },
                                         "classes": ["ge-index-page-table-expectation-suite-link"]
                                     }
