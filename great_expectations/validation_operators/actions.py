@@ -4,7 +4,10 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from ..data_context.store.metric_store import MetricStore
 from ..data_context.types.resource_identifiers import ValidationResultIdentifier
 from .util import send_slack_notification
-from ..exceptions import DataContextError
+from ..exceptions import (
+    DataContextError,
+    ClassInstantiationError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +86,13 @@ class SlackNotificationAction(ValidationAction):
             runtime_environment={},
             config_defaults={},
         )
+        module_name = renderer['module_name']
+        if not self.renderer:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=renderer['class_name']
+            )
         self.slack_webhook = slack_webhook
         assert slack_webhook, "No Slack webhook found in action config."
         self.notify_on = notify_on
@@ -236,11 +246,13 @@ class UpdateDataDocsAction(ValidationAction):
     that a validation result should be added to the data docs.
     """
 
-    def __init__(self, data_context):
+    def __init__(self, data_context, target_site_names=None):
         """
         :param data_context: data context
+        :param target_site_names: *optional* List of site names for building data docs
         """
         super(UpdateDataDocsAction, self).__init__(data_context)
+        self._target_site_names = target_site_names
 
     def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
         logger.debug("UpdateDataDocsAction.run")
@@ -254,5 +266,6 @@ class UpdateDataDocsAction(ValidationAction):
             ))
 
         self.data_context.build_data_docs(
+            site_names=self._target_site_names,
             resource_identifiers=[validation_result_suite_identifier]
         )

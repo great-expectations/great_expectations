@@ -1,20 +1,19 @@
 import datetime
 import logging
 
-from ..data_context.types.resource_identifiers import BatchIdentifier, ExpectationSuiteIdentifier, \
-    ValidationResultIdentifier
+from ..data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 
 logger = logging.getLogger(__name__)
 
 from six import string_types
 
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-)
-from great_expectations.data_asset import (
-    DataAsset,
-)
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.data_asset import DataAsset
 from .util import send_slack_notification
+from great_expectations.exceptions import ClassInstantiationError
 
 # NOTE: Abe 2019/08/24 : This is first implementation of all these classes. Consider them UNSTABLE for now. 
 
@@ -28,7 +27,7 @@ class ValidationOperator(object):
     of validation operator classes that will be the descendants of this base class.
     """
 
-    def run(self, assets_to_validate, run_id):
+    def run(self, assets_to_validate, run_id, evaluation_parameters=None):
         raise NotImplementedError
 
 
@@ -75,19 +74,29 @@ class ActionListValidationOperator(ValidationOperator):
         self.actions = {}
         for action_config in action_list:
             assert isinstance(action_config, dict)
-            #NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
+            # NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
             if not set(action_config.keys()) == {"name", "action"}:
-                raise KeyError('Action config keys must be ("name", "action"). Instead got {}'.format(action_config.keys()))
+                raise KeyError(
+                    'Action config keys must be ("name", "action"). Instead got {}'.format(action_config.keys())
+                )
 
+            config = action_config["action"]
+            module_name = 'great_expectations.validation_operators'
             new_action = instantiate_class_from_config(
-                config=action_config["action"],
+                config=config,
                 runtime_environment={
                     "data_context": self.data_context,
                 },
                 config_defaults={
-                    "module_name": "great_expectations.validation_operators"
+                    "module_name": module_name
                 }
             )
+            if not new_action:
+                raise ClassInstantiationError(
+                    module_name=module_name,
+                    package_name=None,
+                    class_name=config['class_name']
+                )
             self.actions[action_config["name"]] = new_action
 
     def _build_batch_from_item(self, item):
@@ -115,7 +124,7 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch
 
-    def run(self, assets_to_validate, run_id):
+    def run(self, assets_to_validate, run_id, evaluation_parameters=None):
         result_object = {
             "success": None,
             "details": {}
@@ -132,9 +141,11 @@ class ActionListValidationOperator(ValidationOperator):
             #     run_id=run_id,
             # )
             result_object["details"][expectation_suite_identifier] = {}
-            batch_validation_result = batch.validate(run_id=run_id, result_format="SUMMARY")
+            batch_validation_result = batch.validate(run_id=run_id, result_format="SUMMARY",
+                                                     evaluation_parameters=evaluation_parameters)
             result_object["details"][expectation_suite_identifier]["validation_result"] = batch_validation_result
-            batch_actions_results = self._run_actions(batch, expectation_suite_identifier, batch._expectation_suite, batch_validation_result, run_id)
+            batch_actions_results = self._run_actions(batch, expectation_suite_identifier, batch._expectation_suite,
+                                                      batch_validation_result, run_id)
             result_object["details"][expectation_suite_identifier]["actions_results"] = batch_actions_results
 
         result_object["success"] = all([val["validation_result"].success for val in result_object["details"].values()])

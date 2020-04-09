@@ -11,6 +11,7 @@ import uuid
 import click
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.util import verify_dynamic_loading_support
 from great_expectations import DataContext, rtd_url_ge_version
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
@@ -154,14 +155,6 @@ def datasource_profile(datasource, generator_name, data_assets, profile_all_data
     if the number of data assets in the datasource exceeds the internally defined limit. If it does, it will
     prompt the user to either specify the list of data assets to profile or to profile all.
     If the limit is not exceeded, the profiler will profile all data assets in the datasource.
-
-    :param datasource: name of the datasource to profile
-    :param data_assets: if this comma-separated list of data asset names is provided, only the specified data assets will be profiled
-    :param profile_all_data_assets: if provided, all data assets will be profiled
-    :param directory:
-    :param view: Open the docs in a browser
-    :param additional_batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
-    :return:
     """
     cli_message("<yellow>Warning - this is a BETA feature.</yellow>")
     try:
@@ -320,12 +313,6 @@ def load_library(library_name, install_instructions_string=None):
             are different from 'pip install library_name'
     :return: True if the library was loaded successfully, False otherwise
     """
-    # TODO remove this nasty python 2 hack
-    try:
-        ModuleNotFoundError
-    except NameError:
-        ModuleNotFoundError = ImportError
-
     try:
         loaded_module = importlib.import_module(library_name)
         return True
@@ -345,12 +332,6 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
 
     if not load_library("sqlalchemy"):
         return None
-
-    # TODO remove this nasty python 2 hack
-    try:
-        ModuleNotFoundError
-    except NameError:
-        ModuleNotFoundError = ImportError
 
     db_choices = [str(x) for x in list(range(1, 1 + len(SupportedDatabases)))]
     selected_database = int(

@@ -1,10 +1,10 @@
 name: stalebot
 
 on:
-  issues:
-    types: [opened, reopened]
-  schedule:
-  - cron: "5 * * * *"
+#  issues:
+#    types: [opened, reopened]
+#  schedule:
+#  - cron: "5 * * * *"
 
 jobs:
   stale:
