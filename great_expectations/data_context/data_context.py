@@ -730,6 +730,29 @@ class BaseDataContext(object):
 
         return expectation_suite
 
+    def delete_expectation_suite(self, expectation_suite_name):
+        """Delete specified expectation suite from data_context expectation store.
+
+        Args:
+            expectation_suite_name: The name of the expectation_suite to create
+
+        Returns:
+            True for Success and False for Failure.
+        """
+        expectation_suite = ExpectationSuite(expectation_suite_name=expectation_suite_name)
+        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+
+        if not self._stores[self.expectations_store_name].has_key(key):
+            raise ge_exceptions.DataContextError(
+                "expectation_suite with name {} does not exist."
+            )
+        else:
+            self._stores[self.expectations_store_name].remove_key(key)
+
+        if self._stores[self.expectations_store_name].has_key(key):
+            return False
+        return True
+
     def get_expectation_suite(self, expectation_suite_name):
         """Get a named expectation suite for the provided data_asset_name.
 
