@@ -3,8 +3,8 @@ name: stalebot
 on:
 #  issues:
 #    types: [opened, reopened]
-#  schedule:
-#  - cron: "5 * * * *"
+  schedule:
+  - cron: "5 0 1 * *"
 
 jobs:
   stale:
