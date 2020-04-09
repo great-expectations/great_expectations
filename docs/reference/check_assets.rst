@@ -8,7 +8,7 @@ While Great Expectations has nearly :ref:`50 built in expectations<expectation_g
 
 **Check assets** are a **simple design pattern** that enables even more complex and fine-grained data tests, such as:
 
-assertions on on **slices of the data**
+assertions on **slices of the data**
   For example: How many visits occurred last week?
 
 assertions **across logical tables**
