@@ -1,4 +1,4 @@
-.. _contributing:
+.. _extending_contributing:
 
 #######################
 Contributing
