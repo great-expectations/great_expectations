@@ -96,7 +96,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         self._iterators = {}
         try:
             self._s3 = boto3.client('s3', **boto3_options)
-        except TypeError:
+        except AttributeError:
             raise(ImportError("Unable to load boto3, which is required for S3 generator"))
 
     @property
