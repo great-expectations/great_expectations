@@ -86,12 +86,24 @@ class RenderedGraphContent(RenderedComponentContent):
 
 
 class RenderedTableContent(RenderedComponentContent):
-    def __init__(self, table, header=None, subheader=None, header_row=None, styling=None, content_block_type="table"):
+    def __init__(
+            self,
+            table,
+            header=None,
+            subheader=None,
+            header_row=None,
+            styling=None,
+            content_block_type="table",
+            table_options=None,
+            header_row_options=None
+    ):
         super(RenderedTableContent, self).__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.subheader = subheader
         self.table = table
+        self.table_options = table_options
         self.header_row = header_row
+        self.header_row_options = header_row_options
 
     def to_json_dict(self):
         d = super(RenderedTableContent, self).to_json_dict()
@@ -108,6 +120,10 @@ class RenderedTableContent(RenderedComponentContent):
         d["table"] = RenderedContent.rendered_content_list_to_json(self.table)
         if self.header_row is not None:
             d["header_row"] = RenderedContent.rendered_content_list_to_json(self.header_row)
+        if self.header_row_options is not None:
+            d["header_row_options"] = self.header_row_options
+        if self.table_options is not None:
+            d["table_options"] = self.table_options
         return d
 
 
