@@ -67,3 +67,30 @@ def test_get_available_data_asset_names_for_query_path(empty_data_context):
     generator = QueryBatchKwargsGenerator(name="mygenerator", datasource=data_source)
     sql_list = generator.get_available_data_asset_names()
     assert ("dummy", "query") in sql_list["names"]
+
+def test_build_batch_kwargs_for_query_path(basic_sqlalchemy_datasource, data_context):
+    base_directory = data_context.root_directory
+    basic_sqlalchemy_datasource._data_context = data_context
+    generator_name = 'my_generator'
+    query_str = "SELECT * FROM my_table"
+
+    default_sql_files_directory = os.path.join(
+        base_directory, 
+        'datasources', 
+        basic_sqlalchemy_datasource.name, 
+        'generators', 
+        generator_name, 
+    )
+    os.makedirs(default_sql_files_directory)
+    with open(os.path.join(default_sql_files_directory, "example.sql"), "w") as outfile:
+        outfile.write(query_str)
+
+    generator = QueryBatchKwargsGenerator(
+        name=generator_name, 
+        datasource=basic_sqlalchemy_datasource
+    )
+    batch_kwargs = generator.build_batch_kwargs(name='example')
+
+    assert isinstance(batch_kwargs, SqlAlchemyDatasourceQueryBatchKwargs)
+    assert batch_kwargs.query == query_str
+    assert batch_kwargs.query_parameters == None
