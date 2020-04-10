@@ -59,10 +59,10 @@ Submit a pull request
 
         .. image:: great_expectations_running.gif
 
-Video instructions
-------------------
+.. Video instructions
+.. ------------------
 
-#FIXME: Insert video version here.
+.. #FIXME: Insert video version here.
 
 
 
