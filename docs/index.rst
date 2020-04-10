@@ -22,6 +22,7 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
    tutorials
    features
    reference
+   contributing
    community
    roadmap_changelog
    module_docs
