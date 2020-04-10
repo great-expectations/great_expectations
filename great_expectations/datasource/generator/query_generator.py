@@ -25,7 +25,7 @@ except ImportError:
 class QueryBatchKwargsGenerator(BatchKwargsGenerator):
     """Produce query-style batch_kwargs from sql files stored on disk
     """
-    recognized_batch_parameters = {'query_parameters', 'partition_id'}
+    recognized_batch_parameters = {'query_parameters', 'partition_id', 'name'}
 
     def __init__(self, name="default", datasource=None, query_store_backend=None, queries=None):
         super(QueryBatchKwargsGenerator, self).__init__(name=name, datasource=datasource)
@@ -66,7 +66,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
                 self.add_query(query_name, query)
 
     def _get_raw_query(self, generator_asset):
-        return self._store_backend.get(tuple(generator_asset))
+        return self._store_backend.get((generator_asset,))
 
     def _get_iterator(self, generator_asset, query_parameters=None):
         raw_query = self._get_raw_query(generator_asset)
@@ -91,7 +91,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
 
     def add_query(self, generator_asset, query):
         # Backends must have a tuple key; we use only a single-element tuple
-        self._store_backend.set(tuple(generator_asset), query)
+        self._store_backend.set((generator_asset,), query)
 
     def get_available_data_asset_names(self):
         defined_queries = self._store_backend.list_keys()
