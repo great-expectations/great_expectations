@@ -229,8 +229,12 @@ class ValidationResultsPageRenderer(Renderer):
             "styling": {
                 "classes": ["col-12", "table-responsive", "mt-1"],
                 "body": {
-                    "classes": ["table", "table-sm"]
-                }
+                    "classes": ["table", "table-sm"],
+                    "styles": {
+                        "margin-bottom": "0.5rem !important",
+                        "margin-top": "0.5rem !important"
+                    }
+                },
             },
         })
 
@@ -331,20 +335,23 @@ class ValidationResultsPageRenderer(Renderer):
             return RenderedTableContent(**{
                 "content_block_type": "table",
                 "header": RenderedStringTemplateContent(**{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": header,
-                    "tag": "h6",
-                    "styling": {
-                        "classes": ["m-0"]
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": header,
+                        "tag": "h6",
+                        "styling": {
+                            "classes": ["m-0"]
+                        }
                     }
-                }
-            }),
+                }),
                 "table": table_rows,
                 "styling": {
-                    "classes": ["col-6", "table-responsive", "mt-1"],
                     "body": {
-                        "classes": ["table", "table-sm"]
+                        "classes": ["table", "table-sm"],
+                        "styles": {
+                            "margin-bottom": "0.5rem !important",
+                            "margin-top": "0.5rem !important"
+                        }
                     }
                 },
             })
@@ -383,7 +390,11 @@ class ValidationResultsPageRenderer(Renderer):
             "styling": {
                 "classes": ["col-6", "table-responsive", "mt-1", "p-1"],
                 "body": {
-                    "classes": ["table", "table-sm"]
+                    "classes": ["table", "table-sm"],
+                    "styles": {
+                        "margin-bottom": "0.5rem !important",
+                        "margin-top": "0.5rem !important"
+                    }
                 }
             },
         })
@@ -511,7 +522,11 @@ class ExpectationSuitePageRenderer(Renderer):
             "styling": {
                 "classes": ["col-12", "table-responsive", "mt-1"],
                 "body": {
-                    "classes": ["table", "table-sm"]
+                    "classes": ["table", "table-sm"],
+                    "styles": {
+                        "margin-bottom": "0.5rem !important",
+                        "margin-top": "0.5rem !important"
+                    }
                 }
             },
         })
