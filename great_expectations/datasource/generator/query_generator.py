@@ -25,7 +25,7 @@ except ImportError:
 class QueryBatchKwargsGenerator(BatchKwargsGenerator):
     """Produce query-style batch_kwargs from sql files stored on disk
     """
-    recognized_batch_parameters = {'query_parameters', 'partition_id'}
+    recognized_batch_parameters = {'query_parameters', 'partition_id', 'name'}
 
     def __init__(self, name="default", datasource=None, query_store_backend=None, queries=None):
         super(QueryBatchKwargsGenerator, self).__init__(name=name, datasource=datasource)
