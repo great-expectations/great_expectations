@@ -102,6 +102,7 @@ class DefaultJinjaView(object):
         env.filters['render_markdown'] = self.render_markdown
         env.filters['get_html_escaped_json_string_from_dict'] = self.get_html_escaped_json_string_from_dict
         env.filters['generate_html_element_uuid'] = self.generate_html_element_uuid
+        env.filters['attributes_dict_to_html_string'] = self.attributes_dict_to_html_string
         env.globals['ge_version'] = ge_version
 
         template = env.get_template(template)
@@ -123,7 +124,7 @@ class DefaultJinjaView(object):
                         isinstance(content_block_el, dict) and "content_block_type" in content_block_el):
                     new_content_block_id = None
                     if content_block_id:
-                        new_content_block_id = content_block_id + "-" + idx
+                        new_content_block_id = content_block_id + "-" + str(idx)
                     rendered_block += self.render_content_block(
                         context, content_block_el, idx, content_block_id=new_content_block_id)
                 else:
@@ -140,6 +141,14 @@ class DefaultJinjaView(object):
 
     def get_html_escaped_json_string_from_dict(self, source_dict):
         return json.dumps(source_dict).replace('"', '\\"').replace('"', '&quot;')
+
+    def attributes_dict_to_html_string(self, attributes_dict, prefix=""):
+        attributes_string = ""
+        if prefix:
+            prefix += "-"
+        for attribute, value in attributes_dict.items():
+            attributes_string += f'{prefix}{attribute}="{value}" '
+        return attributes_string
 
     def render_styling(self, styling):
 
