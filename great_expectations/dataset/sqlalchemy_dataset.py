@@ -703,9 +703,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
-        sql = sa.select([sa.text("*")]).select_from(self._table).limit(1)
-        col_names = self.engine.execute(sql).keys()
-        col_dict = [{'name': col_name} for col_name in col_names]
+        if self.engine.dialect.name.lower() != "mssql":
+            sql = sa.select([sa.text("*")]).select_from(self._table).limit(1)
+            col_names = self.engine.execute(sql).keys()
+            col_dict = [{'name': col_name} for col_name in col_names]
+        else:
+            type_module = self._get_dialect_type_module()
+            # Get column names and types from the database
+            # StackOverflow to the rescue: https://stackoverflow.com/a/38634368
+            col_info = self.engine.execute("SELECT cols.NAME,ty.NAME FROM tempdb.sys.columns cols JOIN sys.types ty ON cols.user_type_id = ty.user_type_id WHERE object_id = OBJECT_ID('tempdb..{}')".format(self._table)).fetchall()
+            col_dict = [{'name': col_name, 'type': getattr(type_module,col_type.upper())()} for col_name,col_type in col_info]
         return col_dict
 
     ###
