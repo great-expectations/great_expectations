@@ -2,13 +2,13 @@
 
 develop
 -----------------
-* bugfix for Data Docs links encoding on S3 `#1235 <https://github.com/great-expectations/great_expectations/issues/1235>`_
-* Add evaluation parameters support in WarningAndFailureExpectationSuitesValidationOperator
 
 0.9.10
 -----------------
 * Data Docs: improve configurability of site_section_builders
 * TupleFilesystemStoreBackend now ignore `.ipynb_checkpoints` directories `#1203 <https://github.com/great-expectations/great_expectations/issues/1203>`_
+* bugfix for Data Docs links encoding on S3 `#1235 <https://github.com/great-expectations/great_expectations/issues/1235>`_
+* Add evaluation parameters support in WarningAndFailureExpectationSuitesValidationOperator
 
 0.9.9
 -----------------
