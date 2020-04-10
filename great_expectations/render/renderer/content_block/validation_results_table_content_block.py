@@ -23,6 +23,11 @@ logger = logging.getLogger(__name__)
 class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     _content_block_type = "table"
     _rendered_component_type = RenderedTableContent
+    _rendered_component_default_init_kwargs = {
+        "table_options": {
+            "search": True
+        }
+    }
 
     _default_element_styling = {
         "default": {
