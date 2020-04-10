@@ -14,7 +14,7 @@ from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
 from six import string_types
 
-from great_expectations.util import verify_dynamic_loading_support
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import (
     ExpectationSuite,
     get_metric_kwargs_id,
@@ -34,10 +34,7 @@ from great_expectations.dataset import Dataset
 from great_expectations.profile.basic_dataset_profiler import (
     BasicDatasetProfiler,
 )
-
-import great_expectations.exceptions as ge_exceptions
-
-from ..validator.validator import Validator
+from great_expectations.util import verify_dynamic_loading_support
 from .templates import (
     CONFIG_VARIABLES_INTRO,
     CONFIG_VARIABLES_TEMPLATE,
@@ -53,6 +50,7 @@ from .util import (
     safe_mmkdir,
     substitute_all_config_variables,
 )
+from ..validator.validator import Validator
 
 try:
     from urllib.parse import urlparse
@@ -535,6 +533,7 @@ class BaseDataContext(object):
             validation_operator_name,
             assets_to_validate,
             run_id=None,
+            evaluation_parameters=None,
             **kwargs
     ):
         """
@@ -555,12 +554,19 @@ class BaseDataContext(object):
         if run_id is None:
             run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
             logger.info("Setting run_id to: {}".format(run_id))
-
-        return self.validation_operators[validation_operator_name].run(
-            assets_to_validate=assets_to_validate,
-            run_id=run_id,
-            **kwargs
-        )
+        if evaluation_parameters is None:
+            return self.validation_operators[validation_operator_name].run(
+                assets_to_validate=assets_to_validate,
+                run_id=run_id,
+                **kwargs
+            )
+        else:
+            return self.validation_operators[validation_operator_name].run(
+                assets_to_validate=assets_to_validate,
+                run_id=run_id,
+                evaluation_parameters=evaluation_parameters,
+                **kwargs
+            )
 
     def list_validation_operator_names(self):
         if not self.validation_operators:
@@ -846,6 +852,9 @@ class BaseDataContext(object):
         self._evaluation_parameter_dependencies = {}
         for key in self.stores[self.expectations_store_name].list_keys():
             expectation_suite = self.stores[self.expectations_store_name].get(key)
+            if not expectation_suite:
+                continue
+
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
             if len(dependencies) > 0:
                 nested_update(self._evaluation_parameter_dependencies, dependencies)

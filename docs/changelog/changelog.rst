@@ -2,6 +2,20 @@
 
 develop
 -----------------
+* bugfix for Data Docs links encoding on S3 `#1235 <https://github.com/great-expectations/great_expectations/issues/1235>`_
+
+0.9.10
+-----------------
+* Data Docs: improve configurability of site_section_builders
+* TupleFilesystemStoreBackend now ignore `.ipynb_checkpoints` directories `#1203 <https://github.com/great-expectations/great_expectations/issues/1203>`_
+
+0.9.9
+-----------------
+* Allow evaluation parameters support in run_validation_operator
+* Add log_level parameter to jupyter_ux.setup_notebook_logging.
+* Add experimental display_profiled_column_evrs_as_section and display_column_evrs_as_section methods, with a minor (nonbreaking) refactor to create a new _render_for_jupyter method.
+* Allow selection of site in UpdateDataDocsAction with new arg target_site_names in great_expectations.yml
+* Fix issue with regular expression support in BigQuery (#1244)
 
 0.9.8
 -----------------
@@ -10,21 +24,18 @@ develop
 * Remove the "project new" option from the command line (since it is not implemented; users can only run "init" to create a new project).
 * Update type detection for bigquery based on driver changes in pybigquery driver 0.4.14. Added a warning for users who are running an older pybigquery driver
 * added execution tests to the NotebookRenderer to mitigate codegen risks
-* Add option "persist", true by default, for SparkDFDataset to persist the DataFrame it is passed. This addresses #1133
-in a deeper way (thanks @tejsvirai for the robust debugging support and reproduction on spark).
-  - Disabling this option should *only* be done if the user has *already* externally persisted the DataFrame, or if the
-dataset is too large to persist but *computations are guaranteed to be stable across jobs*.
+* Add option "persist", true by default, for SparkDFDataset to persist the DataFrame it is passed. This addresses #1133 in a deeper way (thanks @tejsvirai for the robust debugging support and reproduction on spark).
+   * Disabling this option should *only* be done if the user has *already* externally persisted the DataFrame, or if the dataset is too large to persist but *computations are guaranteed to be stable across jobs*.
 * Enable passing dataset kwargs through datasource via dataset_options batch_kwarg.
 * Fix AttributeError when validating expectations from a JSON file
 * Data Docs: fix bug that was causing erratic scrolling behavior when table of contents contains many columns
+* Data Docs: add ability to hide how-to buttons and related content in Data Docs
 
 0.9.7
 -----------------
 * Update marshmallow dependency to >3. NOTE: as of this release, you MUST use marshamllow >3.0, which REQUIRES python 3. (`#1187 <https://github.com/great-expectations/great_expectations/issues/1187>`_) @jcampbell
-  - Schema checking is now stricter for expectation suites, and data_asset_name must not be present as a top-level
-    key in expectation suite json. It is safe to remove.
-  - Similarly, datasource configuration must now adhere strictly to the required schema, including having any
-    required credentials stored in the "credentials" dictionary.
+   * Schema checking is now stricter for expectation suites, and data_asset_name must not be present as a top-level key in expectation suite json. It is safe to remove.
+   * Similarly, datasource configuration must now adhere strictly to the required schema, including having any required credentials stored in the "credentials" dictionary.
 * New beta CLI command: `tap new` that generates an executable python file to expedite deployments. (`#1193 <https://github.com/great-expectations/great_expectations/issues/1193>`_) @Aylr
 * bugfix in TableBatchKwargsGenerator docs
 * Added feature maturity in README (`#1203 <https://github.com/great-expectations/great_expectations/issues/1203>`_) @kyleaton
@@ -68,8 +79,8 @@ dataset is too large to persist but *computations are guaranteed to be stable ac
 * Add support for transient table creation in snowflake (#1012)
 * Improve path support in TupleStoreBackend for better cross-platform compatibility
 * New features on `ExpecatationSuite`
-    - `.add_citation()`
-    - `get_citations()`
+   - `.add_citation()`
+   - `get_citations()`
 * `SampleExpectationsDatasetProfiler` now leaves a citation containing the original batch kwargs
 * `great_expectations suite edit` now uses batch_kwargs from citations if they exist
 * Bugfix :: suite edit notebooks no longer blow away the existing suite while loading a batch of data
