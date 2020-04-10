@@ -336,6 +336,11 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     def _process_content_block(cls, content_block, has_failed_evr):
         super(ValidationResultsTableContentBlockRenderer, cls)._process_content_block(content_block, has_failed_evr)
         content_block.header_row = ["Status", "Expectation", "Observed Value"]
+        content_block.header_row_options = {
+            "Status": {
+                "sortable": True
+            }
+        }
 
         if has_failed_evr is False:
             styling = deepcopy(content_block.styling) if content_block.styling else {}
