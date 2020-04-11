@@ -45,7 +45,7 @@ Quick start
          <strong class="fa-stack-1x">
             2
          </strong>
-      </span> Connect to data sources</h2>
+      </span> Connect to data</h2>
    </embed>
 
 .. container:: custom-indented-paragraph
@@ -62,7 +62,7 @@ Quick start
          <strong class="fa-stack-1x">
             3
          </strong>
-      </span> Set up data docs</h2>
+      </span> Configure data documentation</h2>
    </embed>
 
 .. container:: custom-indented-paragraph
@@ -113,9 +113,7 @@ Table of contents for Getting Started:
 .. toctree::
    :maxdepth: 1
 
-   /getting_started/install_great_expectations
    /getting_started/initialize_a_project
-   /getting_started/cli_init
    /getting_started/typical_workflow
    /getting_started/add_datasources
    /getting_started/set_up_data_docs
