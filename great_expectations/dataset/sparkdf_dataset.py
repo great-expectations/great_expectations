@@ -2,7 +2,7 @@ import copy
 import inspect
 import logging
 from datetime import datetime
-from functools import wraps
+from functools import reduce, wraps
 from typing import List
 from collections import OrderedDict
 
@@ -1097,3 +1097,22 @@ class SparkDFDataset(MetaSparkDFDataset):
             "__success",
             when(col(column_A_name) == col(column_B_name), True).otherwise(False),
         )
+
+    @DocInherit
+    @MetaSparkDFDataset.multicolumn_map_expectation
+    def expect_multicolumn_values_to_be_unique(
+        self,
+        column_list,  # pyspark.sql.DataFrame
+        ignore_row_if="all_values_are_missing",
+        result_format=None, include_config=True, catch_exceptions=None,
+        meta=None
+    ):
+        column_names = column_list.schema.names[:]
+        conditions = []
+        for i in range(0, len(column_names)-1):
+            # Negate the `eqNullSafe` result and append to the conditions.
+            conditions.append(~(
+                col(column_names[i]).eqNullSafe(col(column_names[i+1]))
+            ))
+
+        return column_list.withColumn('__success', reduce(lambda a, b: a & b, conditions))
