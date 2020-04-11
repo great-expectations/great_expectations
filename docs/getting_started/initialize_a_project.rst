@@ -1,11 +1,31 @@
-.. _tutorial_init:
+.. _getting_started__initialize_a_project:
+
+Initialize a project
+===============================================
+
+
+If you haven't already, install Great Expectations:
+
+.. code-block:: bash
+
+    $ pip install great_expectations
+
+or
+
+.. code-block:: bash
+
+    $ git clone https://github.com/great-expectations/great_expectations.git
+    $ pip install -e great_expectations/
+
+We recommend deploying within a virtual environment. If you're not familiar with pip, virtual environments, notebooks,
+or git, you may want to check out the :ref:`supporting_resources` section before continuing.
 
 Run ``great_expectations init``
 ===============================================
 
 The :ref:`command line interface (CLI) <command_line>` provides the easiest way to start using Great Expectations.
 
-The `init` command will walk you through setting up a new project and connecting to your data.
+The ``init`` command will walk you through setting up a new project and connecting to your data.
 
 Make sure that the machine that you installed GE on has access to a filesystem with data files (e.g., CSV) or a database.
 
@@ -28,4 +48,4 @@ Once you have decided which data you will use, you are ready to start. Run this 
     great_expectations init
 
 
-After you complete the `init` command, read this article to get a more complete picture of how data teams use Great Expectations:  :ref:`typical workflow <typical_workflow>`.
+After you complete the ``init`` command, read this article to get a more complete picture of how data teams use Great Expectations:  :ref:`typical workflow <typical_workflow>`.
