@@ -60,5 +60,5 @@ These guidelines should be followed consistently for methods and variables expos
 
 * For inline code in RST, make sure to use double backticks. This isn’t markdown, folks:
 
-	* Yep: `The ``init`` command will walk you through setting up a new project and connecting to your data.`
-	* Nope: `The `init` command will walk you through setting up a new project and connecting to your data.`
+	* Yep: The ``init`` command will walk you through setting up a new project and connecting to your data.
+	* Nope: The `init` command will walk you through setting up a new project and connecting to your data.
