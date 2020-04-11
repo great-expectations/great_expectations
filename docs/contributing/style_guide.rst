@@ -31,7 +31,7 @@ These guidelines should be followed consistently for methods and variables expos
 
 	* Good: “Configure data documentation”
 	* Nope: “Configuring data documentation”
-	* Avoid: “Configure your data documentation”
+	* Avoid: “Configure documentation for your data”
 
 
 **File names and RST refs**
