@@ -103,6 +103,7 @@ class DefaultJinjaView(object):
         env.filters['get_html_escaped_json_string_from_dict'] = self.get_html_escaped_json_string_from_dict
         env.filters['generate_html_element_uuid'] = self.generate_html_element_uuid
         env.filters['attributes_dict_to_html_string'] = self.attributes_dict_to_html_string
+        env.filters['render_bootstrap_table_data'] = self.render_bootstrap_table_data
         env.globals['ge_version'] = ge_version
 
         template = env.get_template(template)
@@ -138,6 +139,28 @@ class DefaultJinjaView(object):
             return template.render(context, content_block=content_block, index=index, content_block_id=content_block_id)
         else:
             return template.render(context, content_block=content_block, index=index)
+
+    def render_dict_values(self, context, dict_, index=None, content_block_id=None):
+         for key, val in dict_.items():
+             if key.startswith("_"):
+                 continue
+             dict_[key] = self.render_content_block(
+                 context,
+                 val,
+                 index,
+                 content_block_id
+             )
+
+    @contextfilter
+    def render_bootstrap_table_data(self, context, table_data, index=None, content_block_id=None):
+        for table_data_dict in table_data:
+            self.render_dict_values(
+                context,
+                table_data_dict,
+                index,
+                content_block_id
+            )
+        return table_data
 
     def get_html_escaped_json_string_from_dict(self, source_dict):
         return json.dumps(source_dict).replace('"', '\\"').replace('"', '&quot;')
