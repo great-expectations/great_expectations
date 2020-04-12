@@ -367,13 +367,7 @@ class DataAsset(object):
         # FIXME: Should we try to convert the object using something like recursively_convert_to_json_serializable?
         # json.dumps(expectation_config)
 
-        # Drop existing expectations with the same expectation_type.
-        # For column_expectations, _append_expectation should only replace expectations
-        # where the expectation_type AND the column match
-        # !!! This is good default behavior, but
-        # !!!    it needs to be documented, and
-        # !!!    we need to provide syntax to override it.
-
+        #Logic for column_*_expectations
         if 'column' in expectation_config.kwargs:
             column = expectation_config.kwargs['column']
 
@@ -387,6 +381,38 @@ class DataAsset(object):
                 #In this case, it's okay if we don't match any existing expectations
                 pass
 
+        #Logic for column_pair_*_expectations
+        elif 'column_A' in expectation_config.kwargs and 'column_B' in expectation_config.kwargs:
+
+            try:
+                self._expectation_suite.remove_expectation(
+                    expectation_type=expectation_type,
+                    expectation_kwargs={
+                        "column_A" : expectation_config.kwargs["column_A"],
+                        "column_B" : expectation_config.kwargs["column_B"],
+                    },
+                    remove_multiple_matches=True,
+                )
+            except ValueError:
+                #In this case, it's okay if we don't match any existing expectations
+                pass
+
+        #Logic for multicolumn_expectations
+        elif 'column_list' in expectation_config.kwargs:
+
+            try:
+                self._expectation_suite.remove_expectation(
+                    expectation_type=expectation_type,
+                    expectation_kwargs={
+                        "column_list" : expectation_config.kwargs["column_list"],
+                    },
+                    remove_multiple_matches=True,
+                )
+            except ValueError:
+                #In this case, it's okay if we don't match any existing expectations
+                pass
+
+        #Logic for all remaining expectations
         else:
             try:
                 self._expectation_suite.remove_expectation(

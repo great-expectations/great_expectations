@@ -269,3 +269,99 @@ def test__append_expectation():
     ))==1
     assert len(asset._expectation_suite.expectations) == 4
     assert asset._expectation_suite.expectations[3].kwargs["mostly"] == .8
+
+    # It works for column pair expectations
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_pair_values_to_be_equal",
+            kwargs={
+                "column_A": "a",
+                "column_B": "b",
+                "mostly": .8
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 5
+
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_pair_values_to_be_equal",
+            kwargs={
+                "column_A": "a",
+                "column_B": "b",
+                "mostly": .8
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 5
+
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_pair_values_to_be_equal",
+            kwargs={
+                "column_A": "a",
+                "column_B": "c",
+                "mostly": .8
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 6
+
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_pair_values_to_be_equal",
+            kwargs={
+                "column_A": "b",
+                "column_B": "a",
+                "mostly": .8
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 7
+
+    # It works for multicolumn expectations
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_multicolumn_values_to_be_unique",
+            kwargs={
+                "column_list": ["a","b"],
+                "mostly": .8
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 8
+
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_multicolumn_values_to_be_unique",
+            kwargs={
+                "column_list": ["a","b"],
+                "mostly": .8
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 8
+
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_multicolumn_values_to_be_unique",
+            kwargs={
+                "column_list": ["a",],
+                "mostly": .8
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 9
+
+    # Note: this specific behavior is a bit dubious, since uniqueness is commutative,
+    # so ["a", "b"] is identical to ["b", "a"]
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_multicolumn_values_to_be_unique",
+            kwargs={
+                "column_list": ["b","a"],
+                "mostly": .8
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 10
