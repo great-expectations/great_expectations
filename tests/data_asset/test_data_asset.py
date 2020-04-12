@@ -65,7 +65,7 @@ def test_data_asset_name_inheritance(dataset):
 def test_catch_exceptions_with_bad_expectation_type():
     # We want to catch degenerate cases where an expectation suite is incompatible with
     my_df = PandasDataset({"x": range(10)})
-    my_df._append_expectation(ExpectationConfiguration(expectation_type='foobar', kwargs={}))
+    my_df.append_or_update_expectation(ExpectationConfiguration(expectation_type='foobar', kwargs={}))
     result = my_df.validate(catch_exceptions=True)
 
     # Find the foobar result
@@ -84,15 +84,13 @@ def test_catch_exceptions_with_bad_expectation_type():
     with pytest.raises(AttributeError):
         result = my_df.validate(catch_exceptions=False)
 
-def test__append_expectation():
-    # Note: _append_expectation is a misnomer. It should be append_or_update_expectation.
-
+def test_append_or_update_expectation():
     # Note: some asserts within this test rely on strong assumptions about the ordering of expectation_suite._expectations
 
     asset = DataAsset()
     assert len(asset._expectation_suite.expectations) == 0
 
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_column_to_exist",
             kwargs={
@@ -103,7 +101,7 @@ def test__append_expectation():
     assert len(asset._expectation_suite.expectations) == 1
 
     #If we try to append_or_update an expectation with the same type and column, it gets overwritten
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_column_to_exist",
             kwargs={
@@ -114,7 +112,7 @@ def test__append_expectation():
     assert len(asset._expectation_suite.expectations) == 1
 
     #An expectation with the same type and different column creates a new expectation
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_column_to_exist",
             kwargs={
@@ -125,7 +123,7 @@ def test__append_expectation():
     assert len(asset._expectation_suite.expectations) == 2
 
     #An expectation with the same column and different type creates a new expectation
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
             kwargs={
@@ -137,7 +135,7 @@ def test__append_expectation():
 
     #If we try to append_or_update an expectation with the same type and column, parameters get overwritten, too.
     assert "mostly" not in asset._expectation_suite.expectations[2].kwargs
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
             kwargs={
@@ -149,7 +147,7 @@ def test__append_expectation():
     assert len(asset._expectation_suite.expectations) == 3
     assert "mostly" in asset._expectation_suite.expectations[2].kwargs
 
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_be_between",
             kwargs={
@@ -162,7 +160,7 @@ def test__append_expectation():
     assert asset._expectation_suite.expectations[3].kwargs["max_value"] == 90
 
     #If an Expectation doesn't have a column kwarg, then the expectation_type alone is enough to match and overwrite
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_be_between",
             kwargs={
@@ -210,7 +208,7 @@ def test__append_expectation():
     ))==4
 
     #...and if we now _append a matching one, they should all be deleted except the new one
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_be_between",
             kwargs={
@@ -255,7 +253,7 @@ def test__append_expectation():
         expectation_type="expect_column_values_to_not_be_null"
     ))==3
 
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
             kwargs={
@@ -271,7 +269,7 @@ def test__append_expectation():
     assert asset._expectation_suite.expectations[3].kwargs["mostly"] == .8
 
     # It works for column pair expectations
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_column_pair_values_to_be_equal",
             kwargs={
@@ -283,7 +281,7 @@ def test__append_expectation():
     )
     assert len(asset._expectation_suite.expectations) == 5
 
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_column_pair_values_to_be_equal",
             kwargs={
@@ -295,7 +293,7 @@ def test__append_expectation():
     )
     assert len(asset._expectation_suite.expectations) == 5
 
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_column_pair_values_to_be_equal",
             kwargs={
@@ -307,7 +305,7 @@ def test__append_expectation():
     )
     assert len(asset._expectation_suite.expectations) == 6
 
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_column_pair_values_to_be_equal",
             kwargs={
@@ -320,7 +318,7 @@ def test__append_expectation():
     assert len(asset._expectation_suite.expectations) == 7
 
     # It works for multicolumn expectations
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_multicolumn_values_to_be_unique",
             kwargs={
@@ -331,7 +329,7 @@ def test__append_expectation():
     )
     assert len(asset._expectation_suite.expectations) == 8
 
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_multicolumn_values_to_be_unique",
             kwargs={
@@ -342,7 +340,7 @@ def test__append_expectation():
     )
     assert len(asset._expectation_suite.expectations) == 8
 
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_multicolumn_values_to_be_unique",
             kwargs={
@@ -355,7 +353,7 @@ def test__append_expectation():
 
     # Note: this specific behavior is a bit dubious, since uniqueness is commutative,
     # so ["a", "b"] is identical to ["b", "a"]
-    asset._append_expectation(
+    asset.append_or_update_expectation(
         ExpectationConfiguration(
             expectation_type="expect_multicolumn_values_to_be_unique",
             kwargs={

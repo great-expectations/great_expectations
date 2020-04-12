@@ -255,7 +255,7 @@ class DataAsset(object):
                     pass
                 else:
                     # Append the expectation to the config.
-                    self._append_expectation(expectation_config)
+                    self.append_or_update_expectation(expectation_config)
 
                 if include_config:
                     return_obj.expectation_config = copy.deepcopy(expectation_config)
@@ -343,6 +343,11 @@ class DataAsset(object):
         self._expectation_suite.append_expectation(expectation_config)
 
     def _append_expectation(self, expectation_config):
+        warnings.warn("DataAsset._append_expectation is deprecated and will be removed. Please use DataAsset.append_or_update instead.", DeprecationWarning)
+
+        return self.append_or_update_expectation(expectation_config)
+
+    def append_or_update_expectation(self, expectation_config):
         """Appends an expectation to `DataAsset._expectation_suite` and drops existing expectations of the same type.
 
            If `expectation_config` is a column expectation, this drops existing expectations that are specific to \
@@ -357,7 +362,6 @@ class DataAsset(object):
 
            Notes:
                May raise future errors once json-serializable tests are implemented to check for correct arg formatting
-
         """
         expectation_type = expectation_config.expectation_type
 

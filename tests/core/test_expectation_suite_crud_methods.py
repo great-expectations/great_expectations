@@ -34,7 +34,7 @@ def exp5():
         meta={}
     )
 
-def test_append_expectation(empty_suite, exp1, exp2):
+def testappend_or_update_expectation(empty_suite, exp1, exp2):
 
     assert len(empty_suite.expectations) == 0
 
