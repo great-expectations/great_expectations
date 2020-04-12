@@ -839,6 +839,41 @@ class ExpectationSuite(object):
                     return [expectation]
                 else:
                     return expectation
+    
+    def edit_expectation(self,
+        new_kwargs,
+        expectation_type=None,
+        column=None,
+        expectation_kwargs=None,
+        replace_full_kwarg_object=False,
+    ):
+        """Edit exactly one Expectation
+        Args:
+            expectation_type=None                : The name of the expectation type to be matched.
+            column=None                          : The name of the column to be matched.
+            expectation_kwargs=None              : A dictionary of kwargs to match against.
+            replace_full_kwarg_object=False      : Match multiple expectations
+
+        Returns:
+            The revised Expectation
+
+        replace_full_kwarg_object:
+            By default, edit_expectations will keep most of the key-value pairs
+            in kwargs, only replacing those with entries in new_kwargs.
+            However, if replace_full_kwarg_object=True, then the method will
+            replace the full object.
+            In either case, edit_expectation will validate that the kwargs are
+            valid for the specified Expectation.
+
+        Note:
+            If the match criteria specified in column, expectation_type, and
+            expectation_kwargs don't find exactly one match, then
+            edit_expectations raises a ValueError.
+            There is currently no way to use edit_expectation to change the
+            expectation_type of an Expectation.
+        """
+
+        pass
 
 class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
