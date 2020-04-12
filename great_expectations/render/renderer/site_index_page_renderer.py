@@ -1,7 +1,11 @@
+import datetime
+import json
 import logging
 from collections import OrderedDict
 
 import traceback
+
+from dateutil.parser import parse
 
 from .renderer import Renderer
 from great_expectations.render.types import (
@@ -11,7 +15,7 @@ from great_expectations.render.types import (
     RenderedStringTemplateContent,
     RenderedTableContent,
     RenderedBulletListContent,
-)
+    RenderedBootstrapTableContent, RenderedTabsContent)
 from great_expectations.exceptions import GreatExpectationsError
 
 from .call_to_action_renderer import CallToActionRenderer
@@ -24,154 +28,266 @@ logger = logging.getLogger(__name__)
 class SiteIndexPageRenderer(Renderer):
 
     @classmethod
-    def _generate_links_table_rows(cls, index_links_dict, link_list_keys_to_render):
-        section_rows = []
+    def _generate_expectation_suites_link_table(cls, index_links_dict):
+        table_options = {
+            "search": True,
+            "trim-on-search": False,
+            "visible-search": True,
+            "row-style": "rowStyleLinks",
+            "row-attributes": "rowAttributesLinks",
+            "sort-name": "expectation_suite_name",
+            "sort-order": "asc",
+            "height": 550
+        }
+        table_columns = [
+            {
+                "field": "expectation_suite_name",
+                "title": "Expectation Suites",
+                "sortable": True
+            },
+        ]
+        expectation_suite_link_dicts = index_links_dict.get("expectations_links", [])
+        table_data = []
 
-        column_count = len(link_list_keys_to_render)
-        validations_links = index_links_dict.get("validations_links")
-        expectations_links = index_links_dict.get("expectations_links")
+        for dict_ in expectation_suite_link_dicts:
+            table_data.append({
+                "expectation_suite_name": dict_.get("expectation_suite_name"),
+                "_table_row_link_path": dict_.get("filepath")
+            })
 
-        if column_count:
-            cell_width_pct = 100.0/column_count
+        return RenderedBootstrapTableContent(**{
+            "table_columns": table_columns,
+            "table_data": table_data,
+            "table_options": table_options,
+            "styling": {
+                "classes": ["col-12", "ge-index-page-table-container"],
+                "body": {
+                    "classes": ["table-sm", "ge-index-page-expectation_suites-table"]
+                }
+            }
+        })
 
-        if "expectations_links" in link_list_keys_to_render:
-            for expectation_suite_link_dict in expectations_links:
-                expectation_suite_row = []
-                expectation_suite_name = expectation_suite_link_dict["expectation_suite_name"]
+    @classmethod
+    def _generate_profiling_results_link_table(cls, index_links_dict):
+        table_options = {
+            "search": True,
+            "trim-on-search": False,
+            "visible-search": True,
+            "row-style": "rowStyleLinks",
+            "row-attributes": "rowAttributesLinks",
+            "sort-name": "run_time",
+            "sort-order": "desc",
+            "height": 550
+        }
+        table_columns = [
+            {
+                "field": "run_time",
+                "title": "Run Time",
+                "sort-name": "_run_time_sort",
+                "sortable": True
+            },
+            {
+                "field": "asset_name",
+                "title": "Asset Name",
+                "sortable": True
+            },
+            {
+                "field": "batch_identifier",
+                "title": "Batch ID",
+                "sort-name": "_batch_identifier_sort",
+                "sortable": True
+            },
+            {
+                "field": "profiler_name",
+                "title": "Profiler",
+                "sortable": True
+            }
+        ]
+        profiling_link_dicts = index_links_dict.get("profiling_links", [])
+        table_data = []
 
-                expectation_suite_link = RenderedStringTemplateContent(**{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$link_text",
-                        "params": {
-                            "link_text": expectation_suite_name
-                        },
-                        "tag": "a",
-                        "styling": {
-                            "attributes": {
-                                "href": expectation_suite_link_dict["filepath"]
-                            },
-                            "classes": ["ge-index-page-table-expectation-suite-link"]
-                        }
-                    },
-                    "styling": {
-                        "parent": {
-                            "styles": {
-                                "width": "{}%".format(cell_width_pct),
-                            }
-                        }
-                    }
-                })
-                expectation_suite_row.append(expectation_suite_link)
+        for dict_ in profiling_link_dicts:
+            table_data.append({
+                "run_time": cls._get_formatted_datetime(dict_.get("run_time")),
+                "_run_time_sort": cls._get_timestamp(dict_.get("run_time")),
+                "asset_name": dict_.get("asset_name"),
+                "batch_identifier": cls._render_batch_id_cell(
+                    dict_.get("batch_identifier"), dict_.get("batch_kwargs")),
+                "_batch_identifier_sort": dict_.get("batch_identifier"),
+                "profiler_name": dict_.get("expectation_suite_name").split(".")[-1],
+                "_table_row_link_path": dict_.get("filepath")
+            })
 
-                if "validations_links" in link_list_keys_to_render:
-                    sorted_validations_links = [
-                        link_dict for link_dict in sorted(validations_links, key=lambda x: x["run_id"], reverse=True)
-                        if link_dict["expectation_suite_name"] == expectation_suite_name
-                    ]
-                    validation_link_bullets = [
-                        RenderedStringTemplateContent(**{
-                            "content_block_type": "string_template",
-                            "string_template": {
-                                "template": "${validation_success} $link_text",
-                                "params": {
-                                    "link_text": link_dict["run_id"],
-                                    "validation_success": ""
-                                },
-                                "tag": "a",
-                                "styling": {
-                                    "attributes": {
-                                        "href": link_dict["filepath"]
-                                    },
-                                    "params": {
-                                        "validation_success": {
-                                            "tag": "i",
-                                            "classes": ["fas", "fa-check-circle",  "text-success"] if link_dict["validation_success"] else ["fas", "fa-times", "text-danger"]
-                                        }
-                                    },
-                                    "classes": ["ge-index-page-table-validation-links-item"]
-                                }
-                            },
-                            "styling": {
-                                "parent": {
-                                    "classes": ["hide-succeeded-validation-target"] if link_dict[
-                                        "validation_success"] else []
-                                }
-                            }
-                        }) for link_dict in sorted_validations_links if
-                        link_dict["expectation_suite_name"] == expectation_suite_name
-                    ]
-                    validation_link_bullet_list = RenderedBulletListContent(**{
-                        "content_block_type": "bullet_list",
-                        "bullet_list": validation_link_bullets,
-                        "styling": {
-                            "parent": {
-                                "styles": {
-                                    "width": "{}%".format(cell_width_pct)
-                                }
-                            },
-                            "body": {
-                                "classes": ["ge-index-page-table-validation-links-list"]
-                            }
-                        }
-                    })
-                    expectation_suite_row.append(validation_link_bullet_list)
+        return RenderedBootstrapTableContent(**{
+            "table_columns": table_columns,
+            "table_data": table_data,
+            "title_row": "Profiling Results",
+            "table_options": table_options,
+            "styling": {
+                "classes": ["col-12", "ge-index-page-table-container"],
+                "body": {
+                    "classes": ["table-sm", "ge-index-page-profiling-results-table"]
+                }
+            }
+        })
 
-                section_rows.append(expectation_suite_row)
+    @classmethod
+    def _generate_validation_results_link_table(cls, index_links_dict):
+        table_options = {
+            "search": True,
+            "trim-on-search": False,
+            "visible-search": True,
+            "row-style": "rowStyleLinks",
+            "row-attributes": "rowAttributesLinks",
+            "sort-name": "run_time",
+            "sort-order": "desc",
+            "height": 550
+        }
+        table_columns = [
+            {
+                "field": "validation_success",
+                "title": "Status",
+                "sortable": True,
+                "align": "center",
+            },
+            {
+                "field": "run_time",
+                "title": "Run Time",
+                "sort-name": "_run_time_sort",
+                "sortable": True
+            },
+            {
+                "field": "run_name",
+                "title": "Run Name",
+                "sortable": True
+            },
+            {
+                "field": "asset_name",
+                "title": "Asset Name",
+                "sortable": True
+            },
+            {
+                "field": "batch_identifier",
+                "title": "Batch ID",
+                "sort-name": "_batch_identifier_sort",
+                "sortable": True
+            },
+            {
+                "field": "expectation_suite_name",
+                "title": "Expectation Suite",
+                "sort-name": "_expectation_suite_name_sort",
+                "sortable": True
+            }
+        ]
+        validation_link_dicts = index_links_dict.get("validations_links", [])
+        table_data = []
 
-        if not expectations_links and "validations_links" in link_list_keys_to_render:
-            sorted_validations_links = [
-                link_dict for link_dict in sorted(validations_links, key=lambda x: x["run_id"], reverse=True)
-            ]
-            validation_link_bullets = [
-                RenderedStringTemplateContent(**{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "${validation_success} $link_text",
-                        "params": {
-                            "link_text": link_dict["run_id"],
-                            "validation_success": ""
-                        },
-                        "tag": "a",
-                        "styling": {
-                            "attributes": {
-                                "href": link_dict["filepath"]
-                            },
-                            "params": {
-                                "validation_success": {
-                                    "tag": "i",
-                                    "classes": ["fas", "fa-check-circle", "text-success"] if link_dict[
-                                        "validation_success"] else ["fas", "fa-times", "text-danger"]
-                                }
-                            },
-                            "classes": ["ge-index-page-table-validation-links-item"]
-                        }
-                    },
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target"] if link_dict[
-                                "validation_success"] else []
-                        }
-                    }
-                }) for link_dict in sorted_validations_links
-            ]
-            validation_link_bullet_list = RenderedBulletListContent(**{
-                "content_block_type": "bullet_list",
-                "bullet_list": validation_link_bullets,
+        for dict_ in validation_link_dicts:
+            table_data.append({
+                "validation_success": cls._render_validation_success_cell(dict_.get("validation_success")),
+                "run_time": cls._get_formatted_datetime(dict_.get("run_time")),
+                "_run_time_sort": cls._get_timestamp(dict_.get("run_time")),
+                "run_name": dict_.get("run_name"),
+                "batch_identifier": cls._render_batch_id_cell(
+                    dict_.get("batch_identifier"), dict_.get("batch_kwargs")),
+                "_batch_identifier_sort": dict_.get("batch_identifier"),
+                "expectation_suite_name": cls._render_expectation_suite_cell(
+                    dict_.get("expectation_suite_name"),
+                    dict_.get("expectation_suite_filepath")
+                ),
+                "_expectation_suite_name_sort": dict_.get("expectation_suite_name"),
+                "_table_row_link_path": dict_.get("filepath"),
+                "asset_name": dict_.get("asset_name")
+            })
+
+        return RenderedBootstrapTableContent(**{
+            "table_columns": table_columns,
+            "table_data": table_data,
+            "title_row": "Validation Results",
+            "table_options": table_options,
+            "styling": {
+                "classes": ["col-12", "ge-index-page-table-container"],
+                "body": {
+                    "classes": ["table-sm", "ge-index-page-validation-results-table"]
+                }
+            }
+        })
+
+    @classmethod
+    def _render_expectation_suite_cell(cls, expectation_suite_name, expectation_suite_path):
+        return RenderedStringTemplateContent(**{
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": "$link_text",
+                "params": {
+                    "link_text": expectation_suite_name
+                },
+                "tag": "a",
                 "styling": {
-                    "parent": {
-                        "styles": {
-                            "width": "{}%".format(cell_width_pct)
-                        }
+                    "attributes": {
+                        "href": expectation_suite_path
                     },
-                    "body": {
-                        "classes": ["ge-index-page-table-validation-links-list"]
+                    "classes": ["ge-index-page-table-expectation-suite-link"]
+                }
+            },
+        })
+
+    @classmethod
+    def _render_batch_id_cell(cls, batch_id, batch_kwargs):
+        return RenderedStringTemplateContent(**{
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": str(batch_id),
+                "tooltip": {
+                    "content": "Batch Kwargs:\n\n" + json.dumps(batch_kwargs, indent=2),
+                    "placement": "top"
+                },
+                "styling": {
+                    "classes": ["m-0", "p-0"]
+                }
+            }
+        })
+
+    @classmethod
+    def _get_formatted_datetime(cls, _datetime):
+        if isinstance(_datetime, datetime.datetime):
+            return _datetime.strftime("%m/%e/%Y %H:%M:%S")
+        elif isinstance(_datetime, str):
+            return parse(_datetime).strftime("%m/%e/%Y %H:%M:%S")
+        else:
+            return None
+
+    @classmethod
+    def _get_timestamp(cls, _datetime):
+        if isinstance(_datetime, datetime.datetime):
+            return _datetime.timestamp()
+        elif isinstance(_datetime, str):
+            return parse(_datetime).timestamp()
+        else:
+            return ""
+
+    @classmethod
+    def _render_validation_success_cell(cls, validation_success):
+        return RenderedStringTemplateContent(
+            **{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "$validation_success",
+                    "params": {
+                        "validation_success": ""
+                    },
+                    "styling": {
+                        "params": {
+                            "validation_success": {
+                                "tag": "i",
+                                "classes": ["fas", "fa-check-circle", "text-success"] if
+                                    validation_success else ["fas", "fa-times", "text-danger"]
+                            }
+                        },
+                        "classes": ["ge-index-page-table-validation-links-item"]
                     }
                 }
             })
-            section_rows.append([validation_link_bullet_list])
-
-        return section_rows
 
     @classmethod
     def render(cls, index_links_dict):
@@ -210,93 +326,32 @@ class SiteIndexPageRenderer(Renderer):
             })
             content_blocks.append(site_name_header_block)
 
-            table_rows = []
-            table_header_row = []
-            link_list_keys_to_render = []
+            tabs = []
 
-            header_dict = OrderedDict([
-                ["expectations_links", "Expectation Suite"],
-                ["validations_links", "Validation Results (run_id)"]
-            ])
+            if index_links_dict.get("validations_links"):
+                tabs.append({
+                    "tab_name": "Validation Results",
+                    "tab_content": cls._generate_validation_results_link_table(index_links_dict)
+                })
+            if index_links_dict.get("profiling_links"):
+                tabs.append({
+                    "tab_name": "Profiling Results",
+                    "tab_content": cls._generate_profiling_results_link_table(index_links_dict)
+                })
+            if index_links_dict.get("expectations_links"):
+                tabs.append({
+                    "tab_name": "Expectation Suites",
+                    "tab_content": cls._generate_expectation_suites_link_table(index_links_dict)
+                })
 
-            for link_lists_key, header in header_dict.items():
-                if index_links_dict.get(link_lists_key):
-                    class_header_str = link_lists_key.replace("_", "-")
-                    class_str = "ge-index-page-table-{}-header".format(class_header_str)
-                    header = RenderedStringTemplateContent(**{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": header,
-                            "params": {},
-                            "styling": {
-                                "classes": [class_str],
-                            }
-                        }
-                    })
-                    table_header_row.append(header)
-                    link_list_keys_to_render.append(link_lists_key)
-
-            generator_table = RenderedTableContent(**{
-                "content_block_type": "table",
-                "header_row": table_header_row,
-                "table": table_rows,
+            tabs_content_block = RenderedTabsContent(**{
+                "tabs": tabs,
                 "styling": {
-                    "classes": ["col-12", "ge-index-page-table-container"],
-                    "styles": {
-                        "margin-top": "10px"
-                    },
-                    "body": {
-                        "classes": ["table", "table-sm", "ge-index-page-generator-table"]
-                    }
+                    "classes": ["col-12", "ge-index-page-tabs-container"],
                 }
             })
 
-            table_rows += cls._generate_links_table_rows(
-                index_links_dict, link_list_keys_to_render=link_list_keys_to_render
-            )
-
-            content_blocks.append(generator_table)
-
-            if index_links_dict.get("profiling_links"):
-                profiling_table_rows = []
-                for profiling_link_dict in index_links_dict.get("profiling_links"):
-                    profiling_table_rows.append(
-                        [
-                            RenderedStringTemplateContent(**{
-                                "content_block_type": "string_template",
-                                "string_template": {
-                                    "template": "$link_text",
-                                    "params": {
-                                        "link_text": profiling_link_dict["expectation_suite_name"] + "." + profiling_link_dict["batch_identifier"]
-                                    },
-                                    "tag": "a",
-                                    "styling": {
-                                        "attributes": {
-                                            "href": profiling_link_dict["filepath"]
-                                        },
-                                        "classes": ["ge-index-page-table-expectation-suite-link"]
-                                    }
-                                },
-                            })
-                        ]
-                    )
-                content_blocks.append(
-                    RenderedTableContent(**{
-                        "content_block_type": "table",
-                        "header_row": ["Profiling Results"],
-                        "table": profiling_table_rows,
-                        "styling": {
-                            "classes": ["col-12", "ge-index-page-table-container"],
-                            "styles": {
-                                "margin-top": "10px"
-                            },
-                            "body": {
-                                "classes": ["table", "table-sm", "ge-index-page-generator-table"]
-                            }
-                        }
-                    })
-
-                )
+            content_blocks.append(tabs_content_block)
 
             section = RenderedSectionContent(**{
                 "section_name": index_links_dict.get("site_name"),
