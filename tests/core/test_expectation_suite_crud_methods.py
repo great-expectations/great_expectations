@@ -343,6 +343,8 @@ def test_remove_expectation(baseline_suite):
     )
     assert len(baseline_suite.expectations) == 1
 
+# NOTE: Need to add tests for remove_expectations_by_index
+# They will be very similar to remove_expectation
 
 def test_update_expectation(baseline_suite):
     # ValueError: Multiple Expectations matched arguments. No Expectations updated.
