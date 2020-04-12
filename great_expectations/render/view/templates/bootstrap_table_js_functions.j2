@@ -1,0 +1,27 @@
+<script>
+  function rowStyleLinks(row, index) {
+    return {
+      css: {
+        cursor: "pointer"
+      }
+    }
+  }
+
+  function rowAttributesLinks(row, index) {
+    return {
+      "class": "clickable-row",
+      "data-href": row._table_row_link_path
+    }
+  }
+</script>
+
+{% if table_options.get("row-style") == "rowStyleLinks" %}
+  <script>
+    $(document).ready(function() {
+      $("#{{ table_id }}").on('click-row.bs.table', function(e, row, $element) {
+          window.location = $element.data("href");
+        })
+      }
+    );
+  </script>
+{% endif %}
