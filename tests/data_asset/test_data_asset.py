@@ -1,4 +1,5 @@
 import pytest
+import warnings
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core import ExpectationSuite, ExpectationConfiguration, ExpectationKwargs
@@ -83,6 +84,27 @@ def test_catch_exceptions_with_bad_expectation_type():
 
     with pytest.raises(AttributeError):
         result = my_df.validate(catch_exceptions=False)
+
+def test__append_expectation_deprecation_warning():
+    # Note: some asserts within this test rely on strong assumptions about the ordering of expectation_suite._expectations
+
+    asset = DataAsset()
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+
+        asset._append_expectation(
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={
+                    "column": "a"
+                },
+            )
+        )
+
+        assert len(w) == 1
+        assert issubclass(w[-1].category, DeprecationWarning)
+        assert "DataAsset._append_expectation is deprecated" in str(w[-1].message)
 
 def test_append_or_update_expectation():
     # Note: some asserts within this test rely on strong assumptions about the ordering of expectation_suite._expectations
