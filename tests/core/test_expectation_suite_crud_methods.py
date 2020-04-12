@@ -266,6 +266,84 @@ def test_remove_expectation(baseline_suite):
             expectation_type="expect_column_values_to_be_in_set"
         )
 
+    #Tests for dry_run
+    baseline_suite.append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "column": "z",
+                "value_set": [1,2,3,4,5]
+            }
+        )
+    )
+    baseline_suite.append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "column": "z",
+                "value_set": [1,2,3,4,5]
+            }
+        )
+    )
+    baseline_suite.append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_to_exist",
+            kwargs={
+                "column": "z",
+            }
+        )
+    )
+    assert len(baseline_suite.expectations) == 3
+
+    assert baseline_suite.remove_expectation(
+        expectation_type="expect_column_to_exist",
+        dry_run=True
+    ) == ExpectationConfiguration(
+        expectation_type="expect_column_to_exist",
+        kwargs={"column": "z"},
+        meta={},
+    )
+    assert len(baseline_suite.expectations) == 3
+
+    with pytest.raises(ValueError):
+        baseline_suite.remove_expectation(
+            expectation_type="expect_column_values_to_be_in_set",
+            dry_run=True
+        )
+    assert len(baseline_suite.expectations) == 3
+
+    assert baseline_suite.remove_expectation(
+        expectation_type="expect_column_values_to_be_in_set",
+        remove_multiple_matches=True,
+        dry_run=True
+    ) == [
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "column": "z",
+                "value_set": [1,2,3,4,5],
+            },
+            meta={},
+        ),
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "column": "z",
+                "value_set": [1,2,3,4,5]
+            },
+            meta={},
+        )
+    ]
+    assert len(baseline_suite.expectations) == 3
+
+    # Tests for remove_multiple_matches
+    baseline_suite.remove_expectation(
+        expectation_type="expect_column_values_to_be_in_set",
+        remove_multiple_matches=True,
+    )
+    assert len(baseline_suite.expectations) == 1
+
+
 def test_update_expectation(baseline_suite):
     # ValueError: Multiple Expectations matched arguments. No Expectations updated.
     with pytest.raises(ValueError):
