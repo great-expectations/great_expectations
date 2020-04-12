@@ -266,79 +266,82 @@ def test_remove_expectation(baseline_suite):
             expectation_type="expect_column_values_to_be_in_set"
         )
 
-def test_edit_expectation(baseline_suite):
-    # ValueError: Multiple expectations matched arguments. No expectations removed.
+def test_update_expectation(baseline_suite):
+    # ValueError: Multiple Expectations matched arguments. No Expectations updated.
     with pytest.raises(ValueError):
-        baseline_suite.edit_expectation(
+        baseline_suite.update_expectation(
             new_kwargs={}
         )
 
-    # ValueError: No matching expectation found.
+    # ValueError: No matching Expectation found.
     with pytest.raises(ValueError):
-        baseline_suite.edit_expectation(
+        baseline_suite.update_expectation(
             new_kwargs={},
             column="does_not_exist"
         )
 
-    # ValueError: Multiple expectations matched arguments. No expectations removed.
+    # ValueError: Multiple Expectations matched arguments. No Expectations updated.
     with pytest.raises(ValueError):
-        baseline_suite.edit_expectation(
+        baseline_suite.update_expectation(
             new_kwargs={},
             expectation_type="expect_column_values_to_be_in_set"
         )
 
     assert len(baseline_suite.expectations) == 2
-    assert baseline_suite.edit_expectation(
+    assert baseline_suite.update_expectation(
         new_kwargs={
             "column": "c",
         },
         column="a"
-    ) == {
+    ) == ExpectationConfiguration(**{
         "expectation_type": "expect_column_values_to_be_in_set",
         "kwargs": {
             "column": "c",
             "value_set": [1, 2, 3],
-        }
-    }
+        },
+        "meta": {"notes": "This is an expectation."}
+    })
     assert len(baseline_suite.expectations) == 2
 
-    assert baseline_suite.edit_expectation(
+    assert baseline_suite.update_expectation(
         new_kwargs={
             "value_set": [1,2,3],
         },
         column="b"
-    ) == {
+    ) == ExpectationConfiguration(**{
         "expectation_type": "expect_column_values_to_be_in_set",
         "kwargs": {
             "column": "b",
             "value_set": [1, 2, 3],
-        }
-    }
+        },
+        "meta": {"notes": "This is an expectation."}
+    })
     assert len(baseline_suite.expectations) == 2
 
+    # TODO: Implement this check one ExpectationConfiguration knows how to validate kwargs against expectation_types.
     # ValueError: Specified kwargs aren't valid for expectation type expect_column_values_to_be_in_set.
-    with pytest.raises(ValueError):
-        baseline_suite.edit_expectation(
-            new_kwargs={
-                "value_set": [1,2,3],
-            },
-            column="b",
-            replace_full_kwargs_object=True
-        )
-        
-        
-    baseline_suite.edit_expectation(
+    # with pytest.raises(ValueError):
+    #     baseline_suite.update_expectation(
+    #         new_kwargs={
+    #             "value_set": [1,2,3],
+    #         },
+    #         column="b",
+    #         replace_all_kwargs=True
+    #     )
+                
+    baseline_suite.update_expectation(
         new_kwargs={
             "column": "d",
             "value_set": [3,4,5],
         },
         column="b",
-        replace_full_kwargs_object=True
-    ) == {
+        replace_all_kwargs=True
+    ) == ExpectationConfiguration(**{
         "expectation_type": "expect_column_values_to_be_in_set",
         "kwargs": {
             "column": "d",
             "value_set": [3, 4, 5],
-        }
-    }
+        },
+        "meta": {"notes": "This is an expectation."}
+    })
     assert len(baseline_suite.expectations) == 2

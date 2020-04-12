@@ -400,6 +400,35 @@ class ExpectationConfiguration(DictDot):
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
+        
+    def update_kwargs(self,
+        new_kwargs,
+        replace_all_kwargs=False,
+    ):
+        """Update kwargs
+        Args:
+            new_kwargs                           : A dictionary of new kwargs
+            replace_all_kwargs=False             : Replace the whole kwarg object at once.
+
+        Returns:
+            None
+
+        replace_all_kwargs:
+            By default, update_kwargs will keep existing key-value pairs in
+            kwargs, only replacing those with entries in new_kwargs.
+            However, if replace_all_kwargs=True, then the method will
+            replace the full object.
+
+        TODO:
+            For type safety, it would be great if update_kwargs checked
+            whether new kwargs are valid for the specified expectation_type.
+        """
+        if replace_all_kwargs:
+            self._kwargs = new_kwargs
+
+        else:
+            for k,v in new_kwargs.items():
+                self._kwargs[k] = v
 
     def to_json_dict(self):
         myself = expectationConfigurationSchema.dump(self)
@@ -840,40 +869,54 @@ class ExpectationSuite(object):
                 else:
                     return expectation
     
-    def edit_expectation(self,
+    def update_expectation(self,
         new_kwargs,
         expectation_type=None,
         column=None,
         expectation_kwargs=None,
-        replace_full_kwarg_object=False,
+        replace_all_kwargs=False,
     ):
-        """Edit exactly one Expectation
+        """Update exactly one Expectation
         Args:
             expectation_type=None                : The name of the expectation type to be matched.
             column=None                          : The name of the column to be matched.
             expectation_kwargs=None              : A dictionary of kwargs to match against.
-            replace_full_kwarg_object=False      : Match multiple expectations
+            replace_all_kwargs=False             : Replace the whole kwarg object at once.
 
         Returns:
             The revised Expectation
 
-        replace_full_kwarg_object:
-            By default, edit_expectations will keep most of the key-value pairs
-            in kwargs, only replacing those with entries in new_kwargs.
-            However, if replace_full_kwarg_object=True, then the method will
-            replace the full object.
-            In either case, edit_expectation will validate that the kwargs are
-            valid for the specified Expectation.
-
         Note:
             If the match criteria specified in column, expectation_type, and
             expectation_kwargs don't find exactly one match, then
-            edit_expectations raises a ValueError.
-            There is currently no way to use edit_expectation to change the
+            update_expectations raises a ValueError.
+            There is currently no way to use update_expectation to change the
             expectation_type of an Expectation.
         """
 
-        pass
+        matched_expectations = self.find_expectations(
+            expectation_type=expectation_type,
+            column=column,
+            expectation_kwargs=expectation_kwargs
+        )
+
+        #Ensure that exactly one Expectation matches.
+        if len(matched_expectations) == 0:
+            raise ValueError("No matching Expectation found.")
+
+        elif len(matched_expectations) > 1:
+            raise ValueError("Multiple Expectations matched arguments. No Expectations updated.")
+
+        matched_expectation = matched_expectations[0]
+
+        matched_expectation.update_kwargs(
+            new_kwargs,
+            replace_all_kwargs,
+        )
+
+        return matched_expectation
+        
+
 
 class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
