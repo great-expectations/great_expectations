@@ -83,3 +83,91 @@ def test_catch_exceptions_with_bad_expectation_type():
 
     with pytest.raises(AttributeError):
         result = my_df.validate(catch_exceptions=False)
+
+def test__append_expectation():
+    # Note _append_expectation is a misnomer. It should be append_or_update_expectation.
+
+    asset = DataAsset()
+    assert len(asset._expectation_suite.expectations) == 0
+
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_to_exist",
+            kwargs={
+                "column": "a"
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 1
+
+    #If we try to append_or_update an expectation with the same type and column, it gets overwritten
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_to_exist",
+            kwargs={
+                "column": "a"
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 1
+
+    #An expectation with the same type and different column creates a new expectation
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_to_exist",
+            kwargs={
+                "column": "b"
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 2
+
+    #An expectation with the same column and different type creates a new expectation
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_not_be_null",
+            kwargs={
+                "column": "b"
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 3
+
+    #If we try to append_or_update an expectation with the same type and column, parameters get overwritten, too.
+    assert "mostly" not in asset._expectation_suite.expectations[2].kwargs
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_not_be_null",
+            kwargs={
+                "column": "b",
+                "mostly": .9
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 3
+    assert "mostly" in asset._expectation_suite.expectations[2].kwargs
+
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_be_between",
+            kwargs={
+                "min_value": 10,
+                "max_value": 90,
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 4
+    assert asset._expectation_suite.expectations[3].kwargs["max_value"] == 90
+
+    #If an Expectation doesn't have a column kwarg, then the expectation_type alone is enough to match and overwrite
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_be_between",
+            kwargs={
+                "min_value": 20,
+                "max_value": 80,
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 4
+    assert asset._expectation_suite.expectations[3].kwargs["max_value"] == 80

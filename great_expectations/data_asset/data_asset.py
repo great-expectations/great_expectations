@@ -343,12 +343,6 @@ class DataAsset(object):
         self._expectation_suite.append_expectation(expectation_config)
 
     def _append_expectation(self, expectation_config):
-        """This method
-        
-        This method should become a thin wrapper for ExpectationSuite.append_expectation
-
-        Included for backwards compatibility.
-        """
         """Appends an expectation to `DataAsset._expectation_suite` and drops existing expectations of the same type.
 
            If `expectation_config` is a column expectation, this drops existing expectations that are specific to \
