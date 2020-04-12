@@ -1,0 +1,47 @@
+{% include 'content_block_header.j2' %}
+
+{% if "styling" in content_block and "body" in content_block["styling"] -%}
+    {% set content_block_body_styling = content_block["styling"]["body"] | render_styling -%}
+{% else -%}
+    {% set content_block_body_styling = "" -%}
+{% endif -%}
+
+{% set table_options = content_block.get("table_options", {}) %}
+{% set table_id = content_block_id ~ "-body" %}
+
+<table
+  id="{{ table_id }}"
+  {{ content_block_body_styling | replace("{{section_id}}", section_id) | replace("{{content_block_id}}", content_block_id) }}
+  data-toggle="table"
+  {{ table_options | attributes_dict_to_html_string(prefix="data") }}
+>
+  {% set table_columns = content_block["table_columns"] %}
+  <thead>
+    {% if "title_row" in content_block %}
+      <tr>
+        <th data-halign="center" data-colspan="{{ table_columns | length }}">
+          {{ content_block["title_row"] | render_content_block }}
+        </th>
+      </tr>
+    {% endif %}
+    <tr>
+      {% for column in table_columns %}
+        {% set header_cell_content = column.pop("title") %}
+        <th
+          {{ column | attributes_dict_to_html_string(prefix="data") }}
+        >
+          {{ header_cell_content | render_content_block }}
+        </th>
+      {% endfor %}
+    </tr>
+  </thead>
+</table>
+
+{% include 'bootstrap_table_js_functions.j2' %}
+
+<script>
+  let {{ table_id | replace("-", "") ~ "data" }} = {{ content_block["table_data"] | render_bootstrap_table_data }};
+  $('{{ '#' ~ table_id }}').bootstrapTable({
+    data: {{ table_id | replace("-", "") ~ "data" }}
+  })
+</script>
