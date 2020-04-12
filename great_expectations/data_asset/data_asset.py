@@ -377,16 +377,25 @@ class DataAsset(object):
         if 'column' in expectation_config.kwargs:
             column = expectation_config.kwargs['column']
 
-            self._expectation_suite.expectations = [f for f in filter(
-                lambda exp: (exp.expectation_type != expectation_type) or (
-                    'column' in exp.kwargs and exp.kwargs['column'] != column),
-                self._expectation_suite.expectations
-            )]
+            try:
+                self._expectation_suite.remove_expectation(
+                    expectation_type=expectation_type,
+                    column=column,
+                    remove_multiple_matches=True,
+                )
+            except ValueError:
+                #In this case, it's okay if we don't match any existing expectations
+                pass
+
         else:
-            self._expectation_suite.expectations = [f for f in filter(
-                lambda exp: exp.expectation_type != expectation_type,
-                self._expectation_suite.expectations
-            )]
+            try:
+                self._expectation_suite.remove_expectation(
+                    expectation_type=expectation_type,
+                    remove_multiple_matches=True,
+                )
+            except ValueError:
+                #In this case, it's okay if we don't match any existing expectations
+                pass
 
         self._expectation_suite.append_expectation(expectation_config)
 

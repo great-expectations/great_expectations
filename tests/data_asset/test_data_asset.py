@@ -85,7 +85,9 @@ def test_catch_exceptions_with_bad_expectation_type():
         result = my_df.validate(catch_exceptions=False)
 
 def test__append_expectation():
-    # Note _append_expectation is a misnomer. It should be append_or_update_expectation.
+    # Note: _append_expectation is a misnomer. It should be append_or_update_expectation.
+
+    # Note: some asserts within this test rely on strong assumptions about the ordering of expectation_suite._expectations
 
     asset = DataAsset()
     assert len(asset._expectation_suite.expectations) == 0
