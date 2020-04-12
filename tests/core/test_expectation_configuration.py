@@ -97,3 +97,39 @@ def test_expectation_configuration_equivalence(config1, config2, config3, config
     assert config1.isEquivalentTo(config3)  # different meta
     assert config1.isEquivalentTo(config4)  # different result format
     assert not config1.isEquivalentTo(config5)  # different value_set
+
+
+def test_update_kwargs(config1):
+
+    config1.update_kwargs(
+        {"column": "z"}
+    )
+    assert config1.kwargs == {
+        "column": "z",
+        "value_set": [1, 2, 3],
+        "result_format": "BASIC"
+    }
+
+    config1.update_kwargs(
+        {"column": "z"},
+        replace_all_kwargs=True
+    )
+    assert config1.kwargs == {
+        "column": "z",
+    }
+
+    # TODO: Implement this check once ExpectationConfiguration knows how to validate kwargs against expectation_types.
+    # ValueError: Specified kwargs aren't valid for expectation type expect_column_values_to_be_in_set.
+    # with pytest.raises(ValueError):
+    #     config1.update_kwargs(
+    #         new_kwargs={
+    #             "bogus_field": "BOGUS_VALUE",
+    #         },
+    #     )
+
+    #Note: this is degenerate behavior and wouldn't be possible with type checking.
+    config1.update_kwargs(
+        {},
+        replace_all_kwargs=True
+    )
+    assert config1.kwargs == {}

@@ -328,7 +328,7 @@ def test_update_expectation(baseline_suite):
     })
     assert len(baseline_suite.expectations) == 2
 
-    # TODO: Implement this check one ExpectationConfiguration knows how to validate kwargs against expectation_types.
+    # TODO: Implement this check once ExpectationConfiguration knows how to validate kwargs against expectation_types.
     # ValueError: Specified kwargs aren't valid for expectation type expect_column_values_to_be_in_set.
     # with pytest.raises(ValueError):
     #     baseline_suite.update_expectation(
