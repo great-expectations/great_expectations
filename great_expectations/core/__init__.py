@@ -840,10 +840,21 @@ class ExpectationSuite(object):
             expectation_kwargs,
         )
 
-        if len(match_indexes) == 0:
+        return self.remove_expectations_by_index(
+            match_indexes,
+            remove_multiple_matches=remove_multiple_matches,
+            dry_run=dry_run,
+        )
+
+    def remove_expectations_by_index(self,
+        index_list,
+        remove_multiple_matches=False,
+        dry_run=False
+    ):
+        if len(index_list) == 0:
             raise ValueError('No matching expectation found.')
 
-        elif len(match_indexes) > 1:
+        elif len(index_list) > 1:
             if not remove_multiple_matches:
                 raise ValueError(
                     'Multiple expectations matched arguments. No expectations removed.')
@@ -851,24 +862,24 @@ class ExpectationSuite(object):
 
                 if not dry_run:
                     self.expectations = [i for j, i in enumerate(
-                        self.expectations) if j not in match_indexes]
+                        self.expectations) if j not in index_list]
                 else:
-                    return self._copy_and_clean_up_expectations_from_indexes(match_indexes)
+                    return self._copy_and_clean_up_expectations_from_indexes(index_list)
 
         else:  # Exactly one match
             expectation = self._copy_and_clean_up_expectation(
-                self.expectations[match_indexes[0]]
+                self.expectations[index_list[0]]
             )
 
             if not dry_run:
-                del self.expectations[match_indexes[0]]
+                del self.expectations[index_list[0]]
 
             else:
                 if remove_multiple_matches:
                     return [expectation]
                 else:
                     return expectation
-    
+
     def update_expectation(self,
         new_kwargs,
         expectation_type=None,
