@@ -369,59 +369,41 @@ class DataAsset(object):
 
         #Logic for column_*_expectations
         if 'column' in expectation_config.kwargs:
-            column = expectation_config.kwargs['column']
-
-            try:
-                self._expectation_suite.remove_expectation(
-                    expectation_type=expectation_type,
-                    column=column,
-                    remove_multiple_matches=True,
-                )
-            except ValueError:
-                #In this case, it's okay if we don't match any existing expectations
-                pass
+            matched_indexes = self._expectation_suite.find_expectation_indexes(
+                expectation_type=expectation_type,
+                column=expectation_config.kwargs['column'],
+            )
 
         #Logic for column_pair_*_expectations
         elif 'column_A' in expectation_config.kwargs and 'column_B' in expectation_config.kwargs:
-
-            try:
-                self._expectation_suite.remove_expectation(
-                    expectation_type=expectation_type,
-                    expectation_kwargs={
-                        "column_A" : expectation_config.kwargs["column_A"],
-                        "column_B" : expectation_config.kwargs["column_B"],
-                    },
-                    remove_multiple_matches=True,
-                )
-            except ValueError:
-                #In this case, it's okay if we don't match any existing expectations
-                pass
+            matched_indexes = self._expectation_suite.find_expectation_indexes(
+                expectation_type=expectation_type,
+                expectation_kwargs={
+                    "column_A" : expectation_config.kwargs["column_A"],
+                    "column_B" : expectation_config.kwargs["column_B"],
+                },
+            )
 
         #Logic for multicolumn_expectations
         elif 'column_list' in expectation_config.kwargs:
-
-            try:
-                self._expectation_suite.remove_expectation(
-                    expectation_type=expectation_type,
-                    expectation_kwargs={
-                        "column_list" : expectation_config.kwargs["column_list"],
-                    },
-                    remove_multiple_matches=True,
-                )
-            except ValueError:
-                #In this case, it's okay if we don't match any existing expectations
-                pass
+            matched_indexes = self._expectation_suite.find_expectation_indexes(
+                expectation_type=expectation_type,
+                expectation_kwargs={
+                    "column_list" : expectation_config.kwargs["column_list"],
+                },
+            )
 
         #Logic for all remaining expectations
         else:
-            try:
-                self._expectation_suite.remove_expectation(
-                    expectation_type=expectation_type,
-                    remove_multiple_matches=True,
-                )
-            except ValueError:
-                #In this case, it's okay if we don't match any existing expectations
-                pass
+            matched_indexes = self._expectation_suite.find_expectation_indexes(
+                expectation_type=expectation_type,
+            )
+
+        if len(matched_indexes) > 0:
+            self._expectation_suite.remove_expectations_by_index(
+                matched_indexes,
+                remove_multiple_matches=True,
+            )
 
         self._expectation_suite.append_expectation(expectation_config)
 
