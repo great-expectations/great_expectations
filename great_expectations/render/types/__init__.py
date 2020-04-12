@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from great_expectations.render.exceptions import InvalidRenderedContentError
 
 
@@ -12,16 +14,32 @@ class RenderedContent(object):
         return self.to_json_dict() == other.to_json_dict()
 
     @classmethod
-    def rendered_content_list_to_json(cls, list_):
+    def rendered_content_list_to_json(cls, list_, check_dicts=False):
         result_list = []
         for item in list_:
             if isinstance(item, RenderedContent):
                 result_list.append(item.to_json_dict())
             elif isinstance(item, list):
-                result_list.append(RenderedContent.rendered_content_list_to_json(item))
+                result_list.append(RenderedContent.rendered_content_list_to_json(item, check_dicts=check_dicts))
+            elif check_dicts and isinstance(item, dict):
+                result_list.append(cls.rendered_content_dict_to_json(item))
             else:
                 result_list.append(item)
         return result_list
+
+    @classmethod
+    def rendered_content_dict_to_json(cls, dict_, check_list_dicts=True):
+        json_dict = deepcopy(dict_)
+        for key, val in json_dict.items():
+            if not isinstance(val, (RenderedContent, list, dict)):
+                continue
+            elif isinstance(val, RenderedContent):
+                json_dict[key] = val.to_json_dict()
+            elif isinstance(val, list):
+                json_dict[key] = cls.rendered_content_list_to_json(val, check_list_dicts)
+            elif isinstance(val, dict):
+                json_dict[key] = cls.rendered_content_dict_to_json(val, check_list_dicts)
+        return json_dict
 
 
 class RenderedComponentContent(RenderedContent):
