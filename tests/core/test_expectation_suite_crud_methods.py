@@ -287,6 +287,8 @@ def test_update_expectation(baseline_suite):
             expectation_type="expect_column_values_to_be_in_set"
         )
 
+
+    # Verify that update_expectation returns a correct ExpectationConfiguration
     assert len(baseline_suite.expectations) == 2
     assert baseline_suite.update_expectation(
         new_kwargs={
@@ -298,10 +300,17 @@ def test_update_expectation(baseline_suite):
         "kwargs": {
             "column": "c",
             "value_set": [1, 2, 3],
+            "result_format": "BASIC",
         },
         "meta": {"notes": "This is an expectation."}
     })
     assert len(baseline_suite.expectations) == 2
+
+    # Verify that the Expectation was indeed changed in place.
+    assert baseline_suite.find_expectation_indexes(
+        expectation_type="expect_column_values_to_be_in_set",
+        column="c"
+    ) == [0]
 
     assert baseline_suite.update_expectation(
         new_kwargs={
@@ -313,6 +322,7 @@ def test_update_expectation(baseline_suite):
         "kwargs": {
             "column": "b",
             "value_set": [1, 2, 3],
+            "result_format": "BASIC",
         },
         "meta": {"notes": "This is an expectation."}
     })

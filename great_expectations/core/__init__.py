@@ -894,20 +894,20 @@ class ExpectationSuite(object):
             expectation_type of an Expectation.
         """
 
-        matched_expectations = self.find_expectations(
+        matched_expectation_indexes = self.find_expectation_indexes(
             expectation_type=expectation_type,
             column=column,
             expectation_kwargs=expectation_kwargs
         )
 
         #Ensure that exactly one Expectation matches.
-        if len(matched_expectations) == 0:
+        if len(matched_expectation_indexes) == 0:
             raise ValueError("No matching Expectation found.")
 
-        elif len(matched_expectations) > 1:
+        elif len(matched_expectation_indexes) > 1:
             raise ValueError("Multiple Expectations matched arguments. No Expectations updated.")
 
-        matched_expectation = matched_expectations[0]
+        matched_expectation = self.expectations[matched_expectation_indexes[0]]
 
         matched_expectation.update_kwargs(
             new_kwargs,
