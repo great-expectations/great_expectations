@@ -19,6 +19,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as exceptions
 
+from faker import Faker
+fake = Faker()
+
 logger = logging.getLogger(__name__)
 
 
@@ -464,7 +467,11 @@ class DefaultSiteIndexBuilder(object):
                                               section_name,
                                               batch_identifier=None,
                                               run_id=None,
-                                              validation_success=None
+                                              validation_success=None,
+                                              run_time=None,
+                                              run_name=None,
+                                              asset_name=None,
+                                              batch_kwargs=None
                                               ):
         import os
 
@@ -481,13 +488,21 @@ class DefaultSiteIndexBuilder(object):
             filepath = os.path.join("expectations", *expectation_suite_name.split("."))
             filepath += ".html"
 
+        expectation_suite_filepath = os.path.join("expectations", *expectation_suite_name.split("."))
+        expectation_suite_filepath += ".html"
+
         index_links_dict[section_name + "_links"].append(
             {
                 "expectation_suite_name": expectation_suite_name,
                 "filepath": filepath,
                 "run_id": run_id,
                 "batch_identifier": batch_identifier,
-                "validation_success": validation_success
+                "validation_success": validation_success,
+                "run_time": run_time,
+                "run_name": run_name,
+                "asset_name": asset_name,
+                "batch_kwargs": batch_kwargs,
+                "expectation_suite_filepath": expectation_suite_filepath if run_id else None
             }
         )
 
@@ -616,7 +631,7 @@ class DefaultSiteIndexBuilder(object):
                     run_id=profiling_result_key.run_id
                 )
 
-                validation_success = validation.success
+                batch_kwargs = validation.meta.get("batch_kwargs", {})
 
                 self.add_resource_info_to_index_links_dict(
                     index_links_dict=index_links_dict,
@@ -624,7 +639,9 @@ class DefaultSiteIndexBuilder(object):
                     section_name="profiling",
                     batch_identifier=profiling_result_key.batch_identifier,
                     run_id=profiling_result_key.run_id,
-                    validation_success=validation_success
+                    run_time=str(fake.date_time()),
+                    asset_name=fake.file_name(),
+                    batch_kwargs=batch_kwargs
                 )
             except Exception as e:
                 error_msg = "Profiling result not found: {0:s} - skipping".format(str(profiling_result_key.to_tuple()))
@@ -639,6 +656,7 @@ class DefaultSiteIndexBuilder(object):
                 )
 
                 validation_success = validation.success
+                batch_kwargs = validation.meta.get("batch_kwargs", {})
 
                 self.add_resource_info_to_index_links_dict(
                     index_links_dict=index_links_dict,
@@ -646,7 +664,11 @@ class DefaultSiteIndexBuilder(object):
                     section_name="validations",
                     batch_identifier=validation_result_key.batch_identifier,
                     run_id=validation_result_key.run_id,
-                    validation_success=validation_success
+                    validation_success=validation_success,
+                    run_time=str(fake.date_time()),
+                    run_name=fake.bs(),
+                    asset_name=fake.file_name(),
+                    batch_kwargs=batch_kwargs
                 )
             except Exception as e:
                 error_msg = "Validation result not found: {0:s} - skipping".format(str(validation_result_key.to_tuple()))
