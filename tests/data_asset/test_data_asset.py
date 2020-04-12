@@ -171,3 +171,99 @@ def test__append_expectation():
     )
     assert len(asset._expectation_suite.expectations) == 4
     assert asset._expectation_suite.expectations[3].kwargs["max_value"] == 80
+
+    #Behavior for append_expectation is a true append. It never overwrites.
+    asset.append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_be_between",
+            kwargs={
+                "min_value": 20,
+                "max_value": 80,
+            },
+        )
+    )
+    asset.append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_be_between",
+            kwargs={
+                "min_value": 20,
+                "max_value": 80,
+            },
+        )
+    )
+    asset.append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_be_between",
+            kwargs={
+                "min_value": 20,
+                "max_value": 80,
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 7
+
+    # We should have 4 copies of this puppy
+    assert len(asset._expectation_suite.find_expectations(
+        expectation_type="expect_table_row_count_to_be_between"
+    ))==4
+
+    #...and if we now _append a matching one, they should all be deleted except the new one
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_be_between",
+            kwargs={
+                "min_value": 30,
+                "max_value": 70,
+            },
+        )
+    )
+    assert len(asset._expectation_suite.find_expectations(
+        expectation_type="expect_table_row_count_to_be_between"
+    ))==1
+    assert len(asset._expectation_suite.expectations) == 4
+    assert asset._expectation_suite.expectations[3].kwargs["max_value"] == 70
+
+    #Note: This behavior is questionable. You could imagine circumstances where
+    # appending a fifth expectation, or updating all four in place would be better.
+    # For now, that's how it works.
+
+    # appending (not _appending) a couple more expectations with column names also adds duplicates...
+    asset.append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_not_be_null",
+            kwargs={
+                "column": "b",
+                "mostly": .9
+            },
+        )
+    )
+    asset.append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_not_be_null",
+            kwargs={
+                "column": "b",
+                "mostly": .9
+            },
+        )
+    )
+    assert len(asset._expectation_suite.expectations) == 6
+
+    # We should have 3 copies of this puppy
+    assert len(asset._expectation_suite.find_expectations(
+        expectation_type="expect_column_values_to_not_be_null"
+    ))==3
+
+    asset._append_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_not_be_null",
+            kwargs={
+                "column": "b",
+                "mostly": .8
+            },
+        )
+    )
+    assert len(asset._expectation_suite.find_expectations(
+        expectation_type="expect_column_values_to_not_be_null"
+    ))==1
+    assert len(asset._expectation_suite.expectations) == 4
+    assert asset._expectation_suite.expectations[3].kwargs["mostly"] == .8
