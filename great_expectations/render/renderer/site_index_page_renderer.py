@@ -37,7 +37,6 @@ class SiteIndexPageRenderer(Renderer):
             "row-attributes": "rowAttributesLinks",
             "sort-name": "expectation_suite_name",
             "sort-order": "asc",
-            "height": 550,
             "pagination": True
         }
         table_columns = [
@@ -78,7 +77,6 @@ class SiteIndexPageRenderer(Renderer):
             "row-attributes": "rowAttributesLinks",
             "sort-name": "run_time",
             "sort-order": "desc",
-            "height": 550,
             "pagination": True
         }
         table_columns = [
@@ -143,7 +141,6 @@ class SiteIndexPageRenderer(Renderer):
             "row-attributes": "rowAttributesLinks",
             "sort-name": "run_time",
             "sort-order": "desc",
-            "height": 550,
             "pagination": True,
         }
         table_columns = [
@@ -227,6 +224,9 @@ class SiteIndexPageRenderer(Renderer):
                 },
                 "tag": "a",
                 "styling": {
+                    "styles": {
+                      "word-break": "break-all"
+                    },
                     "attributes": {
                         "href": expectation_suite_path
                     },
@@ -246,6 +246,9 @@ class SiteIndexPageRenderer(Renderer):
                     "placement": "top"
                 },
                 "styling": {
+                    "styles": {
+                        "word-break": "break-all"
+                    },
                     "classes": ["m-0", "p-0"]
                 }
             }
