@@ -9,6 +9,7 @@ import great_expectations as ge
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
+from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.basic_suite_builder_profiler import (
     BasicSuiteBuilderProfiler,
 )
@@ -263,6 +264,36 @@ def test__create_expectations_for_datetime_column(datetime_dataset):
     }
 
 
+def test_BasicSuiteBuilderProfiler_raises_error_on_both_included_and_excluded_columns(
+    pandas_dataset,
+):
+    with pytest.raises(ProfilerError):
+        BasicSuiteBuilderProfiler.profile(
+            pandas_dataset,
+            profiler_configuration={
+                "included_expectations": ["foo"],
+                "excluded_expectations": ["foo"],
+            },
+        )
+
+
+@pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+def test_BasicSuiteBuilderProfiler_raises_error_on_non_existent_column_on_pandas(
+    pandas_dataset,
+):
+    with pytest.raises(ProfilerError):
+        BasicSuiteBuilderProfiler().profile(
+            pandas_dataset,
+            profiler_configuration={
+                "columns": ["NON_EXISTANT_COLUMN"],
+                "included_expectations": [
+                    "expect_table_column_count_to_equal",
+                    "expect_column_values_to_not_be_null",
+                ],
+            },
+        )
+
+
 def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
     context = filesystem_csv_data_context
 
@@ -449,7 +480,7 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
 
 
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
-def test_SampleExpectationsDatasetProfiler_uses_all_columns_if_no_configuration_on_pandas(
+def test_BasicSuiteBuilderProfiler_uses_all_columns_if_no_configuration_on_pandas(
     pandas_dataset,
 ):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(pandas_dataset)
@@ -660,9 +691,7 @@ def test_SampleExpectationsDatasetProfiler_uses_all_columns_if_no_configuration_
 
 
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
-def test_SampleExpectationsDatasetProfiler_uses_selected_columns_on_pandas(
-    pandas_dataset,
-):
+def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(pandas_dataset,):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset, profiler_configuration={"columns": ["naturals"]}
     )
@@ -759,7 +788,9 @@ def test_SampleExpectationsDatasetProfiler_uses_selected_columns_on_pandas(
 
 
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
-def test_SampleExpectationsDatasetProfiler_respects_blacklist_on_pandas(pandas_dataset):
+def test_BasicSuiteBuilderProfiler_respects_excluded_expectations_on_pandas(
+    pandas_dataset,
+):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -820,9 +851,124 @@ def test_SampleExpectationsDatasetProfiler_respects_blacklist_on_pandas(pandas_d
     assert observed_suite == expected
 
 
-def test_snapshot_SuiteBuilderProfiler_on_titanic_with_builder_configuration():
+@pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
+    pandas_dataset,
+):
+    observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
+        pandas_dataset,
+        profiler_configuration={
+            "columns": ["naturals", "nulls"],
+            "included_expectations": [
+                "expect_table_column_count_to_equal",
+                "expect_column_values_to_not_be_null",
+            ],
+        },
+    )
+    assert isinstance(observed_suite, ExpectationSuite)
+
+    expected = ExpectationSuite(
+        "default",
+        data_asset_type="Dataset",
+        expectations=[
+            {
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+                "kwargs": {"value": 3},
+                "expectation_type": "expect_table_column_count_to_equal",
+            },
+            {
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+                "kwargs": {"column": "naturals"},
+                "expectation_type": "expect_column_values_to_not_be_null",
+            },
+            {
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+                "kwargs": {"column": "nulls", "mostly": 0.4714285714285715},
+                "expectation_type": "expect_column_values_to_not_be_null",
+            },
+        ],
+    )
+
+    # remove metadata to simplify assertions
+    observed_suite.meta = None
+    expected.meta = None
+    assert observed_suite == expected
+
+
+@pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+def test_BasicSuiteBuilderProfiler_uses_no_columns_if_none_are_selected_on_pandas(
+    pandas_dataset,
+):
+    observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
+        pandas_dataset,
+        profiler_configuration={
+            "columns": [],
+            "included_expectations": [
+                "expect_table_column_count_to_equal",
+                "expect_column_values_to_not_be_null",
+            ],
+        },
+    )
+    assert isinstance(observed_suite, ExpectationSuite)
+
+    expected = ExpectationSuite(
+        "default",
+        data_asset_type="Dataset",
+        expectations=[
+            {
+                "expectation_type": "expect_table_column_count_to_equal",
+                "kwargs": {"value": 3},
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+        ],
+    )
+
+    # remove metadata to simplify assertions
+    observed_suite.meta = None
+    expected.meta = None
+    print(observed_suite)
+    assert observed_suite == expected
+
+
+@pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+def test_BasicSuiteBuilderProfiler_raises_error_on_not_real_expectations_in_included_expectations_on_pandas(
+    pandas_dataset,
+):
+    with pytest.raises(ProfilerError):
+        BasicSuiteBuilderProfiler().profile(
+            pandas_dataset,
+            profiler_configuration={
+                "columns": ["naturals"],
+                "included_expectations": [
+                    "expect_table_column_count_to_equal",
+                    "expect_this_to_not_be_a_real_expectation",
+                    "foo",
+                ],
+            },
+        )
+
+
+@pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+def test_BasicSuiteBuilderProfiler_raises_error_on_not_real_expectations_in_excluded_expectations_on_pandas(
+    pandas_dataset,
+):
+    with pytest.raises(ProfilerError):
+        BasicSuiteBuilderProfiler().profile(
+            pandas_dataset,
+            profiler_configuration={
+                "columns": ["naturals"],
+                "included_expectations": [
+                    "expect_table_column_count_to_equal",
+                    "expect_this_to_not_be_a_real_expectation",
+                    "foo",
+                ],
+            },
+        )
+
+
+def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuration():
     """
-    A snapshot regression test for SuiteBuilderProfiler.
+    A snapshot regression test for BasicSuiteBuilderProfiler.
 
     We are running the profiler on the Titanic dataset and comparing the EVRs
     to ones retrieved from a previously stored file.
@@ -842,7 +988,8 @@ def test_snapshot_SuiteBuilderProfiler_on_titanic_with_builder_configuration():
     evrs = batch.validate(result_format="SUMMARY")
 
     expected_filepath = file_relative_path(
-        __file__, "./fixtures/expected_evrs_SuiteBuilderProfiler_on_titanic_with_configurations.json"
+        __file__,
+        "./fixtures/expected_evrs_SuiteBuilderProfiler_on_titanic_with_configurations.json",
     )
     # THIS IS NOT DEAD CODE. UNCOMMENT TO SAVE A SNAPSHOT WHEN UPDATING THIS TEST
     # with open(expected_filepath, 'w+') as file:

@@ -87,6 +87,10 @@ class DataAsset(object):
         if data_context and hasattr(data_context, '_expectation_explorer_manager'):
             self.set_default_expectation_argument("include_config", True)
 
+    def list_available_expectation_types(self):
+        keys = dir(self)
+        return [expectation for expectation in keys if expectation.startswith("expect_")]
+
     def autoinspect(self, profiler):
         """Deprecated: use profile instead.
 
@@ -996,18 +1000,6 @@ class DataAsset(object):
         self._expectation_suite.add_citation(comment, batch_kwargs=batch_kwargs, batch_markers=batch_markers,
                                              batch_parameters=batch_parameters,
                                              citation_date=citation_date)
-
-    # PENDING DELETION: 20200130 - JPC - Ready for deletion upon release of 0.9.0 with no data_asset_name
-    #
-    # @property
-    # def data_asset_name(self):
-    #     """Gets the current name of this data_asset as stored in the expectations configuration."""
-    #     return self._expectation_suite.data_asset_name
-    #
-    # @data_asset_name.setter
-    # def data_asset_name(self, data_asset_name):
-    #     """Sets the name of this data_asset as stored in the expectations configuration."""
-    #     self._expectation_suite.data_asset_name = data_asset_name
 
     @property
     def expectation_suite_name(self):

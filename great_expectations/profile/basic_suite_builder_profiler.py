@@ -4,6 +4,7 @@ import numpy as np
 from dateutil.parser import parse
 
 from great_expectations.dataset.util import build_categorical_partition_object
+from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.base import (
     ProfilerCardinality,
     ProfilerDataType,
@@ -35,7 +36,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     Configuration is a dictionary with a `columns` key containing a list of the
     column names you want coarse expectations created for. This dictionary can
     also contain a `excluded_expectations` key with a list of expectation
-    names you do not want created.
+    names you do not want created or a `included_expectations` key with a list
+    of expectation names you want created (if applicable).
 
     For example, if you had a wide patients table and you want expectations on
     three columns, you'd do this:
@@ -56,6 +58,20 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 "expect_column_mean_to_be_between",
                 "expect_column_median_to_be_between",
                 "expect_column_quantile_values_to_be_between",
+            ],
+        }
+    )
+
+    For example, if you had a wide patients table and you want only two types of
+    expectations on all applicable columns you'd do this:
+
+    suite = BasicSuiteBuilderProfiler().profile(
+        dataset,
+        {
+            "included_expectations":
+            [
+                "expect_column_to_not_be_null",
+                "expect_column_values_to_be_in_set",
             ],
         }
     )
@@ -362,26 +378,41 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
     @classmethod
     def _profile(cls, dataset, configuration=None):
+        logger.debug(f"Running profiler with configuration: {configuration}")
         if configuration == "demo":
             return cls._demo_profile(dataset)
+
+        column_cache = {}
+        selected_columns = None
+        excluded_expectations = None
+        included_expectations = None
+
+        if configuration:
+            selected_columns = configuration.get("columns", None)
+            excluded_expectations = configuration.get("excluded_expectations", None)
+            included_expectations = configuration.get("included_expectations", None)
+            if excluded_expectations and included_expectations:
+                raise ProfilerError(
+                    "Please specify either `excluded_expectations` or `included_expectations`."
+                )
+        if excluded_expectations:
+            _check_that_expectations_are_available(dataset, excluded_expectations)
+        if included_expectations:
+            _check_that_expectations_are_available(dataset, included_expectations)
 
         dataset.set_default_expectation_argument("catch_exceptions", False)
         dataset = cls._build_table_row_count_expectation(dataset, tolerance=0.1)
         dataset.set_config_value("interactive_evaluation", True)
         dataset = cls._build_table_column_expectations(dataset)
 
-        column_cache = {}
-        columns_to_create_expectations_for = None
-        excluded_expectations = None
+        existing_columns = dataset.get_table_columns()
 
-        if configuration:
-            columns_to_create_expectations_for = configuration.get("columns", None)
-            excluded_expectations = configuration.get("excluded_expectations", None)
+        if selected_columns:
+            for column in selected_columns:
+                if column not in existing_columns:
+                    raise ProfilerError(f"Column {column} does not exist.")
 
-        if not columns_to_create_expectations_for:
-            columns_to_create_expectations_for = dataset.get_table_columns()
-
-        for column in columns_to_create_expectations_for:
+        for column in selected_columns:
             cardinality = cls._get_column_cardinality_with_caching(
                 dataset, column, column_cache
             )
@@ -422,6 +453,20 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         if excluded_expectations:
             dataset = _remove_table_expectations(dataset, excluded_expectations)
             dataset = _remove_column_expectations(dataset, excluded_expectations)
+        elif included_expectations:
+            for expectation in dataset.get_expectation_suite().expectations:
+                if expectation.expectation_type not in included_expectations:
+                    try:
+                        dataset.remove_expectation(
+                            expectation_type=expectation.expectation_type,
+                            expectation_kwargs=expectation.kwargs,
+                            column=expectation.kwargs.get("column", None),
+                            remove_multiple_matches=True,
+                        )
+                    except ValueError:
+                        logger.debug(
+                            f"Attempted to remove {expectation}, which was not found."
+                        )
 
         expectation_suite = cls._build_column_description_metadata(dataset)
 
@@ -519,6 +564,12 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             expectation_suite.meta["columns"] = meta_columns
 
         return expectation_suite
+
+
+def _check_that_expectations_are_available(dataset, excluded_expectations):
+    for expectation in excluded_expectations:
+        if expectation not in dataset.list_available_expectation_types():
+            raise ProfilerError(f"Expectation {expectation} is not available.")
 
 
 def _is_nan(value):
