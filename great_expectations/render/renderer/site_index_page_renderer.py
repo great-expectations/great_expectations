@@ -38,7 +38,7 @@ class SiteIndexPageRenderer(Renderer):
             "sort-name": "expectation_suite_name",
             "sort-order": "asc",
             "height": 550,
-            "virtual-scroll": True
+            "pagination": True
         }
         table_columns = [
             {
@@ -79,7 +79,7 @@ class SiteIndexPageRenderer(Renderer):
             "sort-name": "run_time",
             "sort-order": "desc",
             "height": 550,
-            "virtual-scroll": True
+            "pagination": True
         }
         table_columns = [
             {
@@ -144,7 +144,7 @@ class SiteIndexPageRenderer(Renderer):
             "sort-name": "run_time",
             "sort-order": "desc",
             "height": 550,
-            "virtual-scroll": True
+            "pagination": True,
         }
         table_columns = [
             {
