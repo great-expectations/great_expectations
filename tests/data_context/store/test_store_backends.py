@@ -171,7 +171,8 @@ def test_TupleS3StoreBackend():
     We will exercise the store backend's set method twice and then verify
     that the we calling get and list methods will return the expected keys.
 
-    We will also check that the objects are stored on S3 at the expected location.
+    We will also check that the objects are stored on S3 at the expected location,
+    and that the correct S3 URL for the object can be retrieved.
 
     """
     bucket = "leakybucket"
@@ -206,6 +207,8 @@ def test_TupleS3StoreBackend():
         [s3_object_info['Key'] for s3_object_info in
          boto3.client('s3').list_objects(Bucket=bucket, Prefix=prefix)['Contents']]) == {
         'this_is_a_test_prefix/my_file_AAA', 'this_is_a_test_prefix/my_file_BBB'}
+    
+    assert my_store.get_url_for_key(('AAA',)) == 'https://s3.amazonaws.com/%s/%s/my_file_AAA' % (bucket, prefix)
 
 
 def test_TupleGCSStoreBackend():
