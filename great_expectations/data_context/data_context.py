@@ -895,6 +895,9 @@ class BaseDataContext(object):
         self._evaluation_parameter_dependencies = {}
         for key in self.stores[self.expectations_store_name].list_keys():
             expectation_suite = self.stores[self.expectations_store_name].get(key)
+            if not expectation_suite:
+                continue
+
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
             if len(dependencies) > 0:
                 nested_update(self._evaluation_parameter_dependencies, dependencies)
