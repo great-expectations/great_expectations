@@ -1,5 +1,6 @@
 import copy
 import datetime
+import os
 import signal
 import subprocess
 import time
@@ -121,7 +122,6 @@ def logstream(valid_usage_statistics_message):
     attempts = 0
     while attempts < 3:
         attempts += 1
-        time.sleep(2)
         logStreams = client.describe_log_streams(
             logGroupName=logGroupName,
             orderBy='LastEventTime',
@@ -134,9 +134,10 @@ def logstream(valid_usage_statistics_message):
             if (lastEvent - datetime.datetime.now()) < datetime.timedelta(seconds=30):
                 logStreamName = logStreams["logStreams"][0]["logStreamName"]
                 break
+        time.sleep(2)
     if logStreamName is None:
         assert False, "Unable to warm up a log stream for integration testing."
-    return logStreamName
+    yield logStreamName
 
 
 def test_send_malformed_data(valid_usage_statistics_message):
@@ -161,9 +162,12 @@ def test_usage_statistics_transmission(logstream):
     assert len(pre_events) < 100, "This test assumed small logstream sizes in the qa stream. Consider changing " \
                                   "fetch limit."
 
+    usage_stats_url_env = dict(**os.environ)
+    usage_stats_url_env["GE_USAGE_STATISTICS_URL"] = USAGE_STATISTICS_QA_URL
     p = subprocess.Popen(
         ["python", file_relative_path(__file__, "./instantiate_context_with_usage_statistics.py"), "0"],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        env=usage_stats_url_env
     )
     outs, errs = p.communicate()
     outs = str(outs)
@@ -174,13 +178,13 @@ def test_usage_statistics_transmission(logstream):
     assert "KeyboardInterrupt" not in errs
 
     # Wait a bit for the log events to post
-    time.sleep(5)
+    time.sleep(10)
     post_events = client.get_log_events(
         logGroupName=logGroupName,
         logStreamName=logStreamName,
         limit=100,
     )
-    assert len(pre_events["events"]) + 2 == len(post_events["events"])
+    assert len(pre_events["events"]) + 4 == len(post_events["events"])
 
 
 def test_send_completes_on_kill(logstream):
@@ -197,11 +201,14 @@ def test_send_completes_on_kill(logstream):
     acceptable_shutdown_time = 1
     nap_time = 30
     start = datetime.datetime.now()
+    usage_stats_url_env = dict(**os.environ)
+    usage_stats_url_env["GE_USAGE_STATISTICS_URL"] = USAGE_STATISTICS_QA_URL
     # Instruct the process to wait for 30 seconds after initializing before completing.
     p = subprocess.Popen(
         ["python", file_relative_path(__file__, "./instantiate_context_with_usage_statistics.py"),
          str(nap_time), "False", "True"],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        env=usage_stats_url_env
     )
 
     time.sleep(acceptable_startup_time)
@@ -223,13 +230,13 @@ def test_send_completes_on_kill(logstream):
     assert "Done constructing a DataContext" in outs
     assert "Ending a long nap" not in outs
     assert "KeyboardInterrupt" in errs
-    time.sleep(5)
+    time.sleep(10)
     post_events = client.get_log_events(
         logGroupName=logGroupName,
         logStreamName=logStreamName,
         limit=100,
     )
-    assert len(pre_events["events"]) + 2 == len(post_events["events"])
+    assert len(pre_events["events"]) + 4 == len(post_events["events"])
 
 
 def test_graceful_failure_with_no_internet():
