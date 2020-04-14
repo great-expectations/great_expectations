@@ -321,7 +321,7 @@ def test_configuration_driven_site_builder_without_how_to_buttons(site_builder_d
     # the profiling and the validation sections.
     batch_kwargs = context.build_batch_kwargs(
         datasource=datasource_name,
-        generator=generator_name,
+        batch_kwargs_generator=generator_name,
         name=data_asset_name
     )
 

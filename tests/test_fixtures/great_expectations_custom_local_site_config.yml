@@ -5,6 +5,8 @@ datasources:
   # For example, this one.
   mydatasource:
     class_name: PandasDatasource
+    data_asset_type:
+      class_name: PandasDataset
     batch_kwargs_generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
