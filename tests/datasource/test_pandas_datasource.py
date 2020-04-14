@@ -297,7 +297,7 @@ def test_process_batch_parameters():
 
 
 def test_pandas_datasource_processes_dataset_options(test_folder_connection_path):
-    datasource = PandasDatasource('PandasCSV', generators={
+    datasource = PandasDatasource('PandasCSV', batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": test_folder_connection_path

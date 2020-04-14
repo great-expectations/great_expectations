@@ -55,7 +55,7 @@ def assert_how_to_buttons(context, index_page_locator_info: str, index_links_dic
     )
 
     page_paths_dict = {
-        "index_pages": [index_page_locator_info],
+        "index_pages": [index_page_locator_info[7:]],
         "expectation_suites": [
             os.path.join(data_docs_site_dir, link_dict["filepath"])
             for link_dict in index_links_dict.get("expectations_links", [])

@@ -103,7 +103,7 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory):
                                 )
     data_context_config = data_context.get_config()
 
-    assert name in data_context_config["datasources"] 
+    assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["class_name"] == class_name
     assert data_context_config["datasources"][name]["batch_kwargs_generators"]["default"]["base_directory"] == str(base_dir)
 
@@ -125,7 +125,7 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory):
                                 )
     data_context_config = data_context.get_config()
 
-    assert name in data_context_config["datasources"] 
+    assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["class_name"] == class_name
     assert data_context_config["datasources"][name]["batch_kwargs_generators"]["default"]["reader_options"]["sep"] == "|"
 
@@ -288,7 +288,7 @@ def test_spark_config():
 
 def test_pandas_datasource_processes_dataset_options(test_folder_connection_path):
     pytest.importorskip("pyspark")
-    datasource = SparkDFDatasource('PandasCSV', generators={
+    datasource = SparkDFDatasource('PandasCSV', batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": test_folder_connection_path
