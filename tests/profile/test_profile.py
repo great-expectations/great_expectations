@@ -1,33 +1,15 @@
-import json
 import os
-from collections import OrderedDict
 
 import pytest
 
-import great_expectations as ge
-from great_expectations.data_context.util import file_relative_path
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import PandasDatasource
 from great_expectations.profile.base import DatasetProfiler
-from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
+from great_expectations.profile.basic_dataset_profiler import (
+    BasicDatasetProfiler,
+)
 from great_expectations.profile.columns_exist import ColumnsExistProfiler
-from tests.test_utils import expectationSuiteValidationResultSchema
-import great_expectations.exceptions as ge_exceptions
-
-@pytest.fixture()
-def not_empty_datacontext(empty_data_context, filesystem_csv_2):
-    empty_data_context.add_datasource(
-        "rad_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv_2),
-            }
-        },
-    )
-    return empty_data_context
 
 
 def test_DataSetProfiler_methods():
@@ -264,8 +246,8 @@ def test_BasicDatasetProfiler_numeric_high_cardinality(numeric_high_card_dataset
     )
 
 
-def test_BasicDatasetProfiler_with_context(not_empty_datacontext):
-    context = not_empty_datacontext
+def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
+    context = filesystem_csv_data_context
 
     context.create_expectation_suite("default")
     datasource = context.datasources["rad_datasource"]
@@ -301,12 +283,12 @@ def test_BasicDatasetProfiler_with_context(not_empty_datacontext):
     }
 
 
-def test_context_profiler(not_empty_datacontext):
+def test_context_profiler(filesystem_csv_data_context):
     """
     This just validates that it's possible to profile using the datasource hook,
     and have validation results available in the DataContext
     """
-    context = not_empty_datacontext
+    context = filesystem_csv_data_context
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
     assert context.list_expectation_suites() == []
@@ -326,12 +308,12 @@ def test_context_profiler(not_empty_datacontext):
     assert len(profiled_expectations.expectations) == 8
 
 
-def test_context_profiler_with_data_asset_name(not_empty_datacontext):
+def test_context_profiler_with_data_asset_name(filesystem_csv_data_context):
     """
     If a valid data asset name is passed to the profiling method
     in the data_assets argument, the profiling method profiles only this data asset
     """
-    context = not_empty_datacontext
+    context = filesystem_csv_data_context
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
     assert context.list_expectation_suites() == []
@@ -341,13 +323,14 @@ def test_context_profiler_with_data_asset_name(not_empty_datacontext):
     assert len(profiling_result['results']) == 1
     assert profiling_result['results'][0][0].expectation_suite_name == 'rad_datasource.subdir_reader.f1.BasicDatasetProfiler'
 
-def test_context_profiler_with_nonexisting_data_asset_name(not_empty_datacontext):
+def test_context_profiler_with_nonexisting_data_asset_name(
+        filesystem_csv_data_context):
     """
     If a non-existing data asset name is passed to the profiling method
     in the data_assets argument, the profiling method must return an error
     code in the result and the names of the unrecognized assets
     """
-    context = not_empty_datacontext
+    context = filesystem_csv_data_context
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
     assert context.list_expectation_suites() == []
@@ -360,12 +343,13 @@ def test_context_profiler_with_nonexisting_data_asset_name(not_empty_datacontext
                   'data_assets': [('f1', 'file')]}
     }
 
-def test_context_profiler_with_non_existing_generator(not_empty_datacontext):
+def test_context_profiler_with_non_existing_generator(
+        filesystem_csv_data_context):
     """
     If a non-existing generator name is passed to the profiling method
 in the generator_name argument, the profiling method must raise an exception.
     """
-    context = not_empty_datacontext
+    context = filesystem_csv_data_context
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
     assert context.list_expectation_suites() == []
@@ -373,12 +357,13 @@ in the generator_name argument, the profiling method must raise an exception.
         profiling_result = context.profile_datasource("rad_datasource", data_assets=["this_asset_doesnot_exist"], profiler=BasicDatasetProfiler, batch_kwargs_generator_name="this_gen_does_not_exist")
 
 
-def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple_generators(not_empty_datacontext, filesystem_csv_2):
+def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple_generators(
+        filesystem_csv_data_context, filesystem_csv_2):
     """
     If a no generator_name is passed to the profiling method and the datasource has more than one
     generators configured, the profiling method must return an error code in the result
     """
-    context = not_empty_datacontext
+    context = filesystem_csv_data_context
     context.add_batch_kwargs_generator("rad_datasource", "second_generator", "SubdirReaderBatchKwargsGenerator", **{
                 "base_directory": str(filesystem_csv_2),
             })
@@ -389,12 +374,13 @@ def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple
     assert profiling_result == {'success': False, 'error': {'code': 5}}
 
 
-def test_context_profiler_without_generator_name_arg_on_datasource_with_no_generators(not_empty_datacontext):
+def test_context_profiler_without_generator_name_arg_on_datasource_with_no_generators(
+        filesystem_csv_data_context):
     """
     If a no generator_name is passed to the profiling method and the datasource has no
     generators configured, the profiling method must return an error code in the result
     """
-    context = not_empty_datacontext
+    context = filesystem_csv_data_context
     context.add_datasource(
         "datasource_without_generators",
         module_name="great_expectations.datasource",
@@ -404,69 +390,3 @@ def test_context_profiler_without_generator_name_arg_on_datasource_with_no_gener
     profiling_result = context.profile_datasource("datasource_without_generators", profiler=BasicDatasetProfiler)
 
     assert profiling_result == {'success': False, 'error': {'code': 4}}
-
-
-def test_snapshot_BasicDatasetProfiler_on_titanic():
-    """
-    A snapshot regression test for BasicDatasetProfiler.
-    We are running the profiler on the Titanic dataset
-    and comparing the EVRs to ones retrieved from a
-    previously stored file.
-    """
-    df = ge.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
-    suite, evrs = df.profile(BasicDatasetProfiler)
-
-    # Check to make sure BasicDatasetProfiler is adding meta.columns with a single "description" field for each column
-    assert "columns" in suite.meta
-    for k, v in suite.meta["columns"].items():
-        assert v == {"description": ""}
-
-    # Note: the above already produces an EVR; rerunning isn't strictly necessary just for EVRs
-    evrs = df.validate(result_format="SUMMARY")
-    # remove
-
-    # THIS IS NOT DEAD CODE. UNCOMMENT TO SAVE A SNAPSHOT WHEN UPDATING THIS TEST
-    # with open(
-    #     file_relative_path(
-    #         __file__, '../test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json'
-    #     ), 'w+'
-    # ) as file:
-    #     json.dump(expectationSuiteValidationResultSchema.dump(evrs), file, indent=2)
-    #
-    # with open(
-    #     file_relative_path(
-    #         __file__, '../render/fixtures/BasicDatasetProfiler_evrs.json')
-    #     , 'w+'
-    # ) as file:
-    #     json.dump(expectationSuiteValidationResultSchema.dump(evrs), file, indent=2)
-
-    with open(
-        file_relative_path(
-            __file__, "../test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json"
-        ),
-        "r",
-    ) as file:
-        expected_evrs = expectationSuiteValidationResultSchema.load(
-            json.load(file)
-        )
-
-    # We know that python 2 does not guarantee the order of value_counts, which causes a different
-    # order for items in the partial_unexpected_value_counts list
-    # Remove those before assertions.
-    for result in evrs.results:
-        if "partial_unexpected_counts" in result.result:
-            result.result.pop("partial_unexpected_counts")
-
-    for result in expected_evrs.results:
-        if "partial_unexpected_counts" in result.result:
-            result.result.pop("partial_unexpected_counts")
-
-    # Version and RUN-ID will be different
-    del expected_evrs.meta["great_expectations.__version__"]
-    del evrs.meta["great_expectations.__version__"]
-    del expected_evrs.meta["run_id"]
-    del evrs.meta["run_id"]
-    del evrs.meta["batch_kwargs"]["ge_batch_id"]
-    del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
-
-    assert expected_evrs == evrs

@@ -5,7 +5,6 @@ try:
 except ModuleNotFoundError:
     OperationalError = RuntimeError
 
-from .base import DatasetProfiler
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +20,7 @@ class BasicDatasetProfilerBase(DatasetProfiler):
     FLOAT_TYPE_NAMES = {"FLOAT", "FLOAT4", "FLOAT8", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"}
     STRING_TYPE_NAMES = {"CHAR", "VARCHAR", "TEXT", "STRING", "StringType", "string", "str"}
     BOOLEAN_TYPE_NAMES = {"BOOLEAN", "BOOL", "bool", "BooleanType"}
-    DATETIME_TYPE_NAMES = {"DATETIME", "DATE", "TIME", "TIMESTAMP", "DateType", "TimestampType", "datetime64",
-                           "Timestamp"}
+    DATETIME_TYPE_NAMES = {"DATETIME", "DATE", "TIME", "TIMESTAMP", "DateType", "TimestampType", "datetime64", "Timestamp"}
 
     @classmethod
     def _get_column_type(cls, df, column):
@@ -31,25 +29,25 @@ class BasicDatasetProfilerBase(DatasetProfiler):
         df.set_config_value("interactive_evaluation", True)
         try:
             if df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.INT_TYPE_NAMES))).success:
-                type_ = "int"
+                type_ = ProfilerDataType.INT
 
             elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.FLOAT_TYPE_NAMES))).success:
-                type_ = "float"
+                type_ = ProfilerDataType.FLOAT
 
             elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.STRING_TYPE_NAMES))).success:
-                type_ = "string"
+                type_ = ProfilerDataType.STRING
 
             elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.BOOLEAN_TYPE_NAMES))).success:
-                type_ = "bool"
+                type_ = ProfilerDataType.BOOLEAN
 
             elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.DATETIME_TYPE_NAMES))).success:
-                type_ = "datetime"
+                type_ = ProfilerDataType.DATETIME
 
             else:
                 df.expect_column_values_to_be_in_type_list(column, type_list=None)
-                type_ = "unknown"
+                type_ = ProfilerDataType.UNKNOWN
         except NotImplementedError:
-            type_ = "unknown"
+            type_ = ProfilerDataType.UNKNOWN
 
         df.set_config_value('interactive_evaluation', False)
         return type_
@@ -68,34 +66,32 @@ class BasicDatasetProfilerBase(DatasetProfiler):
             logger.error("Failed to get cardinality of column {0:s} - continuing...".format(column))
 
         if num_unique is None or num_unique == 0 or pct_unique is None:
-            cardinality = "none"
+            cardinality = ProfilerCardinality.NONE
 
         elif pct_unique == 1.0:
-            cardinality = "unique"
+            cardinality = ProfilerCardinality.UNIQUE
 
         elif pct_unique > .1:
-            cardinality = "very many"
+            cardinality = ProfilerCardinality.VERY_MANY
 
         elif pct_unique > .02:
-            cardinality = "many"
+            cardinality = ProfilerCardinality.MANY
 
         else:
-            cardinality = "complicated"
             if num_unique == 1:
-                cardinality = "one"
+                cardinality = ProfilerCardinality.ONE
 
             elif num_unique == 2:
-                cardinality = "two"
+                cardinality = ProfilerCardinality.TWO
 
             elif num_unique < 60:
-                cardinality = "very few"
+                cardinality = ProfilerCardinality.VERY_FEW
 
             elif num_unique < 1000:
-                cardinality = "few"
+                cardinality = ProfilerCardinality.FEW
 
             else:
-                cardinality = "many"
-        # print('col: {0:s}, num_unique: {1:s}, pct_unique: {2:s}, card: {3:s}'.format(column, str(num_unique), str(pct_unique), cardinality))
+                cardinality = ProfilerCardinality.MANY
 
         df.set_config_value('interactive_evaluation', False)
 
@@ -113,7 +109,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
     """
 
     @classmethod
-    def _profile(cls, dataset):
+    def _profile(cls, dataset, configuration=None):
         df = dataset
 
         df.set_default_expectation_argument("catch_exceptions", True)
@@ -139,12 +135,12 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
             df.expect_column_values_to_not_be_null(column, mostly=0.5) # The renderer will show a warning for columns that do not meet this expectation
             df.expect_column_values_to_be_in_set(column, [], result_format="SUMMARY")
 
-            if type_ == "int":
-                if cardinality == "unique":
+            if type_ == ProfilerDataType.INT:
+                if cardinality == ProfilerCardinality.UNIQUE:
                     df.expect_column_values_to_be_unique(column)
-                elif cardinality in ["one", "two", "very few", "few"]:
+                elif cardinality in [ProfilerCardinality.ONE, ProfilerCardinality.TWO, ProfilerCardinality.VERY_FEW, ProfilerCardinality.FEW]:
                     df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
-                elif cardinality in ["many", "very many", "unique"]:
+                elif cardinality in [ProfilerCardinality.MANY, ProfilerCardinality.VERY_MANY, ProfilerCardinality.UNIQUE]:
                     df.expect_column_min_to_be_between(column, min_value=None, max_value=None)
                     df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
                     df.expect_column_mean_to_be_between(column, min_value=None, max_value=None)
@@ -160,14 +156,14 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                                                            threshold=None, result_format='COMPLETE')
                 else: # unknown cardinality - skip
                     pass
-            elif type_ == "float":
-                if cardinality == "unique":
+            elif type_ == ProfilerDataType.FLOAT:
+                if cardinality == ProfilerCardinality.UNIQUE:
                     df.expect_column_values_to_be_unique(column)
 
-                elif cardinality in ["one", "two", "very few", "few"]:
+                elif cardinality in [ProfilerCardinality.ONE, ProfilerCardinality.TWO, ProfilerCardinality.VERY_FEW, ProfilerCardinality.FEW]:
                     df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
 
-                elif cardinality in ["many", "very many", "unique"]:
+                elif cardinality in [ProfilerCardinality.MANY, ProfilerCardinality.VERY_MANY, ProfilerCardinality.UNIQUE]:
                     df.expect_column_min_to_be_between(column, min_value=None, max_value=None)
                     df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
                     df.expect_column_mean_to_be_between(column, min_value=None, max_value=None)
@@ -184,22 +180,21 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                 else:  # unknown cardinality - skip
                     pass
 
-            elif type_ == "string":
+            elif type_ == ProfilerDataType.STRING:
                 # Check for leading and trailing whitespace.
                 #!!! It would be nice to build additional Expectations here, but
                 #!!! the default logic for remove_expectations prevents us.
                 df.expect_column_values_to_not_match_regex(column, r"^\s+|\s+$")
 
-                if cardinality == "unique":
+                if cardinality == ProfilerCardinality.UNIQUE:
                     df.expect_column_values_to_be_unique(column)
 
-                elif cardinality in ["one", "two", "very few", "few"]:
+                elif cardinality in [ProfilerCardinality.ONE, ProfilerCardinality.TWO, ProfilerCardinality.VERY_FEW, ProfilerCardinality.FEW]:
                     df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
                 else:
-                    # print(column, type_, cardinality)
                     pass
 
-            elif type_ == "datetime":
+            elif type_ == ProfilerDataType.DATETIME:
                 df.expect_column_min_to_be_between(column, min_value=None, max_value=None)
 
                 df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
@@ -208,19 +203,16 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                 # df.expect_column_kl_divergence_to_be_less_than(column, partition_object=None,
                 #                                            threshold=None, result_format='COMPLETE')
 
-                if cardinality in ["one", "two", "very few", "few"]:
+                if cardinality in [ProfilerCardinality.ONE, ProfilerCardinality.TWO, ProfilerCardinality.VERY_FEW, ProfilerCardinality.FEW]:
                     df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
-
-
 
             else:
-                if cardinality == "unique":
+                if cardinality == ProfilerCardinality.UNIQUE:
                     df.expect_column_values_to_be_unique(column)
 
-                elif cardinality in ["one", "two", "very few", "few"]:
+                elif cardinality in [ProfilerCardinality.ONE, ProfilerCardinality.TWO, ProfilerCardinality.VERY_FEW, ProfilerCardinality.FEW]:
                     df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
                 else:
-                    # print(column, type_, cardinality)
                     pass
 
         df.set_config_value("interactive_evaluation", True)
