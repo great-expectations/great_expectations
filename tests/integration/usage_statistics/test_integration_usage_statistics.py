@@ -1,12 +1,12 @@
-import pytest
-
 import copy
+import datetime
+import signal
 import subprocess
 import time
-import signal
-import datetime
-import requests
+
 import boto3
+import pytest
+import requests
 
 from great_expectations.data_context.util import file_relative_path
 
@@ -136,7 +136,7 @@ def logstream(valid_usage_statistics_message):
                 break
     if logStreamName is None:
         assert False, "Unable to warm up a log stream for integration testing."
-    return client, logStreamName
+    return logStreamName
 
 
 def test_send_malformed_data(valid_usage_statistics_message):
@@ -151,7 +151,8 @@ def test_send_malformed_data(valid_usage_statistics_message):
 
 
 def test_usage_statistics_transmission(logstream):
-    client, logStreamName = logstream
+    logStreamName = logstream
+    client = boto3.client('logs', region_name='us-east-1')
     pre_events = client.get_log_events(
         logGroupName=logGroupName,
         logStreamName=logStreamName,
@@ -183,7 +184,8 @@ def test_usage_statistics_transmission(logstream):
 
 
 def test_send_completes_on_kill(logstream):
-    client, logStreamName = logstream
+    logStreamName = logstream
+    client = boto3.client('logs', region_name='us-east-1')
     pre_events = client.get_log_events(
         logGroupName=logGroupName,
         logStreamName=logStreamName,
