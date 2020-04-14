@@ -7,6 +7,10 @@
 * Adds anonymized usage statistics to Great Expectations. You can opt out at any time, but we’re hoping that you
 won’t: this data will be very helpful for improving the product. See this article for details: :ref:`Usage Statistics`.
 * CLI: improve look/consistency of `docs list`, `suite list`, and `datasource list` output; add `store list` and `validation-operator list` commands great_expectations/core/logging/usage_statistics.py
+* New SuiteBuilderProfiler that facilitates faster suite generation by allowing columns to be profiled
+* Added two convenience methods to ExpectationSuite: get_table_expectations & get_column_expectations
+* Added optional profiler_configuration to DataContext.profile() and DataAsset.profile()
+* Added list_available_expectation_types() to DataAsset
 
 0.9.11
 -----------------

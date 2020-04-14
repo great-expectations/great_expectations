@@ -37,8 +37,8 @@ from great_expectations.exceptions import (
     BatchKwargsError,
     DatasourceInitializationError,
 )
-from great_expectations.profile.sample_expectations_dataset_profiler import (
-    SampleExpectationsDatasetProfiler,
+from great_expectations.profile.basic_suite_builder_profiler import (
+    BasicSuiteBuilderProfiler,
 )
 from great_expectations.validator.validator import Validator
 
@@ -941,8 +941,6 @@ Name the new expectation suite"""
         context.save_expectation_suite(suite, expectation_suite_name)
         return True, expectation_suite_name
 
-    profiler = SampleExpectationsDatasetProfiler
-
     click.prompt(msg_prompt_what_will_profiler_do, default=True, show_default=False)
 
     cli_message("\nGenerating example Expectation Suite...")
@@ -953,7 +951,8 @@ Name the new expectation suite"""
         batch_kwargs_generator_name=batch_kwargs_generator_name,
         data_asset_name=generator_asset,
         batch_kwargs=batch_kwargs,
-        profiler=profiler,
+        profiler=BasicSuiteBuilderProfiler,
+        profiler_configuration="demo",
         expectation_suite_name=expectation_suite_name,
         run_id=run_id,
         additional_batch_kwargs=additional_batch_kwargs

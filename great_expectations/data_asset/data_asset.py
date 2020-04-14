@@ -87,6 +87,10 @@ class DataAsset(object):
         if data_context and hasattr(data_context, '_expectation_explorer_manager'):
             self.set_default_expectation_argument("include_config", True)
 
+    def list_available_expectation_types(self):
+        keys = dir(self)
+        return [expectation for expectation in keys if expectation.startswith("expect_")]
+
     def autoinspect(self, profiler):
         """Deprecated: use profile instead.
 
@@ -103,17 +107,18 @@ class DataAsset(object):
         expectation_suite, validation_results = profiler.profile(self)
         return expectation_suite, validation_results
 
-    def profile(self, profiler):
+    def profile(self, profiler, profiler_configuration=None):
         """Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
 
         Args:
             profiler: The profiler to use
+            profiler_configuration: Optional profiler configuration dict
 
         Returns:
             tuple(expectation_suite, validation_results)
 
         """
-        expectation_suite, validation_results = profiler.profile(self)
+        expectation_suite, validation_results = profiler.profile(self, profiler_configuration)
         return expectation_suite, validation_results
 
     #TODO: add warning if no expectation_explorer_manager and how to turn on
@@ -1016,18 +1021,6 @@ class DataAsset(object):
         self._expectation_suite.add_citation(comment, batch_kwargs=batch_kwargs, batch_markers=batch_markers,
                                              batch_parameters=batch_parameters,
                                              citation_date=citation_date)
-
-    # PENDING DELETION: 20200130 - JPC - Ready for deletion upon release of 0.9.0 with no data_asset_name
-    #
-    # @property
-    # def data_asset_name(self):
-    #     """Gets the current name of this data_asset as stored in the expectations configuration."""
-    #     return self._expectation_suite.data_asset_name
-    #
-    # @data_asset_name.setter
-    # def data_asset_name(self, data_asset_name):
-    #     """Sets the name of this data_asset as stored in the expectations configuration."""
-    #     self._expectation_suite.data_asset_name = data_asset_name
 
     @property
     def expectation_suite_name(self):
