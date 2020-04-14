@@ -5,7 +5,7 @@ datasources:
   # For example, this one.
   mydatasource:
     class_name: PandasDatasource
-    generators:
+    batch_kwargs_generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
         type: subdir_reader
