@@ -1,13 +1,12 @@
 .. _changelog:
 
-develop
+0.10.0
 -----------------
+* (BREAKING) Clarified API language: renamed all ``generator`` parameters and methods to the more correct
+``batch_kwargs_generator`` language. Existing projects may require simple migration steps. See :ref:`Upgrading to 0.10.x` for instructions.
+* Adds anonymized usage statistics to Great Expectations. You can opt out at any time, but we’re hoping that you
+won’t: this data will be very helpful for improving the product. See this article for details: :ref:`Usage Statistics`.
 * CLI: improve look/consistency of `docs list`, `suite list`, and `datasource list` output; add `store list` and `validation-operator list` commands great_expectations/core/logging/usage_statistics.py
-* We’re adding anonymized  usage statistics to Great Expectations. You can opt out at any time, but we’re hoping that you won’t: this data will be very helpful for improving the product. See this article for details: :ref:`Usage Statistics`
-
-**Breaking**
-
-* Renamed all ``generator`` parameters and methods to the more correct ``batch_kwargs_generator`` language. Existing projects may require simple migration steps. See :ref:`Upgrading to 0.10.x` for instructions.
 
 0.9.11
 -----------------
