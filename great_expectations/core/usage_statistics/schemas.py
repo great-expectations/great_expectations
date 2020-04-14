@@ -182,8 +182,6 @@ empty_payload_schema = {
     "type": "object",
     "properties": {
     },
-    "required": [
-    ],
     "additionalProperties": False
 }
 
@@ -244,9 +242,7 @@ anonymized_expectation_suite_schema = {
                     "type": "object"
                 },
             },
-            "additionalProperties": False,
-            "required": [
-            ]
+            "additionalProperties": False
         }
     ]
 }
