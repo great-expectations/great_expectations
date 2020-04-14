@@ -7,13 +7,15 @@ import logging
 
 from ruamel.yaml import YAML
 
+import warnings
+
+from great_expectations.data_context.util import verify_dynamic_loading_support
 from great_expectations.data_context.util import (
     load_class,
     instantiate_class_from_config
 )
-
 from great_expectations.types import ClassConfig
-import warnings
+from great_expectations.exceptions import ClassInstantiationError
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -85,6 +87,7 @@ class Datasource(object):
             A complete datasource configuration.
 
         """
+        verify_dynamic_loading_support(module_name=module_name, package_name=None)
         class_ = load_class(class_name=class_name, module_name=module_name)
         configuration = class_.build_configuration(data_asset_type=data_asset_type, batch_kwargs_generators=batch_kwargs_generators, **kwargs)
         return configuration
@@ -174,6 +177,13 @@ class Datasource(object):
                 "module_name": "great_expectations.datasource.batch_kwargs_generator"
             }
         )
+        if not generator:
+            raise ClassInstantiationError(
+                module_name="great_expectations.datasource.batch_kwargs_generator",
+                package_name=None,
+                class_name=kwargs['class_name']
+            )
+
         return generator
 
     def get_batch_kwargs_generator(self, name):
@@ -214,21 +224,28 @@ class Datasource(object):
 
         return generators
 
-    def process_batch_parameters(self, limit=None):
+    def process_batch_parameters(self, limit=None, dataset_options=None):
         """Use datasource-specific configuration to translate any batch parameters into batch kwargs at the datasource
         level.
 
         Args:
             limit (int): a parameter all datasources must accept to allow limiting a batch to a smaller number of rows.
+            dataset_options (dict): a set of kwargs that will be passed to the constructor of a dataset built using
+                these batch_kwargs
 
         Returns:
-            batch_parameters, batch_kwargs: a tuple containing all defined batch_parameters and batch_kwargs. Result
-            will include both parameters passed via argument and configured parameters.
+            batch_kwargs: Result will include both parameters passed via argument and configured parameters.
         """
         batch_kwargs = self._datasource_config.get("batch_kwargs", {})
 
         if limit is not None:
             batch_kwargs["limit"] = limit
+
+        if dataset_options is not None:
+            # Then update with any locally-specified reader options
+            if not batch_kwargs.get("dataset_options"):
+                batch_kwargs["dataset_options"] = dict()
+            batch_kwargs["dataset_options"].update(dataset_options)
 
         return batch_kwargs
 

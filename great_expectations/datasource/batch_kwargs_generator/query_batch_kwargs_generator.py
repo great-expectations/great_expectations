@@ -3,7 +3,10 @@ import logging
 
 from .batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
-from great_expectations.exceptions import BatchKwargsError
+from great_expectations.exceptions import (
+    BatchKwargsError,
+    ClassInstantiationError,
+)
 from ...data_context.util import instantiate_class_from_config
 
 logger = logging.getLogger(__name__)
@@ -22,7 +25,7 @@ except ImportError:
 class QueryBatchKwargsGenerator(BatchKwargsGenerator):
     """Produce query-style batch_kwargs from sql files stored on disk
     """
-    recognized_batch_parameters = {'query_parameters', 'partition_id'}
+    recognized_batch_parameters = {'query_parameters', 'partition_id', 'name'}
 
     def __init__(self, name="default", datasource=None, query_store_backend=None, queries=None):
         super(QueryBatchKwargsGenerator, self).__init__(name=name, datasource=datasource)
@@ -42,22 +45,28 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
                 query_store_backend = {
                     "class_name": "InMemoryStoreBackend"
                 }
+        module_name = 'great_expectations.data_context.store'
         self._store_backend = instantiate_class_from_config(
             config=query_store_backend,
             runtime_environment={
                 "root_directory": root_directory
             },
             config_defaults={
-                "module_name": "great_expectations.data_context.store"
+                "module_name": module_name
             }
-
         )
+        if not self._store_backend:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=query_store_backend['class_name']
+            )
         if queries is not None:
             for query_name, query in queries.items():
                 self.add_query(query_name, query)
 
     def _get_raw_query(self, generator_asset):
-        return self._store_backend.get(tuple(generator_asset))
+        return self._store_backend.get((generator_asset,))
 
     def _get_iterator(self, generator_asset, query_parameters=None):
         raw_query = self._get_raw_query(generator_asset)
@@ -82,7 +91,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
 
     def add_query(self, generator_asset, query):
         # Backends must have a tuple key; we use only a single-element tuple
-        self._store_backend.set(tuple(generator_asset), query)
+        self._store_backend.set((generator_asset,), query)
 
     def get_available_data_asset_names(self):
         defined_queries = self._store_backend.list_keys()

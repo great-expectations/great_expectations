@@ -89,3 +89,4 @@ Supporting Resources
 
    /reference/supporting_resources
    /reference/glossary
+   /reference/check_assets

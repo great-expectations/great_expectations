@@ -110,12 +110,13 @@ data_docs_sites:
   # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/en/latest/features/data_docs.html
   local_site:
     class_name: SiteBuilder
+    # set to false to hide how-to buttons in Data Docs
+    show_how_to_buttons: true
     store_backend:
         class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
         class_name: DefaultSiteIndexBuilder
-        show_cta_footer: True
 """
 
 ANONYMIZED_USAGE_STATISTICS_ENABLED = """

@@ -175,6 +175,7 @@ def test_compile_evaluation_parameter_dependencies(data_context):
         'source_patient_data.default': ["expect_table_row_count_to_equal.result.observed_value"]
     }
 
+
 def test_list_datasources(data_context):
     datasources = data_context.list_datasources()
 

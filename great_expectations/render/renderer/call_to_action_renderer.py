@@ -21,7 +21,7 @@ class CallToActionRenderer(object):
             }
         }
     }
-    
+
     @classmethod
     def render(cls, cta_object):
         """
@@ -36,10 +36,10 @@ class CallToActionRenderer(object):
                 "buttons": # list of CallToActionButtons
             }
         """
-        
+
         if not cta_object.get("header"):
             cta_object["header"] = cls._document_defaults.get("header")
-        
+
         cta_object["styling"] = cls._document_defaults.get("styling")
         cta_object["tooltip_icon"] = {
             "template": "$icon",
@@ -47,7 +47,7 @@ class CallToActionRenderer(object):
                 "icon": ""
             },
             "tooltip": {
-                "content": "To disable this footer, set the show_cta_footer flag in your project config to false."
+                "content": "To disable this footer, set the show_how_to_buttons flag in your project's data_docs_sites config to false."
             },
             "styling": {
                 "params": {
@@ -58,5 +58,5 @@ class CallToActionRenderer(object):
                 }
             }
         }
-        
+
         return cta_object

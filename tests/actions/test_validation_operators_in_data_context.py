@@ -1,16 +1,26 @@
 import pytest
-import os
-import shutil
-
-import pandas as pd
+import json
 
 from great_expectations.data_context import (
     BaseDataContext,
-    DataContext,
 )
-from great_expectations.util import (
-    gen_directory_tree_str
+from great_expectations.core import (
+    expectationSuiteSchema,
 )
+
+from great_expectations.data_context.util import (
+    file_relative_path,
+)
+
+
+@pytest.fixture()
+def parameterized_expectation_suite():
+    fixture_path = file_relative_path(
+        __file__,
+        "../test_fixtures/expectation_suites/parameterized_expression_expectation_suite_fixture.json",
+    )
+    with open(fixture_path, "r",) as suite:
+        return expectationSuiteSchema.load(json.load(suite))
 
 
 @pytest.fixture
@@ -27,8 +37,8 @@ def validation_operators_data_context(basic_data_context_config_for_validation_o
                                         "base_directory": str(filesystem_csv_4)
                                     }
                                 })
-
     data_context.create_expectation_suite("f1.foo")
+
     df = data_context.get_batch(batch_kwargs=data_context.build_batch_kwargs("my_datasource",
                                                                              "subdir_reader", "f1"),
                                 expectation_suite_name="f1.foo")
@@ -42,6 +52,41 @@ def validation_operators_data_context(basic_data_context_config_for_validation_o
     data_context.save_expectation_suite(warning_expectations, expectation_suite_name="f1.warning")
 
     return data_context
+
+
+def test_validation_operator_evaluation_parameters(validation_operators_data_context, parameterized_expectation_suite):
+    validation_operators_data_context.save_expectation_suite(parameterized_expectation_suite, "param_suite")
+    res = validation_operators_data_context.run_validation_operator(
+        "store_val_res_and_extract_eval_params",
+        assets_to_validate=[
+            (
+                validation_operators_data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1"),
+                "param_suite"
+            )
+        ],
+        evaluation_parameters={
+            "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
+            ".observed_value": 3
+        }
+    )
+    assert res["success"] is True
+
+    validation_operators_data_context.save_expectation_suite(parameterized_expectation_suite, "param_suite.failure")
+    res = validation_operators_data_context.run_validation_operator(
+        "errors_and_warnings_validation_operator",
+        assets_to_validate=[
+            (
+                validation_operators_data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1"),
+                "param_suite.failure"
+            )
+        ],
+        evaluation_parameters={
+            "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
+            ".observed_value": 10
+        },
+        base_expectation_suite_name="param_suite"
+    )
+    assert res["success"] is False
 
 
 def test_action_list_operator(validation_operators_data_context):
@@ -58,6 +103,7 @@ def test_action_list_operator(validation_operators_data_context):
     operator_result = data_context.run_validation_operator(
         assets_to_validate=[batch, (validator_batch_kwargs, "f1.warning")],
         run_id="test-100",
+        evaluation_parameters={},
         validation_operator_name="store_val_res_and_extract_eval_params",
     )
     # results = data_context.run_validation_operator(my_ge_df)
