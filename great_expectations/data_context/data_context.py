@@ -48,6 +48,7 @@ from .util import (
     instantiate_class_from_config,
     load_class,
     safe_mmkdir,
+    safe_rrmdir,
     substitute_all_config_variables,
 )
 from ..validator.validator import Validator
@@ -404,6 +405,25 @@ class BaseDataContext(object):
             )
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
+
+    def delete_datasource(self,datasource_name=None):
+        """Delete data source 
+        Args:
+
+        Returns:
+        """
+        if datasource_names is None:
+            raise ValueError(
+                "Datasource names must be a datasource name"
+            )
+        else:
+            datasource = self.get_datasource(datasource_name)
+            if datasource:
+               self._datasources.remove(datasource_name)
+            else:
+                raise ValueError(
+                    "Datasource not found"
+                )
 
     def get_available_data_asset_names(self, datasource_names=None, generator_names=None):
         """Inspect datasource and generators to provide available data_asset objects.
@@ -1022,6 +1042,23 @@ class BaseDataContext(object):
             logger.debug("No data_docs_config found. No site(s) built.")
 
         return index_page_locator_infos
+
+    def clean_data_docs(self, site_name=None):
+         if not os.path.isdir(self.root_directory):
+            raise ge_exceptions.DataContextError(
+                "The data docs site and project root directory must be an existing directory to clean "
+            )
+
+        ge_dir = os.path.join(self.root_directory, site_name)
+        if not os.path.isdir(gedir):
+            raise ge_exceptions.DataContextError(
+                "The data docs site and project root directory must be an existing directory to clean "
+            )
+
+        if safe_rrmdir(ge_dir, exist_ok=True):
+            return True
+        else:
+            return False   
 
     def profile_datasource(self,
                            datasource_name,

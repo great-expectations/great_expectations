@@ -35,6 +35,22 @@ def safe_mmkdir(directory, exist_ok=True):
         if e.errno != errno.EEXIST:
             raise
 
+def safe_rrmdir(directory, exist_ok=True):
+    """Simple wrapper since exist_ok is not available in python 2"""
+    if not isinstance(directory, six.string_types):
+        raise TypeError("directory must be of type str, not {0}".format({
+            "directory_type": str(type(directory))
+        }))
+
+    if not exist_ok:
+        raise ValueError(
+            "This wrapper should only be used for exist_ok=True; it is designed to make porting easier later")
+    try:
+        os.removedirs(directory)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
 
 def load_class(class_name, module_name):
     """Dynamically load a class from strings or raise a helpful error."""
