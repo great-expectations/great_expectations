@@ -5,7 +5,6 @@ import os
 
 import traceback
 
-from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLASS
 from great_expectations.core import nested_update
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
