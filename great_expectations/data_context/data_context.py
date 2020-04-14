@@ -767,8 +767,8 @@ class BaseDataContext(object):
                 "expectation_suite with name {} does not exist."
             )
         else:
-            self._stores[self.expectations_store_name].remove_key(key)
-
+            #self._stores[self.expectations_store_name].remove_key(key)
+            del self._stores[self.expectations_store_name][key]
         if self._stores[self.expectations_store_name].has_key(key):
             return False
         return True
