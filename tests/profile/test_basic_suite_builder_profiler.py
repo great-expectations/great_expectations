@@ -15,6 +15,8 @@ from great_expectations.profile.basic_suite_builder_profiler import (
 )
 from tests.test_utils import expectationSuiteValidationResultSchema
 
+FALSEY_VALUES = [None, [], False]
+
 
 def test__find_next_low_card_column(
     non_numeric_low_card_dataset, non_numeric_high_card_dataset
@@ -264,7 +266,7 @@ def test__create_expectations_for_datetime_column(datetime_dataset):
     }
 
 
-def test_BasicSuiteBuilderProfiler_raises_error_on_both_included_and_excluded_columns(
+def test_BasicSuiteBuilderProfiler_raises_error_on_both_included_and_excluded_expectations(
     pandas_dataset,
 ):
     with pytest.raises(ProfilerError):
@@ -277,6 +279,19 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_both_included_and_excluded_co
         )
 
 
+def test_BasicSuiteBuilderProfiler_raises_error_on_both_included_and_excluded_columns(
+    pandas_dataset,
+):
+    with pytest.raises(ProfilerError):
+        BasicSuiteBuilderProfiler.profile(
+            pandas_dataset,
+            profiler_configuration={
+                "included_columns": ["foo"],
+                "excluded_columns": ["foo"],
+            },
+        )
+
+
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 def test_BasicSuiteBuilderProfiler_raises_error_on_non_existent_column_on_pandas(
     pandas_dataset,
@@ -285,7 +300,7 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_non_existent_column_on_pandas
         BasicSuiteBuilderProfiler().profile(
             pandas_dataset,
             profiler_configuration={
-                "columns": ["NON_EXISTANT_COLUMN"],
+                "included_columns": ["NON_EXISTENT_COLUMN"],
                 "included_expectations": [
                     "expect_table_column_count_to_equal",
                     "expect_column_values_to_not_be_null",
@@ -480,7 +495,7 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
 
 
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
-def test_BasicSuiteBuilderProfiler_uses_all_columns_if_no_configuration_on_pandas(
+def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_have_included_or_excluded_columns_on_pandas(
     pandas_dataset,
 ):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(pandas_dataset)
@@ -693,7 +708,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_no_configuration_on_panda
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(pandas_dataset,):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
-        pandas_dataset, profiler_configuration={"columns": ["naturals"]}
+        pandas_dataset, profiler_configuration={"included_columns": ["naturals"]}
     )
     assert isinstance(observed_suite, ExpectationSuite)
 
@@ -794,7 +809,7 @@ def test_BasicSuiteBuilderProfiler_respects_excluded_expectations_on_pandas(
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
-            "columns": ["naturals"],
+            "included_columns": ["naturals"],
             "excluded_expectations": [
                 "expect_table_column_count_to_equal",
                 "expect_column_values_to_be_unique",
@@ -858,7 +873,7 @@ def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
-            "columns": ["naturals", "nulls"],
+            "included_columns": ["naturals", "nulls"],
             "included_expectations": [
                 "expect_table_column_count_to_equal",
                 "expect_column_values_to_not_be_null",
@@ -896,13 +911,14 @@ def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
 
 
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
-def test_BasicSuiteBuilderProfiler_uses_no_columns_if_none_are_selected_on_pandas(
-    pandas_dataset,
+@pytest.mark.parametrize("included_columns", FALSEY_VALUES)
+def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_falsey_on_pandas(
+    included_columns, pandas_dataset,
 ):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
-            "columns": [],
+            "included_columns": included_columns,
             "included_expectations": [
                 "expect_table_column_count_to_equal",
                 "expect_column_values_to_not_be_null",
@@ -926,8 +942,294 @@ def test_BasicSuiteBuilderProfiler_uses_no_columns_if_none_are_selected_on_panda
     # remove metadata to simplify assertions
     observed_suite.meta = None
     expected.meta = None
-    print(observed_suite)
     assert observed_suite == expected
+
+
+@pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+@pytest.mark.parametrize("included_expectations", FALSEY_VALUES)
+def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations_are_falsey_on_pandas(
+    included_expectations, pandas_dataset,
+):
+    observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
+        pandas_dataset,
+        profiler_configuration={"included_expectations": included_expectations,},
+    )
+    assert isinstance(observed_suite, ExpectationSuite)
+
+    expected = ExpectationSuite("default", data_asset_type="Dataset", expectations=[],)
+
+    # remove metadata to simplify assertions
+    observed_suite.meta = None
+    expected.meta = None
+    assert observed_suite == expected
+
+
+@pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+@pytest.mark.parametrize("excluded_expectations", FALSEY_VALUES)
+def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectations_are_falsey_on_pandas(
+    excluded_expectations, pandas_dataset,
+):
+    observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
+        pandas_dataset,
+        profiler_configuration={"excluded_expectations": excluded_expectations,},
+    )
+    assert isinstance(observed_suite, ExpectationSuite)
+
+    expected = ExpectationSuite(
+        "default",
+        data_asset_type="Dataset",
+        expectations=[
+            {
+                "kwargs": {"column": "infinities"},
+                "expectation_type": "expect_column_to_exist",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "nulls"},
+                "expectation_type": "expect_column_to_exist",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "naturals"},
+                "expectation_type": "expect_column_to_exist",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"min_value": 6, "max_value": 7},
+                "expectation_type": "expect_table_row_count_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"value": 3},
+                "expectation_type": "expect_table_column_count_to_equal",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column_list": ["infinities", "nulls", "naturals"]},
+                "expectation_type": "expect_table_columns_to_match_ordered_list",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "infinities"},
+                "expectation_type": "expect_column_values_to_be_unique",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "infinities"},
+                "expectation_type": "expect_column_values_to_not_be_null",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {
+                    "column": "infinities",
+                    "min_value": -Infinity,
+                    "max_value": -Infinity,
+                },
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {
+                    "column": "infinities",
+                    "min_value": Infinity,
+                    "max_value": Infinity,
+                },
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {
+                    "column": "infinities",
+                    "min_value": None,
+                    "max_value": None,
+                },
+                "expectation_type": "expect_column_mean_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "infinities", "min_value": -1.0, "max_value": 1.0},
+                "expectation_type": "expect_column_median_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {
+                    "column": "infinities",
+                    "quantile_ranges": {
+                        "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                        "value_ranges": [
+                            [-Infinity, -Infinity],
+                            [-4.141592653589793, -2.141592653589793],
+                            [-1.0, 1.0],
+                            [2.141592653589793, 4.141592653589793],
+                            [Infinity, Infinity],
+                        ],
+                    },
+                },
+                "expectation_type": "expect_column_quantile_values_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "nulls"},
+                "expectation_type": "expect_column_values_to_be_unique",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "nulls", "mostly": 0.4714285714285715},
+                "expectation_type": "expect_column_values_to_not_be_null",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "nulls", "min_value": -1.0, "max_value": 1.0},
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "nulls", "min_value": 2.3, "max_value": 4.3},
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {
+                    "column": "nulls",
+                    "min_value": 0.6499999999999999,
+                    "max_value": 2.65,
+                },
+                "expectation_type": "expect_column_mean_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {
+                    "column": "nulls",
+                    "min_value": 0.6500000000000001,
+                    "max_value": 2.6500000000000004,
+                },
+                "expectation_type": "expect_column_median_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {
+                    "column": "nulls",
+                    "quantile_ranges": {
+                        "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                        "value_ranges": [
+                            [-1.0, 1.0],
+                            [0.10000000000000009, 2.1],
+                            [1.2000000000000002, 3.2],
+                            [1.2000000000000002, 3.2],
+                            [2.3, 4.3],
+                        ],
+                    },
+                },
+                "expectation_type": "expect_column_quantile_values_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "naturals"},
+                "expectation_type": "expect_column_values_to_be_unique",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "naturals"},
+                "expectation_type": "expect_column_values_to_not_be_null",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "naturals", "min_value": 0.0, "max_value": 2.0},
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "naturals", "min_value": 6.0, "max_value": 8.0},
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "naturals", "min_value": 3.0, "max_value": 5.0},
+                "expectation_type": "expect_column_mean_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {"column": "naturals", "min_value": 3.0, "max_value": 5.0},
+                "expectation_type": "expect_column_median_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+            {
+                "kwargs": {
+                    "column": "naturals",
+                    "quantile_ranges": {
+                        "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                        "value_ranges": [
+                            [0.0, 2.0],
+                            [2.0, 4.0],
+                            [3.0, 5.0],
+                            [4.0, 6.0],
+                            [6.0, 8.0],
+                        ],
+                    },
+                },
+                "expectation_type": "expect_column_quantile_values_to_be_between",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+            },
+        ],
+    )
+
+    # remove metadata to simplify assertions
+    observed_suite.meta = None
+    expected.meta = None
+    assert observed_suite == expected
+
+
+@pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+@pytest.mark.parametrize("excluded_columns", FALSEY_VALUES)
+def test_BasicSuiteBuilderProfiler_uses_all_columns_if_excluded_columns_are_falsey_on_pandas(
+    excluded_columns, pandas_dataset,
+):
+    observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
+        pandas_dataset,
+        profiler_configuration={
+            "excluded_columns": excluded_columns,
+            "included_expectations": [
+                "expect_table_column_count_to_equal",
+                "expect_column_values_to_not_be_null",
+            ],
+        },
+    )
+    assert isinstance(observed_suite, ExpectationSuite)
+
+    expected = ExpectationSuite(
+        "default",
+        data_asset_type="Dataset",
+        expectations=[
+            {
+                "expectation_type": "expect_table_column_count_to_equal",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+                "kwargs": {"value": 3},
+            },
+            {
+                "expectation_type": "expect_column_values_to_not_be_null",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+                "kwargs": {"column": "naturals"},
+            },
+            {
+                "expectation_type": "expect_column_values_to_not_be_null",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+                "kwargs": {"column": "infinities"},
+            },
+            {
+                "expectation_type": "expect_column_values_to_not_be_null",
+                "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
+                "kwargs": {"column": "nulls", "mostly": 0.4714285714285715},
+            },
+        ],
+    )
+
+    # remove metadata to simplify assertions
+    observed_suite.meta = None
+    expected.meta = None
+    assert len(observed_suite.expectations) == 4
+    for ee in expected.expectations:
+        assert ee in observed_suite.expectations
+    # assert observed_suite == expected
 
 
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
@@ -938,7 +1240,6 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_not_real_expectations_in_incl
         BasicSuiteBuilderProfiler().profile(
             pandas_dataset,
             profiler_configuration={
-                "columns": ["naturals"],
                 "included_expectations": [
                     "expect_table_column_count_to_equal",
                     "expect_this_to_not_be_a_real_expectation",
@@ -956,7 +1257,6 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_not_real_expectations_in_excl
         BasicSuiteBuilderProfiler().profile(
             pandas_dataset,
             profiler_configuration={
-                "columns": ["naturals"],
                 "included_expectations": [
                     "expect_table_column_count_to_equal",
                     "expect_this_to_not_be_a_real_expectation",
@@ -976,7 +1276,9 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuratio
     batch = ge.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
     suite, evrs = BasicSuiteBuilderProfiler().profile(
         batch,
-        profiler_configuration={"columns": ["Name", "PClass", "Age", "Sex", "SexCode"]},
+        profiler_configuration={
+            "included_columns": ["Name", "PClass", "Age", "Sex", "SexCode"]
+        },
     )
 
     # Check to make sure SuiteBuilderProfiler is adding meta.columns with a single "description" field for each column

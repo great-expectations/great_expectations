@@ -382,78 +382,99 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         if configuration == "demo":
             return cls._demo_profile(dataset)
 
-        column_cache = {}
-        selected_columns = None
-        excluded_expectations = None
-        included_expectations = None
+        existing_columns = dataset.get_table_columns()
+        selected_columns = existing_columns
+        included_expectations = []
+        excluded_expectations = []
 
         if configuration:
-            selected_columns = configuration.get("columns", None)
-            excluded_expectations = configuration.get("excluded_expectations", None)
-            included_expectations = configuration.get("included_expectations", None)
-            if excluded_expectations and included_expectations:
+            if (
+                "included_expectations" in configuration
+                and "excluded_expectations" in configuration
+            ):
                 raise ProfilerError(
-                    "Please specify either `excluded_expectations` or `included_expectations`."
+                    "Please specify either `included_expectations` or `excluded_expectations`."
                 )
-        if excluded_expectations:
-            _check_that_expectations_are_available(dataset, excluded_expectations)
-        if included_expectations:
-            _check_that_expectations_are_available(dataset, included_expectations)
+            if "included_expectations" in configuration:
+                included_expectations = configuration["included_expectations"]
+                if included_expectations in [False, None, []]:
+                    included_expectations = None
+                _check_that_expectations_are_available(dataset, included_expectations)
+            if "excluded_expectations" in configuration:
+                excluded_expectations = configuration["excluded_expectations"]
+                _check_that_expectations_are_available(dataset, excluded_expectations)
+
+            if (
+                "included_columns" in configuration
+                and "excluded_columns" in configuration
+            ):
+                raise ProfilerError(
+                    "Please specify either `excluded_columns` or `included_columns`."
+                )
+            elif "included_columns" in configuration:
+                selected_columns = configuration["included_columns"]
+            elif "excluded_columns" in configuration:
+                excluded_columns = configuration["excluded_columns"]
+                if excluded_columns in [False, None, []]:
+                    excluded_columns = []
+                selected_columns = set(existing_columns) - set(excluded_columns)
+
+        _check_that_columns_exist(dataset, selected_columns)
+        if included_expectations is None:
+            suite = cls._build_column_description_metadata(dataset)
+            # remove column exist expectations
+            suite.expectations = []
+            return suite
 
         dataset.set_default_expectation_argument("catch_exceptions", False)
         dataset = cls._build_table_row_count_expectation(dataset, tolerance=0.1)
         dataset.set_config_value("interactive_evaluation", True)
         dataset = cls._build_table_column_expectations(dataset)
 
-        existing_columns = dataset.get_table_columns()
-
+        column_cache = {}
         if selected_columns:
             for column in selected_columns:
-                if column not in existing_columns:
-                    raise ProfilerError(f"Column {column} does not exist.")
-
-        for column in selected_columns:
-            cardinality = cls._get_column_cardinality_with_caching(
-                dataset, column, column_cache
-            )
-            column_type = cls._get_column_type_with_caching(
-                dataset, column, column_cache
-            )
-
-            if cardinality in [
-                ProfilerCardinality.TWO,
-                ProfilerCardinality.VERY_FEW,
-                ProfilerCardinality.FEW,
-            ]:
-                cls._create_expectations_for_low_card_column(
+                cardinality = cls._get_column_cardinality_with_caching(
                     dataset, column, column_cache
                 )
-            elif cardinality in [
-                ProfilerCardinality.MANY,
-                ProfilerCardinality.VERY_MANY,
-                ProfilerCardinality.UNIQUE,
-            ]:
-                # TODO we will want to finesse the number and types of
-                #  expectations created here. The simple version is blacklisting
-                #  and the more complex version is desired per column type and
-                #  cardinality. This deserves more thought on configuration.
-                dataset.expect_column_values_to_be_unique(column)
+                column_type = cls._get_column_type_with_caching(
+                    dataset, column, column_cache
+                )
 
-                if column_type in [ProfilerDataType.INT, ProfilerDataType.FLOAT]:
-                    cls._create_expectations_for_numeric_column(dataset, column)
-                elif column_type in [ProfilerDataType.DATETIME]:
-                    cls._create_expectations_for_datetime_column(dataset, column)
-                elif column_type in [ProfilerDataType.STRING]:
-                    cls._create_expectations_for_string_column(dataset, column)
-                elif column_type in [ProfilerDataType.UNKNOWN]:
-                    logger.debug(
-                        f"Skipping expectation creation for column {column} of unknown type: {column_type}"
+                if cardinality in [
+                    ProfilerCardinality.TWO,
+                    ProfilerCardinality.VERY_FEW,
+                    ProfilerCardinality.FEW,
+                ]:
+                    cls._create_expectations_for_low_card_column(
+                        dataset, column, column_cache
                     )
+                elif cardinality in [
+                    ProfilerCardinality.MANY,
+                    ProfilerCardinality.VERY_MANY,
+                    ProfilerCardinality.UNIQUE,
+                ]:
+                    # TODO we will want to finesse the number and types of
+                    #  expectations created here. The simple version is blacklisting
+                    #  and the more complex version is desired per column type and
+                    #  cardinality. This deserves more thought on configuration.
+                    dataset.expect_column_values_to_be_unique(column)
+
+                    if column_type in [ProfilerDataType.INT, ProfilerDataType.FLOAT]:
+                        cls._create_expectations_for_numeric_column(dataset, column)
+                    elif column_type in [ProfilerDataType.DATETIME]:
+                        cls._create_expectations_for_datetime_column(dataset, column)
+                    elif column_type in [ProfilerDataType.STRING]:
+                        cls._create_expectations_for_string_column(dataset, column)
+                    elif column_type in [ProfilerDataType.UNKNOWN]:
+                        logger.debug(
+                            f"Skipping expectation creation for column {column} of unknown type: {column_type}"
+                        )
 
         if excluded_expectations:
             dataset = _remove_table_expectations(dataset, excluded_expectations)
             dataset = _remove_column_expectations(dataset, excluded_expectations)
-        elif included_expectations:
+        if included_expectations:
             for expectation in dataset.get_expectation_suite().expectations:
                 if expectation.expectation_type not in included_expectations:
                     try:
@@ -566,10 +587,18 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         return expectation_suite
 
 
-def _check_that_expectations_are_available(dataset, excluded_expectations):
-    for expectation in excluded_expectations:
-        if expectation not in dataset.list_available_expectation_types():
-            raise ProfilerError(f"Expectation {expectation} is not available.")
+def _check_that_expectations_are_available(dataset, expectations):
+    if expectations:
+        for expectation in expectations:
+            if expectation not in dataset.list_available_expectation_types():
+                raise ProfilerError(f"Expectation {expectation} is not available.")
+
+
+def _check_that_columns_exist(dataset, columns):
+    if columns:
+        for column in columns:
+            if column not in dataset.get_table_columns():
+                raise ProfilerError(f"Column {column} does not exist.")
 
 
 def _is_nan(value):
