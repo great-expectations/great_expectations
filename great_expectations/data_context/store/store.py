@@ -3,7 +3,10 @@ import logging
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import DataContextError
+from great_expectations.exceptions import (
+    DataContextError,
+    ClassInstantiationError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -29,13 +32,20 @@ class Store(object):
                 "class_name": "InMemoryStoreBackend"
             }
         logger.debug("Building store_backend.")
+        module_name = 'great_expectations.data_context.store'
         self._store_backend = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment or {},
             config_defaults={
-                "module_name": "great_expectations.data_context.store"
+                "module_name": module_name
             }
         )
+        if not self._store_backend:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=store_backend
+            )
         if not isinstance(self._store_backend, StoreBackend):
             raise DataContextError("Invalid StoreBackend configuration: expected a StoreBackend instance.")
         self._use_fixed_length_key = self._store_backend.fixed_length_key
@@ -69,7 +79,9 @@ class Store(object):
 
     def get(self, key):
         self._validate_key(key)
-        return self.deserialize(key, self._store_backend.get(self.key_to_tuple(key)))
+        value = self._store_backend.get(self.key_to_tuple(key))
+        if value:
+            return self.deserialize(key, value)
 
     def set(self, key, value):
         self._validate_key(key)

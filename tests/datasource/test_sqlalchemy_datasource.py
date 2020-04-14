@@ -197,3 +197,32 @@ def test_sqlalchemy_datasource_query_and_table_handling(sqlitedb_engine):
         })
     mock_batch.assert_called_once_with(engine=sqlitedb_engine, schema=None, query="select * from foo;",
                                        table_name="bar")
+
+
+def test_sqlalchemy_datasource_processes_dataset_options(test_db_connection_string):
+    datasource = SqlAlchemyDatasource('SqlAlchemy', credentials={"url": test_db_connection_string})
+    batch_kwargs = datasource.process_batch_parameters(dataset_options={"caching": False})
+    batch_kwargs["query"] = "select * from table_1;"
+    batch = datasource.get_batch(batch_kwargs)
+    validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    dataset = validator.get_dataset()
+    assert dataset.caching is False
+
+    batch_kwargs = datasource.process_batch_parameters(dataset_options={"caching": True})
+    batch_kwargs["query"] = "select * from table_1;"
+    batch = datasource.get_batch(batch_kwargs)
+    validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    dataset = validator.get_dataset()
+    assert dataset.caching is True
+
+
+    batch_kwargs = {
+        "query": "select * from table_1;",
+        "dataset_options": {
+            "caching": False
+        }
+    }
+    batch = datasource.get_batch(batch_kwargs)
+    validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    dataset = validator.get_dataset()
+    assert dataset.caching is False

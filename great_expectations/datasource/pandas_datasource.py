@@ -32,7 +32,7 @@ class PandasDatasource(Datasource):
     interacting with the local filesystem (the default subdir_reader generator), and from
     existing in-memory dataframes.
     """
-    recognized_batch_parameters = {'reader_method', 'reader_options', 'limit'}
+    recognized_batch_parameters = {'reader_method', 'reader_options', 'limit', 'dataset_options'}
 
     @classmethod
     def build_configuration(cls, data_asset_type=None, batch_kwargs_generators=None, boto3_options=None, reader_method=None,
@@ -112,9 +112,14 @@ class PandasDatasource(Datasource):
         self._reader_options = configuration_with_defaults.get("reader_options", None)
         self._limit = configuration_with_defaults.get("limit", None)
 
-    def process_batch_parameters(self, reader_method=None, reader_options=None, limit=None):
-        # Note that we do not pass any parameters up, since *all* will be handled by PandasDatasource
-        batch_kwargs = super(PandasDatasource, self).process_batch_parameters()
+    def process_batch_parameters(self,
+                                 reader_method=None,
+                                 reader_options=None,
+                                 limit=None,
+                                 dataset_options=None,
+                                 ):
+        # Note that we do not pass limit up, since even that will be handled by PandasDatasource
+        batch_kwargs = super(PandasDatasource, self).process_batch_parameters(dataset_options=dataset_options)
 
         # Apply globally-configured reader options first
         if self._reader_options:
