@@ -55,6 +55,7 @@ def main(nap_duration=1, block_network=False, enable_usage_statistics=True):
                     "enabled": enable_usage_statistics,
                     # Leaving data_context_id as none would cause a new id to be generated
                     "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
+                    # This will be overridden when tests set an environment variable
                     "usage_statistics_url":
                         "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics",
                 },
