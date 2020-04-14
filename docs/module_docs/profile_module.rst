@@ -15,4 +15,12 @@ Profile Module
     :undoc-members:
     :show-inheritance:
 
+.. automodule:: great_expectations.profile.basic_suite_builder_profiler
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
+.. automodule:: great_expectations.profile.columns_exist
+    :members:
+    :undoc-members:
+    :show-inheritance:
