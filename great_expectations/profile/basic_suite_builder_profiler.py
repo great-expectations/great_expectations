@@ -42,7 +42,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     For example, if you had a wide patients table and you want expectations on
     three columns, you'd do this:
 
-    suite = BasicSuiteBuilderProfiler().profile(
+
+    suite, validation_result = BasicSuiteBuilderProfiler().profile(
         dataset,
         {"columns": ["id", "username", "address"]}
     )
@@ -50,7 +51,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     For example, if you had a wide patients table and you want expectations on
     all columns, excluding three statistical expectations, you'd do this:
 
-    suite = BasicSuiteBuilderProfiler().profile(
+
+    suite, validation_result = BasicSuiteBuilderProfiler().profile(
         dataset,
         {
             "excluded_expectations":
@@ -65,7 +67,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     For example, if you had a wide patients table and you want only two types of
     expectations on all applicable columns you'd do this:
 
-    suite = BasicSuiteBuilderProfiler().profile(
+
+    suite, validation_result = BasicSuiteBuilderProfiler().profile(
         dataset,
         {
             "included_expectations":
@@ -83,7 +86,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     expressive power of expectations and provide a service similar to the one
     expectations glossary documentation page, but on a users' own data.
 
-    suite = BasicSuiteBuilderProfiler().profile(dataset, configuration="demo")
+    suite, validation_result = BasicSuiteBuilderProfiler().profile(dataset, configuration="demo")
     """
 
     @classmethod
