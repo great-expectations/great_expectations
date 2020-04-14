@@ -5,9 +5,9 @@
 Getting started
 ###############
 
-#FIXME: Welcome to the Great Expectations project! We're very glad you want to help out by contributing.
+Welcome to Great Expectations! This tutorial will help you set up your first deployment of Great Expectactions. We'll also introduce important concepts, with links to detailed material you can dig into later.
 
-#FIXME: Our goal is to make your experience as great as possible. Please follow these steps to contribute:
+The whole thing should take about 15 minutes. Please follow these steps to get started:
 
 .. raw:: html
 
