@@ -1,10 +1,15 @@
 import logging
 
+from great_expectations.profile.base import (
+    DatasetProfiler,
+    ProfilerCardinality,
+    ProfilerDataType,
+)
+
 try:
     from sqlalchemy.exc import OperationalError
 except ModuleNotFoundError:
     OperationalError = RuntimeError
-
 
 logger = logging.getLogger(__name__)
 

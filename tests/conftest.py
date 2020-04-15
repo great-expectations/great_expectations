@@ -1,8 +1,8 @@
+import datetime
 import json
 import locale
 import os
 import shutil
-import datetime
 
 import numpy as np
 import pandas as pd
@@ -15,15 +15,14 @@ from great_expectations.core import (
     ExpectationValidationResult,
     expectationSuiteSchema,
 )
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier
+)
 from great_expectations.data_context.util import (
     file_relative_path,
     safe_mmkdir,
 )
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier
-)
 from great_expectations.dataset.pandas_dataset import PandasDataset
-
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
 
 ###
@@ -756,7 +755,7 @@ def filesystem_csv_data_context(empty_data_context, filesystem_csv_2):
         "rad_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        generators={
+        batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
