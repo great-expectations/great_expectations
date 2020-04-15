@@ -418,7 +418,7 @@ class ExpectationConfiguration(DictDot):
             However, if replace_all_kwargs=True, then the method will
             replace the full object.
 
-        TODO:
+        NOTE 2020/04/15 Abe:
             For type safety, it would be great if update_kwargs checked
             whether new kwargs are valid for the specified expectation_type.
         """
