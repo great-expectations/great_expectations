@@ -5,7 +5,6 @@ from collections import namedtuple
 from copy import deepcopy
 import datetime
 
-from dateutil import parser
 from six import string_types
 
 from IPython import get_ipython
@@ -608,6 +607,14 @@ class ExpectationSuite(object):
             return citations
         return self._sort_citations(citations)
 
+    def get_table_expectations(self):
+        """Return a list of table expectations."""
+        return [e for e in self.expectations if e.expectation_type.startswith("expect_table_")]
+
+    def get_column_expectations(self):
+        """Return a list of column map expectations."""
+        return [e for e in self.expectations if "column" in e.kwargs]
+
     @staticmethod
     def _filter_citations(citations, filter_key):
         citations_with_bk = []
@@ -932,7 +939,10 @@ class ExpectationSuiteSchema(Schema):
             pass
         elif len(data.evaluation_parameters) == 0:
             del data.evaluation_parameters
+
         if not hasattr(data, 'meta'):
+            pass
+        elif data.meta is None or data.meta == []:
             pass
         elif len(data.meta) == 0:
             del data.meta

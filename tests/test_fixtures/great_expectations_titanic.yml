@@ -5,7 +5,10 @@ datasources:
   # For example, this one.
   mydatasource:
     class_name: PandasDatasource
-    generators:
+    data_asset_type:
+      module_name: great_expectations.dataset
+      class_name: PandasDataset
+    batch_kwargs_generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
         class_name: SubdirReaderBatchKwargsGenerator

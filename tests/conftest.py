@@ -1,8 +1,8 @@
+import datetime
 import json
 import locale
 import os
 import shutil
-import datetime
 
 import numpy as np
 import pandas as pd
@@ -15,15 +15,14 @@ from great_expectations.core import (
     ExpectationValidationResult,
     expectationSuiteSchema,
 )
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier
+)
 from great_expectations.data_context.util import (
     file_relative_path,
     safe_mmkdir,
 )
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier
-)
 from great_expectations.dataset.pandas_dataset import PandasDataset
-
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
 
 ###
@@ -42,7 +41,9 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "rendered_output: produces rendered output that should be manually reviewed."
     )
-
+    config.addinivalue_line(
+        "markers", "aws_integration: runs aws integration test that may be very slow and requires credentials"
+    )
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -53,6 +54,9 @@ def pytest_addoption(parser):
     )
     parser.addoption(
         "--no-postgresql", action="store_true", help="If set, suppress tests against postgresql"
+    )
+    parser.addoption(
+        "--aws-integration", action="store_true", help="If set, run aws integration tests"
     )
 
 
@@ -105,6 +109,16 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("test_backend", test_backends)
     if "test_backends" in metafunc.fixturenames:
         metafunc.parametrize("test_backends", [test_backends])
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--aws-integration"):
+        # --aws-integration given in cli: do not skip aws-integration tests
+        return
+    skip_aws_integration = pytest.mark.skip(reason="need --aws-integration option to run")
+    for item in items:
+        if "aws_integration" in item.keywords:
+            item.add_marker(skip_aws_integration)
 
 
 @pytest.fixture
@@ -655,7 +669,7 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
     context.add_datasource(
         "titanic",
         class_name="PandasDatasource",
-        generators={
+        batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": os.path.join(project_dir, "data/titanic/")
@@ -665,7 +679,7 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
     context.add_datasource(
         "random",
         class_name="PandasDatasource",
-        generators={
+        batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": os.path.join(project_dir, "data/random/")
@@ -676,6 +690,11 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
     context.profile_datasource("titanic")
     context.profile_datasource("random")
     context.profile_datasource(context.list_datasources()[0]["name"])
+
+    context._project_config.anonymous_usage_statistics = {
+        "enabled": True,
+        "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c"
+    }
 
     return context
 
@@ -743,6 +762,22 @@ def data_context(tmp_path_factory):
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )
     return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture()
+def filesystem_csv_data_context(empty_data_context, filesystem_csv_2):
+    empty_data_context.add_datasource(
+        "rad_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(filesystem_csv_2),
+            }
+        },
+    )
+    return empty_data_context
 
 
 @pytest.fixture
