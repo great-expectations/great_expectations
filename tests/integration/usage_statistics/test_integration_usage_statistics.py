@@ -6,6 +6,7 @@ import subprocess
 import time
 
 import boto3
+import botocore
 import pytest
 import requests
 
@@ -17,13 +18,28 @@ logGroupName = "/great_expectations/usage_statistics/qa"
 
 
 @pytest.fixture(scope="session")
+def aws_session():
+    aws_session = None
+    for session_options in [
+        {"profile_name": "travis-ci", "region_name": "us-east-1"},
+        {"profile_name": "default", "region_name": "us-east-1"},
+        {"region_name": "us-east-1"},
+    ]:
+        try:
+            aws_session = boto3.Session(**session_options)
+        except botocore.exceptions.ProfileNotFound:
+            continue
+    return aws_session
+
+
+@pytest.fixture(scope="session")
 def valid_usage_statistics_message():
     return {
-    'event_payload': {
-        'platform.system': 'Darwin',
-        'platform.release': '19.3.0',
-        'version_info': "sys.version_info(major=3, minor=7, micro=4, releaselevel='final', serial=0)",
-        'anonymized_datasources': [
+        'event_payload': {
+            'platform.system': 'Darwin',
+            'platform.release': '19.3.0',
+            'version_info': "sys.version_info(major=3, minor=7, micro=4, releaselevel='final', serial=0)",
+            'anonymized_datasources': [
             {
                 'anonymized_name': 'f57d8a6edae4f321b833384801847498',
                 'parent_class': 'SqlAlchemyDatasource',
@@ -111,8 +127,8 @@ def valid_usage_statistics_message():
 
 
 @pytest.fixture(scope="session")
-def logstream(valid_usage_statistics_message):
-    client = boto3.client('logs', region_name='us-east-1')
+def logstream(aws_session, valid_usage_statistics_message):
+    client = aws_session.client('logs', region_name='us-east-1')
     # Warm up a logstream
     logStreamName = None
     message = copy.deepcopy(valid_usage_statistics_message)
@@ -151,9 +167,9 @@ def test_send_malformed_data(valid_usage_statistics_message):
     assert res.status_code == 400
 
 
-def test_usage_statistics_transmission(logstream):
+def test_usage_statistics_transmission(aws_session, logstream):
     logStreamName = logstream
-    client = boto3.client('logs', region_name='us-east-1')
+    client = aws_session.client('logs', region_name='us-east-1')
     pre_events = client.get_log_events(
         logGroupName=logGroupName,
         logStreamName=logStreamName,
@@ -178,7 +194,7 @@ def test_usage_statistics_transmission(logstream):
     assert "KeyboardInterrupt" not in errs
 
     # Wait a bit for the log events to post
-    time.sleep(10)
+    time.sleep(15)
     post_events = client.get_log_events(
         logGroupName=logGroupName,
         logStreamName=logStreamName,
@@ -187,9 +203,9 @@ def test_usage_statistics_transmission(logstream):
     assert len(pre_events["events"]) + 4 == len(post_events["events"])
 
 
-def test_send_completes_on_kill(logstream):
+def test_send_completes_on_kill(aws_session, logstream):
     logStreamName = logstream
-    client = boto3.client('logs', region_name='us-east-1')
+    client = aws_session.client('logs', region_name='us-east-1')
     pre_events = client.get_log_events(
         logGroupName=logGroupName,
         logStreamName=logStreamName,
@@ -230,7 +246,7 @@ def test_send_completes_on_kill(logstream):
     assert "Done constructing a DataContext" in outs
     assert "Ending a long nap" not in outs
     assert "KeyboardInterrupt" in errs
-    time.sleep(10)
+    time.sleep(15)
     post_events = client.get_log_events(
         logGroupName=logGroupName,
         logStreamName=logStreamName,
