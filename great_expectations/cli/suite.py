@@ -250,6 +250,44 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n""")
         sys.exit(1)
 
 
+@suite.command(name="delete")
+@click.option("--suite", "-es", default=None, help="Expectation suite name.")
+@click.option(
+    "--directory",
+    "-y",
+    default=None,
+    help="Delete expectation suite.",
+)
+def suite_delete(suite_name, directory):
+    """Delete specified expectation suite from data_context expectation store.
+
+    Args:
+        expectation_suite_name: The name of the expectation_suite to create
+
+    Returns:
+        True for Success and False for Failure.
+    """
+    try:
+        context = DataContext(directory)
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+
+    suite_names = context.list_expectation_suite_names()
+    if len(suite_names) == 0:
+        cli_message("No expectation suites found")
+        return
+
+    if len(suite_names) > 0:
+        expectation_suite = ExpectationSuite(expectation_suite_name=suite_name)
+        key = ExpectationSuiteIdentifier(expectation_suite_name=suite_name)
+        if key:
+            del self._stores[self.expectations_store_name][key]
+        else:
+            cli_message("No matching expectation suites found")
+            return
+
+
 @suite.command(name="list")
 @click.option(
     "--directory",

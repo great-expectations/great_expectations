@@ -102,6 +102,64 @@ def datasource_new(directory):
         sys.exit(1)
 
 
+@datasource.command(name="cleandatadocs")
+@click.argument('site_name', default=None, required=False)
+@click.option(
+    '--directory',
+    '-c',
+    default=None,
+    help="Clean data docs."
+)
+def datasource_cleandatadocs(directory, site_name):
+    """Data docs clean up for specified site_name."""
+    try:
+        context = DataContext(directory)
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+    if clean_data_docs(directory, site_name)
+        cli_message("Data docs at '{}' cleaned.".format(site_name))
+    else:  # no cleanup
+        sys.exit(1)
+
+
+@datasource.command(name="delete")
+@click.option(
+    '--directory',
+    '-y',
+    default=None,
+    help="Datasource to delete"
+)
+def delete_datasource(self,datasource_name=None):
+    """Delete data source
+    Args:
+
+    Returns:
+    """
+    try:
+        context = DataContext(directory)
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+    if datasource_name is None:
+        cli_message("<red>{}</red>".format("Datasource name must be a datasource name"))
+        return
+    else:
+        datasources = context.list_datasources()
+        if not datasources.has_key(datasource_name):
+            cli_message("<red>{}</red>".format("Datasource name must be a datasource name"))
+            return
+        else:
+            #self._stores[self.expectations_store_name].remove_key(key)
+            del datasources[datasource_name]
+        if datasources.has_key(datasource_name):
+            cli_message("<red>{}</red>".format("Datasource not deleted"))
+            return False
+        else:
+            cli_message("<green>{}</greem>".format("Datasource deleted successfully."))
+            return True
+
+
 @datasource.command(name="list")
 @click.option(
     '--directory',

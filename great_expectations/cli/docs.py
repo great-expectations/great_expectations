@@ -8,6 +8,10 @@ from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.util import cli_message
 
+from .util import (
+    safe_rrmdir,
+)
+
 
 @click.group()
 def docs():
@@ -51,6 +55,31 @@ def docs_build(directory, site_name, view=True):
         sys.exit(1)
     except ge_exceptions.PluginClassNotFoundError as err:
         cli_message(err.cli_colored_message)
+        sys.exit(1)
+
+
+def clean_data_docs(directory, site_name=None):
+    """
+    Delete data docs
+  
+    :param directory
+    :param site_name
+    """
+    context = DataContext(directory)
+    if not os.path.isdir(context.root_directory):
+        raise ge_exceptions.DataContextError(
+            "The data docs site and project root directory must be an existing directory to clean "
+        )
+
+    ge_dir = os.path.join(context.root_directory, site_name)
+    if not os.path.isdir(gedir):
+        cli_message("<red>{}</red>".format("The data docs site and project root directory must be an existing directory to clean.."))
+        sys.exit(1)
+
+    if safe_rrmdir(ge_dir, exist_ok=True):
+        cli.message("Cleaned data docs")
+    else:
+        cli_message("<red>{}</red>".format("Cleaning data docs failed.."))
         sys.exit(1)
 
 
