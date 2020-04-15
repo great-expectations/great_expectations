@@ -52,17 +52,14 @@ class UsageStatisticsHandler(object):
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
         self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
         self._sigint_handler = signal.signal(signal.SIGINT, self._teardown)
-        self._sigquit_handler = signal.signal(signal.SIGQUIT, self._teardown)
         atexit.register(self._close_worker)
 
     def _teardown(self, signum: int, frame):
         self._close_worker()
         if signum == signal.SIGTERM:
             self._sigterm_handler(signum, frame)
-        elif signum == signal.SIGINT:
+        if signum == signal.SIGINT:
             self._sigint_handler(signum, frame)
-        elif signum == signal.SIGQUIT:
-            self._sigquit_handler(signum, frame)
 
     def _close_worker(self):
         self._message_queue.put(STOP_SIGNAL)
