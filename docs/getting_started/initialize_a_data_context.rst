@@ -22,8 +22,9 @@ To install from a git fork or branch:
     $ git clone https://github.com/great-expectations/great_expectations.git
     $ pip install -e great_expectations/
 
+
 Run ``great_expectations init``
-===============================================
+-----------------------------------------------
 
 The :ref:`command line interface (CLI) <command_line>` provides the easiest way to start using Great Expectations.
 
