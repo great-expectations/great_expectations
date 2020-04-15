@@ -21,7 +21,7 @@
         <a href="{{ home_url }}">
           <img
             class="NO-CACHE"
-            src="{{ static_images_dir + "logo-long.png" }}"
+            src="{{ static_images_dir + "logo-long.png" | add_data_context_id_to_url }}"
             alt="Great Expectations"
             style="width: auto; height: 50px"
           />
@@ -37,11 +37,4 @@
   </div>
 </nav>
 
-<script>
-  var d = new Date()
-  var els = document.getElementsByClassName('NO-CACHE');
-  for (var i = 0; i < els.length; i++)
-  {
-      els[i].attributes['src'].value += "?d=" + d.toISOString();
-  }
-</script>
+

@@ -1,8 +1,6 @@
 import pytest
 import os
 
-from six import PY2
-
 import great_expectations as ge
 from great_expectations.core.util import nested_update
 from great_expectations.util import lint_code

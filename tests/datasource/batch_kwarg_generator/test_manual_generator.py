@@ -1,8 +1,4 @@
-import pytest
-from six import PY2
-
-from great_expectations.datasource import PandasDatasource
-from great_expectations.datasource.generator.manual_generator import ManualBatchKwargsGenerator
+from great_expectations.datasource.batch_kwargs_generator.manual_batch_kwargs_generator import ManualBatchKwargsGenerator
 
 
 def test_manual_generator(basic_pandas_datasource):

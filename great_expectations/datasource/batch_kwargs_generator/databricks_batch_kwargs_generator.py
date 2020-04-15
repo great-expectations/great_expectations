@@ -1,7 +1,7 @@
 import time
 import logging
 
-from great_expectations.datasource.generator.batch_kwargs_generator import BatchKwargsGenerator
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import BatchKwargsGenerator
 
 logger = logging.getLogger(__name__)
 
