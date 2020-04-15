@@ -1,24 +1,26 @@
-.. _getting_started__initialize_a_project:
+.. _getting_started__initialize_a_data_context:
 
-Initialize a project
+Initialize a Data Context
 ===============================================
 
 
-If you haven't already, install Great Expectations:
+If you haven't already, install Great Expectations.
+
+We recommend deploying within a virtual environment. If you're not familiar with pip, virtual environments, notebooks,
+or git, you may want to check out the :ref:`supporting_resources` section before continuing.
+
+The command to install is especially great `if you're a Dickens fan`__:
 
 .. code-block:: bash
 
     $ pip install great_expectations
 
-or
+To install from a git fork or branch:
 
 .. code-block:: bash
 
     $ git clone https://github.com/great-expectations/great_expectations.git
     $ pip install -e great_expectations/
-
-We recommend deploying within a virtual environment. If you're not familiar with pip, virtual environments, notebooks,
-or git, you may want to check out the :ref:`supporting_resources` section before continuing.
 
 Run ``great_expectations init``
 ===============================================

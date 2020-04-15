@@ -35,7 +35,7 @@ Please follow these steps to get started:
 
    In Great Expectations, your ``DataContext`` manages boilerplate configuration. Using a DataContext is almost always the fastest way to get up and running, even though some teams don't need every component of a DataContext.
    
-   Follow these instructions to `initialize a data context`_.
+   Follow these instructions to :ref:`getting_started__initialize_a_data_context`.
 
    Alternatively, if you really want to learn the components of Great Expectations from the ground up without a DataContext, check out `A magic-free introduction to Great Expectations.`_
 
