@@ -4,6 +4,7 @@ import os
 import signal
 import subprocess
 import time
+import uuid
 
 import boto3
 import botocore
@@ -170,18 +171,13 @@ def test_send_malformed_data(valid_usage_statistics_message):
 def test_usage_statistics_transmission(aws_session, logstream):
     logStreamName = logstream
     client = aws_session.client('logs', region_name='us-east-1')
-    pre_events = client.get_log_events(
-        logGroupName=logGroupName,
-        logStreamName=logStreamName,
-        limit=100,
-    )
-    assert len(pre_events) < 100, "This test assumed small logstream sizes in the qa stream. Consider changing " \
-                                  "fetch limit."
-
     usage_stats_url_env = dict(**os.environ)
     usage_stats_url_env["GE_USAGE_STATISTICS_URL"] = USAGE_STATISTICS_QA_URL
+    start_time = int(time.time() / 1000)
+    data_context_id = str(uuid.uuid4())
     p = subprocess.Popen(
-        ["python", file_relative_path(__file__, "./instantiate_context_with_usage_statistics.py"), "0"],
+        ["python", file_relative_path(__file__, "./instantiate_context_with_usage_statistics.py"), data_context_id,
+         "0"],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         env=usage_stats_url_env
     )
@@ -192,37 +188,37 @@ def test_usage_statistics_transmission(aws_session, logstream):
     assert "Done constructing a DataContext" in outs
     assert "Ending a long nap" in outs
     assert "KeyboardInterrupt" not in errs
-
-    # Wait a bit for the log events to post
-    time.sleep(15)
-    post_events = client.get_log_events(
+    assert errs.count("201") == 4
+    time.sleep(120)
+    queryId = client.start_query(
         logGroupName=logGroupName,
-        logStreamName=logStreamName,
-        limit=100,
+        startTime=start_time,
+        endTime=start_time + 30,
+        queryString='fields @timestamp, @message | filter data_context_id = "' + data_context_id + '"',
+        limit=40
+    ).get("queryId")
+    response = client.get_query_results(
+        queryId=queryId
     )
-    assert len(pre_events["events"]) + 4 == len(post_events["events"])
-
+    assert response["statistics"]["recordsMatched"] == 4
 
 def test_send_completes_on_kill(aws_session, logstream):
     logStreamName = logstream
     client = aws_session.client('logs', region_name='us-east-1')
-    pre_events = client.get_log_events(
-        logGroupName=logGroupName,
-        logStreamName=logStreamName,
-        limit=100,
-    )
     """Test that having usage statistics enabled does not negatively impact kill signals or cause loss of queued usage statistics. """
     # Execute process that initializes data context
     acceptable_startup_time = 6
     acceptable_shutdown_time = 1
     nap_time = 30
     start = datetime.datetime.now()
+    start_time = int(time.time() / 1000)
     usage_stats_url_env = dict(**os.environ)
     usage_stats_url_env["GE_USAGE_STATISTICS_URL"] = USAGE_STATISTICS_QA_URL
+    data_context_id = str(uuid.uuid4())
     # Instruct the process to wait for 30 seconds after initializing before completing.
     p = subprocess.Popen(
         ["python", file_relative_path(__file__, "./instantiate_context_with_usage_statistics.py"),
-         str(nap_time), "False", "True"],
+         data_context_id, str(nap_time), "False", "True"],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         env=usage_stats_url_env
     )
@@ -246,13 +242,19 @@ def test_send_completes_on_kill(aws_session, logstream):
     assert "Done constructing a DataContext" in outs
     assert "Ending a long nap" not in outs
     assert "KeyboardInterrupt" in errs
-    time.sleep(15)
-    post_events = client.get_log_events(
+    assert errs.count("201") == 4
+    time.sleep(120)
+    queryId = client.start_query(
         logGroupName=logGroupName,
-        logStreamName=logStreamName,
-        limit=100,
+        startTime=start_time,
+        endTime=start_time + 30,
+        queryString='fields @timestamp, @message | filter data_context_id = "' + data_context_id + '"',
+        limit=40
+    ).get("queryId")
+    response = client.get_query_results(
+        queryId=queryId
     )
-    assert len(pre_events["events"]) + 4 == len(post_events["events"])
+    assert response["statistics"]["recordsMatched"] == 4
 
 
 def test_graceful_failure_with_no_internet():
@@ -264,10 +266,11 @@ def test_graceful_failure_with_no_internet():
     acceptable_shutdown_time = 1
     nap_time = 0
     start = datetime.datetime.now()
+    data_context_id = str(uuid.uuid4())
     # Instruct the process to wait for 30 seconds after initializing before completing.
     p = subprocess.Popen(
         ["python", file_relative_path(__file__, "./instantiate_context_with_usage_statistics.py"),
-         str(nap_time), "True", "True"],
+         data_context_id, str(nap_time), "True", "True"],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     outs, errs = p.communicate()
