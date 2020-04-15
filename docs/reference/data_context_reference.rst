@@ -380,7 +380,7 @@ following to your data context configuration:
 
 .. code-block:: yaml
 
-    anonymized_usage_statistics:
+    anonymous_usage_statistics:
       data_context_id: <randomly-generated-uuid>
       enabled: false
 
