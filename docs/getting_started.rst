@@ -118,10 +118,8 @@ Table of contents for Getting Started:
 .. toctree::
    :maxdepth: 1
 
-   /getting_started/initialize_a_project
-   /getting_started/typical_workflow
-   /getting_started/add_datasources
+   /getting_started/initialize_a_data_context
+   /getting_started/connect_to_data
    /getting_started/set_up_data_docs
    /getting_started/create_expectation_suites
    /getting_started/validate_data
-   /getting_started/respond_to_validation_results
