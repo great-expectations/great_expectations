@@ -24,38 +24,30 @@ from great_expectations.core import (
 )
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.core.usage_statistics.usage_statistics import (
+    run_validation_operator_usage_statistics,
+    UsageStatisticsHandler,
+    usage_statistics_enabled_method,
+    save_expectation_suite_usage_statistics)
 from great_expectations.core.util import nested_update
+from great_expectations.data_context.templates import (
+    CONFIG_VARIABLES_TEMPLATE,
+    PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
+    PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
+)
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     dataContextConfigSchema,
     AnonymizedUsageStatisticsConfig,
     datasourceConfigSchema, DatasourceConfig, anonymizedUsageStatisticsSchema
 )
-from great_expectations.data_context.util import (
-    file_relative_path,
-    substitute_config_variable,
-)
-from great_expectations.dataset import Dataset
-from great_expectations.profile.basic_dataset_profiler import (
-    BasicDatasetProfiler,
-)
-from great_expectations.core.usage_statistics.usage_statistics import (
-    run_validation_operator_usage_statistics,
-    UsageStatisticsHandler,
-    usage_statistics_enabled_method,
-    save_expectation_suite_usage_statistics)
-
-from great_expectations.validator.validator import Validator
-from great_expectations.util import verify_dynamic_loading_support
-from great_expectations.data_context.templates import (
-    CONFIG_VARIABLES_INTRO,
-    CONFIG_VARIABLES_TEMPLATE,
-    PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
-    PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
-)
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
+)
+from great_expectations.data_context.util import (
+    file_relative_path,
+    substitute_config_variable,
 )
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
@@ -63,7 +55,12 @@ from great_expectations.data_context.util import (
     safe_mmkdir,
     substitute_all_config_variables,
 )
-
+from great_expectations.dataset import Dataset
+from great_expectations.profile.basic_dataset_profiler import (
+    BasicDatasetProfiler,
+)
+from great_expectations.util import verify_dynamic_loading_support
+from great_expectations.validator.validator import Validator
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -913,6 +910,12 @@ class BaseDataContext(object):
                 "expectation_suite %s not found" % expectation_suite_name
             )
 
+    def list_expectation_suite_names(self):
+        """Lists the available expectation suite names"""
+        sorted_expectation_suite_names = [i.expectation_suite_name for i in self.list_expectation_suites()]
+        sorted_expectation_suite_names.sort()
+        return sorted_expectation_suite_names
+
     @usage_statistics_enabled_method(
         event_name="data_context.save_expectation_suite",
         args_payload_fn=save_expectation_suite_usage_statistics,
@@ -1675,12 +1678,6 @@ class DataContext(BaseDataContext):
                 notebook_name = os.path.basename(notebook)
                 destination_path = os.path.join(subdir_path, notebook_name)
                 shutil.copyfile(notebook, destination_path)
-
-    def list_expectation_suite_names(self):
-        """Lists the available expectation suite names"""
-        sorted_expectation_suite_names = [i.expectation_suite_name for i in self.list_expectation_suites()]
-        sorted_expectation_suite_names.sort()
-        return sorted_expectation_suite_names
 
     def __init__(self, context_root_dir=None):
 
