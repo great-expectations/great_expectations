@@ -37,7 +37,7 @@ Please follow these steps to get started:
    
    Follow these instructions to :ref:`getting_started__initialize_a_data_context`.
 
-   Alternatively, if you really want to learn the components of Great Expectations from the ground up without a DataContext, check out `A magic-free introduction to Great Expectations.`_
+   Alternatively, if you really want to learn the components of Great Expectations without a DataContext, check out `A magic-free introduction to Great Expectations.`_
 
 .. raw:: html
 
