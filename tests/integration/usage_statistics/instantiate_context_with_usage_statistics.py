@@ -4,6 +4,7 @@ import sys
 import time
 import socket
 import logging
+import uuid
 
 import pandas as pd
 
@@ -17,7 +18,10 @@ def guard(*args, **kwargs):
     raise ConnectionError("Internet Access is Blocked!")
 
 
-def main(nap_duration=1, block_network=False, enable_usage_statistics=True):
+def main(data_context_id=None, nap_duration=1, block_network=False, enable_usage_statistics=True):
+    if data_context_id is None:
+        data_context_id = str(uuid.uuid4())
+
     if block_network:
         socket.socket = guard
 
@@ -54,7 +58,7 @@ def main(nap_duration=1, block_network=False, enable_usage_statistics=True):
                 anonymous_usage_statistics={
                     "enabled": enable_usage_statistics,
                     # Leaving data_context_id as none would cause a new id to be generated
-                    "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
+                    "data_context_id": data_context_id,
                     # This will be overridden when tests set an environment variable
                     "usage_statistics_url":
                         "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics",
@@ -81,8 +85,10 @@ def main(nap_duration=1, block_network=False, enable_usage_statistics=True):
 
 
 if __name__ == '__main__':
+    data_context_id = sys.argv[1]
+
     try:
-        nap_duration = int(sys.argv[1])
+        nap_duration = int(sys.argv[2])
     except IndexError:
         nap_duration = 1
     except ValueError:
@@ -90,7 +96,7 @@ if __name__ == '__main__':
         nap_duration = 1
 
     try:
-        res = sys.argv[2]
+        res = sys.argv[3]
         if res in ["y", "yes", "True", "true", "t", "T"]:
             block_network = True
         else:
@@ -102,7 +108,7 @@ if __name__ == '__main__':
         block_network = False
 
     try:
-        res = sys.argv[3]
+        res = sys.argv[4]
         if res in ["y", "yes", "True", "true", "t", "T"]:
             enable_usage_statistics = True
         else:
@@ -115,4 +121,4 @@ if __name__ == '__main__':
 
     ge_logger = logging.getLogger("great_expectations")
     ge_logger.setLevel(logging.DEBUG)
-    main(nap_duration, block_network=block_network, enable_usage_statistics=enable_usage_statistics)
+    main(data_context_id, nap_duration, block_network=block_network, enable_usage_statistics=enable_usage_statistics)
