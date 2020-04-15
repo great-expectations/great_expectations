@@ -41,7 +41,9 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "rendered_output: produces rendered output that should be manually reviewed."
     )
-
+    config.addinivalue_line(
+        "markers", "aws_integration: runs aws integration test that may be very slow and requires credentials"
+    )
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -52,6 +54,9 @@ def pytest_addoption(parser):
     )
     parser.addoption(
         "--no-postgresql", action="store_true", help="If set, suppress tests against postgresql"
+    )
+    parser.addoption(
+        "--aws-integration", action="store_true", help="If set, run aws integration tests"
     )
 
 
@@ -104,6 +109,16 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("test_backend", test_backends)
     if "test_backends" in metafunc.fixturenames:
         metafunc.parametrize("test_backends", [test_backends])
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--aws-integration"):
+        # --aws-integration given in cli: do not skip aws-integration tests
+        return
+    skip_aws_integration = pytest.mark.skip(reason="need --aws-integration option to run")
+    for item in items:
+        if "aws_integration" in item.keywords:
+            item.add_marker(skip_aws_integration)
 
 
 @pytest.fixture

@@ -120,7 +120,8 @@ install:
 before_script:
 - psql -c 'create database test_ci;' -U postgres
 script:
-- pytest --cov=great_expectations --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL
+- pytest --aws-integration --cov=great_expectations --slack_hook=$SLACK_WEBHOOK \
+  --slack_report_link=$TRAVIS_BUILD_WEB_URL \
   --slack_channel=notifications-great_expectations tests/
 after_success:
 - coveralls
