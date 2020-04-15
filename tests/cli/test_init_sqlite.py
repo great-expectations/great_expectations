@@ -86,7 +86,7 @@ def test_cli_init_on_new_project(
 
     first_suite = context.list_expectation_suites()[0]
     suite = context.get_expectation_suite(first_suite.expectation_suite_name)
-    assert len(suite.expectations) == 13
+    assert len(suite.expectations) == 14
 
     assert os.path.isdir(ge_dir)
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
@@ -227,7 +227,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
 
     first_suite = context.list_expectation_suites()[0]
     suite = context.get_expectation_suite(first_suite.expectation_suite_name)
-    assert len(suite.expectations) == 13
+    assert len(suite.expectations) == 14
 
     assert os.path.isdir(ge_dir)
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")

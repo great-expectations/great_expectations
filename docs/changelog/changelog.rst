@@ -2,12 +2,26 @@
 
 develop
 -----------------
+* New SuiteBuilderProfiler that facilitates faster suite generation by allowing columns to be profiled
+* Added two convenience methods to ExpectationSuite: get_table_expectations & get_column_expectations
+* Added optional profiler_configuration to DataContext.profile() and DataAsset.profile()
+* Added list_available_expectation_types() to DataAsset
+
+0.9.11
+-----------------
+* Add evaluation parameters support in WarningAndFailureExpectationSuitesValidationOperator `#1284 <https://github.com/great-expectations/great_expectations/issues/1284>`_ thanks `@balexander <https://github.com/balexander>`_
+* Fix compatibility with MS SQL Server. `#1269 <https://github.com/great-expectations/great_expectations/issues/1269>`_ thanks `@kepiej <https://github.com/kepiej>`_
+* Bug fixes for query_generator `#1292 <https://github.com/great-expectations/great_expectations/issues/1292>`_ thanks `@ian-whitestone <https://github.com/ian-whitestone>`_
+
+0.9.10
+-----------------
 * Data Docs: improve configurability of site_section_builders
 * TupleFilesystemStoreBackend now ignore `.ipynb_checkpoints` directories `#1203 <https://github.com/great-expectations/great_expectations/issues/1203>`_
+* bugfix for Data Docs links encoding on S3 `#1235 <https://github.com/great-expectations/great_expectations/issues/1235>`_
 
 0.9.9
 -----------------
-* Allow eveluation parameters support in run_validation_operator
+* Allow evaluation parameters support in run_validation_operator
 * Add log_level parameter to jupyter_ux.setup_notebook_logging.
 * Add experimental display_profiled_column_evrs_as_section and display_column_evrs_as_section methods, with a minor (nonbreaking) refactor to create a new _render_for_jupyter method.
 * Allow selection of site in UpdateDataDocsAction with new arg target_site_names in great_expectations.yml

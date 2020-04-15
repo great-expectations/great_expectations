@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+import urllib
 from collections import OrderedDict
 
 import traceback
@@ -297,7 +298,6 @@ class SiteIndexPageRenderer(Renderer):
 
     @classmethod
     def render(cls, index_links_dict):
-
         sections = []
         cta_object = index_links_dict.pop("cta_object", None)
 

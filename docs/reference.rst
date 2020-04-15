@@ -77,7 +77,6 @@ Extending Great Expectations
    :maxdepth: 2
 
    /reference/extending_great_expectations
-   /reference/contributing
    /reference/improving_library_documentation
 
 
@@ -90,3 +89,4 @@ Supporting Resources
 
    /reference/supporting_resources
    /reference/glossary
+   /reference/check_assets

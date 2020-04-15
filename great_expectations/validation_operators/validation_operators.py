@@ -402,7 +402,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         
         return query
 
-    def run(self, assets_to_validate, run_id, base_expectation_suite_name=None):
+    def run(self, assets_to_validate, run_id, base_expectation_suite_name=None, evaluation_parameters=None):
         if base_expectation_suite_name is None:
             if self.base_expectation_suite_name is None:
                 raise ValueError("base_expectation_suite_name must be configured in the validation operator or passed at runtime")
@@ -452,7 +452,8 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
             if failure_expectation_suite:
                 return_obj["failure"][failure_validation_result_id] = {}
-                failure_validation_result = batch.validate(failure_expectation_suite, result_format="SUMMARY")
+                failure_validation_result = batch.validate(failure_expectation_suite, result_format="SUMMARY",
+                                                           evaluation_parameters=evaluation_parameters)
                 return_obj["failure"][failure_validation_result_id]["validation_result"] = failure_validation_result
                 failure_actions_results = self._run_actions(
                     batch,
@@ -487,7 +488,8 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
             if warning_expectation_suite:
                 return_obj["warning"][warning_validation_result_id] = {}
-                warning_validation_result = batch.validate(warning_expectation_suite, result_format="SUMMARY")
+                warning_validation_result = batch.validate(warning_expectation_suite, result_format="SUMMARY",
+                                                           evaluation_parameters=evaluation_parameters)
                 return_obj["warning"][warning_validation_result_id]["validation_result"] = warning_validation_result
                 warning_actions_results = self._run_actions(
                     batch,
