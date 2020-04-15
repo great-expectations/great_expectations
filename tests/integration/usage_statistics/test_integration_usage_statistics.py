@@ -158,17 +158,26 @@ def test_usage_statistics_transmission(aws_session):
     assert "Ending a long nap" in outs
     assert "KeyboardInterrupt" not in errs
     assert errs.count("201") == 4
-    time.sleep(120)
+    print(data_context_id)
+    time.sleep(60)
     queryId = client.start_query(
         logGroupName=logGroupName,
-        startTime=int((datetime.datetime.now() - datetime.timedelta(minutes=5)).timestamp()),
+        startTime=int((datetime.datetime.now() - datetime.timedelta(minutes=10)).timestamp()),
         endTime=int((datetime.datetime.now() - datetime.timedelta(seconds=1)).timestamp()),
         queryString='fields @timestamp, @message | filter data_context_id = "' + data_context_id + '"',
         limit=40
     ).get("queryId")
-    response = client.get_query_results(
-        queryId=queryId
-    )
+    done = False
+    tries = 0
+    while tries < 3 and not done:
+        time.sleep(5)
+        response = client.get_query_results(
+            queryId=queryId
+        )
+        tries += 1
+        done = response["status"] == "Complete"
+
+    print(response)
     assert response["statistics"]["recordsMatched"] == 4
 
 
@@ -210,17 +219,27 @@ def test_send_completes_on_kill(aws_session):
     assert "Ending a long nap" not in outs
     assert "KeyboardInterrupt" in errs
     assert errs.count("201") == 4
-    time.sleep(120)
+    # An estimate for how long indexing takes...
+    time.sleep(60)
+    print(data_context_id)
     queryId = client.start_query(
         logGroupName=logGroupName,
-        startTime=int((datetime.datetime.now() - datetime.timedelta(minutes=5)).timestamp()),
+        startTime=int((datetime.datetime.now() - datetime.timedelta(minutes=10)).timestamp()),
         endTime=int((datetime.datetime.now() - datetime.timedelta(seconds=1)).timestamp()),
         queryString='fields @timestamp, @message | filter data_context_id = "' + data_context_id + '"',
         limit=40
     ).get("queryId")
-    response = client.get_query_results(
-        queryId=queryId
-    )
+    done = False
+    tries = 0
+    while tries < 3 and not done:
+        time.sleep(5)
+        response = client.get_query_results(
+            queryId=queryId
+        )
+        tries += 1
+        done = response["status"] == "Complete"
+
+    print(response)
     assert response["statistics"]["recordsMatched"] == 4
 
 
