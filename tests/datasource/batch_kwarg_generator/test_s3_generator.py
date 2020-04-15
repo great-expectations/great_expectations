@@ -5,7 +5,7 @@ import pandas as pd
 import boto3
 from moto import mock_s3
 
-from great_expectations.datasource.generator.s3_generator import S3GlobReaderBatchKwargsGenerator
+from great_expectations.datasource.batch_kwargs_generator.s3_batch_kwargs_generator import S3GlobReaderBatchKwargsGenerator
 from great_expectations.exceptions import BatchKwargsError
 
 
@@ -105,7 +105,7 @@ def test_s3_generator_basic_operation(s3_generator):
 
 
 def test_s3_generator_incremental_fetch(s3_generator, caplog):
-    caplog.set_level(logging.DEBUG, logger="great_expectations.datasource.generator.s3_generator")
+    caplog.set_level(logging.DEBUG, logger="great_expectations.datasource.batch_kwargs_generator.s3_batch_kwargs_generator")
 
     # When max_keys is not set, it defaults to 1000, so all items are returned in the first iterator batch,
     # causing only one fetch (and one log entry referencing the startup of the method)

@@ -66,7 +66,6 @@ Advanced Features
    /reference/stores_reference
    /reference/batch_identification
    /reference/validation_operators
-   /reference/usage_statistics
    /reference/metric_reference
 
 *****************************

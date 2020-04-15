@@ -813,6 +813,13 @@ class DataAsset(object):
             elif not isinstance(expectation_suite, ExpectationSuite):
                 logger.error("Unable to validate using the provided value for expectation suite; does it need to be "
                              "loaded from a dictionary?")
+                if getattr(data_context, "_usage_statistics_handler", None):
+                    handler = data_context._usage_statistics_handler
+                    handler.send_usage_message(
+                        event="data_asset.validate",
+                        event_payload=handler._batch_anonymizer.anonymize_batch_info(self),
+                        success=False
+                    )
                 return ExpectationValidationResult(success=False)
             # Evaluation parameter priority is
             # 1. from provided parameters
@@ -958,10 +965,24 @@ class DataAsset(object):
 
             self._data_context = validate__data_context
         except Exception:
+            if getattr(data_context, "_usage_statistics_handler", None):
+                handler = data_context._usage_statistics_handler
+                handler.send_usage_message(
+                    event="data_asset.validate",
+                    event_payload=handler._batch_anonymizer.anonymize_batch_info(self),
+                    success=False
+                )
             raise
         finally:
             self._active_validation = False
 
+        if getattr(data_context, "_usage_statistics_handler", None):
+            handler = data_context._usage_statistics_handler
+            handler.send_usage_message(
+                event="data_asset.validate",
+                event_payload=handler._batch_anonymizer.anonymize_batch_info(self),
+                success=True
+            )
         return result
 
     def get_evaluation_parameter(self, parameter_name, default_value=None):

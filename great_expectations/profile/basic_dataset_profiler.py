@@ -11,7 +11,6 @@ try:
 except ModuleNotFoundError:
     OperationalError = RuntimeError
 
-
 logger = logging.getLogger(__name__)
 
 
