@@ -3,13 +3,24 @@
 Initialize a Data Context
 ===============================================
 
+In Great Expectations, your ``DataContext`` manages boilerplate configuration. Using a DataContext is almost always the fastest way to get up and running, even though some teams don't need every component of a DataContext.
+
+If you really want to learn the components of Great Expectations without a DataContext, check out `A magic-free introduction to Great Expectations.`_
+
+
+Install Great Expectations
+-----------------------------------------------
 
 If you haven't already, install Great Expectations.
 
 We recommend deploying within a virtual environment. If you're not familiar with pip, virtual environments, notebooks,
 or git, you may want to check out the :ref:`supporting_resources` section before continuing.
 
-The command to install is especially great `if you're a Dickens fan`__:
+.. raw:: html
+
+   The command to install is especially great <a href="../_images/pip_install_great_expectations.png" target="_blank">if you're a Dickens fan</a>:
+   <br/>
+   <br/>
 
 .. code-block:: bash
 
