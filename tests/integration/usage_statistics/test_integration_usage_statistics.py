@@ -161,8 +161,8 @@ def test_usage_statistics_transmission(aws_session):
     time.sleep(120)
     queryId = client.start_query(
         logGroupName=logGroupName,
-        startTime=int((datetime.datetime.now() - datetime.datetime.timedelta(minutes=5)).timestamp()),
-        endTime=int((datetime.datetime.now() - datetime.datetime.timedelta(seconds=1)).timestamp()),
+        startTime=int((datetime.datetime.now() - datetime.timedelta(minutes=5)).timestamp()),
+        endTime=int((datetime.datetime.now() - datetime.timedelta(seconds=1)).timestamp()),
         queryString='fields @timestamp, @message | filter data_context_id = "' + data_context_id + '"',
         limit=40
     ).get("queryId")
@@ -213,8 +213,8 @@ def test_send_completes_on_kill(aws_session):
     time.sleep(120)
     queryId = client.start_query(
         logGroupName=logGroupName,
-        startTime=int((datetime.datetime.now() - datetime.datetime.timedelta(minutes=5)).timestamp()),
-        endTime=int((datetime.datetime.now() - datetime.datetime.timedelta(seconds=1)).timestamp()),
+        startTime=int((datetime.datetime.now() - datetime.timedelta(minutes=5)).timestamp()),
+        endTime=int((datetime.datetime.now() - datetime.timedelta(seconds=1)).timestamp()),
         queryString='fields @timestamp, @message | filter data_context_id = "' + data_context_id + '"',
         limit=40
     ).get("queryId")
