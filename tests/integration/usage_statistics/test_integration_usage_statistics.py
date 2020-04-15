@@ -127,36 +127,6 @@ def valid_usage_statistics_message():
 }
 
 
-@pytest.fixture(scope="session")
-def logstream(aws_session, valid_usage_statistics_message):
-    client = aws_session.client('logs', region_name='us-east-1')
-    # Warm up a logstream
-    logStreamName = None
-    message = copy.deepcopy(valid_usage_statistics_message)
-    message["data_context_id"] = "00000000-0000-0000-0000-000000000000"
-    res = requests.post(USAGE_STATISTICS_QA_URL, json=message)
-    assert res.status_code == 201
-    attempts = 0
-    while attempts < 3:
-        attempts += 1
-        logStreams = client.describe_log_streams(
-            logGroupName=logGroupName,
-            orderBy='LastEventTime',
-            descending=True,
-            limit=2,
-        )
-        lastEventTimestamp = logStreams["logStreams"][0].get("lastEventTimestamp")
-        if lastEventTimestamp is not None:
-            lastEvent = datetime.datetime.fromtimestamp(lastEventTimestamp / 1000)
-            if (lastEvent - datetime.datetime.now()) < datetime.timedelta(seconds=30):
-                logStreamName = logStreams["logStreams"][0]["logStreamName"]
-                break
-        time.sleep(2)
-    if logStreamName is None:
-        assert False, "Unable to warm up a log stream for integration testing."
-    yield logStreamName
-
-
 def test_send_malformed_data(valid_usage_statistics_message):
     # We should be able to successfully send a valid message, but find that
     # a malformed message is not accepted
@@ -168,12 +138,11 @@ def test_send_malformed_data(valid_usage_statistics_message):
     assert res.status_code == 400
 
 
-def test_usage_statistics_transmission(aws_session, logstream):
-    logStreamName = logstream
+@pytest.mark.aws_integration
+def test_usage_statistics_transmission(aws_session):
     client = aws_session.client('logs', region_name='us-east-1')
     usage_stats_url_env = dict(**os.environ)
     usage_stats_url_env["GE_USAGE_STATISTICS_URL"] = USAGE_STATISTICS_QA_URL
-    start_time = int(time.time() / 1000)
     data_context_id = str(uuid.uuid4())
     p = subprocess.Popen(
         ["python", file_relative_path(__file__, "./instantiate_context_with_usage_statistics.py"), data_context_id,
@@ -192,8 +161,8 @@ def test_usage_statistics_transmission(aws_session, logstream):
     time.sleep(120)
     queryId = client.start_query(
         logGroupName=logGroupName,
-        startTime=start_time,
-        endTime=start_time + 30,
+        startTime=int((datetime.datetime.now() - datetime.datetime.timedelta(minutes=5)).timestamp()),
+        endTime=int((datetime.datetime.now() - datetime.datetime.timedelta(seconds=1)).timestamp()),
         queryString='fields @timestamp, @message | filter data_context_id = "' + data_context_id + '"',
         limit=40
     ).get("queryId")
@@ -202,8 +171,9 @@ def test_usage_statistics_transmission(aws_session, logstream):
     )
     assert response["statistics"]["recordsMatched"] == 4
 
-def test_send_completes_on_kill(aws_session, logstream):
-    logStreamName = logstream
+
+@pytest.mark.aws_integration
+def test_send_completes_on_kill(aws_session):
     client = aws_session.client('logs', region_name='us-east-1')
     """Test that having usage statistics enabled does not negatively impact kill signals or cause loss of queued usage statistics. """
     # Execute process that initializes data context
@@ -211,7 +181,6 @@ def test_send_completes_on_kill(aws_session, logstream):
     acceptable_shutdown_time = 1
     nap_time = 30
     start = datetime.datetime.now()
-    start_time = int(time.time() / 1000)
     usage_stats_url_env = dict(**os.environ)
     usage_stats_url_env["GE_USAGE_STATISTICS_URL"] = USAGE_STATISTICS_QA_URL
     data_context_id = str(uuid.uuid4())
@@ -222,9 +191,7 @@ def test_send_completes_on_kill(aws_session, logstream):
         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         env=usage_stats_url_env
     )
-
     time.sleep(acceptable_startup_time)
-
     # Send a signal to kill
     p.send_signal(signal.SIGINT)
     outs, errs = p.communicate()
@@ -246,8 +213,8 @@ def test_send_completes_on_kill(aws_session, logstream):
     time.sleep(120)
     queryId = client.start_query(
         logGroupName=logGroupName,
-        startTime=start_time,
-        endTime=start_time + 30,
+        startTime=int((datetime.datetime.now() - datetime.datetime.timedelta(minutes=5)).timestamp()),
+        endTime=int((datetime.datetime.now() - datetime.datetime.timedelta(seconds=1)).timestamp()),
         queryString='fields @timestamp, @message | filter data_context_id = "' + data_context_id + '"',
         limit=40
     ).get("queryId")
