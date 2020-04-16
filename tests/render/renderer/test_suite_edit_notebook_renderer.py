@@ -9,7 +9,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from great_expectations import DataContext
 from great_expectations.cli.suite import _suite_edit
 from great_expectations.core import ExpectationSuiteSchema
-from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
+from great_expectations.render.renderer.suite_edit_notebook_renderer import SuiteEditNotebookRenderer
 
 
 @pytest.fixture
@@ -378,7 +378,7 @@ def warning_suite():
 def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
     critical_suite_with_citations,
 ):
-    obs = NotebookRenderer().render(critical_suite_with_citations)
+    obs = SuiteEditNotebookRenderer().render(critical_suite_with_citations)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -490,7 +490,7 @@ def test_render_with_no_column_cells(
     critical_suite_with_citations,
 ):
     critical_suite_with_citations.expectations = []
-    obs = NotebookRenderer().render(critical_suite_with_citations)
+    obs = SuiteEditNotebookRenderer().render(critical_suite_with_citations)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -592,7 +592,7 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
 ):
     suite_with_no_kwargs_in_citations = critical_suite_with_citations
     suite_with_no_kwargs_in_citations.meta["citations"][0].pop("batch_kwargs")
-    obs = NotebookRenderer().render(suite_with_no_kwargs_in_citations)
+    obs = SuiteEditNotebookRenderer().render(suite_with_no_kwargs_in_citations)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -704,7 +704,7 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
     suite_with_no_kwargs_in_citations = critical_suite_with_citations
     suite_with_no_kwargs_in_citations.meta["citations"][0].pop("batch_kwargs")
     batch_kwargs = {"foo": "bar", "datasource": "things"}
-    obs = NotebookRenderer().render(suite_with_no_kwargs_in_citations, batch_kwargs)
+    obs = SuiteEditNotebookRenderer().render(suite_with_no_kwargs_in_citations, batch_kwargs)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -813,7 +813,7 @@ context.open_data_docs(validation_result_identifier)""",
 def test_render_with_no_batch_kwargs_and_no_citations(critical_suite_with_citations):
     suite_with_no_citations = critical_suite_with_citations
     suite_with_no_citations.meta.pop("citations")
-    obs = NotebookRenderer().render(suite_with_no_citations)
+    obs = SuiteEditNotebookRenderer().render(suite_with_no_citations)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -923,7 +923,7 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
     critical_suite_with_citations,
 ):
     batch_kwargs = {"foo": "bar", "datasource": "things"}
-    obs = NotebookRenderer().render(critical_suite_with_citations, batch_kwargs)
+    obs = SuiteEditNotebookRenderer().render(critical_suite_with_citations, batch_kwargs)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -1032,7 +1032,7 @@ context.open_data_docs(validation_result_identifier)""",
 def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
     suite_with_multiple_citations,
 ):
-    obs = NotebookRenderer().render(suite_with_multiple_citations)
+    obs = SuiteEditNotebookRenderer().render(suite_with_multiple_citations)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -1141,7 +1141,7 @@ context.open_data_docs(validation_result_identifier)""",
 def test_batch_kwarg_path_relative_is_modified_and_found_in_a_code_cell(
     critical_suite_with_citations,
 ):
-    obs = NotebookRenderer().render(critical_suite_with_citations, {"path": "foo/data"})
+    obs = SuiteEditNotebookRenderer().render(critical_suite_with_citations, {"path": "foo/data"})
     assert isinstance(obs, dict)
     found_expected = False
     for cell in obs["cells"]:
@@ -1158,7 +1158,7 @@ def test_batch_kwarg_path_relative_is_modified_and_found_in_a_code_cell(
 def test_batch_kwarg_path_relative_dot_slash_is_modified_and_found_in_a_code_cell(
     critical_suite_with_citations,
 ):
-    obs = NotebookRenderer().render(
+    obs = SuiteEditNotebookRenderer().render(
         critical_suite_with_citations, {"path": "./foo/data"}
     )
     assert isinstance(obs, dict)
@@ -1177,7 +1177,7 @@ def test_batch_kwarg_path_relative_dot_slash_is_modified_and_found_in_a_code_cel
 def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
     critical_suite_with_citations,
 ):
-    obs = NotebookRenderer().render(
+    obs = SuiteEditNotebookRenderer().render(
         critical_suite_with_citations, {"path": "/home/user/foo/data"}
     )
     assert isinstance(obs, dict)
@@ -1194,7 +1194,7 @@ def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
 
 
 def test_complex_suite(warning_suite):
-    obs = NotebookRenderer().render(warning_suite, {"path": "foo/data"})
+    obs = SuiteEditNotebookRenderer().render(warning_suite, {"path": "foo/data"})
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -1546,13 +1546,8 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
 
     # Create notebook
     json_batch_kwargs = json.dumps(batch_kwargs)
-    _suite_edit(
-        suite_name,
-        "mydatasource",
-        directory=root_dir,
-        jupyter=False,
-        batch_kwargs=json_batch_kwargs,
-    )
+    _suite_edit(suite_name, "mydatasource", directory=root_dir, jupyter=False,
+                batch_kwargs=json_batch_kwargs, usage_event="test.notebook_execution")
     edit_notebook_path = os.path.join(uncommitted_dir, "warning.ipynb")
     assert os.path.isfile(edit_notebook_path)
 

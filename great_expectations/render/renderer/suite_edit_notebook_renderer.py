@@ -7,11 +7,11 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.render.renderer.renderer import Renderer
 
 
-class NotebookRenderer(Renderer):
+class SuiteEditNotebookRenderer(Renderer):
     """
-    Render a notebook that can re-create or edit the suite.
+    Render a notebook that can re-create or edit a suite.
 
-    Possible use cases:
+    Use cases:
     - Make an easy path to edit a suite that a Profiler created.
     - Make it easy to edit a suite where only JSON exists.
     """

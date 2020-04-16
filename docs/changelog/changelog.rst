@@ -2,7 +2,7 @@
 
 develop
 -----------------
-
+* renamed NotebookRenderer to SuiteEditNotebookRenderer
 
 0.10.1
 -----------------
