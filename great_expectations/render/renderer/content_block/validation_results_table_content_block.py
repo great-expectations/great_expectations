@@ -25,7 +25,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     _rendered_component_type = RenderedTableContent
     _rendered_component_default_init_kwargs = {
         "table_options": {
-            "search": True
+            "search": True,
+            "icon-size": "sm"
         }
     }
 
