@@ -164,7 +164,7 @@ def test_rendering_components_without_section_loop_index():
 <div id="content-block-2" >
     <div id="content-block-2-header" >
         <h5>
-            <span>Overview</span>
+            Overview
         </h5>
     </div>
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
@@ -181,7 +181,7 @@ def test_rendering_components_without_section_loop_index():
 <div id="content-block" >
     <div id="content-block-header" >
         <h5>
-            <span>Overview</span>
+            Overview
         </h5>
     </div>
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
@@ -199,7 +199,7 @@ def test_rendering_components_without_section_loop_index():
 <div id="content-block" >
     <div id="content-block-header" >
         <h5>
-            <span>Overview</span>
+            Overview
         </h5>
     </div>
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
@@ -297,15 +297,30 @@ def test_rendering_components_with_styling():
                 </span>
             </div>
             <div id="section-1-content-block-2-subheader" class="subheader_foo" subheader="baz" style="subheader:bar;" >
+              
                 <span >
                     <span class="yy" >aaa</span> <span class="xx" >bbb</span> <span class="xx" >ccc</span>
                 </span>
             </div>
         </div>
-<table id="section-1-content-block-2-body" class="body_foo" body="baz" style="body:bar;" >
-    <tr>
-        <td id="section-1-content-block-2-cell-1-1" ><div class="show-scrollbars"><span>Mean</span></div></td><td id="section-1-content-block-2-cell-1-2" ><div class="show-scrollbars"><span>446</span></div></td></tr><tr>
-        <td id="section-1-content-block-2-cell-2-1" ><div class="show-scrollbars"><span>Minimum</span></div></td><td id="section-1-content-block-2-cell-2-2" ><div class="show-scrollbars"><span>1</span></div></td></tr></table>
+<table
+  id="section-1-content-block-2-body"
+  class="body_foo" body="baz" style="body:bar;" 
+  data-toggle="table"
+>
+      <thead hidden>
+        <tr>
+            <th>
+            </th>
+            <th>
+            </th>
+        </tr>
+      </thead>
+    <tbody>
+      <tr>
+          <td id="section-1-content-block-2-cell-1-1" ><div class="show-scrollbars">Mean</div></td><td id="section-1-content-block-2-cell-1-2" ><div class="show-scrollbars">446</div></td></tr><tr>
+          <td id="section-1-content-block-2-cell-2-1" ><div class="show-scrollbars">Minimum</div></td><td id="section-1-content-block-2-cell-2-2" ><div class="show-scrollbars">1</div></td></tr></tbody>
+</table>
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
@@ -424,7 +439,7 @@ def test_render_value_list():
 <div id="section-1-content-block-2" class="col-4" style="margin-top:20px;" >
     <div id="section-1-content-block-2-header" >
             <h5>
-                <span>Example values</span>
+                Example values
             </h5>
         </div>
 <p id="section-1-content-block-2-body" >

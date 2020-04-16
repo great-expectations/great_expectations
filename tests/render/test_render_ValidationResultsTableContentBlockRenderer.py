@@ -15,8 +15,10 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
     result = ValidationResultsTableContentBlockRenderer.render([evr_failed_with_exception]).to_json_dict()
     print(result)
     expected_result = {
-        'content_block_type': 'table', 'styling': {
-            'body': {'classes': ['table']},
+        'content_block_type': 'table',
+        'styling': {
+            'body': {
+                'classes': ['table']},
             'classes': ['ml-2', 'mr-2', 'mt-0', 'mb-0',
                         'table-responsive']}, 'table': [[{
             'content_block_type': 'string_template',
@@ -71,7 +73,9 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
                                 'tag': 'code'}}],
                     'inline_link': False}],
             '--']],
-        'header_row': ['Status', 'Expectation', 'Observed Value']}
+        'header_row': ['Status', 'Expectation', 'Observed Value'],
+        'header_row_options': {'Status': {'sortable': True}},
+        'table_options': {'search': True, 'icon-size': 'sm'}}
     assert result == expected_result
 
 
