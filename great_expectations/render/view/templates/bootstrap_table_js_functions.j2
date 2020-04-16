@@ -13,15 +13,17 @@
       "data-href": row._table_row_link_path
     }
   }
-</script>
 
-{% if table_options.get("row-style") == "rowStyleLinks" %}
-  <script>
-    $(document).ready(function() {
-      $("#{{ table_id }}").on('click-row.bs.table', function(e, row, $element) {
-          window.location = $element.data("href");
-        })
-      }
-    );
-  </script>
-{% endif %}
+  function expectationSuiteNameFilterDataCollector(value, row, formattedValue) {
+    return row._expectation_suite_name_sort;
+  }
+
+  function validationSuccessFilterDataCollector(value, row, formattedValue) {
+    return row._validation_success_text;
+  }
+
+  function clearTableFilters(tableId) {
+    $(`#${tableId}`).bootstrapTable('clearFilterControl');
+    $(`#${tableId}`).bootstrapTable('resetSearch');
+  }
+</script>
