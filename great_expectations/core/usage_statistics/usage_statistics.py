@@ -1,28 +1,28 @@
-import datetime
-import logging
-import requests
-import sys
-import platform
-import threading
-from queue import Queue
 import atexit
-import signal
+import datetime
 import json
+import logging
+import platform
+import signal
+import sys
+import threading
+from functools import wraps
+from queue import Queue
 
 import jsonschema
-
-from functools import wraps
+import requests
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core import nested_update
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import BatchAnonymizer
-from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import ExpectationSuiteAnonymizer
-from great_expectations.core.usage_statistics.schemas import usage_statistics_record_schema
-from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import StoreAnonymizer
-from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import DatasourceAnonymizer
-from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import ValidationOperatorAnonymizer
 from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import DataDocsSiteAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import DatasourceAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import ExpectationSuiteAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import StoreAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import \
+    ValidationOperatorAnonymizer
+from great_expectations.core.usage_statistics.schemas import usage_statistics_record_schema
 
 STOP_SIGNAL = object()
 
@@ -72,11 +72,17 @@ class UsageStatisticsHandler(object):
             if message == STOP_SIGNAL:
                 self._message_queue.task_done()
                 return
-            res = session.post(self._url, json=message, timeout=2)
-            logger.debug("Posted usage stats: message status " + str(res.status_code))
-            if res.status_code != 201:
-                logger.debug("Server rejected message: ", json.dumps(message, indent=2))
-            self._message_queue.task_done()
+            try:
+                res = session.post(self._url, json=message, timeout=2)
+                logger.debug("Posted usage stats: message status " + str(res.status_code))
+                if res.status_code != 201:
+                    logger.debug("Server rejected message: ", json.dumps(message, indent=2))
+            except requests.exceptions.Timeout:
+                logger.debug("Timeout while sending usage stats message.")
+            except Exception as e:
+                logger.debug("Unexpected error posting message: " + str(e))
+            finally:
+                self._message_queue.task_done()
 
     def send_usage_message(self, event, event_payload=None, success=None):
         """send a usage statistics message."""
@@ -253,14 +259,14 @@ def run_validation_operator_usage_statistics(
     try:
         payload["anonymized_operator_name"] = anonymizer.anonymize(validation_operator_name)
     except TypeError as e:
-        logger.warning("run_validation_operator_usage_statistics: Unable to create validation_operator_name hash")
+        logger.debug("run_validation_operator_usage_statistics: Unable to create validation_operator_name hash")
     try:
         batch_anonymizer = data_context._usage_statistics_handler._batch_anonymizer
         payload["anonymized_batches"] = [
             batch_anonymizer.anonymize_batch_info(batch) for batch in assets_to_validate
         ]
     except Exception:
-        logger.warning("run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field")
+        logger.debug("run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field")
     return payload
 
 
@@ -285,7 +291,7 @@ def save_expectation_suite_usage_statistics(
     try:
         payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(expectation_suite_name)
     except Exception:
-        logger.warning(
+        logger.debug(
             "save_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field")
     return payload
 
@@ -307,7 +313,7 @@ def edit_expectation_suite_usage_statistics(
     try:
         payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(expectation_suite_name)
     except Exception:
-        logger.warning(
+        logger.debug(
             "edit_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field")
     return payload
 
