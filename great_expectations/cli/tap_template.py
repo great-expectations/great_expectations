@@ -17,20 +17,24 @@ Usage:
 pipeline.
 """
 import sys
-
+from click.testing import CliRunner
 from great_expectations import DataContext
 
 # tap configuration
 context = DataContext("{1}")
-suite = context.get_expectation_suite("{2}")
-# You can modify your BatchKwargs to select different data
-batch_kwargs = {3}
+# validation config json file 
+validation_config_json = {3}
 
 # tap validation process
-batch = context.get_batch(batch_kwargs, suite)
-results = context.run_validation_operator("action_list_operator", [batch])
+root_dir = context.root_directory
+runner = CliRunner(mix_stderr=False)
+result = runner.invoke(
+        cli,
+        ["validation-operator", "run", "-d", root_dir, "--validation_config_file", validation_config_json],
+        catch_exceptions=False
+)
 
-if not results["success"]:
+if not result["success"]:
     print("Validation Failed!")
     sys.exit(1)
 
