@@ -39,7 +39,8 @@ class SiteIndexPageRenderer(Renderer):
             "sortName": "expectation_suite_name",
             "sortOrder": "asc",
             "pagination": "true",
-            "iconSize": "sm"
+            "iconSize": "sm",
+            "toolbarAlign": "right"
         }
         table_columns = [
             {
@@ -81,7 +82,8 @@ class SiteIndexPageRenderer(Renderer):
             "sortOrder": "desc",
             "pagination": "true",
             "filterControl": "true",
-            "iconSize": "sm"
+            "iconSize": "sm",
+            "toolbarAlign": "right"
         }
         table_columns = [
             {
@@ -150,7 +152,8 @@ class SiteIndexPageRenderer(Renderer):
             "sortOrder": "desc",
             "pagination": "true",
             "filterControl": "true",
-            "iconSize": "sm"
+            "iconSize": "sm",
+            "toolbarAlign": "right"
         }
 
         table_columns = [

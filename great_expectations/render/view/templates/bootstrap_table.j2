@@ -20,8 +20,8 @@
 {% endif %}
 
 <div id="{{ table_toolbar_id }}">
-  {% if table_options.get('filterControl') == "true" %}
-    <button class="btn btn-sm btn-secondary" onclick="clearTableFilters('{{ table_id }}')">Clear Filters</button>
+  {% if table_options.get('filterControl') == "true" or table_options.get('search') == "true" %}
+    <button class="btn btn-sm btn-secondary ml-1" onclick="clearTableFilters('{{ table_id }}')">Clear Filters</button>
   {% endif %}
 </div>
 
