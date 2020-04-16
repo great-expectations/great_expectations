@@ -2,7 +2,7 @@
 
 develop
 -----------------
-
+* removing bootstrap scrollspy on table of contents `#1282 <https://github.com/great-expectations/great_expectations/issues/1282>`_
 
 0.10.0
 -----------------
