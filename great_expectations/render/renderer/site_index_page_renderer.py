@@ -31,20 +31,21 @@ class SiteIndexPageRenderer(Renderer):
     @classmethod
     def _generate_expectation_suites_link_table(cls, index_links_dict):
         table_options = {
-            "search": True,
-            "trim-on-search": False,
-            "visible-search": True,
-            "row-style": "rowStyleLinks",
-            "row-attributes": "rowAttributesLinks",
-            "sort-name": "expectation_suite_name",
-            "sort-order": "asc",
-            "pagination": True
+            "search": "true",
+            "trimOnSearch": "false",
+            "visibleSearch": "true",
+            "rowStyle": "rowStyleLinks",
+            "rowAttributes": "rowAttributesLinks",
+            "sortName": "expectation_suite_name",
+            "sortOrder": "asc",
+            "pagination": "true",
+            "iconSize": "sm"
         }
         table_columns = [
             {
                 "field": "expectation_suite_name",
                 "title": "Expectation Suites",
-                "sortable": True
+                "sortable": "true"
             },
         ]
         expectation_suite_link_dicts = index_links_dict.get("expectations_links", [])
@@ -71,37 +72,43 @@ class SiteIndexPageRenderer(Renderer):
     @classmethod
     def _generate_profiling_results_link_table(cls, index_links_dict):
         table_options = {
-            "search": True,
-            "trim-on-search": False,
-            "visible-search": True,
-            "row-style": "rowStyleLinks",
-            "row-attributes": "rowAttributesLinks",
-            "sort-name": "run_time",
-            "sort-order": "desc",
-            "pagination": True
+            "search": "true",
+            "trimOnSearch": "false",
+            "visibleSearch": "true",
+            "rowStyle": "rowStyleLinks",
+            "rowAttributes": "rowAttributesLinks",
+            "sortName": "run_time",
+            "sortOrder": "desc",
+            "pagination": "true",
+            "filterControl": "true",
+            "iconSize": "sm"
         }
         table_columns = [
             {
                 "field": "run_time",
                 "title": "Run Time",
-                "sort-name": "_run_time_sort",
-                "sortable": True
+                "sortName": "_run_time_sort",
+                "sortable": "true",
+                "filterControl": "datepicker",
             },
             {
                 "field": "asset_name",
                 "title": "Asset Name",
-                "sortable": True
+                "sortable": "true",
+                "filterControl": "select"
             },
             {
                 "field": "batch_identifier",
                 "title": "Batch ID",
-                "sort-name": "_batch_identifier_sort",
-                "sortable": True
+                "sortName": "_batch_identifier_sort",
+                "sortable": "true",
+                "filterControl": "input",
             },
             {
                 "field": "profiler_name",
                 "title": "Profiler",
-                "sortable": True
+                "sortable": "true",
+                "filterControl": "select",
             }
         ]
         profiling_link_dicts = index_links_dict.get("profiling_links", [])
@@ -122,7 +129,6 @@ class SiteIndexPageRenderer(Renderer):
         return RenderedBootstrapTableContent(**{
             "table_columns": table_columns,
             "table_data": table_data,
-            "title_row": "Profiling Results",
             "table_options": table_options,
             "styling": {
                 "classes": ["col-12", "ge-index-page-table-container"],
@@ -135,49 +141,60 @@ class SiteIndexPageRenderer(Renderer):
     @classmethod
     def _generate_validation_results_link_table(cls, index_links_dict):
         table_options = {
-            "search": True,
-            "trim-on-search": False,
-            "visible-search": True,
-            "row-style": "rowStyleLinks",
-            "row-attributes": "rowAttributesLinks",
-            "sort-name": "run_time",
-            "sort-order": "desc",
-            "pagination": True,
+            "search": "true",
+            "trimOnSearch": "false",
+            "visibleSearch": "true",
+            "rowStyle": "rowStyleLinks",
+            "rowAttributes": "rowAttributesLinks",
+            "sortName": "run_time",
+            "sortOrder": "desc",
+            "pagination": "true",
+            "filterControl": "true",
+            "iconSize": "sm"
         }
+
         table_columns = [
             {
                 "field": "validation_success",
                 "title": "Status",
-                "sortable": True,
+                "sortable": "true",
                 "align": "center",
+                "filterControl": "select",
+                "filterDataCollector": "validationSuccessFilterDataCollector",
             },
             {
                 "field": "run_time",
                 "title": "Run Time",
-                "sort-name": "_run_time_sort",
-                "sortable": True
+                "sortName": "_run_time_sort",
+                "sortable": "true",
+                "filterControl": "datepicker",
             },
             {
                 "field": "run_name",
                 "title": "Run Name",
-                "sortable": True
+                "sortable": "true",
+                "filterControl": "input",
             },
             {
                 "field": "asset_name",
                 "title": "Asset Name",
-                "sortable": True
+                "sortable": "true",
+                "filterControl": "select"
             },
             {
                 "field": "batch_identifier",
                 "title": "Batch ID",
-                "sort-name": "_batch_identifier_sort",
-                "sortable": True
+                "sortName": "_batch_identifier_sort",
+                "sortable": "true",
+                "filterControl": "input",
             },
             {
                 "field": "expectation_suite_name",
                 "title": "Expectation Suite",
-                "sort-name": "_expectation_suite_name_sort",
-                "sortable": True
+                "sortName": "_expectation_suite_name_sort",
+                "sortable": "true",
+                "filterControl": "select",
+                "filterDataCollector": "expectationSuiteNameFilterDataCollector"
             }
         ]
         validation_link_dicts = index_links_dict.get("validations_links", [])
@@ -198,13 +215,13 @@ class SiteIndexPageRenderer(Renderer):
                 ),
                 "_expectation_suite_name_sort": dict_.get("expectation_suite_name"),
                 "_table_row_link_path": dict_.get("filepath"),
+                "_validation_success_text": "Success" if dict_.get("validation_success") else "Failed",
                 "asset_name": dict_.get("asset_name")
             })
 
         return RenderedBootstrapTableContent(**{
             "table_columns": table_columns,
             "table_data": table_data,
-            "title_row": "Validation Results",
             "table_options": table_options,
             "styling": {
                 "classes": ["col-12", "ge-index-page-table-container"],
@@ -247,9 +264,6 @@ class SiteIndexPageRenderer(Renderer):
                     "placement": "top"
                 },
                 "styling": {
-                    "styles": {
-                        "word-break": "break-all"
-                    },
                     "classes": ["m-0", "p-0"]
                 }
             }
@@ -258,9 +272,9 @@ class SiteIndexPageRenderer(Renderer):
     @classmethod
     def _get_formatted_datetime(cls, _datetime):
         if isinstance(_datetime, datetime.datetime):
-            return _datetime.strftime("%m/%e/%Y %H:%M:%S")
+            return _datetime.strftime("%m/%d/%Y %H:%M:%S")
         elif isinstance(_datetime, str):
-            return parse(_datetime).strftime("%m/%e/%Y %H:%M:%S")
+            return parse(_datetime).strftime("%m/%d/%Y %H:%M:%S")
         else:
             return None
 
@@ -287,8 +301,8 @@ class SiteIndexPageRenderer(Renderer):
                         "params": {
                             "validation_success": {
                                 "tag": "i",
-                                "classes": ["fas", "fa-check-circle", "text-success"] if
-                                    validation_success else ["fas", "fa-times", "text-danger"]
+                                "classes": ["fas", "fa-check-circle", "text-success", "ge-success-icon"] if
+                                    validation_success else ["fas", "fa-times", "text-danger", "ge-failed-icon"]
                             }
                         },
                         "classes": ["ge-index-page-table-validation-links-item"]
@@ -380,7 +394,7 @@ class SiteIndexPageRenderer(Renderer):
             exception_message = f'''\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
-diagnose and repair the underlying issue.  Detailed information follows:  
+diagnose and repair the underlying issue.  Detailed information follows:
             '''
             exception_traceback = traceback.format_exc()
             exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
