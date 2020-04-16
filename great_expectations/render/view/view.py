@@ -114,7 +114,7 @@ class DefaultJinjaView(object):
     @contextfilter
     def render_content_block(self, context, content_block, index=None, content_block_id=None):
         if type(content_block) is str:
-            return "<span>{content_block}</span>".format(content_block=content_block)
+            return content_block
         elif content_block is None:
             return ""
         elif type(content_block) is list:
