@@ -74,6 +74,7 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
     guid_safe_obs_tree = re.sub(
         r"[a-z0-9]{32}(?=\.(json|html))", "foobarbazguid", date_safe_obs_tree
     )
+    # print(guid_safe_obs_tree)
     assert (
         guid_safe_obs_tree
         == """great_expectations/
@@ -125,6 +126,8 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
                         short-logo-vector.svg
                         short-logo.png
                         validation_failed_unexpected_values.gif
+                    scripts/
+                        bootstrap-table-filter-control.min.js
                     styles/
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
@@ -486,6 +489,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     guid_safe_obs_tree = re.sub(
         r"[a-z0-9]{32}(?=\.(json|html))", "foobarbazguid", date_safe_obs_tree
     )
+    # print(guid_safe_obs_tree)
     assert (
         guid_safe_obs_tree
         == """great_expectations/
@@ -537,6 +541,8 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
                         short-logo-vector.svg
                         short-logo.png
                         validation_failed_unexpected_values.gif
+                    scripts/
+                        bootstrap-table-filter-control.min.js
                     styles/
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css

@@ -365,6 +365,7 @@ project_path/
 
     data_docs_dir = os.path.join(project_dir, "great_expectations/uncommitted/data_docs")
     observed = gen_directory_tree_str(data_docs_dir)
+    # print(observed)
     assert observed == """\
 data_docs/
     local_site/
@@ -402,6 +403,8 @@ data_docs/
                 short-logo-vector.svg
                 short-logo.png
                 validation_failed_unexpected_values.gif
+            scripts/
+                bootstrap-table-filter-control.min.js
             styles/
                 data_docs_custom_styles_template.css
                 data_docs_default_styles.css
