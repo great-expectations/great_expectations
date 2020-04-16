@@ -1,8 +1,9 @@
 .. _changelog:
 
-develop
+0.10.1
 -----------------
 * removing bootstrap scrollspy on table of contents `#1282 <https://github.com/great-expectations/great_expectations/issues/1282>`_
+* Silently tolerate connection timeout during usage stats reporting
 
 0.10.0
 -----------------
