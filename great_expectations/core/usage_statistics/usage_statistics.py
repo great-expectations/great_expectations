@@ -72,11 +72,17 @@ class UsageStatisticsHandler(object):
             if message == STOP_SIGNAL:
                 self._message_queue.task_done()
                 return
-            res = session.post(self._url, json=message, timeout=2)
-            logger.debug("Posted usage stats: message status " + str(res.status_code))
-            if res.status_code != 201:
-                logger.debug("Server rejected message: ", json.dumps(message, indent=2))
-            self._message_queue.task_done()
+            try:
+                res = session.post(self._url, json=message, timeout=2)
+                logger.debug("Posted usage stats: message status " + str(res.status_code))
+                if res.status_code != 201:
+                    logger.debug("Server rejected message: ", json.dumps(message, indent=2))
+            except requests.exceptions.Timeout:
+                logger.debug("Timeout while sending usage stats message.")
+            except Exception as e:
+                logger.debug("Unexpected error posting message: " + str(e))
+            finally:
+                self._message_queue.task_done()
 
     def send_usage_message(self, event, event_payload=None, success=None):
         """send a usage statistics message."""
