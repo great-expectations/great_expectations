@@ -8,8 +8,12 @@ from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.util import cli_message
 
-from .util import (
+from great_expectations.data_context.util import (
+    instantiate_class_from_config,
+    load_class,
+    safe_mmkdir,
     safe_rrmdir,
+    substitute_all_config_variables,
 )
 
 
@@ -76,7 +80,7 @@ def clean_data_docs(directory, site_name=None):
         cli_message("<red>{}</red>".format("The data docs site and project root directory must be an existing directory to clean.."))
         sys.exit(1)
 
-    if safe_rrmdir(ge_dir, exist_ok=True):
+    if crrmdir(ge_dir, exist_ok=True):
         cli.message("Cleaned data docs")
     else:
         cli_message("<red>{}</red>".format("Cleaning data docs failed.."))

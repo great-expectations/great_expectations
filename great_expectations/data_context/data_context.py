@@ -44,14 +44,14 @@ from .types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from .util import (
+from great_expectations.data_context.util import (
     instantiate_class_from_config,
     load_class,
     safe_mmkdir,
     safe_rrmdir,
     substitute_all_config_variables,
 )
-from ..validator.validator import Validator
+from great_expectations.validator.validator import Validator
 
 try:
     from urllib.parse import urlparse
@@ -1052,16 +1052,16 @@ class BaseDataContext(object):
                 "The data docs site and project root directory must be an existing directory to clean "
             )
 
-        ge_dir = os.path.join(self.root_directory, site_name)
-        if not os.path.isdir(gedir):
-            raise ge_exceptions.DataContextError(
-                "The data docs site and project root directory must be an existing directory to clean "
-            )
+         ge_dir = os.path.join(self.root_directory, site_name)
+         if not os.path.isdir(gedir):
+             raise ge_exceptions.DataContextError(
+                 "The data docs site and project root directory must be an existing directory to clean "
+             )
 
-        if safe_rrmdir(ge_dir, exist_ok=True):
-            return True
-        else:
-            return False   
+         if crrmdir(ge_dir, exist_ok=True):
+             return True
+         else:
+             return False   
 
     def profile_datasource(self,
                            datasource_name,

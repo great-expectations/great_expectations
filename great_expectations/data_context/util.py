@@ -35,8 +35,8 @@ def safe_mmkdir(directory, exist_ok=True):
         if e.errno != errno.EEXIST:
             raise
 
+
 def safe_rrmdir(directory, exist_ok=True):
-    """Simple wrapper since exist_ok is not available in python 2"""
     if not isinstance(directory, six.string_types):
         raise TypeError("directory must be of type str, not {0}".format({
             "directory_type": str(type(directory))
