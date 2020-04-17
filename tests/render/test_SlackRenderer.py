@@ -1,6 +1,3 @@
-import pytest
-
-from six import PY2
 
 from freezegun import freeze_time
 
@@ -14,14 +11,6 @@ from ..test_utils import modify_locale
 @modify_locale
 @freeze_time("09/24/2019 23:18:36")
 def test_SlackRenderer():
-    #####
-    #
-    # Skipping for PY2
-    #
-    #####
-    if PY2:
-        pytest.skip("skipping test_SlackRenderer for PY2")
-
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[], success=True,
         statistics={'evaluated_expectations': 0, 'successful_expectations': 0,

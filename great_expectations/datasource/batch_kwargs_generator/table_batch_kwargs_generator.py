@@ -90,7 +90,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 self.inspector = sqlalchemy.inspect(self.engine)
 
             except sqlalchemy.exc.OperationalError:
-                logger.warning("Unable to create inspector from engine in generator '%s'" % name)
+                logger.warning("Unable to create inspector from engine in batch kwargs generator '%s'" % name)
                 self.inspector = None
 
     def _get_iterator(self, generator_asset, query_parameters=None, limit=None, offset=None, partition_id=None):

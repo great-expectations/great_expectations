@@ -49,7 +49,7 @@ def test_sqlalchemy_datasource_custom_data_asset(data_context, test_db_connectio
                                 class_name=class_name,
                                 credentials={"connection_string": test_db_connection_string},
                                 data_asset_type=data_asset_type_config,
-                                generators={
+                                batch_kwargs_generators={
                                     "default": {
                                         "class_name": "TableBatchKwargsGenerator"
                                     }
@@ -76,7 +76,7 @@ def test_sqlalchemy_datasource_custom_data_asset(data_context, test_db_connectio
 def test_standalone_sqlalchemy_datasource(test_db_connection_string, sa):
     datasource = SqlAlchemyDatasource(
         'SqlAlchemy', connection_string=test_db_connection_string, echo=False,
-        generators={"default": {"class_name": "TableBatchKwargsGenerator"}})
+        batch_kwargs_generators={"default": {"class_name": "TableBatchKwargsGenerator"}})
 
     assert set(datasource.get_available_data_asset_names()["default"]["names"]) == {("main.table_1", "table"), ("main.table_2", "table")}
     batch_kwargs = datasource.build_batch_kwargs("default", "main.table_1")
@@ -136,12 +136,12 @@ def test_create_sqlalchemy_datasource(data_context):
 
 
 def test_sqlalchemy_source_templating(sqlitedb_engine):
-    datasource = SqlAlchemyDatasource(engine=sqlitedb_engine, generators={
+    datasource = SqlAlchemyDatasource(engine=sqlitedb_engine, batch_kwargs_generators={
         "foo": {
             "class_name": "QueryBatchKwargsGenerator"
         }
     })
-    generator = datasource.get_generator("foo")
+    generator = datasource.get_batch_kwargs_generator("foo")
     generator.add_query("test", "select 'cat' as ${col_name};")
     batch = datasource.get_batch(generator.build_batch_kwargs("test", query_parameters={'col_name': "animal_name"}))
     dataset = Validator(batch, expectation_suite=ExpectationSuite("test"), expectation_engine=SqlAlchemyDataset).get_dataset()

@@ -1,12 +1,6 @@
-from __future__ import unicode_literals
-
 import os
 import re
 import shutil
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 import pytest
 from click.testing import CliRunner
@@ -20,6 +14,11 @@ from tests.cli.test_cli import yaml
 from tests.cli.test_datasource_sqlite import _add_datasource_and_credentials_to_context
 from tests.cli.test_init_pandas import _delete_and_recreate_dir
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 
 @pytest.fixture
@@ -81,7 +80,15 @@ def test_cli_init_on_new_project(
     context = DataContext(ge_dir)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources() == [
-        {"class_name": "SqlAlchemyDatasource", "name": "titanic"}
+        {
+            "class_name": "SqlAlchemyDatasource",
+            "name": "titanic",
+            "module_name": "great_expectations.datasource",
+            'credentials': {
+                'url': str(engine.url)},
+            'data_asset_type': {'class_name': 'SqlAlchemyDataset',
+                                'module_name': 'great_expectations.dataset'},
+        }
     ]
 
     first_suite = context.list_expectation_suites()[0]
@@ -174,7 +181,12 @@ great_expectations/
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
@@ -222,7 +234,15 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     context = DataContext(ge_dir)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources() == [
-        {"class_name": "SqlAlchemyDatasource", "name": "titanic"}
+        {
+            "class_name": "SqlAlchemyDatasource",
+            "name": "titanic",
+            "module_name": "great_expectations.datasource",
+            'credentials': {
+                'url': str(engine.url)},
+            'data_asset_type': {'class_name': 'SqlAlchemyDataset',
+                                'module_name': 'great_expectations.dataset'},
+        }
     ]
 
     first_suite = context.list_expectation_suites()[0]
@@ -243,7 +263,12 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
@@ -259,6 +284,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert not context.list_expectation_suites()
 
     runner = CliRunner(mix_stderr=False)
+    url = "sqlite:///{}".format(titanic_sqlite_db_file)
     with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
         result = runner.invoke(
             cli,
@@ -272,7 +298,12 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/my_suite/".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/my_suite/".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
     assert "Error: invalid input" not in stdout
     assert "Always know what to expect from your data" in stdout
@@ -292,7 +323,15 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
     context = DataContext(ge_dir)
     assert context.list_datasources() == [
-        {"class_name": "SqlAlchemyDatasource", "name": "sqlite"}
+        {
+            "class_name": "SqlAlchemyDatasource",
+            "name": "sqlite",
+            "module_name": "great_expectations.datasource",
+            'credentials': {
+                'url': url},
+            'data_asset_type': {'class_name': 'SqlAlchemyDataset',
+                                'module_name': 'great_expectations.dataset'},
+        }
     ]
     assert context.list_expectation_suites()[0].expectation_suite_name == "my_suite"
     assert len(context.list_expectation_suites()) == 1
@@ -343,7 +382,12 @@ def initialized_sqlite_project(
     )
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -351,7 +395,15 @@ def initialized_sqlite_project(
     assert isinstance(context, DataContext)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources() == [
-        {"class_name": "SqlAlchemyDatasource", "name": "titanic"}
+        {
+            "class_name": "SqlAlchemyDatasource",
+            "name": "titanic",
+            "module_name": "great_expectations.datasource",
+            'credentials': {
+                'url': str(engine.url)},
+            'data_asset_type': {'class_name': 'SqlAlchemyDataset',
+                                'module_name': 'great_expectations.dataset'},
+        }
     ]
     return project_dir
 
@@ -375,7 +427,9 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert len(context.list_datasources()) == 2
 
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
         )
@@ -401,7 +455,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     project_dir = initialized_sqlite_project
 
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
         )
@@ -427,7 +483,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     project_dir = initialized_sqlite_project
 
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli, ["init", "-d", project_dir], input="Y\n", catch_exceptions=False,
         )
@@ -435,7 +493,12 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/index.html".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/index.html".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
     assert "Error: invalid input" not in stdout
 
@@ -468,18 +531,27 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert context.list_expectation_suites() == []
 
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli,
             ["init", "-d", project_dir],
-            input="1\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
+            input="1\nsink_me\n\n\n".format(
+                os.path.join(project_dir, "data/Titanic.csv")
+            ),
             catch_exceptions=False,
         )
     stdout = result.stdout
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/sink_me/".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/sink_me/".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
     assert "Always know what to expect from your data" in stdout
     assert "Which table would you like to use?" in stdout

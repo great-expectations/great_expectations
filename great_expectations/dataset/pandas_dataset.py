@@ -2,9 +2,7 @@ from __future__ import division
 
 import inspect
 import json
-from datetime import datetime, timedelta
 import logging
-import collections
 from datetime import datetime
 from functools import wraps
 import jsonschema
@@ -12,15 +10,17 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
-from six import PY2, PY3, integer_types, string_types
+from six import PY3, integer_types, string_types
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from .dataset import Dataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
-from great_expectations.dataset.util import \
-    is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
-    _scipy_distribution_positional_args_from_dict, validate_distribution_parameters
+from great_expectations.dataset.util import (
+    is_valid_continuous_partition_object,
+    _scipy_distribution_positional_args_from_dict,
+    validate_distribution_parameters
+)
 
 logger = logging.getLogger(__name__)
 
@@ -285,6 +285,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     # get an attribute error when trying to access them (I think this could be done in __finalize__?)
     _internal_names = pd.DataFrame._internal_names + [
         '_batch_kwargs',
+        '_batch_markers',
         '_batch_id',
         '_expectation_suite',
         '_config',
@@ -610,10 +611,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         elif type_.lower() == "dict":
             return dict,
         elif type_.lower() == "unicode":
-            if PY2:
-                return unicode
-            else:
-                return None
+            return None
         elif type_.lower() in ["string_types"]:
             return string_types
 

@@ -31,7 +31,7 @@ def validation_operators_data_context(basic_data_context_config_for_validation_o
 
     data_context.add_datasource("my_datasource",
                                 class_name="PandasDatasource",
-                                generators={
+                                batch_kwargs_generators={
                                     "subdir_reader": {
                                         "class_name": "SubdirReaderBatchKwargsGenerator",
                                         "base_directory": str(filesystem_csv_4)

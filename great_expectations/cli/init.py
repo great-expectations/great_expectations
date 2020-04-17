@@ -48,10 +48,15 @@ except ImportError:
 @click.option(
     # Note this --no-view option is mostly here for tests
     "--view/--no-view",
-    help="By default open in browser unless you specify the --no-view flag",
+    help="By default open in browser unless you specify the --no-view flag.",
     default=True,
 )
-def init(target_directory, view):
+@click.option(
+    "--usage-stats/--no-usage-stats",
+    help="By default, usage statistics are enabled unless you specify the --no-usage-stats flag.",
+    default=True
+)
+def init(target_directory, view, usage_stats):
     """
     Initialize a new Great Expectations project.
 
@@ -75,7 +80,7 @@ def init(target_directory, view):
             sys.exit(1)
 
         try:
-            context = DataContext.create(target_directory)
+            context = DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
             cli_message(ONBOARDING_COMPLETE)
             # TODO if this is correct, ensure this is covered by a test
             # cli_message(SETUP_SUCCESS)
@@ -91,7 +96,7 @@ def init(target_directory, view):
             exit(0)
 
         try:
-            context = DataContext.create(target_directory)
+            context = DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
         except DataContextError as e:
             # TODO ensure this is covered by a test
             cli_message("<red>{}</red>".format(e))

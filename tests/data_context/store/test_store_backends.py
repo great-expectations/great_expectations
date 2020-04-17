@@ -218,7 +218,6 @@ def test_TupleGCSStoreBackend():
 
     Since no package like moto exists for GCP services, we mock the GCS client
     and assert that the store backend makes the right calls for set, get, and list.
-
     """
     bucket = "leakybucket"
     prefix = "this_is_a_test_prefix"
