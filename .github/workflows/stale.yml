@@ -1,14 +1,16 @@
 name: stalebot
 
 on:
-#  issues:
-#    types: [opened, reopened]
-  schedule:
-  - cron: "5 0 1 * *"
+ issues:
+   types: [reopened]
+ schedule:
+   - cron: "5 0 1 * *"
 
 jobs:
   stale:
     runs-on: ubuntu-latest
+    env:
+      ACTIONS_STEP_DEBUG: true
     steps:
     - uses: actions/stale@v1.1.0
       with:
@@ -22,3 +24,4 @@ jobs:
         exempt-issue-label: stalebot-exempt
         operations-per-run: 30
         main: 'lib/main.js'
+        debug-only: true
