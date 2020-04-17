@@ -1,9 +1,11 @@
 import os
 
 import nbformat
+import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
+from great_expectations.exceptions import DataContextError
 from great_expectations.render.renderer.suite_scaffold_notebook_renderer import (
     SuiteScaffoldNotebookRenderer,
 )
@@ -166,3 +168,36 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     }
     suite = context.get_expectation_suite(suite_name)
     assert suite.expectations
+
+
+def test_notebook_rendering_throws_error_on_existing_suite(
+    titanic_data_context,
+):
+    """
+    To set this test up we:
+    - create a suite
+
+    We then:
+    - create a scaffold notebook for the same suite and expect an error during rendering
+    """
+    context = titanic_data_context
+    root_dir = context.root_directory
+    uncommitted_dir = os.path.join(root_dir, "uncommitted")
+    suite_name = "my_suite"
+
+    csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
+    batch_kwargs = {"datasource": "mydatasource", "path": csv_path}
+    suite = context.create_expectation_suite(suite_name)
+    context.save_expectation_suite(suite)
+
+    # Sanity check test setup
+    assert context.list_expectation_suite_names() == [suite_name]
+    notebook_path = os.path.join(uncommitted_dir, f"{suite_name}.ipynb")
+    assert not os.path.isfile(notebook_path)
+
+    # Create notebook
+    with pytest.raises(DataContextError):
+        renderer = SuiteScaffoldNotebookRenderer(
+            titanic_data_context, suite_name, batch_kwargs
+        )
+        renderer.render_to_disk(notebook_path)

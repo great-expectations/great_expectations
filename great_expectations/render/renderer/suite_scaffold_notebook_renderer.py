@@ -12,15 +12,7 @@ class SuiteScaffoldNotebookRenderer(SuiteEditNotebookRenderer):
     def __init__(self, context: DataContext, suite_name: str, batch_kwargs):
         self.context = context
         self.suite_name = suite_name
-        # TODO remove overwrite
-        # TODO remove overwrite
-        # TODO remove overwrite
-        # TODO remove overwrite
-        # TODO remove overwrite
-        # TODO remove overwrite
-        self.suite = context.create_expectation_suite(
-            suite_name, overwrite_existing=True
-        )
+        self.suite = context.create_expectation_suite(suite_name)
         self.batch_kwargs = self.get_batch_kwargs(self.suite, batch_kwargs)
         self.batch = self.load_batch(context, suite_name, batch_kwargs)
         super().__init__()
@@ -170,17 +162,3 @@ scaffold_config = {
 suite, evr = BasicSuiteBuilderProfiler().profile(batch, profiler_configuration=scaffold_config)""",
             lint=False,
         )
-
-
-if __name__ == "__main__":
-    context = DataContext("/Users/taylor/Desktop/great_expectations/")
-    suite_name = "1"
-    batch_kwargs = {
-        "datasource": "files_datasource",
-        "path": "/Users/taylor/Desktop/data/10k.csv",
-        "reader_method": "read_csv",
-    }
-    scaffolder = SuiteScaffoldNotebookRenderer(context, suite_name, batch_kwargs)
-    scaffolder.render_to_disk(
-        notebook_file_path="/Users/taylor/Desktop/great_expectations/uncommitted/working.ipynb",
-    )

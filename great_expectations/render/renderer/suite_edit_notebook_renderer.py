@@ -192,7 +192,9 @@ context.open_data_docs(validation_result_identifier)"""
         with open(notebook_file_path, "w") as f:
             nbformat.write(notebook, f)
 
-    def render(self, suite: ExpectationSuite, batch_kwargs=None) -> nbformat.NotebookNode:
+    def render(
+        self, suite: ExpectationSuite, batch_kwargs=None
+    ) -> nbformat.NotebookNode:
         """
         Render a notebook dict from an expectation suite.
         """
@@ -211,7 +213,9 @@ context.open_data_docs(validation_result_identifier)"""
 
         return self.notebook
 
-    def render_to_disk(self, suite: ExpectationSuite, notebook_file_path: str, batch_kwargs=None) -> None:
+    def render_to_disk(
+        self, suite: ExpectationSuite, notebook_file_path: str, batch_kwargs=None
+    ) -> None:
         """
         Render a notebook to disk from an expectation suite.
 
