@@ -28,6 +28,7 @@ from .tuple_store_backend import (
     TupleFilesystemStoreBackend,
     TupleS3StoreBackend,
     TupleGCSStoreBackend,
+    TupleStoreBackend
 )
 from .database_store_backend import DatabaseStoreBackend
 

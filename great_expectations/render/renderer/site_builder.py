@@ -5,7 +5,7 @@ import os
 
 import traceback
 
-from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLASS
+from great_expectations.core import nested_update
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
@@ -96,12 +96,22 @@ class SiteBuilder(object):
                  store_backend,
                  site_name=None,
                  site_index_builder=None,
+                 show_how_to_buttons=True,
                  site_section_builders=None,
-                 runtime_environment=None
+                 runtime_environment=None,
+                 **kwargs
                  ):
         self.site_name = site_name
         self.data_context = data_context
         self.store_backend = store_backend
+        self.show_how_to_buttons = show_how_to_buttons
+
+        usage_statistics_config = data_context.anonymous_usage_statistics
+        data_context_id = None
+        if usage_statistics_config and usage_statistics_config.enabled and usage_statistics_config.data_context_id:
+            data_context_id = usage_statistics_config.data_context_id
+
+        self.data_context_id = data_context_id
 
         # set custom_styles_directory if present
         custom_styles_directory = None
@@ -128,8 +138,10 @@ class SiteBuilder(object):
             runtime_environment={
                 "data_context": data_context,
                 "custom_styles_directory": custom_styles_directory,
+                "show_how_to_buttons": self.show_how_to_buttons,
                 "target_store": self.target_store,
-                "site_name": self.site_name
+                "site_name": self.site_name,
+                "data_context_id": self.data_context_id
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -144,46 +156,55 @@ class SiteBuilder(object):
                 class_name=site_index_builder['class_name']
             )
 
-        if site_section_builders is None:
-            site_section_builders = {
-                "expectations": {
-                    "class_name": "DefaultSiteSectionBuilder",
-                    "source_store_name":  data_context.expectations_store_name,
-                    "renderer": {
-                        "class_name": "ExpectationSuitePageRenderer"
-                    }
+        default_site_section_builders_config = {
+            "expectations": {
+                "class_name": "DefaultSiteSectionBuilder",
+                "source_store_name":  data_context.expectations_store_name,
+                "renderer": {
+                    "class_name": "ExpectationSuitePageRenderer"
+                }
+            },
+            "validations": {
+                "class_name": "DefaultSiteSectionBuilder",
+                "source_store_name": data_context.validations_store_name,
+                "run_id_filter": {
+                    "ne": "profiling"
                 },
-                "validations": {
-                    "class_name": "DefaultSiteSectionBuilder",
-                    "source_store_name": data_context.validations_store_name,
-                    "run_id_filter": {
-                        "ne": "profiling"
-                    },
-                    "renderer": {
-                        "class_name": "ValidationResultsPageRenderer"
-                    },
-                    "validation_results_limit": site_index_builder.get("validation_results_limit")
+                "renderer": {
+                    "class_name": "ValidationResultsPageRenderer"
                 },
-                "profiling": {
-                    "class_name": "DefaultSiteSectionBuilder",
-                    "source_store_name":  data_context.validations_store_name,
-                    "run_id_filter": {
-                        "eq": "profiling"
-                    },
-                    "renderer": {
-                        "class_name": "ProfilingResultsPageRenderer"
-                    }
+                "validation_results_limit": site_index_builder.get("validation_results_limit")
+            },
+            "profiling": {
+                "class_name": "DefaultSiteSectionBuilder",
+                "source_store_name":  data_context.validations_store_name,
+                "run_id_filter": {
+                    "eq": "profiling"
+                },
+                "renderer": {
+                    "class_name": "ProfilingResultsPageRenderer"
                 }
             }
+        }
+
+        if site_section_builders is None:
+            site_section_builders = default_site_section_builders_config
+        else:
+            site_section_builders = nested_update(default_site_section_builders_config, site_section_builders)
         self.site_section_builders = {}
         for site_section_name, site_section_config in site_section_builders.items():
+            if not site_section_config or site_section_config in \
+                    ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE']:
+                continue
             module_name = site_section_config.get('module_name') or 'great_expectations.render.renderer.site_builder'
             self.site_section_builders[site_section_name] = instantiate_class_from_config(
                 config=site_section_config,
                 runtime_environment={
                     "data_context": data_context,
                     "target_store": self.target_store,
-                    "custom_styles_directory": custom_styles_directory
+                    "custom_styles_directory": custom_styles_directory,
+                    "data_context_id": self.data_context_id,
+                    "show_how_to_buttons": self.show_how_to_buttons,
                 },
                 config_defaults={
                     "name": site_section_name,
@@ -215,7 +236,8 @@ class SiteBuilder(object):
         for site_section, site_section_builder in self.site_section_builders.items():
             site_section_builder.build(resource_identifiers=resource_identifiers)
 
-        return self.site_index_builder.build()
+        index_page_resource_identifier_tuple = self.site_index_builder.build()
+        return self.get_resource_url(), index_page_resource_identifier_tuple[1]
 
     def get_resource_url(self, resource_identifier=None):
         """
@@ -240,16 +262,21 @@ class DefaultSiteSectionBuilder(object):
             target_store,
             source_store_name,
             custom_styles_directory=None,
+            show_how_to_buttons=True,
             run_id_filter=None,
             validation_results_limit=None,
             renderer=None,
             view=None,
+            data_context_id=None,
+            **kwargs
     ):
         self.name = name
         self.source_store = data_context.stores[source_store_name]
         self.target_store = target_store
         self.run_id_filter = run_id_filter
         self.validation_results_limit = validation_results_limit
+        self.data_context_id = data_context_id
+        self.show_how_to_buttons = show_how_to_buttons
 
         if renderer is None:
             raise exceptions.InvalidConfigError(
@@ -313,7 +340,11 @@ class DefaultSiteSectionBuilder(object):
                 if not self._resource_key_passes_run_id_filter(resource_key):
                     continue
 
-            resource = self.source_store.get(resource_key)
+            try:
+                resource = self.source_store.get(resource_key)
+            except FileNotFoundError as e:
+                logger.warning(f"File {resource_key.to_fixed_length_tuple()} could not be found. Skipping.")
+                continue
 
             if isinstance(resource_key, ExpectationSuiteIdentifier):
                 expectation_suite_name = resource_key.expectation_suite_name
@@ -335,7 +366,11 @@ class DefaultSiteSectionBuilder(object):
 
             try:
                 rendered_content = self.renderer_class.render(resource)
-                viewable_content = self.view_class.render(rendered_content)
+                viewable_content = self.view_class.render(
+                    rendered_content,
+                    data_context_id=self.data_context_id,
+                    show_how_to_buttons=self.show_how_to_buttons
+                )
             except Exception as e:
                 exception_message = f'''\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
@@ -376,18 +411,21 @@ class DefaultSiteIndexBuilder(object):
             data_context,
             target_store,
             custom_styles_directory=None,
-            show_cta_footer=True,
+            show_how_to_buttons=True,
             validation_results_limit=None,
             renderer=None,
             view=None,
+            data_context_id=None,
+            **kwargs
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
         self.name = name
         self.site_name = site_name
         self.data_context = data_context
         self.target_store = target_store
-        self.show_cta_footer = show_cta_footer
         self.validation_results_limit = validation_results_limit
+        self.data_context_id = data_context_id
+        self.show_how_to_buttons = show_how_to_buttons
 
         if renderer is None:
             renderer = {
@@ -470,35 +508,37 @@ class DefaultSiteIndexBuilder(object):
         return index_links_dict
 
     def get_calls_to_action(self):
-        telemetry = None
-        db_driver = None
-        datasource_classes_by_name = self.data_context.list_datasources()
-
-        if datasource_classes_by_name:
-            last_datasource_class_by_name = datasource_classes_by_name[-1]
-            last_datasource_class_name = last_datasource_class_by_name["class_name"]
-            last_datasource_name = last_datasource_class_by_name["name"]
-            last_datasource = self.data_context.datasources[last_datasource_name]
-
-            if last_datasource_class_name == "SqlAlchemyDatasource":
-                try:
-                    db_driver = last_datasource.drivername
-                except AttributeError:
-                    pass
-
-            datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
-            telemetry = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
-                "ge-init-datadocs-v2",
-                datasource_type,
-                db_driver,
-            )
+        usage_statistics = None
+        # db_driver = None
+        # datasource_classes_by_name = self.data_context.list_datasources()
+        #
+        # if datasource_classes_by_name:
+        #     last_datasource_class_by_name = datasource_classes_by_name[-1]
+        #     last_datasource_class_name = last_datasource_class_by_name["class_name"]
+        #     last_datasource_name = last_datasource_class_by_name["name"]
+        #     last_datasource = self.data_context.datasources[last_datasource_name]
+        #
+        #     if last_datasource_class_name == "SqlAlchemyDatasource":
+        #         try:
+        #                # NOTE: JPC - 20200327 - I do not believe datasource will *ever* have a drivername property
+        #                (it's in credentials). Suspect this isn't working.
+        #             db_driver = last_datasource.drivername
+        #         except AttributeError:
+        #             pass
+        #
+        #     datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
+        #     usage_statistics = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
+        #         "ge-init-datadocs-v2",
+        #         datasource_type,
+        #         db_driver,
+        #     )
 
         return {
             "header": "To continue exploring Great Expectations check out one of these tutorials...",
-            "buttons": self._get_call_to_action_buttons(telemetry)
+            "buttons": self._get_call_to_action_buttons(usage_statistics)
         }
 
-    def _get_call_to_action_buttons(self, telemetry):
+    def _get_call_to_action_buttons(self, usage_statistics):
         """
         Build project and user specific calls to action buttons.
 
@@ -541,9 +581,9 @@ class DefaultSiteIndexBuilder(object):
         results.append(customize_data_docs)
         results.append(s3_team_site)
 
-        if telemetry:
+        if usage_statistics:
             for button in results:
-                button.link = button.link + telemetry
+                button.link = button.link + usage_statistics
 
         return results
 
@@ -574,7 +614,7 @@ class DefaultSiteIndexBuilder(object):
         index_links_dict = OrderedDict()
         index_links_dict["site_name"] = self.site_name
 
-        if self.show_cta_footer:
+        if self.show_how_to_buttons:
             index_links_dict["cta_object"] = self.get_calls_to_action()
 
         for expectation_suite_key in expectation_suite_keys:
@@ -630,7 +670,11 @@ class DefaultSiteIndexBuilder(object):
 
         try:
             rendered_content = self.renderer_class.render(index_links_dict)
-            viewable_content = self.view_class.render(rendered_content)
+            viewable_content = self.view_class.render(
+                rendered_content,
+                data_context_id=self.data_context_id,
+                show_how_to_buttons=self.show_how_to_buttons
+            )
         except Exception as e:
             exception_message = f'''\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \

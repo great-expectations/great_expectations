@@ -1,11 +1,34 @@
-import time
 import logging
+import time
+from enum import Enum
+
+from great_expectations.exceptions import GreatExpectationsError
 
 from ..data_asset import DataAsset
 from ..dataset import Dataset
-from great_expectations.exceptions import GreatExpectationsError
 
 logger = logging.getLogger(__name__)
+
+
+class ProfilerDataType(Enum):
+    INT = "int"
+    FLOAT = "float"
+    STRING = "string"
+    BOOLEAN = "boolean"
+    DATETIME = "datetime"
+    UNKNOWN = "unknown"
+
+
+class ProfilerCardinality(Enum):
+    NONE = "none"
+    ONE = "one"
+    TWO = "two"
+    FEW = "few"
+    VERY_FEW = "very few"
+    MANY = "many"
+    VERY_MANY = "very many"
+    UNIQUE = "unique"
+
 
 class DataAssetProfiler(object):
 
@@ -55,11 +78,11 @@ class DatasetProfiler(DataAssetProfiler):
         return expectation_suite
 
     @classmethod
-    def profile(cls, data_asset, run_id=None):
+    def profile(cls, data_asset, run_id=None, profiler_configuration=None):
         if not cls.validate(data_asset):
             raise GreatExpectationsError("Invalid data_asset for profiler; aborting")
 
-        expectation_suite = cls._profile(data_asset)
+        expectation_suite = cls._profile(data_asset, configuration=profiler_configuration)
 
         batch_kwargs = data_asset.batch_kwargs
         expectation_suite = cls.add_meta(expectation_suite, batch_kwargs)
@@ -73,5 +96,5 @@ class DatasetProfiler(DataAssetProfiler):
         return expectation_suite, validation_results
 
     @classmethod
-    def _profile(cls, dataset):
+    def _profile(cls, dataset, configuration=None):
         raise NotImplementedError

@@ -1,7 +1,7 @@
 datasources:
   edw:
     type: sqlalchemy
-    generators:
+    batch_kwargs_generators:
       default:
         type: queries
     data_asset_type:

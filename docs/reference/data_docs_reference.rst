@@ -32,6 +32,8 @@ The default Data Docs site configuration looks like this:
       store_backend:
         class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
+      site_index_builder:
+        class_name: DefaultSiteIndexBuilder
 
 Here is an example of a site configuration from great_expectations.yml with defaults defined explicitly:
 
@@ -47,14 +49,14 @@ Here is an example of a site configuration from great_expectations.yml with defa
       site_index_builder:
         class_name: DefaultSiteIndexBuilder
       site_section_builders:
-        expectations: # if not present, expectation suites are not rendered
+        expectations:  # if empty, or one of ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE'], section not rendered
           class_name: DefaultSiteSectionBuilder
           source_store_name: expectations_store
           renderer:
             module_name: great_expectations.render.renderer
             class_name: ExpectationSuitePageRenderer
 
-        validations: # if not present, validation results are not rendered
+        validations:  # if empty, or one of ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE'], section not rendered
           class_name: DefaultSiteSectionBuilder
           source_store_name: validations_store
           run_id_filter:
@@ -63,7 +65,7 @@ Here is an example of a site configuration from great_expectations.yml with defa
             module_name: great_expectations.render.renderer
             class_name: ValidationResultsPageRenderer
 
-        profiling: # if not present, profiling results are not rendered
+        profiling:  # if empty, or one of ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE'], section not rendered
           class_name: DefaultSiteSectionBuilder
           source_store_name: validations_store
           run_id_filter:
@@ -89,12 +91,12 @@ do so by setting the `validation_results_limit` key in your Data Docs configurat
   data_docs_sites:
     local_site:
       class_name: SiteBuilder
+      show_how_to_buttons: true
       store_backend:
         class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
       site_index_builder:
         class_name: DefaultSiteIndexBuilder
-        show_cta_footer: true
         validation_results_limit: 5
 
 Automatically Publishing Data Docs
@@ -135,14 +137,7 @@ the validations renderer, and no profiling results are rendered at all.
           class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
         site_section_builders:
-          expectations:
-            class_name: DefaultSiteSectionBuilder
-            source_store_name: expectations_store
-            renderer:
-              module_name: great_expectations.render.renderer
-              class_name: ExpectationSuitePageRenderer
-
-          validations:
+          validations:  # if empty, or one of ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE'], section not rendered
             class_name: DefaultSiteSectionBuilder
             source_store_name: validations_store
             run_id_filter:
@@ -155,6 +150,8 @@ the validations renderer, and no profiling results are rendered at all.
                 table_renderer:
                   module_name: custom_renderers.custom_table_content_block
                   class_name: CustomTableContentBlockRenderer
+
+          profiling:  # if empty, or one of ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE'], section not rendered
 
 To support that custom renderer, we need to ensure the implementation is available in our plugins/ directory.
 Note that we can use a subdirectory and standard python submodule notation, but that we need to include an __init__.py
@@ -368,6 +365,8 @@ Before modifying your project configuration, the relevant section looks like thi
       store_backend:
         class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
+      site_index_builder:
+        class_name: DefaultSiteIndexBuilder
 
 This is what it looks like after your changes are added:
 
@@ -379,10 +378,10 @@ This is what it looks like after your changes are added:
         store_backend:
           class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
+        site_index_builder:
+          class_name: DefaultSiteIndexBuilder
         site_section_builders:
           expectations:
-            class_name: DefaultSiteSectionBuilder
-            source_store_name: expectations_store
             renderer:
               module_name: custom_data_docs.renderers.custom_expectation_suite_page_renderer
               class_name: CustomExpectationSuitePageRenderer
@@ -390,10 +389,6 @@ This is what it looks like after your changes are added:
               module_name: custom_data_docs.views.custom_expectation_suite_view
               class_name: CustomExpectationSuiteView
           validations:
-            class_name: DefaultSiteSectionBuilder
-            source_store_name: validations_store
-            run_id_filter:
-              ne: profiling
             renderer:
               module_name: great_expectations.render.renderer
               class_name: ValidationResultsPageRenderer
@@ -402,10 +397,11 @@ This is what it looks like after your changes are added:
                 table_renderer:
                   module_name: custom_data_docs.renderers.custom_table_renderer
                   class_name: CustomTableRenderer
+          profiling:
 
-Note that if your ``data_docs_sites`` configuration contains a ``site_section_builders`` key, you must now explicitly provide
-defaults for anything you would like rendered. By omitting the ``profiling`` key within ``site_section_builders``, your third goal
-is achieved and Data Docs will no longer render Profiling Results pages.
+By providing an empty ``profiling`` key within ``site_section_builders``, your third goal
+is achieved and Data Docs will no longer render Profiling Results pages. The same can be achieved by setting the \
+``profiling`` key to any of the following values: ``['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE']``.
 
 Lastly, to compile your newly-customized Data Docs local site, you run ``great_expectations docs build`` from the command line.
 
@@ -414,14 +410,14 @@ Lastly, to compile your newly-customized Data Docs local site, you run ``great_e
 .. code-block:: yaml
 
     site_section_builders:
-      expectations: # if not present, expectation suites are not rendered
+      expectations: # if empty, or one of ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE'], section not rendered
         class_name: DefaultSiteSectionBuilder
         source_store_name: expectations_store
         renderer:
           module_name: great_expectations.render.renderer
           class_name: ExpectationSuitePageRenderer
 
-      validations: # if not present, validation results are not rendered
+      validations: # if empty, or one of ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE'], section not rendered
         class_name: DefaultSiteSectionBuilder
         source_store_name: validations_store
         run_id_filter:
@@ -430,7 +426,7 @@ Lastly, to compile your newly-customized Data Docs local site, you run ``great_e
           module_name: great_expectations.render.renderer
           class_name: ValidationResultsPageRenderer
 
-      profiling: # if not present, profiling results are not rendered
+      profiling: # if empty, or one of ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE'], section not rendered
         class_name: DefaultSiteSectionBuilder
         source_store_name: validations_store
         run_id_filter:

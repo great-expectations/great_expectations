@@ -1,7 +1,6 @@
 from .base import DatasetProfiler
 
 import warnings
-from six import string_types
 
 from ..dataset.util import create_multiple_expectations
 
@@ -9,12 +8,13 @@ from ..dataset.util import create_multiple_expectations
 class ColumnsExistProfiler(DatasetProfiler):
 
     @classmethod
-    def _profile(cls, dataset):
+    def _profile(cls, dataset, configuration=None):
         """
         This function will take a dataset and add expectations that each column present exists.
 
         Args:
             dataset (great_expectations.dataset): The dataset to profile and to which to add expectations.
+            configuration: Configuration for select profilers.
         """
         if not hasattr(dataset, 'get_table_columns'):
             warnings.warn(

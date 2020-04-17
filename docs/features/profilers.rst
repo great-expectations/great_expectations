@@ -10,7 +10,7 @@ newly-generated Expectation Suite to return a Validation Result. There are sever
 Expectations.
 
 A Profiler makes it possible to quickly create a starting point for generating expectations about a Dataset. For
-example, during the `init` flow, Great Expectations uses the `SampleExpectationsDatasetProfiler` to demonstrate
+example, during the `init` flow, Great Expectations uses the `BasicSuiteBuilderProfiler` to demonstrate
 important features of Expectations by creating and validating an Expectation Suite that has several different kinds of
 expectations built from a small sample of data. A Profiler is also critical to generating the Expectation Suites used
 during :ref:`profiling`.

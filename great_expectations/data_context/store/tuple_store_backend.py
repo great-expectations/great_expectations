@@ -259,7 +259,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 elif self.filepath_suffix and not filepath.endswith(self.filepath_suffix):
                     continue
                 key = self._convert_filepath_to_key(filepath)
-                if key:
+                if key and not self.is_ignored_key(key):
                     key_list.append(key)
 
         return key_list
@@ -380,7 +380,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         else:
             location = "s3-" + location
         s3_key = self._convert_key_to_filepath(key)
-        return "https://%s.amazonaws.com/%s/%s%s" % (location, self.bucket, self.prefix, s3_key)
+        return "https://%s.amazonaws.com/%s/%s/%s" % (location, self.bucket, self.prefix, s3_key)
 
     def _has_key(self, key):
         all_keys = self.list_keys()

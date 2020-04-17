@@ -1,16 +1,10 @@
 # TODO: ADD TESTS ONCE GET_BATCH IS INTEGRATED!
 
-import pytest
-
-from six import PY2
-
 from freezegun import freeze_time
 import pandas as pd
 
 import great_expectations as ge
-from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.validation_operators.validation_operators import (
-    ActionListValidationOperator,
     WarningAndFailureExpectationSuitesValidationOperator
 )
 
@@ -23,16 +17,6 @@ from ..test_utils import modify_locale
 @modify_locale
 @freeze_time("09/26/2019 13:42:41")
 def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
-    #####
-    #####
-    #
-    # WARNING: PY2 SUPPORT IS UNTESTED BECAUSE OF DICTIONARY ORDER ISSUES NOT YET RESOLVED
-    #
-    #####
-    #####
-    if PY2:
-        pytest.skip("skipping test_errors_warnings_validation_operator_run_slack_query in py2")
-
     project_path = str(tmp_path_factory.mktemp('great_expectations'))
 
     # NOTE: This setup is almost identical to test_DefaultDataContextAwareValidationOperator.
@@ -45,7 +29,7 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
 
     data_context.add_datasource("my_datasource",
                                 class_name="PandasDatasource",
-                                generators={
+                                batch_kwargs_generators={
                                     "subdir_reader": {
                                         "class_name": "SubdirReaderBatchKwargsGenerator",
                                         "base_directory": str(filesystem_csv_4)

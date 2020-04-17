@@ -10,7 +10,7 @@ datasources:
     type: pandas
     data_asset_type:
       class_name: PandasDataset
-    generators:
+    batch_kwargs_generators:
       default:
         reader_options:
           engine: python

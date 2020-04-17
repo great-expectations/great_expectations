@@ -16,7 +16,7 @@ from great_expectations.render.renderer.notebook_renderer import NotebookRendere
 def critical_suite_with_citations():
     """
     This hand made fixture has a wide range of expectations, and has a mix of
-    metadata including an SampleExpectationsDatasetProfiler entry, and citations.
+    metadata including an BasicSuiteBuilderProfiler entry, and citations.
     """
     schema = ExpectationSuiteSchema()
     critical_suite = {
@@ -47,7 +47,7 @@ def critical_suite_with_citations():
                         "pandas_data_fingerprint": "f6037d92eb4c01f976513bc0aec2420d",
                     },
                     "batch_parameters": None,
-                    "comment": "SampleExpectationsDatasetProfiler added a citation based on the current batch.",
+                    "comment": "BasicSuiteBuilderProfiler added a citation based on the current batch.",
                 }
             ],
             "notes": {
@@ -56,8 +56,8 @@ def critical_suite_with_citations():
                     "#### This is an _example_ suite\n\n- This suite was made by quickly glancing at 1000 rows of your data.\n- This is **not a production suite**. It is meant to show examples of expectations.\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\n"
                 ],
             },
-            "SampleExpectationsDatasetProfiler": {
-                "created_by": "SampleExpectationsDatasetProfiler",
+            "BasicSuiteBuilderProfiler": {
+                "created_by": "BasicSuiteBuilderProfiler",
                 "created_at": 1582838223.843476,
                 "batch_kwargs": {
                     "path": "/Users/foo/data/10k.csv",
@@ -72,7 +72,7 @@ def critical_suite_with_citations():
                 "meta": {
                     "question": True,
                     "Notes": "There are empty strings that should probably be nulls",
-                    "SampleExpectationsDatasetProfiler": {"confidence": "very low"},
+                    "BasicSuiteBuilderProfiler": {"confidence": "very low"},
                 },
             },
             {
@@ -133,7 +133,7 @@ def suite_with_multiple_citations():
 def warning_suite():
     """
     This hand made fixture has a wide range of expectations, and has a mix of
-    metadata including SampleExpectationsDatasetProfiler entries.
+    metadata including BasicSuiteBuilderProfiler entries.
     """
     schema = ExpectationSuiteSchema()
     warning_suite = {
@@ -152,7 +152,7 @@ def warning_suite():
                         "pandas_data_fingerprint": "f6037d92eb4c01f976513bc0aec2420d",
                     },
                     "batch_parameters": None,
-                    "comment": "SampleExpectationsDatasetProfiler added a citation based on the current batch.",
+                    "comment": "BasicSuiteBuilderProfiler added a citation based on the current batch.",
                 }
             ],
         },
@@ -169,14 +169,14 @@ def warning_suite():
                 "expectation_type": "expect_column_values_to_not_be_null",
                 "kwargs": {"column": "npi"},
                 "meta": {
-                    "SampleExpectationsDatasetProfiler": {"confidence": "very low"}
+                    "BasicSuiteBuilderProfiler": {"confidence": "very low"}
                 },
             },
             {
                 "expectation_type": "expect_column_values_to_not_be_null",
                 "kwargs": {"column": "provider_type"},
                 "meta": {
-                    "SampleExpectationsDatasetProfiler": {"confidence": "very low"}
+                    "BasicSuiteBuilderProfiler": {"confidence": "very low"}
                 },
             },
             {
@@ -1538,8 +1538,10 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     assert len(suite.expectations) == 3
     assert context.list_expectation_suite_names() == [suite_name]
     assert context.list_datasources() == [
-        {"class_name": "PandasDatasource", "name": "mydatasource"}
-    ]
+        {'module_name': 'great_expectations.datasource', 'class_name': 'PandasDatasource',
+         'data_asset_type': {'module_name': 'great_expectations.dataset', 'class_name': 'PandasDataset'},
+         'batch_kwargs_generators': {'mygenerator': {'class_name': 'SubdirReaderBatchKwargsGenerator', 'base_directory': '../data'}},
+         'name': 'mydatasource'}]
     assert context.get_validation_result("warning") == {}
 
     # Create notebook

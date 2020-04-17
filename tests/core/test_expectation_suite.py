@@ -66,6 +66,64 @@ def exp4():
 
 
 @pytest.fixture
+def column_pair_expectation():
+    return ExpectationConfiguration(
+        expectation_type="expect_column_pair_values_to_be_in_set",
+        kwargs={
+            "column_A": "1",
+            "column_B": "b",
+            "value_set": [(1, 1), (2, 2)],
+            "result_format": "BASIC"
+        },
+    )
+
+
+@pytest.fixture
+def table_exp1():
+    return ExpectationConfiguration(
+        expectation_type="expect_table_columns_to_match_ordered_list",
+        kwargs={"value": ["a", "b", "c"]},
+    )
+
+
+@pytest.fixture
+def table_exp2():
+    return ExpectationConfiguration(
+        expectation_type="expect_table_row_count_to_be_between",
+        kwargs={"min_value": 0, "max_value": 1},
+    )
+
+
+@pytest.fixture
+def table_exp3():
+    return ExpectationConfiguration(
+        expectation_type="expect_table_row_count_to_equal", kwargs={"value": 1}
+    )
+
+
+@pytest.fixture
+def empty_suite():
+    return ExpectationSuite(
+        expectation_suite_name="warning",
+        expectations=[],
+        meta={"notes": "This is an expectation suite."},
+    )
+
+
+@pytest.fixture
+def suite_with_table_and_column_expectations(
+    exp1, exp2, exp3, exp4, column_pair_expectation, table_exp1, table_exp2, table_exp3
+):
+    suite = ExpectationSuite(
+        expectation_suite_name="warning",
+        expectations=[exp1, exp2, exp3, exp4, column_pair_expectation, table_exp1, table_exp2, table_exp3],
+        meta={"notes": "This is an expectation suite."},
+    )
+    assert suite.expectations == [exp1, exp2, exp3, exp4, column_pair_expectation, table_exp1, table_exp2, table_exp3]
+    return suite
+
+
+@pytest.fixture
 def baseline_suite(exp1, exp2):
     return ExpectationSuite(
         expectation_suite_name="warning",
@@ -301,3 +359,29 @@ def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_
             "comment": "second",
         },
     ]
+
+
+def test_get_table_expectations_returns_empty_list_on_empty_suite(empty_suite):
+    assert empty_suite.get_table_expectations() == []
+
+
+def test_get_table_expectations_returns_empty_list_on_suite_without_any(baseline_suite):
+    assert baseline_suite.get_table_expectations() == []
+
+
+def test_get_table_expectations(
+    suite_with_table_and_column_expectations, table_exp1, table_exp2, table_exp3
+):
+    obs = suite_with_table_and_column_expectations.get_table_expectations()
+    assert obs == [table_exp1, table_exp2, table_exp3]
+
+
+def test_get_column_expectations_returns_empty_list_on_empty_suite(empty_suite):
+    assert empty_suite.get_column_expectations() == []
+
+
+def test_get_column_expectations(
+    suite_with_table_and_column_expectations, exp1, exp2, exp3, exp4
+):
+    obs = suite_with_table_and_column_expectations.get_column_expectations()
+    assert obs == [exp1, exp2, exp3, exp4]

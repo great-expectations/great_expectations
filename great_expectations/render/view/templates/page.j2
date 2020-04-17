@@ -17,15 +17,17 @@
     {% include 'favicon.j2' %}
   </head>
 
-  <body
-        data-spy="scroll"
-        data-target="#navigation"
-        data-offset="50"
-    >
-    {% include 'carousel_modal.j2' %}
-    {% include 'edit_expectations_instructions_modal.j2' %}
+  <body>
+    {% if show_how_to_buttons | default(True) %}
+      {% include 'carousel_modal.j2' %}
+    {% endif %}
+
+    {% if renderer_type in ["ValidationResultsPageRenderer", "ExpectationSuitePageRenderer"] and show_how_to_buttons | default(True) %}
+      {% include 'edit_expectations_instructions_modal.j2' %}
+    {% endif %}
+
     {% include 'top_navbar.j2' %}
-    {% if renderer_type == "ValidationResultsPageRenderer" %}
+    {% if renderer_type == "ValidationResultsPageRenderer" and show_how_to_buttons | default(True) %}
       <script>
         try {
           if (localStorage.getItem('ge-walkthrough-modal-dismissed') !== 'true') {

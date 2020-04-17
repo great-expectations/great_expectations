@@ -96,8 +96,9 @@ def test_missing_engine_error(sa):
     assert "Engine or connection_string must be provided." in str(err.value)
 
 
-def test_only_connection_string(sa):
-    SqlAlchemyDataset('test_engine', connection_string='sqlite://')
+def test_only_connection_string(titanic_sqlite_db):
+    conn_string = titanic_sqlite_db.url
+    SqlAlchemyDataset('titanic', connection_string=conn_string)
 
 
 def test_sqlalchemydataset_raises_error_on_missing_table_name(sa):
@@ -141,6 +142,55 @@ def test_sqlalchemydataset_with_custom_sql(sa):
     assert result.success is False
 
 
+def test_column(sa):
+    engine = sa.create_engine("sqlite://")
+
+    data = pd.DataFrame(
+        {
+            "name": ["Frank", "Steve", "Jane", "Frank", "Michael"],
+            "age": [16, 21, 38, 22, 10],
+            "pet": ["fish", "python", "cat", "python", "frog"],
+        }
+    )
+    data.to_sql(name="test_sql_data", con=engine, index=False)
+    dataset = SqlAlchemyDataset("test_sql_data", engine=engine)
+    assert set(dataset.get_table_columns()) == {"name", "age", "pet"}
+
+    obs = dataset.columns
+    # Hacks to check instances of types
+    for col in obs:
+        col["type"] = str(col["type"])
+
+    assert len(obs) == 3
+    for column in [
+        {
+            "name": "name",
+            "type": "TEXT",
+            "nullable": True,
+            "default": None,
+            "autoincrement": "auto",
+            "primary_key": 0,
+        },
+        {
+            "name": "age",
+            "type": "BIGINT",
+            "nullable": True,
+            "default": None,
+            "autoincrement": "auto",
+            "primary_key": 0,
+        },
+        {
+            "name": "pet",
+            "type": "TEXT",
+            "nullable": True,
+            "default": None,
+            "autoincrement": "auto",
+            "primary_key": 0,
+        },
+    ]:
+        assert column in obs
+
+
 def test_column_fallback(sa):
     engine = sa.create_engine('sqlite://')
 
@@ -152,9 +202,12 @@ def test_column_fallback(sa):
 
     data.to_sql(name='test_sql_data', con=engine, index=False)
     dataset = SqlAlchemyDataset('test_sql_data', engine=engine)
+    assert set(dataset.get_table_columns()) == {"name", "age", "pet"}
+
     fallback_dataset = SqlAlchemyDataset('test_sql_data', engine=engine)
     # override columns attribute to test fallback
     fallback_dataset.columns = fallback_dataset.column_reflection_fallback()
+    assert set(fallback_dataset.get_table_columns()) == {"name", "age", "pet"}
 
     # check that the results are the same for a few expectations
     assert (dataset.expect_column_to_exist('age') == 
