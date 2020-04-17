@@ -1010,6 +1010,7 @@ class BaseDataContext(object):
                            max_data_assets=20,
                            profile_all_data_assets=True,
                            profiler=BasicDatasetProfiler,
+                           profiler_configuration=None,
                            dry_run=False,
                            run_id="profiling",
                            additional_batch_kwargs=None):
@@ -1023,6 +1024,7 @@ class BaseDataContext(object):
                 profile_all_data_assets=True is required to profile all
             profile_all_data_assets: when True, all data assets are profiled, regardless of their number
             profiler: the profiler class to use
+            profiler_configuration: Optional profiler configuration dict
             dry_run: when true, the method checks arguments and reports if can profile or specifies the arguments that are missing
             additional_batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
         Returns:
@@ -1156,6 +1158,7 @@ class BaseDataContext(object):
                             generator_name=generator_name,
                             data_asset_name=name,
                             profiler=profiler,
+                            profiler_configuration=profiler_configuration,
                             run_id=run_id,
                             additional_batch_kwargs=additional_batch_kwargs
                         )["results"][0]
@@ -1196,6 +1199,7 @@ class BaseDataContext(object):
                            batch_kwargs=None,
                            expectation_suite_name=None,
                            profiler=BasicDatasetProfiler,
+                           profiler_configuration=None,
                            run_id="profiling",
                            additional_batch_kwargs=None):
         """
@@ -1206,6 +1210,7 @@ class BaseDataContext(object):
         :param data_asset_name: the name of the profiled data asset
         :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the generator (generator_name arg) will choose a batch
         :param profiler: the profiler class to use
+        :param profiler_configuration: Optional profiler configuration dict
         :param run_id: optional - if set, the validation result created by the profiler will be under the provided run_id
         :param additional_batch_kwargs:
         :returns
@@ -1281,7 +1286,7 @@ class BaseDataContext(object):
 
         # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
         # will have more to unpack.
-        expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
+        expectation_suite, validation_results = profiler.profile(batch, run_id=run_id, profiler_configuration=profiler_configuration)
         profiling_results['results'].append((expectation_suite, validation_results))
 
         self.validations_store.set(
