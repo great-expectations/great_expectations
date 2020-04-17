@@ -27,7 +27,7 @@ One can test, for example, whether abbreviated state names are correct condition
                        'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
                        'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
                        'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'] + ['PR', 'VI', 'GU', 'AE'],
-            condition='`Provider Business Mailing Address Country Code (If outside U.S.)` in ["US", "UM"]'
+            row_condition='`Provider Business Mailing Address Country Code (If outside U.S.)` in ["US", "UM"]'
         )
     {
         "success": false,
@@ -60,7 +60,7 @@ One can also test whether name prefixes are consistent with gender:
     >>> my_df.expect_column_values_to_be_in_set(
             column='Provider Name Prefix Text',
             value_set=['MRS.', 'MS.', 'MISS', 'DR.', 'PROF.'],
-            condition='`Provider Gender Code`=="F"'
+            row_condition='`Provider Gender Code`=="F"'
         )
     {
         "success": false,
@@ -93,7 +93,7 @@ Conditional Expectations can also be used to test for alternative non-missingnes
 
     >>> my_df.expect_column_values_to_be_null(
             column='Provider Last Name (Legal Name)',
-            condition='`Provider Organization Name (Legal Business Name)`.notnull()'
+            row_condition='`Provider Organization Name (Legal Business Name)`.notnull()'
         )
     {
         "success": true,
@@ -107,7 +107,7 @@ Conditional Expectations can also be used to test for alternative non-missingnes
 
     >>> my_df.expect_column_values_to_not_be_null(
             column='Authorized Official Last Name',
-            condition='`Provider Organization Name (Legal Business Name)`.notnull()'
+            row_condition='`Provider Organization Name (Legal Business Name)`.notnull()'
         )
     {
         "success": true,

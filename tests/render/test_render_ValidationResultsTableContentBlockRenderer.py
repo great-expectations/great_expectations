@@ -41,7 +41,8 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
                         "partition_object": None,
                         "threshold": None,
                         "result_format": "SUMMARY",
-                        "condition": None}}},
+                        "row_condition": None,
+                        "condition_engine": None}}},
                 {
                     'content_block_type': 'string_template',
                     'string_template': {
@@ -132,7 +133,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
               "min_value": 0,
               "max_value": None,
               "result_format": "SUMMARY",
-              "condition": None
+              "row_condition": None,
+              "condition_engine": None,
             },
             "styling": None
           }

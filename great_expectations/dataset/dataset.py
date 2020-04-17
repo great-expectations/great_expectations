@@ -94,15 +94,15 @@ class MetaDataset(DataAsset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(self, column, result_format=None, condition=None, *args, **kwargs):
+        def inner_wrapper(self, column, result_format=None, row_condition=None, condition_engine=None, *args, **kwargs):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
             # Retain support for string-only output formats:
             result_format = parse_result_format(result_format)
 
-            if condition:
-                self = self.query(condition).reset_index(drop=True)
+            if row_condition:
+                self = self.query(row_condition).reset_index(drop=True)
 
             element_count = self.get_row_count()
             nonnull_count = self.get_column_nonnull_count(column)

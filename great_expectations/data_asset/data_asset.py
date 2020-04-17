@@ -185,6 +185,11 @@ class DataAsset(object):
                 else:
                     meta = None
 
+                # Set "condition_engine" to default parameter: "pandas", but only if "row_condition" is present
+                # TODO: when other engines are implemented, this should be given as argument or obtained from condition
+                if "row_condition" in kwargs:
+                    all_args["condition_engine"] = "pandas"
+
                 # Get the signature of the inner wrapper:
                 if PY3:
                     argspec = inspect.getfullargspec(func)[0][1:]
@@ -366,15 +371,17 @@ class DataAsset(object):
         # !!!    it needs to be documented, and
         # !!!    we need to provide syntax to override it.
 
-        if 'column' in expectation_config.kwargs and 'condition' in expectation_config.kwargs:
+        if 'column' in expectation_config.kwargs and 'row_condition' in expectation_config.kwargs:
             column = expectation_config.kwargs['column']
-            condition = expectation_config.kwargs['condition']
+            row_condition = expectation_config.kwargs['row_condition']
+            condition_engine = expectation_config.kwargs['condition_engine']
 
             self._expectation_suite.expectations = [f for f in filter(
                 lambda exp: (exp.expectation_type != expectation_type) or
                             ('column' in exp.kwargs and exp.kwargs['column'] != column) or
-                            ('condition' in exp.kwargs and exp.kwargs['condition'] != condition) or
-                            ('condition' not in exp.kwargs),
+                            ('condition_engine' in exp.kwargs and exp.kwargs['condition_engine'] != condition_engine) or
+                            ('row_condition' in exp.kwargs and exp.kwargs['row_condition'] != row_condition) or
+                            ('row_condition' not in exp.kwargs),
                 self._expectation_suite.expectations
             )]
 
@@ -384,7 +391,7 @@ class DataAsset(object):
             self._expectation_suite.expectations = [f for f in filter(
                 lambda exp: (exp.expectation_type != expectation_type) or
                             ('column' in exp.kwargs and exp.kwargs['column'] != column) or
-                            ('condition' in exp.kwargs),
+                            ('row_condition' in exp.kwargs),
                 self._expectation_suite.expectations
             )]
 

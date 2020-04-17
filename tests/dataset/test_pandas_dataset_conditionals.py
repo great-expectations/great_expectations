@@ -67,7 +67,7 @@ def test_expectation_decorator_summary_mode():
     })
 
     assert df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY",
-                                                 condition="group=='a'")\
+                                                 row_condition="group=='a'")\
         == exp_output
 
     assert df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY")\
@@ -83,7 +83,7 @@ def test_expectation_decorator_summary_mode():
         },
     })
 
-    assert df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY", condition="group=='a'")\
+    assert df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY", row_condition="group=='a'")\
         == exp_output
 
     assert df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY")\
@@ -110,10 +110,10 @@ def test_positional_arguments():
         }
     })
 
-    assert df.expect_column_mean_to_be_between('x', 4, 6, condition='group=="a"') == exp_output
+    assert df.expect_column_mean_to_be_between('x', 4, 6, row_condition='group=="a"') == exp_output
     assert df.expect_column_mean_to_be_between('x', 4, 6) != exp_output
 
-    out = df.expect_column_values_to_be_between('y', 1, 6, condition='group=="a"')
+    out = df.expect_column_values_to_be_between('y', 1, 6, row_condition='group=="a"')
     t = {'out': {'success': False, 'unexpected_list': [
         8, 10], 'unexpected_index_list': [3, 4]}}
     if 'out' in t:
@@ -123,7 +123,7 @@ def test_positional_arguments():
         if 'unexpected_list' in t['out']:
             assert t['out']['unexpected_list'] == out.result['unexpected_list']
 
-    out = df.expect_column_values_to_be_between('y', 1, 6, mostly=.5, condition='group=="a"')
+    out = df.expect_column_values_to_be_between('y', 1, 6, mostly=.5, row_condition='group=="a"')
     t = {'out': {'success': True, 'unexpected_list': [
         8, 10], 'unexpected_index_list': [3, 4]}}
     if 'out' in t:
@@ -133,7 +133,7 @@ def test_positional_arguments():
         if 'unexpected_list' in t['out']:
             assert t['out']['unexpected_list'] == out.result['unexpected_list']
 
-    out = df.expect_column_values_to_be_in_set('z', ['a', 'b', 'c'], condition='group=="a"')
+    out = df.expect_column_values_to_be_in_set('z', ['a', 'b', 'c'], row_condition='group=="a"')
     t = {'out': {'success': False, 'unexpected_list': [
         'abc'], 'unexpected_index_list': [4]}}
     if 'out' in t:
@@ -143,7 +143,7 @@ def test_positional_arguments():
         if 'unexpected_list' in t['out']:
             assert t['out']['unexpected_list'] == out.result['unexpected_list']
 
-    out = df.expect_column_values_to_be_in_set('z', ['a', 'b', 'c'], mostly=.5, condition='group=="a"')
+    out = df.expect_column_values_to_be_in_set('z', ['a', 'b', 'c'], mostly=.5, row_condition='group=="a"')
     t = {'out': {'success': True, 'unexpected_list': [
         'abc'], 'unexpected_index_list': [4]}}
     if 'out' in t:
@@ -174,7 +174,7 @@ def test_result_format_argument_in_decorators():
         }
     })
 
-    assert df.expect_column_mean_to_be_between('x', 4, 6, result_format=None, condition="group=='a'")\
+    assert df.expect_column_mean_to_be_between('x', 4, 6, result_format=None, row_condition="group=='a'")\
         == exp_output
 
     assert df.expect_column_mean_to_be_between('x', 4, 6, result_format=None)\
@@ -195,18 +195,18 @@ def test_result_format_argument_in_decorators():
                                                                     'unexpected_percent_nonmissing': 40.0},
                                                          'success': False})
 
-    assert df.expect_column_values_to_be_between('y', 1, 6, result_format=None, condition="group=='a'")\
+    assert df.expect_column_values_to_be_between('y', 1, 6, result_format=None, row_condition="group=='a'")\
         == exp_output
 
-    assert df.expect_column_values_to_be_between('y', 1, 6, result_format=None, condition="group=='a'")\
+    assert df.expect_column_values_to_be_between('y', 1, 6, result_format=None, row_condition="group=='a'")\
         != df.expect_column_values_to_be_between('y', 1, 6, result_format=None)\
 
     # Test unknown output format
     with pytest.raises(ValueError):
-        df.expect_column_values_to_be_between('y', 1, 6, result_format="QUACK", condition="group=='a'")
+        df.expect_column_values_to_be_between('y', 1, 6, result_format="QUACK", row_condition="group=='a'")
 
     with pytest.raises(ValueError):
-        df.expect_column_mean_to_be_between('x', 4, 6, result_format="QUACK", condition="group=='a'")
+        df.expect_column_mean_to_be_between('x', 4, 6, result_format="QUACK", row_condition="group=='a'")
 
 
 def test_ge_pandas_subsetting():
@@ -218,10 +218,10 @@ def test_ge_pandas_subsetting():
     }))
 
     # Put some simple expectations on the data frame
-    df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4], condition="group=='a'")
-    df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8], condition="group=='a'")
-    df.expect_column_values_to_be_in_set("C", ['a', 'b', 'c', 'd'], condition="group=='a'")
-    df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'h'], condition="group=='a'")
+    df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4], row_condition="group=='a'")
+    df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8], row_condition="group=='a'")
+    df.expect_column_values_to_be_in_set("C", ['a', 'b', 'c', 'd'], row_condition="group=='a'")
+    df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'h'], row_condition="group=='a'")
 
     # The subsetted data frame should:
     #
@@ -263,7 +263,7 @@ def test_ge_pandas_subsetting():
     assert sub1.find_expectations() == exp1
 
 
-def test_condition_in_expectation_config():
+def test_row_condition_in_expectation_config():
     df = duplicate_and_obfuscuate(
         ge.dataset.PandasDataset({
             'x': [1, 2, 3, 4, 5, 6, 7, 7, None, None]
@@ -279,18 +279,48 @@ def test_condition_in_expectation_config():
             "min_value": 1,
             "max_value": 5,
             "result_format": "SUMMARY",
-            "condition": "group=='a'"
+            "row_condition": "group=='a'",
+            "condition_engine": "pandas",
         },
         "expectation_type": "expect_column_values_to_be_between"
     })
 
-    assert "condition" in df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY",
-                                                                condition="group=='a'").expectation_config["kwargs"]
+    assert "row_condition" in df.expect_column_values_to_be_between('x', min_value=1, max_value=5,
+                                                                    result_format="SUMMARY",
+                                                                    row_condition="group=='a'"
+                                                                    ).expectation_config["kwargs"]
 
-    assert "group=='a'" ==\
-        df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY",
-                                              condition="group=='a'").expectation_config["kwargs"]["condition"]
+    assert "group=='a'" == \
+           df.expect_column_values_to_be_between('x', min_value=1, max_value=5,
+                                                 result_format="SUMMARY",
+                                                 row_condition="group=='a'"
+                                                 ).expectation_config["kwargs"]["row_condition"]
 
-    assert df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY",
-                                                 condition="group=='a'").expectation_config.\
-        isEquivalentTo(exp_expectation_config)
+    assert df.expect_column_values_to_be_between('x', min_value=1, max_value=5,
+                                                 result_format="SUMMARY",
+                                                 row_condition="group=='a'"
+                                                 ).expectation_config.isEquivalentTo(exp_expectation_config)
+
+
+# TODO: this test should be changed when other engines will be implemented
+def test_default_condition_engine_in_expectation_config():
+    df = duplicate_and_obfuscuate(
+        ge.dataset.PandasDataset({
+            'x': [1, 2, 3, 4, 5, 6, 7, 7, None, None]
+        })
+    )
+
+    df.set_default_expectation_argument("include_config", True)
+
+    assert "pandas" == \
+           df.expect_column_values_to_be_between('x', min_value=1, max_value=5,
+                                                 result_format="SUMMARY",
+                                                 row_condition="group=='a'"
+                                                 ).expectation_config["kwargs"]["condition_engine"]
+
+    assert "pandas" == \
+           df.expect_column_values_to_be_between('x', min_value=1, max_value=5,
+                                                 result_format="SUMMARY",
+                                                 row_condition="group=='a'",
+                                                 condition_engine="SQL"
+                                                 ).expectation_config["kwargs"]["condition_engine"]
