@@ -1068,7 +1068,7 @@ class BaseDataContext(object):
          )
 
          if safe_rrmdir(ge_dir, exist_ok=True):
-             remove_store_keys(site_builder)
+             clean_store_keys(site_builder)
              return True
          else:
              return False   

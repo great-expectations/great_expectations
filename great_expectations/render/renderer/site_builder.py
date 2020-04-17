@@ -209,6 +209,59 @@ class SiteBuilder(object):
                     package_name=None,
                     class_name=site_section_config['class_name']
                 )
+    
+    def clean_store_keys(self, resource_identifiers=None):
+        source_store_keys = self.source_store.list_keys()
+        if self.name == "validations" and self.validation_results_limit:
+            source_store_keys = sorted(source_store_keys, key=lambda x: x.run_id, reverse=True)[:self.validation_results_limit]
+
+        for resource_key in source_store_keys:
+
+            # if no resource_identifiers are passed,
+            # delete every key in its source store.
+            # if the caller did pass resource_identifiers, the section builder
+            # delete keys only for the specified resources
+            if resource_identifiers and resource_key not in resource_identifiers:
+                continue
+
+            if self.run_id_filter:
+                if not self._resource_key_passes_run_id_filter(resource_key):
+                    continue
+
+            try:
+                resource = self.source_store.get(resource_key)
+                if resource:
+                    try:
+                        del source_store[resource_key]
+                    except KeyError:
+                        pass
+            except FileNotFoundError as e:
+                logger.warning(f"File {resource_key.to_fixed_length_tuple()} could not be found. Skipping.")
+                continue
+
+            if isinstance(resource_key, ExpectationSuiteIdentifier):
+                expectation_suite_name = resource_key.expectation_suite_name
+                if expectation_suite_name:
+                    try:
+                        del source_store[resource_key]
+                        logger.debug("        Deleting expectation suite {} resource key".format(expectation_suite_name))
+                    except KeyError:
+                        pass
+            elif isinstance(resource_key, ValidationResultIdentifier):
+                run_id = resource_key.run_id
+                expectation_suite_name = resource_key.expectation_suite_identifier.expectation_suite_name
+                if run_id == "profiling":
+                    try:
+                        del source_store[resource_key]
+                        logger.debug("        Deleting profiling for batch {} resource key".format(resource_key.batch_identifier))
+                    except KeyError:
+                        pass
+                else:
+                    try:
+                        del source_store[resource_key]
+                        logger.debug("        Deleting validation {} resource key".format(resource_key.batch_identifier))
+                    except KeyError:
+                        pass
 
     def build(self, resource_identifiers=None):
         """
@@ -311,59 +364,6 @@ class DefaultSiteSectionBuilder(object):
                 class_name=view['class_name']
             )
 
-    def remove_store_keys(self, resource_identifiers=None):
-        source_store_keys = self.source_store.list_keys()
-        if self.name == "validations" and self.validation_results_limit:
-            source_store_keys = sorted(source_store_keys, key=lambda x: x.run_id, reverse=True)[:self.validation_results_limit]
- 
-        for resource_key in source_store_keys:
-
-            # if no resource_identifiers are passed,
-            # delete every key in its source store.
-            # if the caller did pass resource_identifiers, the section builder
-            # delete keys only for the specified resources
-            if resource_identifiers and resource_key not in resource_identifiers:
-                continue
-
-            if self.run_id_filter:
-                if not self._resource_key_passes_run_id_filter(resource_key):
-                    continue
-
-            try:
-                resource = self.source_store.get(resource_key)
-                if resource:
-                    try:
-                        del source_store[resource_key]
-                    except KeyError:
-                        pass
-            except FileNotFoundError as e:
-                logger.warning(f"File {resource_key.to_fixed_length_tuple()} could not be found. Skipping.")
-                continue
-
-            if isinstance(resource_key, ExpectationSuiteIdentifier):
-                expectation_suite_name = resource_key.expectation_suite_name
-                if expectation_suite_name:
-                    try:
-                        del source_store[resource_key]
-                        logger.debug("        Deleting expectation suite {} resource key".format(expectation_suite_name))
-                    except KeyError:
-                        pass
-            elif isinstance(resource_key, ValidationResultIdentifier):
-                run_id = resource_key.run_id
-                expectation_suite_name = resource_key.expectation_suite_identifier.expectation_suite_name
-                if run_id == "profiling":
-                    try:
-                        del source_store[resource_key]
-                        logger.debug("        Deleting profiling for batch {} resource key".format(resource_key.batch_identifier))
-                    except KeyError:
-                        pass
-                else:
-                    try:
-                        del source_store[resource_key]
-                        logger.debug("        Deleting validation {} resource key".format(resource_key.batch_identifier))
-                    except KeyError:
-                        pass
- 
     def build(self, resource_identifiers=None):
         source_store_keys = self.source_store.list_keys()
         if self.name == "validations" and self.validation_results_limit:
