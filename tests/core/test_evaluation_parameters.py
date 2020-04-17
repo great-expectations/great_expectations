@@ -60,7 +60,7 @@ def test_parse_evaluation_parameter():
     # ...but we cannot leave *partially* evaluated expressions (phew!)
     with pytest.raises(EvaluationParameterError) as e:
         parse_evaluation_parameter("foo + bar", {"foo": 2})
-    assert "unsupported operand type(s) for +" in str(e.value)
+    assert "Error while evaluating evaluation parameter expression: could not convert string to float" in str(e.value)
 
 
 def test_parser_timing():

@@ -33,7 +33,7 @@ class ExpectationsStore(Store):
         super().__init__(store_backend=store_backend, runtime_environment=runtime_environment)
 
     def serialize(self, key, value):
-        return self._expectationSuiteSchema.dumps(value)
+        return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
 
     def deserialize(self, key, value):
         return self._expectationSuiteSchema.loads(value)
