@@ -19,6 +19,8 @@ def test_render_snapshot_test(titanic_data_context):
     )
     obs = renderer.render(None, None)
     assert isinstance(obs, nbformat.NotebookNode)
+    ## NOTE!!! - When updating this snapshot be sure to include the dynamic
+    # csv_path in the second cell due to pytest fixtures
     expected = {
         "nbformat": 4,
         "nbformat_minor": 4,
@@ -26,17 +28,16 @@ def test_render_snapshot_test(titanic_data_context):
         "cells": [
             {
                 "cell_type": "markdown",
-                "source": "# Scaffold a new Expectation Suite\nUse this notebook to scaffold a new expectations suite. This process helps you\navoid writing lots of boilerplate when authoring suites.\n\n**Expectation Suite Name**: `my_suite`\n\nWe'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)",
+                "source": "# Scaffold a new Expectation Suite (BETA)\nUse this notebook to scaffold a new expectations suite. This process helps you\navoid writing lots of boilerplate when authoring suites.\n\n**Expectation Suite Name**: `my_suite`\n\nWe'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                ## NOTE - be sure to include the csv_path which is dynamic due to pytest fixtures
-                "source": "from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.profile import BasicSuiteBuilderProfiler\nfrom great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = \"my_suite\"\nsuite = context.create_expectation_suite(\n    expectation_suite_name, overwrite_existing=True)\n\nbatch_kwargs = {\n    'path': '"
+                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.profile import BasicSuiteBuilderProfiler\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "my_suite"\nsuite = context.create_expectation_suite(\n    expectation_suite_name, overwrite_existing=True\n)\n\nbatch_kwargs = {\n    "path": "'
                 + csv_path
-                + "',\n    'datasource': 'mydatasource'}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()",
+                + '",\n    "datasource": "mydatasource",\n}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -82,7 +83,6 @@ def test_render_snapshot_test(titanic_data_context):
             },
         ],
     }
-
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
 

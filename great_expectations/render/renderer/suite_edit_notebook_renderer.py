@@ -1,10 +1,10 @@
 import os
 
-import autopep8
 import nbformat
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.render.renderer.renderer import Renderer
+from great_expectations.util import lint_code
 
 
 class SuiteEditNotebookRenderer(Renderer):
@@ -120,10 +120,7 @@ context.open_data_docs(validation_result_identifier)"""
         Add the given code as a new code cell.
         """
         if lint:
-            try:
-                code = autopep8.fix_code(code, options={"aggressive": 2}).rstrip("\n")
-            except RuntimeError:
-                pass
+            code = lint_code(code).rstrip("\n")
 
         cell = nbformat.v4.new_code_cell(code)
         self.notebook["cells"].append(cell)
