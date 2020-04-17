@@ -67,7 +67,6 @@ Advanced Features
    /reference/stores_reference
    /reference/batch_identification
    /reference/validation_operators
-   /reference/usage_statistics
    /reference/metric_reference
 
 *****************************
@@ -78,7 +77,6 @@ Extending Great Expectations
    :maxdepth: 2
 
    /reference/extending_great_expectations
-   /reference/contributing
    /reference/improving_library_documentation
 
 
@@ -91,3 +89,4 @@ Supporting Resources
 
    /reference/supporting_resources
    /reference/glossary
+   /reference/check_assets

@@ -2,8 +2,6 @@ import os
 
 import autopep8
 import nbformat
-from dateutil import parser
-from datetime import datetime
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.render.renderer.renderer import Renderer
@@ -183,7 +181,7 @@ context.open_data_docs(validation_result_identifier)"""
         if not meta:
             return ""
 
-        profiler = "SampleExpectationsDatasetProfiler"
+        profiler = "BasicSuiteBuilderProfiler"
         if profiler in meta.keys():
             meta.pop(profiler)
 

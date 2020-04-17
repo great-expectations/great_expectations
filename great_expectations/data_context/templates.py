@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+import os
+import uuid
 
 PROJECT_HELP_COMMENT = """
 # Welcome to Great Expectations! Always know what to expect from your data.
 # 
-# Here you can define datasources, batch kwarg generators, integrations and
+# Here you can define datasources, batch kwargs generators, integrations and
 # more. This file is intended to be committed to your repo. For help with
 # configuration please:
 #   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#configuration
@@ -17,8 +19,7 @@ config_version: 1
 datasources: {}
 """
 
-CONFIG_VARIABLES_INTRO = """
-# This config file supports variable substitution which enables: 1) keeping
+CONFIG_VARIABLES_INTRO = """# This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes
 # such as staging vs prod.
 #
@@ -31,10 +32,11 @@ CONFIG_VARIABLES_INTRO = """
 # If the substitution value comes from the config variables file, it can be a
 # simple (non-nested) value or a nested value such as a dictionary. If it comes
 # from an environment variable, it must be a simple value. Read more at:
-# https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets"""
+# https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets
 
-# This junky fake key keeps ruaml.yml from nuking the important comment block
-CONFIG_VARIABLES_TEMPLATE = "ge_comment_preservation_key: 1" + CONFIG_VARIABLES_INTRO
+"""
+
+CONFIG_VARIABLES_TEMPLATE = CONFIG_VARIABLES_INTRO + "instance_id: " + str(uuid.uuid4()) + os.linesep
 
 PROJECT_OPTIONAL_CONFIG_COMMENT = CONFIG_VARIABLES_INTRO + """
 config_variables_file_path: uncommitted/config_variables.yml
@@ -108,12 +110,24 @@ data_docs_sites:
   # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/en/latest/features/data_docs.html
   local_site:
     class_name: SiteBuilder
+    # set to false to hide how-to buttons in Data Docs
+    show_how_to_buttons: true
     store_backend:
         class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
         class_name: DefaultSiteIndexBuilder
-        show_cta_footer: True
 """
 
-PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT
+ANONYMIZED_USAGE_STATISTICS_ENABLED = """
+anonymous_usage_statistics:
+  enabled: True
+"""
+
+ANONYMIZED_USAGE_STATISTICS_DISABLED = """
+anonymous_usage_statistics:
+  enabled: False
+"""
+
+PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED = PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT + ANONYMIZED_USAGE_STATISTICS_ENABLED
+PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED = PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT + ANONYMIZED_USAGE_STATISTICS_DISABLED

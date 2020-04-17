@@ -7,8 +7,7 @@ try:
 except ImportError:
     import mock
 
-from great_expectations.exceptions import DataContextError
-from great_expectations.datasource.generator import SubdirReaderBatchKwargsGenerator, GlobReaderBatchKwargsGenerator, DatabricksTableBatchKwargsGenerator
+from great_expectations.datasource.batch_kwargs_generator import SubdirReaderBatchKwargsGenerator, GlobReaderBatchKwargsGenerator, DatabricksTableBatchKwargsGenerator
 
 
 def test_file_kwargs_generator(data_context, filesystem_csv):
@@ -17,7 +16,7 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
     datasource = data_context.add_datasource("default",
                                         module_name="great_expectations.datasource",
                                         class_name="PandasDatasource",
-                                        generators={
+                                        batch_kwargs_generators={
     "subdir_reader": {
         "class_name": "SubdirReaderBatchKwargsGenerator",
         "base_directory": str(base_dir),
@@ -25,7 +24,7 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
 }
 )
 
-    generator = datasource.get_generator("subdir_reader")
+    generator = datasource.get_batch_kwargs_generator("subdir_reader")
     known_data_asset_names = datasource.get_available_data_asset_names()
 
     # Use set to avoid order dependency

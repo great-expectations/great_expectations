@@ -2,7 +2,6 @@ import glob
 import json
 
 import pytest
-from six import PY2
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.data_context.util import file_relative_path
@@ -102,8 +101,6 @@ def test_all_expectations_using_test_definitions():
     # TODO: accommodate case where multiple datasets exist within one expectation test definition
     
     # We encountered unicode coding errors on Python 2, but since this is just a smoke test, review the smoke test results in python 3.
-    if PY2: 
-        return
-    
+
     with open(file_relative_path(__file__, './output/test_render_bullet_list_content_block.json'), 'w') as f:
        json.dump(test_results, f, indent=2)

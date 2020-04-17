@@ -196,8 +196,8 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
                                 'header': {'content_block_type': 'string_template',
                                            'string_template': {'template': 'Info', 'tag': 'h6',
                                                                'styling': {'classes': ['m-0']}}},
-                                'table': [['Great Expectations Version', "0.9.0b1+310.g05637d48.dirty"],
-                                          ['Run ID', "20200130T171315.316592Z"]]}
+                                'table': [['Great Expectations Version', "0.9.7+17.g02805059.dirty"],
+                                          ['Run ID', "20200322T170247.671855Z"]]}
 
     assert validation_info == expected_validation_info
 
