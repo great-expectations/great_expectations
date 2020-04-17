@@ -105,7 +105,7 @@ This is be done by running `great_expectations suite edit {self.suite_name}`."""
     def render(
         self, suite: ExpectationSuite, batch_kwargs=None
     ) -> nbformat.NotebookNode:
-        self.notebook = nbformat.v4.new_notebook()
+        self._notebook = nbformat.v4.new_notebook()
         self.add_header()
         self.add_markdown_cell(
             """\
@@ -134,7 +134,7 @@ after this scaffold gets you close to what you want.**"""
         )
         self._add_scaffold_cell()
         self.add_footer()
-        return self.notebook
+        return self._notebook
 
     def render_to_disk(self, notebook_file_path: str) -> None:
         """
@@ -144,7 +144,7 @@ after this scaffold gets you close to what you want.**"""
         citations.
         """
         self.render(self.suite, self.batch_kwargs)
-        self.write_notebook_to_disk(self.notebook, notebook_file_path)
+        self.write_notebook_to_disk(self._notebook, notebook_file_path)
 
     def _add_scaffold_cell(self):
         self.add_code_cell(

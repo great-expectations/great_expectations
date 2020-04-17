@@ -123,14 +123,14 @@ context.open_data_docs(validation_result_identifier)"""
             code = lint_code(code).rstrip("\n")
 
         cell = nbformat.v4.new_code_cell(code)
-        self.notebook["cells"].append(cell)
+        self._notebook["cells"].append(cell)
 
     def add_markdown_cell(self, markdown: str) -> None:
         """
         Add the given markdown as a new markdown cell.
         """
         cell = nbformat.v4.new_markdown_cell(markdown)
-        self.notebook["cells"].append(cell)
+        self._notebook["cells"].append(cell)
 
     def add_expectation_cells_from_suite(self, expectations):
         expectations_by_column = self._get_expectations_by_column(expectations)
@@ -201,7 +201,7 @@ context.open_data_docs(validation_result_identifier)"""
         if not isinstance(suite, ExpectationSuite):
             raise RuntimeWarning("render must be given an ExpectationSuite.")
 
-        self.notebook = nbformat.v4.new_notebook()
+        self._notebook = nbformat.v4.new_notebook()
 
         suite_name = suite.expectation_suite_name
 
@@ -211,7 +211,7 @@ context.open_data_docs(validation_result_identifier)"""
         self.add_expectation_cells_from_suite(suite.expectations)
         self.add_footer()
 
-        return self.notebook
+        return self._notebook
 
     def render_to_disk(
         self, suite: ExpectationSuite, notebook_file_path: str, batch_kwargs=None
@@ -223,7 +223,7 @@ context.open_data_docs(validation_result_identifier)"""
         citations.
         """
         self.render(suite, batch_kwargs)
-        self.write_notebook_to_disk(self.notebook, notebook_file_path)
+        self.write_notebook_to_disk(self._notebook, notebook_file_path)
 
     def add_authoring_intro(self):
         self.add_markdown_cell(
