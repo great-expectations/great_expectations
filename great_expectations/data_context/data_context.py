@@ -51,6 +51,7 @@ from great_expectations.data_context.util import (
     safe_rrmdir,
     substitute_all_config_variables,
 )
+from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.validator.validator import Validator
 
 try:
@@ -1058,7 +1059,16 @@ class BaseDataContext(object):
                  "The data docs site and project root directory must be an existing directory to clean "
              )
 
-         if crrmdir(ge_dir, exist_ok=True):
+         site_builder = SiteBuilder(
+            data_context=context,
+            runtime_environment={
+                "root_directory": context.root_directory
+            },
+            **local_site_config
+         )
+
+         if safe_rrmdir(ge_dir, exist_ok=True):
+             remove_store_keys(site_builder)
              return True
          else:
              return False   
