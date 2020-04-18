@@ -18,7 +18,7 @@ from great_expectations.cli.util import cli_message, load_expectation_suite, cli
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message, _anonymizers, \
     edit_expectation_suite_usage_statistics
 from great_expectations.data_asset import DataAsset
-from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
+from great_expectations.render.renderer.suite_edit_notebook_renderer import SuiteEditNotebookRenderer
 
 json_parse_exception = json.decoder.JSONDecodeError
 
@@ -184,7 +184,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
         notebook_path = os.path.join(
             context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
         )
-        NotebookRenderer().render_to_disk(suite, notebook_path, batch_kwargs)
+        SuiteEditNotebookRenderer().render_to_disk(suite, notebook_path, batch_kwargs)
 
         if not jupyter:
             cli_message("To continue editing this suite, run <green>jupyter "
