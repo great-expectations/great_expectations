@@ -1,12 +1,13 @@
 from __future__ import division
 
 import inspect
-import sys
+from typing import List
+
 from six import PY3, string_types
 from functools import wraps
 from numbers import Number
 from dateutil.parser import parse
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from itertools import zip_longest
 from functools import lru_cache
@@ -191,7 +192,7 @@ class Dataset(MetaDataset):
         """Returns: int, table column count"""
         raise NotImplementedError
 
-    def get_table_columns(self):
+    def get_table_columns(self) -> List[str]:
         """Returns: List[str], list of column names"""
         raise NotImplementedError
 
