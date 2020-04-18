@@ -70,17 +70,9 @@ def test_recursively_convert_to_json_serializable():
     assert isinstance(x['np.int16'][0], int)
     assert isinstance(x['np.int32'][0], int)
 
-    # Integers in python 2.x can be of type int or of type long
-    if sys.version_info.major >= 3:
-        # Python 3.x
-        assert isinstance(x['np.uint'][0], int)
-        assert isinstance(x['np.uint8'][0], int)
-        assert isinstance(x['np.uint64'][0], int)
-    elif sys.version_info.major >= 2:
-        # Python 2.x
-        assert isinstance(x['np.uint'][0], (int, long))
-        assert isinstance(x['np.uint8'][0], (int, long))
-        assert isinstance(x['np.uint64'][0], (int, long))
+    assert isinstance(x['np.uint'][0], int)
+    assert isinstance(x['np.uint8'][0], int)
+    assert isinstance(x['np.uint64'][0], int)
 
     assert isinstance(x['np.float32'][0], float)
     assert isinstance(x['np.float64'][0], float)

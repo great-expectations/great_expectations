@@ -5,7 +5,6 @@ import os
 
 import traceback
 
-from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLASS
 from great_expectations.core import nested_update
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
@@ -110,6 +109,13 @@ class SiteBuilder(object):
         self.store_backend = store_backend
         self.show_how_to_buttons = show_how_to_buttons
 
+        usage_statistics_config = data_context.anonymous_usage_statistics
+        data_context_id = None
+        if usage_statistics_config and usage_statistics_config.enabled and usage_statistics_config.data_context_id:
+            data_context_id = usage_statistics_config.data_context_id
+
+        self.data_context_id = data_context_id
+
         # set custom_styles_directory if present
         custom_styles_directory = None
         plugins_directory = data_context.plugins_directory
@@ -137,7 +143,8 @@ class SiteBuilder(object):
                 "custom_styles_directory": custom_styles_directory,
                 "show_how_to_buttons": self.show_how_to_buttons,
                 "target_store": self.target_store,
-                "site_name": self.site_name
+                "site_name": self.site_name,
+                "data_context_id": self.data_context_id
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -199,6 +206,7 @@ class SiteBuilder(object):
                     "data_context": data_context,
                     "target_store": self.target_store,
                     "custom_styles_directory": custom_styles_directory,
+                    "data_context_id": self.data_context_id,
                     "show_how_to_buttons": self.show_how_to_buttons,
                 },
                 config_defaults={
@@ -231,7 +239,8 @@ class SiteBuilder(object):
         for site_section, site_section_builder in self.site_section_builders.items():
             site_section_builder.build(resource_identifiers=resource_identifiers)
 
-        return self.site_index_builder.build()
+        index_page_resource_identifier_tuple = self.site_index_builder.build()
+        return self.get_resource_url(), index_page_resource_identifier_tuple[1]
 
     def get_resource_url(self, resource_identifier=None):
         """
@@ -261,6 +270,7 @@ class DefaultSiteSectionBuilder(object):
             validation_results_limit=None,
             renderer=None,
             view=None,
+            data_context_id=None,
             **kwargs
     ):
         self.name = name
@@ -268,6 +278,7 @@ class DefaultSiteSectionBuilder(object):
         self.target_store = target_store
         self.run_id_filter = run_id_filter
         self.validation_results_limit = validation_results_limit
+        self.data_context_id = data_context_id
         self.show_how_to_buttons = show_how_to_buttons
 
         if renderer is None:
@@ -360,6 +371,7 @@ class DefaultSiteSectionBuilder(object):
                 rendered_content = self.renderer_class.render(resource)
                 viewable_content = self.view_class.render(
                     rendered_content,
+                    data_context_id=self.data_context_id,
                     show_how_to_buttons=self.show_how_to_buttons
                 )
             except Exception as e:
@@ -406,6 +418,7 @@ class DefaultSiteIndexBuilder(object):
             validation_results_limit=None,
             renderer=None,
             view=None,
+            data_context_id=None,
             **kwargs
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
@@ -414,6 +427,7 @@ class DefaultSiteIndexBuilder(object):
         self.data_context = data_context
         self.target_store = target_store
         self.validation_results_limit = validation_results_limit
+        self.data_context_id = data_context_id
         self.show_how_to_buttons = show_how_to_buttons
 
         if renderer is None:
@@ -509,35 +523,37 @@ class DefaultSiteIndexBuilder(object):
         return index_links_dict
 
     def get_calls_to_action(self):
-        telemetry = None
-        db_driver = None
-        datasource_classes_by_name = self.data_context.list_datasources()
-
-        if datasource_classes_by_name:
-            last_datasource_class_by_name = datasource_classes_by_name[-1]
-            last_datasource_class_name = last_datasource_class_by_name["class_name"]
-            last_datasource_name = last_datasource_class_by_name["name"]
-            last_datasource = self.data_context.datasources[last_datasource_name]
-
-            if last_datasource_class_name == "SqlAlchemyDatasource":
-                try:
-                    db_driver = last_datasource.drivername
-                except AttributeError:
-                    pass
-
-            datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
-            telemetry = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
-                "ge-init-datadocs-v2",
-                datasource_type,
-                db_driver,
-            )
+        usage_statistics = None
+        # db_driver = None
+        # datasource_classes_by_name = self.data_context.list_datasources()
+        #
+        # if datasource_classes_by_name:
+        #     last_datasource_class_by_name = datasource_classes_by_name[-1]
+        #     last_datasource_class_name = last_datasource_class_by_name["class_name"]
+        #     last_datasource_name = last_datasource_class_by_name["name"]
+        #     last_datasource = self.data_context.datasources[last_datasource_name]
+        #
+        #     if last_datasource_class_name == "SqlAlchemyDatasource":
+        #         try:
+        #                # NOTE: JPC - 20200327 - I do not believe datasource will *ever* have a drivername property
+        #                (it's in credentials). Suspect this isn't working.
+        #             db_driver = last_datasource.drivername
+        #         except AttributeError:
+        #             pass
+        #
+        #     datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
+        #     usage_statistics = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
+        #         "ge-init-datadocs-v2",
+        #         datasource_type,
+        #         db_driver,
+        #     )
 
         return {
             "header": "To continue exploring Great Expectations check out one of these tutorials...",
-            "buttons": self._get_call_to_action_buttons(telemetry)
+            "buttons": self._get_call_to_action_buttons(usage_statistics)
         }
 
-    def _get_call_to_action_buttons(self, telemetry):
+    def _get_call_to_action_buttons(self, usage_statistics):
         """
         Build project and user specific calls to action buttons.
 
@@ -580,9 +596,9 @@ class DefaultSiteIndexBuilder(object):
         results.append(customize_data_docs)
         results.append(s3_team_site)
 
-        if telemetry:
+        if usage_statistics:
             for button in results:
-                button.link = button.link + telemetry
+                button.link = button.link + usage_statistics
 
         return results
 
@@ -678,6 +694,7 @@ class DefaultSiteIndexBuilder(object):
             rendered_content = self.renderer_class.render(index_links_dict)
             viewable_content = self.view_class.render(
                 rendered_content,
+                data_context_id=self.data_context_id,
                 show_how_to_buttons=self.show_how_to_buttons
             )
         except Exception as e:

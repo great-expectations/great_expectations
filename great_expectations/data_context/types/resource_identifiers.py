@@ -1,9 +1,11 @@
 import logging
+from typing import Union
 
 from marshmallow import Schema, fields, post_load
 
 from great_expectations.core import IDDict
 from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.exceptions import InvalidDataContextKeyError, DataContextError
 
 logger = logging.getLogger(__name__)
@@ -44,18 +46,23 @@ class ExpectationSuiteIdentifierSchema(Schema):
 
 
 class BatchIdentifier(DataContextKey):
+    """A BatchIdentifier tracks """
 
-    def __init__(self, batch_identifier):
+    def __init__(self, batch_identifier: Union[BatchKwargs, dict, str], data_asset_name: str = None):
         super(BatchIdentifier, self).__init__()
-        # batch_kwargs
         # if isinstance(batch_identifier, (BatchKwargs, dict)):
         #     self._batch_identifier = batch_identifier.batch_fingerprint
-        # else:
+
         self._batch_identifier = batch_identifier
+        self._data_asset_name = data_asset_name
 
     @property
     def batch_identifier(self):
         return self._batch_identifier
+
+    @property
+    def data_asset_name(self):
+        return self._data_asset_name
 
     def to_tuple(self):
         return self.batch_identifier,

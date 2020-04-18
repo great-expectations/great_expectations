@@ -1538,8 +1538,10 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     assert len(suite.expectations) == 3
     assert context.list_expectation_suite_names() == [suite_name]
     assert context.list_datasources() == [
-        {"class_name": "PandasDatasource", "name": "mydatasource"}
-    ]
+        {'module_name': 'great_expectations.datasource', 'class_name': 'PandasDatasource',
+         'data_asset_type': {'module_name': 'great_expectations.dataset', 'class_name': 'PandasDataset'},
+         'batch_kwargs_generators': {'mygenerator': {'class_name': 'SubdirReaderBatchKwargsGenerator', 'base_directory': '../data'}},
+         'name': 'mydatasource'}]
     assert context.get_validation_result("warning") == {}
 
     # Create notebook

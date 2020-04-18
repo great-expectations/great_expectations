@@ -20,9 +20,9 @@ def test_suite_help_output(caplog,):
     assert (
         """\
 Commands:
-  edit  Generate a Jupyter notebook for editing an existing expectation suite.
-  list  Lists available expectation suites.
-  new   Create a new expectation suite."""
+  edit  Generate a Jupyter notebook for editing an existing Expectation Suite.
+  list  Lists available Expectation Suites.
+  new   Create a new Expectation Suite."""
         in result.stdout
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -211,7 +211,11 @@ def test_suite_new_empty_suite_creates_empty_suite(
     citations = suite.get_citations()
     citations[0].pop("citation_date")
     assert citations[0] == {
-        "batch_kwargs": {"datasource": "mydatasource", "path": csv, 'reader_method': 'read_csv'},
+        "batch_kwargs": {
+            "datasource": "mydatasource",
+            "path": csv,
+            "reader_method": "read_csv",
+        },
         "batch_markers": None,
         "batch_parameters": None,
         "comment": "New suite added via CLI",
@@ -278,14 +282,15 @@ def test_suite_new_empty_suite_creates_empty_suite_with_no_jupyter(
     citations = suite.get_citations()
     citations[0].pop("citation_date")
     assert citations[0] == {
-        'batch_kwargs': {
-            'datasource': 'mydatasource',
-            'path': csv,
-            'reader_method': 'read_csv'
+        "batch_kwargs": {
+            "datasource": "mydatasource",
+            "path": csv,
+            "reader_method": "read_csv",
         },
-        'batch_markers': None,
-        'batch_parameters': None,
-        'comment': 'New suite added via CLI'}
+        "batch_markers": None,
+        "batch_parameters": None,
+        "comment": "New suite added via CLI",
+    }
 
     assert mock_subprocess.call_count == 0
     assert mock_webbroser.call_count == 0
@@ -353,7 +358,7 @@ def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
 
     assert len(obs_urls) == 1
     assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]
+        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]["site_url"]
     )
 
     expected_index_path = os.path.join(
@@ -428,7 +433,7 @@ def test_suite_new_multiple_datasources_with_generator_without_suite_name_argume
 
     assert len(obs_urls) == 1
     assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]
+        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]["site_url"]
     )
 
     expected_index_path = os.path.join(
@@ -490,7 +495,7 @@ def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
 
     assert len(obs_urls) == 1
     assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]
+        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]["site_url"]
     )
 
     expected_index_path = os.path.join(
@@ -1062,7 +1067,7 @@ def test_suite_list_with_zero_suites(caplog, empty_data_context):
         cli, "suite list -d {}".format(project_dir), catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert "No expectation suites found" in result.output
+    assert "No Expectation Suites found" in result.output
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -1077,8 +1082,8 @@ def test_suite_list_with_one_suite(caplog, empty_data_context):
         cli, "suite list -d {}".format(project_dir), catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert "1 expectation suite found" in result.output
-    assert "\ta.warning" in result.output
+    assert "1 Expectation Suite found" in result.output
+    assert "a.warning" in result.output
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
@@ -1096,9 +1101,9 @@ def test_suite_list_with_multiple_suites(caplog, empty_data_context):
     )
     output = result.output
     assert result.exit_code == 0
-    assert "3 expectation suites found:" in output
-    assert "\ta.warning" in output
-    assert "\tb.warning" in output
-    assert "\tc.warning" in output
+    assert "3 Expectation Suites found:" in output
+    assert "a.warning" in output
+    assert "b.warning" in output
+    assert "c.warning" in output
 
     assert_no_logging_messages_or_tracebacks(caplog, result)

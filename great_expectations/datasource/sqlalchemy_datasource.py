@@ -2,6 +2,8 @@ import logging
 import datetime
 from string import Template
 
+from urllib.parse import urlparse
+
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.types import (
     SqlAlchemyDatasourceQueryBatchKwargs,
@@ -38,13 +40,13 @@ class SqlAlchemyDatasource(Datasource):
     recognized_batch_parameters = {'query_parameters', 'limit', 'dataset_options'}
 
     @classmethod
-    def build_configuration(cls, data_asset_type=None, generators=None, **kwargs):
+    def build_configuration(cls, data_asset_type=None, batch_kwargs_generators=None, **kwargs):
         """
         Build a full configuration object for a datasource, potentially including generators with defaults.
 
         Args:
             data_asset_type: A ClassConfig dictionary
-            generators: Generator configuration dictionary
+            batch_kwargs_generators: Generator configuration dictionary
             **kwargs: Additional kwargs to be part of the datasource constructor's initialization
 
         Returns:
@@ -53,29 +55,32 @@ class SqlAlchemyDatasource(Datasource):
         """
 
         if data_asset_type is None:
-            data_asset_type = {"class_name": "SqlAlchemyDataset"}
+            data_asset_type = {
+                "class_name": "SqlAlchemyDataset",
+                "module_name": "great_expectations.dataset"
+            }
         else:
             data_asset_type = classConfigSchema.dump(ClassConfig(**data_asset_type))
 
         configuration = kwargs
         configuration["data_asset_type"] = data_asset_type
-        if generators is not None:
-            configuration["generators"] = generators
+        if batch_kwargs_generators is not None:
+            configuration["batch_kwargs_generators"] = batch_kwargs_generators
 
         return configuration
 
-    def __init__(self, name="default", data_context=None, data_asset_type=None, credentials=None, generators=None, **kwargs):
+    def __init__(self, name="default", data_context=None, data_asset_type=None, credentials=None, batch_kwargs_generators=None, **kwargs):
         if not sqlalchemy:
             raise DatasourceInitializationError(name, "ModuleNotFoundError: No module named 'sqlalchemy'")
 
-        configuration_with_defaults = SqlAlchemyDatasource.build_configuration(data_asset_type, generators, **kwargs)
+        configuration_with_defaults = SqlAlchemyDatasource.build_configuration(data_asset_type, batch_kwargs_generators, **kwargs)
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
-        generators = configuration_with_defaults.pop("generators", None)
+        batch_kwargs_generators = configuration_with_defaults.pop("batch_kwargs_generators", None)
         super(SqlAlchemyDatasource, self).__init__(
             name,
             data_context=data_context,
             data_asset_type=data_asset_type,
-            generators=generators,
+            batch_kwargs_generators=batch_kwargs_generators,
             **configuration_with_defaults)
 
         if credentials is not None:
@@ -97,9 +102,7 @@ class SqlAlchemyDatasource(Datasource):
                 self.engine.connect()
             elif "url" in credentials:
                 url = credentials.pop("url")
-                # TODO perhaps we could carefully regex out the driver from the
-                #  url. It would need to be cautious to avoid leaking secrets.
-                self.drivername = "other"
+                self.drivername = urlparse(url).scheme
                 self.engine = create_engine(url, **kwargs)
                 self.engine.connect()
 

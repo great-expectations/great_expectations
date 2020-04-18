@@ -3,14 +3,9 @@ from __future__ import unicode_literals
 import os
 import re
 import shutil
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 import pytest
 from click.testing import CliRunner
-from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -19,8 +14,12 @@ from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
-@pytest.mark.xfail(condition=PY2, reason="Py2")
+
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
@@ -37,8 +36,12 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
     )
     stdout = result.output
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(project_dir) \
-           in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
     assert len(stdout) < 3000, "CLI output is unreasonably long."
     assert "Always know what to expect from your data" in stdout
@@ -53,7 +56,9 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
-    assert "A new Expectation suite 'Titanic.warning' was added to your project" in stdout
+    assert (
+        "A new Expectation suite 'Titanic.warning' was added to your project" in stdout
+    )
     assert "Great Expectations is now set up" in stdout
 
     assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
@@ -167,7 +172,9 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
     csv_path = os.path.join(project_dir, "data", "Titanic.csv")
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli,
             ["init", "-d", project_dir],
@@ -175,7 +182,12 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
             catch_exceptions=False,
         )
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/my_suite/".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/my_suite/".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -197,7 +209,13 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
     context = DataContext(ge_dir)
     assert context.list_datasources() == [
-        {"name": "files_datasource", "class_name": "PandasDatasource"}
+        {
+            "name": "files_datasource",
+            "class_name": "PandasDatasource",
+            'data_asset_type': {'class_name': 'PandasDataset',
+                                'module_name': 'great_expectations.dataset'},
+            "module_name": "great_expectations.datasource",
+        }
     ]
     assert context.list_expectation_suites()[0].expectation_suite_name == "my_suite"
     assert len(context.list_expectation_suites()) == 1
@@ -245,8 +263,12 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
         input="Y\n1\n1\n{}\n\n\n\n".format(data_path, catch_exceptions=False),
     )
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(project_dir) \
-           in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
     context = DataContext(os.path.join(project_dir, DataContext.GE_DIR))
     assert isinstance(context, DataContext)
@@ -271,7 +293,9 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert len(context.list_datasources()) == 2
 
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
         )
@@ -296,7 +320,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     project_dir = initialized_project
 
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
         )
@@ -322,7 +348,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     project_dir = initialized_project
 
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli, ["init", "-d", project_dir], input="Y\n", catch_exceptions=False,
         )
@@ -330,7 +358,12 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/index.html".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/index.html".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
     assert "Error: invalid input" not in stdout
 
@@ -363,11 +396,15 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert context.list_expectation_suites() == []
 
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli,
             ["init", "-d", project_dir],
-            input="{}\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
+            input="{}\nsink_me\n\n\n".format(
+                os.path.join(project_dir, "data/Titanic.csv")
+            ),
             catch_exceptions=False,
         )
     stdout = result.stdout
@@ -385,8 +422,9 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(condition=PY2, reason="Py2")
-def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(caplog, tmp_path_factory):
+def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
+    caplog, tmp_path_factory
+):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     os.makedirs(os.path.join(project_dir, "data"))
     data_path = os.path.join(project_dir, "data", "broken_excel_file.xls")
@@ -407,11 +445,20 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(cap
     assert "What are you processing your files with" in stdout
     assert "Enter the path (relative or absolute) of a data file" in stdout
     assert "Cannot load file." in stdout
-    assert "- Please check the file and try again or select a different data file." in stdout
-    assert "- Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'" in stdout
+    assert (
+        "- Please check the file and try again or select a different data file."
+        in stdout
+    )
+    assert (
+        "- Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'"
+        in stdout
+    )
     assert "Try again? [Y/n]:" in stdout
     assert "[{}]:".format(data_path) in stdout
-    assert "We have saved your setup progress. When you are ready, run great_expectations init to continue." in stdout
+    assert (
+        "We have saved your setup progress. When you are ready, run great_expectations init to continue."
+        in stdout
+    )
 
     assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
@@ -426,9 +473,10 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(cap
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(condition=PY2, reason="Py2")
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different_file(mock_webbrowser, caplog, tmp_path_factory):
+def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different_file(
+    mock_webbrowser, caplog, tmp_path_factory
+):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     os.makedirs(os.path.join(project_dir, "data"))
     data_path = os.path.join(project_dir, "data", "broken_excel_file.xls")
@@ -442,12 +490,18 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="Y\n1\n1\n{}\n\n{}\n".format(data_path, data_path_2, catch_exceptions=False),
+        input="Y\n1\n1\n{}\n\n{}\n".format(
+            data_path, data_path_2, catch_exceptions=False
+        ),
     )
     stdout = result.output
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(project_dir) in \
-           mock_webbrowser.call_args[0][0]
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(
+            project_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
     assert len(stdout) < 3000, "CLI output is unreasonably long."
     assert "Always know what to expect from your data" in stdout
@@ -455,20 +509,28 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     assert "What are you processing your files with" in stdout
     assert "Enter the path (relative or absolute) of a data file" in stdout
     assert "Cannot load file." in stdout
-    assert "- Please check the file and try again or select a different data file." in stdout
-    assert "- Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'" in stdout
+    assert (
+        "- Please check the file and try again or select a different data file."
+        in stdout
+    )
+    assert (
+        "- Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'"
+        in stdout
+    )
     assert "Try again? [Y/n]:" in stdout
     assert "[{}]:".format(data_path) in stdout
 
     assert "Name the new expectation suite [Titanic.warning]" in stdout
     assert (
-            "Great Expectations will choose a couple of columns and generate expectations about them"
-            in stdout
+        "Great Expectations will choose a couple of columns and generate expectations about them"
+        in stdout
     )
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
-    assert "A new Expectation suite 'Titanic.warning' was added to your project" in stdout
+    assert (
+        "A new Expectation suite 'Titanic.warning' was added to your project" in stdout
+    )
     assert "Great Expectations is now set up" in stdout
 
     assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
@@ -556,7 +618,8 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
                 warning/
                     9999.9999/
                         foobarbazguid.json
-""")
+"""
+    )
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 

@@ -1,14 +1,19 @@
-import great_expectations.exceptions as ge_exceptions
+import logging
 
 try:
     import sqlalchemy
-    from sqlalchemy import create_engine, Column, String, MetaData, Table, select, and_, column
+    from sqlalchemy import create_engine, Column, String, MetaData, Table, select, and_, column, text
+    from sqlalchemy.func import count
     from sqlalchemy.engine.url import URL
+    from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
     sqlalchemy = None
     create_engine = None
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
+
+logger = logging.getLogger(__name__)
 
 
 class DatabaseStoreBackend(StoreBackend):
@@ -19,7 +24,7 @@ class DatabaseStoreBackend(StoreBackend):
             raise ge_exceptions.DataContextError("ModuleNotFoundError: No module named 'sqlalchemy'")
 
         if not self.fixed_length_key:
-            raise ValueError("DatabaseStoreBackend requires use of a fixed-length-key")
+            raise ge_exceptions.InvalidConfigError("DatabaseStoreBackend requires use of a fixed-length-key")
 
         meta = MetaData()
         self.key_columns = key_columns
@@ -27,7 +32,7 @@ class DatabaseStoreBackend(StoreBackend):
         cols = []
         for column in key_columns:
             if column == "value":
-                raise ValueError("'value' cannot be used as a key_element name")
+                raise ge_exceptions.InvalidConfigError("'value' cannot be used as a key_element name")
             cols.append(Column(column, String, primary_key=True))
 
         cols.append(Column("value", String))
@@ -47,9 +52,11 @@ class DatabaseStoreBackend(StoreBackend):
                 *[getattr(self._table.columns, key_col) == val for key_col, val in zip(self.key_columns, key)]
             )
         )
-        res = self.engine.execute(sel).fetchone()
-        if res:
+        try:
             return self.engine.execute(sel).fetchone()[0]
+        except (IndexError, SQLAlchemyError) as e:
+            logger.debug("Error fetching value: " + str(e))
+            raise ge_exceptions.StoreError("Unable to fetch value for key: " + str(key))
 
     def _set(self, key, value, **kwargs):
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
@@ -58,7 +65,16 @@ class DatabaseStoreBackend(StoreBackend):
         self.engine.execute(ins)
 
     def _has_key(self, key):
-        pass
+        sel = select([count(column("value"))]).select_from(self._table).where(
+            and_(
+                *[getattr(self._table.columns, key_col) == val for key_col, val in zip(self.key_columns, key)]
+            )
+        )
+        try:
+            return self.engine.execute(sel).fetchone()[0] == 1
+        except (IndexError, SQLAlchemyError) as e:
+            logger.debug("Error checking for value: " + str(e))
+            return False
 
     def list_keys(self, prefix=()):
         sel = select([column(col) for col in self.key_columns]).select_from(self._table).where(

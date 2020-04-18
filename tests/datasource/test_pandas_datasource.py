@@ -6,7 +6,6 @@ import os
 from ruamel.yaml import YAML
 
 import pandas as pd
-from six import PY2, PY3
 import shutil
 
 from great_expectations.core import ExpectationSuite
@@ -36,20 +35,20 @@ def test_folder_connection_path(tmp_path_factory):
 
 
 def test_standalone_pandas_datasource(test_folder_connection_path):
-    datasource = PandasDatasource('PandasCSV', generators={
+    datasource = PandasDatasource('PandasCSV', batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": test_folder_connection_path
             }
         }
-    )
+                                  )
 
     assert datasource.get_available_data_asset_names() == {'subdir_reader': {'names': [('test', 'file')],
                                                                         'is_complete_list':
         True}}
     manual_batch_kwargs = PathBatchKwargs(path=os.path.join(str(test_folder_connection_path), "test.csv"))
 
-    generator = datasource.get_generator("subdir_reader")
+    generator = datasource.get_batch_kwargs_generator("subdir_reader")
     auto_batch_kwargs = generator.yield_batch_kwargs("test")
 
     assert manual_batch_kwargs["path"] == auto_batch_kwargs["path"]
@@ -75,10 +74,7 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
     name = "test_pandas_datasource"
     class_name = "PandasDatasource"
-    # OLD STYLE: Remove even from record later...
-    # type_ = "pandas"
-    # data_context.add_datasource(name, type_, base_directory=str(basedir))
-    data_context.add_datasource(name, class_name=class_name, generators={
+    data_context.add_datasource(name, class_name=class_name, batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(basedir)
@@ -101,7 +97,7 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
         "datasources"][name]
 
     # We should have added a default generator built from the default config
-    assert data_context_file_config["datasources"][name]["generators"]["subdir_reader"]["class_name"] == \
+    assert data_context_file_config["datasources"][name]["batch_kwargs_generators"]["subdir_reader"]["class_name"] == \
         "SubdirReaderBatchKwargsGenerator"
 
 
@@ -116,7 +112,7 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
     data_context.add_datasource(name,
                                 class_name=class_name,
                                 data_asset_type=data_asset_type_config,
-                                generators={
+                                batch_kwargs_generators={
                                     "subdir_reader": {
                                         "class_name": "SubdirReaderBatchKwargsGenerator",
                                         "base_directory": str(test_folder_connection_path)
@@ -135,13 +131,13 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
     data_context.create_expectation_suite(expectation_suite_name="test")
     batch = data_context.get_batch(expectation_suite_name="test",
                                    batch_kwargs=data_context.build_batch_kwargs(datasource=name,
-                                                                                generator="subdir_reader", name="test")
+                                                                                batch_kwargs_generator="subdir_reader", name="test")
     )
     assert type(batch).__name__ == "CustomPandasDataset"
     res = batch.expect_column_values_to_have_odd_lengths("col_2")
     assert res.success is True
 
-@pytest.mark.skip(condition=PY2, reason="We don't specifically test py2 unicode reading since this test is about our handling of kwargs *to* read_csv")
+
 def test_pandas_source_read_csv(data_context, tmp_path_factory):
 
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
@@ -150,7 +146,7 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
                                 module_name="great_expectations.datasource",
                                 class_name="PandasDatasource",
                                 reader_options={"encoding": "utf-8"},
-                                generators={
+                                batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(basedir)
@@ -167,7 +163,7 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
     data_context.add_datasource("mysource2",
                                 module_name="great_expectations.datasource",
                                 class_name="PandasDatasource",
-                                generators={
+                                batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(basedir)
@@ -182,7 +178,7 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
     data_context.add_datasource("mysource3",
                                 module_name="great_expectations.datasource",
                                 class_name="PandasDatasource",
-                                generators={
+                                batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(basedir),
@@ -216,13 +212,13 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
 
 def test_invalid_reader_pandas_datasource(tmp_path_factory):
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_pandas_datasource"))
-    datasource = PandasDatasource('mypandassource', generators={
+    datasource = PandasDatasource('mypandassource', batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": basepath
             }
         }
-    )
+                                  )
 
 
     with open(os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w") as newfile:
@@ -252,13 +248,13 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
 
 
 def test_read_limit(test_folder_connection_path):
-    datasource = PandasDatasource('PandasCSV', generators={
+    datasource = PandasDatasource('PandasCSV', batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": test_folder_connection_path
             }
         }
-    )
+                                  )
 
     batch_kwargs = PathBatchKwargs({
             "path": os.path.join(str(test_folder_connection_path), "test.csv"),
@@ -301,7 +297,7 @@ def test_process_batch_parameters():
 
 
 def test_pandas_datasource_processes_dataset_options(test_folder_connection_path):
-    datasource = PandasDatasource('PandasCSV', generators={
+    datasource = PandasDatasource('PandasCSV', batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": test_folder_connection_path

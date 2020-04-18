@@ -20,11 +20,7 @@
     {% include 'favicon.j2' %}
   </head>
 
-  <body
-        data-spy="scroll"
-        data-target="#navigation"
-        data-offset="50"
-    >
+  <body>
     {% if show_how_to_buttons | default(True) %}
       {% include 'carousel_modal.j2' %}
     {% endif %}

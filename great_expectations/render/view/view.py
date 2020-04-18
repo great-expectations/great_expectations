@@ -105,6 +105,7 @@ class DefaultJinjaView(object):
         env.filters['attributes_dict_to_html_string'] = self.attributes_dict_to_html_string
         env.filters['render_bootstrap_table_data'] = self.render_bootstrap_table_data
         env.globals['ge_version'] = ge_version
+        env.filters['add_data_context_id_to_url'] = self.add_data_context_id_to_url
 
         template = env.get_template(template)
         template.globals['now'] = datetime.datetime.utcnow
@@ -112,7 +113,18 @@ class DefaultJinjaView(object):
         return template
 
     @contextfilter
-    def render_content_block(self, context, content_block, index=None, content_block_id=None):
+    def add_data_context_id_to_url(self, jinja_context, url, add_datetime=True):
+        data_context_id = jinja_context.get("data_context_id")
+        if add_datetime:
+            datetime_iso_string = datetime.datetime.now().isoformat()
+            url += "?d=" + datetime_iso_string
+        if data_context_id:
+            url = url + "&dataContextId=" if add_datetime else url + "?dataContextId="
+            url += data_context_id
+        return url
+
+    @contextfilter
+    def render_content_block(self, jinja_context, content_block, index=None, content_block_id=None):
         if type(content_block) is str:
             return content_block
         elif content_block is None:
@@ -136,9 +148,9 @@ class DefaultJinjaView(object):
         content_block_type = content_block.get("content_block_type")
         template = self._get_template(template="{content_block_type}.j2".format(content_block_type=content_block_type))
         if content_block_id:
-            return template.render(context, content_block=content_block, index=index, content_block_id=content_block_id)
+            return template.render(jinja_context, content_block=content_block, index=index, content_block_id=content_block_id)
         else:
-            return template.render(context, content_block=content_block, index=index)
+            return template.render(jinja_context, content_block=content_block, index=index)
 
     def render_dict_values(self, context, dict_, index=None, content_block_id=None):
          for key, val in dict_.items():
