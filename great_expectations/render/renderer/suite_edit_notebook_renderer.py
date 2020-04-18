@@ -1,17 +1,17 @@
 import os
 
-import autopep8
 import nbformat
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.render.renderer.renderer import Renderer
+from great_expectations.util import lint_code
 
 
-class NotebookRenderer(Renderer):
+class SuiteEditNotebookRenderer(Renderer):
     """
-    Render a notebook that can re-create or edit the suite.
+    Render a notebook that can re-create or edit a suite.
 
-    Possible use cases:
+    Use cases:
     - Make an easy path to edit a suite that a Profiler created.
     - Make it easy to edit a suite where only JSON exists.
     """
@@ -48,7 +48,7 @@ class NotebookRenderer(Renderer):
 
         return ", ".join(kwargs)
 
-    def add_header(self, suite_name, batch_kwargs):
+    def add_header(self, suite_name: str, batch_kwargs) -> None:
         self.add_markdown_cell(
             """# Edit Your Expectation Suite
 Use this notebook to recreate and modify your expectation suite:
@@ -85,7 +85,7 @@ batch.head()""".format(
             lint=True,
         )
 
-    def add_footer(self):
+    def add_footer(self) -> None:
         self.add_markdown_cell(
             """\
 ## Save & Review Your Expectations
@@ -115,25 +115,22 @@ context.build_data_docs()
 context.open_data_docs(validation_result_identifier)"""
         )
 
-    def add_code_cell(self, code, lint=False):
+    def add_code_cell(self, code: str, lint: bool = False) -> None:
         """
         Add the given code as a new code cell.
         """
         if lint:
-            try:
-                code = autopep8.fix_code(code, options={"aggressive": 2}).rstrip("\n")
-            except RuntimeError:
-                pass
+            code = lint_code(code).rstrip("\n")
 
         cell = nbformat.v4.new_code_cell(code)
-        self.notebook["cells"].append(cell)
+        self._notebook["cells"].append(cell)
 
-    def add_markdown_cell(self, markdown):
+    def add_markdown_cell(self, markdown: str) -> None:
         """
         Add the given markdown as a new markdown cell.
         """
         cell = nbformat.v4.new_markdown_cell(markdown)
-        self.notebook["cells"].append(cell)
+        self._notebook["cells"].append(cell)
 
     def add_expectation_cells_from_suite(self, expectations):
         expectations_by_column = self._get_expectations_by_column(expectations)
@@ -191,43 +188,42 @@ context.open_data_docs(validation_result_identifier)"""
         return ""
 
     @classmethod
-    def _write_notebook_to_disk(cls, notebook, notebook_file_path):
+    def write_notebook_to_disk(cls, notebook, notebook_file_path):
         with open(notebook_file_path, "w") as f:
             nbformat.write(notebook, f)
 
-    def render(self, suite, batch_kwargs=None):
+    def render(
+        self, suite: ExpectationSuite, batch_kwargs=None
+    ) -> nbformat.NotebookNode:
         """
         Render a notebook dict from an expectation suite.
         """
         if not isinstance(suite, ExpectationSuite):
             raise RuntimeWarning("render must be given an ExpectationSuite.")
 
-        self.notebook = nbformat.v4.new_notebook()
+        self._notebook = nbformat.v4.new_notebook()
 
         suite_name = suite.expectation_suite_name
 
-        batch_kwargs = self._get_batch_kwargs(suite, batch_kwargs)
+        batch_kwargs = self.get_batch_kwargs(suite, batch_kwargs)
         self.add_header(suite_name, batch_kwargs)
         self.add_authoring_intro()
         self.add_expectation_cells_from_suite(suite.expectations)
         self.add_footer()
 
-        return self.notebook
+        return self._notebook
 
-    def render_to_disk(self, suite, notebook_file_path, batch_kwargs=None):
+    def render_to_disk(
+        self, suite: ExpectationSuite, notebook_file_path: str, batch_kwargs=None
+    ) -> None:
         """
         Render a notebook to disk from an expectation suite.
 
         If batch_kwargs are passed they will override any found in suite
         citations.
-
-        :param data_asset_name:
-        :param batch_kwargs:
-        :type suite: dict
-        :type notebook_file_path: str
         """
         self.render(suite, batch_kwargs)
-        self._write_notebook_to_disk(self.notebook, notebook_file_path)
+        self.write_notebook_to_disk(self._notebook, notebook_file_path)
 
     def add_authoring_intro(self):
         self.add_markdown_cell(
@@ -239,7 +235,7 @@ Add expectations by calling specific expectation methods on the `batch` object. 
 You can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**."""
         )
 
-    def _get_batch_kwargs(self, suite, batch_kwargs):
+    def get_batch_kwargs(self, suite, batch_kwargs):
         if isinstance(batch_kwargs, dict):
             return self._fix_path_in_batch_kwargs(batch_kwargs)
 

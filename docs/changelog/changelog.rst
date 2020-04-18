@@ -2,7 +2,9 @@
 
 develop
 -----------------
-
+* renamed NotebookRenderer to SuiteEditNotebookRenderer
+* SuiteEditNotebookRenderer now lints using black
+* removed autopep8 dependency
 
 0.10.1
 -----------------
