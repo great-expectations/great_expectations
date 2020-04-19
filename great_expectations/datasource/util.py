@@ -48,7 +48,7 @@ class S3Url(object):
         return self._parsed.geturl()
 
 
-def hash_dataframe(df):
+def hash_pandas_dataframe(df):
     try:
         obj = pd.util.hash_pandas_object(df, index=True).values
     except TypeError:

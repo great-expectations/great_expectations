@@ -19,7 +19,7 @@ from great_expectations.datasource.types import BatchMarkers
 from great_expectations.core.batch import Batch
 from great_expectations.types import ClassConfig
 from great_expectations.exceptions import BatchKwargsError
-from .util import S3Url, hash_dataframe
+from .util import S3Url, hash_pandas_dataframe
 
 logger = logging.getLogger(__name__)
 
@@ -200,7 +200,7 @@ class PandasDatasource(Datasource):
                                    batch_kwargs)
 
         if df.memory_usage().sum() < HASH_THRESHOLD:
-            batch_markers["pandas_data_fingerprint"] = hash_dataframe(df)
+            batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
         return Batch(
             datasource_name=self.name,
