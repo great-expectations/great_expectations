@@ -1,19 +1,16 @@
 from __future__ import division
 
 import inspect
-import sys
+from typing import List
+
 from six import PY3, string_types
 from functools import wraps
 from numbers import Number
 from dateutil.parser import parse
-from datetime import datetime, timedelta
+from datetime import datetime
 
-if sys.version_info.major == 2:  # If python 2
-    from itertools import izip_longest as zip_longest
-    from backports.functools_lru_cache import lru_cache
-elif sys.version_info.major == 3:  # If python 3
-    from itertools import zip_longest
-    from functools import lru_cache
+from itertools import zip_longest
+from functools import lru_cache
 
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -195,7 +192,7 @@ class Dataset(MetaDataset):
         """Returns: int, table column count"""
         raise NotImplementedError
 
-    def get_table_columns(self):
+    def get_table_columns(self) -> List[str]:
         """Returns: List[str], list of column names"""
         raise NotImplementedError
 
@@ -3146,7 +3143,7 @@ class Dataset(MetaDataset):
         result_format=None, include_config=True, catch_exceptions=None,
         meta=None
     ):
-        """Expect the column to sum to be between an min and max value
+        """Expect the column minimum to be between an min and max value
 
         expect_column_min_to_be_between is a \
         :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
@@ -3391,7 +3388,6 @@ class Dataset(MetaDataset):
                 below_max = True
 
             success = above_min and below_max
-
 
         if parse_strings_as_datetimes:
             if output_strftime_format:

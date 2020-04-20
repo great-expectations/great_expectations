@@ -1,6 +1,6 @@
 # Welcome to Great Expectations! Always know what to expect from your data.
 #
-# Here you can define datasources, batch kwarg generators, integrations and
+# Here you can define datasources, batch kwargs generators, integrations and
 # more. This file is intended to be committed to your repo. For help with
 # configuration please:
 #   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#configuration
@@ -17,7 +17,7 @@ datasources:
     credentials: ${my_postgres_db}
     data_asset_type:
       class_name: SqlAlchemyDataset
-    generators:
+    batch_kwargs_generators:
       default:
         class_name: TableBatchKwargsGenerator
 
@@ -25,7 +25,7 @@ datasources:
 # secrets out of source control & 2) environment-based configuration changes
 # such as staging vs prod.
 #
-# When GE encounters substitution syntax (like `my_key: ${my_value}` or 
+# When GE encounters substitution syntax (like `my_key: ${my_value}` or
 # `my_key: $my_value`) in the config file it will attempt to replace the value
 # of `my_key` with the value from an environment variable `my_value` or a
 # corresponding key read from the file specified using
@@ -72,7 +72,7 @@ stores:
 # Stores are configurable places to store things like Expectations, Validations
 # Data Docs, and more. These are for advanced users only - most users can simply
 # leave this section alone.
-# 
+#
 # Three stores are required: expectations, validations, and
 # evaluation_parameters, and must exist with a valid store entry. Additional
 # stores can be configured for uses such as data_docs, validation_operators, etc.
@@ -101,9 +101,9 @@ data_docs_sites:
   # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/en/latest/features/data_docs.html
   local_site:
     class_name: SiteBuilder
+    show_how_to_buttons: true
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-      show_cta_footer: true

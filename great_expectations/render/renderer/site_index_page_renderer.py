@@ -1,16 +1,22 @@
-from collections import OrderedDict
 import logging
+import urllib
+from collections import OrderedDict
 
-from .renderer import Renderer
+import traceback
+
+from great_expectations.render.renderer.call_to_action_renderer import CallToActionRenderer
+from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
     RenderedSectionContent,
     RenderedDocumentContent,
-    RenderedHeaderContent, RenderedStringTemplateContent, RenderedTableContent, RenderedBulletListContent
+    RenderedHeaderContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+    RenderedBulletListContent,
 )
 
-from .call_to_action_renderer import CallToActionRenderer
-
 logger = logging.getLogger(__name__)
+
 
 # FIXME : This class needs to be rebuilt to accept SiteSectionIdentifiers as input.
 # FIXME : This class needs tests.
@@ -42,7 +48,7 @@ class SiteIndexPageRenderer(Renderer):
                         "tag": "a",
                         "styling": {
                             "attributes": {
-                                "href": expectation_suite_link_dict["filepath"]
+                                "href": urllib.parse.quote(expectation_suite_link_dict["filepath"])
                             },
                             "classes": ["ge-index-page-table-expectation-suite-link"]
                         }
@@ -74,7 +80,7 @@ class SiteIndexPageRenderer(Renderer):
                                 "tag": "a",
                                 "styling": {
                                     "attributes": {
-                                        "href": link_dict["filepath"]
+                                        "href": urllib.parse.quote(link_dict["filepath"])
                                     },
                                     "params": {
                                         "validation_success": {
@@ -128,7 +134,7 @@ class SiteIndexPageRenderer(Renderer):
                         "tag": "a",
                         "styling": {
                             "attributes": {
-                                "href": link_dict["filepath"]
+                                "href": urllib.parse.quote(link_dict["filepath"])
                             },
                             "params": {
                                 "validation_success": {
@@ -168,7 +174,6 @@ class SiteIndexPageRenderer(Renderer):
 
     @classmethod
     def render(cls, index_links_dict):
-
         sections = []
         cta_object = index_links_dict.pop("cta_object", None)
 
@@ -265,7 +270,7 @@ class SiteIndexPageRenderer(Renderer):
                                     "tag": "a",
                                     "styling": {
                                         "attributes": {
-                                            "href": profiling_link_dict["filepath"]
+                                            "href": urllib.parse.quote(profiling_link_dict["filepath"])
                                         },
                                         "classes": ["ge-index-page-table-expectation-suite-link"]
                                     }
@@ -309,7 +314,11 @@ class SiteIndexPageRenderer(Renderer):
             return index_page_document
 
         except Exception as e:
-            logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
-
-
-
+            exception_message = f'''\
+An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
+not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
+diagnose and repair the underlying issue.  Detailed information follows:  
+            '''
+            exception_traceback = traceback.format_exc()
+            exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+            logger.error(exception_message, e, exc_info=True)

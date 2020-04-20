@@ -1,22 +1,22 @@
 import datetime
 import logging
+from collections import OrderedDict
 
-from ..data_context.types.resource_identifiers import BatchIdentifier, ExpectationSuiteIdentifier, \
-    ValidationResultIdentifier
+from ..data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 
 logger = logging.getLogger(__name__)
 
 from six import string_types
 
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-)
-from great_expectations.data_asset import (
-    DataAsset,
-)
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.data_asset import DataAsset
 from .util import send_slack_notification
+from great_expectations.exceptions import ClassInstantiationError
 
-# NOTE: Abe 2019/08/24 : This is first implementation of all these classes. Consider them UNSTABLE for now. 
+# NOTE: Abe 2019/08/24 : This is first implementation of all these classes. Consider them UNSTABLE for now.
 
 
 class ValidationOperator(object):
@@ -28,7 +28,7 @@ class ValidationOperator(object):
     of validation operator classes that will be the descendants of this base class.
     """
 
-    def run(self, assets_to_validate, run_id):
+    def run(self, assets_to_validate, run_id, evaluation_parameters=None):
         raise NotImplementedError
 
 
@@ -72,22 +72,32 @@ class ActionListValidationOperator(ValidationOperator):
         self.data_context = data_context
 
         self.action_list = action_list
-        self.actions = {}
+        self.actions = OrderedDict()
         for action_config in action_list:
             assert isinstance(action_config, dict)
-            #NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
+            # NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
             if not set(action_config.keys()) == {"name", "action"}:
-                raise KeyError('Action config keys must be ("name", "action"). Instead got {}'.format(action_config.keys()))
+                raise KeyError(
+                    'Action config keys must be ("name", "action"). Instead got {}'.format(action_config.keys())
+                )
 
+            config = action_config["action"]
+            module_name = 'great_expectations.validation_operators'
             new_action = instantiate_class_from_config(
-                config=action_config["action"],
+                config=config,
                 runtime_environment={
                     "data_context": self.data_context,
                 },
                 config_defaults={
-                    "module_name": "great_expectations.validation_operators"
+                    "module_name": module_name
                 }
             )
+            if not new_action:
+                raise ClassInstantiationError(
+                    module_name=module_name,
+                    package_name=None,
+                    class_name=config['class_name']
+                )
             self.actions[action_config["name"]] = new_action
 
     def _build_batch_from_item(self, item):
@@ -115,7 +125,7 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch
 
-    def run(self, assets_to_validate, run_id):
+    def run(self, assets_to_validate, run_id, evaluation_parameters=None):
         result_object = {
             "success": None,
             "details": {}
@@ -132,9 +142,11 @@ class ActionListValidationOperator(ValidationOperator):
             #     run_id=run_id,
             # )
             result_object["details"][expectation_suite_identifier] = {}
-            batch_validation_result = batch.validate(run_id=run_id, result_format="SUMMARY")
+            batch_validation_result = batch.validate(run_id=run_id, result_format="SUMMARY",
+                                                     evaluation_parameters=evaluation_parameters)
             result_object["details"][expectation_suite_identifier]["validation_result"] = batch_validation_result
-            batch_actions_results = self._run_actions(batch, expectation_suite_identifier, batch._expectation_suite, batch_validation_result, run_id)
+            batch_actions_results = self._run_actions(batch, expectation_suite_identifier, batch._expectation_suite,
+                                                      batch_validation_result, run_id)
             result_object["details"][expectation_suite_identifier]["actions_results"] = batch_actions_results
 
         result_object["success"] = all([val["validation_result"].success for val in result_object["details"].values()])
@@ -293,7 +305,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         for suffix in expectation_suite_name_suffixes:
             assert isinstance(suffix, string_types)
         self.expectation_suite_name_suffixes = expectation_suite_name_suffixes
-        
+
         self.slack_webhook = slack_webhook
         self.notify_on = notify_on
 
@@ -313,7 +325,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                 validation_result_identifier, value in run_return_obj.get("failure").items()
                 if not value["validation_result"].success
             ]
-    
+
         title_block = {
             "type": "section",
             "text": {
@@ -334,7 +346,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                 "text": "*Status*: {}".format(status_text)},
         }
         query["blocks"].append(status_element)
-        
+
         batch_identifiers_element = {
             "type": "section",
             "text": {
@@ -343,7 +355,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             }
         }
         query["blocks"].append(batch_identifiers_element)
-    
+
         if not success:
             failed_data_assets_element = {
                 "type": "section",
@@ -353,7 +365,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                 }
             }
             query["blocks"].append(failed_data_assets_element)
-    
+
         run_id_element = {
             "type": "section",
             "text":
@@ -364,7 +376,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             ,
         }
         query["blocks"].append(run_id_element)
-        
+
         timestamp_element = {
             "type": "section",
             "text":
@@ -388,10 +400,10 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             ],
         }
         query["blocks"].append(footer_section)
-        
+
         return query
 
-    def run(self, assets_to_validate, run_id, base_expectation_suite_name=None):
+    def run(self, assets_to_validate, run_id, base_expectation_suite_name=None, evaluation_parameters=None):
         if base_expectation_suite_name is None:
             if self.base_expectation_suite_name is None:
                 raise ValueError("base_expectation_suite_name must be configured in the validation operator or passed at runtime")
@@ -441,7 +453,8 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
             if failure_expectation_suite:
                 return_obj["failure"][failure_validation_result_id] = {}
-                failure_validation_result = batch.validate(failure_expectation_suite, result_format="SUMMARY")
+                failure_validation_result = batch.validate(failure_expectation_suite, result_format="SUMMARY",
+                                                           evaluation_parameters=evaluation_parameters)
                 return_obj["failure"][failure_validation_result_id]["validation_result"] = failure_validation_result
                 failure_actions_results = self._run_actions(
                     batch,
@@ -476,7 +489,8 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
             if warning_expectation_suite:
                 return_obj["warning"][warning_validation_result_id] = {}
-                warning_validation_result = batch.validate(warning_expectation_suite, result_format="SUMMARY")
+                warning_validation_result = batch.validate(warning_expectation_suite, result_format="SUMMARY",
+                                                           evaluation_parameters=evaluation_parameters)
                 return_obj["warning"][warning_validation_result_id]["validation_result"] = warning_validation_result
                 warning_actions_results = self._run_actions(
                     batch,

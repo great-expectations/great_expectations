@@ -35,6 +35,26 @@ You will most likely be prompted to install a new template. Rest assured that
 your original yaml file will be archived automatically for you. Even so, it's
 in your source control system already, right? ;-)
 
+.. _Upgrading to 0.10.x:
+*************************
+Upgrading to 0.10.x
+*************************
+
+In the 0.10.0 release, there are several breaking changes to the DataContext API.
+
+Most are related to the clarified naming ``BatchKwargsGenerators``.
+
+So, if you are using methods on the data context that used to have an argument named ``generators``,
+you will need to update that code to use the more precise name ``batch_kwargs_generators``.
+
+For example, in the method ``DataContext.get_available_data_asset_names`` the parameter ``generator_names`` is now ``batch_kwargs_generator_names``.
+
+If you are using ``BatchKwargsGenerators`` in your project config, follow these steps to upgrade your existing Great Expectations project:
+* Edit your ``great_expectations.yml`` file and change the key ``generators`` to ``batch_kwargs_generators``.
+
+* Run a simple command such as: ``great_expectations datasource list`` and ensure you see a list of datasources.
+
+
 *************************
 Upgrading to 0.9.x
 *************************

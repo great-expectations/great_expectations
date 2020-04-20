@@ -32,17 +32,17 @@ class PandasDatasource(Datasource):
     interacting with the local filesystem (the default subdir_reader generator), and from
     existing in-memory dataframes.
     """
-    recognized_batch_parameters = {'reader_method', 'reader_options', 'limit'}
+    recognized_batch_parameters = {'reader_method', 'reader_options', 'limit', 'dataset_options'}
 
     @classmethod
-    def build_configuration(cls, data_asset_type=None, generators=None, boto3_options=None, reader_method=None,
+    def build_configuration(cls, data_asset_type=None, batch_kwargs_generators=None, boto3_options=None, reader_method=None,
                             reader_options=None, limit=None, **kwargs):
         """
         Build a full configuration object for a datasource, potentially including generators with defaults.
 
         Args:
             data_asset_type: A ClassConfig dictionary
-            generators: Generator configuration dictionary
+            batch_kwargs_generators: Generator configuration dictionary
             boto3_options: Optional dictionary with key-value pairs to pass to boto3 during instantiation.
             reader_method: Optional default reader_method for generated batches
             reader_options: Optional default reader_options for generated batches
@@ -55,14 +55,17 @@ class PandasDatasource(Datasource):
         """
 
         if data_asset_type is None:
-            data_asset_type = {"class_name": "PandasDataset"}
+            data_asset_type = {
+                "class_name": "PandasDataset",
+                "module_name": "great_expectations.dataset"
+            }
         else:
             data_asset_type = classConfigSchema.dump(ClassConfig(**data_asset_type))
 
         configuration = kwargs
         configuration["data_asset_type"] = data_asset_type
-        if generators:
-            configuration["generators"] = generators
+        if batch_kwargs_generators:
+            configuration["batch_kwargs_generators"] = batch_kwargs_generators
 
         if boto3_options is not None:
             if isinstance(boto3_options, dict):
@@ -86,9 +89,9 @@ class PandasDatasource(Datasource):
 
         return configuration
 
-    def __init__(self, name="pandas", data_context=None, data_asset_type=None, generators=None,
+    def __init__(self, name="pandas", data_context=None, data_asset_type=None, batch_kwargs_generators=None,
                  boto3_options=None, reader_method=None, reader_options=None, limit=None, **kwargs):
-        configuration_with_defaults = PandasDatasource.build_configuration(data_asset_type, generators,
+        configuration_with_defaults = PandasDatasource.build_configuration(data_asset_type, batch_kwargs_generators,
                                                                            boto3_options,
                                                                            reader_method=reader_method,
                                                                            reader_options=reader_options,
@@ -96,11 +99,11 @@ class PandasDatasource(Datasource):
                                                                            **kwargs)
 
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
-        generators = configuration_with_defaults.pop("generators", None)
+        batch_kwargs_generators = configuration_with_defaults.pop("batch_kwargs_generators", None)
         super(PandasDatasource, self).__init__(name,
                                                data_context=data_context,
                                                data_asset_type=data_asset_type,
-                                               generators=generators,
+                                               batch_kwargs_generators=batch_kwargs_generators,
                                                **configuration_with_defaults)
 
         self._build_generators()
@@ -109,9 +112,14 @@ class PandasDatasource(Datasource):
         self._reader_options = configuration_with_defaults.get("reader_options", None)
         self._limit = configuration_with_defaults.get("limit", None)
 
-    def process_batch_parameters(self, reader_method=None, reader_options=None, limit=None):
-        # Note that we do not pass any parameters up, since *all* will be handled by PandasDatasource
-        batch_kwargs = super(PandasDatasource, self).process_batch_parameters()
+    def process_batch_parameters(self,
+                                 reader_method=None,
+                                 reader_options=None,
+                                 limit=None,
+                                 dataset_options=None,
+                                 ):
+        # Note that we do not pass limit up, since even that will be handled by PandasDatasource
+        batch_kwargs = super(PandasDatasource, self).process_batch_parameters(dataset_options=dataset_options)
 
         # Apply globally-configured reader options first
         if self._reader_options:

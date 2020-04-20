@@ -1,6 +1,8 @@
 import logging
 from copy import deepcopy
 
+import traceback
+
 from six import integer_types
 
 from great_expectations.render.renderer.content_block.expectation_string import (
@@ -10,8 +12,10 @@ from great_expectations.render.types import (
     RenderedContentBlockContainer,
     RenderedStringTemplateContent,
     RenderedTableContent,
-    CollapseContent)
+    CollapseContent,
+)
 from great_expectations.render.util import num_to_str
+from great_expectations.exceptions import GreatExpectationsError
 
 logger = logging.getLogger(__name__)
 
@@ -353,18 +357,32 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             unexpected_table = None
             observed_value = ["--"]
 
+            data_docs_exception_message = f'''\
+An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
+not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
+diagnose and repair the underlying issue.  Detailed information follows:  
+            '''
             try:
                 unexpected_statement = cls._get_unexpected_statement(evr)
             except Exception as e:
-                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+                exception_traceback = traceback.format_exc()
+                exception_message = data_docs_exception_message \
+                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                logger.error(exception_message, e, exc_info=True)
             try:
                 unexpected_table = cls._get_unexpected_table(evr)
             except Exception as e:
-                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+                exception_traceback = traceback.format_exc()
+                exception_message = data_docs_exception_message \
+                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                logger.error(exception_message, e, exc_info=True)
             try:
                 observed_value = [cls._get_observed_value(evr)]
             except Exception as e:
-                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+                exception_traceback = traceback.format_exc()
+                exception_message = data_docs_exception_message \
+                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                logger.error(exception_message, e, exc_info=True)
 
             # If the expectation has some unexpected values...:
             if unexpected_statement:

@@ -26,7 +26,7 @@ class TupleStoreBackend(StoreBackend):
 
     def __init__(self, filepath_template=None, filepath_prefix=None, filepath_suffix=None, forbidden_substrings=None,
                  platform_specific_separator=True, fixed_length_key=False):
-        super(TupleStoreBackend, self).__init__(fixed_length_key=fixed_length_key)
+        super().__init__(fixed_length_key=fixed_length_key)
         if forbidden_substrings is None:
             forbidden_substrings = ["/", "\\"]
         self.forbidden_substrings = forbidden_substrings
@@ -57,7 +57,7 @@ class TupleStoreBackend(StoreBackend):
             self._fixed_length_key = True
 
     def _validate_key(self, key):
-        super(TupleStoreBackend, self)._validate_key(key)
+        super()._validate_key(key)
 
         for key_element in key:
             for substring in self.forbidden_substrings:
@@ -188,7 +188,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                  platform_specific_separator=True,
                  root_directory=None,
                  fixed_length_key=False):
-        super(TupleFilesystemStoreBackend, self).__init__(
+        super().__init__(
             filepath_template=filepath_template,
             filepath_prefix=filepath_prefix,
             filepath_suffix=filepath_suffix,
@@ -259,7 +259,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 elif self.filepath_suffix and not filepath.endswith(self.filepath_suffix):
                     continue
                 key = self._convert_filepath_to_key(filepath)
-                if key:
+                if key and not self.is_ignored_key(key):
                     key_list.append(key)
 
         return key_list
@@ -297,7 +297,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             platform_specific_separator=False,
             fixed_length_key=False
     ):
-        super(TupleS3StoreBackend, self).__init__(
+        super().__init__(
             filepath_template=filepath_template,
             filepath_prefix=filepath_prefix,
             filepath_suffix=filepath_suffix,
@@ -380,7 +380,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         else:
             location = "s3-" + location
         s3_key = self._convert_key_to_filepath(key)
-        return "https://%s.amazonaws.com/%s/%s%s" % (location, self.bucket, self.prefix, s3_key)
+        return "https://%s.amazonaws.com/%s/%s/%s" % (location, self.bucket, self.prefix, s3_key)
 
     def _has_key(self, key):
         all_keys = self.list_keys()
@@ -409,7 +409,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             platform_specific_separator=False,
             fixed_length_key=False
     ):
-        super(TupleGCSStoreBackend, self).__init__(
+        super().__init__(
             filepath_template=filepath_template,
             filepath_prefix=filepath_prefix,
             filepath_suffix=filepath_suffix,

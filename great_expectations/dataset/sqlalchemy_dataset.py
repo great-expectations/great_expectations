@@ -1,4 +1,7 @@
 from __future__ import division
+
+from typing import List
+
 from six import PY3, string_types
 
 import uuid
@@ -253,6 +256,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             #was used for a temp table and raising an error
             schema = None
             table_name = "ge_tmp_" + str(uuid.uuid4())[:8]
+            # mssql expects all temporary table names to have a prefix '#'
+            if engine.dialect.name.lower() == "mssql":
+                table_name = "#" + table_name
             generated_table_name = table_name
         else:
             generated_table_name = None
@@ -279,8 +285,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_module("sqlalchemy.dialects." + self.engine.dialect.name)
 
-            if engine and engine.dialect.name.lower() == "sqlite":
-                # sqlite temp tables only persist within a connection so override the engine
+            if engine and engine.dialect.name.lower() in ["sqlite", "mssql"]:
+                # sqlite/mssql temp tables only persist within a connection so override the engine
                 self.engine = engine.connect()
         elif self.engine.dialect.name.lower() == "snowflake":
             self.dialect = import_module("snowflake.sqlalchemy.snowdialect")
@@ -325,6 +331,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # reflection will not find the temporary schema
             self.columns = self.column_reflection_fallback()
 
+        # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
+        if len(self.columns) == 0:
+            self.columns = self.column_reflection_fallback()
+
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
 
@@ -351,6 +361,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 head_sql_str += self._table.name
             head_sql_str += " limit {0:d}".format(n)
 
+            # Limit is unknown in mssql! Use top instead!
+            if self.engine.dialect.name.lower() == "mssql":
+                head_sql_str = "select top({n}) * from {table}".format(n=n, table=self._table.name)
+
             df = pd.read_sql(head_sql_str, con=self.engine)
 
         return PandasDataset(
@@ -371,7 +385,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def get_column_count(self):
         return len(self.columns)
 
-    def get_table_columns(self):
+    def get_table_columns(self) -> List[str]:
         return [col['name'] for col in self.columns]
 
     def get_column_nonnull_count(self, column):
@@ -482,8 +496,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return column_median
 
     def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
-        selects = [sa.func.percentile_disc(quantile).within_group(
-            sa.column(column).asc()) for quantile in quantiles]
+        if self.engine.dialect.name.lower() != "mssql":
+            selects = [sa.func.percentile_disc(quantile).within_group(
+                sa.column(column).asc()) for quantile in quantiles]
+        else:
+            # mssql requires over(), so we add an empty over() clause
+            selects = [sa.func.percentile_disc(quantile).within_group(
+                sa.column(column).asc()).over() for quantile in quantiles]
         try:
             if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
                 # Redshift does not have a percentile_disc method, but does support an approximate version
@@ -501,9 +520,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return list(quantiles)
 
     def get_column_stdev(self, column):
-        res = self.engine.execute(sa.select([
-                sa.func.stddev_samp(sa.column(column))
-            ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
+        if self.engine.dialect.name.lower() != "mssql":
+            res = self.engine.execute(sa.select([
+                    sa.func.stddev_samp(sa.column(column))
+                ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
+        else:
+            # stdev_samp is not a recognized built-in function name but stdevp does exist for mssql!
+            res = self.engine.execute(sa.select([
+                    sa.func.stdevp(sa.column(column))
+                ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
         return float(res[0])
 
     def get_column_hist(self, column, bins):
@@ -664,6 +689,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif self.engine.dialect.name == "mysql":
             stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql)
+        elif self.engine.dialect.name == "mssql":
+            # Insert "into #{table_name}" in the custom sql query right before the "from" clause
+            # Split is case sensitive so detect case.
+            # Note: transforming custom_sql to uppercase/lowercase has uninteded consequences (i.e., changing column names), so this is not an option!
+            if 'from' in custom_sql:
+                strsep = 'from'
+            else:
+                strsep = 'FROM'
+            custom_sqlmod = custom_sql.split(strsep, maxsplit=1)
+            stmt = (custom_sqlmod[0] + "into {table_name} from" + custom_sqlmod[1]).format(table_name=table_name)
         else:
             stmt = "CREATE TEMPORARY TABLE \"{table_name}\" AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql)
@@ -671,9 +706,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
-        sql = sa.select([sa.text("*")]).select_from(self._table).limit(1)
-        col_names = self.engine.execute(sql).keys()
-        col_dict = [{'name': col_name} for col_name in col_names]
+        if self.engine.dialect.name.lower() != "mssql":
+            sql = sa.select([sa.text("*")]).select_from(self._table).limit(1)
+            col_names = self.engine.execute(sql).keys()
+            col_dict = [{'name': col_name} for col_name in col_names]
+        else:
+            type_module = self._get_dialect_type_module()
+            # Get column names and types from the database
+            # StackOverflow to the rescue: https://stackoverflow.com/a/38634368
+            col_info = self.engine.execute("SELECT cols.NAME,ty.NAME FROM tempdb.sys.columns cols JOIN sys.types ty ON cols.user_type_id = ty.user_type_id WHERE object_id = OBJECT_ID('tempdb..{}')".format(self._table)).fetchall()
+            col_dict = [{'name': col_name, 'type': getattr(type_module,col_type.upper())()} for col_name,col_type in col_info]
         return col_dict
 
     ###
@@ -717,9 +759,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         except (TypeError, AttributeError):
             pass
 
-        # Bigquery
-        if bigquery_types_tuple is not None:
-            return bigquery_types_tuple
+        # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
+        try:
+            if (isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect) and
+                    bigquery_types_tuple is not None):
+                return bigquery_types_tuple
+        except (TypeError, AttributeError):
+            pass
 
         return self.dialect
 
@@ -768,7 +814,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 }
 
         except AttributeError:
-            raise ValueError("Unrecognized sqlalchemy type: %s" % type_)
+            raise ValueError("Type not recognized by current driver: %s" % type_)
 
     @DocInherit
     @DataAsset.expectation(['column', 'type_', 'mostly'])
@@ -972,38 +1018,53 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         return sa.column(column).notin_(dup_query)
 
-    def _get_dialect_regex_fn(self, positive=True):
+    def _get_dialect_regex_expression(self, column, regex, positive=True):
         try:
             # postgres
             if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
-                return "~" if positive else "!~"
+                if positive:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("~"))
+                else:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("!~"))
         except AttributeError:
             pass
 
         try:
             # redshift
             if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
-                return "~" if positive else "!~"
+                if positive:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("~"))
+                else:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("!~"))
         except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
             pass
         try:
             # Mysql
             if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
-                return "REGEXP" if positive else "NOT REGEXP"
+                if positive:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("REGEXP"))
+                else:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("NOT REGEXP"))
         except AttributeError:
             pass
 
         try:
             # Snowflake
             if isinstance(self.engine.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect):
-                return "RLIKE" if positive else "NOT RLIKE"
+                if positive:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("RLIKE"))
+                else:
+                    return BinaryExpression(sa.column(column), literal(regex), custom_op("NOT RLIKE"))
         except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
             pass
 
         try:
             # Bigquery
             if isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
-                return "REGEXP_CONTAINS" if positive else "NOT REGEXP_CONTAINS"
+                if positive:
+                    return sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex))
+                else:
+                    return sa.not_(sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex)))
         except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
             pass
 
@@ -1015,13 +1076,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             mostly=None,
             result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
-
-        regex_fn = self._get_dialect_regex_fn(positive=True)
-        if regex_fn is None:
+        regex_expression = self._get_dialect_regex_expression(column, regex, positive=True)
+        if regex_expression is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
-        return BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn))
+        return regex_expression
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_not_match_regex(
@@ -1031,12 +1091,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             mostly=None,
             result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
-        regex_fn = self._get_dialect_regex_fn(positive=False)
-        if regex_fn is None:
+        regex_expression = self._get_dialect_regex_expression(column, regex, positive=False)
+        if regex_expression is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
-        return BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn))
+        return regex_expression
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_match_regex_list(self,
@@ -1050,20 +1110,23 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if match_on not in ["any", "all"]:
             raise ValueError("match_on must be any or all")
 
-        regex_fn = self._get_dialect_regex_fn(positive=True)
-        if regex_fn is None:
+        if len(regex_list) == 0:
+            raise ValueError("At least one regex must be supplied in the regex_list.")
+
+        regex_expression = self._get_dialect_regex_expression(column, regex_list[0], positive=True)
+        if regex_expression is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
         if match_on == "any":
             condition = \
                 sa.or_(
-                    *[BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn)) for regex in regex_list]
+                    *[self._get_dialect_regex_expression(column, regex, positive=True) for regex in regex_list]
                 )
         else:
             condition = \
                 sa.and_(
-                    *[BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn)) for regex in regex_list]
+                    *[self._get_dialect_regex_expression(column, regex, positive=True) for regex in regex_list]
                 )
         return condition
 
@@ -1071,12 +1134,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def expect_column_values_to_not_match_regex_list(self, column, regex_list,
                                                      mostly=None,
                                                      result_format=None, include_config=True, catch_exceptions=None, meta=None):
+        if len(regex_list) == 0:
+            raise ValueError("At least one regex must be supplied in the regex_list.")
 
-        regex_fn = self._get_dialect_regex_fn(positive=False)
-        if regex_fn is None:
+        regex_expression = self._get_dialect_regex_expression(column, regex_list[0], positive=False)
+        if regex_expression is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
         return sa.and_(
-            *[BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn)) for regex in regex_list]
+            *[self._get_dialect_regex_expression(column, regex, positive=False) for regex in regex_list]
         )

@@ -5,6 +5,7 @@ import inspect
 import logging
 from datetime import datetime
 from functools import wraps
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -332,6 +333,9 @@ class SparkDFDataset(MetaSparkDFDataset):
     def __init__(self, spark_df, *args, **kwargs):
         # Creation of the Spark DataFrame is done outside this class
         self.spark_df = spark_df
+        self._persist = kwargs.pop("persist", True)
+        if self._persist:
+            self.spark_df.persist()
         super(SparkDFDataset, self).__init__(*args, **kwargs)
 
     def head(self, n=5):
@@ -352,7 +356,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     def get_column_count(self):
         return len(self.spark_df.columns)
 
-    def get_table_columns(self):
+    def get_table_columns(self) -> List[str]:
         return self.spark_df.columns
 
     def get_column_nonnull_count(self, column):

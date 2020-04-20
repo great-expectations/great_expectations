@@ -34,6 +34,7 @@ from great_expectations.exceptions import (
     DataContextError,
 )
 from great_expectations.util import gen_directory_tree_str
+from tests.integration.usage_statistics.test_integration_usage_statistics import USAGE_STATISTICS_QA_URL
 from tests.test_utils import safe_remove
 
 try:
@@ -68,7 +69,7 @@ def test_get_available_data_asset_names_with_one_datasource_including_a_single_g
     empty_data_context.add_datasource("my_datasource",
                            module_name="great_expectations.datasource",
                            class_name="PandasDatasource",
-                           generators={
+                           batch_kwargs_generators={
                              "subdir_reader": {
                                  "class_name": "SubdirReaderBatchKwargsGenerator",
                                  "base_directory": str(filesystem_csv)
@@ -104,7 +105,7 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
     context.add_datasource(
         "first",
         class_name="SqlAlchemyDatasource",
-        generators={"foo": {"class_name": "TableBatchKwargsGenerator", }},
+        batch_kwargs_generators={"foo": {"class_name": "TableBatchKwargsGenerator", }},
         **connection_kwargs
     )
     context.add_datasource(
@@ -115,7 +116,7 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
     context.add_datasource(
         "third",
         class_name="SqlAlchemyDatasource",
-        generators={"bar": {"class_name": "TableBatchKwargsGenerator", }},
+        batch_kwargs_generators={"bar": {"class_name": "TableBatchKwargsGenerator", }},
         **connection_kwargs
     )
 
@@ -174,15 +175,22 @@ def test_compile_evaluation_parameter_dependencies(data_context):
         'source_patient_data.default': ["expect_table_row_count_to_equal.result.observed_value"]
     }
 
+
 def test_list_datasources(data_context):
     datasources = data_context.list_datasources()
 
-    assert OrderedDict(datasources) == OrderedDict([
+    assert datasources == [
         {
             'name': 'mydatasource',
-            'class_name': 'PandasDatasource'
+            'class_name': 'PandasDatasource',
+            'module_name': 'great_expectations.datasource',
+            'data_asset_type': {'class_name': 'PandasDataset'},
+            'batch_kwargs_generators': {'mygenerator': {'base_directory': '../data',
+                                           'class_name': 'SubdirReaderBatchKwargsGenerator',
+                                           'reader_options': {'engine': 'python',
+                                                              'sep': None}}},
         }
-    ])
+    ]
 
     data_context.add_datasource("second_pandas_source",
                            module_name="great_expectations.datasource",
@@ -191,16 +199,25 @@ def test_list_datasources(data_context):
 
     datasources = data_context.list_datasources()
 
-    assert OrderedDict(datasources) == OrderedDict([
+    assert datasources == [
         {
             'name': 'mydatasource',
-            'class_name': 'PandasDatasource'
+            'class_name': 'PandasDatasource',
+            'module_name': 'great_expectations.datasource',
+            'data_asset_type': {'class_name': 'PandasDataset'},
+            'batch_kwargs_generators': {'mygenerator': {'base_directory': '../data',
+                                           'class_name': 'SubdirReaderBatchKwargsGenerator',
+                                           'reader_options': {'engine': 'python',
+                                                              'sep': None}}},
         },
         {
             'name': 'second_pandas_source',
-            'class_name': 'PandasDatasource'
+            'class_name': 'PandasDatasource',
+            'module_name': 'great_expectations.datasource',
+            'data_asset_type': {'class_name': 'PandasDataset',
+                                'module_name': 'great_expectations.dataset'},
         }
-    ])
+    ]
 
 
 def test_data_context_get_validation_result(titanic_data_context):
@@ -279,7 +296,7 @@ project_path/
     context.add_datasource("titanic",
                            module_name="great_expectations.datasource",
                            class_name="PandasDatasource",
-                           generators={
+                           batch_kwargs_generators={
                              "subdir_reader": {
                                  "class_name": "SubdirReaderBatchKwargsGenerator",
                                  "base_directory": os.path.join(project_dir, "data/titanic/")
@@ -290,7 +307,7 @@ project_path/
     context.add_datasource("random",
                            module_name="great_expectations.datasource",
                            class_name="PandasDatasource",
-                           generators={
+                           batch_kwargs_generators={
                                "subdir_reader": {
                                    "class_name": "SubdirReaderBatchKwargsGenerator",
                                    "base_directory": os.path.join(project_dir, "data/random/")
@@ -484,6 +501,11 @@ def basic_data_context_config():
                 "class_name": "ActionListValidationOperator",
                 "action_list": []
             }
+        },
+        "anonymous_usage_statistics": {
+            "enabled": True,
+            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
+            "usage_statistics_url": USAGE_STATISTICS_QA_URL
         }
     })
 
@@ -945,7 +967,7 @@ def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasource
 
     obs = context.get_docs_sites_urls()
     assert len(obs) == 1
-    assert obs[0].endswith("great_expectations/uncommitted/data_docs/local_site/index.html")
+    assert obs[0]["site_url"].endswith("great_expectations/uncommitted/data_docs/local_site/index.html")
 
 
 def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_site(tmp_path_factory):
@@ -974,7 +996,8 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     assert os.path.isfile(expected_path)
 
     obs = context.get_docs_sites_urls()
-    assert obs == ["file://{}".format(expected_path)]
+    print(obs)
+    assert obs == [{'site_name': 'my_rad_site', 'site_url': "file://{}".format(expected_path)}]
 
 
 def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_local_site(tmp_path_factory):
@@ -1013,10 +1036,14 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
         assert os.path.isfile(expected_path)
 
     obs = context.get_docs_sites_urls()
-    assert set(obs) == set([
-        "file://{}".format(path_1),
-        "file://{}".format(path_2),
-    ])
+
+    assert obs == [
+        {'site_name': 'my_rad_site',
+         'site_url': "file://{}".format(path_1)},
+        {
+            'site_name': 'another_just_amazing_site',
+            'site_url': "file://{}".format(path_2)}
+    ]
 
 
 def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):

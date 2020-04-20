@@ -286,7 +286,7 @@ To view the expectation suite you just created as HTML, rebuild the data docs an
     # save the Expectation Suite (by default to a JSON file in great_expectations/expectations folder
     batch.save_expectation_suite(discard_failed_expectations=False)
 
-# This step is optional, but useful - evaluate the expectations against the current batch of data
+    # This step is optional, but useful - evaluate the expectations against the current batch of data
     run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
     results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
     expectation_suite_identifier = list(results["details"].keys())[0]
