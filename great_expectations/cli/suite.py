@@ -7,9 +7,8 @@ import click
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli.datasource import (
-    create_expectation_suite as create_expectation_suite_impl,
-)
+from great_expectations.cli.toolkit import \
+    create_expectation_suite as create_expectation_suite_impl
 from great_expectations.cli.datasource import (
     get_batch_kwargs,
     select_datasource,
@@ -77,10 +76,10 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
 
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
     """
-    _suite_edit(suite, datasource, directory, jupyter, batch_kwargs)
+    _suite_edit(suite, datasource, directory, jupyter, batch_kwargs, usage_event = "cli.suite.edit")
 
 
-def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
+def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs, usage_event):
     batch_kwargs_json = batch_kwargs
     batch_kwargs = None
     try:
@@ -108,7 +107,7 @@ def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
                 )
                 send_usage_message(
                     data_context=context,
-                    event="cli.suite.edit",
+                    event=usage_event,
                     success=False
                 )
                 sys.exit(1)
@@ -118,7 +117,7 @@ def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
                 )
                 send_usage_message(
                     data_context=context,
-                    event="cli.suite.edit",
+                    event=usage_event,
                     success=False
                 )
                 sys.exit(1)
@@ -130,7 +129,7 @@ def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
                 )
                 send_usage_message(
                     data_context=context,
-                    event="cli.suite.edit",
+                    event=usage_event,
                     success=False
                 )
                 sys.exit(1)
@@ -151,7 +150,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                 cli_message("<red>{}</red>".format(ve))
                 send_usage_message(
                     data_context=context,
-                    event="cli.suite.edit",
+                    event=usage_event,
                     success=False
                 )
                 sys.exit(1)
@@ -160,7 +159,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                 cli_message("<red>No datasources found in the context.</red>")
                 send_usage_message(
                     data_context=context,
-                    event="cli.suite.edit",
+                    event=usage_event,
                     success=False
                 )
                 sys.exit(1)
@@ -197,7 +196,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
         send_usage_message(
             data_context=context,
-            event="cli.suite.edit",
+            event=usage_event,
             event_payload=payload,
             success=True
         )
@@ -208,7 +207,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
     except Exception as e:
         send_usage_message(
             data_context=context,
-            event="cli.suite.edit",
+            event=usage_event,
             success=False
         )
         raise e
@@ -284,7 +283,7 @@ def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
                 if jupyter:
                     cli_message("""<green>Because you requested an empty suite, we'll open a notebook for you now to edit it!
 If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n""")
-                _suite_edit(suite_name, datasource_name, directory, jupyter=jupyter, batch_kwargs=batch_kwargs)
+                _suite_edit(suite_name, datasource_name, directory, jupyter=jupyter, batch_kwargs=batch_kwargs, usage_event="cli.suite.new")
             send_usage_message(
                 data_context=context,
                 event="cli.suite.new",
@@ -315,6 +314,81 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n""")
             event="cli.suite.new",
             success=False
         )
+        raise e
+
+
+@suite.command(name="scaffold")
+@click.option("--suite", "-es", default=None, help="Expectation suite name.")
+@click.option(
+    "--directory",
+    "-d",
+    default=None,
+    help="The project's great_expectations directory.",
+)
+@click.option(
+    "--jupyter/--no-jupyter",
+    is_flag=True,
+    help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
+    default=True,
+)
+def suite_scaffold(suite, directory, jupyter):
+    """
+    Scaffold a new Expectation Suite.
+    """
+    # TODO sooo much of this is reused
+    # TODO sooo much of this is reused
+    # TODO sooo much of this is reused
+    # TODO sooo much of this is reused
+    try:
+        context = DataContext(directory)
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+
+    datasource_name = None
+    generator_name = None
+    generator_asset = None
+
+    try:
+        success, suite_name = create_expectation_suite_impl(
+            context,
+            datasource_name=datasource_name,
+            batch_kwargs_generator_name=generator_name,
+            generator_asset=generator_asset,
+            expectation_suite_name=suite,
+            additional_batch_kwargs={"limit": 1000},
+            empty_suite=False,
+            show_intro_message=False,
+            profiler_configuration={"excluded_columns": None, "excluded_expectations": None}
+        )
+        if success:
+            cli_message(
+                "A new Expectation suite '{}' was added to your project".format(
+                    suite_name
+                )
+            )
+            # TODO batch kwargs rrrg
+            # TODO batch kwargs rrrg
+            # TODO batch kwargs rrrg
+            # TODO batch kwargs rrrg
+            send_usage_message(
+                data_context=context, event="cli.suite.scaffold", success=True
+            )
+        else:
+            send_usage_message(
+                data_context=context, event="cli.suite.scaffold", success=False
+            )
+    except (
+        ge_exceptions.DataContextError,
+        ge_exceptions.ProfilerError,
+        IOError,
+        SQLAlchemyError,
+    ) as e:
+        cli_message("<red>{}</red>".format(e))
+        send_usage_message(data_context=context, event="cli.suite.scaffold", success=False)
+        sys.exit(1)
+    except Exception as e:
+        send_usage_message(data_context=context, event="cli.suite.scaffold", success=False)
         raise e
 
 

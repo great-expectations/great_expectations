@@ -7,7 +7,7 @@ from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.datasource import \
     add_datasource as add_datasource_impl
-from great_expectations.cli.datasource import \
+from great_expectations.cli.toolkit import \
     create_expectation_suite as create_expectation_suite_impl
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import (
