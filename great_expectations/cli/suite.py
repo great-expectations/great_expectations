@@ -1,11 +1,11 @@
 import json
 import os
-import subprocess
 import sys
 
 import click
 
 from great_expectations import exceptions as ge_exceptions
+import great_expectations.cli.toolkit as toolkit
 from great_expectations.cli.toolkit import \
     create_expectation_suite as create_expectation_suite_impl
 from great_expectations.cli.datasource import (
@@ -16,8 +16,10 @@ from great_expectations.cli.util import cli_message, load_expectation_suite, \
     cli_message_list, load_data_context_with_error_handling
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message, \
     edit_expectation_suite_usage_statistics
-from great_expectations.data_asset import DataAsset
+from great_expectations.exceptions import DataContextError
 from great_expectations.render.renderer.suite_edit_notebook_renderer import SuiteEditNotebookRenderer
+from great_expectations.render.renderer.suite_scaffold_notebook_renderer import \
+    SuiteScaffoldNotebookRenderer
 
 json_parse_exception = json.decoder.JSONDecodeError
 
@@ -93,8 +95,7 @@ def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs, usage_event
                 batch_kwargs = json.loads(batch_kwargs_json)
                 if datasource:
                     batch_kwargs["datasource"] = datasource
-                _batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
-                assert isinstance(_batch, DataAsset)
+                _batch = toolkit.load_batch(context, suite, batch_kwargs)
             except json_parse_exception as je:
                 cli_message(
                     "<red>Please check that your batch_kwargs are valid JSON.\n{}</red>".format(
@@ -174,11 +175,8 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                     additional_batch_kwargs=additional_batch_kwargs,
                 )
 
-        notebook_name = "{}.ipynb".format(suite.expectation_suite_name)
-
-        notebook_path = os.path.join(
-            context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
-        )
+        notebook_name = "edit_{}.ipynb".format(suite.expectation_suite_name)
+        notebook_path = _get_notebook_path(context, notebook_name)
         SuiteEditNotebookRenderer().render_to_disk(suite, notebook_path, batch_kwargs)
 
         if not jupyter:
@@ -198,7 +196,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
         )
 
         if jupyter:
-            subprocess.call(["jupyter", "notebook", notebook_path])
+            toolkit.launch_jupyter_notebook(notebook_path)
 
     except Exception as e:
         send_usage_message(
@@ -325,17 +323,55 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n""")
 )
 def suite_scaffold(suite, directory, jupyter):
     """Scaffold a new Expectation Suite."""
+    _suite_scaffold(suite, directory, jupyter)
+
+
+def _suite_scaffold(suite, directory, jupyter):
+    suite_name = suite
     context = load_data_context_with_error_handling(directory)
-    # TODO select datasource
-    # TODO get batch
+
     # TODO check if suite exists
+    if suite_name in context.list_expectation_suite_names():
+        toolkit.tell_user_suite_exists(suite_name)
+        sys.exit(1)
+
+    # TODO select datasource
+    datasource = toolkit.select_datasource(context)
+    if datasource is None:
+        # TODO test this and maybe move this logic into a helper
+        # select_datasource takes care of displaying an error message, so all is left here is to exit.
+        sys.exit(1)
+
+    # TODO create suite
+    try:
+        suite = context.create_expectation_suite(suite_name)
+    except DataContextError:
+        suite = context.get_expectation_suite(suite_name)
+
+    # TODO get batch_kwargs
+    _, _, _, batch_kwargs = get_batch_kwargs(context, datasource_name=datasource.name)
+    # batch = toolkit.load_batch(context, suite, batch_kwargs)
+
     # TODO render notebook
+    renderer = SuiteScaffoldNotebookRenderer(context, suite, batch_kwargs)
+    notebook_filename = f"scaffold_{suite.expectation_suite_name}.ipynb"
+    notebook_path = _get_notebook_path(context, notebook_filename)
+    # TODO test file created
+    renderer.render_to_disk(notebook_path)
+    profiler_configuration = {"excluded_columns": None, "excluded_expectations": None}
+
     # TODO open notebook
+    if jupyter:
+        # TODO test this
+        toolkit.launch_jupyter_notebook(notebook_path)
+    else:
+        # TODO test this
+        cli_message(f"To continue scaffolding this suite, run `jupyter notebook {notebook_path}`")
+
     # TODO send usage message
-
-
-    profiler_configuration={"excluded_columns": None, "excluded_expectations": None}
     send_usage_message(data_context=context, event="cli.suite.scaffold", success=True)
+    # TODO send usage message for certain failures?
+    send_usage_message(data_context=context, event="cli.suite.scaffold", success=False)
 
 
 @suite.command(name="list")
@@ -382,3 +418,11 @@ def suite_list(directory):
             success=False
         )
         raise e
+
+
+def _get_notebook_path(context, notebook_name):
+    return os.path.abspath(
+        os.path.join(
+            context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
+        )
+    )

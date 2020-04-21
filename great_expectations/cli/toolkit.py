@@ -1,6 +1,8 @@
 import datetime
 import os
+import subprocess
 import sys
+from typing import Union
 
 import click
 
@@ -12,9 +14,12 @@ from great_expectations.cli.datasource import (
 )
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.util import cli_message
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
+from great_expectations.dataset import Dataset
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
 
@@ -49,7 +54,7 @@ def create_expectation_suite(
     datasource_name = data_source.name
 
     if expectation_suite_name in context.list_expectation_suite_names():
-        _tell_user_suite_exists(expectation_suite_name)
+        tell_user_suite_exists(expectation_suite_name)
         sys.exit(1)
 
     if (
@@ -83,7 +88,7 @@ def create_expectation_suite(
                 show_default=True,
             )
             if expectation_suite_name in context.list_expectation_suite_names():
-                _tell_user_suite_exists(expectation_suite_name)
+                tell_user_suite_exists(expectation_suite_name)
             else:
                 break
 
@@ -195,7 +200,7 @@ def _get_default_expectation_suite_name(batch_kwargs, generator_asset):
     return suite_name
 
 
-def _tell_user_suite_exists(suite_name):
+def tell_user_suite_exists(suite_name):
     cli_message(
         f"<red>An expectation suite named `{suite_name}` already exists. If you intend to edit the suite please use `great_expectations suite edit {suite_name}`.</red>"
     )
@@ -207,3 +212,15 @@ def create_empty_suite(context, expectation_suite_name, batch_kwargs):
     )
     suite.add_citation(comment="New suite added via CLI", batch_kwargs=batch_kwargs)
     context.save_expectation_suite(suite, expectation_suite_name)
+
+
+def launch_jupyter_notebook(notebook_path: str) -> None:
+    subprocess.call(["jupyter", "notebook", notebook_path])
+
+
+def load_batch(context: DataContext, suite: Union[str, ExpectationSuite], batch_kwargs: Union[dict, BatchKwargs]) -> Dataset:
+    batch: Dataset = context.get_batch(batch_kwargs, suite)
+    assert isinstance(
+        batch, Dataset
+    ), "Batch failed to load. Please check your batch_kwargs"
+    return batch

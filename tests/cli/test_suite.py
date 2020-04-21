@@ -20,9 +20,9 @@ def test_suite_help_output(caplog,):
     assert (
         """\
 Commands:
-  edit  Generate a Jupyter notebook for editing an existing Expectation Suite.
-  list  Lists available Expectation Suites.
-  new   Create a new Expectation Suite.
+  edit      Generate a Jupyter notebook for editing an existing Expectation...
+  list      Lists available Expectation Suites.
+  new       Create a new Expectation Suite.
   scaffold  Scaffold a new Expectation Suite."""
         in result.stdout
     )
@@ -202,7 +202,7 @@ def test_suite_new_empty_suite_creates_empty_suite(
     expected_suite_path = os.path.join(root_dir, "expectations", "foo.json")
     assert os.path.isfile(expected_suite_path)
 
-    expected_notebook = os.path.join(root_dir, "uncommitted", "foo.ipynb")
+    expected_notebook = os.path.join(root_dir, "uncommitted", "edit_foo.ipynb")
     assert os.path.isfile(expected_notebook)
 
     context = DataContext(root_dir)
@@ -273,7 +273,7 @@ def test_suite_new_empty_suite_creates_empty_suite_with_no_jupyter(
     expected_suite_path = os.path.join(root_dir, "expectations", "foo.json")
     assert os.path.isfile(expected_suite_path)
 
-    expected_notebook = os.path.join(root_dir, "uncommitted", "foo.ipynb")
+    expected_notebook = os.path.join(root_dir, "uncommitted", "edit_foo.ipynb")
     assert os.path.isfile(expected_notebook)
 
     context = DataContext(root_dir)
@@ -716,7 +716,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert "Select a datasource" in stdout
     assert "Which data would you like to use" in stdout
 
-    expected_notebook_path = os.path.join(root_dir, "uncommitted", "foo_suite.ipynb")
+    expected_notebook_path = os.path.join(root_dir, "uncommitted", "edit_foo_suite.ipynb")
     assert os.path.isfile(expected_notebook_path)
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
@@ -781,7 +781,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert "Select a datasource" not in stdout
     assert "Which data would you like to use" not in stdout
 
-    expected_notebook_path = os.path.join(root_dir, "uncommitted", "foo_suite.ipynb")
+    expected_notebook_path = os.path.join(root_dir, "uncommitted", "edit_foo_suite.ipynb")
     assert os.path.isfile(expected_notebook_path)
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
@@ -869,7 +869,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert "Select a datasource" not in stdout
     assert "Which data would you like to use" not in stdout
 
-    expected_notebook_path = os.path.join(root_dir, "uncommitted", "foo_suite.ipynb")
+    expected_notebook_path = os.path.join(root_dir, "uncommitted", "edit_foo_suite.ipynb")
     assert os.path.isfile(expected_notebook_path)
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
@@ -971,7 +971,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
     assert stdout == ""
     assert result.exit_code == 0
 
-    expected_notebook_path = os.path.join(project_dir, "uncommitted", "foo.ipynb")
+    expected_notebook_path = os.path.join(project_dir, "uncommitted", "edit_foo.ipynb")
     assert os.path.isfile(expected_notebook_path)
     expected_suite_path = os.path.join(project_dir, "expectations", "foo.json")
     assert os.path.isfile(expected_suite_path)
@@ -1048,7 +1048,7 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     assert "Which data would you like to use" not in stdout
     assert "Enter the path" in stdout
 
-    expected_notebook_path = os.path.join(root_dir, "uncommitted", "my_new_suite.ipynb")
+    expected_notebook_path = os.path.join(root_dir, "uncommitted", "edit_my_new_suite.ipynb")
     assert os.path.isfile(expected_notebook_path)
 
     expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")

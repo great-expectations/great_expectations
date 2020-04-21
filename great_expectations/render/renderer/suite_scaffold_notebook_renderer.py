@@ -9,12 +9,12 @@ from great_expectations.render.renderer.suite_edit_notebook_renderer import (
 
 
 class SuiteScaffoldNotebookRenderer(SuiteEditNotebookRenderer):
-    def __init__(self, context: DataContext, suite_name: str, batch_kwargs):
+    def __init__(self, context: DataContext, suite: ExpectationSuite, batch_kwargs):
         self.context = context
-        self.suite_name = suite_name
-        self.suite = context.create_expectation_suite(suite_name)
+        self.suite = suite
+        self.suite_name = suite.expectation_suite_name
         self.batch_kwargs = self.get_batch_kwargs(self.suite, batch_kwargs)
-        self.batch = self.load_batch(context, suite_name, batch_kwargs)
+        self.batch = self.load_batch()
         super().__init__()
 
     def add_header(self):
@@ -94,17 +94,14 @@ should edit this suite to make finer grained adjustments to the expectations.
 This is be done by running `great_expectations suite edit {self.suite_name}`."""
         )
 
-    def load_batch(self, context: DataContext, suite_name: str, batch_kwargs):
-        batch = context.get_batch(batch_kwargs, self.suite)
-        # TODO maybe assertions here- is the batch protected?
+    def load_batch(self):
+        batch = self.context.get_batch(self.batch_kwargs, self.suite)
         assert isinstance(
             batch, Dataset
         ), "Batch failed to load. Please check your batch_kwargs"
         return batch
 
-    def render(
-        self, suite: ExpectationSuite, batch_kwargs=None
-    ) -> nbformat.NotebookNode:
+    def render(self, batch_kwargs=None, **kwargs) -> nbformat.NotebookNode:
         self._notebook = nbformat.v4.new_notebook()
         self.add_header()
         self.add_markdown_cell(
@@ -143,7 +140,7 @@ after this scaffold gets you close to what you want.**"""
         If batch_kwargs are passed they will override any found in suite
         citations.
         """
-        self.render(self.suite, self.batch_kwargs)
+        self.render(self.batch_kwargs)
         self.write_notebook_to_disk(self._notebook, notebook_file_path)
 
     def _add_scaffold_cell(self):

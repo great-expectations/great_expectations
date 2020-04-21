@@ -16,10 +16,12 @@ def test_render_snapshot_test(titanic_data_context):
         "mydatasource", "mygenerator", "Titanic"
     )
     csv_path = batch_kwargs["path"]
+    suite_name = "my_suite"
+    suite = titanic_data_context.create_expectation_suite(suite_name)
     renderer = SuiteScaffoldNotebookRenderer(
-        titanic_data_context, "my_suite", batch_kwargs
+        titanic_data_context, suite, batch_kwargs
     )
-    obs = renderer.render(None, None)
+    obs = renderer.render(None)
     assert isinstance(obs, nbformat.NotebookNode)
     ## NOTE!!! - When updating this snapshot be sure to include the dynamic
     # csv_path in the second cell due to pytest fixtures
@@ -111,12 +113,13 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     root_dir = context.root_directory
     uncommitted_dir = os.path.join(root_dir, "uncommitted")
     suite_name = "my_suite"
+    suite = context.create_expectation_suite(suite_name)
 
     csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
     batch_kwargs = {"datasource": "mydatasource", "path": csv_path}
 
     # Sanity check test setup
-    assert context.list_expectation_suite_names() == []
+    assert context.list_expectation_suite_names() == [suite_name]
     assert context.list_datasources() == [
         {
             "module_name": "great_expectations.datasource",
@@ -140,7 +143,7 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
 
     # Create notebook
     renderer = SuiteScaffoldNotebookRenderer(
-        titanic_data_context, suite_name, batch_kwargs
+        titanic_data_context, suite, batch_kwargs
     )
     renderer.render_to_disk(notebook_path)
     assert os.path.isfile(notebook_path)
@@ -168,36 +171,3 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     }
     suite = context.get_expectation_suite(suite_name)
     assert suite.expectations
-
-
-def test_notebook_rendering_throws_error_on_existing_suite(
-    titanic_data_context,
-):
-    """
-    To set this test up we:
-    - create a suite
-
-    We then:
-    - create a scaffold notebook for the same suite and expect an error during rendering
-    """
-    context = titanic_data_context
-    root_dir = context.root_directory
-    uncommitted_dir = os.path.join(root_dir, "uncommitted")
-    suite_name = "my_suite"
-
-    csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
-    batch_kwargs = {"datasource": "mydatasource", "path": csv_path}
-    suite = context.create_expectation_suite(suite_name)
-    context.save_expectation_suite(suite)
-
-    # Sanity check test setup
-    assert context.list_expectation_suite_names() == [suite_name]
-    notebook_path = os.path.join(uncommitted_dir, f"{suite_name}.ipynb")
-    assert not os.path.isfile(notebook_path)
-
-    # Create notebook
-    with pytest.raises(DataContextError):
-        renderer = SuiteScaffoldNotebookRenderer(
-            titanic_data_context, suite_name, batch_kwargs
-        )
-        renderer.render_to_disk(notebook_path)
