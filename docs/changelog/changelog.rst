@@ -2,6 +2,7 @@
 
 develop
 -----------------
+* consolidated error handling in CLI DataContext loading
 
 0.10.3
 -----------------

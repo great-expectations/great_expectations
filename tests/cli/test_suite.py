@@ -22,7 +22,8 @@ def test_suite_help_output(caplog,):
 Commands:
   edit  Generate a Jupyter notebook for editing an existing Expectation Suite.
   list  Lists available Expectation Suites.
-  new   Create a new Expectation Suite."""
+  new   Create a new Expectation Suite.
+  scaffold  Scaffold a new Expectation Suite."""
         in result.stdout
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)

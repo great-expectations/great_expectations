@@ -5,7 +5,6 @@ import sys
 
 import click
 
-from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.toolkit import \
     create_expectation_suite as create_expectation_suite_impl
@@ -13,8 +12,9 @@ from great_expectations.cli.datasource import (
     get_batch_kwargs,
     select_datasource,
 )
-from great_expectations.cli.util import cli_message, load_expectation_suite, cli_message_list
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message, _anonymizers, \
+from great_expectations.cli.util import cli_message, load_expectation_suite, \
+    cli_message_list, load_data_context_with_error_handling
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message, \
     edit_expectation_suite_usage_statistics
 from great_expectations.data_asset import DataAsset
 from great_expectations.render.renderer.suite_edit_notebook_renderer import SuiteEditNotebookRenderer
@@ -82,11 +82,7 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
 def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs, usage_event):
     batch_kwargs_json = batch_kwargs
     batch_kwargs = None
-    try:
-        context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        return
+    context = load_data_context_with_error_handling(directory)
 
     try:
         suite = load_expectation_suite(context, suite)
@@ -247,11 +243,7 @@ def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
 
     If you wish to skip the examples, add the `--empty` flag.
     """
-    try:
-        context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        return
+    context = load_data_context_with_error_handling(directory)
 
     datasource_name = None
     generator_name = None
@@ -332,18 +324,12 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n""")
     default=True,
 )
 def suite_scaffold(suite, directory, jupyter):
-    """
-    Scaffold a new Expectation Suite.
-    """
+    """Scaffold a new Expectation Suite."""
     # TODO sooo much of this is reused
     # TODO sooo much of this is reused
     # TODO sooo much of this is reused
     # TODO sooo much of this is reused
-    try:
-        context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        return
+    context = load_data_context_with_error_handling(directory)
 
     datasource_name = None
     generator_name = None
@@ -401,11 +387,7 @@ def suite_scaffold(suite, directory, jupyter):
 )
 def suite_list(directory):
     """Lists available Expectation Suites."""
-    try:
-        context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        return
+    context = load_data_context_with_error_handling(directory)
 
     try:
         suite_names = [

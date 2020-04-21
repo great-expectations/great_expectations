@@ -3,8 +3,8 @@ import importlib
 import json
 import logging
 import os
-import sys
 import platform
+import sys
 import uuid
 
 import click
@@ -17,16 +17,21 @@ from great_expectations.cli.util import (
     cli_message,
     cli_message_list,
     cli_message_dict,
+    load_data_context_with_error_handling,
     mark_cli_as_experimental,
-    )
+)
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.core.usage_statistics.usage_statistics import (
+    send_usage_message,
+)
 from great_expectations.datasource import (
     PandasDatasource,
     SparkDFDatasource,
     SqlAlchemyDatasource,
 )
-from great_expectations.datasource.batch_kwargs_generator import ManualBatchKwargsGenerator
+from great_expectations.datasource.batch_kwargs_generator import (
+    ManualBatchKwargsGenerator,
+)
 from great_expectations.datasource.batch_kwargs_generator.table_batch_kwargs_generator import (
     TableBatchKwargsGenerator,
 )
@@ -35,7 +40,6 @@ from great_expectations.exceptions import (
     DatasourceInitializationError,
 )
 from great_expectations.validator.validator import Validator
-
 
 logger = logging.getLogger(__name__)
 
@@ -81,12 +85,7 @@ def datasource():
 )
 def datasource_new(directory):
     """Add a new datasource to the data context."""
-    try:
-        context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        return
-
+    context = load_data_context_with_error_handling(directory)
     datasource_name, data_source_type = add_datasource(context)
 
     if datasource_name:
@@ -114,46 +113,29 @@ def datasource_new(directory):
 )
 def datasource_list(directory):
     """List known datasources."""
-    context = None
-    try:
-        failed = True
-        context = DataContext(directory)
-        datasources = context.list_datasources()
+    context = load_data_context_with_error_handling(directory)
+    datasources = context.list_datasources()
+    datasource_count = len(datasources)
 
-        if len(datasources) == 0:
-            cli_message("No Datasources found")
-            failed=False
-            send_usage_message(
-                data_context=context,
-                event="cli.datasource.list",
-                success=True
-            )
-            return
+    if datasource_count == 0:
+        list_intro_string = "No Datasources found"
+    else:
+        list_intro_string = _build_datasource_intro_string(datasource_count)
 
-        if len(datasources) == 1:
-            list_intro_string = "1 Datasource found:"
+    cli_message(list_intro_string)
+    for datasource in datasources:
+        cli_message("")
+        cli_message_dict(datasource)
 
-        if len(datasources) > 1:
-            list_intro_string = "{} Datasources found:".format(len(datasources))
-        cli_message(list_intro_string)
-        for datasource in datasources:
-            cli_message("")
-            cli_message_dict(datasource)
-        failed = False
-        send_usage_message(
-            data_context=context,
-            event="cli.datasource.list",
-            success=True
-        )
-    except (ge_exceptions.ConfigNotFoundError, ge_exceptions.InvalidConfigError) as err:
-        cli_message("<red>{}</red>".format(err.message))
-    finally:
-        if failed and context is not None:
-            send_usage_message(
-                data_context=context,
-                event="cli.datasource.list",
-                success=False
-            )
+    send_usage_message(data_context=context, event="cli.datasource.list", success=True)
+
+
+def _build_datasource_intro_string(datasource_count):
+    if datasource_count == 1:
+        list_intro_string = "1 Datasource found:"
+    if datasource_count > 1:
+        list_intro_string = f"{datasource_count} Datasources found:"
+    return list_intro_string
 
 
 @datasource.command(name="profile")
@@ -193,11 +175,7 @@ def datasource_profile(datasource, batch_kwargs_generator_name, data_assets, pro
     prompt the user to either specify the list of data assets to profile or to profile all.
     If the limit is not exceeded, the profiler will profile all data assets in the datasource.
     """
-    try:
-        context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        return
+    context = load_data_context_with_error_handling(directory)
 
     try:
         if additional_batch_kwargs is not None:
@@ -1245,17 +1223,6 @@ msg_prompt_choose_database = """
 Which database backend are you using?
 {}
 """.format("\n".join(["    {}. {}".format(i, db.value) for i, db in enumerate(SupportedDatabases, 1)]))
-
-#     msg_prompt_dbt_choose_profile = """
-# Please specify the name of the dbt profile (from your ~/.dbt/profiles.yml file Great Expectations \
-# should use to connect to the database
-#     """
-
-#     msg_dbt_go_to_notebook = """
-# To create expectations for your dbt models start Jupyter and open notebook
-# great_expectations/notebooks/using_great_expectations_with_dbt.ipynb -
-# it will walk you through next steps.
-#     """
 
 msg_prompt_filesys_enter_base_path = """
 Enter the path (relative or absolute) of the root directory where the data files are stored.

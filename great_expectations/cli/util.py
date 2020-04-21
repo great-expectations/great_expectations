@@ -4,7 +4,7 @@ from functools import wraps
 
 import six
 
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as ge_exceptions, DataContext
 from great_expectations.cli.cli_logging import logger
 
 try:
@@ -121,6 +121,22 @@ def load_expectation_suite(context, suite_name):
             "the name by running `great_expectations suite list` and try again."
         )
         logger.info(e)
+        sys.exit(1)
+
+
+def load_data_context_with_error_handling(directory):
+    """Return a DataContext with good error handling and exit codes."""
+    try:
+        context = DataContext(directory)
+        return context
+    except (ge_exceptions.ConfigNotFoundError, ge_exceptions.InvalidConfigError) as err:
+        cli_message("<red>{}</red>".format(err.message))
+        sys.exit(1)
+    except ge_exceptions.PluginModuleNotFoundError as err:
+        cli_message(err.cli_colored_message)
+        sys.exit(1)
+    except ge_exceptions.PluginClassNotFoundError as err:
+        cli_message(err.cli_colored_message)
         sys.exit(1)
 
 
