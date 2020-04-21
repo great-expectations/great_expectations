@@ -2,9 +2,14 @@
 
 develop
 -----------------
+
+0.10.2
+-----------------
 * renamed NotebookRenderer to SuiteEditNotebookRenderer
 * SuiteEditNotebookRenderer now lints using black
+* New SuiteScaffoldNotebookRenderer renderer to expedite suite creation
 * removed autopep8 dependency
+* bugfix: extra backslash in S3 urls if store was configured without a prefix `#1314 <https://github.com/great-expectations/great_expectations/issues/1314>`_
 
 0.10.1
 -----------------
