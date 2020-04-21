@@ -78,8 +78,7 @@ def create_expectation_suite(
         )
         while True:
             expectation_suite_name = click.prompt(
-                """
-        Name the new expectation suite""",
+                "\nName the new expectation suite",
                 default=default_expectation_suite_name,
                 show_default=True,
             )
@@ -92,6 +91,34 @@ def create_expectation_suite(
         create_empty_suite(context, expectation_suite_name, batch_kwargs)
         return True, expectation_suite_name
 
+    profiling_results = _profile_to_create_a_suite(
+        additional_batch_kwargs,
+        batch_kwargs,
+        batch_kwargs_generator_name,
+        context,
+        datasource_name,
+        expectation_suite_name,
+        generator_asset,
+        profiler_configuration,
+    )
+
+    build_docs(context, view=False)
+    if open_docs:
+        _attempt_to_open_validation_results_in_data_docs(context, profiling_results)
+
+    return True, expectation_suite_name
+
+
+def _profile_to_create_a_suite(
+    additional_batch_kwargs,
+    batch_kwargs,
+    batch_kwargs_generator_name,
+    context,
+    datasource_name,
+    expectation_suite_name,
+    generator_asset,
+    profiler_configuration,
+):
     click.prompt(
         """
 Great Expectations will choose a couple of columns and generate expectations about them
@@ -102,10 +129,9 @@ Press Enter to continue
         default=True,
         show_default=False,
     )
-
+    # TODO this may not apply
     cli_message("\nGenerating example Expectation Suite...")
     run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
     profiling_results = context.profile_data_asset(
         datasource_name,
         batch_kwargs_generator_name=batch_kwargs_generator_name,
@@ -117,15 +143,9 @@ Press Enter to continue
         run_id=run_id,
         additional_batch_kwargs=additional_batch_kwargs,
     )
-
     if not profiling_results["success"]:
         _raise_profiling_errors(profiling_results)
-
-    build_docs(context, view=False)
-    if open_docs:
-        _attempt_to_open_validation_results_in_data_docs(context, profiling_results)
-
-    return True, expectation_suite_name
+    return profiling_results
 
 
 def _raise_profiling_errors(profiling_results):

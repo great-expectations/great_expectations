@@ -325,57 +325,17 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n""")
 )
 def suite_scaffold(suite, directory, jupyter):
     """Scaffold a new Expectation Suite."""
-    # TODO sooo much of this is reused
-    # TODO sooo much of this is reused
-    # TODO sooo much of this is reused
-    # TODO sooo much of this is reused
     context = load_data_context_with_error_handling(directory)
+    # TODO select datasource
+    # TODO get batch
+    # TODO check if suite exists
+    # TODO render notebook
+    # TODO open notebook
+    # TODO send usage message
 
-    datasource_name = None
-    generator_name = None
-    generator_asset = None
 
-    try:
-        success, suite_name = create_expectation_suite_impl(
-            context,
-            datasource_name=datasource_name,
-            batch_kwargs_generator_name=generator_name,
-            generator_asset=generator_asset,
-            expectation_suite_name=suite,
-            additional_batch_kwargs={"limit": 1000},
-            empty_suite=False,
-            show_intro_message=False,
-            profiler_configuration={"excluded_columns": None, "excluded_expectations": None}
-        )
-        if success:
-            cli_message(
-                "A new Expectation suite '{}' was added to your project".format(
-                    suite_name
-                )
-            )
-            # TODO batch kwargs rrrg
-            # TODO batch kwargs rrrg
-            # TODO batch kwargs rrrg
-            # TODO batch kwargs rrrg
-            send_usage_message(
-                data_context=context, event="cli.suite.scaffold", success=True
-            )
-        else:
-            send_usage_message(
-                data_context=context, event="cli.suite.scaffold", success=False
-            )
-    except (
-        ge_exceptions.DataContextError,
-        ge_exceptions.ProfilerError,
-        IOError,
-        SQLAlchemyError,
-    ) as e:
-        cli_message("<red>{}</red>".format(e))
-        send_usage_message(data_context=context, event="cli.suite.scaffold", success=False)
-        sys.exit(1)
-    except Exception as e:
-        send_usage_message(data_context=context, event="cli.suite.scaffold", success=False)
-        raise e
+    profiler_configuration={"excluded_columns": None, "excluded_expectations": None}
+    send_usage_message(data_context=context, event="cli.suite.scaffold", success=True)
 
 
 @suite.command(name="list")
