@@ -48,6 +48,8 @@ class ValidationResultsPageRenderer(Renderer):
 
     def render(self, validation_results):
         run_id = validation_results.meta['run_id']
+        run_time = run_id.get("run_time")
+        run_name = run_id.get("run_name")
         batch_id = BatchKwargs(validation_results.meta['batch_kwargs']).to_id()
         expectation_suite_name = validation_results.meta['expectation_suite_name']
         batch_kwargs = validation_results.meta.get("batch_kwargs")
@@ -138,7 +140,7 @@ class ValidationResultsPageRenderer(Renderer):
 
         return RenderedDocumentContent(**{
             "renderer_type": "ValidationResultsPageRenderer",
-            "page_title": expectation_suite_name + " / " + run_id + " / " + batch_id,
+            "page_title": expectation_suite_name + " / " + run_name + " / " + run_time + " / " + batch_id,
             "batch_kwargs": batch_kwargs,
             "expectation_suite_name": expectation_suite_name,
             "sections": sections,
@@ -149,7 +151,7 @@ class ValidationResultsPageRenderer(Renderer):
     def _render_validation_header(cls, validation_results):
         success = validation_results.success
         expectation_suite_name = validation_results.meta['expectation_suite_name']
-        expectation_suite_path_components = ['..' for _ in range(len(expectation_suite_name.split('.')) + 2)] \
+        expectation_suite_path_components = ['..' for _ in range(len(expectation_suite_name.split('.')) + 3)] \
             + ["expectations"] + expectation_suite_name.split(".")
         expectation_suite_path = os.path.join(*expectation_suite_path_components) + ".html"
         if success:
@@ -208,6 +210,8 @@ class ValidationResultsPageRenderer(Renderer):
     @classmethod
     def _render_validation_info(cls, validation_results):
         run_id = validation_results.meta['run_id']
+        run_time = run_id.get("run_time")
+        run_name = run_id.get("run_name")
         ge_version = validation_results.meta["great_expectations.__version__"]
 
         return RenderedTableContent(**{
@@ -224,7 +228,8 @@ class ValidationResultsPageRenderer(Renderer):
             }),
             "table": [
                 ["Great Expectations Version", ge_version],
-                ["Run ID", run_id]
+                ["Run Name", run_name],
+                ["Run Time", run_time]
             ],
             "styling": {
                 "classes": ["col-12", "table-responsive", "mt-1"],
@@ -669,6 +674,8 @@ class ProfilingResultsPageRenderer(Renderer):
 
     def render(self, validation_results):
         run_id = validation_results.meta['run_id']
+        run_time = run_id.get("run_time")
+        run_name = run_id.get("run_name")
         expectation_suite_name = validation_results.meta['expectation_suite_name']
         batch_kwargs = validation_results.meta.get("batch_kwargs")
 
@@ -687,7 +694,7 @@ class ProfilingResultsPageRenderer(Renderer):
 
         return RenderedDocumentContent(**{
             "renderer_type": "ProfilingResultsPageRenderer",
-            "page_title": run_id + "-" + expectation_suite_name + "-ProfilingResults",
+            "page_title": run_time + "-" + run_name + "-" + expectation_suite_name + "-ProfilingResults",
             "expectation_suite_name": expectation_suite_name,
             "utm_medium": "profiling-results-page",
             "batch_kwargs": batch_kwargs,
