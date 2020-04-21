@@ -78,7 +78,7 @@ class DatasetProfiler(DataAssetProfiler):
         return expectation_suite
 
     @classmethod
-    def profile(cls, data_asset, run_id=None, profiler_configuration=None):
+    def profile(cls, data_asset, run_name=None, profiler_configuration=None):
         if not cls.validate(data_asset):
             raise GreatExpectationsError("Invalid data_asset for profiler; aborting")
 
@@ -86,7 +86,7 @@ class DatasetProfiler(DataAssetProfiler):
 
         batch_kwargs = data_asset.batch_kwargs
         expectation_suite = cls.add_meta(expectation_suite, batch_kwargs)
-        validation_results = data_asset.validate(expectation_suite, run_id=run_id, result_format="SUMMARY")
+        validation_results = data_asset.validate(expectation_suite, run_name=run_name, result_format="SUMMARY")
         expectation_suite.add_citation(
             comment=str(cls.__name__) + " added a citation based on the current batch.",
             batch_kwargs=data_asset.batch_kwargs,

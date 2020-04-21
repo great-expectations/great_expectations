@@ -677,7 +677,7 @@ class BaseDataContext(object):
             self,
             validation_operator_name,
             assets_to_validate,
-            run_id=None,
+            run_name=None,
             evaluation_parameters=None,
             **kwargs
     ):
@@ -690,25 +690,25 @@ class BaseDataContext(object):
             assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
                 the list can be either batches, or a tuple that will allow the operator to fetch the batch:
                 (batch_kwargs, expectation_suite_name)
-            run_id: The run_id for the validation; if None, a default value will be used
+            run_name: The run_name for the validation; if None, a default value will be used
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:
             ValidationOperatorResult
         """
-        if run_id is None:
-            run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-            logger.info("Setting run_id to: {}".format(run_id))
+        if run_name is None:
+            run_name = f'{validation_operator_name}_{datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")}'
+            logger.info("Setting run_name to: {}".format(run_name))
         if evaluation_parameters is None:
             return self.validation_operators[validation_operator_name].run(
                 assets_to_validate=assets_to_validate,
-                run_id=run_id,
+                run_name=run_name,
                 **kwargs
             )
         else:
             return self.validation_operators[validation_operator_name].run(
                 assets_to_validate=assets_to_validate,
-                run_id=run_id,
+                run_name=run_name,
                 evaluation_parameters=evaluation_parameters,
                 **kwargs
             )
@@ -1187,7 +1187,7 @@ class BaseDataContext(object):
                            profiler=BasicDatasetProfiler,
                            profiler_configuration=None,
                            dry_run=False,
-                           run_id="profiling",
+                           run_name="profiling",
                            additional_batch_kwargs=None):
         """Profile the named datasource using the named profiler.
 
@@ -1334,7 +1334,7 @@ class BaseDataContext(object):
                             data_asset_name=name,
                             profiler=profiler,
                             profiler_configuration=profiler_configuration,
-                            run_id=run_id,
+                            run_name=run_name,
                             additional_batch_kwargs=additional_batch_kwargs
                         )["results"][0]
                     )
@@ -1375,7 +1375,7 @@ class BaseDataContext(object):
                            expectation_suite_name=None,
                            profiler=BasicDatasetProfiler,
                            profiler_configuration=None,
-                           run_id="profiling",
+                           run_name="profiling",
                            additional_batch_kwargs=None):
         """
         Profile a data asset
@@ -1386,7 +1386,7 @@ class BaseDataContext(object):
         :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the batch kwargs generator (generator_name arg) will choose a batch
         :param profiler: the profiler class to use
         :param profiler_configuration: Optional profiler configuration dict
-        :param run_id: optional - if set, the validation result created by the profiler will be under the provided run_id
+        :param run_name: optional - if set, the validation result created by the profiler will be under the provided run_name
         :param additional_batch_kwargs:
         :returns
             A dictionary::
@@ -1398,7 +1398,7 @@ class BaseDataContext(object):
 
             When success = False, the error details are under "error" key
         """
-
+        run_id = RunIdentifier(run_name=run_name)
         logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
 
         if not additional_batch_kwargs:
@@ -1462,7 +1462,7 @@ class BaseDataContext(object):
 
         # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
         # will have more to unpack.
-        expectation_suite, validation_results = profiler.profile(batch, run_id=run_id, profiler_configuration=profiler_configuration)
+        expectation_suite, validation_results = profiler.profile(batch, run_name=run_name, profiler_configuration=profiler_configuration)
         profiling_results['results'].append((expectation_suite, validation_results))
 
         self.validations_store.set(

@@ -28,7 +28,7 @@ class ValidationOperator(object):
     of validation operator classes that will be the descendants of this base class.
     """
 
-    def run(self, assets_to_validate, run_id, evaluation_parameters=None):
+    def run(self, assets_to_validate, run_name, evaluation_parameters=None):
         raise NotImplementedError
 
 
@@ -125,7 +125,7 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch
 
-    def run(self, assets_to_validate, run_id, evaluation_parameters=None):
+    def run(self, assets_to_validate, run_name, evaluation_parameters=None):
         result_object = {
             "success": None,
             "details": {}
@@ -403,7 +403,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
         return query
 
-    def run(self, assets_to_validate, run_id, base_expectation_suite_name=None, evaluation_parameters=None):
+    def run(self, assets_to_validate, run_name, base_expectation_suite_name=None, evaluation_parameters=None):
         if base_expectation_suite_name is None:
             if self.base_expectation_suite_name is None:
                 raise ValueError("base_expectation_suite_name must be configured in the validation operator or passed at runtime")

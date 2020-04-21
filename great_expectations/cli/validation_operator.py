@@ -20,6 +20,7 @@ from great_expectations.cli.util import (
     cli_message_list,
     cli_message_dict
 )
+from great_expectations.core import RunIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 json_parse_exception = json.decoder.JSONDecodeError
@@ -104,10 +105,10 @@ def validation_operator_list(directory):
     help="""The name of the expectation suite. """,
 )
 @click.option(
-    "--run_id",
+    "--run_name",
     "-r",
     default=None,
-    help="""Run id. If not specified, a timestamp-based run id will be automatically generated. """,
+    help="""Run name. If not specified, a timestamp-based run id will be automatically generated. """,
 )
 @click.option(
     "--directory",
@@ -115,7 +116,7 @@ def validation_operator_list(directory):
     default=None,
     help="The project's great_expectations directory.",
 )
-def validation_operator_run(name, run_id, validation_config_file, suite, directory):
+def validation_operator_run(name, run_name, validation_config_file, suite, directory):
     # Note though the long lines here aren't pythonic, they look best if Click does the line wraps.
     """
     Run a validation operator against some data.
@@ -281,8 +282,10 @@ Let's help you specify the batch of data your want the validation operator to va
                     batch = context.get_batch(entry["batch_kwargs"], expectation_suite_name)
                     batches_to_validate.append(batch)
 
-            if run_id is None:
-                run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+            if run_name is None:
+                run_name = name + "_" + datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+
+            run_id = RunIdentifier(run_name=run_name)
 
             if suite is None:
                 results = context.run_validation_operator(

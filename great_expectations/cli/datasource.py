@@ -944,7 +944,7 @@ Name the new expectation suite"""
     click.prompt(msg_prompt_what_will_profiler_do, default=True, show_default=False)
 
     cli_message("\nGenerating example Expectation Suite...")
-    run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+    run_name = "sample_run"
 
     profiling_results = context.profile_data_asset(
         datasource_name,
@@ -954,7 +954,7 @@ Name the new expectation suite"""
         profiler=BasicSuiteBuilderProfiler,
         profiler_configuration="demo",
         expectation_suite_name=expectation_suite_name,
-        run_id=run_id,
+        run_name=run_name,
         additional_batch_kwargs=additional_batch_kwargs
     )
 

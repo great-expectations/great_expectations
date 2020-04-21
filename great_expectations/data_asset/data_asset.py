@@ -349,7 +349,7 @@ class DataAsset(object):
 
     def _append_expectation(self, expectation_config):
         """This method
-        
+
         This method should become a thin wrapper for ExpectationSuite.append_expectation
 
         Included for backwards compatibility.
@@ -710,7 +710,7 @@ class DataAsset(object):
 
     def validate(self,
                  expectation_suite=None,
-                 run_id=None,
+                 run_name=None,
                  data_context=None,
                  evaluation_parameters=None,
                  catch_exceptions=True,
@@ -724,9 +724,9 @@ class DataAsset(object):
             expectation_suite (json or None): \
                 If None, uses the expectations config generated with the DataAsset during the current session. \
                 If a JSON file, validates those expectations.
-            run_id (str): \
-                A string used to identify this validation result as part of a collection of validations. See \
-                DataContext for more information.
+            run_name (str): \
+                Used to identify this validation result as part of a collection of validations. \
+                See DataContext for more information.
             data_context (DataContext): \
                 A datacontext object to use as part of validation for binding evaluation parameters and \
                 registering validation results.
@@ -782,6 +782,7 @@ class DataAsset(object):
            AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
         try:
+            run_id = RunIdentifier(run_name=run_name)
             self._active_validation = True
 
             # If a different validation data context was provided, override
@@ -939,9 +940,6 @@ class DataAsset(object):
                 results = abbrev_results
 
             expectation_suite_name = expectation_suite.expectation_suite_name
-
-            if run_id is None:
-                run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
 
             result = ExpectationSuiteValidationResult(
                 results=results,
