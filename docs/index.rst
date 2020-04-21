@@ -17,6 +17,7 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
 
    intro
    getting_started
+   how_to_guides
    expectation_glossary
    command_line
    tutorials

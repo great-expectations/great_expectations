@@ -56,7 +56,7 @@ Please follow these steps to get started:
    
    Great Expectations' ``DataSource`` and ``Generator`` classes handle all of these cases. They manage configuration and provide a consistent, cross-platform API for referencing data. Together, DataSources and Generators will allow you to reference meaningful batches of data for validation (and other use cases.)
    
-   Check out `connect to data`_ to learn how to configure DataSources and Generators.
+   Check out :ref:`getting_started__connect_to_data` to learn how to configure DataSources and Generators.
 
 .. raw:: html
 
@@ -88,10 +88,9 @@ Please follow these steps to get started:
 
 .. container:: custom-indented-paragraph
 
-   Once you have everything set up, 
-   #FIXME: Issues in GitHub are a great place to start. Check out the `help wanted <https://github.com/great-expectations/great_expectations/labels/help%20wanted>`__ and `good first issue <https://github.com/great-expectations/great_expectations/labels/good%20first%20issue>`__ labels. Comment to let everyone know you’re working on it. 
-
-   #FIXME: If there’s no issue for what you want to work on, please create one. Add a comment to let everyone know that you're working on it. We prefer small, incremental commits, because it makes the thought process behind changes easier to review.
+   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas varius purus odio, nec condimentum nisi viverra et. Ut eu ornare ex, sed finibus dolor. Suspendisse potenti. Nulla vel massa ornare, ultrices odio nec, porttitor sapien. Curabitur vehicula placerat porttitor. #FIXME
+   
+   Sed a sem tortor. Curabitur lobortis, massa vitae dignissim posuere, leo dolor hendrerit est, non sollicitudin eros metus quis velit. Curabitur ut enim vitae velit euismod ullamcorper. Duis vehicula vel metus at aliquet. Pellentesque lacinia mi id mollis pharetra. Donec at maximus erat. Praesent ut odio ante. #FIXME
 
 .. raw:: html
 
@@ -106,11 +105,27 @@ Please follow these steps to get started:
 
 .. container:: custom-indented-paragraph
 
-   #FIXME: Issues in GitHub are a great place to start. Check out the `help wanted <https://github.com/great-expectations/great_expectations/labels/help%20wanted>`__ and `good first issue <https://github.com/great-expectations/great_expectations/labels/good%20first%20issue>`__ labels. Comment to let everyone know you’re working on it. 
+   Maecenas varius purus odio, nec condimentum nisi viverra et. Ut eu ornare ex, sed finibus dolor. Suspendisse potenti. Nulla vel massa ornare, ultrices odio nec, porttitor sapien. #FIXME
+   
+   Curabitur vehicula placerat porttitor. Sed a sem tortor. Curabitur lobortis, massa vitae dignissim posuere, leo dolor hendrerit est, non sollicitudin eros metus quis velit. Curabitur ut enim vitae velit euismod ullamcorper. Duis vehicula vel metus at aliquet. Pellentesque lacinia mi id mollis pharetra. Donec at maximus erat. Praesent ut odio ante. #FIXME
 
-   #FIXME: If there’s no issue for what you want to work on, please create one. Add a comment to let everyone know that you're working on it. We prefer small, incremental commits, because it makes the thought process behind changes easier to review.
+.. raw:: html
 
+   <embed>
+      <h2><span class="fa-stack">
+         <span class="fa fa-circle-o fa-stack-2x"></span>
+         <strong class="fa-stack-1x">
+            6
+         </strong>
+      </span> Pick your deployment pattern</h2>
+   </embed>
 
+.. container:: custom-indented-paragraph
+
+   By this point, you'll have your first, working deployment of Great Expectations. It will be pretty basic: most of the storage and execution will be handled locally.
+   
+   The next step is to `pick your deployment pattern`_. DataContexts make this modular, so that you can add or swap out one component at a time. Most of these changes are quick, incremental steps---so you can upgrade from a basic demo deployment to a full production deployment at your own pace and be confident that your DataContext will continue to work at every step along the way.
+   
 -----
 
 Table of contents for Getting Started:
@@ -123,3 +138,4 @@ Table of contents for Getting Started:
    /getting_started/set_up_data_docs
    /getting_started/create_expectation_suites
    /getting_started/validate_data
+   /getting_started/pick_your_deployment_pattern
