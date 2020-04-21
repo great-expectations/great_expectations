@@ -11,6 +11,7 @@ from IPython import get_ipython
 from marshmallow import Schema, fields, ValidationError, post_load, pre_dump
 
 from great_expectations import __version__ as ge_version
+from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import nested_update
 from great_expectations.types import DictDot
@@ -107,7 +108,7 @@ def convert_to_json_serializable(data):
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
     if isinstance(data, (ExpectationConfiguration, ExpectationSuite, ExpectationValidationResult,
-                         ExpectationSuiteValidationResult)):
+                         ExpectationSuiteValidationResult, RunIdentifier)):
         return data.to_json_dict()
 
     try:
@@ -213,7 +214,7 @@ def ensure_json_serializable(data):
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
     if isinstance(data, (ExpectationConfiguration, ExpectationSuite, ExpectationValidationResult,
-                         ExpectationSuiteValidationResult)):
+                         ExpectationSuiteValidationResult, RunIdentifier)):
         return
 
     try:
@@ -287,6 +288,49 @@ def ensure_json_serializable(data):
     else:
         raise InvalidExpectationConfigurationError('%s is of type %s which cannot be serialized to json' % (
             str(data), type(data).__name__))
+
+
+class RunIdentifier(DataContextKey):
+    """A RunIdentifier identifies a run (collection of validations) by run_name and run_time."""
+
+    def __init__(self, run_name=None, run_time=None):
+        super(RunIdentifier, self).__init__()
+        self._run_name = run_name
+        self._run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
+
+    @property
+    def run_name(self):
+        return self._run_name
+
+    @property
+    def run_time(self):
+        return self._run_time
+
+    def to_tuple(self):
+        return self._run_name or "__none__", self._run_time.isoformat()
+
+    def __repr__(self):
+        return json.dumps(self.to_json_dict())
+
+    def __str__(self):
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def to_json_dict(self):
+        myself = runIdentifierSchema.dump(self)
+        return myself
+
+    @classmethod
+    def from_tuple(cls, tuple_):
+        return cls(tuple_[0], datetime.datetime.fromisoformat(tuple_[1]))
+
+
+class RunIdentifierSchema(Schema):
+    run_name = fields.Str()
+    run_time = fields.DateTime(format="iso")
+
+    @post_load
+    def make_run_identifier(self, data, **kwargs):
+        return RunIdentifier(**data)
 
 
 class ExpectationKwargs(dict):
@@ -625,7 +669,7 @@ class ExpectationSuite(object):
           Returns:
               A copy of the provided expectation with `success_on_last_run` and other specified key-value pairs removed
 
-          Note: 
+          Note:
               This method may move to ExpectationConfiguration, minus the "copy" part.
         """
         new_expectation = deepcopy(expectation)
@@ -1137,3 +1181,4 @@ expectationConfigurationSchema = ExpectationConfigurationSchema()
 expectationSuiteSchema = ExpectationSuiteSchema()
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
+runIdentifierSchema = RunIdentifierSchema()
