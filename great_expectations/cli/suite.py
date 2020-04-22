@@ -308,7 +308,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n""")
 
 
 @suite.command(name="scaffold")
-@click.option("--suite", "-es", default=None, help="Expectation suite name.")
+@click.argument("suite")
 @click.option(
     "--directory",
     "-d",
@@ -329,10 +329,14 @@ def suite_scaffold(suite, directory, jupyter):
 def _suite_scaffold(suite, directory, jupyter):
     suite_name = suite
     context = load_data_context_with_error_handling(directory)
+    notebook_filename = f"scaffold_{suite_name}.ipynb"
+    notebook_path = _get_notebook_path(context, notebook_filename)
 
     # TODO check if suite exists
     if suite_name in context.list_expectation_suite_names():
         toolkit.tell_user_suite_exists(suite_name)
+        if os.path.isfile(notebook_path):
+            cli_message(f"  - If you wish to adjust your scaffolding, you can open this notebook with jupyter: `{notebook_path}` <red>(Please note that if you run that notebook, you will overwrite your existing suite.)</red>")
         sys.exit(1)
 
     # TODO select datasource
@@ -343,22 +347,16 @@ def _suite_scaffold(suite, directory, jupyter):
         sys.exit(1)
 
     # TODO create suite
-    try:
-        suite = context.create_expectation_suite(suite_name)
-    except DataContextError:
-        suite = context.get_expectation_suite(suite_name)
+    suite = context.create_expectation_suite(suite_name)
 
     # TODO get batch_kwargs
     _, _, _, batch_kwargs = get_batch_kwargs(context, datasource_name=datasource.name)
-    # batch = toolkit.load_batch(context, suite, batch_kwargs)
 
     # TODO render notebook
     renderer = SuiteScaffoldNotebookRenderer(context, suite, batch_kwargs)
-    notebook_filename = f"scaffold_{suite.expectation_suite_name}.ipynb"
-    notebook_path = _get_notebook_path(context, notebook_filename)
+
     # TODO test file created
     renderer.render_to_disk(notebook_path)
-    profiler_configuration = {"excluded_columns": None, "excluded_expectations": None}
 
     # TODO open notebook
     if jupyter:

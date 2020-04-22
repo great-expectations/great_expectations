@@ -202,7 +202,8 @@ def _get_default_expectation_suite_name(batch_kwargs, generator_asset):
 
 def tell_user_suite_exists(suite_name):
     cli_message(
-        f"<red>An expectation suite named `{suite_name}` already exists. If you intend to edit the suite please use `great_expectations suite edit {suite_name}`.</red>"
+        f"""<red>An expectation suite named `{suite_name}` already exists.</red>
+  - If you intend to edit the suite please use `great_expectations suite edit {suite_name}`."""
     )
 
 
