@@ -12,7 +12,7 @@ from great_expectations.cli.datasource import (
 from great_expectations.cli.util import (
     cli_message,
     load_expectation_suite,
-    mark_cli_as_beta,
+    mark_cli_as_experimental,
 )
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message,
@@ -37,7 +37,7 @@ def tap():
     default=None,
     help="The project's great_expectations directory.",
 )
-@mark_cli_as_beta
+@mark_cli_as_experimental
 def tap_new(suite, tap_filename, directory, datasource=None):
     """Create a new tap file for easy deployments."""
     context = _get_context(directory)

@@ -19,7 +19,7 @@ from great_expectations.cli.util import (
     cli_message,
     cli_message_list,
     cli_message_dict,
-    mark_cli_as_beta,
+    mark_cli_as_experimental,
     )
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
@@ -191,10 +191,10 @@ def datasource_list(directory):
 )
 @click.option('--additional-batch-kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
-@mark_cli_as_beta
+@mark_cli_as_experimental
 def datasource_profile(datasource, batch_kwargs_generator_name, data_assets, profile_all_data_assets, directory, view, additional_batch_kwargs):
     """
-    Profile a datasource (BETA)
+    Profile a datasource (Experimental)
 
     If the optional data_assets and profile_all_data_assets arguments are not specified, the profiler will check
     if the number of data assets in the datasource exceeds the internally defined limit. If it does, it will

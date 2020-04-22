@@ -124,12 +124,12 @@ def load_expectation_suite(context, suite_name):
         sys.exit(1)
 
 
-def mark_cli_as_beta(func):
-    """Apply as a decorator to CLI commands that are in BETA."""
+def mark_cli_as_experimental(func):
+    """Apply as a decorator to CLI commands that are Experimental."""
     @wraps(func)
     def wrapper(*args, **kwargs):
         cli_message(
-            "<yellow>Heads up! This feature is in BETA. It may change. "
+            "<yellow>Heads up! This feature is Experimental. It may change. "
             "Please give us your feedback!</yellow>"
         )
         func(*args, **kwargs)
