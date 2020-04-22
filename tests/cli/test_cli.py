@@ -140,6 +140,31 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
         assert error_message in result.output
         result = runner.invoke(cli, ["suite", "edit", "FAKE"], catch_exceptions=False)
         assert error_message in result.output
+
+        # expectation suite delete
+        result = runner.invoke(
+            cli, ["suite", "delete", "-d", "FAKE"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        result = runner.invoke(cli, ["suite", "delete"], catch_exceptions=False)
+        assert error_message in result.output
+
+        # datasource delete
+        result = runner.invoke(
+            cli, ["datasource", "delete", "-d", "new"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        result = runner.invoke(cli, ["suite", "delete_datasource", "new"], catch_exceptions=False)
+        assert error_message in result.output
+ 
+        # data_docs clean
+        result = runner.invoke(
+            cli, ["suite", "clean_data_docs", "-d", "FAKE"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        result = runner.invoke(cli, ["suite", "clean_data_docs"], catch_exceptions=False)
+        assert error_message in result.output   
+    
     except:
         raise
     finally:
