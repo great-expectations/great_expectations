@@ -18,7 +18,9 @@ from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.util import (
     cli_message,
     cli_message_list,
-    cli_message_dict)
+    cli_message_dict,
+    mark_cli_as_experimental,
+    )
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.resource_identifiers import (
@@ -189,16 +191,16 @@ def datasource_list(directory):
 )
 @click.option('--additional-batch-kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
+@mark_cli_as_experimental
 def datasource_profile(datasource, batch_kwargs_generator_name, data_assets, profile_all_data_assets, directory, view, additional_batch_kwargs):
     """
-    Profile a datasource (Beta)
+    Profile a datasource (Experimental)
 
     If the optional data_assets and profile_all_data_assets arguments are not specified, the profiler will check
     if the number of data assets in the datasource exceeds the internally defined limit. If it does, it will
     prompt the user to either specify the list of data assets to profile or to profile all.
     If the limit is not exceeded, the profiler will profile all data assets in the datasource.
     """
-    cli_message("<yellow>Warning - this is a BETA feature.</yellow>")
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
