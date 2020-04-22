@@ -3,6 +3,10 @@
 develop
 -----------------
 
+0.10.3
+-----------------
+* Use pickle to generate hash for dataframes with unhashable objects.
+
 0.10.2
 -----------------
 * renamed NotebookRenderer to SuiteEditNotebookRenderer
