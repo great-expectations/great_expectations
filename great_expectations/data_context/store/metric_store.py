@@ -64,7 +64,7 @@ class EvaluationParameterStore(MetricStore):
 
     def get_bind_params(self, run_id):
         params = {}
-        for k in self._store_backend.list_keys((run_id,)):
+        for k in self._store_backend.list_keys(run_id.to_tuple()):
             key = self.tuple_to_key(k)
             params[key.to_evaluation_parameter_urn()] = self.get(key)
         return params

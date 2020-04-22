@@ -1,3 +1,4 @@
+from great_expectations.core import RunIdentifier
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier
@@ -127,12 +128,12 @@ class ValidationMetricIdentifier(MetricIdentifier):
 
     def to_tuple(self):
         # Note use of _metric_kwargs_id instead of metric_kwargs_id to preserve no None semantics
-        return tuple([self.run_id] + list(self.expectation_suite_identifier.to_tuple()) + [self.metric_name,
+        return tuple(list(self.run_id.to_tuple()) + list(self.expectation_suite_identifier.to_tuple()) + [self.metric_name,
                      self._metric_kwargs_id])
 
     def to_fixed_length_tuple(self):
         # Note use of _metric_kwargs_id instead of metric_kwargs_id to preserve no None semantics
-        return tuple([self.run_id] + list(self.expectation_suite_identifier.to_fixed_length_tuple()) +
+        return tuple(list(self.run_id.to_tuple()) + list(self.expectation_suite_identifier.to_fixed_length_tuple()) +
                      [self.metric_name, self._metric_kwargs_id])
 
     def to_evaluation_parameter_urn(self):
@@ -151,7 +152,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
         if len(tuple_) < 4:
             raise GreatExpectationsError("ValidationMetricIdentifier tuple must have at least four components.")
         return cls(
-            run_id=tuple_[0],
+            run_id=RunIdentifier.to_tuple((tuple_[0], tuple_[1])),
             expectation_suite_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[1:-2]),
             metric_name=tuple_[-2],
             metric_kwargs_id=tuple_[-1]
@@ -163,7 +164,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
             raise GreatExpectationsError("ValidationMetricIdentifier fixed length tuple must have exactly four "
                                          "components.")
         return cls(
-            run_id=tuple_[0],
+            run_id=RunIdentifier.to_tuple((tuple_[0], tuple_[1])),
             expectation_suite_identifier=ExpectationSuiteIdentifier.from_fixed_length_tuple(tuple((tuple_[1],))),
             metric_name=tuple_[2],
             metric_kwargs_id=tuple_[3]

@@ -1,9 +1,11 @@
+import datetime
+import json
 import logging
 from typing import Union
 
 from marshmallow import Schema, fields, post_load
 
-from great_expectations.core import IDDict
+from great_expectations.core import IDDict, RunIdentifier, RunIdentifierSchema
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.exceptions import InvalidDataContextKeyError, DataContextError
@@ -92,7 +94,7 @@ class ValidationResultIdentifier(DataContextKey):
         Args:
             expectation_suite_identifier (ExpectationSuiteIdentifier, list, tuple, or dict):
                 identifying information for the fully qualified expectation suite used to validate
-            run_id (str): The run_id for which validation occurred
+            run_id (RunIdentifier): The run_id for which validation occurred
         """
         super(ValidationResultIdentifier, self).__init__()
         self._expectation_suite_identifier = expectation_suite_identifier
@@ -113,23 +115,24 @@ class ValidationResultIdentifier(DataContextKey):
 
     def to_tuple(self):
         return tuple(
-            list(self.expectation_suite_identifier.to_tuple()) + [
-                self.run_id or "__none__",
-                self.batch_identifier or "__none__"
-            ]
+            list(self.expectation_suite_identifier.to_tuple()) +
+            list(self.run_id.to_tuple()) +
+            [self.batch_identifier or "__none__"]
         )
 
     def to_fixed_length_tuple(self):
-        return self.expectation_suite_identifier.expectation_suite_name, self.run_id or "__none__", \
-               self.batch_identifier or "__none__"
+        return tuple([self.expectation_suite_identifier.expectation_suite_name] +
+                list(self.run_id.to_tuple()) +
+                [self.batch_identifier or "__none__"]
+         )
 
     @classmethod
     def from_tuple(cls, tuple_):
-        return cls(ExpectationSuiteIdentifier.from_tuple(tuple_[0:-2]), tuple_[-2], tuple_[-1])
+        return cls(ExpectationSuiteIdentifier.from_tuple(tuple_[0:-3]), RunIdentifier.from_tuple((tuple_[-3], tuple_[-2])), tuple_[-1])
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
-        return cls(ExpectationSuiteIdentifier(tuple_[0]), tuple_[1], tuple_[2])
+        return cls(ExpectationSuiteIdentifier(tuple_[0]), RunIdentifier.from_tuple(tuple_[1], tuple_[2]), tuple_[3])
 
     @classmethod
     def from_object(cls, validation_result):
@@ -150,7 +153,7 @@ class ValidationResultIdentifier(DataContextKey):
 class ValidationResultIdentifierSchema(Schema):
     expectation_suite_identifier = fields.Nested(ExpectationSuiteIdentifierSchema, required=True, error_messages={
         'required': 'expectation_suite_identifier is required for a ValidationResultIdentifier'})
-    run_id = fields.Str(required=True, error_messages={'required': "run_id is required for a "
+    run_id = fields.Nested(RunIdentifierSchema, required=True, error_messages={'required': "run_id is required for a "
                                                                    "ValidationResultIdentifier"})
     batch_identifier = fields.Nested(BatchIdentifierSchema, required=True)
 
@@ -217,3 +220,4 @@ class SiteSectionIdentifier(DataContextKey):
 
 expectationSuiteIdentifierSchema = ExpectationSuiteIdentifierSchema()
 validationResultIdentifierSchema = ValidationResultIdentifierSchema()
+runIdentifierSchema = RunIdentifierSchema()

@@ -2,6 +2,7 @@ import datetime
 import logging
 from collections import OrderedDict
 
+from great_expectations.core import RunIdentifier
 from ..data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -131,16 +132,13 @@ class ActionListValidationOperator(ValidationOperator):
             "details": {}
         }
 
+        run_id = RunIdentifier(run_name=run_name)
+
         for item in assets_to_validate:
             batch = self._build_batch_from_item(item)
             expectation_suite_identifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=batch._expectation_suite.expectation_suite_name
             )
-            # validation_result_id = ValidationResultIdentifier(
-            #     batch_identifier=BatchIdentifier(batch.batch_id),
-            #     expectation_suite_identifier=expectation_suite_identifier,
-            #     run_id=run_id,
-            # )
             result_object["details"][expectation_suite_identifier] = {}
             batch_validation_result = batch.validate(run_id=run_id, result_format="SUMMARY",
                                                      evaluation_parameters=evaluation_parameters)
@@ -408,6 +406,8 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             if self.base_expectation_suite_name is None:
                 raise ValueError("base_expectation_suite_name must be configured in the validation operator or passed at runtime")
             base_expectation_suite_name = self.base_expectation_suite_name
+
+        run_id = RunIdentifier(run_name=run_name)
 
         return_obj = {
             "batch_identifiers": [],

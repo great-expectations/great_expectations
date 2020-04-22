@@ -26,7 +26,7 @@ from great_expectations.data_asset.util import (
     parse_result_format,
 )
 from great_expectations.core import ExpectationSuite, ExpectationConfiguration, ExpectationValidationResult, \
-    ExpectationSuiteValidationResult, expectationSuiteSchema
+    ExpectationSuiteValidationResult, expectationSuiteSchema, RunIdentifier
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.exceptions import GreatExpectationsError
 

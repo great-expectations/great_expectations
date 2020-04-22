@@ -21,7 +21,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import (
     ExpectationSuite,
     get_metric_kwargs_id,
-)
+    RunIdentifier)
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -982,7 +982,7 @@ class BaseDataContext(object):
                         metric_value = validation_results.get_metric(metric_name, **metric_kwargs)
                         self.stores[target_store_name].set(
                             ValidationMetricIdentifier(
-                                run_id=run_id,
+                                run_id=RunIdentifier(**run_id),
                                 expectation_suite_identifier=ExpectationSuiteIdentifier(expectation_suite_name),
                                 metric_name=metric_name,
                                 metric_kwargs_id=get_metric_kwargs_id(metric_name, metric_kwargs)
