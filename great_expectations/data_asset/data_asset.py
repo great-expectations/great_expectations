@@ -782,6 +782,7 @@ class DataAsset(object):
            AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
         try:
+            validation_time = datetime.datetime.now(datetime.timezone.utc)
             run_id = RunIdentifier(run_name=run_name)
             self._active_validation = True
 
@@ -957,7 +958,8 @@ class DataAsset(object):
                     "run_id": run_id,
                     "batch_kwargs": self.batch_kwargs,
                     "batch_markers": self.batch_markers,
-                    "batch_parameters": self.batch_parameters
+                    "batch_parameters": self.batch_parameters,
+                    "validation_time": validation_time
                 }
             )
 
