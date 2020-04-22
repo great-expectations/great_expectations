@@ -1,4 +1,4 @@
-.. _getting_started:
+.. _how_to_guides:
 
 
 ####################
