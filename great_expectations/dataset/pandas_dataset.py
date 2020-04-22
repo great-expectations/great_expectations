@@ -5,6 +5,8 @@ import json
 import logging
 from datetime import datetime
 from functools import wraps
+from typing import List
+
 import jsonschema
 import numpy as np
 import pandas as pd
@@ -336,7 +338,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def get_column_count(self):
         return self.shape[1]
 
-    def get_table_columns(self):
+    def get_table_columns(self) -> List[str]:
         return list(self.columns)
 
     def get_column_sum(self, column):
