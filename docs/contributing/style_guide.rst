@@ -16,3 +16,49 @@ Style Guide
 
 These guidelines should be followed consistently for methods and variables exposed in the API. They aren't intended to be strict rules for every internal line of code in every function.
 
+
+.rst files
+----------------------------------------------------
+
+**Titles**
+
+* Only the first word in each title is capitalized:
+
+	* Yep: “File a bug report or feature request”
+	* Nope: “File a Bug Report or Feature Request”
+
+* For sections within “how to”-type guides, titles should be short, imperative sentences. Avoid extra words:
+
+	* Good: “Configure data documentation”
+	* Nope: “Configuring data documentation”
+	* Avoid: “Configure documentation for your data”
+
+
+**File names and RST refs**
+
+* File names should parallel titles, so that URLs and titles are similar. Use snake case for file names.
+    
+    * For example: the page titled ``Initialize a project`` has this filename: ``initialize_a_project.rst``, which produces this URL: ``initialize_a_project.html``
+
+* Refs are ``_{filename}`` or ``_{folder_name}__{filename}``.
+    
+    * Ex: `_getting_started__initialize_a_project`
+
+
+**Classes**
+
+* When using referencing an object that has a specific class name, prefer the class name. When using class names, use.
+
+	* Acceptable: “You can create suites of Expectations as follows…”
+	* Better: “You can create ExpectationSuites as follows…”
+	* Wrong: “You can create expectation suites as follows…”
+
+* (Not yet implemented: Link class names on first reference within each page.)
+
+
+**Code formatting**
+
+* For inline code in RST, make sure to use double backticks. This isn’t markdown, folks:
+
+	* Yep: The ``init`` command will walk you through setting up a new project and connecting to your data.
+	* Nope: The `init` command will walk you through setting up a new project and connecting to your data.

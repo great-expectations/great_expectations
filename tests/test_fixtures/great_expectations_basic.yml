@@ -9,7 +9,7 @@ datasources:
     class_name: PandasDatasource
     data_asset_type:
       class_name: PandasDataset
-    generators:
+    batch_kwargs_generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
         class_name: SubdirReaderBatchKwargsGenerator

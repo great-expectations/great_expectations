@@ -2,10 +2,9 @@ from __future__ import unicode_literals
 
 import os
 import shutil
-import pytest
-
 from unittest import mock
 
+import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
@@ -61,7 +60,9 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
 
     # Test the second invocation of init
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli, ["init", "-d", root_dir], input="Y\nn\n", catch_exceptions=False
         )
@@ -120,7 +121,9 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     )
 
     runner = CliRunner(mix_stderr=False)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli, ["init", "-d", root_dir], input="n\n", catch_exceptions=False
         )

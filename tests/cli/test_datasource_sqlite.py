@@ -1,10 +1,9 @@
 from __future__ import unicode_literals
 
+from collections import OrderedDict
 import os
 
-import pytest
 from click.testing import CliRunner
-from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -12,10 +11,11 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import (
     assert_no_logging_messages_or_tracebacks,
     assert_no_tracebacks,
+    assert_dict_key_and_val_in_stdout
 )
 
 
-def test_cli_datasorce_list(empty_data_context, empty_sqlite_db, caplog):
+def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
@@ -26,7 +26,7 @@ def test_cli_datasorce_list(empty_data_context, empty_sqlite_db, caplog):
     )
 
     stdout = result.output.strip()
-    assert "[]" in stdout
+    assert "No Datasources found" in stdout
     assert context.list_datasources() == []
 
     datasource_name = "wow_a_datasource"
@@ -38,19 +38,25 @@ def test_cli_datasorce_list(empty_data_context, empty_sqlite_db, caplog):
     result = runner.invoke(
         cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
     )
+    url = str(empty_sqlite_db.engine.url)
+    expected_output = """\
+1 Datasource found:[0m
+[0m
+ - [36mname:[0m wow_a_datasource[0m
+   [36mmodule_name:[0m great_expectations.datasource[0m
+   [36mclass_name:[0m SqlAlchemyDatasource[0m
+   [36mbatch_kwargs_generators:[0m[0m
+     [36mdefault:[0m[0m
+       [36mclass_name:[0m TableBatchKwargsGenerator[0m
+   [36mcredentials:[0m[0m
+     [36murl:[0m {}[0m
+   [36mdata_asset_type:[0m[0m
+     [36mclass_name:[0m SqlAlchemyDataset[0m
+     [36mmodule_name:[0m None[0m
+""".format(url).strip()
     stdout = result.output.strip()
-    if PY2:
-        # deal with legacy python dictionary sorting
-        assert (
-            "'name': 'wow_a_datasource'"
-            and "'class_name': u'SqlAlchemyDatasource'" in stdout
-        )
-        assert len(stdout) >= 60 and len(stdout) <= 75
-    else:
-        assert (
-            "[{'name': 'wow_a_datasource', 'class_name': 'SqlAlchemyDatasource'}]"
-            in stdout
-        )
+
+    assert stdout == expected_output
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -58,7 +64,8 @@ def test_cli_datasorce_list(empty_data_context, empty_sqlite_db, caplog):
 def _add_datasource_and_credentials_to_context(context, datasource_name, sqlite_engine):
     original_datasources = context.list_datasources()
 
-    credentials = {"url": str(sqlite_engine.url)}
+    url = str(sqlite_engine.url)
+    credentials = {"url": url}
     context.save_config_variable(datasource_name, credentials)
     context.add_datasource(
         datasource_name,
@@ -67,22 +74,32 @@ def _add_datasource_and_credentials_to_context(context, datasource_name, sqlite_
         class_name="SqlAlchemyDatasource",
         data_asset_type={"class_name": "SqlAlchemyDataset"},
         credentials="${" + datasource_name + "}",
-        generators={"default": {"class_name": "TableBatchKwargsGenerator"}},
+        batch_kwargs_generators={"default": {"class_name": "TableBatchKwargsGenerator"}},
     )
 
     expected_datasources = original_datasources
     expected_datasources.append(
-        {"name": datasource_name, "class_name": "SqlAlchemyDatasource"}
+        {
+            "name": datasource_name,
+            "class_name": "SqlAlchemyDatasource",
+            "module_name": "great_expectations.datasource",
+            'credentials': OrderedDict([('url', url)]),
+            'data_asset_type': {'class_name': 'SqlAlchemyDataset', 'module_name': None},
+            'batch_kwargs_generators': {'default': {'class_name': 'TableBatchKwargsGenerator'}},
+        }
     )
 
     assert context.list_datasources() == expected_datasources
     return context
 
 
-def _add_datasource__with_two_generators_and_credentials_to_context(context, datasource_name, sqlite_engine):
+def _add_datasource__with_two_generators_and_credentials_to_context(
+    context, datasource_name, sqlite_engine
+):
     original_datasources = context.list_datasources()
 
-    credentials = {"url": str(sqlite_engine.url)}
+    url = str(sqlite_engine.url)
+    credentials = {"url": url}
     context.save_config_variable(datasource_name, credentials)
     context.add_datasource(
         datasource_name,
@@ -91,27 +108,41 @@ def _add_datasource__with_two_generators_and_credentials_to_context(context, dat
         class_name="SqlAlchemyDatasource",
         data_asset_type={"class_name": "SqlAlchemyDataset"},
         credentials="${" + datasource_name + "}",
-        generators={"default": {"class_name": "TableBatchKwargsGenerator"},
-                    "second_generator": {
-                        "class_name": "ManualBatchKwargsGenerator",
-                        "assets": {
-                            "asset_one": [
-                                {
-                                    "partition_id": 1,
-                                    "query": "select * from main.titanic"
-                                }
-                            ]
-                        }
-                    }},
+        batch_kwargs_generators={
+            "default": {"class_name": "TableBatchKwargsGenerator"},
+            "second_generator": {
+                "class_name": "ManualBatchKwargsGenerator",
+                "assets": {
+                    "asset_one": [
+                        {"partition_id": 1, "query": "select * from main.titanic"}
+                    ]
+                },
+            },
+        },
     )
 
     expected_datasources = original_datasources
     expected_datasources.append(
-        {"name": datasource_name, "class_name": "SqlAlchemyDatasource"}
+        {
+            "name": datasource_name,
+            "class_name": "SqlAlchemyDatasource",
+            "module_name": "great_expectations.datasource",
+            'credentials': {
+                'url': url},
+            'data_asset_type': {'class_name': 'SqlAlchemyDataset', 'module_name': None},
+            'batch_kwargs_generators': {'default': {'class_name': 'TableBatchKwargsGenerator'},
+                           'second_generator': {'assets': {'asset_one': [{'partition_id': 1,
+                                                                          'query': 'select '
+                                                                                   '* '
+                                                                                   'from '
+                                                                                   'main.titanic'}]},
+                                                'class_name': 'ManualBatchKwargsGenerator'}},
+        }
     )
 
     assert context.list_datasources() == expected_datasources
     return context
+
 
 def test_cli_datasorce_new_connection_string(
     empty_data_context, empty_sqlite_db, caplog
@@ -212,7 +243,7 @@ def test_cli_datasource_profile_on_empty_database(
     assert result.exit_code == 1
 
     assert "Profiling 'wow_a_datasource'" in stdout
-    assert "No batch kwarg generators can list available data assets" in stdout
+    assert "No batch kwargs generators can list available data assets" in stdout
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -270,7 +301,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert len(validation.results) == 51
 
     assert "Preparing column 1 of 7" in caplog.messages[0]
-    assert len(caplog.messages) == 7
+    assert len(caplog.messages) == 10
     assert_no_tracebacks(result)
 
 
@@ -304,7 +335,7 @@ def test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg(
             "datasource",
             "profile",
             datasource_name,
-            "--generator-name",
+            "--batch-kwargs-generator-name",
             second_generator_name,
             "-d",
             project_root_dir,
@@ -329,11 +360,10 @@ def test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg(
     )
 
     assert "Preparing column 1 of 7" in caplog.messages[0]
-    assert len(caplog.messages) == 7
+    assert len(caplog.messages) == 10
     assert_no_tracebacks(result)
 
 
-@pytest.mark.xfail(condition=PY2, reason="a known issue on Py2")
 def test_cli_datasource_profile_with_no_datasource_args(
     empty_data_context, titanic_sqlite_db, caplog
 ):
@@ -354,7 +384,8 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert result.exit_code == 0
     stdout = result.stdout
     assert "Profiling 'wow_a_datasource'" in stdout
-    assert "The following Data Docs sites were built:\n- local_site:" in stdout
+    assert "The following Data Docs sites were built:\n" in stdout
+    assert "local_site:" in stdout
 
     context = DataContext(project_root_dir)
     assert len(context.list_datasources()) == 1
@@ -380,7 +411,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert len(validation.results) == 51
 
     assert "Preparing column 1 of 7" in caplog.messages[0]
-    assert len(caplog.messages) == 7
+    assert len(caplog.messages) == 10
     assert_no_tracebacks(result)
 
 
@@ -421,7 +452,8 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     stdout = result.stdout
     assert result.exit_code == 0
     assert "Profiling '{}'".format(datasource_name) in stdout
-    assert "The following Data Docs sites were built:\n- local_site:" in stdout
+    assert "The following Data Docs sites were built:\n" in stdout
+    assert "local_site:" in stdout
 
     context = DataContext(project_root_dir)
     assert len(context.list_datasources()) == 1
@@ -455,7 +487,7 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     assert row_count_validation_results[0].result["observed_value"] == 97
 
     assert "Preparing column 1 of 7" in caplog.messages[0]
-    assert len(caplog.messages) == 7
+    assert len(caplog.messages) == 10
     assert_no_tracebacks(result)
 
 
@@ -488,7 +520,8 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     stdout = result.stdout
     assert result.exit_code == 0
     assert "Profiling '{}'".format(datasource_name) in stdout
-    assert "The following Data Docs sites were built:\n- local_site:" in stdout
+    assert "The following Data Docs sites were built:\n" in stdout
+    assert "local_site:" in stdout
 
     context = DataContext(project_root_dir)
     assert len(context.list_datasources()) == 1
@@ -514,7 +547,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     assert len(validation.results) == 51
 
     assert "Preparing column 1 of 7" in caplog.messages[0]
-    assert len(caplog.messages) == 7
+    assert len(caplog.messages) == 10
     assert_no_tracebacks(result)
 
 
