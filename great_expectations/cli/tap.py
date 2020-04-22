@@ -9,8 +9,14 @@ from great_expectations.cli.datasource import (
     get_batch_kwargs,
     select_datasource,
 )
-from great_expectations.cli.util import cli_message, load_expectation_suite
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.cli.util import (
+    cli_message,
+    load_expectation_suite,
+    mark_cli_as_experimental,
+)
+from great_expectations.core.usage_statistics.usage_statistics import (
+    send_usage_message,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import lint_code
 
@@ -31,9 +37,9 @@ def tap():
     default=None,
     help="The project's great_expectations directory.",
 )
+@mark_cli_as_experimental
 def tap_new(suite, tap_filename, directory, datasource=None):
-    """BETA! Create a new tap file for easy deployments."""
-    cli_message("<yellow>This is a BETA feature which may change. If you have ideas please file a GitHub issue!</yellow>")
+    """Create a new tap file for easy deployments."""
     context = _get_context(directory)
     try:
         _validate_tap_filename(tap_filename)
