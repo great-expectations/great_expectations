@@ -413,13 +413,14 @@ class BaseDataContext(object):
 
         Returns:
         """
-        if datasource_names is None:
+        if datasource_name is None:
             raise ValueError(
                 "Datasource names must be a datasource name"
             )
         else:
             datasource = self.get_datasource(datasource_name)
             if datasource:
+               self._project_config["datasources"][datasource_name] = None
                self._datasources.remove(datasource_name)
             else:
                 raise ValueError(
