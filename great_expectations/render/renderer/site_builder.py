@@ -170,7 +170,7 @@ class SiteBuilder(object):
             "validations": {
                 "class_name": "DefaultSiteSectionBuilder",
                 "source_store_name": data_context.validations_store_name,
-                "run_id_filter": {
+                "run_name_filter": {
                     "ne": "profiling"
                 },
                 "renderer": {
@@ -181,7 +181,7 @@ class SiteBuilder(object):
             "profiling": {
                 "class_name": "DefaultSiteSectionBuilder",
                 "source_store_name":  data_context.validations_store_name,
-                "run_id_filter": {
+                "run_name_filter": {
                     "eq": "profiling"
                 },
                 "renderer": {
@@ -266,7 +266,7 @@ class DefaultSiteSectionBuilder(object):
             source_store_name,
             custom_styles_directory=None,
             show_how_to_buttons=True,
-            run_id_filter=None,
+            run_name_filter=None,
             validation_results_limit=None,
             renderer=None,
             view=None,
@@ -276,7 +276,7 @@ class DefaultSiteSectionBuilder(object):
         self.name = name
         self.source_store = data_context.stores[source_store_name]
         self.target_store = target_store
-        self.run_id_filter = run_id_filter
+        self.run_name_filter = run_name_filter
         self.validation_results_limit = validation_results_limit
         self.data_context_id = data_context_id
         self.show_how_to_buttons = show_how_to_buttons
@@ -339,8 +339,8 @@ class DefaultSiteSectionBuilder(object):
             if resource_identifiers and resource_key not in resource_identifiers:
                 continue
 
-            if self.run_id_filter:
-                if not self._resource_key_passes_run_id_filter(resource_key):
+            if self.run_name_filter:
+                if not self._resource_key_passes_run_name_filter(resource_key):
                     continue
 
             try:
@@ -354,14 +354,17 @@ class DefaultSiteSectionBuilder(object):
                 logger.debug("        Rendering expectation suite {}".format(expectation_suite_name))
             elif isinstance(resource_key, ValidationResultIdentifier):
                 run_id = resource_key.run_id
+                run_name = run_id.run_name
+                run_time = run_id.run_time
                 expectation_suite_name = resource_key.expectation_suite_identifier.expectation_suite_name
-                if run_id == "profiling":
+                if run_name == "profiling":
                     logger.debug("        Rendering profiling for batch {}".format(resource_key.batch_identifier))
                 else:
 
                     logger.debug(
-                        "        Rendering validation: run id: {}, suite {} for batch {}".format(
-                            run_id,
+                        "        Rendering validation: run name: {}, run time: {}, suite {} for batch {}".format(
+                            run_name,
+                            run_time,
                             expectation_suite_name,
                             resource_key.batch_identifier
                         )
@@ -392,17 +395,17 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 viewable_content
             )
 
-    def _resource_key_passes_run_id_filter(self, resource_key):
+    def _resource_key_passes_run_name_filter(self, resource_key):
         if type(resource_key) == ValidationResultIdentifier:
-            run_id = resource_key.run_id
+            run_name = resource_key.run_id.run_name
         else:
-            raise TypeError("run_id_filter filtering is only implemented for ValidationResultResources.")
+            raise TypeError("run_name_filter filtering is only implemented for ValidationResultResources.")
 
-        if self.run_id_filter.get("eq"):
-            return self.run_id_filter.get("eq") == run_id
+        if self.run_name_filter.get("eq"):
+            return self.run_name_filter.get("eq") == run_name
 
-        elif self.run_id_filter.get("ne"):
-            return self.run_id_filter.get("ne") != run_id
+        elif self.run_name_filter.get("ne"):
+            return self.run_name_filter.get("ne") != run_name
 
 
 class DefaultSiteIndexBuilder(object):
@@ -616,11 +619,11 @@ class DefaultSiteIndexBuilder(object):
         ]
         profiling_result_keys = [
             validation_result_key for validation_result_key in validation_and_profiling_result_keys
-            if validation_result_key.run_id == "profiling"
+            if validation_result_key.run_id.run_name == "profiling"
         ]
         validation_result_keys = [
             validation_result_key for validation_result_key in validation_and_profiling_result_keys
-            if validation_result_key.run_id != "profiling"
+            if validation_result_key.run_id.run_name != "profiling"
         ]
         validation_result_keys = sorted(validation_result_keys, key=lambda x: x.run_id, reverse=True)
         if self.validation_results_limit:
