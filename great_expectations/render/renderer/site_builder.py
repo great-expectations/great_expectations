@@ -328,7 +328,7 @@ class DefaultSiteSectionBuilder(object):
     def build(self, resource_identifiers=None):
         source_store_keys = self.source_store.list_keys()
         if self.name == "validations" and self.validation_results_limit:
-            source_store_keys = sorted(source_store_keys, key=lambda x: x.run_id, reverse=True)[:self.validation_results_limit]
+            source_store_keys = sorted(source_store_keys, key=lambda x: x.run_id.run_time, reverse=True)[:self.validation_results_limit]
 
         for resource_key in source_store_keys:
 
@@ -625,7 +625,7 @@ class DefaultSiteIndexBuilder(object):
             validation_result_key for validation_result_key in validation_and_profiling_result_keys
             if validation_result_key.run_id.run_name != "profiling"
         ]
-        validation_result_keys = sorted(validation_result_keys, key=lambda x: x.run_id, reverse=True)
+        validation_result_keys = sorted(validation_result_keys, key=lambda x: x.run_id.run_time, reverse=True)
         if self.validation_results_limit:
             validation_result_keys = validation_result_keys[:self.validation_results_limit]
 
