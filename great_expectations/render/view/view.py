@@ -139,7 +139,7 @@ class DefaultJinjaView(object):
                     if content_block_id:
                         new_content_block_id = content_block_id + "-" + str(idx)
                     rendered_block += self.render_content_block(
-                        context, content_block_el, idx, content_block_id=new_content_block_id)
+                        jinja_context, content_block_el, idx, content_block_id=new_content_block_id)
                 else:
                     rendered_block += "<span>" + str(content_block_el) + "</span>"
             return rendered_block
