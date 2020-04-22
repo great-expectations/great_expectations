@@ -658,7 +658,8 @@ class DefaultSiteIndexBuilder(object):
                     section_name="profiling",
                     batch_identifier=profiling_result_key.batch_identifier,
                     run_id=profiling_result_key.run_id,
-                    run_time=str(fake.date_time()),
+                    run_time=profiling_result_key.run_id.run_time,
+                    run_name=profiling_result_key.run_id.run_name,
                     asset_name=fake.file_name(),
                     batch_kwargs=batch_kwargs
                 )
@@ -684,8 +685,8 @@ class DefaultSiteIndexBuilder(object):
                     batch_identifier=validation_result_key.batch_identifier,
                     run_id=validation_result_key.run_id,
                     validation_success=validation_success,
-                    run_time=str(fake.date_time()),
-                    run_name=fake.bs(),
+                    run_time=validation_result_key.run_id.run_time,
+                    run_name=validation_result_key.run_id.run_name,
                     asset_name=fake.file_name(),
                     batch_kwargs=batch_kwargs
                 )
