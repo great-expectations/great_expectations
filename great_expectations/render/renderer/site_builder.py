@@ -214,7 +214,7 @@ class SiteBuilder(object):
         source_store_keys = self.source_store.list_keys()
         if self.name == "validations" and self.validation_results_limit:
             source_store_keys = sorted(source_store_keys, key=lambda x: x.run_id, reverse=True)[:self.validation_results_limit]
-
+        bdel = False 
         for resource_key in source_store_keys:
 
             # if no resource_identifiers are passed,
@@ -233,6 +233,8 @@ class SiteBuilder(object):
                 if resource:
                     try:
                         del source_store[resource_key]
+                        source_store.remove_item(resource_key)
+                        bdel = True
                     except KeyError:
                         pass
             except FileNotFoundError as e:
@@ -244,7 +246,9 @@ class SiteBuilder(object):
                 if expectation_suite_name:
                     try:
                         del source_store[resource_key]
-                        logger.debug("        Deleting expectation suite {} resource key".format(expectation_suite_name))
+                        logger.debug("        Deleting expectation suite {} expectation resource key".format(expectation_suite_name))
+                        source_store.remove_item(resource_key)
+                        bdel = True
                     except KeyError:
                         pass
             elif isinstance(resource_key, ValidationResultIdentifier):
@@ -253,15 +257,22 @@ class SiteBuilder(object):
                 if run_id == "profiling":
                     try:
                         del source_store[resource_key]
-                        logger.debug("        Deleting profiling for batch {} resource key".format(resource_key.batch_identifier))
+                        logger.debug("        Deleting profiling for batch {} validation resource key".format(resource_key.batch_identifier))
+                        source_store.remove_item(resource_key)
+                        bdel = True
                     except KeyError:
                         pass
                 else:
                     try:
                         del source_store[resource_key]
                         logger.debug("        Deleting validation {} resource key".format(resource_key.batch_identifier))
+                        source_store.remove_item(resource_key)
+                        bdel = True
                     except KeyError:
                         pass
+        return bdel
+         
+
 
     def build(self, resource_identifiers=None):
         """
