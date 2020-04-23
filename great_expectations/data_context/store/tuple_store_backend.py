@@ -402,7 +402,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         s3_key = self._convert_key_to_filepath(key)
         if s3_key:
             try:
-                s3.Object(boto3.client('s3').get_bucket_location(Bucket=self.bucket), s3_key).delete():
+                s3.Object(boto3.client('s3').get_bucket_location(Bucket=self.bucket), s3_key).delete()
                 return True
             except client.exceptions.NotFoundException as e:
                 return False
