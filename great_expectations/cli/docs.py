@@ -148,8 +148,10 @@ def clean_data_docs(directory, site_name=None):
         raise ge_exceptions.DataContextError(
             "The data docs site and project root directory must be an existing directory to clean "
         )
-
-    ge_dir = os.path.join(context.root_directory, site_name)
+    if site_name is None:
+        ge_dir = context.root_directory
+    else:
+        ge_dir = os.path.join(context.root_directory, site_name)
     if not os.path.isdir(gedir):
         cli_message("<red>{}</red>".format("The data docs site and project root directory must be an existing directory to clean.."))
         sys.exit(1)
