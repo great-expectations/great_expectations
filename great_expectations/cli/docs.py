@@ -152,14 +152,13 @@ def clean_data_docs(directory, site_name=None):
         ge_dir = context.root_directory
     else:
         ge_dir = os.path.join(context.root_directory, site_name)
-    if not os.path.isdir(gedir):
+    if not os.path.isdir(ge_dir):
         cli_message("<red>{}</red>".format("The data docs site and project root directory must be an existing directory to clean.."))
         sys.exit(1)
-
-    if crrmdir(ge_dir, exist_ok=True):
-        cli.message("Cleaned data docs")
+    if context.clean_data_docs(ge_dir):
+        cli_message("Cleaned data docs")
     else:
-        cli_message("<red>{}</red>".format("Cleaning data docs failed.."))
+        cli_message("<red>{}</red>".format("Cleaning data docs failed; make sure docs were built previouly.."))
         sys.exit(1)
 
 def build_docs(context, site_name=None, view=True):

@@ -1236,24 +1236,41 @@ class BaseDataContext(object):
             )
 
          ge_dir = os.path.join(self.root_directory, site_name)
-         if not os.path.isdir(gedir):
+         if not os.path.isdir(ge_dir):
              raise ge_exceptions.DataContextError(
                  "The data docs site and project root directory must be an existing directory to clean "
              )
-
+         data_docs_urls = self.get_docs_sites_urls()
+         for site_dict in data_docs_urls:
+             myval = site_dict["site_url"][7:]
+             os.rename(myval,"/tmp/index.html")
+             return True
+         return False    
+         #module_name = 'great_expectations.render.renderer.site_builder'
+         """
+         module_name = 'great_expectations.data_context.store'
          site_builder = SiteBuilder(
-            data_context=context,
+            data_context=self,
             runtime_environment={
-                "root_directory": context.root_directory
+                "root_directory": self.root_directory
             },
-            **local_site_config
+            config_defaults={
+                            "module_name": module_name
+                        }
          )
-
+         ldocs = context.get_docs_sites_urls(self)
+         return ldocs
+         """
+         #site_builder.clean_store_keys()
+         #return True
+         """
          if safe_rrmdir(ge_dir, exist_ok=True):
              clean_store_keys(site_builder)
              return True
          else:
-             return False   
+             return False
+         """
+         
 
     def profile_datasource(self,
                            datasource_name,
