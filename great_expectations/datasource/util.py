@@ -1,7 +1,7 @@
-try:
-    from urlparse import urlparse
-except ImportError:
-    from urllib.parse import urlparse
+import pickle
+import hashlib
+from urllib.parse import urlparse
+import pandas as pd
 
 # S3Url class courtesy: https://stackoverflow.com/questions/42641315/s3-urls-get-bucket-name-and-path
 class S3Url(object):
@@ -46,3 +46,13 @@ class S3Url(object):
     @property
     def url(self):
         return self._parsed.geturl()
+
+
+def hash_pandas_dataframe(df):
+    try:
+        obj = pd.util.hash_pandas_object(df, index=True).values
+    except TypeError:
+        # In case of facing unhashable objects (like dict), use pickle
+        obj = pickle.dumps(df, pickle.HIGHEST_PROTOCOL)
+
+    return hashlib.md5(obj).hexdigest()

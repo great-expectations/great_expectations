@@ -392,7 +392,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
         else:
             location = "s3-" + location
         s3_key = self._convert_key_to_filepath(key)
-        return "https://%s.amazonaws.com/%s/%s/%s" % (location, self.bucket, self.prefix, s3_key)
+        if not self.prefix:
+            return f"https://{location}.amazonaws.com/{self.bucket}/{s3_key}"
+        return f"https://{location}.amazonaws.com/{self.bucket}/{self.prefix}/{s3_key}"
 
     def _remove_item(self, key):
         import boto3

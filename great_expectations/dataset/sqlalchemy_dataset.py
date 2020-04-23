@@ -1,4 +1,7 @@
 from __future__ import division
+
+from typing import List
+
 from six import PY3, string_types
 
 import uuid
@@ -382,7 +385,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def get_column_count(self):
         return len(self.columns)
 
-    def get_table_columns(self):
+    def get_table_columns(self) -> List[str]:
         return [col['name'] for col in self.columns]
 
     def get_column_nonnull_count(self, column):
