@@ -3,17 +3,16 @@ import sys
 
 import click
 
-from great_expectations import DataContext
-from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.datasource import (
     get_batch_kwargs,
     select_datasource,
 )
 from great_expectations.cli.util import (
     cli_message,
+    load_data_context_with_error_handling,
     load_expectation_suite,
-    mark_cli_as_experimental,
 )
+from great_expectations.cli.mark import Mark as mark
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message,
 )
@@ -37,10 +36,10 @@ def tap():
     default=None,
     help="The project's great_expectations directory.",
 )
-@mark_cli_as_experimental
+@mark.cli_as_experimental
 def tap_new(suite, tap_filename, directory, datasource=None):
-    """Create a new tap file for easy deployments."""
-    context = _get_context(directory)
+    """Create a new tap file for easy deployments. (BETA)"""
+    context = load_data_context_with_error_handling(directory)
     try:
         _validate_tap_filename(tap_filename)
         context_directory = context.root_directory
@@ -77,15 +76,6 @@ def _validate_tap_filename(tap_filename):
             "<red>Tap filename must end in .py. Please correct and re-run</red>"
         )
         exit(1)
-
-
-def _get_context(directory):
-    try:
-        context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        exit(1)
-    return context
 
 
 def _get_datasource(context, datasource):

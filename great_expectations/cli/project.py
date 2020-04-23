@@ -51,5 +51,7 @@ def do_config_check(target_directory):
         ge_exceptions.UnsupportedConfigVersionError,
         ge_exceptions.DataContextError,
         ge_exceptions.PluginClassNotFoundError,
+        ge_exceptions.PluginModuleNotFoundError,
+        ge_exceptions.GreatExpectationsError,
     ) as err:
         return False, err.message, None
