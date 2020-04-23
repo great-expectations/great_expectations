@@ -1,11 +1,11 @@
 import re
 import sys
-from functools import wraps
 
 import six
 
 from great_expectations import exceptions as ge_exceptions, DataContext
 from great_expectations.cli.cli_logging import logger
+from great_expectations.core import ExpectationSuite
 
 try:
     from termcolor import colored
@@ -104,7 +104,8 @@ def is_sane_slack_webhook(url):
     return "https://hooks.slack.com/" in url.strip()
 
 
-def load_expectation_suite(context, suite_name):
+# TODO consolidate all the myriad CLI tests into this
+def load_expectation_suite(context: DataContext, suite_name: str) -> ExpectationSuite:
     """
     Load an expectation suite from a given context.
 
@@ -121,10 +122,12 @@ def load_expectation_suite(context, suite_name):
             "the name by running `great_expectations suite list` and try again."
         )
         logger.info(e)
+        # TODO this should try to send a usage statistic failure
         sys.exit(1)
 
 
-def load_data_context_with_error_handling(directory):
+# TODO consolidate all the myriad CLI tests into this
+def load_data_context_with_error_handling(directory: str) -> DataContext:
     """Return a DataContext with good error handling and exit codes."""
     try:
         context = DataContext(directory)

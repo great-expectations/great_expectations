@@ -16,6 +16,7 @@ from great_expectations.cli.docs import build_docs
 from great_expectations.cli.util import cli_message
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
+from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -200,14 +201,14 @@ def _get_default_expectation_suite_name(batch_kwargs, generator_asset):
     return suite_name
 
 
-def tell_user_suite_exists(suite_name):
+def tell_user_suite_exists(suite_name: str) -> None:
     cli_message(
         f"""<red>An expectation suite named `{suite_name}` already exists.</red>
   - If you intend to edit the suite please use `great_expectations suite edit {suite_name}`."""
     )
 
 
-def create_empty_suite(context, expectation_suite_name, batch_kwargs):
+def create_empty_suite(context: DataContext, expectation_suite_name: str, batch_kwargs) -> None:
     suite = context.create_expectation_suite(
         expectation_suite_name, overwrite_existing=False
     )
@@ -219,9 +220,9 @@ def launch_jupyter_notebook(notebook_path: str) -> None:
     subprocess.call(["jupyter", "notebook", notebook_path])
 
 
-def load_batch(context: DataContext, suite: Union[str, ExpectationSuite], batch_kwargs: Union[dict, BatchKwargs]) -> Dataset:
-    batch: Dataset = context.get_batch(batch_kwargs, suite)
+def load_batch(context: DataContext, suite: Union[str, ExpectationSuite], batch_kwargs: Union[dict, BatchKwargs]) -> DataAsset:
+    batch: DataAsset = context.get_batch(batch_kwargs, suite)
     assert isinstance(
-        batch, Dataset
+        batch, DataAsset
     ), "Batch failed to load. Please check your batch_kwargs"
     return batch

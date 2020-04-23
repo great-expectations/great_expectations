@@ -15,6 +15,7 @@ class Mark:
     def your_function()
     """
 
+    @staticmethod
     def cli_as_experimental(func: Callable) -> Callable:
         """Apply as a decorator to CLI commands that are Experimental."""
 
@@ -28,6 +29,7 @@ class Mark:
 
         return wrapper
 
+    @staticmethod
     def cli_as_beta(func: Callable) -> Callable:
         """Apply as a decorator to CLI commands that are beta."""
 
@@ -41,6 +43,7 @@ class Mark:
 
         return wrapper
 
+    @staticmethod
     def cli_as_deprecation(
         message: str = "<yellow>Heads up! This feature will be deprecated in the next major release</yellow>",
     ) -> Callable:

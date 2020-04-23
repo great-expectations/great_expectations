@@ -452,7 +452,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
         except DatasourceInitializationError as de:
             cli_message(message.format(str(de)))
             if not click.confirm(
-                    "Enter the credentials again?".format(str(de)),
+                    "Enter the credentials again?",
                     default=True
             ):
                 context.add_datasource(datasource_name,
@@ -686,6 +686,7 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
     return datasource_name
 
 
+# TODO consolidate all the myriad CLI tests into this
 def select_datasource(context, datasource_name=None):
     msg_prompt_select_data_source = "Select a datasource"
     msg_no_datasources_configured = "<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
@@ -713,6 +714,7 @@ def select_datasource(context, datasource_name=None):
     return data_source
 
 
+# TODO consolidate all the myriad CLI tests into this
 def select_batch_kwargs_generator(context, datasource_name, available_data_assets_dict=None):
     msg_prompt_select_generator = "Select batch kwarg generator"
 
@@ -742,6 +744,7 @@ def select_batch_kwargs_generator(context, datasource_name, available_data_asset
 
 
 # TODO this method needs testing
+# TODO this method has different numbers of returned objects
 def get_batch_kwargs(context,
                      datasource_name=None,
                      batch_kwargs_generator_name=None,

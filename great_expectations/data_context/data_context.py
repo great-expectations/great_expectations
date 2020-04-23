@@ -868,7 +868,7 @@ class BaseDataContext(object):
             validation_operators.append(value)
         return validation_operators
 
-    def create_expectation_suite(self, expectation_suite_name, overwrite_existing=False):
+    def create_expectation_suite(self, expectation_suite_name, overwrite_existing=False) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
         Args:

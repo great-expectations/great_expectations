@@ -294,7 +294,7 @@ def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
     )
 
 
-def _suite_new(suite, directory, empty, jupyter, view, batch_kwargs, usage_event):
+def _suite_new(suite: str, directory: str, empty: bool, jupyter: bool, view: bool, batch_kwargs, usage_event: str) -> None:
     # TODO break this up into demo and new
     context = load_data_context_with_error_handling(directory)
 
@@ -396,9 +396,9 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
         send_usage_message(data_context=context, event=usage_event, success=False)
         sys.exit(1)
 
-    suite = context.create_expectation_suite(suite_name)
+    _suite = context.create_expectation_suite(suite_name)
     _, _, _, batch_kwargs = get_batch_kwargs(context, datasource_name=datasource.name)
-    renderer = SuiteScaffoldNotebookRenderer(context, suite, batch_kwargs)
+    renderer = SuiteScaffoldNotebookRenderer(context, _suite, batch_kwargs)
     renderer.render_to_disk(notebook_path)
 
     if jupyter:
