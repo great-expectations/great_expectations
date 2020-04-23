@@ -7,12 +7,19 @@ import click
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.core import (
+    ExpectationSuite,
+    get_metric_kwargs_id,
+)
 from great_expectations.cli.datasource import (
     create_expectation_suite as create_expectation_suite_impl,
 )
 from great_expectations.cli.datasource import (
     get_batch_kwargs,
     select_datasource,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
 )
 from great_expectations.cli.util import cli_message, load_expectation_suite, cli_message_list
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message, _anonymizers, \
@@ -326,11 +333,11 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n""")
     default=None,
     help="Delete expectation suite.",
 )
-def suite_delete(suite_name, directory):
+def suite_delete(suite, directory):
     """Delete specified expectation suite from data_context expectation store.
 
     Args:
-        expectation_suite_name: The name of the expectation_suite to create
+        expectation_suite_name: The name of the expectation_suite to delete
 
     Returns:
         True for Success and False for Failure.
@@ -347,10 +354,10 @@ def suite_delete(suite_name, directory):
         return
 
     if len(suite_names) > 0:
-        expectation_suite = ExpectationSuite(expectation_suite_name=suite_name)
-        key = ExpectationSuiteIdentifier(expectation_suite_name=suite_name)
+        expectation_suite = ExpectationSuite(expectation_suite_name=suite)
+        key = ExpectationSuiteIdentifier(expectation_suite_name=suite)
         if key:
-            del self._stores[self.expectations_store_name][key]
+            context.delete_expectation_suite(expectation_suite)
         else:
             cli_message("No matching expectation suites found")
             return
