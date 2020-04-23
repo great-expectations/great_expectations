@@ -2,9 +2,20 @@
 
 develop
 -----------------
+
+0.10.4
+-----------------
 * consolidated error handling in CLI DataContext loading
 * new cli command `suite scaffold` to speed up creation of suites
 * new cli command `suite demo` that creates an example suite
+* Update bigquery.rst `#1330 <https://github.com/great-expectations/great_expectations/issues/1330>`_
+* Fix datetime reference in create_expectations.rst `#1321 <https://github.com/great-expectations/great_expectations/issues/1321>`_ Thanks @jschendel !
+* Update issue templates
+* CLI command experimental decorator
+* Update style_guide.rst
+* Add pull request template
+* Use pickle to generate hash for dataframes with unhashable objects. `#1315 <https://github.com/great-expectations/great_expectations/issues/1315>`_ Thanks @shahinism !
+* Unpin pytest
 
 0.10.3
 -----------------
