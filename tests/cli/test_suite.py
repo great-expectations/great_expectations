@@ -1141,3 +1141,197 @@ def test_suite_list_with_multiple_suites(caplog, empty_data_context):
     assert "c.warning" in output
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+def test_suite_scaffold_on_context_with_no_datasource_raises_error(
+    mock_subprocess, mock_emit, caplog, empty_data_context
+):
+    """
+    We call the "suite scaffold" command on a context with no datasource
+
+    The command should:
+    - exit with a clear error message
+    - send a DataContext init success message
+    - send a scaffold fail message
+    """
+    context = empty_data_context
+    root_dir = context.root_directory
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli, ["suite", "scaffold", "foop", "-d", root_dir], catch_exceptions=False,
+    )
+    stdout = result.output
+    assert result.exit_code == 1
+    assert (
+        "No datasources found in the context. To add a datasource, run `great_expectations datasource new`"
+        in stdout
+    )
+
+    assert mock_subprocess.call_count == 0
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.suite.scaffold", "event_payload": {}, "success": False}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_suite_scaffold_on_existing_suite_raises_error(
+    mock_emit, caplog, empty_data_context
+):
+    """
+    We call the "suite scaffold" command with an existing suite
+
+    The command should:
+    - exit with a clear error message
+    - send a DataContext init success message
+    - send a scaffold fail message
+    """
+    context = empty_data_context
+    root_dir = context.root_directory
+    suite = context.create_expectation_suite("foop")
+    context.save_expectation_suite(suite)
+    assert context.list_expectation_suite_names() == ["foop"]
+    mock_emit.reset_mock()
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli, ["suite", "scaffold", "foop", "-d", root_dir], catch_exceptions=False,
+    )
+    stdout = result.output
+    assert result.exit_code == 1
+    assert "An expectation suite named `foop` already exists." in stdout
+    assert (
+        "If you intend to edit the suite please use `great_expectations suite edit foop`."
+        in stdout
+    )
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.suite.scaffold", "event_payload": {}, "success": False}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+def test_suite_scaffold_creates_notebook_and_opens_jupyter(
+    mock_subprocess, mock_emit, caplog, titanic_data_context
+):
+    """
+    We call the "suite scaffold" command
+
+    The command should:
+    - create a new notebook
+    - open the notebook in jupyter
+    - send a DataContext init success message
+    - send a scaffold success message
+    """
+    context = titanic_data_context
+    root_dir = context.root_directory
+    suite_name = "foop"
+    expected_notebook_path = os.path.join(
+        root_dir, context.GE_EDIT_NOTEBOOK_DIR, f"scaffold_{suite_name}.ipynb"
+    )
+    assert not os.path.isfile(expected_notebook_path)
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["suite", "scaffold", suite_name, "-d", root_dir],
+        input="1\n1\n",
+        catch_exceptions=False,
+    )
+    stdout = result.output
+    assert result.exit_code == 0
+    assert os.path.isfile(expected_notebook_path)
+
+    assert mock_subprocess.call_count == 1
+    assert mock_subprocess.call_args_list == [
+        mock.call(["jupyter", "notebook", expected_notebook_path])
+    ]
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.suite.scaffold", "event_payload": {}, "success": True}
+        ),
+    ]
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
+    mock_subprocess, mock_emit, caplog, titanic_data_context
+):
+    """
+    We call the "suite scaffold --no-jupyter"
+
+    The command should:
+    - create a new notebook
+    - NOT open the notebook in jupyter
+    - tell the user to open the notebook
+    - send a DataContext init success message
+    - send a scaffold success message
+    """
+    context = titanic_data_context
+    root_dir = context.root_directory
+    suite_name = "foop"
+    expected_notebook_path = os.path.join(
+        root_dir, context.GE_EDIT_NOTEBOOK_DIR, f"scaffold_{suite_name}.ipynb"
+    )
+    assert not os.path.isfile(expected_notebook_path)
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["suite", "scaffold", suite_name, "-d", root_dir, "--no-jupyter"],
+        input="1\n1\n",
+        catch_exceptions=False,
+    )
+    stdout = result.output
+    assert result.exit_code == 0
+    assert os.path.isfile(expected_notebook_path)
+    assert (
+        f"To continue scaffolding this suite, run `jupyter notebook {expected_notebook_path}`"
+        in stdout
+    )
+
+    assert mock_subprocess.call_count == 0
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.suite.scaffold", "event_payload": {}, "success": True}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)

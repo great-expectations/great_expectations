@@ -375,54 +375,40 @@ def suite_scaffold(suite, directory, jupyter):
     _suite_scaffold(suite, directory, jupyter)
 
 
-def _suite_scaffold(suite, directory, jupyter):
+def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
+    usage_event = "cli.suite.scaffold"
     suite_name = suite
     context = load_data_context_with_error_handling(directory)
     notebook_filename = f"scaffold_{suite_name}.ipynb"
     notebook_path = _get_notebook_path(context, notebook_filename)
 
-    # TODO check if suite exists
     if suite_name in context.list_expectation_suite_names():
         toolkit.tell_user_suite_exists(suite_name)
         if os.path.isfile(notebook_path):
             cli_message(
                 f"  - If you wish to adjust your scaffolding, you can open this notebook with jupyter: `{notebook_path}` <red>(Please note that if you run that notebook, you will overwrite your existing suite.)</red>"
             )
+        send_usage_message(data_context=context, event=usage_event, success=False)
         sys.exit(1)
 
-    # TODO select datasource
     datasource = toolkit.select_datasource(context)
     if datasource is None:
-        # TODO test this and maybe move this logic into a helper
-        # select_datasource takes care of displaying an error message, so all is left here is to exit.
+        send_usage_message(data_context=context, event=usage_event, success=False)
         sys.exit(1)
 
-    # TODO create suite
     suite = context.create_expectation_suite(suite_name)
-
-    # TODO get batch_kwargs
     _, _, _, batch_kwargs = get_batch_kwargs(context, datasource_name=datasource.name)
-
-    # TODO render notebook
     renderer = SuiteScaffoldNotebookRenderer(context, suite, batch_kwargs)
-
-    # TODO test file created
     renderer.render_to_disk(notebook_path)
 
-    # TODO open notebook
     if jupyter:
-        # TODO test this
         toolkit.launch_jupyter_notebook(notebook_path)
     else:
-        # TODO test this
         cli_message(
             f"To continue scaffolding this suite, run `jupyter notebook {notebook_path}`"
         )
 
-    # TODO send usage message
-    send_usage_message(data_context=context, event="cli.suite.scaffold", success=True)
-    # TODO send usage message for certain failures?
-    send_usage_message(data_context=context, event="cli.suite.scaffold", success=False)
+    send_usage_message(data_context=context, event=usage_event, success=True)
 
 
 @suite.command(name="list")
