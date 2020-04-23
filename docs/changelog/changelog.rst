@@ -2,6 +2,9 @@
 
 develop
 -----------------
+* consolidated error handling in CLI DataContext loading
+* new cli command `suite scaffold` to speed up creation of suites
+* new cli command `suite demo` that creates an example suite
 
 0.10.3
 -----------------
