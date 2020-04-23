@@ -20,7 +20,6 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
-from great_expectations.dataset import Dataset
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
 

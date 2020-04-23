@@ -4,7 +4,7 @@ import sys
 
 import click
 
-import great_expectations.cli.toolkit as toolkit
+from great_expectations.cli import toolkit as toolkit
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.datasource import (
     get_batch_kwargs,
