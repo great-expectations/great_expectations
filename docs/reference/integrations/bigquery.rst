@@ -8,7 +8,7 @@ To add a BigQuery datasource do this:
 
 1. Run ``great_expectations datasource new``
 2. Choose the *SQL* option from the menu.
-3. When asked which sqlalchemy driver to use enter ``bigquery``.
+3. When asked which sqlalchemy driver to use, enter ``other``.
 4. Consult the `PyBigQuery <https://github.com/mxmzdlv/pybigquery`_ docs
    for help building a connection string for your BigQuery cluster. It will look
    something like this:
