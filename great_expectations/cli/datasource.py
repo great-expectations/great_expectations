@@ -113,27 +113,6 @@ def datasource_new(directory):
         sys.exit(1)
 
 
-@datasource.command(name="cleandatadocs")
-@click.argument('site_name', default=None, required=False)
-@click.option(
-    '--directory',
-    '-c',
-    default=None,
-    help="Clean data docs."
-)
-def datasource_cleandatadocs(directory, site_name):
-    """Data docs clean up for specified site_name."""
-    try:
-        context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        return
-    if clean_store_keys(directory, site_name):
-        cli_message("Data docs at '{}' cleaned.".format(site_name))
-    else:  # no cleanup
-        sys.exit(1)
-
-
 @datasource.command(name="delete")
 @click.option(
     '--directory',
