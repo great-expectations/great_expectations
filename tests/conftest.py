@@ -106,9 +106,9 @@ def build_test_backends_list(metafunc):
 def pytest_generate_tests(metafunc):
     test_backends = build_test_backends_list(metafunc)
     if "test_backend" in metafunc.fixturenames:
-        metafunc.parametrize("test_backend", test_backends)
+        metafunc.parametrize("test_backend", test_backends, scope="module")
     if "test_backends" in metafunc.fixturenames:
-        metafunc.parametrize("test_backends", [test_backends])
+        metafunc.parametrize("test_backends", [test_backends], scope="module")
 
 
 def pytest_collection_modifyitems(config, items):
@@ -119,6 +119,12 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "aws_integration" in item.keywords:
             item.add_marker(skip_aws_integration)
+
+
+@pytest.fixture(autouse=True)
+def no_usage_stats(monkeypatch):
+    # Do not generate usage stats from test runs
+    monkeypatch.setenv("GE_USAGE_STATS", "False")
 
 
 @pytest.fixture
