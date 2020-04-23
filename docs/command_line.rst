@@ -128,6 +128,13 @@ Running ``great_expectations suite list`` gives a list of available expectation 
 ``great_expectations suite new``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. attention::
+
+  In the next major release ``suite new`` command will no longer create a sample suite.
+  Instead, ``suite new`` will create an empty suite.
+  Additionally the ``--empty`` flag will be deprecated.
+  The existing behavior of automatic creation of a demo suite is now in the command ``suite demo``.
+
 Create a new expectation suite.
 Just as writing SQL queries is far better with access to data, so are writing expectations.
 These are best written interactively against some data.
@@ -192,6 +199,12 @@ If you already know the name of the suite you want to create you can skip one of
 
 ``great_expectations suite new --empty``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. attention::
+
+  In the next major release ``suite new`` command will no longer create a sample suite.
+  Instead, ``suite new`` will create an empty suite.
+  Therefore the ``--empty`` flag will be deprecated.
 
 If you prefer to skip the example expectations and start writing expectations in a new empty suite directly in a jupyter notebook, add the ``--empty`` flag.
 
@@ -276,6 +289,123 @@ If you prefer to disable Great Expectations from automatically opening the gener
     To continue editing this suite, run jupyter notebook /Users/dickens/Desktop/great_expectations/uncommitted/npi.warning.ipynb
 
 You can then run jupyter.
+
+
+``great_expectations suite scaffold <SUITE_NAME>``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To facilitate fast creation of suites this command helps you write boilerplate using simple heuristics.
+Much like the ``suite new`` and ``suite edit`` commands, you will be prompted interactively to choose some data from one of your datasources.
+
+.. important::
+
+    The suites generated here **are not meant to be production suites** - they are scaffolds to build upon.
+
+    Great Expectations will chooses which expectations **might make sense** for a column based on the type and cardinality of the data in each selected column.
+
+    You will definitely want to edit the suite to hone it after scaffolding.
+
+
+To create a new suite called "npi_distribution" in a project that has a single files-based ``PandasDatasource``:
+
+.. code-block:: bash
+
+    $ great_expectations suite scaffold npi_distribution
+    Heads up! This feature is Experimental. It may change. Please give us your feedback!
+
+    Enter the path (relative or absolute) of a data file
+    : npi.csv
+    ...jupyter opens
+
+You'll then see jupyter open a scaffolding notebook.
+Run the first cell in the notebook that loads the data.
+You don't need to worry about what's happening there.
+
+The next code cell in the notebook presents you with a list of all the columns found in your selected data.
+To select which columns you want to scaffold expectations on, simply uncomment them to include them.
+
+Run the next few code cells to see the scaffolded suite in Data Docs.
+
+You may keep the scaffold notebook open and iterate on the included and excluded columns and expectations to get closer to the kind of suite you want.
+
+.. important::
+
+    Great Expectations generates working jupyter notebooks.
+    This saves you tons of time by avoiding all the necessary boilerplate.
+
+    Because these notebooks can be generated at any time from the expectation suites (stored as JSON) you should **consider the notebooks to be entirely disposable artifacts**.
+
+    They are put in your ``great_expectations/uncommitted`` directory and you can delete them at any time.
+
+Because the scaffolder is not very smart, you will want to edit this suite to tune the parameters and make any adjustments such as removing expectations that don't make sense for your use case.
+
+``great_expectations suite scaffold <SUITE_NAME> --no-jupyter``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you wish to skip opening the scaffolding notebook in juypter you can use this optional flag.
+
+The notebook will be created in your ``great_expectations/uncommitted`` directory.
+
+.. code-block:: bash
+
+    suite scaffold npi_distributions --no-jupyter
+    Heads up! This feature is Experimental. It may change. Please give us your feedback!
+
+    Enter the path (relative or absolute) of a data file
+    : npi.csv
+    To continue scaffolding this suite, run `jupyter notebook uncommitted/scaffold_npi_distributions.ipynb`
+
+
+
+``great_expectations suite demo``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Create a sample expectation suite.
+Just as writing SQL queries is far better with access to data, so are writing expectations.
+These are best written interactively against some data.
+
+To this end, this command interactively helps you choose some data, creates the new suite, adds sample expectations to it, and opens up Data Docs.
+
+.. important::
+
+    The sample suites generated **are not meant to be production suites** - they are examples only.
+
+    Great Expectations will choose a couple of columns and generate expectations about them to demonstrate some examples of assertions you can make about your data.
+
+.. code-block:: bash
+
+    $ great_expectations suite demo
+    Enter the path (relative or absolute) of a data file
+    : data/npi.csv
+
+    Name the new expectation suite [npi.warning]:
+
+    Great Expectations will choose a couple of columns and generate expectations about them
+    to demonstrate some examples of assertions you can make about your data.
+
+    Press Enter to continue
+    :
+
+    Generating example Expectation Suite...
+    Building Data Docs...
+    The following Data Docs sites were built:
+    - local_site:
+       file:///Users/dickens/Desktop/great_expectations/uncommitted/data_docs/local_site/index.html
+    A new Expectation suite 'npi.warning' was added to your project
+
+To edit this suite you can click the **How to edit** button in Data Docs, or run the command: ``great_expectations suite edit npi.warning``.
+This will generate a jupyter notebook and allow you to add, remove or adjust any expectations in the sample suite.
+
+.. important::
+
+    Great Expectations generates working jupyter notebooks when you make new suites and edit existing ones.
+    This saves you tons of time by avoiding all the necessary boilerplate.
+
+    Because these notebooks can be generated at any time from the expectation suites (stored as JSON) you should **consider the notebooks to be entirely disposable artifacts**.
+
+    They are put in your ``great_expectations/uncommitted`` directory and you can delete them at any time.
+
+    Because they can expose actual data, we strongly suggest leaving them in the ``uncommitted`` directory to avoid potential data leaks into source control.
 
 
 great_expectations validation-operator

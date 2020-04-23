@@ -37,7 +37,7 @@ No data sources found in the great_expectations.yml of your project.
 <p>
 If you did not create the data source during init, here is how to add it now: <a href="https://great-expectations.readthedocs.io/en/latest/how_to_add_data_source.html">How To Add a Data Source</a>
 </p>
-""".format(data_source_type)))
+"""))
         elif len(configured_datasources) > 1:
             display(HTML("""
 <p>
