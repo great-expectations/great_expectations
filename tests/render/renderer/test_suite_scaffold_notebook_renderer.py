@@ -1,11 +1,9 @@
 import os
 
 import nbformat
-import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
-from great_expectations.exceptions import DataContextError
 from great_expectations.render.renderer.suite_scaffold_notebook_renderer import (
     SuiteScaffoldNotebookRenderer,
 )
@@ -65,7 +63,7 @@ def test_render_snapshot_test(titanic_data_context):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": '# Wipe the suite clean to prevent unwanted expectations on the batch\nsuite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)\nbatch = context.get_batch(batch_kwargs, suite)\n\nscaffold_config = {\n    "included_columns": included_columns,\n    # "excluded_columns": [],\n    # "included_expectations: [],\n    # "excluded_expectations: [],\n}\nsuite, evr = BasicSuiteBuilderProfiler().profile(batch, profiler_configuration=scaffold_config)',
+                "source": '# Wipe the suite clean to prevent unwanted expectations on the batch\nsuite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)\nbatch = context.get_batch(batch_kwargs, suite)\n\nscaffold_config = {\n    "included_columns": included_columns,\n    # "excluded_columns": [],\n    # "included_expectations": [],\n    # "excluded_expectations": [],\n}\nsuite, evr = BasicSuiteBuilderProfiler().profile(batch, profiler_configuration=scaffold_config)',
                 "outputs": [],
             },
             {

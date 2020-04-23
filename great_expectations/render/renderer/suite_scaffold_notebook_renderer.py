@@ -153,8 +153,8 @@ batch = context.get_batch(batch_kwargs, suite)
 scaffold_config = {
     "included_columns": included_columns,
     # "excluded_columns": [],
-    # "included_expectations: [],
-    # "excluded_expectations: [],
+    # "included_expectations": [],
+    # "excluded_expectations": [],
 }
 suite, evr = BasicSuiteBuilderProfiler().profile(batch, profiler_configuration=scaffold_config)""",
             lint=False,
