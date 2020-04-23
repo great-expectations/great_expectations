@@ -138,16 +138,3 @@ def load_data_context_with_error_handling(directory):
     except ge_exceptions.PluginClassNotFoundError as err:
         cli_message(err.cli_colored_message)
         sys.exit(1)
-
-
-def mark_cli_as_experimental(func):
-    """Apply as a decorator to CLI commands that are Experimental."""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        cli_message(
-            "<yellow>Heads up! This feature is Experimental. It may change. "
-            "Please give us your feedback!</yellow>"
-        )
-        func(*args, **kwargs)
-
-    return wrapper

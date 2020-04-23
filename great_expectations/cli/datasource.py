@@ -15,11 +15,10 @@ from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.util import (
     cli_message,
-    cli_message_list,
     cli_message_dict,
     load_data_context_with_error_handling,
-    mark_cli_as_experimental,
 )
+from great_expectations.cli.mark import Mark as mark
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message,
@@ -165,7 +164,7 @@ def _build_datasource_intro_string(datasource_count):
 )
 @click.option('--additional-batch-kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
-@mark_cli_as_experimental
+@mark.cli_as_experimental
 def datasource_profile(datasource, batch_kwargs_generator_name, data_assets, profile_all_data_assets, directory, view, additional_batch_kwargs):
     """
     Profile a datasource (Experimental)

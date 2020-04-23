@@ -13,13 +13,13 @@ from great_expectations.core import ExpectationSuite
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
-def test_suite_help_output(caplog,):
+def test_suite_help_output(caplog):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, ["suite"], catch_exceptions=False)
     assert result.exit_code == 0
     assert (
-        """\
-Commands:
+        """Commands:
+  demo      Create a new demo Expectation Suite.
   edit      Generate a Jupyter notebook for editing an existing Expectation...
   list      Lists available Expectation Suites.
   new       Create a new Expectation Suite.
@@ -31,11 +31,11 @@ Commands:
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_on_context_with_no_datasources(
+def test_suite_demo_on_context_with_no_datasources(
     mock_webbrowser, mock_subprocess, caplog, empty_data_context
 ):
     """
-    We call the "suite new" command on a data context that has no datasources
+    We call the "suite demo" command on a data context that has no datasources
     configured.
 
     The command should:
@@ -48,7 +48,7 @@ def test_suite_new_on_context_with_no_datasources(
     root_dir = project_root_dir
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["suite", "new", "-d", root_dir], catch_exceptions=False,
+        cli, ["suite", "demo", "-d", root_dir], catch_exceptions=False,
     )
     stdout = result.stdout
 
@@ -63,11 +63,11 @@ def test_suite_new_on_context_with_no_datasources(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_enter_existing_suite_name_as_arg(
+def test_suite_demo_enter_existing_suite_name_as_arg(
     mock_webbrowser, mock_subprocess, caplog, data_context
 ):
     """
-    We call the "suite new" command with the name of an existing expectation
+    We call the "suite demo" command with the name of an existing expectation
     suite in the --suite argument
 
     The command should:
@@ -80,19 +80,34 @@ def test_suite_new_enter_existing_suite_name_as_arg(
     project_root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(project_root_dir, "uncommitted"))
 
-    root_dir = project_root_dir
-    os.chdir(root_dir)
-    context = DataContext(root_dir)
+    context = DataContext(project_root_dir)
+    existing_suite_name = "my_dag_node.default"
+    assert context.list_expectation_suite_names() == [existing_suite_name]
+
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "my_dag_node.default", "--no-view"],
+        [
+            "suite",
+            "demo",
+            "-d",
+            project_root_dir,
+            "--suite",
+            existing_suite_name,
+            "--no-view",
+        ],
         catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert result.exit_code == 1
-    assert "already exists. If you intend to edit the suite" in stdout
+    assert (
+        f"An expectation suite named `{existing_suite_name}` already exists." in stdout
+    )
+    assert (
+        f"If you intend to edit the suite please use `great_expectations suite edit {existing_suite_name}`"
+        in stdout
+    )
 
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
@@ -102,11 +117,11 @@ def test_suite_new_enter_existing_suite_name_as_arg(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_answer_suite_name_prompts_with_name_of_existing_suite(
+def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
     mock_webbrowser, mock_subprocess, caplog, data_context, filesystem_csv_2
 ):
     """
-    We call the "suite new" command without the suite name argument
+    We call the "suite demo" command without the suite name argument
 
     The command should:
 
@@ -124,15 +139,26 @@ def test_suite_new_answer_suite_name_prompts_with_name_of_existing_suite(
 
     runner = CliRunner(mix_stderr=False)
     csv_path = os.path.join(filesystem_csv_2, "f1.csv")
+
+    existing_suite_name = "my_dag_node.default"
+    context = DataContext(root_dir)
+    assert context.list_expectation_suite_names() == [existing_suite_name]
+
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir],
-        input=f"{csv_path}\nmy_dag_node.default\nmy_new_suite\n\n",
+        ["suite", "demo", "-d", root_dir],
+        input=f"{csv_path}\n{existing_suite_name}\nmy_new_suite\n\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "already exists. If you intend to edit the suite" in stdout
+    assert (
+        f"An expectation suite named `{existing_suite_name}` already exists." in stdout
+    )
+    assert (
+        f"If you intend to edit the suite please use `great_expectations suite edit {existing_suite_name}`"
+        in stdout
+    )
     assert "Enter the path" in stdout
     assert "Name the new expectation suite [f1.warning]" in stdout
     assert (
@@ -161,11 +187,11 @@ def test_suite_new_answer_suite_name_prompts_with_name_of_existing_suite(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_empty_suite_creates_empty_suite(
+def test_suite_new_creates_empty_suite(
     mock_webbroser, mock_subprocess, caplog, data_context, filesystem_csv_2
 ):
     """
-    Running "suite new --empty" should:
+    Running "suite new" should:
     - make an empty suite
     - open jupyter
     - NOT open data docs
@@ -176,6 +202,7 @@ def test_suite_new_empty_suite_creates_empty_suite(
     os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
     csv = os.path.join(filesystem_csv_2, "f1.csv")
+    # TODO this test must be updated to remove the --empty flag in the next major release
     result = runner.invoke(
         cli,
         ["suite", "new", "-d", root_dir, "--empty", "--suite", "foo"],
@@ -235,21 +262,20 @@ def test_suite_new_empty_suite_creates_empty_suite(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_empty_suite_creates_empty_suite_with_no_jupyter(
+def test_suite_new_empty_with_no_jupyter(
     mock_webbroser, mock_subprocess, caplog, data_context, filesystem_csv_2
 ):
     """
-    Running "suite new --empty --no-jupyter" should:
+    Running "suite new --no-jupyter" should:
     - make an empty suite
     - NOT open jupyter
     - NOT open data docs
     """
-    project_root_dir = data_context.root_directory
-    os.mkdir(os.path.join(project_root_dir, "uncommitted"))
-    root_dir = project_root_dir
-    os.chdir(root_dir)
+    os.mkdir(os.path.join(data_context.root_directory, "uncommitted"))
+    root_dir = data_context.root_directory
     runner = CliRunner(mix_stderr=False)
     csv = os.path.join(filesystem_csv_2, "f1.csv")
+    # TODO this test must be updated to remove the --empty flag in the next major release
     result = runner.invoke(
         cli,
         ["suite", "new", "-d", root_dir, "--empty", "--suite", "foo", "--no-jupyter"],
@@ -301,11 +327,11 @@ def test_suite_new_empty_suite_creates_empty_suite_with_no_jupyter(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
+def test_suite_demo_one_datasource_without_generator_without_suite_name_argument(
     mock_webbrowser, mock_subprocess, caplog, empty_data_context, filesystem_csv_2
 ):
     """
-    We call the "suite new" command without the suite name argument
+    We call the "suite demo" command without the suite name argument
 
     The command should:
 
@@ -327,18 +353,14 @@ def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
     )
 
     context = empty_data_context
-    project_root_dir = context.root_directory
-
-    root_dir = project_root_dir
-    os.chdir(root_dir)
+    root_dir = context.root_directory
     context = DataContext(root_dir)
     runner = CliRunner(mix_stderr=False)
+    csv_path = os.path.join(filesystem_csv_2, "f1.csv")
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir],
-        input="{0:s}\nmy_new_suite\n\n".format(
-            os.path.join(filesystem_csv_2, "f1.csv")
-        ),
+        ["suite", "demo", "-d", root_dir],
+        input=f"{csv_path}\nmy_new_suite\n\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -359,7 +381,8 @@ def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
 
     assert len(obs_urls) == 1
     assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]["site_url"]
+        "great_expectations/uncommitted/data_docs/local_site/index.html"
+        in obs_urls[0]["site_url"]
     )
 
     expected_index_path = os.path.join(
@@ -378,14 +401,14 @@ def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_multiple_datasources_with_generator_without_suite_name_argument(
+def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argument(
     mock_webbrowser,
     mock_subprocess,
     caplog,
     site_builder_data_context_with_html_store_titanic_random,
 ):
     """
-    We call the "suite new" command without the suite name argument
+    We call the "suite demo" command without the suite name argument
 
     - The data context has two datasources - we choose one of them.
     - It has a generator configured. We choose to use the generator and select a
@@ -401,7 +424,7 @@ def test_suite_new_multiple_datasources_with_generator_without_suite_name_argume
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir],
+        ["suite", "demo", "-d", root_dir],
         input="1\n1\n1\nmy_new_suite\n\n",
         catch_exceptions=False,
     )
@@ -434,7 +457,8 @@ def test_suite_new_multiple_datasources_with_generator_without_suite_name_argume
 
     assert len(obs_urls) == 1
     assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]["site_url"]
+        "great_expectations/uncommitted/data_docs/local_site/index.html"
+        in obs_urls[0]["site_url"]
     )
 
     expected_index_path = os.path.join(
@@ -453,14 +477,14 @@ def test_suite_new_multiple_datasources_with_generator_without_suite_name_argume
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
+def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument(
     mock_webbrowser,
     mock_subprocess,
     caplog,
     site_builder_data_context_with_html_store_titanic_random,
 ):
     """
-    We call the "suite new" command with the suite name argument
+    We call the "suite demo" command with the suite name argument
 
     - The data context has two datasources - we choose one of them.
     - It has a generator configured. We choose to use the generator and select
@@ -474,7 +498,7 @@ def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo_suite"],
+        ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -496,7 +520,8 @@ def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
 
     assert len(obs_urls) == 1
     assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]["site_url"]
+        "great_expectations/uncommitted/data_docs/local_site/index.html"
+        in obs_urls[0]["site_url"]
     )
 
     expected_index_path = os.path.join(
@@ -684,7 +709,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo_suite"],
+        ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -716,7 +741,9 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert "Select a datasource" in stdout
     assert "Which data would you like to use" in stdout
 
-    expected_notebook_path = os.path.join(root_dir, "uncommitted", "edit_foo_suite.ipynb")
+    expected_notebook_path = os.path.join(
+        root_dir, "uncommitted", "edit_foo_suite.ipynb"
+    )
     assert os.path.isfile(expected_notebook_path)
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
@@ -755,7 +782,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo_suite"],
+        ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -781,7 +808,9 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert "Select a datasource" not in stdout
     assert "Which data would you like to use" not in stdout
 
-    expected_notebook_path = os.path.join(root_dir, "uncommitted", "edit_foo_suite.ipynb")
+    expected_notebook_path = os.path.join(
+        root_dir, "uncommitted", "edit_foo_suite.ipynb"
+    )
     assert os.path.isfile(expected_notebook_path)
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
@@ -824,7 +853,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-view"],
+        ["suite", "demo", "-d", root_dir, "--suite", "foo_suite", "--no-view"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -869,7 +898,9 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert "Select a datasource" not in stdout
     assert "Which data would you like to use" not in stdout
 
-    expected_notebook_path = os.path.join(root_dir, "uncommitted", "edit_foo_suite.ipynb")
+    expected_notebook_path = os.path.join(
+        root_dir, "uncommitted", "edit_foo_suite.ipynb"
+    )
     assert os.path.isfile(expected_notebook_path)
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
@@ -1014,7 +1045,7 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir],
+        ["suite", "demo", "-d", root_dir],
         input="{0:s}\nmy_new_suite\n\n".format(
             os.path.join(filesystem_csv_2, "f1.csv")
         ),
@@ -1048,7 +1079,9 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     assert "Which data would you like to use" not in stdout
     assert "Enter the path" in stdout
 
-    expected_notebook_path = os.path.join(root_dir, "uncommitted", "edit_my_new_suite.ipynb")
+    expected_notebook_path = os.path.join(
+        root_dir, "uncommitted", "edit_my_new_suite.ipynb"
+    )
     assert os.path.isfile(expected_notebook_path)
 
     expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")

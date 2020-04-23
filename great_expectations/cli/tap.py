@@ -9,14 +9,13 @@ from great_expectations.cli.datasource import (
 )
 from great_expectations.cli.util import (
     cli_message,
+    load_data_context_with_error_handling,
     load_expectation_suite,
-    mark_cli_as_experimental,
 )
+from great_expectations.cli.mark import Mark as mark
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message,
 )
-from great_expectations.cli.util import cli_message, load_expectation_suite, \
-    load_data_context_with_error_handling
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import lint_code
 
@@ -37,7 +36,7 @@ def tap():
     default=None,
     help="The project's great_expectations directory.",
 )
-@mark_cli_as_experimental
+@mark.cli_as_experimental
 def tap_new(suite, tap_filename, directory, datasource=None):
     """Create a new tap file for easy deployments. (BETA)"""
     context = load_data_context_with_error_handling(directory)
