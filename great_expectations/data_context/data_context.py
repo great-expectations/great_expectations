@@ -46,7 +46,10 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import (
-    file_relative_path
+    file_relative_path,
+    substitute_config_variable,
+)
+from great_expectations.data_context.util import (
     instantiate_class_from_config,
     load_class,
     safe_mmkdir,
