@@ -129,12 +129,17 @@ def docs_list(directory):
                 event="cli.docs.list",
                 success=False
             )
-
-
+@docs.command(name="clean")
+@click.option(
+    '--directory',
+    '-y',
+    default=None,
+    help="Clean data docs"
+)
 def clean_data_docs(directory, site_name=None):
     """
     Delete data docs
-  
+
     :param directory
     :param site_name
     """
@@ -154,7 +159,6 @@ def clean_data_docs(directory, site_name=None):
     else:
         cli_message("<red>{}</red>".format("Cleaning data docs failed.."))
         sys.exit(1)
-
 
 def build_docs(context, site_name=None, view=True):
     """Build documentation in a context"""
