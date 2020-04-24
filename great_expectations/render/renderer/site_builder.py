@@ -1,10 +1,9 @@
 import logging
-
-from collections import OrderedDict
 import os
-
 import traceback
+from collections import OrderedDict
 
+import great_expectations.exceptions as exceptions
 from great_expectations.core import nested_update
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
@@ -14,9 +13,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-
 from great_expectations.data_context.util import instantiate_class_from_config
-import great_expectations.exceptions as exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -217,9 +214,9 @@ class SiteBuilder(object):
                     package_name=None,
                     class_name=site_section_config['class_name']
                 )
-    
-    def clean_store_keys(self, siteurl):
-        return True
+
+    def clean_site(self):
+        self.target_store.clean_site()
 
     def build(self, resource_identifiers=None):
         """

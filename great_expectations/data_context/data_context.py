@@ -53,10 +53,8 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
     load_class,
     safe_mmkdir,
-    safe_rrmdir,
     substitute_all_config_variables,
 )
-from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.validator.validator import Validator
 
 try:
@@ -1228,28 +1226,24 @@ class BaseDataContext(object):
 
         return index_page_locator_infos
 
-    def clean_data_docs(self, sname=None):
-        sites = self.get_docs_sites_urls()
-        print(sites)
-        for site_dict in sites:
-            if site_dict['site_name'] == sname:
-                sites123 = self._project_config_with_variables_substituted.data_docs_sites
-                for site_name, site_config in sites123.items():
-                    if site_name == sname:
-                        complete_site_config = site_config
-                        module_name = 'great_expectations.render.renderer.site_builder'
-                        site_builder = instantiate_class_from_config(
-                            config=complete_site_config,
-                            runtime_environment={
-                                "data_context": self,
-                                "root_directory": self.root_directory
-                            },
-                            config_defaults={
-                                "module_name": module_name
-                            }
-                        )
-                        site_builder.clean_store_keys(site_dict['site_url'])
-                        return True
+    def clean_data_docs(self, site_name=None):
+        sites123 = self._project_config_with_variables_substituted.data_docs_sites
+        for sname, site_config in sites123.items():
+            if site_name == sname:
+                complete_site_config = site_config
+                module_name = 'great_expectations.render.renderer.site_builder'
+                site_builder = instantiate_class_from_config(
+                    config=complete_site_config,
+                    runtime_environment={
+                        "data_context": self,
+                        "root_directory": self.root_directory
+                    },
+                    config_defaults={
+                        "module_name": module_name
+                    }
+                )
+                site_builder.clean_site()
+                return True
         return False
 
     def profile_datasource(self,
