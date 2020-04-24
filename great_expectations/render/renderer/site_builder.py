@@ -660,7 +660,7 @@ class DefaultSiteIndexBuilder(object):
                     run_id=profiling_result_key.run_id,
                     run_time=profiling_result_key.run_id.run_time,
                     run_name=profiling_result_key.run_id.run_name,
-                    asset_name=fake.file_name(),
+                    asset_name=batch_kwargs.get("data_asset_name"),
                     batch_kwargs=batch_kwargs
                 )
             except Exception as e:
@@ -687,7 +687,7 @@ class DefaultSiteIndexBuilder(object):
                     validation_success=validation_success,
                     run_time=validation_result_key.run_id.run_time,
                     run_name=validation_result_key.run_id.run_name,
-                    asset_name=fake.file_name(),
+                    asset_name=batch_kwargs.get("data_asset_name"),
                     batch_kwargs=batch_kwargs
                 )
             except Exception as e:
