@@ -18,7 +18,7 @@ or git, you may want to check out the :ref:`supporting_resources` section before
 
 .. raw:: html
 
-   The command to install is especially great <a href="../_images/pip_install_great_expectations.png" target="_blank">if you're a Dickens fan</a>:
+   The command to install is especially great <a href="https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/pip_install_great_expectations.png" target="_blank">if you're a Dickens fan</a>:
    <br/>
    <br/>
 
