@@ -407,9 +407,7 @@ class BaseDataContext(object):
                             package_name=None,
                             class_name=complete_site_config['class_name']
                         )
-
                     url = site_builder.get_resource_url(resource_identifier=resource_identifier)
-
                     site_urls.append({
                         "site_name": site_name,
                         "site_url": url
@@ -933,7 +931,8 @@ class BaseDataContext(object):
         """
         expectation_suite = ExpectationSuite(expectation_suite_name=expectation_suite_name)
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
-
+        del self._stores[self.expectations_store_name][key]
+        return True
         if not self._stores[self.expectations_store_name].has_key(key):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
@@ -1229,48 +1228,29 @@ class BaseDataContext(object):
 
         return index_page_locator_infos
 
-    def clean_data_docs(self, site_name=None):
-         if not os.path.isdir(self.root_directory):
-            raise ge_exceptions.DataContextError(
-                "The data docs site and project root directory must be an existing directory to clean "
-            )
-
-         ge_dir = os.path.join(self.root_directory, site_name)
-         if not os.path.isdir(ge_dir):
-             raise ge_exceptions.DataContextError(
-                 "The data docs site and project root directory must be an existing directory to clean "
-             )
-         data_docs_urls = self.get_docs_sites_urls()
-         for site_dict in data_docs_urls:
-             myval = site_dict["site_url"][7:]
-             os.rename(myval,"/tmp/index.html")
-             return True
-         return False    
-         #module_name = 'great_expectations.render.renderer.site_builder'
-         """
-         module_name = 'great_expectations.data_context.store'
-         site_builder = SiteBuilder(
-            data_context=self,
-            runtime_environment={
-                "root_directory": self.root_directory
-            },
-            config_defaults={
-                            "module_name": module_name
-                        }
-         )
-         ldocs = context.get_docs_sites_urls(self)
-         return ldocs
-         """
-         #site_builder.clean_store_keys()
-         #return True
-         """
-         if safe_rrmdir(ge_dir, exist_ok=True):
-             clean_store_keys(site_builder)
-             return True
-         else:
-             return False
-         """
-         
+    def clean_data_docs(self, sname=None):
+        sites = self.get_docs_sites_urls()
+        print(sites)
+        for site_dict in sites:
+            if site_dict['site_name'] == sname:
+                sites123 = self._project_config_with_variables_substituted.data_docs_sites
+                for site_name, site_config in sites123.items():
+                    if site_name == sname:
+                        complete_site_config = site_config
+                        module_name = 'great_expectations.render.renderer.site_builder'
+                        site_builder = instantiate_class_from_config(
+                            config=complete_site_config,
+                            runtime_environment={
+                                "data_context": self,
+                                "root_directory": self.root_directory
+                            },
+                            config_defaults={
+                                "module_name": module_name
+                            }
+                        )
+                        site_builder.clean_store_keys(site_dict['site_url'])
+                        return True
+        return False
 
     def profile_datasource(self,
                            datasource_name,

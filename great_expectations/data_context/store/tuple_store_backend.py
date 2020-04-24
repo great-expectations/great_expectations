@@ -208,6 +208,12 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
 
+    # noinspection PyMethodMayBeStatic
+    def key_to_tuple(self, key):
+        if self._use_fixed_length_key:
+            return key.to_fixed_length_tuple()
+        return key.to_tuple()
+
     def _get(self, key):
         filepath = os.path.join(
             self.full_base_directory,
@@ -264,9 +270,9 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return key_list
 
-    def _remove_item(self, key):
+    def remove_item(self, key):
         if not isinstance(key, tuple):
-            key = key.to_tuple()
+            key = self.key_to_tuple(key)
         filepath = os.path.join(
             self.full_base_directory,
             self._convert_key_to_filepath(key)
@@ -396,7 +402,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             return f"https://{location}.amazonaws.com/{self.bucket}/{s3_key}"
         return f"https://{location}.amazonaws.com/{self.bucket}/{self.prefix}/{s3_key}"
 
-    def _remove_item(self, key):
+    def remove_item(self, key):
         import boto3
         s3 = boto3.resource('s3')
         s3_key = self._convert_key_to_filepath(key)
@@ -507,7 +513,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         path = self._convert_key_to_filepath(key)
         return "https://storage.googleapis.com/" + self.bucket + "/" + path
 
-    def _remove_item(self, key):
+    def remove_item(self, key):
         from google.cloud import storage
         gcs = storage.Client(self.project)
         gcs_object_key = self._convert_key_to_filepath(key)

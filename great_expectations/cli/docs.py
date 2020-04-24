@@ -136,6 +136,11 @@ def docs_list(directory):
     default=None,
     help="Clean data docs"
 )
+@click.option(
+    "--site-name",
+    "-s",
+    help="The site for which to generate documentation. See data_docs section in great_expectations.yml",
+)
 def clean_data_docs(directory, site_name=None):
     """
     Delete data docs
@@ -143,23 +148,32 @@ def clean_data_docs(directory, site_name=None):
     :param directory
     :param site_name
     """
-    context = DataContext(directory)
-    if not os.path.isdir(context.root_directory):
-        raise ge_exceptions.DataContextError(
-            "The data docs site and project root directory must be an existing directory to clean "
+    try:
+        failed = True
+        context = DataContext(directory)
+        context.clean_data_docs(sname=site_name)
+        failed = False
+        send_usage_message(
+            data_context=context,
+            event="cli.docs.clean",
+            success=True
         )
-    if site_name is None:
-        ge_dir = context.root_directory
-    else:
-        ge_dir = os.path.join(context.root_directory, site_name)
-    if not os.path.isdir(ge_dir):
-        cli_message("<red>{}</red>".format("The data docs site and project root directory must be an existing directory to clean.."))
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)
-    if context.clean_data_docs(ge_dir):
-        cli_message("Cleaned data docs")
-    else:
-        cli_message("<red>{}</red>".format("Cleaning data docs failed; make sure docs were built previouly.."))
+    except ge_exceptions.PluginModuleNotFoundError as err:
+        cli_message(err.cli_colored_message)
         sys.exit(1)
+    except ge_exceptions.PluginClassNotFoundError as err:
+        cli_message(err.cli_colored_message)
+        sys.exit(1)
+    finally:
+        if failed and context is not None:
+            send_usage_message(
+                data_context=context,
+                event="cli.docs.clean",
+                success=False
+            )
 
 def build_docs(context, site_name=None, view=True):
     """Build documentation in a context"""
