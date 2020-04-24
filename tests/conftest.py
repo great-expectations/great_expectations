@@ -608,6 +608,18 @@ def empty_data_context(tmp_path_factory):
 
 
 @pytest.fixture
+def empty_context_with_checkpoint(empty_data_context):
+    context = empty_data_context
+    root_dir = empty_data_context.root_directory
+    fixture_name = "my_checkpoint.yml"
+    fixture_path = file_relative_path(__file__, f"./data_context/fixtures/contexts/{fixture_name}")
+    checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
+    shutil.copy(fixture_path, checkpoints_file)
+    assert os.path.isfile(checkpoints_file)
+    return context
+
+
+@pytest.fixture
 def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     # Reenable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")

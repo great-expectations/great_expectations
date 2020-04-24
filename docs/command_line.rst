@@ -31,7 +31,6 @@ This is a list of the most common commands you'll use in order of how much you'l
 * ``great_expectations docs clean``
 * ``great_expectations validation-operator run``
 * ``great_expectations datasource list``
-* ``great_expectations datasource new``
 * ``great_expectations datasource profile``
 * ``great_expectations datasource delete``
 * ``great_expectations init``
@@ -614,13 +613,27 @@ For details on profiling, see this :ref:`reference document<profiling_reference>
 
 .. caution:: Profiling is a beta feature and is not guaranteed to be stable. YMMV
 
+great_expectations checkpoint
+==============================
+
+``great_expectations checkpoint list``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+List the checkpoints found in the project.
+
+.. code-block:: bash
+
+    $ great_expectations checkpoint list
+    Found 1 checkpoint.
+    my_checkpoint
+
 great_expectations tap
 ==============================
 
 All command line operations for working with taps are here.
 A tap is an executable python file that runs validations that you can create to aid deployment of validations.
 
-``great_expectations tap new``
+
+``great_expectations checkpoint new``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Creating a tap requires a valid suite name and tap filename.
@@ -628,7 +641,7 @@ This is the name of a python file that this command will write to.
 
 
 .. note::
-    Taps are a beta feature to speed up deployment.
+    Checkpoints are an experimental feature to speed up deployment.
     Please
     `open a new issue <https://github.com/great-expectations/great_expectations/issues/new>`__
     if you discover a use case that does not yet work

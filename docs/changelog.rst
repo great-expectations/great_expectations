@@ -6,6 +6,9 @@ Changelog
 
 develop
 -----------------
+* DataContext.list_checkpoints() returns a list of checkpoint names found in the project
+* new cli command: checkpoint list
+* DataContext.get_checkpoint() returns a validated dictionary loaded from yml
 
 0.10.5
 -----------------
@@ -23,6 +26,7 @@ develop
 * Clarified scaffolding language in scaffold notebook
 * DataContext.create() adds an additional directory: `checkpoints`
 * Marked tap command for deprecation in next major release
+
 
 0.10.4
 -----------------

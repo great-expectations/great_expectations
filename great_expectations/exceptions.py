@@ -19,6 +19,10 @@ class DataContextError(GreatExpectationsError):
     pass
 
 
+class CheckpointError(DataContextError):
+    pass
+
+
 class StoreBackendError(DataContextError):
     pass
 
