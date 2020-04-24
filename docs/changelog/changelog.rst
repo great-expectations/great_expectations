@@ -2,6 +2,7 @@
 
 develop
 -----------------
+* new cli command noun `checkpoint` (in the next major release this tap will be deprecated
 
 0.10.4
 -----------------
