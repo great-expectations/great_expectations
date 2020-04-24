@@ -19,7 +19,7 @@
 }
 
 .wy-nav-content {
-    font-family: "American Typewriter";
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
     color: #222222;
     background: #FFFFFF;
 }
@@ -32,9 +32,14 @@
     background: #FFFFFF;
 }
 
-.wy-menu {
-    font-family: "American Typewriter";
+.wy-menu-vertical a{
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     color: #222222;
+}
+
+.wy-menu-vertical a:hover{
+    color: #333333;
+    background: fuchsia;
 }
 
 .wy-nav-side {

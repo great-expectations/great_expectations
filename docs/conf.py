@@ -104,7 +104,7 @@ html_theme_options = {
     'logo_only': True,
 }
 
-html_logo = './_static/generic_dickens_protagonist.png'
+html_logo = '../generic_dickens_protagonist.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
