@@ -3,6 +3,7 @@
 develop
 -----------------
 * new cli command noun `checkpoint` (in the next major release this tap will be deprecated
+* DataContext.create() adds an additional directory: `checkpoints`
 
 0.10.4
 -----------------
