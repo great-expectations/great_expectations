@@ -125,6 +125,8 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
     print(my_store.list_keys())
     assert set(my_store.list_keys()) == {("AAA",), ("BBB",)}
 
+    my_store.remove_item("bbb")
+    assert my_store.get(("BBB",)) == ""  
     print(gen_directory_tree_str(project_path))
     assert gen_directory_tree_str(project_path) == """\
 test_TupleFilesystemStoreBackend__dir0/
