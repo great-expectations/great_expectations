@@ -4,18 +4,18 @@ import logging
 import click
 
 from great_expectations import __version__ as ge_version
+from great_expectations.cli.checkpoint import checkpoint
 from great_expectations.cli.cli_logging import _set_up_logger
 from great_expectations.cli.datasource import datasource
 from great_expectations.cli.docs import docs
 from great_expectations.cli.init import init
 from great_expectations.cli.project import project
-from great_expectations.cli.suite import suite
-from great_expectations.cli.validation_operator import validation_operator
 from great_expectations.cli.store import store
-
+from great_expectations.cli.suite import suite
+from great_expectations.cli.tap import tap
+from great_expectations.cli.validation_operator import validation_operator
 
 # TODO: consider using a specified-order supporting class for help (but wasn't working with python 2)
-from great_expectations.cli.tap import tap
 
 
 @click.group()
@@ -60,6 +60,7 @@ cli.add_command(suite)
 cli.add_command(validation_operator)
 cli.add_command(store)
 cli.add_command(tap)
+cli.add_command(checkpoint)
 
 
 def main():
