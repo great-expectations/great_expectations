@@ -1,6 +1,9 @@
 import datetime
 import logging
+import warnings
 from collections import OrderedDict
+
+from dateutil.parser import parse, ParserError
 
 from great_expectations.core import RunIdentifier
 from ..data_context.types.resource_identifiers import (
@@ -29,7 +32,7 @@ class ValidationOperator(object):
     of validation operator classes that will be the descendants of this base class.
     """
 
-    def run(self, assets_to_validate, run_name, evaluation_parameters=None):
+    def run(self, assets_to_validate, run_id=None, evaluation_parameters=None, run_name=None, run_time=None):
         raise NotImplementedError
 
 
@@ -126,13 +129,28 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch
 
-    def run(self, assets_to_validate, run_name, evaluation_parameters=None):
+    def run(self, assets_to_validate, run_id=None, evaluation_parameters=None, run_name=None, run_time=None):
+        assert (not (run_id and run_name) and not (run_id and run_time),
+                "Please provide either a run_id or run_name and/or run_time.")
+        if isinstance(run_id, str) and not run_name:
+            warnings.warn("String run_ids will be deprecated in the future. Please provide a run_id of type "
+                          "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
+                          "and run_time (both optional). Instead of providing a run_id, you may also provide"
+                          "run_name and run_time separately.", DeprecationWarning)
+            try:
+                run_time = parse(run_id)
+            except ParserError:
+                pass
+            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
+        elif isinstance(run_id, dict):
+            run_id = RunIdentifier(**run_id)
+        elif not isinstance(run_id, RunIdentifier):
+            run_id = RunIdentifier(run_name=run_name, run_time=run_time)
+
         result_object = {
             "success": None,
             "details": {}
         }
-
-        run_id = RunIdentifier(run_name=run_name)
 
         for item in assets_to_validate:
             batch = self._build_batch_from_item(item)
@@ -401,13 +419,36 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
         return query
 
-    def run(self, assets_to_validate, run_name, base_expectation_suite_name=None, evaluation_parameters=None):
+    def run(
+            self,
+            assets_to_validate,
+            run_id=None,
+            base_expectation_suite_name=None,
+            evaluation_parameters=None,
+            run_name=None,
+            run_time=None
+    ):
+        assert (not (run_id and run_name) and not (run_id and run_time),
+                "Please provide either a run_id or run_name and/or run_time.")
+        if isinstance(run_id, str) and not run_name:
+            warnings.warn("String run_ids will be deprecated in the future. Please provide a run_id of type "
+                          "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
+                          "and run_time (both optional). Instead of providing a run_id, you may also provide"
+                          "run_name and run_time separately.", DeprecationWarning)
+            try:
+                run_time = parse(run_id)
+            except ParserError:
+                pass
+            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
+        elif isinstance(run_id, dict):
+            run_id = RunIdentifier(**run_id)
+        elif not isinstance(run_id, RunIdentifier):
+            run_id = RunIdentifier(run_name=run_name, run_time=run_time)
+
         if base_expectation_suite_name is None:
             if self.base_expectation_suite_name is None:
                 raise ValueError("base_expectation_suite_name must be configured in the validation operator or passed at runtime")
             base_expectation_suite_name = self.base_expectation_suite_name
-
-        run_id = RunIdentifier(run_name=run_name)
 
         return_obj = {
             "batch_identifiers": [],
