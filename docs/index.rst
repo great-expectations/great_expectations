@@ -1,8 +1,5 @@
 .. great_expectations documentation master file
 
-.. image:: ../generic_dickens_protagonist.png
-   :align: right
-
 ################################
 Welcome to Great Expectations!
 ################################

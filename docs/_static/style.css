@@ -10,3 +10,38 @@
 .widetable {
     min-width: 1000px !important;
 }
+
+.wy-side-scroll {
+    background: #FFFFFF;
+}
+.wy-nav-top {
+    background: #FFFFFF;
+}
+
+.wy-nav-content {
+    font-family: "American Typewriter";
+    color: #222222;
+    background: #FFFFFF;
+}
+
+.wy-nav-content-wrap {
+    background: #FFFFFF;
+}
+
+.wy-side-nav-search {
+    background: #FFFFFF;
+}
+
+.wy-menu {
+    font-family: "American Typewriter";
+    color: #222222;
+}
+
+.wy-nav-side {
+    background: #FFFFFF;
+    top: 50px;
+}
+
+.ge_header {
+    background: aquamarine;
+}
