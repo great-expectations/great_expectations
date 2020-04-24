@@ -141,23 +141,31 @@ def docs_list(directory):
     "-s",
     help="The site for which to generate documentation. See data_docs section in great_expectations.yml",
 )
-def clean_data_docs(directory, site_name=None):
+@click.option(
+    "--all",
+    "-a",
+    help="The site for which to generate documentation. See data_docs section in great_expectations.yml",
+)
+def clean_data_docs(directory, site_name=None, all=None):
     """
     Delete data docs
-
-    :param directory
-    :param site_name
+    
+    :param site_name: name for the first-level keys in the "data_docs_sites" section of the configuration
     """
     try:
-        failed = True
         context = DataContext(directory)
-        context.clean_data_docs(sname=site_name)
+        failed = True
+        if (site_name is None and all is None):
+            cli_message("<red>{}</red>".format("Please specify --all y to remove all sites or specify specific site using site_name"))
+            sys.exit(1)
+        context.clean_data_docs(site_name=site_name)
         failed = False
         send_usage_message(
             data_context=context,
             event="cli.docs.clean",
             success=True
         )
+        cli_message("<green>{}</green>".format("Cleaned data docs"))
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)

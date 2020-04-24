@@ -214,7 +214,7 @@ class HtmlSiteStore(object):
         for _, target_store_backend in self.store_backends.items():
             keys = target_store_backend.list_keys()
             for key in keys:
-                target_store_backend.remove_item(key)
+                target_store_backend.remove_key(key)
 
     def copy_static_assets(self, static_assets_source_dir=None):
         """
