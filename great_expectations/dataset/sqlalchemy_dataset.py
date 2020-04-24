@@ -2,7 +2,7 @@ from __future__ import division
 
 from typing import List
 
-from six import PY3, string_types
+from six import string_types
 
 import uuid
 from functools import wraps
@@ -107,10 +107,7 @@ class MetaSqlAlchemyDataset(Dataset):
         The decorator will then use that filter to obtain unexpected elements, relevant counts, and return the formatted
         object.
         """
-        if PY3:
-            argspec = inspect.getfullargspec(func)[0][1:]
-        else:
-            argspec = inspect.getargspec(func)[0][1:]
+        argspec = inspect.getfullargspec(func)[0][1:]
 
         @cls.expectation(argspec)
         @wraps(func)

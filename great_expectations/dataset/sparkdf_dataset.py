@@ -10,7 +10,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-from six import PY3, string_types
+from six import string_types
 
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -62,10 +62,7 @@ class MetaSparkDFDataset(Dataset):
         See :func:`column_map_expectation <great_expectations.Dataset.base.Dataset.column_map_expectation>` \
         for full documentation of this function.
         """
-        if PY3:
-            argspec = inspect.getfullargspec(func)[0][1:]
-        else:
-            argspec = inspect.getargspec(func)[0][1:]
+        argspec = inspect.getfullargspec(func)[0][1:]
 
         @cls.expectation(argspec)
         @wraps(func)
@@ -186,10 +183,7 @@ class MetaSparkDFDataset(Dataset):
         The column_pair_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
         truthiness of some condition on a per row basis across a pair of columns.
         """
-        if PY3:
-            argspec = inspect.getfullargspec(func)[0][1:]
-        else:
-            argspec = inspect.getargspec(func)[0][1:]
+        argspec = inspect.getfullargspec(func)[0][1:]
 
         @cls.expectation(argspec)
         @wraps(func)
