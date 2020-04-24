@@ -1,11 +1,16 @@
-# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
-from abc import ABCMeta, abstractmethod
+"""A store backend is used by a store to interact with a storage system such as a filesystem, database,
+or remote blob store.
 
-from six import string_types
+    GE Feature Maturity:
+        - name: store_backend
+        - feature_type: store_backend
+        - description: tuple stores for a variety of backend: filesystem, S3, GCS
+        - maturity: production
+"""
+from abc import ABC, abstractmethod
 
 
-class StoreBackend(object):
-    __metaclass__ = ABCMeta
+class StoreBackend(ABC):
     """A store backend acts as a key-value store that can accept tuples as keys, to abstract away
     reading and writing to a persistence layer.
 
@@ -47,11 +52,11 @@ class StoreBackend(object):
     def _validate_key(self, key):
         if isinstance(key, tuple):
             for key_element in key:
-                if not isinstance(key_element, string_types):
+                if not isinstance(key_element, str):
                     raise TypeError(
                         "Elements within tuples passed as keys to {0} must be instances of {1}, not {2}".format(
                             self.__class__.__name__,
-                            string_types,
+                            str,
                             type(key_element),
                         ))
         else:

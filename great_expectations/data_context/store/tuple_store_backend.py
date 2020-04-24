@@ -1,7 +1,15 @@
+"""
+GE Feature Maturity:
+    name: tuple_store_backend
+    feature_type: store_backend
+    description: tuple stores for a variety of backend: filesystem, S3, GCS
+    maturity: beta
+"""
+
+import logging
 import os
 import random
 import re
-import logging
 # PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 from abc import ABCMeta
 

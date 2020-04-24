@@ -12,24 +12,15 @@ Generator Module
     :show-inheritance:
     :exclude-members: BatchKwargsGenerator
 
-    .. autoclass:: great_expectations.datasource.generator.batch_kwargs_generator.BatchKwargsGenerator
+    .. autoclass:: great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator.BatchKwargsGenerator
         :members:
         :undoc-members:
-
-
-InMemoryGenerator
--------------------------------------------------------------------------------
-
-.. autoclass:: great_expectations.datasource.generator.in_memory_generator.InMemoryGenerator
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 
 QueryBatchKwargsGenerator
 ------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.query_generator.QueryBatchKwargsGenerator
+.. autoclass:: great_expectations.datasource.batch_kwargs_generator.query_batch_kwargs_generator.QueryBatchKwargsGenerator
     :members:
     :undoc-members:
     :show-inheritance:
@@ -38,7 +29,7 @@ QueryBatchKwargsGenerator
 TableBatchKwargsGenerator
 ------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.table_generator.TableBatchKwargsGenerator
+.. autoclass:: great_expectations.datasource.batch_kwargs_generator.table_batch_kwargs_generator.TableBatchKwargsGenerator
     :members:
     :undoc-members:
     :show-inheritance:
@@ -47,7 +38,7 @@ TableBatchKwargsGenerator
 SubdirReaderBatchKwargsGenerator
 ----------------------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.subdir_reader_generator.SubdirReaderBatchKwargsGenerator
+.. autoclass:: great_expectations.datasource.batch_kwargs_generator.subdir_reader_batch_kwargs_generator.SubdirReaderBatchKwargsGenerator
     :members:
     :undoc-members:
     :show-inheritance:
@@ -56,7 +47,7 @@ SubdirReaderBatchKwargsGenerator
 GlobReaderBatchKwargsGenerator
 -------------------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.glob_reader_generator.GlobReaderBatchKwargsGenerator
+.. autoclass:: great_expectations.datasource.batch_kwargs_generator.glob_reader_batch_kwargs_generator.GlobReaderBatchKwargsGenerator
     :members:
     :undoc-members:
     :show-inheritance:
@@ -65,7 +56,7 @@ GlobReaderBatchKwargsGenerator
 S3GlobReaderBatchKwargsGenerator
 -------------------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.s3_generator.S3GlobReaderBatchKwargsGenerator
+.. autoclass:: great_expectations.datasource.batch_kwargs_generator.s3_batch_kwargs_generator.S3GlobReaderBatchKwargsGenerator
     :members:
     :undoc-members:
     :show-inheritance:
@@ -74,7 +65,7 @@ S3GlobReaderBatchKwargsGenerator
 DatabricksTableBatchKwargsGenerator
 ---------------------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.databricks_generator.DatabricksTableBatchKwargsGenerator
+.. autoclass:: great_expectations.datasource.batch_kwargs_generator.databricks_batch_kwargs_generator.DatabricksTableBatchKwargsGenerator
     :members:
     :undoc-members:
     :show-inheritance:
