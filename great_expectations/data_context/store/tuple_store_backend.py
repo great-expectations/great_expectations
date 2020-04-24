@@ -8,7 +8,7 @@ from abc import ABCMeta
 from six import string_types
 
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.data_context.util import safe_mmkdir
+from great_expectations.data_context.util import safe_mmkdir, safe_rrmdir
 from great_expectations.exceptions import StoreBackendError
 
 logger = logging.getLogger(__name__)
@@ -265,10 +265,16 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         return key_list
 
     def remove_key(self, key):
-        key_list = self.list_keys()
-        del key_list[key_list.index(key)]
-
-        return True
+        if not isinstance(key, tuple):
+            key = self.key_to_tuple(key)
+        filepath = os.path.join(
+            self.full_base_directory,
+            self._convert_key_to_filepath(key)
+        )
+        path, filename = os.path.split(filepath)
+        if safe_rrmdir(str(path)):
+            return True
+        return False
        
     def get_url_for_key(self, key, protocol=None):
         path = self._convert_key_to_filepath(key)
@@ -391,9 +397,17 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return f"https://{location}.amazonaws.com/{self.bucket}/{self.prefix}/{s3_key}"
 
     def remove_key(self, key):
-        key_list = self.list_keys()
-        del key_list[key_list.index(key)]
-        return True
+        import boto3
+        s3 = boto3.resource('s3')
+        s3_key = self._convert_key_to_filepath(key)
+        if s3_key:
+            try:
+                s3.Object(boto3.client('s3').get_bucket_location(Bucket=self.bucket), s3_key).delete()
+                return True
+            except client.exceptions.NotFoundException as e:
+                return False
+        else:
+            return False
 
     def _has_key(self, key):
         all_keys = self.list_keys()
@@ -494,8 +508,15 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         return "https://storage.googleapis.com/" + self.bucket + "/" + path
 
     def remove_key(self, key):
-        key_list = self.list_keys()
-        del key_list[key_list.index(key)]
+        from google.cloud import storage
+        gcs = storage.Client(self.project)
+        gcs_object_key = self._convert_key_to_filepath(key)
+        bucket = cloudStorageClient.bucket(self.bucket)
+        blob = bucket.blob(gcs_object_key)
+        try:
+            blob.delete()
+        except exceptions.NotFound as e:
+            return False
         return True
 
     def _has_key(self, key):
