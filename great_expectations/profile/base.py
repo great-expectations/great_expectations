@@ -31,14 +31,12 @@ class ProfilerCardinality(Enum):
 
 
 class DataAssetProfiler(object):
-
     @classmethod
     def validate(cls, data_asset):
         return isinstance(data_asset, DataAsset)
 
 
 class DatasetProfiler(DataAssetProfiler):
-
     @classmethod
     def validate(cls, dataset):
         return isinstance(dataset, Dataset)

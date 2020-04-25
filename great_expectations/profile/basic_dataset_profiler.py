@@ -72,29 +72,21 @@ class BasicDatasetProfilerBase(DatasetProfiler):
 
         if num_unique is None or num_unique == 0 or pct_unique is None:
             cardinality = ProfilerCardinality.NONE
-
         elif pct_unique == 1.0:
             cardinality = ProfilerCardinality.UNIQUE
-
         elif pct_unique > .1:
             cardinality = ProfilerCardinality.VERY_MANY
-
         elif pct_unique > .02:
             cardinality = ProfilerCardinality.MANY
-
         else:
             if num_unique == 1:
                 cardinality = ProfilerCardinality.ONE
-
             elif num_unique == 2:
                 cardinality = ProfilerCardinality.TWO
-
             elif num_unique < 60:
                 cardinality = ProfilerCardinality.VERY_FEW
-
             elif num_unique < 1000:
                 cardinality = ProfilerCardinality.FEW
-
             else:
                 cardinality = ProfilerCardinality.MANY
 

@@ -31,10 +31,7 @@ from great_expectations.util import (
     load_class,
     verify_dynamic_loading_support,
 )
-from great_expectations.exceptions import (
-    ClassInstantiationError,
-    GreatExpectationsError,
-)
+from great_expectations.exceptions import ClassInstantiationError
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +61,8 @@ class ColumnSectionRenderer(Renderer):
 
 
 class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
-
     def __init__(self, overview_table_renderer=None, expectation_string_renderer=None, runtime_environment=None):
+        super().__init__()
         if overview_table_renderer is None:
             overview_table_renderer = {
                 "class_name": "ProfilingOverviewTableContentBlockRenderer"
@@ -635,8 +632,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
 
 class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
-
     def __init__(self, table_renderer=None):
+        super().__init__()
         if table_renderer is None:
             table_renderer = {
                 "class_name": "ValidationResultsTableContentBlockRenderer"
@@ -697,8 +694,8 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
 
 
 class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
-
     def __init__(self, bullet_list_renderer=None):
+        super().__init__()
         if bullet_list_renderer is None:
             bullet_list_renderer = {
                 "class_name": "ExpectationSuiteBulletListContentBlockRenderer"

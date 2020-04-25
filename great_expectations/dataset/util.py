@@ -13,9 +13,7 @@ def is_valid_partition_object(partition_object):
     :param partition_object: The partition_object to evaluate
     :return: Boolean
     """
-    if is_valid_continuous_partition_object(partition_object) or is_valid_categorical_partition_object(partition_object):
-        return True
-    return False
+    return is_valid_continuous_partition_object(partition_object) or is_valid_categorical_partition_object(partition_object)
 
 
 def is_valid_categorical_partition_object(partition_object):
@@ -26,10 +24,8 @@ def is_valid_categorical_partition_object(partition_object):
     if partition_object is None or ("weights" not in partition_object) or ("values" not in partition_object):
         return False
     # Expect the same number of values as weights; weights should sum to one
-    if len(partition_object['values']) == len(partition_object['weights']) and \
-            np.allclose(np.sum(partition_object['weights']), 1):
-        return True
-    return False
+    return len(partition_object['values']) == len(partition_object['weights']) and \
+            np.allclose(np.sum(partition_object['weights']), 1)
 
 
 def is_valid_continuous_partition_object(partition_object):
@@ -40,8 +36,9 @@ def is_valid_continuous_partition_object(partition_object):
     """
     if (partition_object is None) or ("weights" not in partition_object) or ("bins" not in partition_object):
         return False
-    if("tail_weights" in partition_object):
-        if (len(partition_object["tail_weights"])!=2):
+
+    if "tail_weights" in partition_object:
+        if len(partition_object["tail_weights"]) != 2:
             return False
         comb_weights=partition_object["tail_weights"]+partition_object["weights"]
     else:
@@ -52,11 +49,9 @@ def is_valid_continuous_partition_object(partition_object):
     #     return False
 
     # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one
-    if (len(partition_object['bins']) == (len(partition_object['weights']) + 1)) and \
+    return (len(partition_object['bins']) == (len(partition_object['weights']) + 1)) and \
             np.all(np.diff(partition_object['bins']) > 0) and \
-            np.allclose(np.sum(comb_weights), 1):
-        return True
-    return False
+            np.allclose(np.sum(comb_weights), 1)
 
 
 def categorical_partition_data(data):
@@ -160,8 +155,7 @@ def continuous_partition_data(data, bins='auto', n_bins=10, **kwargs):
     if bins == 'uniform':
         bins = np.linspace(start=np.min(data), stop=np.max(data), num=n_bins+1)
     elif bins == 'ntile':
-        bins = np.percentile(data, np.linspace(
-            start=0, stop=100, num=n_bins+1))
+        bins = np.percentile(data, np.linspace(start=0, stop=100, num=n_bins+1))
     elif bins != 'auto':
         raise ValueError("Invalid parameter for bins argument")
 

@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class ExpectationSuiteIdentifier(DataContextKey):
-
     def __init__(self, expectation_suite_name):
         super(ExpectationSuiteIdentifier, self).__init__()
         self._expectation_suite_name = expectation_suite_name
@@ -44,7 +43,6 @@ class ExpectationSuiteIdentifierSchema(Schema):
 
 
 class BatchIdentifier(DataContextKey):
-
     def __init__(self, batch_identifier):
         super(BatchIdentifier, self).__init__()
         # batch_kwargs
