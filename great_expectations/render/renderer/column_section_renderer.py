@@ -41,6 +41,9 @@ def convert_to_string_and_escape(var):
 
 
 class ColumnSectionRenderer(Renderer):
+    def __init__(self):
+        super().__init__()
+
     @classmethod
     def _get_column_name(cls, ge_object):
         # This is broken out for ease of locating future validation here
