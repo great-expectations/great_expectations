@@ -3,7 +3,7 @@
 
 
 Setting up your dev environment
-==========================================
+===============================
 
 Prerequisites
 -------------------
@@ -90,11 +90,11 @@ Depending on which features of Great Expectations you want to work on, you may w
         .. code-block::
 
             psycopg2.OperationalError: could not connect to server: Connection refused
-            	Is the server running on host "localhost" (::1) and accepting
-            	TCP/IP connections on port 5432?
+                Is the server running on host "localhost" (::1) and accepting
+                TCP/IP connections on port 5432?
             could not connect to server: Connection refused
-            	Is the server running on host "localhost" (127.0.0.1) and accepting
-            	TCP/IP connections on port 5432?            
+                Is the server running on host "localhost" (127.0.0.1) and accepting
+                TCP/IP connections on port 5432?
         
     * Or this...
 

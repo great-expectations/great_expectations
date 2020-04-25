@@ -17,7 +17,7 @@ Note: as of 8/1/2019, this style guide is aspirational. It's applied unevenly ac
 
 * *The project name "Great Expectations" is always spaced and capitalized.* Good: "Great Expectations"; bad: "great_expectations", "great expectations", "GE."
 * *Headers are capitalized like sentences.* Good: "Installing within a project." Bad: "Installing Within a Project."
-* *We refer to ourselves in the first person plural*. Good: "we", "our". Bad: "I"   . This helps us avoid awkward passive sentences. Occassionally, we refer to ourselves as "the Great Expectations team" (or community) for clarity.
+* *We refer to ourselves in the first person plural*. Good: "we", "our". Bad: "I"   . This helps us avoid awkward passive sentences. Occasionally, we refer to ourselves as "the Great Expectations team" (or community) for clarity.
 * *We refer to developers and users as "you"*: "you can," "you should," "you might want to."
 * *Core concepts are always capitalized.* Pretend the docs are a fantasy novel, and core concepts are magic. Good: "Like assertions in traditional python unit tests, Expectations provide a flexible, declarative language for describing expected behavior."
 * *Core concepts are linked on first reference within each page.*
