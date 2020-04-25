@@ -743,7 +743,7 @@ def select_datasource(context, datasource_name=None):
 
 
 def select_batch_kwargs_generator(context, datasource_name, available_data_assets_dict=None):
-    msg_prompt_select_generator = "Select batch kwarggenerator"
+    msg_prompt_select_generator = "Select batch kwarg generator"
 
     if available_data_assets_dict is None:
         available_data_assets_dict = context.get_available_data_asset_names(datasource_names=datasource_name)
