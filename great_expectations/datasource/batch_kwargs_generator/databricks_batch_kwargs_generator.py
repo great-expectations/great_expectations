@@ -34,8 +34,8 @@ class DatabricksTableBatchKwargsGenerator(BatchKwargsGenerator):
         tables = self.spark.sql('show tables in {}'.format(self.database))
         return {"names": [(row.tableName, "table") for row in tables.collect()]}
 
-    def _get_iterator(self, generator_asset, **kwargs):
-        query = 'select * from {}.{}'.format(self.database, generator_asset)
+    def _get_iterator(self, data_asset_name, **kwargs):
+        query = 'select * from {}.{}'.format(self.database, data_asset_name)
         if kwargs.get('partition'):
             if not kwargs.get('date_field'):
                 raise Exception('Must specify date_field when using partition.')

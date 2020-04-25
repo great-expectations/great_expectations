@@ -1521,7 +1521,7 @@ class DataContext(BaseDataContext):
     existing infrastructure and work environment.
 
     DataContexts use a datasource-based namespace, where each accessible type of data has a three-part
-    normalized *data_asset_name*, consisting of *datasource/generator/generator_asset*.
+    normalized *data_asset_name*, consisting of *datasource/generator/data_asset_name*.
 
     - The datasource actually connects to a source of materialized data and returns Great Expectations DataAssets \
       connected to a compute environment and ready for validation.
@@ -1529,7 +1529,7 @@ class DataContext(BaseDataContext):
     - The BatchKwargGenerator knows how to introspect datasources and produce identifying "batch_kwargs" that define \
       particular slices of data.
 
-    - The generator_asset is a specific name -- often a table name or other name familiar to users -- that \
+    - The data_asset_name is a specific name -- often a table name or other name familiar to users -- that \
       batch kwargs generators can slice into batches.
 
     An expectation suite is a collection of expectations ready to be applied to a batch of data. Since

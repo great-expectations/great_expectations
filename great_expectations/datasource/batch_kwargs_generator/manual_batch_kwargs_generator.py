@@ -1,4 +1,5 @@
 import logging
+import warnings
 from copy import deepcopy
 
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import BatchKwargsGenerator
@@ -32,7 +33,7 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
                 logs:
                   path: data/log.csv
     """
-    recognized_batch_parameters = {"name", "partition_id"}
+    recognized_batch_parameters = {"data_asset_name", "partition_id"}
 
     def __init__(self, name="default",
                  datasource=None,
@@ -52,18 +53,18 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
     def get_available_data_asset_names(self):
         return {"names": [(key, "manual") for key in self.assets.keys()]}
 
-    def _get_generator_asset_config(self, generator_asset):
-        if generator_asset is None:
+    def _get_data_asset_config(self, data_asset_name):
+        if data_asset_name is None:
             return
 
-        elif generator_asset in self.assets:
-            return self.assets[generator_asset]
+        elif data_asset_name in self.assets:
+            return self.assets[data_asset_name]
 
-        raise InvalidBatchKwargsError("No asset definition for requested asset %s" % generator_asset)
+        raise InvalidBatchKwargsError("No asset definition for requested asset %s" % data_asset_name)
 
-    def _get_iterator(self, generator_asset, **kwargs):
+    def _get_iterator(self, data_asset_name, **kwargs):
         datasource_batch_kwargs = self._datasource.process_batch_parameters(**kwargs)
-        asset_definition = deepcopy(self._get_generator_asset_config(generator_asset))
+        asset_definition = deepcopy(self._get_data_asset_config(data_asset_name))
         if isinstance(asset_definition, list):
             for batch_definition in asset_definition:
                 batch_definition.update(datasource_batch_kwargs)
@@ -72,9 +73,17 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
             asset_definition.update(datasource_batch_kwargs)
             return iter([asset_definition])
 
-    def get_available_partition_ids(self, generator_asset):
+    # TODO: deprecate generator_asset argument
+    def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
+        assert ((generator_asset and not data_asset_name) or (not generator_asset and data_asset_name),
+                "Please provide either generator_asset or data_asset_name.")
+        if generator_asset:
+            warnings.warn("The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
+                          "Please update code accordingly.", DeprecationWarning)
+            data_asset_name = generator_asset
+
         partition_ids = []
-        asset_definition = self._get_generator_asset_config(generator_asset=generator_asset)
+        asset_definition = self._get_data_asset_config(data_asset_name=data_asset_name)
         if isinstance(asset_definition, list):
             for batch_definition in asset_definition:
                 try:
@@ -93,7 +102,7 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
         partition_id = batch_parameters.pop("partition_id", None)
         batch_kwargs = self._datasource.process_batch_parameters(batch_parameters)
         if partition_id:
-            asset_definition = self._get_generator_asset_config(generator_asset=batch_parameters.get("name"))
+            asset_definition = self._get_data_asset_config(data_asset_name=batch_parameters.get("data_asset_name"))
             if isinstance(asset_definition, list):
                 for batch_definition in asset_definition:
                     try:
@@ -110,7 +119,7 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
                 except KeyError:
                     pass
         else:
-            batch_kwargs = next(self._get_iterator(batch_parameters.get("name")))
+            batch_kwargs = next(self._get_iterator(data_asset_name=batch_parameters.get("data_asset_name")))
 
         if batch_kwargs is not None:
             return batch_kwargs

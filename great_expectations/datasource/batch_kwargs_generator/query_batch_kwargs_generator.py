@@ -1,5 +1,6 @@
 import os
 import logging
+import warnings
 
 from .batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
@@ -25,7 +26,7 @@ except ImportError:
 class QueryBatchKwargsGenerator(BatchKwargsGenerator):
     """Produce query-style batch_kwargs from sql files stored on disk
     """
-    recognized_batch_parameters = {'query_parameters', 'partition_id', 'name'}
+    recognized_batch_parameters = {'query_parameters', 'partition_id', "data_asset_name"}
 
     def __init__(self, name="default", datasource=None, query_store_backend=None, queries=None):
         super(QueryBatchKwargsGenerator, self).__init__(name=name, datasource=datasource)
@@ -63,16 +64,16 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
             )
         if queries is not None:
             for query_name, query in queries.items():
-                self.add_query(query_name, query)
+                self.add_query(data_asset_name=query_name, query=query)
 
-    def _get_raw_query(self, generator_asset):
-        return self._store_backend.get((generator_asset,))
+    def _get_raw_query(self, data_asset_name):
+        return self._store_backend.get((data_asset_name,))
 
-    def _get_iterator(self, generator_asset, query_parameters=None):
-        raw_query = self._get_raw_query(generator_asset)
+    def _get_iterator(self, data_asset_name, query_parameters=None):
+        raw_query = self._get_raw_query(data_asset_name=data_asset_name)
         if raw_query is None:
-            logger.warning("No query defined for generator asset: %s" % generator_asset)
-            # There is no valid query path or temp query storage defined with the generator_asset
+            logger.warning("No query defined for data asset: %s" % data_asset_name)
+            # There is no valid query path or temp query storage defined with the data_asset_name
             return None
 
         if query_parameters is None:
@@ -89,9 +90,18 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
 
         return iter_
 
-    def add_query(self, generator_asset, query):
+    # TODO: deprecate generator_asset argument, remove default on query arg
+    def add_query(self, generator_asset=None, query=None, data_asset_name=None):
+        assert query, "Please provide a query."
+        assert ((generator_asset and not data_asset_name) or (not generator_asset and data_asset_name),
+                "Please provide either generator_asset or data_asset_name.")
+        if generator_asset:
+            warnings.warn("The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
+                          "Please update code accordingly.", DeprecationWarning)
+            data_asset_name = generator_asset
+
         # Backends must have a tuple key; we use only a single-element tuple
-        self._store_backend.set((generator_asset,), query)
+        self._store_backend.set((data_asset_name,), query)
 
     def get_available_data_asset_names(self):
         defined_queries = self._store_backend.list_keys()
@@ -100,8 +110,8 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
 
     def _build_batch_kwargs(self, batch_parameters):
         """Build batch kwargs from a partition id."""
-        generator_asset = batch_parameters.pop("name")
-        raw_query = self._get_raw_query(generator_asset)
+        data_asset_name = batch_parameters.pop("data_asset_name")
+        raw_query = self._get_raw_query(data_asset_name=data_asset_name)
         partition_id = batch_parameters.pop("partition_id", None)
         batch_kwargs = self._datasource.process_batch_parameters(**batch_parameters)
         batch_kwargs["query"] = raw_query
@@ -113,5 +123,11 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
 
         return SqlAlchemyDatasourceQueryBatchKwargs(batch_kwargs)
 
-    def get_available_partition_ids(self, generator_asset):
+    # TODO: deprecate generator_asset argument
+    def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
+        assert ((generator_asset and not data_asset_name) or (not generator_asset and data_asset_name),
+                "Please provide either generator_asset or data_asset_name.")
+        if generator_asset:
+            warnings.warn("The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
+                          "Please update code accordingly.", DeprecationWarning)
         raise BatchKwargsError("QueryBatchKwargsGenerator cannot identify partitions.", {})
