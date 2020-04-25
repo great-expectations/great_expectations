@@ -16,7 +16,6 @@ from typing import Union
 
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
-from six import string_types
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import (
@@ -567,7 +566,7 @@ class BaseDataContext(object):
         data_asset_names = {}
         if datasource_names is None:
             datasource_names = [datasource["name"] for datasource in self.list_datasources()]
-        elif isinstance(datasource_names, string_types):
+        elif isinstance(datasource_names, str):
             datasource_names = [datasource_names]
         elif not isinstance(datasource_names, list):
             raise ValueError(
@@ -575,7 +574,7 @@ class BaseDataContext(object):
             )
 
         if batch_kwargs_generator_names is not None:
-            if isinstance(batch_kwargs_generator_names, string_types):
+            if isinstance(batch_kwargs_generator_names, str):
                 batch_kwargs_generator_names = [batch_kwargs_generator_names]
             if len(batch_kwargs_generator_names) == len(datasource_names):  # Iterate over both together
                 for idx, datasource_name in enumerate(datasource_names):
@@ -1890,7 +1889,7 @@ def _get_metric_configuration_tuples(metric_configuration, base_kwargs=None):
     if base_kwargs is None:
         base_kwargs = {}
 
-    if isinstance(metric_configuration, string_types):
+    if isinstance(metric_configuration, str):
         return [(metric_configuration, base_kwargs)]
 
     metric_configurations_list = []

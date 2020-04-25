@@ -1,7 +1,6 @@
 import logging
 import os
 import errno
-import six
 import importlib
 import copy
 import re
@@ -21,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 def safe_mmkdir(directory, exist_ok=True):
     """Simple wrapper since exist_ok is not available in python 2"""
-    if not isinstance(directory, six.string_types):
+    if not isinstance(directory, str):
         raise TypeError("directory must be of type str, not {0}".format({
             "directory_type": str(type(directory))
         }))
@@ -96,10 +95,8 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     if runtime_environment is not None:
         # If there are additional kwargs available in the runtime_environment requested by a
         # class to be instantiated, provide them
-        if six.PY3:
-            argspec = inspect.getfullargspec(class_.__init__)[0][1:]
-        else:
-            argspec = inspect.getargspec(class_.__init__)[0][1:]
+        argspec = inspect.getfullargspec(class_.__init__)[0][1:]
+
         missing_args = set(argspec) - set(config_with_defaults.keys())
         config_with_defaults.update(
             {missing_arg: runtime_environment[missing_arg] for missing_arg in missing_args

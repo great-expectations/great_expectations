@@ -1,9 +1,4 @@
-from __future__ import division
-
 from typing import List
-
-from six import PY3, string_types
-
 import uuid
 from functools import wraps
 import inspect
@@ -107,10 +102,7 @@ class MetaSqlAlchemyDataset(Dataset):
         The decorator will then use that filter to obtain unexpected elements, relevant counts, and return the formatted
         object.
         """
-        if PY3:
-            argspec = inspect.getfullargspec(func)[0][1:]
-        else:
-            argspec = inspect.getargspec(func)[0][1:]
+        argspec = inspect.getfullargspec(func)[0][1:]
 
         @cls.expectation(argspec)
         @wraps(func)
@@ -198,7 +190,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 output_strftime_format = kwargs["output_strftime_format"]
                 maybe_limited_unexpected_list = []
                 for x in unexpected_query_results.fetchall():
-                    if isinstance(x[column], string_types):
+                    if isinstance(x[column], str):
                         col = parse(x[column])
                     else:
                         col = x[column]
