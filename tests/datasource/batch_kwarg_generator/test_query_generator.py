@@ -34,7 +34,7 @@ def test_basic_operation(basic_sqlalchemy_datasource):
 
 def test_add_query(basic_sqlalchemy_datasource):
     generator = QueryBatchKwargsGenerator(datasource=basic_sqlalchemy_datasource)
-    generator.add_query("my_asset", "select * from my_table where val > $condition")
+    generator.add_query(data_asset_name="my_asset", query="select * from my_table where val > $condition")
 
     batch_kwargs = generator.yield_batch_kwargs("my_asset", query_parameters={"condition": 5})
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceQueryBatchKwargs)
@@ -50,7 +50,7 @@ def test_partition_id(basic_sqlalchemy_datasource):
         }
     )
 
-    batch_kwargs = generator.build_batch_kwargs("my_asset", partition_id="foo")
+    batch_kwargs = generator.build_batch_kwargs(data_asset_name="my_asset", partition_id="foo")
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceQueryBatchKwargs)
     assert batch_kwargs.query == "SELECT * FROM my_table WHERE value = $partition_id"
     assert batch_kwargs.query_parameters == {"partition_id": "foo"}
@@ -75,18 +75,18 @@ def test_build_batch_kwargs_for_query_path(basic_sqlalchemy_datasource, data_con
     query_str = "SELECT * FROM my_table"
 
     default_sql_files_directory = os.path.join(
-        base_directory, 
-        'datasources', 
-        basic_sqlalchemy_datasource.name, 
-        'generators', 
-        generator_name, 
+        base_directory,
+        'datasources',
+        basic_sqlalchemy_datasource.name,
+        'generators',
+        generator_name,
     )
     os.makedirs(default_sql_files_directory)
     with open(os.path.join(default_sql_files_directory, "example.sql"), "w") as outfile:
         outfile.write(query_str)
 
     generator = QueryBatchKwargsGenerator(
-        name=generator_name, 
+        name=generator_name,
         datasource=basic_sqlalchemy_datasource
     )
     batch_kwargs = generator.build_batch_kwargs(name='example')

@@ -142,7 +142,7 @@ def test_sqlalchemy_source_templating(sqlitedb_engine):
         }
     })
     generator = datasource.get_batch_kwargs_generator("foo")
-    generator.add_query("test", "select 'cat' as ${col_name};")
+    generator.add_query(data_asset_name="test", query="select 'cat' as ${col_name};")
     batch = datasource.get_batch(generator.build_batch_kwargs("test", query_parameters={'col_name': "animal_name"}))
     dataset = Validator(batch, expectation_suite=ExpectationSuite("test"), expectation_engine=SqlAlchemyDataset).get_dataset()
     res = dataset.expect_column_to_exist("animal_name")

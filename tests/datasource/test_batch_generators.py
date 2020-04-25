@@ -30,7 +30,7 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
     # Use set to avoid order dependency
     assert set(known_data_asset_names["subdir_reader"]["names"]) == {('f1', 'file'), ('f2', 'file'), ('f3', 'directory')}
 
-    f1_batches = [batch_kwargs["path"] for batch_kwargs in generator.get_iterator("f1")]
+    f1_batches = [batch_kwargs["path"] for batch_kwargs in generator.get_iterator(data_asset_name="f1")]
     assert len(f1_batches) == 1
     expected_batches = [
         {
@@ -40,7 +40,7 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
     for batch in expected_batches:
         assert batch["path"] in f1_batches
 
-    f3_batches = [batch_kwargs["path"] for batch_kwargs in generator.get_iterator("f3")]
+    f3_batches = [batch_kwargs["path"] for batch_kwargs in generator.get_iterator(data_asset_name="f3")]
     assert len(f3_batches) == 2
     expected_batches = [
         {
@@ -96,7 +96,7 @@ def test_glob_reader_generator(basic_pandas_datasource, tmp_path_factory):
     # Use set in test to avoid order issues
     assert set(g2_assets["names"]) == {("blargs", "path"), ("fs", "path")}
 
-    blargs_kwargs = [x["path"] for x in g2.get_iterator("blargs")]
+    blargs_kwargs = [x["path"] for x in g2.get_iterator(data_asset_name="blargs")]
     real_blargs = [
         os.path.join(basedir, "f1.blarg"),
         os.path.join(basedir, "f3.blarg"),
@@ -162,6 +162,6 @@ def test_databricks_generator(basic_sparkdf_datasource):
     # We have no tables available
     assert available_assets == {"names": []}
 
-    databricks_kwargs_iterator = generator.get_iterator("foo")
+    databricks_kwargs_iterator = generator.get_iterator(data_asset_name="foo")
     kwargs = [batch_kwargs for batch_kwargs in databricks_kwargs_iterator]
     assert "select * from" in kwargs[0]["query"].lower()
