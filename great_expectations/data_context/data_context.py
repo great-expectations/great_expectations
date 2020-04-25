@@ -53,7 +53,6 @@ from great_expectations.data_context.util import (
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     load_class,
-    safe_mmkdir,
     substitute_all_config_variables,
 )
 from great_expectations.dataset import Dataset
@@ -530,7 +529,7 @@ class BaseDataContext(object):
 
         config_variables_filepath = os.path.join(self.root_directory, config_variables_filepath)
 
-        safe_mmkdir(os.path.dirname(config_variables_filepath), exist_ok=True)
+        os.makedirs(os.path.dirname(config_variables_filepath), exist_ok=True)
         if not os.path.isfile(config_variables_filepath):
             logger.info("Creating new substitution_variables file at {config_variables_filepath}".format(
                 config_variables_filepath=config_variables_filepath)
@@ -1564,7 +1563,7 @@ class DataContext(BaseDataContext):
             )
 
         ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
-        safe_mmkdir(ge_dir, exist_ok=True)
+        os.makedirs(ge_dir, exist_ok=True)
         cls.scaffold_directories(ge_dir)
 
         if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
@@ -1615,7 +1614,7 @@ class DataContext(BaseDataContext):
 
     @classmethod
     def write_config_variables_template_to_disk(cls, uncommitted_dir):
-        safe_mmkdir(uncommitted_dir)
+        os.makedirs(uncommitted_dir, exist_ok=True)
         config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
         with open(config_var_file, "w") as template:
             template.write(CONFIG_VARIABLES_TEMPLATE)
@@ -1632,33 +1631,33 @@ class DataContext(BaseDataContext):
     @classmethod
     def scaffold_directories(cls, base_dir):
         """Safely create GE directories for a new project."""
-        safe_mmkdir(base_dir, exist_ok=True)
+        os.makedirs(base_dir, exist_ok=True)
         open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
 
         for directory in cls.BASE_DIRECTORIES:
             if directory == "plugins":
                 plugins_dir = os.path.join(base_dir, directory)
-                safe_mmkdir(plugins_dir, exist_ok=True)
-                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs"), exist_ok=True)
-                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "views"), exist_ok=True)
-                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "renderers"), exist_ok=True)
-                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "styles"), exist_ok=True)
+                os.makedirs(plugins_dir, exist_ok=True)
+                os.makedirs(os.path.join(plugins_dir, "custom_data_docs"), exist_ok=True)
+                os.makedirs(os.path.join(plugins_dir, "custom_data_docs", "views"), exist_ok=True)
+                os.makedirs(os.path.join(plugins_dir, "custom_data_docs", "renderers"), exist_ok=True)
+                os.makedirs(os.path.join(plugins_dir, "custom_data_docs", "styles"), exist_ok=True)
                 cls.scaffold_custom_data_docs(plugins_dir)
             else:
-                safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
+                os.makedirs(os.path.join(base_dir, directory), exist_ok=True)
 
         uncommitted_dir = os.path.join(base_dir, cls.GE_UNCOMMITTED_DIR)
 
         for new_directory in cls.UNCOMMITTED_DIRECTORIES:
             new_directory_path = os.path.join(uncommitted_dir, new_directory)
-            safe_mmkdir(
+            os.makedirs(
                 new_directory_path,
                 exist_ok=True
             )
 
         notebook_path = os.path.join(base_dir, "notebooks")
         for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
-            safe_mmkdir(os.path.join(notebook_path, subdir), exist_ok=True)
+            os.makedirs(os.path.join(notebook_path, subdir), exist_ok=True)
 
     @classmethod
     def scaffold_custom_data_docs(cls, plugins_dir):

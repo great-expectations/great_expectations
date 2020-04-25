@@ -5,7 +5,6 @@ import logging
 from abc import ABCMeta
 
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.data_context.util import safe_mmkdir
 from great_expectations.exceptions import StoreBackendError
 
 logger = logging.getLogger(__name__)
@@ -202,7 +201,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             else:
                 self.full_base_directory = os.path.join(root_directory, base_directory)
 
-        safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
+        os.makedirs(str(os.path.dirname(self.full_base_directory)), exist_ok=True)
 
     def _get(self, key):
         filepath = os.path.join(
@@ -221,7 +220,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         )
         path, filename = os.path.split(filepath)
 
-        safe_mmkdir(str(path))
+        os.makedirs(str(path), exist_ok=True)
         with open(filepath, "wb") as outfile:
             if isinstance(value, str):
                 outfile.write(value.encode("utf-8"))

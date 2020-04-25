@@ -1,6 +1,5 @@
 import logging
 import os
-import errno
 import importlib
 import copy
 import re
@@ -16,23 +15,6 @@ from great_expectations.exceptions import (
 )
 
 logger = logging.getLogger(__name__)
-
-
-def safe_mmkdir(directory, exist_ok=True):
-    """Simple wrapper since exist_ok is not available in python 2"""
-    if not isinstance(directory, str):
-        raise TypeError("directory must be of type str, not {0}".format({
-            "directory_type": str(type(directory))
-        }))
-
-    if not exist_ok:
-        raise ValueError(
-            "This wrapper should only be used for exist_ok=True; it is designed to make porting easier later")
-    try:
-        os.makedirs(directory)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
 
 
 def load_class(class_name, module_name):
