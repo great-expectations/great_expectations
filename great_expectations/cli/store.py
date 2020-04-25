@@ -1,14 +1,13 @@
-import json
-import os
-import sys
-
 import click
 
-from great_expectations import DataContext
-from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli.cli_logging import logger
-from great_expectations.cli.util import cli_message, cli_message_list, cli_message_dict
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.cli.util import (
+    cli_message,
+    cli_message_dict,
+    load_data_context_with_error_handling,
+)
+from great_expectations.core.usage_statistics.usage_statistics import (
+    send_usage_message,
+)
 
 
 @click.group()
@@ -26,11 +25,7 @@ def store():
 )
 def store_list(directory):
     """List known Stores."""
-    try:
-        context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        return
+    context = load_data_context_with_error_handling(directory)
 
     try:
         stores = context.list_stores()
@@ -68,4 +63,3 @@ def store_list(directory):
             success=False
         )
         raise e
-
