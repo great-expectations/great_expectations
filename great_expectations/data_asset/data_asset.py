@@ -416,7 +416,6 @@ class DataAsset(object):
             discard_catch_exceptions_kwargs=discard_catch_exceptions_kwargs,
         )
 
-
     def _copy_and_clean_up_expectations_from_indexes(
         self,
         match_indexes,

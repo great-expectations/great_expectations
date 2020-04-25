@@ -13,7 +13,8 @@ def is_valid_partition_object(partition_object):
     :param partition_object: The partition_object to evaluate
     :return: Boolean
     """
-    return is_valid_continuous_partition_object(partition_object) or is_valid_categorical_partition_object(partition_object)
+    return is_valid_continuous_partition_object(partition_object) \
+        or is_valid_categorical_partition_object(partition_object)
 
 
 def is_valid_categorical_partition_object(partition_object):
@@ -25,7 +26,7 @@ def is_valid_categorical_partition_object(partition_object):
         return False
     # Expect the same number of values as weights; weights should sum to one
     return len(partition_object['values']) == len(partition_object['weights']) and \
-            np.allclose(np.sum(partition_object['weights']), 1)
+        np.allclose(np.sum(partition_object['weights']), 1)
 
 
 def is_valid_continuous_partition_object(partition_object):
@@ -50,8 +51,7 @@ def is_valid_continuous_partition_object(partition_object):
 
     # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one
     return (len(partition_object['bins']) == (len(partition_object['weights']) + 1)) and \
-            np.all(np.diff(partition_object['bins']) > 0) and \
-            np.allclose(np.sum(comb_weights), 1)
+        np.all(np.diff(partition_object['bins']) > 0) and np.allclose(np.sum(comb_weights), 1)
 
 
 def categorical_partition_data(data):
