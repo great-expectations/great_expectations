@@ -15,13 +15,11 @@ from ....core import (
     ExpectationValidationResult,
     ExpectationConfiguration,
 )
-from great_expectations.exceptions import GreatExpectationsError
 
 logger = logging.getLogger(__name__)
 
 
 class ContentBlockRenderer(Renderer):
-
     _rendered_component_type = TextContent
     _default_header = ""
 

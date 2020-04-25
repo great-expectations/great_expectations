@@ -1,4 +1,3 @@
-from datetime import datetime
 import json
 import sys
 from datetime import datetime
@@ -56,11 +55,9 @@ def validation_operator_list(directory):
         if len(validation_operators) == 0:
             cli_message("No Validation Operators found")
             return
-
-        if len(validation_operators) == 1:
+        elif len(validation_operators) == 1:
             list_intro_string = "1 Validation Operator found:"
-
-        if len(validation_operators) > 1:
+        else:
             list_intro_string = "{} Validation Operators found:".format(len(validation_operators))
 
         cli_message(list_intro_string)
@@ -252,13 +249,7 @@ Let's help you specify the batch of data your want the validation operator to va
                     batch_kwargs_generator,
                     data_asset,
                     batch_kwargs,
-                ) = get_batch_kwargs(
-                    context,
-                    datasource_name=data_source.name,
-                    batch_kwargs_generator_name=None,
-                    generator_asset=None,
-                    additional_batch_kwargs=None,
-                )
+                ) = get_batch_kwargs(context, datasource_name=data_source.name)
 
             validation_config = {
                 "validation_operator_name": name,

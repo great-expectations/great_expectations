@@ -283,7 +283,7 @@ class FileDataAsset(MetaFileDataAsset):
                 of unexpected lines is less than mostly, the method still returns
                 true even if all lines don't match the expectation criteria.
 
-            null_lines_regex (valid regular expression or None): \
+            nonnull_lines_regex (valid regular expression or None): \
                 If not none, a regex to skip lines as null. Defaults to empty or whitespace-only lines.
 
         Other Parameters:
