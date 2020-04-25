@@ -677,8 +677,10 @@ class BaseDataContext(object):
             self,
             validation_operator_name,
             assets_to_validate,
-            run_name=None,
+            run_id=None,
             evaluation_parameters=None,
+            run_name=None,
+            run_time=None,
             **kwargs
     ):
         """
@@ -696,20 +698,21 @@ class BaseDataContext(object):
         Returns:
             ValidationOperatorResult
         """
-        if run_name is None:
-            run_name = f'{validation_operator_name}_{datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")}'
-            logger.info("Setting run_name to: {}".format(run_name))
         if evaluation_parameters is None:
             return self.validation_operators[validation_operator_name].run(
                 assets_to_validate=assets_to_validate,
+                run_id=run_id,
                 run_name=run_name,
+                run_time=run_time,
                 **kwargs
             )
         else:
             return self.validation_operators[validation_operator_name].run(
                 assets_to_validate=assets_to_validate,
-                run_name=run_name,
+                run_id=run_id,
                 evaluation_parameters=evaluation_parameters,
+                run_name=run_name,
+                run_time=run_time,
                 **kwargs
             )
 
