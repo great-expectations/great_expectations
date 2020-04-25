@@ -4189,5 +4189,5 @@ class Dataset(MetaDataset):
 
     @staticmethod
     def _parse_value_set(value_set):
-        parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+        parsed_value_set = [parse(value) if isinstance(value, str) else value for value in value_set]
         return parsed_value_set
