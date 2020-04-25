@@ -61,7 +61,7 @@ class MetaFileDataAsset(DataAsset):
         def inner_wrapper(self, skip=None, mostly=None, null_lines_regex=r"^\s*$", result_format=None, *args, **kwargs):
             try:
                 f = open(self._path)
-            except:
+            except OSError:
                 raise
 
             if result_format is None:
@@ -75,7 +75,7 @@ class MetaFileDataAsset(DataAsset):
                 try:
                     assert float(skip).is_integer()
                     assert float(skip) >= 0
-                except AssertionError:
+                except (AssertionError, ValueError):
                     raise ValueError("skip must be a positive integer")
 
                 for i in range(1, skip+1):
@@ -213,14 +213,14 @@ class FileDataAsset(MetaFileDataAsset):
         """
         try:
             comp_regex = re.compile(regex)
-        except:
+        except (ValueError, TypeError):
             raise ValueError("Must enter valid regular expression for regex")
 
         if expected_min_count is not None:
             try:
                 assert float(expected_min_count).is_integer()
                 assert float(expected_min_count) >= 0
-            except:
+            except (AssertionError, ValueError):
                 raise ValueError("expected_min_count must be a non-negative \
                                  integer or None")
 
@@ -228,14 +228,14 @@ class FileDataAsset(MetaFileDataAsset):
             try:
                 assert float(expected_max_count).is_integer()
                 assert float(expected_max_count) >= 0
-            except:
+            except (AssertionError, ValueError):
                 raise ValueError("expected_max_count must be a non-negative \
                                  integer or None")
 
         if expected_max_count is not None and expected_min_count is not None:
             try:
                 assert expected_max_count >= expected_min_count
-            except:
+            except (AssertionError, ValueError):
                 raise ValueError("expected_max_count must be greater than or \
                                  equal to expected_min_count")
 
@@ -314,13 +314,13 @@ class FileDataAsset(MetaFileDataAsset):
         """
         try:
             comp_regex = re.compile(regex)
-        except:
+        except (ValueError, TypeError):
             raise ValueError("Must enter valid regular expression for regex")
 
         try:
             assert float(expected_count).is_integer()
             assert float(expected_count) >= 0
-        except AssertionError:
+        except (AssertionError, ValueError):
             raise ValueError("expected_count must be a non-negative integer")
 
         return [len(comp_regex.findall(line)) == expected_count for line in _lines]
@@ -564,7 +564,7 @@ class FileDataAsset(MetaFileDataAsset):
             try:
                 assert float(skip).is_integer()
                 assert float(skip) >= 0
-            except AssertionError:
+            except (AssertionError, ValueError):
                 raise ValueError("skip must be a positive integer")
 
             lines = lines[skip:]
