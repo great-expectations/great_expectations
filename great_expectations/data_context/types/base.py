@@ -163,7 +163,7 @@ class AnonymizedUsageStatisticsConfig(DictDot):
 
 
 class AnonymizedUsageStatisticsConfigSchema(Schema):
-    data_context_id = fields.UUID(required=False)
+    data_context_id = fields.UUID()
     enabled = fields.Boolean(default=True)
     usage_statistics_url = fields.URL(allow_none=True)
     _explicit_url = fields.Boolean(required=False)

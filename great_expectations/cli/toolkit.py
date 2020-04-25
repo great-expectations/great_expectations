@@ -82,11 +82,8 @@ def create_expectation_suite(
             batch_kwargs, generator_asset
         )
         while True:
-            expectation_suite_name = click.prompt(
-                "\nName the new expectation suite",
-                default=default_expectation_suite_name,
-                show_default=True,
-            )
+            expectation_suite_name = click.prompt("\nName the new expectation suite",
+                                                  default=default_expectation_suite_name)
             if expectation_suite_name in context.list_expectation_suite_names():
                 tell_user_suite_exists(expectation_suite_name)
             else:
@@ -208,9 +205,7 @@ def tell_user_suite_exists(suite_name: str) -> None:
 
 
 def create_empty_suite(context: DataContext, expectation_suite_name: str, batch_kwargs) -> None:
-    suite = context.create_expectation_suite(
-        expectation_suite_name, overwrite_existing=False
-    )
+    suite = context.create_expectation_suite(expectation_suite_name)
     suite.add_citation(comment="New suite added via CLI", batch_kwargs=batch_kwargs)
     context.save_expectation_suite(suite, expectation_suite_name)
 

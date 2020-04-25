@@ -642,7 +642,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
                 "class_name": "ValidationResultsTableContentBlockRenderer"
             }
         module_name = table_renderer.get("module_name", "great_expectations.render.renderer.content_block")
-        verify_dynamic_loading_support(module_name=module_name, package_name=None)
+        verify_dynamic_loading_support(module_name=module_name)
         class_name = table_renderer.get("class_name")
         self._table_renderer = load_class(
             class_name=class_name,
@@ -704,7 +704,7 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
                 "class_name": "ExpectationSuiteBulletListContentBlockRenderer"
             }
         module_name = bullet_list_renderer.get("module_name", "great_expectations.render.renderer.content_block")
-        verify_dynamic_loading_support(module_name=module_name, package_name=None)
+        verify_dynamic_loading_support(module_name=module_name)
         class_name = bullet_list_renderer.get("class_name")
         self._bullet_list_renderer = load_class(
             class_name=class_name,

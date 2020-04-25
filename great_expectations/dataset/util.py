@@ -401,7 +401,7 @@ def validate_distribution_parameters(distribution, params):
     chi2_msg = "chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
     expon_msg = "expon distributions require 0 parameters and optionally 'loc', 'scale'."
 
-    if (distribution not in ['norm', 'beta', 'gamma', 'poisson', 'uniform', 'chi2', 'expon']):
+    if distribution not in ['norm', 'beta', 'gamma', 'poisson', 'uniform', 'chi2', 'expon']:
         raise AttributeError(
             "Unsupported  distribution provided: %s" % distribution)
 
