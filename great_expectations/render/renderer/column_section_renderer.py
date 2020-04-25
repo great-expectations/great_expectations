@@ -1,7 +1,6 @@
 import json
 import logging
 import re
-from builtins import str  # PY2 compatibility
 
 import altair as alt
 import pandas as pd
@@ -31,10 +30,7 @@ from great_expectations.util import (
     load_class,
     verify_dynamic_loading_support,
 )
-from great_expectations.exceptions import (
-    ClassInstantiationError,
-    GreatExpectationsError,
-)
+from great_expectations.exceptions import ClassInstantiationError
 
 logger = logging.getLogger(__name__)
 

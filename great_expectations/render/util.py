@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """Rendering utility"""
-from __future__ import unicode_literals
 import decimal
 import locale
 
