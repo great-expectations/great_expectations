@@ -79,10 +79,7 @@ class MetaDataset(DataAsset):
             <great_expectations.dataset.dataset.Dataset.expect_column_mean_to_be_between>` \
             for an example of a column_aggregate_expectation
         """
-        if PY3:
-            argspec = inspect.getfullargspec(func)[0][1:]
-        else:
-            argspec = inspect.getargspec(func)[0][1:]
+        argspec = inspect.getfullargspec(func)[0][1:]
 
         @cls.expectation(argspec)
         @wraps(func)

@@ -184,9 +184,6 @@ class SiteSectionIdentifier(DataContextKey):
         return self._resource_identifier
 
     def to_tuple(self):
-        # if PY3:
-        #     return (self.site_section_name, *self.resource_identifier.to_tuple())
-        # else:
         site_section_identifier_tuple_list = [self.site_section_name] + list(self.resource_identifier.to_tuple())
         return tuple(site_section_identifier_tuple_list)
 
