@@ -587,14 +587,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         elif type_.lower() == "bool":
             return bool,
         elif type_.lower() in ["int", "long"]:
-            return int
+            return int,
         elif type_.lower() == "float":
             return float,
         elif type_.lower() == "bytes":
             return bytes,
         elif type_.lower() == "complex":
             return complex,
-        elif type_.lower() == "str":
+        elif type_.lower() in ["str", "string_types"]:
             return str,
         elif type_.lower() == "list":
             return list,
@@ -602,8 +602,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             return dict,
         elif type_.lower() == "unicode":
             return None
-        elif type_.lower() in ["string_types"]:
-            return str
 
     @MetaPandasDataset.column_map_expectation
     def _expect_column_values_to_be_of_type__map(

@@ -30,7 +30,10 @@ from great_expectations.util import (
     load_class,
     verify_dynamic_loading_support,
 )
-from great_expectations.exceptions import ClassInstantiationError
+from great_expectations.exceptions import (
+    ClassInstantiationError,
+    GreatExpectationsError,
+)
 
 logger = logging.getLogger(__name__)
 
