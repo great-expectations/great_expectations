@@ -76,6 +76,7 @@ class BatchIdentifier(DataContextKey):
 
 class BatchIdentifierSchema(Schema):
     batch_identifier = fields.Str()
+    data_asset_name = fields.Str()
 
     # noinspection PyUnusedLocal
     @post_load
@@ -221,3 +222,4 @@ class SiteSectionIdentifier(DataContextKey):
 expectationSuiteIdentifierSchema = ExpectationSuiteIdentifierSchema()
 validationResultIdentifierSchema = ValidationResultIdentifierSchema()
 runIdentifierSchema = RunIdentifierSchema()
+batchIdentifierSchema = BatchIdentifierSchema()
