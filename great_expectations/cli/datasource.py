@@ -456,8 +456,13 @@ Since we could not connect to the database, you can complete troubleshooting in 
 
 After you connect to the datasource, run great_expectations init to continue.
 
-""".format(datasource_name, DataContext.GE_YML, context.get_config()["config_variables_file_path"], rtd_url_ge_version,
-           selected_database.value.lower()))
+""".format
+                    (
+                        datasource_name, DataContext.GE_YML,
+                        context.get_config()["config_variables_file_path"], rtd_url_ge_version,
+                        selected_database.value.lower()
+                    )
+                )
                 return None
 
     return datasource_name
@@ -755,9 +760,9 @@ def get_batch_kwargs(context,
     datasource_name = data_source.name
 
     if batch_kwargs_generator_name is None:
-        batch_kwargs_generator_name = select_batch_kwargs_generator(context, datasource_name,
-                                                                    available_data_assets_dict
-                                                                    =available_data_assets_dict)
+        batch_kwargs_generator_name = select_batch_kwargs_generator(
+            context, datasource_name, available_data_assets_dict=available_data_assets_dict
+        )
 
     # if the user provided us with the batch kwargs generator name and the generator asset, we have everything we need -
     # let's ask the generator to build batch kwargs for this asset - we are done.
