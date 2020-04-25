@@ -1,11 +1,10 @@
-from pathlib import Path
-
-import pytest
-
+import glob
+import os
 import json
 import logging
 from collections import OrderedDict
 
+import pytest
 import pandas as pd
 
 from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
@@ -22,17 +21,18 @@ logger = logging.getLogger(__name__)
 def pytest_generate_tests(metafunc):
 
     # Load all the JSON files in the directory
-    dir_path = Path(__file__).resolve().parent
-    expectation_dirs = [dir_ for dir_ in dir_path.glob('*') if dir_.is_dir()]
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    expectation_dirs = [dir_ for dir_ in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, dir_))]
 
     parametrized_tests = []
     ids = []
 
     for expectation_category in expectation_dirs:
-        test_configuration_files = (dir_path / expectation_category).glob('*.json')
+
+        test_configuration_files = glob.glob(dir_path+'/' + expectation_category + '/*.json')
         for c in build_test_backends_list(metafunc):
             for filename in test_configuration_files:
-                file = filename.open()
+                file = open(filename)
                 # Use OrderedDict so that python2 will use the correct order of columns in all cases
                 test_configuration = json.load(file, object_pairs_hook=OrderedDict)
 
