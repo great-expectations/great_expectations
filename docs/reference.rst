@@ -1,14 +1,14 @@
 
-#############
+#########
 Reference
-#############
+#########
 
 Reference materials provide clear descriptions of GE features. See the :ref:`module_docs` for more detailed descriptions
 of classes and methods.
 
-********************
+*******************
 Basic Functionality
-********************
+*******************
 
 .. toctree::
    :maxdepth: 2
@@ -18,9 +18,9 @@ Basic Functionality
    /reference/custom_expectations
    /reference/implemented_expectations
 
-**************
+*************
 Core GE Types
-**************
+*************
 
 .. toctree::
    :maxdepth: 1
@@ -31,9 +31,9 @@ Core GE Types
    /reference/datasource_reference
    /reference/batch_kwargs
 
-************************
+********************
 Configuration Guides
-************************
+********************
 
 .. toctree::
    :maxdepth: 2
@@ -43,9 +43,9 @@ Configuration Guides
    /reference/profiling_reference
    /reference/migrating_versions
 
-************************
+************
 Integrations
-************************
+************
 
 .. toctree::
    :maxdepth: 2
@@ -54,9 +54,9 @@ Integrations
    /reference/integrations/bigquery
    /reference/integrations/snowflake
 
-******************
+*****************
 Advanced Features
-******************
+*****************
 
 .. toctree::
    :maxdepth: 2
@@ -68,9 +68,9 @@ Advanced Features
    /reference/validation_operators
    /reference/metric_reference
 
-*****************************
+****************************
 Extending Great Expectations
-*****************************
+****************************
 
 .. toctree::
    :maxdepth: 2
@@ -79,9 +79,9 @@ Extending Great Expectations
    /reference/improving_library_documentation
 
 
-**********************************
+********************
 Supporting Resources
-**********************************
+********************
 
 .. toctree::
    :maxdepth: 2
