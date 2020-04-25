@@ -86,26 +86,12 @@ To initialize your Great Expectations deployment for the project, run this comma
 
     great_expectations init
 
-This command only needs to be run once per deployment of Great Expectations. It will create a ``great_expectations/`` subdirectory, structured like this:
+This command only needs to be run once per deployment of Great Expectations. It will create a ``great_expectations/`` subdirectory containing all of the important components of a Great Expectations deployment, in miniature:
 
-.. code-block:: bash
-
-    great_expectations
-    ...
-    ├── expectations
-    ...
-    ├── great_expectations.yml
-    ├── notebooks
-    ...
-    ├── .gitignore
-    └── uncommitted
-        ├── config_variables.yml
-        ├── documentation
-        │   └── local_site
-        └── validations
-
-This ``great_expectations/`` directory contains all of the important components of a Great Expectations deployment, in miniature:
-
+Data Sources
+Data Documentation
+Expectations
+Validation Results
 * The ``great_expectations.yml`` configuration file defines how to access the project's Data Sources, Expectations, Validation Results, etc.
 * The ``expectations/`` directory stores all your Expectations as JSON files.
 * The ``uncommitted/`` directory contains files that shouldn't live in version control. It has a ``.gitignore`` configured to exclude all its contents from version control. The main contents of the default ``uncommitted/`` directory are:
@@ -113,5 +99,3 @@ This ``great_expectations/`` directory contains all of the important components 
   * ``uncommitted/config_variables.yml``, which should hold sensitive information, such as database credentials and other secrets.
   * ``uncommitted/validations``, which will hold Validation Results.
   * ``uncommitted/documentation``, which will hold contains data documentation generated from Expectations and Validation Results.
-
-A note on git: many teams find it convenient to use git to store Expectations and the core configuration in ``great_expectations.yml``. Essentially, this approach treats Expectations like test fixtures: they live adjacent to code and are stored within version control. git acts as a collaboration tool and source of record. Other alternatives, such as storing Expectations in a file store, or database are also possible. We'll discuss these more at the end of this tutorial.
