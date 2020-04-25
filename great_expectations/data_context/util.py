@@ -6,6 +6,7 @@ import importlib
 import copy
 import re
 import inspect
+import shutil
 from collections import OrderedDict
 
 from great_expectations.util import verify_dynamic_loading_support
@@ -46,7 +47,8 @@ def safe_rrmdir(directory, exist_ok=True):
         raise ValueError(
             "This wrapper should only be used for exist_ok=True; it is designed to make porting easier later")
     try:
-        os.removedirs(directory)
+        shutil.rmtree(directory)
+        #os.removedirs(directory)
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
