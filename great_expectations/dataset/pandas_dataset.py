@@ -906,7 +906,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                         return False
 
                 else:
-                    if (isinstance(val, str) != isinstance(min_value, str)) or (isinstance(val, str) != isinstance(max_value, str)):
+                    if (isinstance(val, str) != isinstance(min_value, str)) or \
+                            (isinstance(val, str) != isinstance(max_value, str)):
                         raise TypeError(
                             "Column values, min_value, and max_value must either be None or of the same type.")
 
