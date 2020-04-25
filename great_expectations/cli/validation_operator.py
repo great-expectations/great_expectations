@@ -7,7 +7,6 @@ import click
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli.cli_logging import logger
 
 
 from great_expectations.cli.datasource import (
@@ -17,7 +16,6 @@ from great_expectations.cli.datasource import (
 from great_expectations.cli.util import (
     cli_message,
     load_expectation_suite,
-    cli_message_list,
     cli_message_dict
 )
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
@@ -30,7 +28,6 @@ except ImportError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
     SQLAlchemyError = ge_exceptions.ProfilerError
-()
 
 @click.group()
 def validation_operator():
