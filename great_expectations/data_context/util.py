@@ -47,7 +47,8 @@ def safe_rrmdir(directory, exist_ok=True):
         raise ValueError(
             "This wrapper should only be used for exist_ok=True; it is designed to make porting easier later")
     try:
-        shutil.rmtree(directory)
+        if os.path.exists(directory):
+            shutil.rmtree(directory)
         #os.removedirs(directory)
     except OSError as e:
         if e.errno != errno.EEXIST:
