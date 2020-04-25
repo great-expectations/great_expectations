@@ -195,7 +195,7 @@ def datasource_profile(datasource, batch_kwargs_generator_name, data_assets, pro
                 sys.exit(1)
             elif len(datasources) > 1:
                 cli_message(
-                    "<red>Error: please specify the datasource to profile. " \
+                    "<red>Error: please specify the datasource to profile. "
                     "Available datasources: " + ", ".join(datasources) + "</red>"
                 )
                 send_usage_message(
@@ -756,7 +756,8 @@ def get_batch_kwargs(context,
 
     if batch_kwargs_generator_name is None:
         batch_kwargs_generator_name = select_batch_kwargs_generator(context, datasource_name,
-                                                                    available_data_assets_dict=available_data_assets_dict)
+                                                                    available_data_assets_dict
+                                                                    =available_data_assets_dict)
 
     # if the user provided us with the batch kwargs generator name and the generator asset, we have everything we need -
     # let's ask the generator to build batch kwargs for this asset - we are done.
@@ -1121,13 +1122,13 @@ Great Expectations is building Data Docs from the data you just profiled!"""
             elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS:
                 cli_message(
                     msg_too_many_data_assets.format(profiling_results['error']['num_data_assets'], datasource_name))
-            elif profiling_results['error'][
-                'code'] == DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND:
+            elif profiling_results['error']['code'] \
+                    == DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND:
                 cli_message(
                     msg_error_multiple_generators_found.format(datasource_name))
                 sys.exit(1)
-            elif profiling_results['error'][
-                'code'] == DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND:
+            elif profiling_results['error']['code'] \
+                    == DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND:
                 cli_message(
                     msg_error_no_generators_found.format(datasource_name))
                 sys.exit(1)

@@ -284,16 +284,15 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
     """
 
-
     def __init__(self,
-        data_context,
-        action_list,
-        base_expectation_suite_name=None,
-        expectation_suite_name_suffixes=None,
-        stop_on_first_error=False,
-        slack_webhook=None,
-        notify_on="all"
-    ):
+                 data_context,
+                 action_list,
+                 base_expectation_suite_name=None,
+                 expectation_suite_name_suffixes=None,
+                 stop_on_first_error=False,
+                 slack_webhook=None,
+                 notify_on="all"
+                 ):
         super(WarningAndFailureExpectationSuitesValidationOperator, self).__init__(
             data_context,
             action_list,
