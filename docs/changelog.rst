@@ -7,6 +7,12 @@ Changelog
 develop
 -----------------
 * new cli command noun `checkpoint` (in the next major release this tap will be deprecated
+* tidy up the changelog
+
+  - Fix bullet list spacing issues
+  - Fix 0.10. formatting
+  - Drop roadmap_and_changelog.rst and move changelog.rst to the top level of the table of contents
+
 
 0.10.4
 -----------------
