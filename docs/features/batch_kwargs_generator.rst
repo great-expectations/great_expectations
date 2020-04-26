@@ -1,8 +1,8 @@
 .. _batch_kwargs_generator:
 
-########################
+#######################
 Batch Kwargs Generators
-########################
+#######################
 
 Batch Kwargs are specific instructions for a Datasource about what data should be prepared as a “batch” for
 validation. The batch could be a specific database table, the most recent log file delivered to S3, or even a subset
@@ -18,9 +18,9 @@ configuration, you could provide a timestamp as a partition name, and the Batch 
 instructions that a SQLAlchemyDatasource could use to materialize a SQLAlchemyDataset corresponding to that batch of
 data and ready for validation.
 
-********
+*****
 Batch
-********
+*****
 
 A batch is a sample from a data asset, sliced according to a particular rule.
 For example, an hourly slide of the Events table or “most recent `users` records.”
