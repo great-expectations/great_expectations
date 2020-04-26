@@ -39,7 +39,7 @@ configuration information. For example, the following simple configuration suppo
         default:
           class_name: InMemoryGenerator
 
-The following configuration demonstrates a more complicated configuration for reading assets from s3 into pandas. It
+The following configuration demonstrates a more complicated configuration for reading assets from S3 into pandas. It
 will access the amazon public NYC taxi data and provides access to two assets: 'taxi-green' and 'taxi-fhv' which
 represent two public datasets available from the resource.
 
@@ -260,7 +260,7 @@ new directory or use this template:
 
     # Welcome to Great Expectations! Always know what to expect from your data.
     #
-    # Here you can define datasources, batch kwarg generators, integrations and
+    # Here you can define datasources, batch kwargs generators, integrations and
     # more. This file is intended to be committed to your repo. For help with
     # configuration please:
     #   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#configuration
@@ -364,3 +364,33 @@ new directory or use this template:
         store_backend:
           class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
+
+.. _Usage Statistics:
+
+#################
+Usage Statistics
+#################
+
+To help us improve the tool, by default we track event data when certain Data Context-enabled commands are run. The
+usage statistics include things like the OS and python version, and which GE features are used. You can see the exact
+schemas for all of our messages `here <https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/core/usage_statistics/schemas.py>`_.
+
+While we hope you'll leave them on, you can easily disable usage statistics for a Data Context by adding the
+following to your data context configuration:
+
+.. code-block:: yaml
+
+    anonymous_usage_statistics:
+      data_context_id: <randomly-generated-uuid>
+      enabled: false
+
+You can also disable usage statistics system-wide by setting the ``GE_USAGE_STATS``` environment variable to
+``FALSE`` or adding the following code block to a file called ``great_expectations.conf`` located in ``/etc/`` or
+``~/.great_expectations``:
+
+.. code-block::
+
+    [anonymous_usage_statistics]
+    enabled=FALSE
+
+As always, please reach out `on Slack <https://greatexpectations.io/slack>`__ if you have any questions or comments.

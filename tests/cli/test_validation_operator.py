@@ -190,40 +190,94 @@ def test_validation_operator_list_with_one_operator(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context.create_expectation_suite("a.warning")
+
+
+def test_validation_operator_list_with_zero_validation_operators(caplog, empty_data_context):
+    project_dir = empty_data_context.root_directory
+    context = DataContext(project_dir)
+    context._project_config.validation_operators = {}
+    context._save_project_config()
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
         cli, "validation-operator list -d {}".format(project_dir), catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert "1 validation operator found" in result.output
-    assert "\taction_list_operator" in result.output
+    assert "No Validation Operators found" in result.output
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@mock.patch.object(DataContext, 'list_validation_operator_names', return_value=[], side_effect=None)
-def test_validation_operator_list_with_no_operators(caplog, empty_data_context):
+def test_validation_operator_list_with_one_validation_operator(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
-    context = DataContext(project_dir)
-    context.create_expectation_suite("a.warning")
     runner = CliRunner(mix_stderr=False)
+
+    expected_result = """\
+1 Validation Operator found:[0m
+[0m
+ - [36mname:[0m action_list_operator[0m
+   [36mclass_name:[0m ActionListValidationOperator[0m
+   [36maction_list:[0m store_validation_result (StoreValidationResultAction) => store_evaluation_params (StoreEvaluationParametersAction) => update_data_docs (UpdateDataDocsAction)[0m"""
 
     result = runner.invoke(
         cli, "validation-operator list -d {}".format(project_dir), catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert "No validation operators are configured in the project" in result.output
+    assert result.output.strip() == expected_result
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@mock.patch.object(DataContext, 'list_validation_operator_names', return_value=["op_one", "op_two"], side_effect=None)
-def test_validation_operator_list_with_two_operators(caplog, empty_data_context):
+def test_validation_operator_list_with_multiple_validation_operators(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
-    context = DataContext(project_dir)
-    context.create_expectation_suite("a.warning")
     runner = CliRunner(mix_stderr=False)
-
+    context = DataContext(project_dir)
+    context.add_validation_operator(
+        "my_validation_operator",
+        {
+            "class_name": "WarningAndFailureExpectationSuitesValidationOperator",
+            "action_list": [
+                {
+                    "name": "store_validation_result",
+                    "action": {
+                        "class_name": "StoreValidationResultAction"
+                    }
+                },
+                {
+                    "name": "store_evaluation_params",
+                    "action": {
+                        "class_name": "StoreEvaluationParametersAction"
+                    }
+                },
+                {
+                    "name": "update_data_docs",
+                    "action": {
+                        "class_name": "UpdateDataDocsAction"
+                    }
+                }
+            ],
+            "base_expectation_suite_name": "new-years-expectations",
+            "slack_webhook": "https://hooks.slack.com/services/dummy"
+        }
+    )
+    context._save_project_config()
+    expected_result = """\
+2 Validation Operators found:[0m
+[0m
+ - [36mname:[0m action_list_operator[0m
+   [36mclass_name:[0m ActionListValidationOperator[0m
+   [36maction_list:[0m store_validation_result (StoreValidationResultAction) => store_evaluation_params (StoreEvaluationParametersAction) => update_data_docs (UpdateDataDocsAction)[0m
+[0m
+ - [36mname:[0m my_validation_operator[0m
+   [36mclass_name:[0m WarningAndFailureExpectationSuitesValidationOperator[0m
+   [36maction_list:[0m store_validation_result (StoreValidationResultAction) => store_evaluation_params (StoreEvaluationParametersAction) => update_data_docs (UpdateDataDocsAction)[0m
+   [36mbase_expectation_suite_name:[0m new-years-expectations[0m
+   [36mslack_webhook:[0m https://hooks.slack.com/services/dummy[0m"""
+   
     result = runner.invoke(
         cli, "validation-operator list -d {}".format(project_dir), catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert "2 validation operators" in result.output
+    assert result.output.strip() == expected_result
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)

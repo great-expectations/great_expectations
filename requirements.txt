@@ -7,7 +7,6 @@ pytz>=2015.6
 six>=1.12.0
 jsonschema>=2.5.1
 altair>=3.1.0
-backports.functools_lru_cache>=1.5
 ruamel.yaml>=0.15.24
 ipywidgets>=7.4.2
 requests>=2.20
@@ -18,5 +17,4 @@ mistune>=0.8.4
 future>=0.16
 jinja2>=2.10
 marshmallow>3.0
-autopep8>=1.4.4
 black==19.10b0

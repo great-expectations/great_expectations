@@ -586,12 +586,6 @@ def is_library_installed(library_name):
     """
     Tests if a library is installed.
     """
-    # Gross legacy python 2 hacks
-    try:
-        ModuleNotFoundError
-    except NameError:
-        ModuleNotFoundError = ImportError
-
     try:
         importlib.import_module(library_name)
         return True

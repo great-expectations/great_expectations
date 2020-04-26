@@ -5,6 +5,7 @@ import inspect
 import logging
 from datetime import datetime
 from functools import wraps
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -355,7 +356,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     def get_column_count(self):
         return len(self.spark_df.columns)
 
-    def get_table_columns(self):
+    def get_table_columns(self) -> List[str]:
         return self.spark_df.columns
 
     def get_column_nonnull_count(self, column):

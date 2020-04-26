@@ -2,6 +2,50 @@
 
 develop
 -----------------
+* new cli command noun `checkpoint` (in the next major release this tap will be deprecated
+
+0.10.4
+-----------------
+* consolidated error handling in CLI DataContext loading
+* new cli command `suite scaffold` to speed up creation of suites
+* new cli command `suite demo` that creates an example suite
+* Update bigquery.rst `#1330 <https://github.com/great-expectations/great_expectations/issues/1330>`_
+* Fix datetime reference in create_expectations.rst `#1321 <https://github.com/great-expectations/great_expectations/issues/1321>`_ Thanks @jschendel !
+* Update issue templates
+* CLI command experimental decorator
+* Update style_guide.rst
+* Add pull request template
+* Use pickle to generate hash for dataframes with unhashable objects. `#1315 <https://github.com/great-expectations/great_expectations/issues/1315>`_ Thanks @shahinism !
+* Unpin pytest
+
+0.10.3
+-----------------
+* Use pickle to generate hash for dataframes with unhashable objects.
+
+0.10.2
+-----------------
+* renamed NotebookRenderer to SuiteEditNotebookRenderer
+* SuiteEditNotebookRenderer now lints using black
+* New SuiteScaffoldNotebookRenderer renderer to expedite suite creation
+* removed autopep8 dependency
+* bugfix: extra backslash in S3 urls if store was configured without a prefix `#1314 <https://github.com/great-expectations/great_expectations/issues/1314>`_
+
+0.10.1
+-----------------
+* removing bootstrap scrollspy on table of contents `#1282 <https://github.com/great-expectations/great_expectations/issues/1282>`_
+* Silently tolerate connection timeout during usage stats reporting
+
+0.10.0
+-----------------
+* (BREAKING) Clarified API language: renamed all ``generator`` parameters and methods to the more correct
+``batch_kwargs_generator`` language. Existing projects may require simple migration steps. See :ref:`Upgrading to 0.10.x` for instructions.
+* Adds anonymized usage statistics to Great Expectations. You can opt out at any time, but we’re hoping that you
+won’t: this data will be very helpful for improving the product. See this article for details: :ref:`Usage Statistics`.
+* CLI: improve look/consistency of `docs list`, `suite list`, and `datasource list` output; add `store list` and `validation-operator list` commands great_expectations/core/logging/usage_statistics.py
+* New SuiteBuilderProfiler that facilitates faster suite generation by allowing columns to be profiled
+* Added two convenience methods to ExpectationSuite: get_table_expectations & get_column_expectations
+* Added optional profiler_configuration to DataContext.profile() and DataAsset.profile()
+* Added list_available_expectation_types() to DataAsset
 
 0.9.11
 -----------------
@@ -74,7 +118,7 @@ develop
 * Docs typo fixes
 * Jupyter notebook improvements
 * `great_expectations init` improvements
-* Simpler messaging in valiation notebooks
+* Simpler messaging in validation notebooks
 * replaced hacky loop with suite list call in notebooks
 * CLI suite new now supports `--empty` flag that generates an empty suite and opens a notebook
 * add error handling to `init` flow for cases where user tries using a broken file
@@ -84,7 +128,7 @@ develop
 -----------------
 * Add support for transient table creation in snowflake (#1012)
 * Improve path support in TupleStoreBackend for better cross-platform compatibility
-* New features on `ExpecatationSuite`
+* New features on `ExpectationSuite`
    - `.add_citation()`
    - `get_citations()`
 * `SampleExpectationsDatasetProfiler` now leaves a citation containing the original batch kwargs

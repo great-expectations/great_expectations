@@ -1,50 +1,46 @@
-import datetime
 import enum
 import importlib
 import json
 import logging
 import os
-import sys
 import platform
+import sys
 import uuid
 
 import click
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.util import verify_dynamic_loading_support
 from great_expectations import DataContext, rtd_url_ge_version
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
-from great_expectations.cli.util import cli_message
+from great_expectations.cli.util import (
+    cli_message,
+    cli_message_dict,
+    load_data_context_with_error_handling,
+)
+from great_expectations.cli.mark import Mark as mark
 from great_expectations.core import ExpectationSuite
-from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
+from great_expectations.core.usage_statistics.usage_statistics import (
+    send_usage_message,
 )
 from great_expectations.datasource import (
     PandasDatasource,
     SparkDFDatasource,
     SqlAlchemyDatasource,
 )
-from great_expectations.datasource.generator import ManualBatchKwargsGenerator
-from great_expectations.datasource.generator.table_generator import (
+from great_expectations.datasource.batch_kwargs_generator import (
+    ManualBatchKwargsGenerator,
+)
+from great_expectations.datasource.batch_kwargs_generator.table_batch_kwargs_generator import (
     TableBatchKwargsGenerator,
 )
 from great_expectations.exceptions import (
     BatchKwargsError,
     DatasourceInitializationError,
 )
-from great_expectations.profile.sample_expectations_dataset_profiler import (
-    SampleExpectationsDatasetProfiler,
-)
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
-
-# FIXME: This prevents us from seeing a huge stack of these messages in python 2. We'll need to fix that later.
-# tests/test_cli.py::test_cli_profile_with_datasource_arg
-#   /Users/abe/Documents/superconductive/tools/great_expectations/tests/test_cli.py:294: Warning: Click detected the use of the unicode_literals __future__ import.  This is heavily discouraged because it can introduce subtle bugs in your code.  You should instead use explicit u"" literals for your unicode strings.  For more information see https://click.palletsprojects.com/python3/
-#     cli, ["profile", "my_datasource", "-d", project_root_dir])
-click.disable_unicode_literals_warning = True
 
 
 class DatasourceTypes(enum.Enum):
@@ -75,7 +71,7 @@ class SupportedDatabases(enum.Enum):
 
 @click.group()
 def datasource():
-    """datasource operations"""
+    """Datasource operations"""
     pass
 
 
@@ -88,17 +84,22 @@ def datasource():
 )
 def datasource_new(directory):
     """Add a new datasource to the data context."""
-    try:
-        context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        return
-
+    context = load_data_context_with_error_handling(directory)
     datasource_name, data_source_type = add_datasource(context)
 
     if datasource_name:
         cli_message("A new datasource '{}' was added to your project.".format(datasource_name))
+        send_usage_message(
+            data_context=context,
+            event="cli.datasource.new",
+            success=True
+        )
     else:  # no datasource was created
+        send_usage_message(
+            data_context=context,
+            event="cli.datasource.new",
+            success=False
+        )
         sys.exit(1)
 
 
@@ -111,23 +112,39 @@ def datasource_new(directory):
 )
 def datasource_list(directory):
     """List known datasources."""
-    try:
-        context = DataContext(directory)
-        datasources = context.list_datasources()
-        # TODO Pretty up this console output
-        cli_message(str([d for d in datasources]))
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        return
+    context = load_data_context_with_error_handling(directory)
+    datasources = context.list_datasources()
+    datasource_count = len(datasources)
+
+    if datasource_count == 0:
+        list_intro_string = "No Datasources found"
+    else:
+        list_intro_string = _build_datasource_intro_string(datasource_count)
+
+    cli_message(list_intro_string)
+    for datasource in datasources:
+        cli_message("")
+        cli_message_dict(datasource)
+
+    send_usage_message(data_context=context, event="cli.datasource.list", success=True)
+
+
+def _build_datasource_intro_string(datasource_count):
+    if datasource_count == 1:
+        list_intro_string = "1 Datasource found:"
+    if datasource_count > 1:
+        list_intro_string = f"{datasource_count} Datasources found:"
+    return list_intro_string
 
 
 @datasource.command(name="profile")
 @click.argument('datasource', default=None, required=False)
 @click.option(
-    "--generator-name",
+    "--batch-kwargs-generator-name",
     "-g",
     default=None,
-    help="The name of the batch kwarg generator configured in the datasource. The generator will list data assets in the datasource"
+    help="The name of the batch kwargs generator configured in the datasource. It will list data assets in the "
+         "datasource"
 )
 @click.option('--data-assets', '-l', default=None,
               help='Comma-separated list of the names of data assets that should be profiled. Requires datasource specified.')
@@ -147,58 +164,82 @@ def datasource_list(directory):
 )
 @click.option('--additional-batch-kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
-def datasource_profile(datasource, generator_name, data_assets, profile_all_data_assets, directory, view, additional_batch_kwargs):
+@mark.cli_as_experimental
+def datasource_profile(datasource, batch_kwargs_generator_name, data_assets, profile_all_data_assets, directory, view, additional_batch_kwargs):
     """
-    Profile a datasource (Beta)
+    Profile a datasource (Experimental)
 
     If the optional data_assets and profile_all_data_assets arguments are not specified, the profiler will check
     if the number of data assets in the datasource exceeds the internally defined limit. If it does, it will
     prompt the user to either specify the list of data assets to profile or to profile all.
     If the limit is not exceeded, the profiler will profile all data assets in the datasource.
     """
-    cli_message("<yellow>Warning - this is a BETA feature.</yellow>")
+    context = load_data_context_with_error_handling(directory)
+
     try:
-        context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        return
+        if additional_batch_kwargs is not None:
+            # TODO refactor out json load check in suite edit and add here
+            additional_batch_kwargs = json.loads(additional_batch_kwargs)
+            # TODO refactor batch load check in suite edit and add here
 
-    if additional_batch_kwargs is not None:
-        # TODO refactor out json load check in suite edit and add here
-        additional_batch_kwargs = json.loads(additional_batch_kwargs)
-        # TODO refactor batch load check in suite edit and add here
-
-    if datasource is None:
-        datasources = [_datasource["name"] for _datasource in context.list_datasources()]
-        if not datasources:
-            cli_message(NO_DATASOURCES_FOUND)
-            sys.exit(1)
-        elif len(datasources) > 1:
-            cli_message(
-                "<red>Error: please specify the datasource to profile. "\
-                "Available datasources: " + ", ".join(datasources) + "</red>"
-            )
-            sys.exit(1)
+        if datasource is None:
+            datasources = [_datasource["name"] for _datasource in context.list_datasources()]
+            if not datasources:
+                cli_message(NO_DATASOURCES_FOUND)
+                send_usage_message(
+                    data_context=context,
+                    event="cli.datasource.profile",
+                    success=False
+                )
+                sys.exit(1)
+            elif len(datasources) > 1:
+                cli_message(
+                    "<red>Error: please specify the datasource to profile. "\
+                    "Available datasources: " + ", ".join(datasources) + "</red>"
+                )
+                send_usage_message(
+                    data_context=context,
+                    event="cli.datasource.profile",
+                    success=False
+                )
+                sys.exit(1)
+            else:
+                profile_datasource(
+                    context,
+                    datasources[0],
+                    batch_kwargs_generator_name=batch_kwargs_generator_name,
+                    data_assets=data_assets,
+                    profile_all_data_assets=profile_all_data_assets,
+                    open_docs=view,
+                    additional_batch_kwargs=additional_batch_kwargs
+                )
+                send_usage_message(
+                    data_context=context,
+                    event="cli.datasource.profile",
+                    success=True
+                )
         else:
             profile_datasource(
                 context,
-                datasources[0],
-                generator_name=generator_name,
+                datasource,
+                batch_kwargs_generator_name=batch_kwargs_generator_name,
                 data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 open_docs=view,
                 additional_batch_kwargs=additional_batch_kwargs
             )
-    else:
-        profile_datasource(
-            context,
-            datasource,
-            generator_name=generator_name,
-            data_assets=data_assets,
-            profile_all_data_assets=profile_all_data_assets,
-            open_docs=view,
-            additional_batch_kwargs=additional_batch_kwargs
+            send_usage_message(
+                data_context=context,
+                event="cli.datasource.profile",
+                success=True
+            )
+    except Exception as e:
+        send_usage_message(
+            data_context=context,
+            event="cli.datasource.profile",
+            success=False
         )
+        raise e
 
 
 def add_datasource(context, choose_one_data_asset=False):
@@ -208,7 +249,7 @@ def add_datasource(context, choose_one_data_asset=False):
     :param context:
     :param choose_one_data_asset: optional - if True, this signals the method that the intent
             is to let user choose just one data asset (e.g., a file) and there is no need
-            to configure a generator that comprehensively scans the datasource for data assets
+            to configure a batch kwargs generator that comprehensively scans the datasource for data assets
     :return: a tuple: datasource_name, data_source_type
     """
 
@@ -292,7 +333,7 @@ def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_
             )
 
         configuration = PandasDatasource.build_configuration(
-            generators={
+            batch_kwargs_generators={
                 "subdir_reader": {
                     "class_name": "SubdirReaderBatchKwargsGenerator",
                     "base_directory": os.path.join("..", path),
@@ -411,7 +452,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
         except DatasourceInitializationError as de:
             cli_message(message.format(str(de)))
             if not click.confirm(
-                    "Enter the credentials again?".format(str(de)),
+                    "Enter the credentials again?",
                     default=True
             ):
                 context.add_datasource(datasource_name,
@@ -596,7 +637,7 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
     if passthrough_generator_only:
         datasource_name = "files_spark_datasource"
 
-        # configuration = SparkDFDatasource.build_configuration(generators={
+        # configuration = SparkDFDatasource.build_configuration(batch_kwargs_generators={
         #     "default": {
         #         "class_name": "PassthroughGenerator",
         #     }
@@ -632,18 +673,20 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
                 show_default=True
             )
 
-        configuration = SparkDFDatasource.build_configuration(generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderBatchKwargsGenerator",
-        "base_directory": os.path.join("..", path)
-    }
-}
-)
+        configuration = SparkDFDatasource.build_configuration(
+            batch_kwargs_generators={
+                "subdir_reader": {
+                    "class_name": "SubdirReaderBatchKwargsGenerator",
+                    "base_directory": os.path.join("..", path)
+                }
+            }
+        )
 
     context.add_datasource(name=datasource_name, class_name='SparkDFDatasource', **configuration)
     return datasource_name
 
 
+# TODO consolidate all the myriad CLI tests into this
 def select_datasource(context, datasource_name=None):
     msg_prompt_select_data_source = "Select a datasource"
     msg_no_datasources_configured = "<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
@@ -670,8 +713,10 @@ def select_datasource(context, datasource_name=None):
 
     return data_source
 
-def select_generator(context, datasource_name, available_data_assets_dict=None):
-    msg_prompt_select_generator = "Select generator"
+
+# TODO consolidate all the myriad CLI tests into this
+def select_batch_kwargs_generator(context, datasource_name, available_data_assets_dict=None):
+    msg_prompt_select_generator = "Select batch kwarg generator"
 
     if available_data_assets_dict is None:
         available_data_assets_dict = context.get_available_data_asset_names(datasource_names=datasource_name)
@@ -685,7 +730,7 @@ def select_generator(context, datasource_name, available_data_assets_dict=None):
         return None
     elif len(available_data_asset_names_by_generator.keys()) == 1:
         return list(available_data_asset_names_by_generator.keys())[0]
-    else:  # multiple generators
+    else:  # multiple batch_kwargs_generators
         generator_names = list(available_data_asset_names_by_generator.keys())
         choices = "\n".join(["    {}. {}".format(i, generator_name) for i, generator_name in enumerate(generator_names, 1)])
         option_selection = click.prompt(
@@ -693,64 +738,65 @@ def select_generator(context, datasource_name, available_data_assets_dict=None):
             type=click.Choice([str(i) for i, generator_name in enumerate(generator_names, 1)]),
             show_choices=False
         )
-        generator_name = generator_names[int(option_selection)-1]
+        batch_kwargs_generator_name = generator_names[int(option_selection)-1]
 
-        return generator_name
+        return batch_kwargs_generator_name
 
 
 # TODO this method needs testing
+# TODO this method has different numbers of returned objects
 def get_batch_kwargs(context,
                      datasource_name=None,
-                     generator_name=None,
+                     batch_kwargs_generator_name=None,
                      generator_asset=None,
                      additional_batch_kwargs=None):
     """
     This method manages the interaction with user necessary to obtain batch_kwargs for a batch of a data asset.
 
-    In order to get batch_kwargs this method needs datasource_name, generator_name and generator_asset
-    to combine them into a fully qualified data asset identifier(datasource_name/generator_name/generator_asset).
+    In order to get batch_kwargs this method needs datasource_name, batch_kwargs_generator_name and generator_asset
+    to combine them into a fully qualified data asset identifier(datasource_name/batch_kwargs_generator_name/generator_asset).
     All three arguments are optional. If they are present, the method uses their values. Otherwise, the method
     prompts user to enter them interactively. Since it is possible for any of these three components to be
     passed to this method as empty values and to get their values after interacting with user, this method
     returns these components' values in case they changed.
 
-    If the datasource has generators that can list available data asset names, the method lets user choose a name
-    from that list (note: if there are multiple generators, user has to choose one first). If a name known to
-    the chosen generator is selected, the generator will be able to yield batch_kwargs. The method also gives user
-    an alternative to selecting the data asset name from the generator's list - user can type in a name for their
-    data asset. In this case a passthrough batch kwargs generator will be used to construct a fully qualified data asset
-    identifier (note: if the datasource has no passthrough generator configured, the method will exist with a failure).
-    Since no generator can yield batch_kwargs for this data asset name, the method prompts user to specify batch_kwargs
+    If the datasource has batch_kwargs_generators that can list available data asset names, the method lets user choose a name
+    from that list (note: if there are multiple batch_kwargs_generators, user has to choose one first). If a name known to
+    the chosen batch_kwargs_generator is selected, the batch_kwargs_generators will be able to yield batch_kwargs. The method also gives user
+    an alternative to selecting the data asset name from the batch_kwargs_generators's list - user can type in a name for their
+    data asset. In this case a passthrough batch kwargs batch_kwargs_generators will be used to construct a fully qualified data asset
+    identifier (note: if the datasource has no passthrough batch_kwargs_generators configured, the method will exist with a failure).
+    Since no batch_kwargs_generators can yield batch_kwargs for this data asset name, the method prompts user to specify batch_kwargs
     by choosing a file (if the datasource is pandas or spark) or by writing a SQL query (if the datasource points
     to a database).
 
     :param context:
     :param datasource_name:
-    :param generator_name:
+    :param batch_kwargs_generator_name:
     :param generator_asset:
     :param additional_batch_kwargs:
-    :return: a tuple: (datasource_name, generator_name, generator_asset, batch_kwargs). The components
+    :return: a tuple: (datasource_name, batch_kwargs_generator_name, generator_asset, batch_kwargs). The components
                 of the tuple were passed into the methods as optional arguments, but their values might
                 have changed after this method's execution. If the returned batch_kwargs is None, it means
-                that the generator will know to yield batch_kwargs when called.
+                that the batch_kwargs_generator will know to yield batch_kwargs when called.
     """
     try:
         available_data_assets_dict = context.get_available_data_asset_names(datasource_names=datasource_name)
     except ValueError:
-        # the datasource has no generators
+        # the datasource has no batch_kwargs_generators
         available_data_assets_dict = {datasource_name: {}}
 
     data_source = select_datasource(context, datasource_name=datasource_name)
     datasource_name = data_source.name
 
-    if generator_name is None:
-        generator_name = select_generator(context, datasource_name,
-                                          available_data_assets_dict=available_data_assets_dict)
+    if batch_kwargs_generator_name is None:
+        batch_kwargs_generator_name = select_batch_kwargs_generator(context, datasource_name,
+                                                                  available_data_assets_dict=available_data_assets_dict)
 
-    # if the user provided us with the generator name and the generator asset, we have everything we need -
+    # if the user provided us with the batch kwargs generator name and the generator asset, we have everything we need -
     # let's ask the generator to build batch kwargs for this asset - we are done.
-    if generator_name is not None and generator_asset is not None:
-        generator = datasource.get_generator(generator_name)
+    if batch_kwargs_generator_name is not None and generator_asset is not None:
+        generator = datasource.get_batch_kwargs_generator(batch_kwargs_generator_name)
         batch_kwargs = generator.build_batch_kwargs(generator_asset, **additional_batch_kwargs)
         return batch_kwargs
 
@@ -758,7 +804,7 @@ def get_batch_kwargs(context,
         generator_asset, batch_kwargs = _get_batch_kwargs_from_generator_or_from_file_path(
             context,
             datasource_name,
-            generator_name=generator_name,
+            batch_kwargs_generator_name=batch_kwargs_generator_name,
         )
 
     elif isinstance(context.get_datasource(datasource_name), SqlAlchemyDatasource):
@@ -768,146 +814,11 @@ def get_batch_kwargs(context,
     else:
         raise ge_exceptions.DataContextError("Datasource {0:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {1:s}".format(datasource_name, str(type(context.get_datasource(datasource_name)))))
 
-    return (datasource_name, generator_name, generator_asset, batch_kwargs)
-
-
-def create_expectation_suite(
-    context,
-    datasource_name=None,
-    generator_name=None,
-    generator_asset=None,
-    batch_kwargs=None,
-    expectation_suite_name=None,
-    additional_batch_kwargs=None,
-    empty_suite=False,
-    show_intro_message=False,
-    open_docs=False
-):
-    """
-    Create a new expectation suite.
-
-    :return: a tuple: (success, suite name)
-    """
-
-    msg_intro = "\n<cyan>========== Create sample Expectations ==========</cyan>\n\n"
-    msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
-    """
-    msg_prompt_what_will_profiler_do = """
-Great Expectations will choose a couple of columns and generate expectations about them
-to demonstrate some examples of assertions you can make about your data. 
-    
-Press Enter to continue
-"""
-
-    msg_prompt_expectation_suite_name = """
-Name the new expectation suite"""
-
-    msg_suite_already_exists = "<red>An expectation suite named `{}` already exists. If you intend to edit the suite please use `great_expectations suite edit {}`.</red>"
-
-    if show_intro_message and not empty_suite:
-        cli_message(msg_intro)
-
-    data_source = select_datasource(context, datasource_name=datasource_name)
-    if data_source is None:
-        # select_datasource takes care of displaying an error message, so all is left here is to exit.
-        sys.exit(1)
-
-    datasource_name = data_source.name
-
-    existing_suite_names = [expectation_suite_id.expectation_suite_name for expectation_suite_id in context.list_expectation_suites()]
-
-    if expectation_suite_name in existing_suite_names:
-        cli_message(
-            msg_suite_already_exists.format(
-                expectation_suite_name,
-                expectation_suite_name
-            )
-        )
-        sys.exit(1)
-
-    if generator_name is None or generator_asset is None or batch_kwargs is None:
-        datasource_name, generator_name, generator_asset, batch_kwargs = get_batch_kwargs(
-            context,
-            datasource_name=datasource_name,
-            generator_name=generator_name,
-            generator_asset=generator_asset,
-            additional_batch_kwargs=additional_batch_kwargs)
-        # In this case, we have "consumed" the additional_batch_kwargs
-        additional_batch_kwargs = {}
-
-    if expectation_suite_name is None:
-        if generator_asset:
-            default_expectation_suite_name = "{}.warning".format(generator_asset)
-        elif "query" in batch_kwargs:
-            default_expectation_suite_name = "query.warning"
-        elif "path" in batch_kwargs:
-            try:
-                # Try guessing a filename
-                filename = os.path.split(os.path.normpath(batch_kwargs["path"]))[1]
-                # Take all but the last part after the period
-                filename = ".".join(filename.split(".")[:-1])
-                default_expectation_suite_name = str(filename) + ".warning"
-            except (OSError, IndexError):
-                default_expectation_suite_name = "warning"
-        else:
-            default_expectation_suite_name = "warning"
-        while True:
-            expectation_suite_name = click.prompt(msg_prompt_expectation_suite_name, default=default_expectation_suite_name, show_default=True)
-            if expectation_suite_name in existing_suite_names:
-                cli_message(
-                    msg_suite_already_exists.format(
-                        expectation_suite_name,
-                        expectation_suite_name
-                    )
-                )
-            else:
-                break
-
-    if empty_suite:
-        suite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=False)
-        suite.add_citation(comment="New suite added via CLI", batch_kwargs=batch_kwargs)
-        context.save_expectation_suite(suite, expectation_suite_name)
-        return True, expectation_suite_name
-
-    profiler = SampleExpectationsDatasetProfiler
-
-    click.prompt(msg_prompt_what_will_profiler_do, default=True, show_default=False)
-
-    cli_message("\nGenerating example Expectation Suite...")
-    run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-    profiling_results = context.profile_data_asset(
-        datasource_name,
-        generator_name=generator_name,
-        data_asset_name=generator_asset,
-        batch_kwargs=batch_kwargs,
-        profiler=profiler,
-        expectation_suite_name=expectation_suite_name,
-        run_id=run_id,
-        additional_batch_kwargs=additional_batch_kwargs
-    )
-
-    if profiling_results['success']:
-        build_docs(context, view=False)
-        if open_docs:  # This is mostly to keep tests from spawning windows
-            try:
-                # TODO this is really brittle and not covered in tests
-                validation_result = profiling_results["results"][0][1]
-                validation_result_identifier = ValidationResultIdentifier.from_object(validation_result)
-                context.open_data_docs(resource_identifier=validation_result_identifier)
-            except (KeyError, IndexError):
-                context.open_data_docs()
-
-        return True, expectation_suite_name
-
-    if profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND:
-        raise ge_exceptions.DataContextError(msg_some_data_assets_not_found.format(",".join(profiling_results['error']['not_found_data_assets'])))
-    if not profiling_results['success']:  # unknown error
-        raise ge_exceptions.DataContextError("Unknown profiling error code: " + profiling_results['error']['code'])
+    return (datasource_name, batch_kwargs_generator_name, generator_asset, batch_kwargs)
 
 
 def _get_batch_kwargs_from_generator_or_from_file_path(context, datasource_name,
-                                                       generator_name=None,
+                                                       batch_kwargs_generator_name=None,
                                                        additional_batch_kwargs={}):
     msg_prompt_generator_or_file_path =  """
 Would you like to: 
@@ -940,8 +851,8 @@ We could not determine the format of the file. What is it?
     generator_asset = None
 
     datasource = context.get_datasource(datasource_name)
-    if generator_name is not None:
-        generator = datasource.get_generator(generator_name)
+    if batch_kwargs_generator_name is not None:
+        generator = datasource.get_batch_kwargs_generator(batch_kwargs_generator_name)
 
         option_selection = click.prompt(
             msg_prompt_generator_or_file_path,
@@ -1162,7 +1073,7 @@ Enter an SQL query
 def profile_datasource(
     context,
     datasource_name,
-    generator_name=None,
+    batch_kwargs_generator_name=None,
     data_assets=None,
     profile_all_data_assets=False,
     max_data_assets=20,
@@ -1188,12 +1099,12 @@ def profile_datasource(
     msg_too_many_data_assets = """There are {0:d} data assets in {1:s}. Profiling all of them might take too long.    
 """
 
-    msg_error_multiple_generators_found = """<red>More than one batch kwarg generators found in datasource {0:s}.
-Specify the one you want the profiler to use in generator_name argument.</red>      
+    msg_error_multiple_generators_found = """<red>More than one batch kwargs generator found in datasource {0:s}.
+Specify the one you want the profiler to use in batch_kwargs_generator_name argument.</red>      
 """
 
-    msg_error_no_generators_found = """<red>No batch kwarg generators can list available data assets in datasource {0:s}.
-The datasource might be empty or a generator not configured in the config file.</red>    
+    msg_error_no_generators_found = """<red>No batch kwargs generators can list available data assets in datasource 
+    {0:s}. The datasource might be empty or a batch kwargs generator not configured in the config file.</red>    
 """
 
     msg_prompt_enter_data_asset_list = """Enter comma-separated list of data asset names (e.g., {0:s})   
@@ -1218,7 +1129,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
     # Call the data context's profiling method to check if the arguments are valid
     profiling_results = context.profile_datasource(
         datasource_name,
-        generator_name=generator_name,
+        batch_kwargs_generator_name=batch_kwargs_generator_name,
         data_assets=data_assets,
         profile_all_data_assets=profile_all_data_assets,
         max_data_assets=max_data_assets,
@@ -1230,7 +1141,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         if data_assets or profile_all_data_assets or click.confirm(msg_confirm_ok_to_proceed.format(datasource_name), default=True):
             profiling_results = context.profile_datasource(
                 datasource_name,
-                generator_name=generator_name,
+                batch_kwargs_generator_name=batch_kwargs_generator_name,
                 data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 max_data_assets=max_data_assets,
@@ -1247,11 +1158,11 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 cli_message(msg_some_data_assets_not_found.format("," .join(profiling_results['error']['not_found_data_assets'])))
             elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS:
                 cli_message(msg_too_many_data_assets.format(profiling_results['error']['num_data_assets'], datasource_name))
-            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_MULTIPLE_GENERATORS_FOUND:
+            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND:
                 cli_message(
                     msg_error_multiple_generators_found.format(datasource_name))
                 sys.exit(1)
-            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_NO_GENERATOR_FOUND:
+            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND:
                 cli_message(
                     msg_error_no_generators_found.format(datasource_name))
                 sys.exit(1)
@@ -1285,7 +1196,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
             # (no dry run this time)
             profiling_results = context.profile_datasource(
                 datasource_name,
-                generator_name=generator_name,
+                batch_kwargs_generator_name=batch_kwargs_generator_name,
                 data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 max_data_assets=max_data_assets,
@@ -1314,17 +1225,6 @@ msg_prompt_choose_database = """
 Which database backend are you using?
 {}
 """.format("\n".join(["    {}. {}".format(i, db.value) for i, db in enumerate(SupportedDatabases, 1)]))
-
-#     msg_prompt_dbt_choose_profile = """
-# Please specify the name of the dbt profile (from your ~/.dbt/profiles.yml file Great Expectations \
-# should use to connect to the database
-#     """
-
-#     msg_dbt_go_to_notebook = """
-# To create expectations for your dbt models start Jupyter and open notebook
-# great_expectations/notebooks/using_great_expectations_with_dbt.ipynb -
-# it will walk you through next steps.
-#     """
 
 msg_prompt_filesys_enter_base_path = """
 Enter the path (relative or absolute) of the root directory where the data files are stored.

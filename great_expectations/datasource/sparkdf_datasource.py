@@ -23,7 +23,7 @@ except ImportError:
 
 class SparkDFDatasource(Datasource):
     """The SparkDFDatasource produces SparkDFDatasets and supports generators capable of interacting with local
-    filesystem (the default subdir_reader generator) and databricks notebooks.
+    filesystem (the default subdir_reader batch kwargs  generator) and databricks notebooks.
 
     Accepted Batch Kwargs:
         - PathBatchKwargs ("path" or "s3" keys)
@@ -33,13 +33,13 @@ class SparkDFDatasource(Datasource):
     recognized_batch_parameters = {'reader_method', 'reader_options', 'limit', 'dataset_options'}
 
     @classmethod
-    def build_configuration(cls, data_asset_type=None, generators=None, spark_config=None, **kwargs):
+    def build_configuration(cls, data_asset_type=None, batch_kwargs_generators=None, spark_config=None, **kwargs):
         """
         Build a full configuration object for a datasource, potentially including generators with defaults.
 
         Args:
             data_asset_type: A ClassConfig dictionary
-            generators: Generator configuration dictionary
+            batch_kwargs_generators: Generator configuration dictionary
             spark_config: dictionary of key-value pairs to pass to the spark builder
             **kwargs: Additional kwargs to be part of the datasource constructor's initialization
 
@@ -49,7 +49,10 @@ class SparkDFDatasource(Datasource):
         """
 
         if data_asset_type is None:
-            data_asset_type = {"class_name": "SparkDFDataset"}
+            data_asset_type = {
+                "class_name": "SparkDFDataset",
+                "module_name": "great_expectations.dataset"
+            }
         else:
             data_asset_type = classConfigSchema.dump(ClassConfig(**data_asset_type))
 
@@ -61,12 +64,12 @@ class SparkDFDatasource(Datasource):
             "data_asset_type": data_asset_type,
             "spark_config": spark_config
         })
-        if generators:
-            configuration["generators"] = generators
+        if batch_kwargs_generators:
+            configuration["batch_kwargs_generators"] = batch_kwargs_generators
 
         return configuration
 
-    def __init__(self, name="default", data_context=None, data_asset_type=None, generators=None,
+    def __init__(self, name="default", data_context=None, data_asset_type=None, batch_kwargs_generators=None,
                  spark_config=None, **kwargs):
         """Build a new SparkDFDatasource instance.
 
@@ -74,19 +77,19 @@ class SparkDFDatasource(Datasource):
             name: the name of this datasource
             data_context: the DataContext to which this datasource is connected
             data_asset_type: ClassConfig describing the data_asset type to be constructed by this datasource
-            generators: generator configuration
+            batch_kwargs_generators: generator configuration
             spark_config: dictionary of key-value pairs to be set on the spark session builder
             **kwargs: Additional
         """
-        configuration_with_defaults = SparkDFDatasource.build_configuration(data_asset_type, generators,
+        configuration_with_defaults = SparkDFDatasource.build_configuration(data_asset_type, batch_kwargs_generators,
                                                                             spark_config, **kwargs)
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
-        generators = configuration_with_defaults.pop("generators", None)
+        batch_kwargs_generators = configuration_with_defaults.pop("batch_kwargs_generators", None)
         super(SparkDFDatasource, self).__init__(
             name,
             data_context=data_context,
             data_asset_type=data_asset_type,
-            generators=generators,
+            batch_kwargs_generators=batch_kwargs_generators,
             **configuration_with_defaults)
 
         try:

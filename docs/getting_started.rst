@@ -1,9 +1,9 @@
 .. _getting_started:
 
 
-####################
+###############
 Getting started
-####################
+###############
 
 Welcome to Great Expectations! This tutorial will help you set up your first deployment of Great Expectactions. We'll also introduce important concepts, with links to detailed material you can dig into later.
 
