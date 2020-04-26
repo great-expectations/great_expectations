@@ -9,7 +9,7 @@ Following these instructions helps us make sure the code review and merge proces
 .. _contributing_before_submitting_a_pr:
 
 Before submitting a pull request
-------------
+--------------------------------
 
 Once your code is ready, please go through the following checklist before submitting a pull request. 
 
@@ -17,7 +17,7 @@ Once your code is ready, please go through the following checklist before submit
 **1. Have you signed the CLA?**
 
     * A Contributor License Agreement helps guarantee that contributions to Great Expectations will always remain free and open.
-    * Please see :ref:`contributing_cla` for more information and instructions for how to sign the CLA the first time you contriubte to Great Expectations.
+    * Please see :ref:`contributing_cla` for more information and instructions for how to sign the CLA the first time you contribute to Great Expectations.
     * If you’ve included your (physical) mailing address in the CLA, we’ll send you a personalized Great Expectations mug once your first PR is merged!
 
 **2. Have you followed the Style Guide for code and comments?**
@@ -54,7 +54,7 @@ If you’ve checked off all these items, you’re now ready to submit a pull req
 .. _contributing_submitting_a_pr:
 
 How to submit a pull request
---------------
+----------------------------
 
 When you’re done with your work...
 

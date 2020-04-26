@@ -28,5 +28,3 @@ Given the above configuration, we can observe the following:
 >>> batch = context.get_batch(batch_kwargs, my_suite)
 >>> isinstance(batch, MyCustomPandasAsset)
 True
-
-*Last updated:* |lastupdate|

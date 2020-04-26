@@ -44,6 +44,7 @@ Options:
   --help         Show this message and exit.
 
 Commands:
+  checkpoint           Checkpoint operations
   datasource           Datasource operations
   docs                 Data Docs operations
   init                 Initialize a new Great Expectations project.
