@@ -1,9 +1,9 @@
 .. _getting_started:
 
 
-####################
+###############
 Getting started
-####################
+###############
 
 It's easy! Just use pip install:
 

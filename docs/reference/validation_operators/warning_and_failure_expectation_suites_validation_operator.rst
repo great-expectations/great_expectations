@@ -78,7 +78,7 @@ This is an example of invoking an instance of a Validation Operator from Python:
 
 The `run` method returns a result object.
 
-The value of "success" is True if no critical expectation suites ("failure") failed to validate (non-critial warning") expectation suites are allowed to fail without affecting the success status of the run.
+The value of "success" is True if no critical expectation suites ("failure") failed to validate (non-critical warning") expectation suites are allowed to fail without affecting the success status of the run.
 
 .. code-block:: json
 
