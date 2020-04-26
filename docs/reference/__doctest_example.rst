@@ -1,6 +1,6 @@
-#################################
+################
 Doctest Examples
-#################################
+################
 
 Use these examples during migration to testable docs.
 
