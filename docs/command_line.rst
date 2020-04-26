@@ -81,7 +81,7 @@ connect to your data, show you some sample expectations, and open Data Docs.
 
 .. note::
 
-  	You can install the Great Expectations python package by typing ``pip install great_expectations``, if you don't have it already.
+        You can install the Great Expectations python package by typing ``pip install great_expectations``, if you don't have it already.
 
 .. code-block:: bash
 
@@ -121,9 +121,9 @@ Running ``great_expectations suite list`` gives a list of available expectation 
 
     $ great_expectations suite list
     3 expectation suites found:
-      	customer_requests.warning
-      	customer_requests.critical
-      	churn_model_input
+        customer_requests.warning
+        customer_requests.critical
+        churn_model_input
 
 ``great_expectations suite new``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -634,7 +634,7 @@ If you are using a SQL datasource you will be guided through a series of prompts
 
 .. tip::
 
-	 A custom SQL query can be very handy if for example you wanted to validate all records in a table with timestamps.
+         A custom SQL query can be very handy if for example you wanted to validate all records in a table with timestamps.
 
 For example, imagine you have a machine learning model that looks at the last 14 days of customer events to predict churn.
 If you have built a suite called ``churn_model_assumptions`` and a postgres database with a ``user_events`` table with an ``event_timestamp`` column and you wanted to validate all events that occurred in the last 14 days you might do something like:

@@ -1,8 +1,8 @@
 .. _saving_metrics:
 
-###############
+##############
 Saving Metrics
-###############
+##############
 
 Saving metrics during Validation makes it easy to construct a new data series based on observed
 dataset characteristics computed by Great Expectations. That data series can serve as the source for a dashboard or
@@ -11,9 +11,9 @@ overall data quality metrics, for example.
 Storing metrics is still a **beta** feature of Great Expectations, and we expect configuration and
 capability to evolve rapidly.
 
-*********************************
+*********************
 Adding a MetricsStore
-*********************************
+*********************
 
 A MetricStore is a special store that can store Metrics computed during Validation. A Metric store tracks the run_id
 of the validation and the expectation suite name in addition to the metric name and metric kwargs.
@@ -37,9 +37,9 @@ The next time your DataContext is loaded, it will connect to the database and in
 one has not already been created. See the :ref:`metrics_reference` for more information on additional configuration
 options.
 
-*********************************
+*******************************
 Configuring a Validation Action
-*********************************
+*******************************
 
 Once a MetricStore is available, it is possible to configure a new `StoreMetricsAction` to save metrics during
 validation.

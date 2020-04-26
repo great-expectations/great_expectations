@@ -1,21 +1,21 @@
 .. _validation:
 
-##############
+##########
 Validation
-##############
+##########
 
 Once you've constructed and stored Expectations, you can use them to validate new data. Validation generates a report
 that details any specific deviations from expected values.
 
 We recommend using :ref:`data_context` to manage expectation suites and coordinate validation across runs.
 
-*******************
+******************
 Validation Results
-*******************
+******************
 
 The report contains information about:
 
-  - the overall sucess (the `success` field),
+  - the overall success (the `success` field),
   - summary statistics of the expectations (the `statistics` field), and
   - the detailed results of each expectation (the `results` field).
 
@@ -101,9 +101,9 @@ An example report looks like the following:
       }
     }
 
-*****************************
+****************************
 Reviewing Validation Results
-*****************************
+****************************
 
 The easiest way to review Validation Results is to view them from your local Data Docs site, where you can also conveniently
 view Expectation Suites and with additional configuration, Profiling Results (see :ref:`data_docs_site_configuration`). Out of the box, Great Expectations Data Docs is configured to compile a local
@@ -116,9 +116,9 @@ Note that by default, Data Docs will only compile Validation Results located in 
 
 To learn more about setting up Great Expectations for your team read :ref:`using_ge_on_teams`.
 
-*********************
+********************
 Validation Operators
-*********************
+********************
 
 The example above demonstrates how to validate one batch of data against one expectation suite. The `validate` method returns a dictionary of validation results. This is sufficient when exploring your data and getting to know Great Expectations.
 When deploying Great Expectations in a real data pipeline, you will typically discover additional needs:
@@ -132,9 +132,9 @@ Validation Operators are mini-applications that can be configured to implement t
 Read :ref:`validation_operators_and_actions` to learn more.
 
 
-*********************
+*******************
 Deployment patterns
-*********************
+*******************
 
 Useful deployment patterns include:
 

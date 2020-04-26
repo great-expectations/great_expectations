@@ -16,9 +16,7 @@ Expectations to have more control over the metrics that they generate, expose, a
 
 The following examples demonstrate how metrics are defined:
 
-.. code-block:: pythohn
+.. code-block:: python
 
     res = df.expect_column_values_to_be_in_set("Sex", ["male", "female"])
     res.get_metric("expect_column_values_to_be_in_set.result.missing_count", column="Sex")
-
-*Last updated:* |lastupdate|

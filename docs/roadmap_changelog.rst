@@ -1,12 +1,12 @@
 .. _roadmap_changelog:
 
-#######################
+#####################
 Roadmap and changelog
-#######################
+#####################
 
-******************
+****************
 Planned Features
-******************
+****************
 
 * Improved variable typing
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
@@ -14,9 +14,9 @@ Planned Features
 * Multi-batch expectations
 
 
-*******************
+*********
 Changelog
-*******************
+*********
 
 .. toctree::
    :maxdepth: 2
