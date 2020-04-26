@@ -1,8 +1,8 @@
 .. _datasource:
 
-##############
+###########
 Datasources
-##############
+###########
 
 Datasources are responsible for connecting data and compute infrastructure. Each Datasource provides
 Great Expectations Data Assets connected to a specific compute environment, such as a

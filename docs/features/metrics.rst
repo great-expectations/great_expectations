@@ -20,5 +20,3 @@ values, it will most likely be an md5 hash of key/value pairs. It can also be No
 kwargs required to identify the metric.
 
 See the :ref:`metrics_reference` or :ref:`Saving Metrics Tutorial <saving_metrics>` for more information.
-
-*Last updated:* |lastupdate|
