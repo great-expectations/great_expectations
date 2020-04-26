@@ -1,16 +1,16 @@
 .. _expectation_glossary:
 
-################################
+########################
 Glossary of Expectations
-################################
+########################
 
 This is a list of all built-in Expectations. Expectations are extendable so you
 can create custom expectations for your data domain! To do so see this article:
 :ref:`custom_expectations_reference`.
 
-*********
+*******
 Dataset
-*********
+*******
 
 Dataset objects model tabular data and include expectations with row and column semantics. Many Dataset expectations
 are implemented using column_map_expectation and column_aggregate_expectation decorators.
@@ -18,7 +18,7 @@ are implemented using column_map_expectation and column_aggregate_expectation de
 Not all expectations are currently implemented for each backend. Please see :ref:`implemented_expectations`.
 
 Table shape
-=============================================
+===========
 
 * :func:`expect_column_to_exist <great_expectations.dataset.dataset.Dataset.expect_column_to_exist>`
 * :func:`expect_table_columns_to_match_ordered_list <great_expectations.dataset.dataset.Dataset.expect_table_columns_to_match_ordered_list>`
@@ -26,7 +26,7 @@ Table shape
 * :func:`expect_table_row_count_to_equal <great_expectations.dataset.dataset.Dataset.expect_table_row_count_to_equal>`
 
 Missing values, unique values, and types
-=============================================
+========================================
 
 * :func:`expect_column_values_to_be_unique <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_unique>`
 * :func:`expect_column_values_to_not_be_null <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_be_null>`
@@ -35,7 +35,7 @@ Missing values, unique values, and types
 * :func:`expect_column_values_to_be_in_type_list <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_in_type_list>`
 
 Sets and ranges
-=============================================
+===============
 
 * :func:`expect_column_values_to_be_in_set <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_in_set>`
 * :func:`expect_column_values_to_not_be_in_set <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_be_in_set>`
@@ -45,7 +45,7 @@ Sets and ranges
 
 
 String matching
-=============================================
+===============
 
 * :func:`expect_column_value_lengths_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_value_lengths_to_be_between>`
 * :func:`expect_column_value_lengths_to_equal <great_expectations.dataset.dataset.Dataset.expect_column_value_lengths_to_equal>`
@@ -55,7 +55,7 @@ String matching
 * :func:`expect_column_values_to_not_match_regex_list <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_match_regex_list>`
 
 Datetime and JSON parsing
-=============================================
+=========================
 
 * :func:`expect_column_values_to_match_strftime_format <great_expectations.dataset.dataset.Dataset.expect_column_values_to_match_strftime_format>`
 * :func:`expect_column_values_to_be_dateutil_parseable <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_dateutil_parseable>`
@@ -63,7 +63,7 @@ Datetime and JSON parsing
 * :func:`expect_column_values_to_match_json_schema <great_expectations.dataset.dataset.Dataset.expect_column_values_to_match_json_schema>`
 
 Aggregate functions
-=============================================
+===================
 
 * :func:`expect_column_distinct_values_to_be_in_set <great_expectations.dataset.dataset.Dataset.expect_column_distinct_values_to_be_in_set>`
 * :func:`expect_column_distinct_values_to_contain_set <great_expectations.dataset.dataset.Dataset.expect_column_distinct_values_to_contain_set>`
@@ -80,7 +80,7 @@ Aggregate functions
 * :func:`expect_column_sum_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_sum_to_be_between>`
 
 Multi-column
-=============================================
+============
 * :func:`expect_column_pair_values_A_to_be_greater_than_B <great_expectations.dataset.dataset.Dataset.expect_column_pair_values_A_to_be_greater_than_B>`
 * :func:`expect_column_pair_values_to_be_equal <great_expectations.dataset.dataset.Dataset.expect_column_pair_values_to_be_equal>`
 * :func:`expect_column_pair_values_to_be_in_set <great_expectations.dataset.dataset.Dataset.expect_column_pair_values_to_be_in_set>`
@@ -88,16 +88,16 @@ Multi-column
 
 
 Distributional functions
-=============================================
+========================
 
 * :func:`expect_column_kl_divergence_to_be_less_than <great_expectations.dataset.dataset.Dataset.expect_column_kl_divergence_to_be_less_than>`
 * :func:`expect_column_bootstrapped_ks_test_p_value_to_be_greater_than <great_expectations.dataset.dataset.Dataset.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than>`
 * :func:`expect_column_chisquare_test_p_value_to_be_greater_than <great_expectations.dataset.dataset.Dataset.expect_column_chisquare_test_p_value_to_be_greater_than>`
 * :func:`expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than <great_expectations.dataset.dataset.Dataset.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than>`
 
-******************
+*************
 FileDataAsset
-******************
+*************
 
 File data assets reason at the file level, and the line level (for text data).
 
