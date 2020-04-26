@@ -118,7 +118,7 @@ won’t: this data will be very helpful for improving the product. See this arti
 * Docs typo fixes
 * Jupyter notebook improvements
 * `great_expectations init` improvements
-* Simpler messaging in valiation notebooks
+* Simpler messaging in validation notebooks
 * replaced hacky loop with suite list call in notebooks
 * CLI suite new now supports `--empty` flag that generates an empty suite and opens a notebook
 * add error handling to `init` flow for cases where user tries using a broken file
@@ -128,7 +128,7 @@ won’t: this data will be very helpful for improving the product. See this arti
 -----------------
 * Add support for transient table creation in snowflake (#1012)
 * Improve path support in TupleStoreBackend for better cross-platform compatibility
-* New features on `ExpecatationSuite`
+* New features on `ExpectationSuite`
    - `.add_citation()`
    - `get_citations()`
 * `SampleExpectationsDatasetProfiler` now leaves a citation containing the original batch kwargs

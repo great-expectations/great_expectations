@@ -1,13 +1,13 @@
 .. _community:
 
-####################
+#########
 Community
-####################
+#########
 
 We're committed to supporting and growing the community around Great Expectations.
 It's not enough to build a great tool. We want to build a great community as well.
 
-Open source doesn’t always have the best reputation for being friendly and welcoming, and that makes us sad.
+Open source doesn't always have the best reputation for being friendly and welcoming, and that makes us sad.
 Everyone belongs in open source, and Great Expectations is dedicated to making you feel welcome.
 
 Get in touch with the Great Expectations team
@@ -32,7 +32,7 @@ on GitHub and we'll see what we can do.
 
 
 Contribute code or documentation
-----------------------------------
+--------------------------------
 
 We welcome contributions to Great Expectations. Please start with our :ref:`contributing` guide and don't be shy
 with questions!

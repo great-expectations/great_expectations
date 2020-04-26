@@ -2,7 +2,7 @@
 
 
 Style Guide
-==============
+===========
 
 * Ensure any new features or behavioral differences introduced by your changes are documented in the docs, and ensure you have docstrings on your contributions. We use the Sphinx's `Napoleon extension <http://www.sphinx-doc.org/en/master/ext/napoleon.html>`__ to build documentation from Google-style docstrings.
 * Avoid abbreviations, e.g. use `column_index` instead of `column_idx`.
@@ -21,20 +21,20 @@ These guidelines should be followed consistently for methods and variables expos
 
 
 .rst files
-----------------------------------------------------
+----------
 
 **Titles**
 
 * Only the first word in each title is capitalized:
 
-	* Yep: “File a bug report or feature request”
-	* Nope: “File a Bug Report or Feature Request”
+        * Yep: “File a bug report or feature request”
+        * Nope: “File a Bug Report or Feature Request”
 
 * For sections within “how to”-type guides, titles should be short, imperative sentences. Avoid extra words:
 
-	* Good: “Configure data documentation”
-	* Nope: “Configuring data documentation”
-	* Avoid: “Configure documentation for your data”
+        * Good: “Configure data documentation”
+        * Nope: “Configuring data documentation”
+        * Avoid: “Configure documentation for your data”
 
 
 **File names and RST refs**
@@ -52,9 +52,9 @@ These guidelines should be followed consistently for methods and variables expos
 
 * When using referencing an object that has a specific class name, prefer the class name. When using class names, use.
 
-	* Acceptable: “You can create suites of Expectations as follows…”
-	* Better: “You can create ExpectationSuites as follows…”
-	* Wrong: “You can create expectation suites as follows…”
+        * Acceptable: “You can create suites of Expectations as follows…”
+        * Better: “You can create ExpectationSuites as follows…”
+        * Wrong: “You can create expectation suites as follows…”
 
 * (Not yet implemented: Link class names on first reference within each page.)
 
@@ -63,5 +63,5 @@ These guidelines should be followed consistently for methods and variables expos
 
 * For inline code in RST, make sure to use double backticks. This isn’t markdown, folks:
 
-	* Yep: The ``init`` command will walk you through setting up a new project and connecting to your data.
-	* Nope: The `init` command will walk you through setting up a new project and connecting to your data.
+        * Yep: The ``init`` command will walk you through setting up a new project and connecting to your data.
+        * Nope: The `init` command will walk you through setting up a new project and connecting to your data.
