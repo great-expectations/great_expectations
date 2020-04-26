@@ -1,8 +1,8 @@
 .. _profiling:
 
-##############
+#########
 Profiling
-##############
+#########
 
 Profiling is a way of Rendering Validation Results to produce a summary of observed characteristics. When Validation
 Results are rendered as Profiling data, they create a new section in :ref:`data_docs`. By computing the **observed**

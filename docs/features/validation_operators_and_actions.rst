@@ -1,9 +1,9 @@
 .. _validation_operators_and_actions:
 
 
-##############################################
+#############################################
 Validation Operators And Actions Introduction
-##############################################
+#############################################
 
 The `validate` method evaluates one batch of data against one expectation suite and returns a dictionary of validation results. This is sufficient when you explore your data and get to know Great Expectations.
 When deploying Great Expectations in a real data pipeline, you will typically discover additional needs:
@@ -24,7 +24,7 @@ The classes that implement them are in :py:mod:`great_expectations.validation_op
 
 
 ActionListValidationOperator
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ActionListValidationOperator validates each batch in the list that is passed as `assets_to_validate` argument to its `run` method against the expectation suite included within that batch and then invokes a list of configured actions on every validation result.
 
@@ -37,7 +37,7 @@ A user can choose the actions to perform in their instance of the operator.
 Read more about ActionListValidationOperator here: :ref:`action_list_validation_operator`.
 
 WarningAndFailureExpectationSuitesValidationOperator
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 WarningAndFailureExpectationSuitesValidationOperator implements a business logic pattern that many data practitioners consider useful.
 
@@ -115,9 +115,9 @@ This is an example of invoking an instance of a Validation Operator from Python:
 Each operator class is free to define its own object that the `run` method returns. Consult the reference of the specific Validation Operator.
 
 
-********
+*******
 Actions
-********
+*******
 
 The Validation Operator implementations above invoke actions.
 

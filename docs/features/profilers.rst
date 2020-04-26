@@ -1,8 +1,8 @@
 .. _profilers:
 
-##############
+#########
 Profilers
-##############
+#########
 
 Great Expectations provides a mechanism to automatically generate expectations, using a feature called a `Profiler`. A
 Profiler builds an Expectation Suite from one or more Data Assets. It usually also validates the data against the
@@ -20,5 +20,3 @@ convention that all columns **named** "id" are primary keys, whereas all columns
 **suffix** "_id" are foreign keys. In that case, when the team using Great Expectations first encounters a new
 dataset that followed the convention, a Profiler could use that knowledge to add an expect_column_values_to_be_unique
 Expectation to the "id" column (but not, for example an "address_id" column).
-
-*Last updated:* |lastupdate|
