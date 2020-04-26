@@ -1,8 +1,8 @@
 .. _expectations:
 
-##############
+############
 Expectations
-##############
+############
 
 Expectations are the workhorse abstraction in Great Expectations. Like assertions in traditional python unit tests,
 Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests,
@@ -130,7 +130,7 @@ Iterative exploratory analysis
 ===============================
 
 Build expectations as you conduct exploratory data analysis to ensure insights about data processes and pipelines
-remain part of your team's knowldege. Great Expectations's library of Expectations has been developed by a broad
+remain part of your team's knowledge. Great Expectations's library of Expectations has been developed by a broad
 cross-section of data scientists and engineers. Check out the :ref:`expectation_glossary`; it covers all kinds of
 practical use cases:
 
