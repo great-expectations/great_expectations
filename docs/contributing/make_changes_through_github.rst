@@ -2,12 +2,12 @@
 
 
 Making changes directly through Github
-==========================================
+======================================
 
 If you want to change documentation, but not code, we suggest using the GitHub markdown editor, which means you don’t have to fork the repo at all. Here’s how you do this:
 
 Start editing
----------------------
+-------------
 
 **1A. Edit from docs.greatexpecations.io**
 
@@ -25,7 +25,7 @@ Start editing
     * Please pay close attention to the :ref:`contributing_style_guide`.
 
 Submit a pull request
--------------------------
+---------------------
 
 
 **3. Submit your edits as a PR**

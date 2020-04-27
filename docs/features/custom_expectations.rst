@@ -1,8 +1,8 @@
 .. _custom_expectations_feature:
 
-####################################
+###################
 Custom expectations
-####################################
+###################
 
 Expectations are especially useful when they capture critical aspects of data understanding that analysts and
 practitioners know based on its *semantic* meaning. It's common to want to extend Great Expectations with application-
