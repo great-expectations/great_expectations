@@ -3,7 +3,7 @@
 
 
 Validate Data
-==============
+=============
 
 Expectations describe Data Assets. Data Assets are composed of Batches. Validation checks Expectations against a Batch of data. Expectation Suites combine multiple Expectations into an overall description of a Batch.
 
@@ -77,7 +77,7 @@ To read more about DataContexts, see: :ref:`data_context`
 
 
 2. Choose an Expectation Suite
--------------------------------------------
+------------------------------
 
 The ``context`` instantiated in the previous section has a convenience method that lists all Expectation Suites created in a project:
 
@@ -94,7 +94,7 @@ Choose the Expectation Suite you will use to validate a Batch of data:
 
 
 3. Load a batch of data you want to validate
----------------------------------------------
+--------------------------------------------
 
 Expectations describe Batches of data - Expectation Suites combine multiple Expectations into an overall description of a Batch. Validation checks a Batch against an Expectation Suite.
 
@@ -181,7 +181,7 @@ can read about the default Generators' behavior and how to implement additional 
 :ref:`batch_kwargs_generator`.
 
 4. Validate the batch
------------------------
+---------------------
 
 When Great Expectations is integrated into a data pipeline, the pipeline calls GE to validate a specific batch (an input to a pipeline's step or its output).
 
@@ -299,7 +299,7 @@ the slack webhook URL in the uncommitted/config_variables.yml file:
   validation_notification_slack_webhook: https://slack.com/your_webhook_url
 
 Running the Validation Operator
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Before running the Validation Operator, create a ``run_id``. A ``run_id`` links together validations of different data assets, making it possible to track "runs" of a pipeline and
 follow data assets as they are transformed, joined, annotated, enriched, or evaluated. The run id can be any string;
