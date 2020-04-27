@@ -558,7 +558,6 @@ class BaseDataContext(object):
             datasource = self.get_datasource(datasource_name)
             if datasource:
                #remove key until we have a delete method on project_config
-               del self._project_config["datasources"][datasource_name]
                self._project_config["datasources"][datasource_name] = None
                self._datasources.remove(datasource_name)
             else:
