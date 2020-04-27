@@ -14,8 +14,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     load_class,
-    safe_mmkdir,
-    safe_rrmdir,
     substitute_all_config_variables,
 )
 
@@ -99,12 +97,12 @@ def docs_list(directory):
 @click.option(
     "--site-name",
     "-s",
-    help="The site for which to generate documentation. See data_docs section in great_expectations.yml",
+    help="The site that you want documentation cleaned for. See data_docs section in great_expectations.yml",
 )
 @click.option(
     "--all",
     "-a",
-    help="The site for which to generate documentation. See data_docs section in great_expectations.yml",
+    help="With this, all sites will get their data docs cleaned out. See data_docs section in great_expectations.yml",
 )
 def clean_data_docs(directory, site_name=None, all=None):
     """Delete data docs"""
@@ -115,12 +113,13 @@ def clean_data_docs(directory, site_name=None, all=None):
         sys.exit(1)
     context.clean_data_docs(site_name=site_name)
     failed = False
-    send_usage_message(
-        data_context=context,
-        event="cli.docs.clean",
-        success=True
-    )
-    cli_message("<green>{}</green>".format("Cleaned data docs"))
+    if failed == False and context is not None:
+        send_usage_message(
+            data_context=context,
+            event="cli.docs.clean",
+            success=True
+        )
+        cli_message("<green>{}</green>".format("Cleaned data docs"))
      
     if failed and context is not None:
         send_usage_message(

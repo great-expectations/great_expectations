@@ -117,7 +117,7 @@ def delete_datasource(self,datasource_name=None):
         cli_message("<red>{}</red>".format("Datasource name must be a datasource name"))
         return
     else:
-        datasources = context.list_datasources()
+        datasources = context.delete_datasource()
         if not datasources.has_key(datasource_name):
             cli_message("<red>{}</red>".format("Datasource name must be a datasource name"))
             return

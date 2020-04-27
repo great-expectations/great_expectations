@@ -928,20 +928,14 @@ class BaseDataContext(object):
         Returns:
             True for Success and False for Failure.
         """
-        expectation_suite = ExpectationSuite(expectation_suite_name=expectation_suite_name)
-        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
-        del self._stores[self.expectations_store_name][key]
-        return True
         if not self._stores[self.expectations_store_name].has_key(key):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
             )
         else:
-            #self._stores[self.expectations_store_name].remove_key(key)
-            del self._stores[self.expectations_store_name][key]
-        if self._stores[self.expectations_store_name].has_key(key):
-            return False
-        return True
+            self._stores[self.expectations_store_name].remove_key(key)
+            return True
+        return False
 
     def get_expectation_suite(self, expectation_suite_name):
         """Get a named expectation suite for the provided data_asset_name.

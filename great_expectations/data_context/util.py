@@ -4,7 +4,6 @@ import importlib
 import copy
 import re
 import inspect
-import shutil
 from collections import OrderedDict
 
 from great_expectations.util import verify_dynamic_loading_support
@@ -34,23 +33,6 @@ def safe_mmkdir(directory, exist_ok=True):
         if e.errno != errno.EEXIST:
             raise
 
-
-def safe_rrmdir(directory, exist_ok=True):
-    if not isinstance(directory, six.string_types):
-        raise TypeError("directory must be of type str, not {0}".format({
-            "directory_type": str(type(directory))
-        }))
-
-    if not exist_ok:
-        raise ValueError(
-            "This wrapper should only be used for exist_ok=True; it is designed to make porting easier later")
-    try:
-        if os.path.exists(directory):
-            shutil.rmtree(directory)
-        #os.removedirs(directory)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
 
 
 def load_class(class_name, module_name):
