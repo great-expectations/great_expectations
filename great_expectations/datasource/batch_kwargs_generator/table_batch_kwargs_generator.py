@@ -205,8 +205,8 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
 
     # TODO: deprecate generator_asset argument
     def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
-        assert ((generator_asset and not data_asset_name) or (not generator_asset and data_asset_name),
-                "Please provide either generator_asset or data_asset_name.")
+        assert (generator_asset and not data_asset_name) or (not generator_asset and data_asset_name), \
+                "Please provide either generator_asset or data_asset_name."
         if generator_asset:
             warnings.warn("The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
                           "Please update code accordingly.", DeprecationWarning)
