@@ -7,8 +7,9 @@ Changelog
 develop
 -----------------
 * DataContext.list_checkpoints() returns a list of checkpoint names found in the project
-* new cli command: checkpoint list
 * DataContext.get_checkpoint() returns a validated dictionary loaded from yml
+* new cli command: checkpoint list
+* new cli command: checkpoint run
 
 0.10.5
 -----------------

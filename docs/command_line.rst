@@ -626,14 +626,23 @@ List the checkpoints found in the project.
     Found 1 checkpoint.
     my_checkpoint
 
+
+``great_expectations checkpoint run <CHECKPOINT>``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Run an existing checkpoint.
+
+.. code-block:: bash
+
+    $ great_expectations checkpoint run my_checkpoint
+    Validation Failed!
+
 great_expectations tap
 ==============================
 
 All command line operations for working with taps are here.
 A tap is an executable python file that runs validations that you can create to aid deployment of validations.
 
-
-``great_expectations checkpoint new``
+``great_expectations tap new``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Creating a tap requires a valid suite name and tap filename.

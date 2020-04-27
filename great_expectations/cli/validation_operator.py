@@ -197,7 +197,7 @@ Call `great_expectation suite list` command to list the expectation suites in yo
                 )
                 sys.exit(0)
 
-            suite = load_expectation_suite(context, suite)
+            suite = load_expectation_suite(context, suite, "cli.validation_operator.run")
 
             if name is None:
                 cli_message(

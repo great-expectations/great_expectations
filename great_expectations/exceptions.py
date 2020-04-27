@@ -23,6 +23,10 @@ class CheckpointError(DataContextError):
     pass
 
 
+class CheckpointNotFoundError(CheckpointError):
+    pass
+
+
 class StoreBackendError(DataContextError):
     pass
 

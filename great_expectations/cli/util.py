@@ -1,9 +1,11 @@
 import re
 import sys
 
-from great_expectations import exceptions as ge_exceptions, DataContext
+from great_expectations import DataContext
+from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_logging import logger
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 try:
     from termcolor import colored
@@ -45,14 +47,18 @@ def action_list_to_string(action_list):
     """Util function for turning an action list into pretty string"""
     action_list_string = ""
     for idx, action in enumerate(action_list):
-        action_list_string += "{} ({})".format(action["name"], action["action"]["class_name"])
+        action_list_string += "{} ({})".format(
+            action["name"], action["action"]["class_name"]
+        )
         if idx == len(action_list) - 1:
             continue
         action_list_string += " => "
     return action_list_string
 
 
-def cli_message_dict(dict_, indent=3, bullet_char="-", message_list=None, recursion_flag=False):
+def cli_message_dict(
+    dict_, indent=3, bullet_char="-", message_list=None, recursion_flag=False
+):
     """Util function for displaying nested dicts representing ge objects in cli"""
     if message_list is None:
         message_list = []
@@ -71,7 +77,9 @@ def cli_message_dict(dict_, indent=3, bullet_char="-", message_list=None, recurs
     if dict_.get("action_list"):
         action_list = dict_.pop("action_list")
         action_list_string = action_list_to_string(action_list)
-        message = "{}<cyan>action_list:</cyan> {}".format(" " * indent, action_list_string)
+        message = "{}<cyan>action_list:</cyan> {}".format(
+            " " * indent, action_list_string
+        )
         message_list.append(message)
     sorted_keys = sorted(dict_.keys())
     for key in sorted_keys:
@@ -82,7 +90,12 @@ def cli_message_dict(dict_, indent=3, bullet_char="-", message_list=None, recurs
         if isinstance(dict_[key], dict):
             message = "{}<cyan>{}:</cyan>".format(" " * indent, key)
             message_list.append(message)
-            cli_message_dict(dict_[key], indent=indent + 2, message_list=message_list, recursion_flag=True)
+            cli_message_dict(
+                dict_[key],
+                indent=indent + 2,
+                message_list=message_list,
+                recursion_flag=True,
+            )
         else:
             message = "{}<cyan>{}:</cyan> {}".format(" " * indent, key, str(dict_[key]))
             message_list.append(message)
@@ -103,11 +116,14 @@ def is_sane_slack_webhook(url):
 
 
 # TODO consolidate all the myriad CLI tests into this
-def load_expectation_suite(context: DataContext, suite_name: str) -> ExpectationSuite:
+def load_expectation_suite(
+    context: DataContext, suite_name: str, usage_event: str
+) -> ExpectationSuite:
     """
     Load an expectation suite from a given context.
 
     Handles a suite name with or without `.json`
+    :param usage_event:
     """
     if suite_name.endswith(".json"):
         suite_name = suite_name[:-5]
@@ -120,7 +136,7 @@ def load_expectation_suite(context: DataContext, suite_name: str) -> Expectation
             "the name by running `great_expectations suite list` and try again."
         )
         logger.info(e)
-        # TODO this should try to send a usage statistic failure
+        send_usage_message(context, event=usage_event, success=False)
         sys.exit(1)
 
 

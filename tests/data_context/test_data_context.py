@@ -28,7 +28,9 @@ from great_expectations.exceptions import (
     BatchKwargsError,
     ConfigNotFoundError,
     DataContextError,
-    CheckpointError)
+    CheckpointError,
+    CheckpointNotFoundError,
+)
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -1208,7 +1210,7 @@ def test_get_checkpoint_raises_error_on_not_found_checkpoint(
     empty_context_with_checkpoint,
 ):
     context = empty_context_with_checkpoint
-    with pytest.raises(DataContextError):
+    with pytest.raises(CheckpointNotFoundError):
         context.get_checkpoint("not_a_checkpoint")
 
 
@@ -1224,7 +1226,7 @@ def test_get_checkpoint_raises_error_empty_checkpoint(
     assert os.path.isfile(checkpoint_file_path)
     assert context.list_checkpoints() == ["my_checkpoint"]
 
-    with pytest.raises(DataContextError):
+    with pytest.raises(CheckpointError):
         context.get_checkpoint("my_checkpoint")
 
 

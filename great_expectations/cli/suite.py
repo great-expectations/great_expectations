@@ -116,7 +116,7 @@ def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs, usage_event
     context = load_data_context_with_error_handling(directory)
 
     try:
-        suite = load_expectation_suite(context, suite)
+        suite = load_expectation_suite(context, suite, usage_event)
         citations = suite.get_citations(require_batch_kwargs=True)
 
         if batch_kwargs_json:
