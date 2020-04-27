@@ -108,38 +108,26 @@ def docs_list(directory):
 )
 def clean_data_docs(directory, site_name=None, all=None):
     """Delete data docs"""
-    try:
-        context = DataContext(directory)
-        failed = True
-        if (site_name is None and all is None):
-            cli_message("<red>{}</red>".format("Please specify --all y to remove all sites or specify specific site using site_name"))
-            sys.exit(1)
-        context.clean_data_docs(site_name=site_name)
-        failed = False
+    context = load_data_context_with_error_handling(directory)
+    failed = True
+    if (site_name is None and all is None):
+        cli_message("<red>{}</red>".format("Please specify --all y to remove all sites or specify specific site using site_name"))
+        sys.exit(1)
+    context.clean_data_docs(site_name=site_name)
+    failed = False
+    send_usage_message(
+        data_context=context,
+        event="cli.docs.clean",
+        success=True
+    )
+    cli_message("<green>{}</green>".format("Cleaned data docs"))
+     
+    if failed and context is not None:
         send_usage_message(
             data_context=context,
             event="cli.docs.clean",
-            success=True
+            success=False
         )
-        cli_message("<green>{}</green>".format("Cleaned data docs"))
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        sys.exit(1)
-    except ge_exceptions.PluginModuleNotFoundError as err:
-        cli_message(err.cli_colored_message)
-        sys.exit(1)
-    except ge_exceptions.PluginClassNotFoundError as err:
-        cli_message(err.cli_colored_message)
-        sys.exit(1)
-    finally:
-        if failed and context is not None:
-            send_usage_message(
-                data_context=context,
-                event="cli.docs.clean",
-                success=False
-            )
-
-    send_usage_message(data_context=context, event="cli.docs.list", success=True)
 
 
 def _build_intro_string(docs_sites_strings):
