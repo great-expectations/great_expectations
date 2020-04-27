@@ -1,7 +1,5 @@
 import logging
 import os
-import errno
-import six
 import importlib
 import copy
 import re
@@ -115,10 +113,8 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     if runtime_environment is not None:
         # If there are additional kwargs available in the runtime_environment requested by a
         # class to be instantiated, provide them
-        if six.PY3:
-            argspec = inspect.getfullargspec(class_.__init__)[0][1:]
-        else:
-            argspec = inspect.getargspec(class_.__init__)[0][1:]
+        argspec = inspect.getfullargspec(class_.__init__)[0][1:]
+
         missing_args = set(argspec) - set(config_with_defaults.keys())
         config_with_defaults.update(
             {missing_arg: runtime_environment[missing_arg] for missing_arg in missing_args

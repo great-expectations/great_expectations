@@ -1,7 +1,6 @@
 import json
 import logging
 import re
-from builtins import str  # PY2 compatibility
 
 import altair as alt
 import pandas as pd
