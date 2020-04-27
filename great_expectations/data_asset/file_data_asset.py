@@ -1,4 +1,3 @@
-from __future__ import division
 import re
 import inspect
 import hashlib
@@ -7,8 +6,8 @@ import json
 import jsonschema
 from functools import wraps
 import numpy as np
-from six import PY3
 from itertools import compress
+
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 
@@ -51,10 +50,7 @@ class MetaFileDataAsset(DataAsset):
             <great_expectations.data_asset.base.DataAsset.expect_file_line_regex_match_count_to_be_between>` \
             for an example of a file_lines_map_expectation
         """
-        if PY3:
-            argspec = inspect.getfullargspec(func)[0][1:]
-        else:
-            argspec = inspect.getargspec(func)[0][1:]
+        argspec = inspect.getfullargspec(func)[0][1:]
 
         @cls.expectation(argspec)
         @wraps(func)
@@ -256,12 +252,12 @@ class FileDataAsset(MetaFileDataAsset):
             truth_list = [True for line in _lines]
 
         return truth_list
-    
+
     @MetaFileDataAsset.file_lines_map_expectation
-    def expect_file_line_regex_match_count_to_equal(self, regex, 
-                                                    expected_count=0, 
+    def expect_file_line_regex_match_count_to_equal(self, regex,
+                                                    expected_count=0,
                                                     skip=None,
-                                                    mostly=None, 
+                                                    mostly=None,
                                                     nonnull_lines_regex=r"^\s*$",
                                                     result_format=None,
                                                     include_config=True,
@@ -455,7 +451,7 @@ class FileDataAsset(MetaFileDataAsset):
             success = True
         elif (size >= minsize) and (size <= maxsize):
             success = True
-        else: 
+        else:
             success = False
 
         return {
@@ -464,7 +460,7 @@ class FileDataAsset(MetaFileDataAsset):
                 "observed_value": size
             }
         }
-    
+
     @DataAsset.expectation(["filepath"])
     def expect_file_to_exist(self, filepath=None, result_format=None, include_config=True,
                              catch_exceptions=None, meta=None):
@@ -584,7 +580,7 @@ class FileDataAsset(MetaFileDataAsset):
             success = True
 
         return {"success":success}
-    
+
     @DataAsset.expectation([])
     def expect_file_to_be_valid_json(self, schema=None, result_format=None,
                                      include_config=True, catch_exceptions=None,
