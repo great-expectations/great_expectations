@@ -56,12 +56,6 @@ from great_expectations.data_context.util import (
     substitute_all_config_variables,
 )
 from great_expectations.validator.validator import Validator
-
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
-
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource
 from great_expectations.profile.basic_dataset_profiler import (
