@@ -5,12 +5,7 @@ from functools import partial
 
 from ..types.configurations import classConfigSchema
 
-try:
-    from io import StringIO
-except ImportError:
-    from StringIO import StringIO
-
-from six import PY2
+from io import StringIO
 
 import pandas as pd
 
@@ -152,11 +147,6 @@ class PandasDatasource(Datasource):
         return batch_kwargs
 
     def get_batch(self, batch_kwargs, batch_parameters=None):
-        # pandas cannot take unicode as a delimiter, which can happen in py2. Handle this case explicitly.
-        # We handle it here so that the updated value will be in the batch_kwargs for transparency to the user.
-        if PY2 and "reader_options" in batch_kwargs and "sep" in batch_kwargs['reader_options'] and \
-                batch_kwargs['reader_options']['sep'] is not None:
-            batch_kwargs['reader_options']['sep'] = str(batch_kwargs['reader_options']['sep'])
         # We will use and manipulate reader_options along the way
         reader_options = batch_kwargs.get("reader_options", {})
 
