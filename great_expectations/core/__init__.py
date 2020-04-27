@@ -1,10 +1,12 @@
 import logging
 import json
 # PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
+import warnings
 from collections import namedtuple
 from copy import deepcopy
 import datetime
 
+from dateutil.parser import parse
 from six import string_types
 
 from IPython import get_ipython
@@ -296,6 +298,15 @@ class RunIdentifier(DataContextKey):
     def __init__(self, run_name=None, run_time=None):
         super(RunIdentifier, self).__init__()
         self._run_name = run_name
+
+        if isinstance(run_time, str):
+            try:
+                run_time = parse(run_time)
+            except ParserError:
+                warnings.warn(f'Unable to parse provided run_time str ("{run_time}") to datetime. Defaulting '
+                              f'run_time to current time.')
+                run_time = datetime.datetime.now(datetime.timezone.utc)
+
         self._run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
 
     @property
