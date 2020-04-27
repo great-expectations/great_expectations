@@ -1,4 +1,3 @@
-from __future__ import division
 import json
 import inspect
 import copy
@@ -10,16 +9,10 @@ import logging
 import datetime
 
 from marshmallow import ValidationError
-from six import string_types
 from collections import namedtuple, Counter, defaultdict
+from collections.abc import Hashable
 
 from great_expectations.data_asset.evaluation_parameters import build_evaluation_parameters
-
-try:
-    from collections.abc import Hashable
-except ImportError:  # Python 2.7
-    from collections import Hashable
-
 from great_expectations import __version__ as ge_version
 from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
@@ -798,7 +791,7 @@ class DataAsset(object):
                     discard_include_config_kwargs=False,
                     discard_catch_exceptions_kwargs=False,
                 )
-            elif isinstance(expectation_suite, string_types):
+            elif isinstance(expectation_suite, str):
                 try:
                     with open(expectation_suite, 'r') as infile:
                         expectation_suite = expectationSuiteSchema.loads(infile.read())
