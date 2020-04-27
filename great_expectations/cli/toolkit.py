@@ -33,8 +33,6 @@ def create_expectation_suite(context, datasource_name=None, batch_kwargs_generat
 
     :return: a tuple: (success, suite name)
     """
-    assert (generator_asset and not data_asset_name) or (not generator_asset and data_asset_name), \
-        "Please provide either generator_asset or data_asset_name."
     if generator_asset:
         warnings.warn("The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
                       "Please update code accordingly.", DeprecationWarning)
