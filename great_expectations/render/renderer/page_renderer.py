@@ -49,7 +49,7 @@ class ValidationResultsPageRenderer(Renderer):
     def render(self, validation_results):
         run_id = validation_results.meta['run_id']
         run_time = run_id.get("run_time")
-        run_name = run_id.get("run_name")
+        run_name = run_id.get("run_name") or "__none__"
         batch_id = BatchKwargs(validation_results.meta['batch_kwargs']).to_id()
         expectation_suite_name = validation_results.meta['expectation_suite_name']
         batch_kwargs = validation_results.meta.get("batch_kwargs")
