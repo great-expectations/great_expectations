@@ -490,5 +490,4 @@ def _get_notebook_path(context, notebook_name):
         os.path.join(
             context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
         )
-        raise e
     )
