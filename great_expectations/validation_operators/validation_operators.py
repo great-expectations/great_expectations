@@ -130,8 +130,8 @@ class ActionListValidationOperator(ValidationOperator):
         return batch
 
     def run(self, assets_to_validate, run_id=None, evaluation_parameters=None, run_name=None, run_time=None):
-        assert (not (run_id and run_name) and not (run_id and run_time),
-                "Please provide either a run_id or run_name and/or run_time.")
+        assert not (run_id and run_name) and not (run_id and run_time), \
+                "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
             warnings.warn("String run_ids will be deprecated in the future. Please provide a run_id of type "
                           "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
@@ -430,8 +430,8 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             run_name=None,
             run_time=None
     ):
-        assert (not (run_id and run_name) and not (run_id and run_time),
-                "Please provide either a run_id or run_name and/or run_time.")
+        assert not (run_id and run_name) and not (run_id and run_time), \
+            "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
             warnings.warn("String run_ids will be deprecated in the future. Please provide a run_id of type "
                           "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
