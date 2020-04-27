@@ -1,4 +1,3 @@
-import os
 
 import click
 
@@ -91,7 +90,7 @@ def docs_list(directory):
 @docs.command(name="clean")
 @click.option(
     '--directory',
-    '-y',
+    '-d',
     default=None,
     help="Clean data docs"
 )
@@ -106,11 +105,7 @@ def docs_list(directory):
     help="The site for which to generate documentation. See data_docs section in great_expectations.yml",
 )
 def clean_data_docs(directory, site_name=None, all=None):
-    """
-    Delete data docs
-    
-    :param site_name: name for the first-level keys in the "data_docs_sites" section of the configuration
-    """
+    """Delete data docs"""
     try:
         context = DataContext(directory)
         failed = True
