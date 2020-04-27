@@ -371,25 +371,13 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 @click.option("--suite", "-es", default=None, help="Expectation suite name.")
 @click.option(
     "--directory",
-    "-y",
+    "-d",
     default=None,
     help="Delete expectation suite.",
 )
 def suite_delete(suite, directory):
-    """Delete specified expectation suite from data_context expectation store.
-
-    Args:
-        expectation_suite_name: The name of the expectation_suite to delete
-
-    Returns:
-        True for Success and False for Failure.
-    """
-    try:
-        context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        return
-
+    """Delete an expectation suite from the expectation store."""
+    context = load_data_context_with_error_handling(directory)
     suite_names = context.list_expectation_suite_names()
     if len(suite_names) == 0:
         cli_message("No expectation suites found")
@@ -402,7 +390,7 @@ def suite_delete(suite, directory):
             context.delete_expectation_suite(expectation_suite)
         else:
             cli_message("No matching expectation suites found")
-            return
+            sys.exit(1)
 
 
 @suite.command(name="scaffold")

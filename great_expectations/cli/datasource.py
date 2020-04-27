@@ -106,21 +106,13 @@ def datasource_new(directory):
 @datasource.command(name="delete")
 @click.option(
     '--directory',
-    '-y',
+    '-d',
     default=None,
     help="Datasource to delete"
 )
 def delete_datasource(self,datasource_name=None):
-    """Delete data source
-    Args:
-
-    Returns:
-    """
-    try:
-        context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        return
+    """Delete data source"""
+    context = load_data_context_with_error_handling(directory)
     if datasource_name is None:
         cli_message("<red>{}</red>".format("Datasource name must be a datasource name"))
         return
@@ -134,7 +126,7 @@ def delete_datasource(self,datasource_name=None):
             del datasources[datasource_name]
         if datasources.has_key(datasource_name):
             cli_message("<red>{}</red>".format("Datasource not deleted"))
-            return False
+            sys.exit(1)
         else:
             cli_message("<green>{}</greem>".format("Datasource deleted successfully."))
             return True
