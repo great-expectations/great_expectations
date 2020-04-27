@@ -12,8 +12,10 @@ import sys
 import uuid
 import warnings
 import webbrowser
+
 from typing import Union
 
+from dateutil.parser import parse, ParserError
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
 from six import string_types
@@ -988,7 +990,7 @@ class BaseDataContext(object):
                         metric_value = validation_results.get_metric(metric_name, **metric_kwargs)
                         self.stores[target_store_name].set(
                             ValidationMetricIdentifier(
-                                run_id=RunIdentifier(**run_id),
+                                run_id=run_id,
                                 expectation_suite_identifier=ExpectationSuiteIdentifier(expectation_suite_name),
                                 metric_name=metric_name,
                                 metric_kwargs_id=get_metric_kwargs_id(metric_name, metric_kwargs)
@@ -1193,8 +1195,11 @@ class BaseDataContext(object):
                            profiler=BasicDatasetProfiler,
                            profiler_configuration=None,
                            dry_run=False,
-                           run_name="profiling",
-                           additional_batch_kwargs=None):
+                           run_id=None,
+                           additional_batch_kwargs=None,
+                           run_name=None,
+                           run_time=None
+                           ):
         """Profile the named datasource using the named profiler.
 
         Args:
@@ -1340,8 +1345,10 @@ class BaseDataContext(object):
                             data_asset_name=name,
                             profiler=profiler,
                             profiler_configuration=profiler_configuration,
+                            run_id=run_id,
+                            additional_batch_kwargs=additional_batch_kwargs,
                             run_name=run_name,
-                            additional_batch_kwargs=additional_batch_kwargs
+                            run_time=run_time
                         )["results"][0]
                     )
 
@@ -1381,8 +1388,11 @@ class BaseDataContext(object):
                            expectation_suite_name=None,
                            profiler=BasicDatasetProfiler,
                            profiler_configuration=None,
-                           run_name="profiling",
-                           additional_batch_kwargs=None):
+                           run_id=None,
+                           additional_batch_kwargs=None,
+                           run_name=None,
+                           run_time=None
+                           ):
         """
         Profile a data asset
 
@@ -1404,7 +1414,25 @@ class BaseDataContext(object):
 
             When success = False, the error details are under "error" key
         """
-        run_id = RunIdentifier(run_name=run_name)
+
+        assert not (run_id and run_name) and not (run_id and run_time), \
+            "Please provide either a run_id or run_name and/or run_time."
+        if isinstance(run_id, str) and not run_name:
+            warnings.warn("String run_ids will be deprecated in the future. Please provide a run_id of type "
+                          "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
+                          "and run_time (both optional). Instead of providing a run_id, you may also provide"
+                          "run_name and run_time separately.", DeprecationWarning)
+            try:
+                run_time = parse(run_id)
+            except ParserError:
+                pass
+            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
+        elif isinstance(run_id, dict):
+            run_id = RunIdentifier(**run_id)
+        elif not isinstance(run_id, RunIdentifier):
+            run_name = run_name or "profiling"
+            run_id = RunIdentifier(run_name=run_name, run_time=run_time)
+
         logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
 
         if not additional_batch_kwargs:
@@ -1468,7 +1496,7 @@ class BaseDataContext(object):
 
         # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
         # will have more to unpack.
-        expectation_suite, validation_results = profiler.profile(batch, run_name=run_name, profiler_configuration=profiler_configuration)
+        expectation_suite, validation_results = profiler.profile(batch, run_id=run_id, profiler_configuration=profiler_configuration)
         profiling_results['results'].append((expectation_suite, validation_results))
 
         self.validations_store.set(
