@@ -1,8 +1,4 @@
-from __future__ import division
-
 from typing import List
-
-from six import string_types
 
 import uuid
 from functools import wraps
@@ -195,7 +191,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 output_strftime_format = kwargs["output_strftime_format"]
                 maybe_limited_unexpected_list = []
                 for x in unexpected_query_results.fetchall():
-                    if isinstance(x[column], string_types):
+                    if isinstance(x[column], str):
                         col = parse(x[column])
                     else:
                         col = x[column]

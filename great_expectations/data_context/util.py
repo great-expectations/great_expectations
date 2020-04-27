@@ -1,7 +1,5 @@
 import logging
 import os
-import errno
-import six
 import importlib
 import copy
 import re
@@ -17,23 +15,6 @@ from great_expectations.exceptions import (
 )
 
 logger = logging.getLogger(__name__)
-
-
-def safe_mmkdir(directory, exist_ok=True):
-    """Simple wrapper since exist_ok is not available in python 2"""
-    if not isinstance(directory, six.string_types):
-        raise TypeError("directory must be of type str, not {0}".format({
-            "directory_type": str(type(directory))
-        }))
-
-    if not exist_ok:
-        raise ValueError(
-            "This wrapper should only be used for exist_ok=True; it is designed to make porting easier later")
-    try:
-        os.makedirs(directory)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
 
 
 def load_class(class_name, module_name):
@@ -97,6 +78,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
         # If there are additional kwargs available in the runtime_environment requested by a
         # class to be instantiated, provide them
         argspec = inspect.getfullargspec(class_.__init__)[0][1:]
+
         missing_args = set(argspec) - set(config_with_defaults.keys())
         config_with_defaults.update(
             {missing_arg: runtime_environment[missing_arg] for missing_arg in missing_args

@@ -1,5 +1,3 @@
-from __future__ import division
-
 import copy
 import inspect
 import logging
@@ -10,7 +8,6 @@ from typing import List
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-from six import string_types
 
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -129,7 +126,7 @@ class MetaSparkDFDataset(Dataset):
                         if val is None:
                             parsed_maybe_limited_unexpected_list.append(val)
                         else:
-                            if isinstance(val, string_types):
+                            if isinstance(val, str):
                                 val = parse(val)
                             parsed_maybe_limited_unexpected_list.append(datetime.strftime(val, output_strftime_format))
                     maybe_limited_unexpected_list = parsed_maybe_limited_unexpected_list
@@ -264,7 +261,7 @@ class MetaSparkDFDataset(Dataset):
                         if val is None or (val[0] is None or val[1] is None):
                             parsed_maybe_limited_unexpected_list.append(val)
                         else:
-                            if isinstance(val[0], string_types) and isinstance(val[1], string_types):
+                            if isinstance(val[0], str) and isinstance(val[1], str):
                                 val = (parse(val[0]), parse(val[1]))
                             parsed_maybe_limited_unexpected_list.append((datetime.strftime(val[0], output_strftime_format), datetime.strftime(val[1], output_strftime_format)))
                     maybe_limited_unexpected_list = parsed_maybe_limited_unexpected_list
@@ -562,7 +559,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             return column.withColumn('__success', lit(True))
         if parse_strings_as_datetimes:
             column = self._apply_dateutil_parse(column)
-            value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+            value_set = [parse(value) if isinstance(value, str) else value for value in value_set]
         if None in value_set:
             # spark isin returns None when any value is compared to None
             logger.error("expect_column_values_to_be_in_set cannot support a None in the value_set in spark")

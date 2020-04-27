@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import copy
-from six import string_types
-
 import logging
 
 from ruamel.yaml import YAML
@@ -104,7 +102,7 @@ class Datasource(object):
         """
         self._data_context = data_context
         self._name = name
-        if isinstance(data_asset_type, string_types):
+        if isinstance(data_asset_type, str):
             warnings.warn(
                 "String-only configuration for data_asset_type is deprecated. Use module_name and class_name instead.",
                 DeprecationWarning)
@@ -290,7 +288,7 @@ class Datasource(object):
         available_data_asset_names = {}
         if batch_kwargs_generator_names is None:
             batch_kwargs_generator_names = [generator["name"] for generator in self.list_batch_kwargs_generators()]
-        elif isinstance(batch_kwargs_generator_names, string_types):
+        elif isinstance(batch_kwargs_generator_names, str):
             batch_kwargs_generator_names = [batch_kwargs_generator_names]
 
         for generator_name in batch_kwargs_generator_names:

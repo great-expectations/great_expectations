@@ -1,16 +1,15 @@
-from __future__ import division
-
 import inspect
 from typing import List
+from itertools import zip_longest
+from functools import lru_cache, wraps
 
-from six import string_types
-from functools import wraps
 from numbers import Number
 from dateutil.parser import parse
 from datetime import datetime
 
-from itertools import zip_longest
-from functools import lru_cache
+import pandas as pd
+import numpy as np
+from scipy import stats
 
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -20,10 +19,6 @@ from great_expectations.dataset.util import (
     is_valid_partition_object,
     is_valid_categorical_partition_object
 )
-
-import pandas as pd
-import numpy as np
-from scipy import stats
 
 
 class MetaDataset(DataAsset):
@@ -4194,5 +4189,5 @@ class Dataset(MetaDataset):
 
     @staticmethod
     def _parse_value_set(value_set):
-        parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+        parsed_value_set = [parse(value) if isinstance(value, str) else value for value in value_set]
         return parsed_value_set
