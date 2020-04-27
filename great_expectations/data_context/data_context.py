@@ -12,6 +12,7 @@ import sys
 import uuid
 import warnings
 import webbrowser
+from typing import Union
 
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
@@ -30,6 +31,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
     save_expectation_suite_usage_statistics)
 from great_expectations.core.util import nested_update
+from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
@@ -56,6 +58,7 @@ from great_expectations.data_context.util import (
     substitute_all_config_variables,
 )
 from great_expectations.dataset import Dataset
+from great_expectations.datasource import Datasource
 from great_expectations.profile.basic_dataset_profiler import (
     BasicDatasetProfiler,
 )
@@ -624,7 +627,7 @@ class BaseDataContext(object):
         )
         return batch_kwargs
 
-    def get_batch(self, batch_kwargs, expectation_suite_name, data_asset_type=None, batch_parameters=None):
+    def get_batch(self, batch_kwargs: Union[dict, BatchKwargs], expectation_suite_name: Union[str, ExpectationSuite], data_asset_type=None, batch_parameters=None) -> DataAsset:
         """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If
         batch_parameters are included, they will be available as attributes of the batch.
 
@@ -809,7 +812,7 @@ class BaseDataContext(object):
             )
         return datasource
 
-    def get_datasource(self, datasource_name="default"):
+    def get_datasource(self, datasource_name: str = "default") -> Datasource:
         """Get the named datasource
 
         Args:
@@ -825,7 +828,7 @@ class BaseDataContext(object):
                 self._project_config_with_variables_substituted.datasources[datasource_name])
         else:
             raise ValueError(
-                "Unable to load datasource `%s` -- no configuration found or invalid configuration." % datasource_name
+                f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
         datasource_config = datasourceConfigSchema.load(datasource_config)
         datasource = self._build_datasource_from_config(datasource_name, datasource_config)
@@ -870,7 +873,7 @@ class BaseDataContext(object):
             validation_operators.append(value)
         return validation_operators
 
-    def create_expectation_suite(self, expectation_suite_name, overwrite_existing=False):
+    def create_expectation_suite(self, expectation_suite_name, overwrite_existing=False) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
         Args:

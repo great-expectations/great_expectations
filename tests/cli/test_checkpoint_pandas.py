@@ -10,23 +10,23 @@ from great_expectations.cli import cli
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
-def test_tap_help_output(caplog,):
+def test_checkpoint_help_output(caplog,):
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["tap"], catch_exceptions=False)
+    result = runner.invoke(cli, ["checkpoint"], catch_exceptions=False)
     assert result.exit_code == 0
     assert (
         """Commands:
-  new  BETA! Create a new tap file for easy deployments"""
+  new  Create a new checkpoint file for easy deployments."""
         in result.stdout
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_tap_new_with_filename_not_ending_in_py_raises_helpful_error(
+def test_checkpoint_new_with_filename_not_ending_in_py_raises_helpful_error(
     caplog, empty_data_context
 ):
     """
-    We call the "tap new" command with a bogus filename
+    We call the "checkpoint new" command with a bogus filename
 
     The command should:
     - exit with a clear error message
@@ -35,20 +35,19 @@ def test_tap_new_with_filename_not_ending_in_py_raises_helpful_error(
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"tap new sweet_suite tap -d {root_dir}", catch_exceptions=False,
+        cli, f"checkpoint new sweet_suite checkpoint -d {root_dir}", catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert result.exit_code == 1
-    assert "This is a BETA feature which may change" in stdout
     assert "Tap filename must end in .py. Please correct and re-run" in stdout
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_tap_new_on_context_with_no_datasources(caplog, empty_data_context):
+def test_checkpoint_new_on_context_with_no_datasources(caplog, empty_data_context):
     """
-    We call the "tap new" command on a data context that has no datasources
+    We call the "checkpoint new" command on a data context that has no datasources
     configured.
 
     The command should:
@@ -57,20 +56,19 @@ def test_tap_new_on_context_with_no_datasources(caplog, empty_data_context):
     root_dir = empty_data_context.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"tap new not_a_suite tap.py -d {root_dir}", catch_exceptions=False,
+        cli, f"checkpoint new not_a_suite checkpoint.py -d {root_dir}", catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert result.exit_code == 1
-    assert "This is a BETA feature which may change" in stdout
     assert "No datasources found in the context" in stdout
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_tap_new_with_non_existant_suite(caplog, empty_data_context):
+def test_checkpoint_new_with_non_existant_suite(caplog, empty_data_context):
     """
-    We call the "tap new" command on a data context that has a datasource
+    We call the "checkpoint new" command on a data context that has a datasource
     configured and no suites.
 
     The command should:
@@ -84,22 +82,21 @@ def test_tap_new_with_non_existant_suite(caplog, empty_data_context):
     root_dir = empty_data_context.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"tap new not_a_suite tap.py -d {root_dir}", catch_exceptions=False,
+        cli, f"checkpoint new not_a_suite checkpoint.py -d {root_dir}", catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert result.exit_code == 1
-    assert "This is a BETA feature which may change" in stdout
     assert "Could not find a suite named `not_a_suite`" in stdout
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_tap_new_on_context_with_2_datasources_with_no_datasource_option_prompts_user(
+def test_checkpoint_new_on_context_with_2_datasources_with_no_datasource_option_prompts_user(
     caplog, empty_data_context
 ):
     """
-    We call the "tap new" command on a data context that has 2 datasources
+    We call the "checkpoint new" command on a data context that has 2 datasources
     configured.
 
     The command should:
@@ -119,31 +116,30 @@ def test_tap_new_on_context_with_2_datasources_with_no_datasource_option_prompts
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"tap new not_a_suite tap.py -d {root_dir}",
+        f"checkpoint new not_a_suite checkpoint.py -d {root_dir}",
         input="1\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
 
-    assert "This is a BETA feature which may change" in stdout
     assert "Select a datasource" in stdout
     assert result.exit_code == 1
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_tap_new_on_context_builds_runnable_tap_file(
+def test_checkpoint_new_on_context_builds_runnable_tap_file(
     caplog, empty_data_context, filesystem_csv
 ):
     """
-    We call the "tap new" command on a data context that has 2 datasources
+    We call the "checkpoint new" command on a data context that has 2 datasources
     configured.
 
     The command should:
     - prompt the user to choose a datasource
-    - create the tap file
+    - create the checkpoint file
 
-    This test then runs the tap file to verify it is runnable.
+    This test then runs the checkpoint file to verify it is runnable.
     """
     context = empty_data_context
     root_dir = context.root_directory
@@ -160,20 +156,19 @@ def test_tap_new_on_context_builds_runnable_tap_file(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"tap new sweet_suite tap.py -d {root_dir}",
+        f"checkpoint new sweet_suite checkpoint.py -d {root_dir}",
         input=f"{csv}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
 
-    assert "This is a BETA feature which may change" in stdout
     assert "Enter the path (relative or absolute) of a data file" in stdout
-    assert "A new tap has been generated" in stdout
+    assert "A new checkpoint has been generated" in stdout
     assert result.exit_code == 0
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
-    tap_file = os.path.abspath(os.path.join(root_dir, "..", "tap.py"))
+    tap_file = os.path.abspath(os.path.join(root_dir, "..", "checkpoint.py"))
     # In travis on osx, python may not execute from the build dir
     cmdstring = f"python {tap_file}"
     if os.environ.get("TRAVIS_OS_NAME") == "osx":
@@ -188,18 +183,18 @@ def test_tap_new_on_context_builds_runnable_tap_file(
     assert status == 0
     assert output == "Validation Succeeded!"
 
-def test_tap_new_on_context_builds_runnable_tap_file_that_fails_validation(
+def test_checkpoint_new_on_context_builds_runnable_tap_file_that_fails_validation(
     caplog, empty_data_context, filesystem_csv
 ):
     """
-    We call the "tap new" command on a data context that has 1 datasource
+    We call the "checkpoint new" command on a data context that has 1 datasource
     configured with a suite that will fail.
 
     The command should:
     - prompt the user to choose a datasource
-    - create the tap file
+    - create the checkpoint file
 
-    This test then runs the tap file to verify it is runnable and fails
+    This test then runs the checkpoint file to verify it is runnable and fails
     correctly.
     """
     context = empty_data_context
@@ -223,20 +218,19 @@ def test_tap_new_on_context_builds_runnable_tap_file_that_fails_validation(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"tap new sweet_suite tap.py -d {root_dir}",
+        f"checkpoint new sweet_suite checkpoint.py -d {root_dir}",
         input=f"{csv}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
 
-    assert "This is a BETA feature which may change" in stdout
     assert "Enter the path (relative or absolute) of a data file" in stdout
-    assert "A new tap has been generated" in stdout
+    assert "A new checkpoint has been generated" in stdout
     assert result.exit_code == 0
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
     # In travis on osx, python may not execute from the build dir
-    tap_file = os.path.abspath(os.path.join(root_dir, "..", "tap.py"))
+    tap_file = os.path.abspath(os.path.join(root_dir, "..", "checkpoint.py"))
     cmdstring = f"python {tap_file}"
     if os.environ.get("TRAVIS_OS_NAME") == "osx":
         build_dir = os.environ.get("TRAVIS_BUILD_DIR")
@@ -247,18 +241,18 @@ def test_tap_new_on_context_builds_runnable_tap_file_that_fails_validation(
     assert output == "Validation Failed!"
 
 
-def test_tap_new_on_context_with_1_datasources_with_no_datasource_option_prompts_user_and_generates_runnable_tap_file(
+def test_checkpoint_new_on_context_with_1_datasources_with_no_datasource_option_prompts_user_and_generates_runnable_tap_file(
     caplog, empty_data_context, filesystem_csv
 ):
     """
-    We call the "tap new" command on a data context that has 1 datasources
+    We call the "checkpoint new" command on a data context that has 1 datasources
     configured.
 
     The command should:
     - NOT prompt the user to choose a datasource
-    - create the tap file
+    - create the checkpoint file
 
-    This test then runs the tap file to verify it is runnable.
+    This test then runs the checkpoint file to verify it is runnable.
     """
     context = empty_data_context
     root_dir = context.root_directory
@@ -275,20 +269,19 @@ def test_tap_new_on_context_with_1_datasources_with_no_datasource_option_prompts
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"tap new sweet_suite tap.py -d {root_dir}",
+        f"checkpoint new sweet_suite checkpoint.py -d {root_dir}",
         input=f"{csv}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
 
-    assert "This is a BETA feature which may change" in stdout
     assert "Select a datasource" not in stdout
-    assert "A new tap has been generated" in stdout
+    assert "A new checkpoint has been generated" in stdout
     assert result.exit_code == 0
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
-    tap_file = os.path.abspath(os.path.join(root_dir, "..", "tap.py"))
+    tap_file = os.path.abspath(os.path.join(root_dir, "..", "checkpoint.py"))
     status, output = subprocess.getstatusoutput(f"python {tap_file}")
     assert status == 0
     assert output == "Validation Succeeded!"

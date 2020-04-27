@@ -1,8 +1,10 @@
 import os
+from typing import Union
 
 import nbformat
 
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import lint_code
 
@@ -235,7 +237,7 @@ Add expectations by calling specific expectation methods on the `batch` object. 
 You can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**."""
         )
 
-    def get_batch_kwargs(self, suite, batch_kwargs):
+    def get_batch_kwargs(self, suite: ExpectationSuite, batch_kwargs: Union[dict, BatchKwargs]):
         if isinstance(batch_kwargs, dict):
             return self._fix_path_in_batch_kwargs(batch_kwargs)
 
@@ -253,6 +255,8 @@ You can see all the available expectations in the **[expectation glossary](https
 
     @staticmethod
     def _fix_path_in_batch_kwargs(batch_kwargs):
+        if isinstance(batch_kwargs, BatchKwargs):
+            batch_kwargs = dict(batch_kwargs)
         if batch_kwargs and "path" in batch_kwargs.keys():
             base_dir = batch_kwargs["path"]
             if not os.path.isabs(base_dir):

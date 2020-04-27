@@ -1,7 +1,7 @@
 .. _tutorial_create_expectations:
 
 Create Expectations
-==============================
+===================
 
 This tutorial covers the workflow of creating and editing expectations.
 
@@ -28,7 +28,7 @@ The lifecycle of an Expectation Suite starts with creating it. Then it goes thro
 We will describe the Create, Review and Edit steps in brief:
 
 Create an Expectation Suite
-----------------------------------------
+---------------------------
 
 Expectation Suites are saved as JSON files, so you *could* create a new suite by writing a file directly. However the preferred way is to let the CLI save you time and typos.  If you cannot use the :ref:`CLI <command_line>` in your environment (e.g., in a Databricks cluster), you can create and edit an Expectation Suite in a notebook. Jump to this section for details: :ref:`Jupyter Notebook for Creating and Editing Expectation Suites`.
 
@@ -47,7 +47,7 @@ The command concludes by saving the newly generated Expectation Suite as a JSON 
 
 
 Review an Expectation Suite
-----------------------------------------
+---------------------------
 
 :ref:`Data Docs<data_docs>` is a feature of Great Expectations that creates data documentation by compiling expectations and validation results into HTML.
 
@@ -59,7 +59,7 @@ Reviewing expectations is best done in Data Docs:
 .. image:: ../images/sample_e_s_view.png
 
 Edit an Expectation Suite
-----------------------------------------
+-------------------------
 
 The best interface for editing an Expectation Suite is a Jupyter notebook.
 
@@ -287,7 +287,7 @@ To view the expectation suite you just created as HTML, rebuild the data docs an
     batch.save_expectation_suite(discard_failed_expectations=False)
 
     # This step is optional, but useful - evaluate the expectations against the current batch of data
-    run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+    run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
     results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
     expectation_suite_identifier = list(results["details"].keys())[0]
     validation_result_identifier = ValidationResultIdentifier(
