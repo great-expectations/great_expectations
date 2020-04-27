@@ -1,4 +1,3 @@
-from __future__ import division
 import json
 import inspect
 import copy
@@ -10,16 +9,10 @@ import logging
 import datetime
 
 from marshmallow import ValidationError
-from six import PY3, string_types
 from collections import namedtuple, Counter, defaultdict
+from collections.abc import Hashable
 
 from great_expectations.data_asset.evaluation_parameters import build_evaluation_parameters
-
-try:
-    from collections.abc import Hashable
-except ImportError:  # Python 2.7
-    from collections import Hashable
-
 from great_expectations import __version__ as ge_version
 from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
@@ -194,10 +187,7 @@ class DataAsset(object):
                     meta = None
 
                 # Get the signature of the inner wrapper:
-                if PY3:
-                    argspec = inspect.getfullargspec(func)[0][1:]
-                else:
-                    argspec = inspect.getargspec(func)[0][1:]
+                argspec = inspect.getfullargspec(func)[0][1:]
 
                 if "result_format" in argspec:
                     all_args["result_format"] = result_format
@@ -801,7 +791,7 @@ class DataAsset(object):
                     discard_include_config_kwargs=False,
                     discard_catch_exceptions_kwargs=False,
                 )
-            elif isinstance(expectation_suite, string_types):
+            elif isinstance(expectation_suite, str):
                 try:
                     with open(expectation_suite, 'r') as infile:
                         expectation_suite = expectationSuiteSchema.loads(infile.read())
@@ -1195,11 +1185,7 @@ class DataAsset(object):
             Check out :ref:`custom_expectations_reference` for more information.
         """
 
-        if PY3:
-            argspec = inspect.getfullargspec(function)[0][1:]
-        else:
-            # noinspection PyDeprecation
-            argspec = inspect.getargspec(function)[0][1:]
+        argspec = inspect.getfullargspec(function)[0][1:]
 
         new_function = self.expectation(argspec)(function)
         return new_function(self, *args, **kwargs)

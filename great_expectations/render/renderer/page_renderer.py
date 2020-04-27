@@ -1,8 +1,6 @@
 import logging
 import os
 
-from six import string_types
-
 from collections import OrderedDict
 
 from ...core.id_dict import BatchKwargs
@@ -543,7 +541,7 @@ class ExpectationSuitePageRenderer(Renderer):
             notes = expectations.meta["notes"]
             note_content = None
 
-            if isinstance(notes, string_types):
+            if isinstance(notes, str):
                 note_content = [notes]
 
             elif isinstance(notes, list):
@@ -552,7 +550,7 @@ class ExpectationSuitePageRenderer(Renderer):
             elif isinstance(notes, dict):
                 if "format" in notes:
                     if notes["format"] == "string":
-                        if isinstance(notes["content"], string_types):
+                        if isinstance(notes["content"], str):
                             note_content = [notes["content"]]
                         elif isinstance(notes["content"], list):
                             note_content = notes["content"]
@@ -560,7 +558,7 @@ class ExpectationSuitePageRenderer(Renderer):
                             logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
 
                     elif notes["format"] == "markdown":
-                        if isinstance(notes["content"], string_types):
+                        if isinstance(notes["content"], str):
                             note_content = [
                                 RenderedMarkdownContent(**{
                                     "content_block_type": "markdown",

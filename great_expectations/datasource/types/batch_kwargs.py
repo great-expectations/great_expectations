@@ -1,6 +1,5 @@
 import logging
 
-# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 from abc import ABCMeta
 
 from great_expectations.core.id_dict import BatchKwargs
@@ -23,24 +22,21 @@ class BatchMarkers(BatchKwargs):
         return self.get("ge_load_time")
 
 
-class PandasDatasourceBatchKwargs(BatchKwargs):
-    __metaclass__ = ABCMeta
+class PandasDatasourceBatchKwargs(BatchKwargs, metaclass=ABCMeta):
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
     """
     pass
 
 
-class SparkDFDatasourceBatchKwargs(BatchKwargs):
-    __metaclass__ = ABCMeta
+class SparkDFDatasourceBatchKwargs(BatchKwargs, metaclass=ABCMeta):
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
     """
     pass
 
 
-class SqlAlchemyDatasourceBatchKwargs(BatchKwargs):
-    __metaclass__ = ABCMeta
+class SqlAlchemyDatasourceBatchKwargs(BatchKwargs, metaclass=ABCMeta):
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
     """
