@@ -326,10 +326,11 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         self.notify_on = notify_on
 
     def _build_slack_query(self, run_return_obj):
-        timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
         success = run_return_obj.get("success")
         status_text = "Success :tada:" if success else "Failed :x:"
         run_id = run_return_obj.get("run_id")
+        run_name = run_id.run_name
+        run_time = run_id.run_time.strftime("%x %X")
         batch_identifiers = run_return_obj.get("batch_identifiers")
         failed_data_assets = []
 
