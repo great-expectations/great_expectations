@@ -260,7 +260,7 @@ Let's help you specify the batch of data your want the validation operator to va
                     context,
                     datasource_name=data_source.name,
                     batch_kwargs_generator_name=None,
-                    generator_asset=None,
+                    data_asset_name=None,
                     additional_batch_kwargs=None,
                 )
 

@@ -175,7 +175,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                     context,
                     datasource_name=data_source.name,
                     batch_kwargs_generator_name=None,
-                    generator_asset=None,
+                    data_asset_name=None,
                     additional_batch_kwargs=additional_batch_kwargs,
                 )
 
@@ -256,7 +256,7 @@ def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
 
     datasource_name = None
     generator_name = None
-    generator_asset = None
+    data_asset_name = None
 
     try:
         if batch_kwargs is not None:
@@ -266,7 +266,7 @@ def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
             context,
             datasource_name=datasource_name,
             batch_kwargs_generator_name=generator_name,
-            generator_asset=generator_asset,
+            data_asset_name=data_asset_name,
             batch_kwargs=batch_kwargs,
             expectation_suite_name=suite,
             additional_batch_kwargs={"limit": 1000},

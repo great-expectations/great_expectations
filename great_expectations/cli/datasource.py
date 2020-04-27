@@ -774,13 +774,13 @@ def select_batch_kwargs_generator(context, datasource_name, available_data_asset
 def get_batch_kwargs(context,
                      datasource_name=None,
                      batch_kwargs_generator_name=None,
-                     generator_asset=None,
+                     data_asset_name=None,
                      additional_batch_kwargs=None):
     """
     This method manages the interaction with user necessary to obtain batch_kwargs for a batch of a data asset.
 
-    In order to get batch_kwargs this method needs datasource_name, batch_kwargs_generator_name and generator_asset
-    to combine them into a fully qualified data asset identifier(datasource_name/batch_kwargs_generator_name/generator_asset).
+    In order to get batch_kwargs this method needs datasource_name, batch_kwargs_generator_name and data_asset_name
+    to combine them into a fully qualified data asset identifier(datasource_name/batch_kwargs_generator_name/data_asset_name).
     All three arguments are optional. If they are present, the method uses their values. Otherwise, the method
     prompts user to enter them interactively. Since it is possible for any of these three components to be
     passed to this method as empty values and to get their values after interacting with user, this method
@@ -799,9 +799,9 @@ def get_batch_kwargs(context,
     :param context:
     :param datasource_name:
     :param batch_kwargs_generator_name:
-    :param generator_asset:
+    :param data_asset_name:
     :param additional_batch_kwargs:
-    :return: a tuple: (datasource_name, batch_kwargs_generator_name, generator_asset, batch_kwargs). The components
+    :return: a tuple: (datasource_name, batch_kwargs_generator_name, data_asset_name, batch_kwargs). The components
                 of the tuple were passed into the methods as optional arguments, but their values might
                 have changed after this method's execution. If the returned batch_kwargs is None, it means
                 that the batch_kwargs_generator will know to yield batch_kwargs when called.
@@ -819,35 +819,35 @@ def get_batch_kwargs(context,
         batch_kwargs_generator_name = select_batch_kwargs_generator(context, datasource_name,
                                                                   available_data_assets_dict=available_data_assets_dict)
 
-    # if the user provided us with the batch kwargs generator name and the generator asset, we have everything we need -
+    # if the user provided us with the batch kwargs generator name and the data asset, we have everything we need -
     # let's ask the generator to build batch kwargs for this asset - we are done.
-    if batch_kwargs_generator_name is not None and generator_asset is not None:
+    if batch_kwargs_generator_name is not None and data_asset_name is not None:
         generator = datasource.get_batch_kwargs_generator(batch_kwargs_generator_name)
-        batch_kwargs = generator.build_batch_kwargs(generator_asset, **additional_batch_kwargs)
+        batch_kwargs = generator.build_batch_kwargs(data_asset_name, **additional_batch_kwargs)
         return batch_kwargs
 
     if isinstance(context.get_datasource(datasource_name), (PandasDatasource, SparkDFDatasource)):
-        generator_asset, batch_kwargs = _get_batch_kwargs_from_generator_or_from_file_path(
+        data_asset_name, batch_kwargs = _get_batch_kwargs_from_generator_or_from_file_path(
             context,
             datasource_name,
             batch_kwargs_generator_name=batch_kwargs_generator_name,
         )
 
     elif isinstance(context.get_datasource(datasource_name), SqlAlchemyDatasource):
-        generator_asset, batch_kwargs = _get_batch_kwargs_for_sqlalchemy_datasource(context,
+        data_asset_name, batch_kwargs = _get_batch_kwargs_for_sqlalchemy_datasource(context,
                                                                                     datasource_name,
                                                                                     additional_batch_kwargs=additional_batch_kwargs)
     else:
         raise ge_exceptions.DataContextError("Datasource {0:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {1:s}".format(datasource_name, str(type(context.get_datasource(datasource_name)))))
 
-    return (datasource_name, batch_kwargs_generator_name, generator_asset, batch_kwargs)
+    return (datasource_name, batch_kwargs_generator_name, data_asset_name, batch_kwargs)
 
 
 def create_expectation_suite(
     context,
     datasource_name=None,
     batch_kwargs_generator_name=None,
-    generator_asset=None,
+    data_asset_name=None,
     batch_kwargs=None,
     expectation_suite_name=None,
     additional_batch_kwargs=None,
@@ -897,19 +897,19 @@ Name the new expectation suite"""
         )
         sys.exit(1)
 
-    if batch_kwargs_generator_name is None or generator_asset is None or batch_kwargs is None:
-        datasource_name, batch_kwargs_generator_name, generator_asset, batch_kwargs = get_batch_kwargs(
+    if batch_kwargs_generator_name is None or data_asset_name is None or batch_kwargs is None:
+        datasource_name, batch_kwargs_generator_name, data_asset_name, batch_kwargs = get_batch_kwargs(
             context,
             datasource_name=datasource_name,
             batch_kwargs_generator_name=batch_kwargs_generator_name,
-            generator_asset=generator_asset,
+            data_asset_name=data_asset_name,
             additional_batch_kwargs=additional_batch_kwargs)
         # In this case, we have "consumed" the additional_batch_kwargs
         additional_batch_kwargs = {}
 
     if expectation_suite_name is None:
-        if generator_asset:
-            default_expectation_suite_name = "{}.warning".format(generator_asset)
+        if data_asset_name:
+            default_expectation_suite_name = "{}.warning".format(data_asset_name)
         elif "query" in batch_kwargs:
             default_expectation_suite_name = "query.warning"
         elif "path" in batch_kwargs:
@@ -949,7 +949,7 @@ Name the new expectation suite"""
     profiling_results = context.profile_data_asset(
         datasource_name,
         batch_kwargs_generator_name=batch_kwargs_generator_name,
-        data_asset_name=generator_asset,
+        data_asset_name=data_asset_name,
         batch_kwargs=batch_kwargs,
         profiler=BasicSuiteBuilderProfiler,
         profiler_configuration="demo",
@@ -1008,7 +1008,7 @@ We could not determine the format of the file. What is it?
         "4": "json",
     }
 
-    generator_asset = None
+    data_asset_name = None
 
     datasource = context.get_datasource(datasource_name)
     if batch_kwargs_generator_name is not None:
@@ -1031,21 +1031,21 @@ We could not determine the format of the file. What is it?
             prompt = msg_prompt_enter_data_asset_name + choices + "\n" + msg_prompt_enter_data_asset_name_suffix.format(
                 len(data_asset_names_to_display))
 
-            generator_asset_selection = click.prompt(prompt, default=None, show_default=False)
+            data_asset_name_selection = click.prompt(prompt, default=None, show_default=False)
 
-            generator_asset_selection = generator_asset_selection.strip()
+            data_asset_name_selection = data_asset_name_selection.strip()
             try:
-                data_asset_index = int(generator_asset_selection) - 1
+                data_asset_index = int(data_asset_name_selection) - 1
                 try:
-                    generator_asset = \
+                    data_asset_name = \
                         [name[0] for name in available_data_asset_names][data_asset_index]
                 except IndexError:
                     pass
             except ValueError:
-                generator_asset = generator_asset_selection
+                data_asset_name = data_asset_name_selection
 
-            batch_kwargs = generator.build_batch_kwargs(generator_asset, **additional_batch_kwargs)
-            return (generator_asset, batch_kwargs)
+            batch_kwargs = generator.build_batch_kwargs(data_asset_name, **additional_batch_kwargs)
+            return (data_asset_name, batch_kwargs)
 
     # No generator name was passed or the user chose to enter a file path
 
@@ -1135,7 +1135,19 @@ We have saved your setup progress. When you are ready, run great_expectations in
 """)
                     sys.exit(1)
 
-    return (generator_asset, batch_kwargs)
+    if data_asset_name is None and batch_kwargs.get("path"):
+        try:
+            # Try guessing a filename
+            filename = os.path.split(batch_kwargs.get("path"))[1]
+            # Take all but the last part after the period
+            filename = ".".join(filename.split(".")[:-1])
+            data_asset_name = filename
+        except (OSError, IndexError):
+            pass
+
+    batch_kwargs["data_asset_name"] = data_asset_name
+
+    return (data_asset_name, batch_kwargs)
 
 
 def _get_batch_kwargs_for_sqlalchemy_datasource(context, datasource_name,
@@ -1151,7 +1163,7 @@ Enter an SQL query
     if additional_batch_kwargs is None:
         additional_batch_kwargs = {}
 
-    generator_asset = None
+    data_asset_name = None
 
     datasource = context.get_datasource(datasource_name)
 
@@ -1200,7 +1212,7 @@ Enter an SQL query
                 try:
                     data_asset_index = int(selection) - 1
                     try:
-                        generator_asset = \
+                        data_asset_name = \
                             [name[0] for name in available_data_asset_names][data_asset_index]
                     except IndexError:
                         pass
@@ -1211,7 +1223,7 @@ Enter an SQL query
                 query = click.prompt(msg_prompt_query, default=None, show_default=False)
 
             if query is None:
-                batch_kwargs = temp_generator.build_batch_kwargs(generator_asset, **additional_batch_kwargs)
+                batch_kwargs = temp_generator.build_batch_kwargs(data_asset_name, **additional_batch_kwargs)
                 batch_kwargs.update(temp_table_kwargs)
             else:
                 batch_kwargs = {
@@ -1227,7 +1239,9 @@ Enter an SQL query
         except KeyError as error:
             cli_message("""<red>ERROR: {}</red>""".format(str(error)))
 
-    return generator_asset, batch_kwargs
+    batch_kwargs["data_asset_name"] = data_asset_name
+
+    return data_asset_name, batch_kwargs
 
 
 def profile_datasource(
