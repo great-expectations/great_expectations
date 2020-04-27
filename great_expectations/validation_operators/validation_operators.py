@@ -382,27 +382,28 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             }
             query["blocks"].append(failed_data_assets_element)
 
-        run_id_element = {
+        run_name_element = {
             "type": "section",
             "text":
                 {
                     "type": "mrkdwn",
-                    "text": "*Run ID:* {}".format(run_id),
+                    "text": "*Run Name:* {}".format(run_name),
                 }
             ,
         }
-        query["blocks"].append(run_id_element)
+        query["blocks"].append(run_name_element)
 
-        timestamp_element = {
+        run_time_element = {
             "type": "section",
             "text":
                 {
                     "type": "mrkdwn",
-                    "text": "*Timestamp:* {}".format(timestamp),
+                    "text": "*Run Time:* {}".format(run_time),
                 }
             ,
         }
-        query["blocks"].append(timestamp_element)
+        query["blocks"].append(run_time_element)
+
         query["blocks"].append(divider_block)
 
         documentation_url = "https://docs.greatexpectations.io/en/latest/reference/validation_operators/warning_and_failure_expectation_suites_validation_operator.html"
