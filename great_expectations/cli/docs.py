@@ -87,6 +87,8 @@ def docs_list(directory):
                 event="cli.docs.list",
                 success=False
             )
+
+
 @docs.command(name="clean")
 @click.option(
     '--directory',
