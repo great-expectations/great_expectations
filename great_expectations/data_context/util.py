@@ -1,7 +1,5 @@
 import logging
 import os
-import errno
-import six
 import importlib
 import copy
 import re
@@ -19,31 +17,14 @@ from great_expectations.exceptions import (
 logger = logging.getLogger(__name__)
 
 
-def safe_mmkdir(directory, exist_ok=True):
-    """Simple wrapper since exist_ok is not available in python 2"""
-    if not isinstance(directory, six.string_types):
-        raise TypeError("directory must be of type str, not {0}".format({
-            "directory_type": str(type(directory))
-        }))
-
-    if not exist_ok:
-        raise ValueError(
-            "This wrapper should only be used for exist_ok=True; it is designed to make porting easier later")
-    try:
-        os.makedirs(directory)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
-
-
 def load_class(class_name, module_name):
     """Dynamically load a class from strings or raise a helpful error."""
     try:
         loaded_module = importlib.import_module(module_name)
         class_ = getattr(loaded_module, class_name)
-    except ModuleNotFoundError as e:
+    except ModuleNotFoundError:
         raise PluginModuleNotFoundError(module_name)
-    except AttributeError as e:
+    except AttributeError:
         raise PluginClassNotFoundError(
             module_name=module_name,
             class_name=class_name
@@ -65,7 +46,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     if module_name is None:
         try:
             module_name = config_defaults.pop("module_name")
-        except KeyError as e:
+        except KeyError:
             raise KeyError("Neither config : {} nor config_defaults : {} contains a module_name key.".format(
                 config, config_defaults,
             ))
@@ -73,7 +54,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
         config_defaults.pop("module_name", None)
 
-    verify_dynamic_loading_support(module_name=module_name, package_name=None)
+    verify_dynamic_loading_support(module_name=module_name)
 
     class_name = config.pop("class_name", None)
     if class_name is None:
@@ -81,7 +62,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
                        "an explicit class_name for %s" % config.get("name"))
         try:
             class_name = config_defaults.pop("class_name")
-        except KeyError as e:
+        except KeyError:
             raise KeyError("Neither config : {} nor config_defaults : {} contains a class_name key.".format(
                 config, config_defaults,
             ))
@@ -96,10 +77,8 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     if runtime_environment is not None:
         # If there are additional kwargs available in the runtime_environment requested by a
         # class to be instantiated, provide them
-        if six.PY3:
-            argspec = inspect.getfullargspec(class_.__init__)[0][1:]
-        else:
-            argspec = inspect.getargspec(class_.__init__)[0][1:]
+        argspec = inspect.getfullargspec(class_.__init__)[0][1:]
+
         missing_args = set(argspec) - set(config_with_defaults.keys())
         config_with_defaults.update(
             {missing_arg: runtime_environment[missing_arg] for missing_arg in missing_args
