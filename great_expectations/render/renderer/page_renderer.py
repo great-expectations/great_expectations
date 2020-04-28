@@ -59,7 +59,7 @@ class ValidationResultsPageRenderer(Renderer):
             run_name = run_id.get("run_name") or "__none__"
             run_time = run_id.get("run_time") or "__none__"
         elif isinstance(run_id, RunIdentifier):
-            run_name = run_id.run_name
+            run_name = run_id.run_name or "__none__"
             run_time = run_id.run_time.isoformat()
         batch_id = BatchKwargs(validation_results.meta['batch_kwargs']).to_id()
         expectation_suite_name = validation_results.meta['expectation_suite_name']
@@ -231,7 +231,7 @@ class ValidationResultsPageRenderer(Renderer):
             run_name = run_id.get("run_name") or "__none__"
             run_time = run_id.get("run_time") or "__none__"
         elif isinstance(run_id, RunIdentifier):
-            run_name = run_id.run_name
+            run_name = run_id.run_name or "__none__"
             run_time = run_id.run_time.isoformat()
         ge_version = validation_results.meta["great_expectations.__version__"]
 
@@ -705,7 +705,7 @@ class ProfilingResultsPageRenderer(Renderer):
             run_name = run_id.get("run_name") or "__none__"
             run_time = run_id.get("run_time") or "__none__"
         elif isinstance(run_id, RunIdentifier):
-            run_name = run_id.run_name
+            run_name = run_id.run_name or "__none__"
             run_time = run_id.run_time.isoformat()
 
         expectation_suite_name = validation_results.meta['expectation_suite_name']
