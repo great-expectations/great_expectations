@@ -260,7 +260,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
     def remove_key(self, key):
         if not isinstance(key, tuple):
-            key = self.key_to_tuple(key)
+            key = key.to_tuple()
         filepath = os.path.join(
             self.full_base_directory,
             self._convert_key_to_filepath(key)
@@ -389,6 +389,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
     def remove_key(self, key):
         import boto3
+        from botocore.exceptions import ClientError
         s3 = boto3.resource('s3')
         s3_key = self._convert_key_to_filepath(key)
         if s3_key:
@@ -400,7 +401,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
                 s3.meta.client.delete_objects(Bucket="MyBucket", Delete=delete_keys)
                 return True
-            except client.exceptions.NotFoundException as e:
+            except ClientError as e:
                 return False
         else:
             return False

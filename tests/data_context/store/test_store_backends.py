@@ -75,7 +75,8 @@ def test_tuple_filesystem_store_filepath_prefix_error(tmp_path_factory):
             base_directory=project_path,
             filepath_prefix="invalid_prefix_ends_with\\")
     assert "filepath_prefix may not end with" in e.value.message
-
+   
+    
 
 def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
     path = str(tmp_path_factory.mktemp('test_FilesystemStoreBackend_two_way_string_conversion__dir'))
@@ -125,15 +126,16 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
     print(my_store.list_keys())
     assert set(my_store.list_keys()) == {("AAA",), ("BBB",)}
 
-    my_store.remove_item("bbb")
-    assert my_store.get(("BBB",)) == ""  
     print(gen_directory_tree_str(project_path))
     assert gen_directory_tree_str(project_path) == """\
 test_TupleFilesystemStoreBackend__dir0/
     my_file_AAA
     my_file_BBB
 """
-
+    my_store.remove_key(("BBB",))
+    with pytest.raises(FileNotFoundError):
+        assert my_store.get(("BBB",)) == ""
+    
 
 def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('things'))
@@ -213,6 +215,8 @@ def test_TupleS3StoreBackend_with_prefix():
     assert my_store.get_url_for_key(('AAA',)) == 'https://s3.amazonaws.com/%s/%s/my_file_AAA' % (bucket, prefix)
     assert my_store.get_url_for_key(('BBB',)) == 'https://s3.amazonaws.com/%s/%s/my_file_BBB' % (bucket, prefix)
 
+    my_store.remove_key(("BBB",))
+    assert my_store.get(("BBB",)) == None
 
 @mock_s3
 def test_TupleS3StoreBackend_with_empty_prefixes():
@@ -335,3 +339,13 @@ def test_TupleGCSStoreBackend():
         my_store.list_keys()
 
         mock_client.list_blobs.assert_called_once_with("leakybucket", prefix="this_is_a_test_prefix")
+
+        my_store.remove_key("leakybucket", prefix="this_is_a_test_prefix")
+   
+        from google.cloud.exceptions import NotFound
+        
+        try: 
+            mock_client.get_bucket.assert_called_once_with("leakybucket")
+        except NotFound:
+            pass
+        
