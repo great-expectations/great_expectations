@@ -59,7 +59,7 @@ Here is an example of a site configuration from great_expectations.yml with defa
         validations:  # if empty, or one of ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE'], section not rendered
           class_name: DefaultSiteSectionBuilder
           source_store_name: validations_store
-          run_id_filter:
+          run_name_filter:
             ne: profiling # exclude validations with run id "profiling" - reserved for profiling results
           renderer:
             module_name: great_expectations.render.renderer
@@ -68,15 +68,15 @@ Here is an example of a site configuration from great_expectations.yml with defa
         profiling:  # if empty, or one of ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE'], section not rendered
           class_name: DefaultSiteSectionBuilder
           source_store_name: validations_store
-          run_id_filter:
+          run_name_filter:
             eq: profiling
           renderer:
             module_name: great_expectations.render.renderer
             class_name: ProfilingResultsPageRenderer
 
 ``validations_store`` in the example above specifies the name of a store configured in the `stores` section.
-Validation and profiling results from that store will be included in the documentation. The optional ``run_id_filter``
-attribute allows to include (``eq`` for exact match) or exclude (``ne``) validation results with a particular run id.
+Validation and profiling results from that store will be included in the documentation. The optional ``run_name_filter``
+attribute allows to include (``eq`` for exact match) or exclude (``ne``) validation results with a particular run name.
 
 .. _customizing_data_docs_store_backend:
 
@@ -140,7 +140,7 @@ the validations renderer, and no profiling results are rendered at all.
           validations:  # if empty, or one of ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE'], section not rendered
             class_name: DefaultSiteSectionBuilder
             source_store_name: validations_store
-            run_id_filter:
+            run_name_filter:
               ne: profiling
             renderer:
               module_name: great_expectations.render.renderer
@@ -419,7 +419,7 @@ Lastly, to compile your newly-customized Data Docs local site, you run ``great_e
       validations: # if empty, or one of ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE'], section not rendered
         class_name: DefaultSiteSectionBuilder
         source_store_name: validations_store
-        run_id_filter:
+        run_name_filter:
           ne: profiling # exclude validations with run id "profiling" - reserved for profiling results
         renderer:
           module_name: great_expectations.render.renderer
@@ -428,7 +428,7 @@ Lastly, to compile your newly-customized Data Docs local site, you run ``great_e
       profiling: # if empty, or one of ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE'], section not rendered
         class_name: DefaultSiteSectionBuilder
         source_store_name: validations_store
-        run_id_filter:
+        run_name_filter:
           eq: profiling
         renderer:
           module_name: great_expectations.render.renderer
