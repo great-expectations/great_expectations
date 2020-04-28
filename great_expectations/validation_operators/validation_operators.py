@@ -9,8 +9,6 @@ from ..data_context.types.resource_identifiers import (
 
 logger = logging.getLogger(__name__)
 
-from six import string_types
-
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.data_asset import DataAsset
 from .util import send_slack_notification
@@ -114,7 +112,7 @@ class ActionListValidationOperator(ValidationOperator):
         """
         if not isinstance(item, DataAsset):
             if not (isinstance(item, tuple) and len(item) == 2 and isinstance(item[0], dict) and isinstance(
-                    item[1], string_types)):
+                    item[1], str)):
                 raise ValueError("Unable to build batch from item.")
             batch = self.data_context.get_batch(
                 batch_kwargs=item[0],
@@ -306,7 +304,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
         assert len(expectation_suite_name_suffixes) == 2
         for suffix in expectation_suite_name_suffixes:
-            assert isinstance(suffix, string_types)
+            assert isinstance(suffix, str)
         self.expectation_suite_name_suffixes = expectation_suite_name_suffixes
 
         self.slack_webhook = slack_webhook

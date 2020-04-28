@@ -1,6 +1,4 @@
 #Test File Expectations
-from __future__ import division
-
 import os
 import platform
 

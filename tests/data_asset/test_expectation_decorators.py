@@ -1,5 +1,3 @@
-from __future__ import division
-
 import pytest
 
 from great_expectations.core import ExpectationKwargs, ExpectationConfiguration, ExpectationValidationResult

@@ -12,7 +12,7 @@ from great_expectations.data_context.types.resource_identifiers import Validatio
     ExpectationSuiteIdentifier
 from great_expectations.render.renderer.site_builder import SiteBuilder
 
-from great_expectations.data_context.util import safe_mmkdir, instantiate_class_from_config, file_relative_path
+from great_expectations.data_context.util import instantiate_class_from_config, file_relative_path
 
 
 def assert_how_to_buttons(context, index_page_locator_info: str, index_links_dict: dict, show_how_to_buttons=True):
@@ -211,8 +211,8 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     assert len(index_links_dict["profiling_links"]) == 3
 
     # save documentation locally
-    safe_mmkdir("./tests/render/output")
-    safe_mmkdir("./tests/render/output/documentation")
+    os.makedirs("./tests/render/output", exist_ok=True)
+    os.makedirs("./tests/render/output/documentation", exist_ok=True)
 
     if os.path.isdir("./tests/render/output/documentation"):
         shutil.rmtree("./tests/render/output/documentation")
