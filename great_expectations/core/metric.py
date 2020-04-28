@@ -91,6 +91,21 @@ class ValidationMetric(Metric):
         if not isinstance(expectation_suite_identifier, ExpectationSuiteIdentifier):
             expectation_suite_identifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_identifier)
+        if isinstance(run_id, str):
+            warnings.warn("String run_ids will be deprecated in the future. Please provide a run_id of type "
+                          "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
+                          "and run_time (both optional).", DeprecationWarning)
+            try:
+                run_time = parse(run_id)
+            except ParserError:
+                run_time = None
+            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
+        elif isinstance(run_id, dict):
+            run_id = RunIdentifier(**run_id)
+        elif run_id is None:
+            run_id = RunIdentifier()
+        elif not isinstance(run_id, RunIdentifier):
+            run_id = RunIdentifier(run_name=str(run_id))
         self._run_id = run_id
         self._expectation_suite_identifier = expectation_suite_identifier
 
