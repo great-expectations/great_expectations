@@ -85,12 +85,12 @@ data_docs_sites:
 
       validations:
         source_store_name: expectations_store
-        run_id_filter:
+        run_name_filter:
           ne: custom_validations_filter
 
       profiling:
         source_store_name: expectations_store
-        run_id_filter:
+        run_name_filter:
           eq: custom_profiling_filter
 
 validation_operators:
