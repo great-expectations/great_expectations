@@ -32,7 +32,7 @@ def test_suite_help_output(caplog):
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_on_context_with_no_datasources(
-    mock_webbrowser, mock_subprocess, caplog, empty_data_context
+        mock_webbrowser, mock_subprocess, caplog, empty_data_context, monkeypatch
 ):
     """
     We call the "suite demo" command on a data context that has no datasources
@@ -1158,6 +1158,8 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
     - send a DataContext init success message
     - send a scaffold fail message
     """
+    # Reset GE_USAGE_STATS for this test only
+    monkeypatch.setenv("GE_USAGE_STATS", "True")
     context = empty_data_context
     root_dir = context.root_directory
 
@@ -1190,7 +1192,7 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_suite_scaffold_on_existing_suite_raises_error(
-    mock_emit, caplog, empty_data_context
+        mock_emit, caplog, empty_data_context, monkeypatch
 ):
     """
     We call the "suite scaffold" command with an existing suite
@@ -1200,6 +1202,8 @@ def test_suite_scaffold_on_existing_suite_raises_error(
     - send a DataContext init success message
     - send a scaffold fail message
     """
+    # Reenable monkeypatch
+    monkeypatch.setenv("GE_USAGE_STATS", "True")
     context = empty_data_context
     root_dir = context.root_directory
     suite = context.create_expectation_suite("foop")
@@ -1237,7 +1241,7 @@ def test_suite_scaffold_on_existing_suite_raises_error(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_scaffold_creates_notebook_and_opens_jupyter(
-    mock_subprocess, mock_emit, caplog, titanic_data_context
+        mock_subprocess, mock_emit, caplog, titanic_data_context, monkeypatch
 ):
     """
     We call the "suite scaffold" command
@@ -1248,6 +1252,8 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
     - send a DataContext init success message
     - send a scaffold success message
     """
+    # Reenable monkeypatch
+    monkeypatch.setenv("GE_USAGE_STATS", "True")
     context = titanic_data_context
     root_dir = context.root_directory
     suite_name = "foop"
@@ -1288,7 +1294,7 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
-    mock_subprocess, mock_emit, caplog, titanic_data_context
+        mock_subprocess, mock_emit, caplog, titanic_data_context, monkeypatch
 ):
     """
     We call the "suite scaffold --no-jupyter"
@@ -1300,6 +1306,8 @@ def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
     - send a DataContext init success message
     - send a scaffold success message
     """
+    # Reenable monkeypatch
+    monkeypatch.setenv("GE_USAGE_STATS", "True")
     context = titanic_data_context
     root_dir = context.root_directory
     suite_name = "foop"
