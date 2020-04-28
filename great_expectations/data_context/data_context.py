@@ -493,7 +493,7 @@ class BaseDataContext(object):
                 else:
                     root_directory = ""
                 var_path = os.path.join(root_directory, defined_path)
-                with open(var_path, "r") as config_variables_file:
+                with open(var_path) as config_variables_file:
                     return yaml.load(config_variables_file) or {}
             except IOError as e:
                 if e.errno != errno.ENOENT:
@@ -730,7 +730,7 @@ class BaseDataContext(object):
         """
         logger.debug("Starting BaseDataContext.add_datasource for %s" % name)
         module_name = kwargs.get("module_name", "great_expectations.datasource")
-        verify_dynamic_loading_support(module_name=module_name, package_name=None)
+        verify_dynamic_loading_support(module_name=module_name)
         class_name = kwargs.get("class_name")
         datasource_class = load_class(
             module_name=module_name,
@@ -1606,7 +1606,7 @@ class DataContext(BaseDataContext):
         path_to_yml = os.path.join(ge_dir, cls.GE_YML)
 
         # TODO this is so brittle and gross
-        with open(path_to_yml, "r") as f:
+        with open(path_to_yml) as f:
             config = yaml.load(f)
         config_var_path = config.get("config_variables_file_path")
         config_var_path = os.path.join(ge_dir, config_var_path)
@@ -1710,7 +1710,7 @@ class DataContext(BaseDataContext):
         """
         path_to_yml = os.path.join(self.root_directory, self.GE_YML)
         try:
-            with open(path_to_yml, "r") as data:
+            with open(path_to_yml) as data:
                 config_dict = yaml.load(data)
 
         except YAMLError as err:
@@ -1753,7 +1753,7 @@ class DataContext(BaseDataContext):
     def find_context_root_dir(cls):
         result = None
         yml_path = None
-        ge_home_environment = os.getenv("GE_HOME", None)
+        ge_home_environment = os.getenv("GE_HOME")
         if ge_home_environment:
             ge_home_environment = os.path.expanduser(ge_home_environment)
             if os.path.isdir(ge_home_environment) and os.path.isfile(

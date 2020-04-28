@@ -208,7 +208,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             self.full_base_directory,
             self._convert_key_to_filepath(key)
         )
-        with open(filepath, 'r') as infile:
+        with open(filepath) as infile:
             return infile.read()
 
     def _set(self, key, value, **kwargs):
