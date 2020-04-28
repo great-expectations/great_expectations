@@ -254,6 +254,7 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
         _ = titanic_data_context.profile_datasource("fakey_mc_fake")
 
 
+@freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
 def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):
 
@@ -321,11 +322,14 @@ project_path/
     # validation result
     titanic_profiled_batch_id = PathBatchKwargs({
         'path': os.path.join(project_dir, 'data/titanic/Titanic.csv'),
-        'datasource': 'titanic'}
+        'datasource': 'titanic',
+        'data_asset_name': 'Titanic'
+    }
     ).to_id()
 
 
     tree_str = gen_directory_tree_str(project_dir)
+    # print(tree_str)
     assert tree_str == """project_path/
     data/
         random/
@@ -363,7 +367,8 @@ project_path/
                         Titanic/
                             BasicDatasetProfiler/
                                 profiling/
-                                    {}.json
+                                    2019-09-26T13:42:41+00:00/
+                                        {}.json
 """.format(titanic_profiled_batch_id)
 
     context.profile_datasource("random")
@@ -371,17 +376,21 @@ project_path/
 
     f1_profiled_batch_id = PathBatchKwargs({
         'path': os.path.join(project_dir, 'data/random/f1.csv'),
-        'datasource': 'random'}
+        'datasource': 'random',
+        'data_asset_name': 'f1'
+    }
     ).to_id()
 
     f2_profiled_batch_id = PathBatchKwargs({
         'path': os.path.join(project_dir, 'data/random/f2.csv'),
-        'datasource': 'random'}
+        'datasource': 'random',
+        'data_asset_name': 'f2'
+    }
     ).to_id()
 
     data_docs_dir = os.path.join(project_dir, "great_expectations/uncommitted/data_docs")
     observed = gen_directory_tree_str(data_docs_dir)
-    # print(observed)
+    print(observed)
     assert observed == """\
 data_docs/
     local_site/
@@ -430,17 +439,20 @@ data_docs/
                     f1/
                         BasicDatasetProfiler/
                             profiling/
-                                {0:s}.html
+                                2019-09-26T13:42:41+00:00/
+                                    {0:s}.html
                     f2/
                         BasicDatasetProfiler/
                             profiling/
-                                {1:s}.html
+                                2019-09-26T13:42:41+00:00/
+                                    {1:s}.html
             titanic/
                 subdir_reader/
                     Titanic/
                         BasicDatasetProfiler/
                             profiling/
-                                {2:s}.html
+                                2019-09-26T13:42:41+00:00/
+                                    {2:s}.html
 """.format(f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id)
 
     # save data_docs locally
