@@ -13,7 +13,10 @@ develop
   - Fix bullet list spacing issues
   - Fix 0.10. formatting
   - Drop roadmap_and_changelog.rst and move changelog.rst to the top level of the table of contents
-
+* DataContext.run_validation_operator() now raises a DataContextError if:
+  - no batches are passed
+  - batches are of the the wrong type
+  - no matching validation operator is found in the project
 
 0.10.4
 -----------------
