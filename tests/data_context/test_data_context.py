@@ -4,13 +4,14 @@ import shutil
 from collections import OrderedDict
 
 import pytest
+from freezegun import freeze_time
 from ruamel.yaml import YAML
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
     expectationSuiteSchema,
-)
+    RunIdentifier)
 from great_expectations.data_context import (
     BaseDataContext,
     DataContext,
@@ -217,21 +218,23 @@ def test_list_datasources(data_context):
     ]
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_data_context_get_validation_result(titanic_data_context):
     """
     Test that validation results can be correctly fetched from the configured results store
     """
-    profiling_results = titanic_data_context.profile_datasource("mydatasource")
+    run_id = RunIdentifier(run_name="profiling")
+    profiling_results = titanic_data_context.profile_datasource("mydatasource", run_id=run_id)
 
     all_validation_result = titanic_data_context.get_validation_result(
         "mydatasource.mygenerator.Titanic.BasicDatasetProfiler",
-        run_id="profiling"
+        run_id=run_id
     )
     assert len(all_validation_result.results) == 51
 
     failed_validation_result = titanic_data_context.get_validation_result(
         "mydatasource.mygenerator.Titanic.BasicDatasetProfiler",
-        run_id="profiling",
+        run_id=run_id,
         failed_only=True,
     )
     assert len(failed_validation_result.results) == 8

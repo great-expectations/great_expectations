@@ -2,6 +2,8 @@ import pytest
 
 import datetime
 
+from freezegun import freeze_time
+
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 
@@ -137,6 +139,7 @@ def test_database_evaluation_parameter_store_basics(param_store):
     assert value == metric_value
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that
