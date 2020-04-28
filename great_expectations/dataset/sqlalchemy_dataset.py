@@ -1,8 +1,4 @@
-from __future__ import division
-
 from typing import List
-
-from six import PY3, string_types
 
 import uuid
 from functools import wraps
@@ -107,10 +103,7 @@ class MetaSqlAlchemyDataset(Dataset):
         The decorator will then use that filter to obtain unexpected elements, relevant counts, and return the formatted
         object.
         """
-        if PY3:
-            argspec = inspect.getfullargspec(func)[0][1:]
-        else:
-            argspec = inspect.getargspec(func)[0][1:]
+        argspec = inspect.getfullargspec(func)[0][1:]
 
         @cls.expectation(argspec)
         @wraps(func)
@@ -198,7 +191,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 output_strftime_format = kwargs["output_strftime_format"]
                 maybe_limited_unexpected_list = []
                 for x in unexpected_query_results.fetchall():
-                    if isinstance(x[column], string_types):
+                    if isinstance(x[column], str):
                         col = parse(x[column])
                     else:
                         col = x[column]
@@ -1076,7 +1069,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             mostly=None,
             result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
-        regex_expression = self._get_dialect_regex_expression(column, regex, positive=True)
+        regex_expression = self._get_dialect_regex_expression(column, regex)
         if regex_expression is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
@@ -1113,7 +1106,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if len(regex_list) == 0:
             raise ValueError("At least one regex must be supplied in the regex_list.")
 
-        regex_expression = self._get_dialect_regex_expression(column, regex_list[0], positive=True)
+        regex_expression = self._get_dialect_regex_expression(column, regex_list[0])
         if regex_expression is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
@@ -1121,12 +1114,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if match_on == "any":
             condition = \
                 sa.or_(
-                    *[self._get_dialect_regex_expression(column, regex, positive=True) for regex in regex_list]
+                    *[self._get_dialect_regex_expression(column, regex) for regex in regex_list]
                 )
         else:
             condition = \
                 sa.and_(
-                    *[self._get_dialect_regex_expression(column, regex, positive=True) for regex in regex_list]
+                    *[self._get_dialect_regex_expression(column, regex) for regex in regex_list]
                 )
         return condition
 

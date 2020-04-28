@@ -1,5 +1,3 @@
-from __future__ import division
-
 import inspect
 import json
 import logging
@@ -12,7 +10,6 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
-from six import PY3, integer_types, string_types
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
@@ -52,10 +49,7 @@ class MetaPandasDataset(Dataset):
         See :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>` \
         for full documentation of this function.
         """
-        if PY3:
-            argspec = inspect.getfullargspec(func)[0][1:]
-        else:
-            argspec = inspect.getargspec(func)[0][1:]
+        argspec = inspect.getfullargspec(func)[0][1:]
 
         @cls.expectation(argspec)
         @wraps(func)
@@ -101,7 +95,7 @@ class MetaPandasDataset(Dataset):
                     if val is None:
                         parsed_unexpected_list.append(val)
                     else:
-                        if isinstance(val, string_types):
+                        if isinstance(val, str):
                             val = parse(val)
                         parsed_unexpected_list.append(datetime.strftime(val, output_strftime_format))
                 unexpected_list = parsed_unexpected_list
@@ -140,10 +134,7 @@ class MetaPandasDataset(Dataset):
         The column_pair_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
         truthiness of some condition on a per row basis across a pair of columns.
         """
-        if PY3:
-            argspec = inspect.getfullargspec(func)[0][1:]
-        else:
-            argspec = inspect.getargspec(func)[0][1:]
+        argspec = inspect.getfullargspec(func)[0][1:]
 
         @cls.expectation(argspec)
         @wraps(func)
@@ -214,10 +205,7 @@ class MetaPandasDataset(Dataset):
         The multicolumn_map_expectation decorator handles boilerplate issues surrounding the common pattern of
         evaluating truthiness of some condition on a per row basis across a set of columns.
         """
-        if PY3:
-            argspec = inspect.getfullargspec(func)[0][1:]
-        else:
-            argspec = inspect.getargspec(func)[0][1:]
+        argspec = inspect.getfullargspec(func)[0][1:]
 
         @cls.expectation(argspec)
         @wraps(func)
@@ -599,14 +587,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         elif type_.lower() == "bool":
             return bool,
         elif type_.lower() in ["int", "long"]:
-            return integer_types
+            return int,
         elif type_.lower() == "float":
             return float,
         elif type_.lower() == "bytes":
             return bytes,
         elif type_.lower() == "complex":
             return complex,
-        elif type_.lower() == "str":
+        elif type_.lower() in ["str", "string_types"]:
             return str,
         elif type_.lower() == "list":
             return list,
@@ -614,8 +602,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             return dict,
         elif type_.lower() == "unicode":
             return None
-        elif type_.lower() in ["string_types"]:
-            return string_types
 
     @MetaPandasDataset.column_map_expectation
     def _expect_column_values_to_be_of_type__map(
@@ -889,7 +875,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
             try:
                 temp_column = column.map(parse)
-            except TypeError as e:
+            except TypeError:
                 temp_column = column
 
         else:
@@ -903,8 +889,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             # Ensure types can be compared since some types in Python 3 cannot be logically compared.
             # print type(val), type(min_value), type(max_value), val, min_value, max_value
 
-            if type(val) == None:
+            if type(val) is None:
                 return False
+
             if min_value is not None and max_value is not None:
                 if allow_cross_type_comparisons:
                     try:
@@ -920,7 +907,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                         return False
 
                 else:
-                    if (isinstance(val, string_types) != isinstance(min_value, string_types)) or (isinstance(val, string_types) != isinstance(max_value, string_types)):
+                    if (isinstance(val, str) != isinstance(min_value, str)) or \
+                            (isinstance(val, str) != isinstance(max_value, str)):
                         raise TypeError(
                             "Column values, min_value, and max_value must either be None or of the same type.")
 
@@ -944,7 +932,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                         return False
 
                 else:
-                    if isinstance(val, string_types) != isinstance(max_value, string_types):
+                    if isinstance(val, str) != isinstance(max_value, str):
                         raise TypeError(
                             "Column values, min_value, and max_value must either be None or of the same type.")
 
@@ -964,7 +952,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                         return False
 
                 else:
-                    if isinstance(val, string_types) != isinstance(min_value, string_types):
+                    if isinstance(val, str) != isinstance(min_value, str):
                         raise TypeError(
                             "Column values, min_value, and max_value must either be None or of the same type.")
 
@@ -1141,10 +1129,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             try:
                 datetime.strptime(val, strftime_format)
                 return True
-            except TypeError as e:
+            except TypeError:
                 raise TypeError("Values passed to expect_column_values_to_match_strftime_format must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format.")
-
-            except ValueError as e:
+            except ValueError:
                 return False
 
         return column.map(is_parseable_by_format)
@@ -1223,7 +1210,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             raise e
 
         # Format arguments for scipy.kstest
-        if (isinstance(params, dict)):
+        if isinstance(params, dict):
             positional_parameters = _scipy_distribution_positional_args_from_dict(
                 distribution, params)
         else:
@@ -1278,9 +1265,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             bootstrap_sample_size = len(partition_object['weights']) * 2
 
         results = [stats.kstest(
-            np.random.choice(column, size=bootstrap_sample_size, replace=True),
+            np.random.choice(column, size=bootstrap_sample_size),
             estimated_cdf)[1]
-            for k in range(bootstrap_samples)]
+            for _ in range(bootstrap_samples)]
 
         test_result = (1 + sum(x >= p for x in results)) / \
             (bootstrap_samples + 1)

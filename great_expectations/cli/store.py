@@ -38,11 +38,9 @@ def store_list(directory):
                 success=True
             )
             return
-
-        if len(stores) == 1:
+        elif len(stores) == 1:
             list_intro_string = "1 Store found:"
-
-        if len(stores) > 1:
+        else:
             list_intro_string = "{} Stores found:".format(len(stores))
 
         cli_message(list_intro_string)

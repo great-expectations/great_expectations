@@ -2,8 +2,6 @@ import pytest
 
 import os
 
-from great_expectations.data_context.util import safe_mmkdir
-
 from great_expectations.datasource.batch_kwargs_generator import SubdirReaderBatchKwargsGenerator
 from great_expectations.exceptions import BatchKwargsError
 
@@ -18,7 +16,7 @@ def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_facto
         "asset_2/20190102__asset_2.csv"
     ]
     for file in mock_files:
-        safe_mmkdir(os.path.join(base_directory, file.split("/")[0]))
+        os.makedirs(os.path.join(base_directory, file.split("/")[0]), exist_ok=True)
         open(os.path.join(base_directory, file), "w").close()
 
     subdir_reader_generator = SubdirReaderBatchKwargsGenerator("test_generator", datasource=basic_pandas_datasource,
@@ -84,7 +82,7 @@ def test_subdir_reader_file_partitioning(basic_pandas_datasource, tmp_path_facto
     ]
     for file in mock_files:
         if "/" in file:
-            safe_mmkdir(os.path.join(base_directory, file.split("/")[0]))
+            os.makedirs(os.path.join(base_directory, file.split("/")[0]), exist_ok=True)
         open(os.path.join(base_directory, file), "w").close()
 
     # If we have files, we should see them as individual assets
@@ -124,7 +122,7 @@ def test_subdir_reader_configurable_reader_method(basic_pandas_datasource, tmp_p
     ]
     for file in mock_files:
         if "/" in file:
-            safe_mmkdir(os.path.join(base_directory, file.split("/")[0]))
+            os.makedirs(os.path.join(base_directory, file.split("/")[0]), exist_ok=True)
         open(os.path.join(base_directory, file), "w").close()
 
     # If we have files, we should see them as individual assets
