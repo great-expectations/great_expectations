@@ -342,7 +342,7 @@ class DefaultSiteSectionBuilder(object):
 
             try:
                 resource = self.source_store.get(resource_key)
-            except FileNotFoundError as e:
+            except FileNotFoundError:
                 logger.warning(f"File {resource_key.to_fixed_length_tuple()} could not be found. Skipping.")
                 continue
 
@@ -641,7 +641,7 @@ class DefaultSiteIndexBuilder(object):
                     run_id=profiling_result_key.run_id,
                     validation_success=validation_success
                 )
-            except Exception as e:
+            except Exception:
                 error_msg = "Profiling result not found: {0:s} - skipping".format(str(profiling_result_key.to_tuple()))
                 logger.warning(error_msg)
 
@@ -663,7 +663,7 @@ class DefaultSiteIndexBuilder(object):
                     run_id=validation_result_key.run_id,
                     validation_success=validation_success
                 )
-            except Exception as e:
+            except Exception:
                 error_msg = "Validation result not found: {0:s} - skipping".format(str(validation_result_key.to_tuple()))
                 logger.warning(error_msg)
 

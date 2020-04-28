@@ -1069,7 +1069,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             mostly=None,
             result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
-        regex_expression = self._get_dialect_regex_expression(column, regex, positive=True)
+        regex_expression = self._get_dialect_regex_expression(column, regex)
         if regex_expression is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
@@ -1106,7 +1106,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if len(regex_list) == 0:
             raise ValueError("At least one regex must be supplied in the regex_list.")
 
-        regex_expression = self._get_dialect_regex_expression(column, regex_list[0], positive=True)
+        regex_expression = self._get_dialect_regex_expression(column, regex_list[0])
         if regex_expression is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
@@ -1114,12 +1114,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if match_on == "any":
             condition = \
                 sa.or_(
-                    *[self._get_dialect_regex_expression(column, regex, positive=True) for regex in regex_list]
+                    *[self._get_dialect_regex_expression(column, regex) for regex in regex_list]
                 )
         else:
             condition = \
                 sa.and_(
-                    *[self._get_dialect_regex_expression(column, regex, positive=True) for regex in regex_list]
+                    *[self._get_dialect_regex_expression(column, regex) for regex in regex_list]
                 )
         return condition
 

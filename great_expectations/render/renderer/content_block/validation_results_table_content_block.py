@@ -13,7 +13,7 @@ from great_expectations.render.types import (
     CollapseContent,
 )
 from great_expectations.render.util import num_to_str
-from great_expectations.exceptions import GreatExpectationsError
+
 
 logger = logging.getLogger(__name__)
 

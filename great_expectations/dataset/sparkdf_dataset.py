@@ -486,7 +486,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         # find the number of values exactly equal to the upper bound to add those
 
         # We'll try for an optimization by asking for it at the same time
-        if added_max == True:
+        if added_max:
             upper_bound_count = temp_column.select(column).filter(col(column) == bins[-2]).count()
         else:
             upper_bound_count = 0
@@ -701,10 +701,9 @@ class SparkDFDataset(MetaSparkDFDataset):
             try:
                 datetime.strptime(val, strftime_format)
                 return True
-            except TypeError as e:
+            except TypeError:
                 raise TypeError("Values passed to expect_column_values_to_match_strftime_format must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format.")
-
-            except ValueError as e:
+            except ValueError:
                 return False
 
         success_udf = udf(is_parseable_by_format)

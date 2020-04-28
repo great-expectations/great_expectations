@@ -99,7 +99,7 @@ def is_sane_slack_webhook(url):
     if url is None:
         return False
 
-    return "https://hooks.slack.com/" in url.strip()
+    return url.strip().startswith("https://hooks.slack.com/")
 
 
 # TODO consolidate all the myriad CLI tests into this
