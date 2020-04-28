@@ -1,7 +1,7 @@
 from datetime import datetime
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 import click
 
@@ -283,7 +283,7 @@ Let's help you specify the batch of data your want the validation operator to va
                     batches_to_validate.append(batch)
 
             if run_name is None:
-                run_name = name + "_" + datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+                run_name = datetime.now(timezone.utc).isoformat()
 
             run_id = RunIdentifier(run_name=run_name)
 
