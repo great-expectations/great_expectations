@@ -173,7 +173,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
         if len(tuple_) < 4:
             raise GreatExpectationsError("ValidationMetricIdentifier tuple must have at least four components.")
         return cls(
-            run_id=RunIdentifier.to_tuple((tuple_[0], tuple_[1])),
+            run_id=RunIdentifier.from_tuple((tuple_[0], tuple_[1])),
             expectation_suite_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[1:-2]),
             metric_name=tuple_[-2],
             metric_kwargs_id=tuple_[-1]
@@ -185,7 +185,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
             raise GreatExpectationsError("ValidationMetricIdentifier fixed length tuple must have exactly four "
                                          "components.")
         return cls(
-            run_id=RunIdentifier.to_tuple((tuple_[0], tuple_[1])),
+            run_id=RunIdentifier.from_fixed_length_tuple((tuple_[0], tuple_[1])),
             expectation_suite_identifier=ExpectationSuiteIdentifier.from_fixed_length_tuple(tuple((tuple_[1],))),
             metric_name=tuple_[2],
             metric_kwargs_id=tuple_[3]
