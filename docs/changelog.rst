@@ -1,9 +1,19 @@
 .. _changelog:
 
+#########
+Changelog
+#########
+
 develop
 -----------------
 * new cli command noun `checkpoint` (in the next major release this tap will be deprecated
 * improvements to ge.read_json tests
+* tidy up the changelog
+
+  - Fix bullet list spacing issues
+  - Fix 0.10. formatting
+  - Drop roadmap_and_changelog.rst and move changelog.rst to the top level of the table of contents
+
 
 0.10.4
 -----------------
@@ -38,11 +48,9 @@ develop
 
 0.10.0
 -----------------
-* (BREAKING) Clarified API language: renamed all ``generator`` parameters and methods to the more correct
-``batch_kwargs_generator`` language. Existing projects may require simple migration steps. See :ref:`Upgrading to 0.10.x` for instructions.
-* Adds anonymized usage statistics to Great Expectations. You can opt out at any time, but we’re hoping that you
-won’t: this data will be very helpful for improving the product. See this article for details: :ref:`Usage Statistics`.
-* CLI: improve look/consistency of `docs list`, `suite list`, and `datasource list` output; add `store list` and `validation-operator list` commands great_expectations/core/logging/usage_statistics.py
+* (BREAKING) Clarified API language: renamed all ``generator`` parameters and methods to the more correct ``batch_kwargs_generator`` language. Existing projects may require simple migration steps. See :ref:`Upgrading to 0.10.x` for instructions.
+* Adds anonymized usage statistics to Great Expectations. See this article for details: :ref:`Usage Statistics`.
+* CLI: improve look/consistency of ``docs list``, ``suite list``, and ``datasource list`` output; add ``store list`` and ``validation-operator list`` commands.
 * New SuiteBuilderProfiler that facilitates faster suite generation by allowing columns to be profiled
 * Added two convenience methods to ExpectationSuite: get_table_expectations & get_column_expectations
 * Added optional profiler_configuration to DataContext.profile() and DataAsset.profile()
@@ -76,7 +84,9 @@ won’t: this data will be very helpful for improving the product. See this arti
 * Update type detection for bigquery based on driver changes in pybigquery driver 0.4.14. Added a warning for users who are running an older pybigquery driver
 * added execution tests to the NotebookRenderer to mitigate codegen risks
 * Add option "persist", true by default, for SparkDFDataset to persist the DataFrame it is passed. This addresses #1133 in a deeper way (thanks @tejsvirai for the robust debugging support and reproduction on spark).
-   * Disabling this option should *only* be done if the user has *already* externally persisted the DataFrame, or if the dataset is too large to persist but *computations are guaranteed to be stable across jobs*.
+
+  * Disabling this option should *only* be done if the user has *already* externally persisted the DataFrame, or if the dataset is too large to persist but *computations are guaranteed to be stable across jobs*.
+
 * Enable passing dataset kwargs through datasource via dataset_options batch_kwarg.
 * Fix AttributeError when validating expectations from a JSON file
 * Data Docs: fix bug that was causing erratic scrolling behavior when table of contents contains many columns
@@ -85,8 +95,10 @@ won’t: this data will be very helpful for improving the product. See this arti
 0.9.7
 -----------------
 * Update marshmallow dependency to >3. NOTE: as of this release, you MUST use marshamllow >3.0, which REQUIRES python 3. (`#1187 <https://github.com/great-expectations/great_expectations/issues/1187>`_) @jcampbell
-   * Schema checking is now stricter for expectation suites, and data_asset_name must not be present as a top-level key in expectation suite json. It is safe to remove.
-   * Similarly, datasource configuration must now adhere strictly to the required schema, including having any required credentials stored in the "credentials" dictionary.
+
+  * Schema checking is now stricter for expectation suites, and data_asset_name must not be present as a top-level key in expectation suite json. It is safe to remove.
+  * Similarly, datasource configuration must now adhere strictly to the required schema, including having any required credentials stored in the "credentials" dictionary.
+
 * New beta CLI command: `tap new` that generates an executable python file to expedite deployments. (`#1193 <https://github.com/great-expectations/great_expectations/issues/1193>`_) @Aylr
 * bugfix in TableBatchKwargsGenerator docs
 * Added feature maturity in README (`#1203 <https://github.com/great-expectations/great_expectations/issues/1203>`_) @kyleaton
@@ -130,8 +142,10 @@ won’t: this data will be very helpful for improving the product. See this arti
 * Add support for transient table creation in snowflake (#1012)
 * Improve path support in TupleStoreBackend for better cross-platform compatibility
 * New features on `ExpectationSuite`
-   - `.add_citation()`
-   - `get_citations()`
+
+  - ``add_citation()``
+  - ``get_citations()``
+
 * `SampleExpectationsDatasetProfiler` now leaves a citation containing the original batch kwargs
 * `great_expectations suite edit` now uses batch_kwargs from citations if they exist
 * Bugfix :: suite edit notebooks no longer blow away the existing suite while loading a batch of data
@@ -281,7 +295,7 @@ us on Slack for questions you don't see addressed!
 0.8.4.post0
 ----------------
 * Correct a packaging issue resulting in missing notebooks in tarball release; update docs to reflect new notebook
-locations.
+  locations.
 
 
 0.8.4
@@ -408,12 +422,15 @@ v0.7.8
 -----------------
 * BREAKING: slack webhook URL now must be in the profiles.yml file (treat as a secret)
 * Profiler improvements:
+
   - Display candidate profiling data assets in alphabetical order
   - Add columns to the expectation_suite meta during profiling to support human-readable description information
+
 * Improve handling of optional dependencies during CLI init
 * Improve documentation for create_expectations notebook
 * Fix several anachronistic documentation and docstring phrases (#659, #660, #668, #681; #thanks @StevenMMortimer)
 * Fix data docs rendering issues:
+
   - documentation rendering failure from unrecognized profiled column type (#679; thanks @dinedal))
   - PY2 failure on encountering unicode (#676)
 
@@ -430,9 +447,12 @@ v0.7.8
 * Fix databricks generator (thanks @sspitz3!)
 * Improve performance of DataContext loading by moving optional import
 * Fix several memory and performance issues in SparkDFDataset.
+
   - Use only distinct value count instead of bringing values to driver
   - Migrate away from UDF for set membership, nullity, and regex expectations
+
 * Fix several UI issues in the data_documentation
+
   - Move prescriptive dataset expectations to Overview section
   - Fix broken link on Home breadcrumb
   - Scroll follows navigation properly
