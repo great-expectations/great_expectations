@@ -104,12 +104,15 @@ html_theme_options = {
     'logo_only': True,
 }
 
+html_static_path = ['_static', '_static/style.css', '_static/hk-grotesk-pro/HKGroteskPro-Bold.woff2','_static/hk-grotesk-pro/HKGroteskPro-Regular.woff2','_static/hk-grotesk-pro/HKGroteskPro-SemiBold.woff2','_static/hk-grotesk-pro/HKGroteskPro-Medium.woff2']
+html_css_files = ['style.css', 'hk-grotesk-pro/HKGroteskPro-Bold.woff']
+
 html_logo = '../generic_dickens_protagonist.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+
 
 # -- Options for Napoleon Extension --------------------------------------------
 

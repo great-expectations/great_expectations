@@ -50,3 +50,31 @@
 .ge_header {
     background: aquamarine;
 }
+
+h1,h1,h3,h4,h5,h6,p{
+    font-family: HKGroteskPro !important;
+}
+
+@font-face {
+  font-family: HKGroteskPro;
+  font-weight: 400;
+    src: url(hk-grotesk-pro/HKGroteskPro-Regular.woff2) format("woff2"), url(hk-grotesk-pro/HKGroteskPro-Regular.woff) format("woff")
+ }
+
+@font-face {
+    font-family: HKGroteskPro;
+    font-weight: 600;
+    src: url(hk-grotesk-pro/HKGroteskPro-Medium.woff2) format("woff2"), url(hk-grotesk-pro/HKGroteskPro-Medium.woff) format("woff")
+}
+
+@font-face {
+  font-family: HKGroteskPro;
+  font-weight: 700;
+  src: url(hk-grotesk-pro/HKGroteskPro-SemiBold.woff2) format("woff2"), url(hk-grotesk-pro/HKGroteskPro-SemiBold.woff) format("woff")
+}
+
+@font-face {
+  font-family: HKGroteskPro;
+  font-weight: 800;
+  src: url(hk-grotesk-pro/HKGroteskPro-Bold.woff2) format("woff2"), url(hk-grotesk-pro/HKGroteskPro-Bold.woff) format("woff")
+}
