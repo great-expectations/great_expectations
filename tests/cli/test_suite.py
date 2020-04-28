@@ -30,7 +30,7 @@ def test_suite_help_output(caplog):
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_on_context_with_no_datasources(
-    mock_webbrowser, mock_subprocess, caplog, empty_data_context
+        mock_webbrowser, mock_subprocess, caplog, empty_data_context
 ):
     """
     We call the "suite demo" command on a data context that has no datasources
@@ -1146,7 +1146,7 @@ def test_suite_list_with_multiple_suites(caplog, empty_data_context):
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_scaffold_on_context_with_no_datasource_raises_error(
-    mock_subprocess, mock_emit, caplog, empty_data_context
+        mock_subprocess, mock_emit, caplog, empty_data_context_stats_enabled
 ):
     """
     We call the "suite scaffold" command on a context with no datasource
@@ -1156,7 +1156,7 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
     - send a DataContext init success message
     - send a scaffold fail message
     """
-    context = empty_data_context
+    context = empty_data_context_stats_enabled
     root_dir = context.root_directory
 
     runner = CliRunner(mix_stderr=False)
@@ -1188,7 +1188,7 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_suite_scaffold_on_existing_suite_raises_error(
-    mock_emit, caplog, empty_data_context
+        mock_emit, caplog, empty_data_context_stats_enabled
 ):
     """
     We call the "suite scaffold" command with an existing suite
@@ -1198,7 +1198,7 @@ def test_suite_scaffold_on_existing_suite_raises_error(
     - send a DataContext init success message
     - send a scaffold fail message
     """
-    context = empty_data_context
+    context = empty_data_context_stats_enabled
     root_dir = context.root_directory
     suite = context.create_expectation_suite("foop")
     context.save_expectation_suite(suite)
@@ -1235,7 +1235,7 @@ def test_suite_scaffold_on_existing_suite_raises_error(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_scaffold_creates_notebook_and_opens_jupyter(
-    mock_subprocess, mock_emit, caplog, titanic_data_context
+        mock_subprocess, mock_emit, caplog, titanic_data_context_stats_enabled
 ):
     """
     We call the "suite scaffold" command
@@ -1246,7 +1246,7 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
     - send a DataContext init success message
     - send a scaffold success message
     """
-    context = titanic_data_context
+    context = titanic_data_context_stats_enabled
     root_dir = context.root_directory
     suite_name = "foop"
     expected_notebook_path = os.path.join(
@@ -1286,7 +1286,7 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
-    mock_subprocess, mock_emit, caplog, titanic_data_context
+        mock_subprocess, mock_emit, caplog, titanic_data_context_stats_enabled
 ):
     """
     We call the "suite scaffold --no-jupyter"
@@ -1298,7 +1298,7 @@ def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
     - send a DataContext init success message
     - send a scaffold success message
     """
-    context = titanic_data_context
+    context = titanic_data_context_stats_enabled
     root_dir = context.root_directory
     suite_name = "foop"
     expected_notebook_path = os.path.join(
