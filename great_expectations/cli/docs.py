@@ -1,4 +1,5 @@
-
+import os
+  
 import click
 
 from great_expectations.cli.cli_logging import logger
@@ -9,12 +10,6 @@ from great_expectations.cli.util import (
 )
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message,
-)
-
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-    load_class,
-    substitute_all_config_variables,
 )
 
 
@@ -70,21 +65,8 @@ def docs_list(directory):
     else:
         list_intro_string = _build_intro_string(docs_sites_strings)
         cli_message_list(docs_sites_strings, list_intro_string)
-        failed = False
-        send_usage_message(
-            data_context=context,
-            event="cli.docs.list",
-            success=True
-        )
-    except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
-    finally:
-        if failed and context is not None:
-            send_usage_message(
-                data_context=context,
-                event="cli.docs.list",
-                success=False
-            )
+
+    send_usage_message(data_context=context, event="cli.docs.list", success=True)
 
 
 @docs.command(name="clean")
