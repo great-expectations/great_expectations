@@ -3,8 +3,6 @@ from copy import deepcopy
 
 import traceback
 
-from six import integer_types
-
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
 )
@@ -307,7 +305,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
         if result.get("observed_value"):
             observed_value = result.get("observed_value")
-            if isinstance(observed_value, (integer_types, float)) and not isinstance(observed_value, bool):
+            if isinstance(observed_value, (int, float)) and not isinstance(observed_value, bool):
                 return num_to_str(observed_value, precision=10, use_locale=True)
             return str(observed_value)
         elif expectation_type == "expect_column_values_to_be_null":

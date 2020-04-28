@@ -1,8 +1,6 @@
 import re
 import sys
 
-import six
-
 from great_expectations import exceptions as ge_exceptions, DataContext
 from great_expectations.cli.cli_logging import logger
 from great_expectations.core import ExpectationSuite
@@ -32,7 +30,7 @@ def cli_message(string):
         "<red>(.*?)</red>", colored("\g<1>", "red"), mod_string, flags=flags
     )
 
-    six.print_(colored(mod_string))
+    print(colored(mod_string))
 
 
 def cli_message_list(string_list, list_intro_string=None):

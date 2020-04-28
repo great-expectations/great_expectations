@@ -1,12 +1,8 @@
 # Utility methods for dealing with DataAsset objects
 
-from __future__ import division
-
 import decimal
 import sys
 import datetime
-
-from six import string_types, integer_types
 
 import pandas as pd
 import numpy as np
@@ -21,7 +17,7 @@ def parse_result_format(result_format):
     """This is a simple helper utility that can be used to parse a string result_format into the dict format used
     internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
     there is no need to specify a custom partial_unexpected_count."""
-    if isinstance(result_format, string_types):
+    if isinstance(result_format, str):
         result_format = {
             'result_format': result_format,
             'partial_unexpected_count': 20
@@ -119,7 +115,7 @@ def recursively_convert_to_json_serializable(test_obj):
     except (TypeError, ValueError):
         pass
 
-    if isinstance(test_obj, (string_types, integer_types, float, bool)):
+    if isinstance(test_obj, (str, int, float, bool)):
         # No problem to encode json
         return test_obj
 

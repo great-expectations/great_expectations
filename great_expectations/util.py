@@ -4,7 +4,6 @@ import json
 import logging
 
 import black
-from six import string_types
 
 from great_expectations.core import expectationSuiteSchema
 
@@ -435,7 +434,7 @@ def validate(
     if expectation_suite is None:
         logger.info("Using expectation suite from DataContext.")
         # Allow data_context to be a string, and try loading it from path in that case
-        if isinstance(data_context, string_types):
+        if isinstance(data_context, str):
             from great_expectations.data_context import DataContext
             data_context = DataContext(data_context)
         expectation_suite = data_context.get_expectation_suite(
