@@ -266,8 +266,8 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             self._convert_key_to_filepath(key)
         )
         path, filename = os.path.split(filepath)
-        if os.path.exists(directory):
-            if shutil.rmtree(directory):
+        if os.path.exists(filepath):
+            if shutil.rmtree(self.full_base_directory):
                 return True
         return False
        

@@ -1216,8 +1216,10 @@ class BaseDataContext(object):
 
     def clean_data_docs(self, site_name=None):
         sites123 = self._project_config_with_variables_substituted.data_docs_sites
+        cleaned = False
         for sname, site_config in sites123.items():
-            if site_name == sname:
+            if site_name is None:
+                cleaned = False
                 complete_site_config = site_config
                 module_name = 'great_expectations.render.renderer.site_builder'
                 site_builder = instantiate_class_from_config(
@@ -1231,8 +1233,24 @@ class BaseDataContext(object):
                     }
                 )
                 site_builder.clean_site()
-                return True
-        return False
+                cleaned = True
+            else:
+                if site_name == sname:
+                    complete_site_config = site_config
+                    module_name = 'great_expectations.render.renderer.site_builder'
+                    site_builder = instantiate_class_from_config(
+                        config=complete_site_config,
+                        runtime_environment={
+                            "data_context": self,
+                            "root_directory": self.root_directory
+                        },
+                        config_defaults={
+                            "module_name": module_name
+                        }
+                    )
+                    site_builder.clean_site()
+                    return True
+        return cleaned
 
     def profile_datasource(self,
                            datasource_name,
