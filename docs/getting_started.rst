@@ -52,11 +52,9 @@ Please follow these steps to get started:
 
 .. container:: custom-indented-paragraph
 
-   Once you have a DataContext, you'll want to connect to data. Your data could live in files on disk, in a database, in a cloud store, etc. You might also manage connections to data through another orchestration tool.
+   Once you have a DataContext, you'll want to connect to data. In Great Expectations, ``Datasources`` simplify connections, by managing configuration and providing a consistent, cross-platform API for referencing data.
    
-   Great Expectations' ``Datasource`` classes handle all of these cases. They manage configuration and provide a consistent, cross-platform API for referencing data. DataSources will allow you to reference meaningful Batches of data for validation (and other use cases.)
-   
-   Check out :ref:`getting_started__connect_to_data` to learn how to configure Datasources.
+   Check out :ref:`getting_started__connect_to_data` to learn how to configure your first Datasource.
 
 .. raw:: html
 
@@ -135,7 +133,7 @@ Table of contents for Getting Started:
 
    /getting_started/initialize_a_data_context
    /getting_started/connect_to_data
-   /getting_started/create_expectations
+   /getting_started/create_your_first_expectations
    /getting_started/set_up_data_docs
    /getting_started/validate_data
    /getting_started/pick_your_deployment_pattern
