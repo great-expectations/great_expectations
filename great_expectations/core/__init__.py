@@ -326,7 +326,7 @@ class RunIdentifier(DataContextKey):
 
     @classmethod
     def from_tuple(cls, tuple_):
-        return cls(tuple_[0], datetime.datetime.fromisoformat(tuple_[1]))
+        return cls(tuple_[0], tuple_[1])
 
 
 class RunIdentifierSchema(Schema):

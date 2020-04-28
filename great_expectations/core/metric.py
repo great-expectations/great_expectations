@@ -185,23 +185,23 @@ class ValidationMetricIdentifier(MetricIdentifier):
 
     @classmethod
     def from_tuple(cls, tuple_):
-        if len(tuple_) < 4:
-            raise GreatExpectationsError("ValidationMetricIdentifier tuple must have at least four components.")
+        if len(tuple_) < 5:
+            raise GreatExpectationsError("ValidationMetricIdentifier tuple must have at least five components.")
         return cls(
             run_id=RunIdentifier.from_tuple((tuple_[0], tuple_[1])),
-            expectation_suite_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[1:-2]),
+            expectation_suite_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[2:-2]),
             metric_name=tuple_[-2],
             metric_kwargs_id=tuple_[-1]
         )
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
-        if len(tuple_) != 4:
-            raise GreatExpectationsError("ValidationMetricIdentifier fixed length tuple must have exactly four "
+        if len(tuple_) != 5:
+            raise GreatExpectationsError("ValidationMetricIdentifier fixed length tuple must have exactly five "
                                          "components.")
         return cls(
             run_id=RunIdentifier.from_fixed_length_tuple((tuple_[0], tuple_[1])),
-            expectation_suite_identifier=ExpectationSuiteIdentifier.from_fixed_length_tuple(tuple((tuple_[1],))),
+            expectation_suite_identifier=ExpectationSuiteIdentifier.from_fixed_length_tuple(tuple((tuple_[2],))),
             metric_name=tuple_[2],
             metric_kwargs_id=tuple_[3]
         )

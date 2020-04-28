@@ -151,7 +151,7 @@ class ValidationResultIdentifier(DataContextKey):
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
-        return cls(ExpectationSuiteIdentifier(tuple_[0]), RunIdentifier.from_tuple(tuple_[1], tuple_[2]), tuple_[3])
+        return cls(ExpectationSuiteIdentifier(tuple_[0]), RunIdentifier.from_tuple((tuple_[1], tuple_[2])), tuple_[3])
 
     @classmethod
     def from_object(cls, validation_result):
