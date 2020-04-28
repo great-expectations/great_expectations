@@ -9,8 +9,6 @@ from ..data_context.types.resource_identifiers import (
 
 logger = logging.getLogger(__name__)
 
-from six import string_types
-
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.data_asset import DataAsset
 from .util import send_slack_notification
@@ -114,7 +112,7 @@ class ActionListValidationOperator(ValidationOperator):
         """
         if not isinstance(item, DataAsset):
             if not (isinstance(item, tuple) and len(item) == 2 and isinstance(item[0], dict) and isinstance(
-                    item[1], string_types)):
+                    item[1], str)):
                 raise ValueError("Unable to build batch from item.")
             batch = self.data_context.get_batch(
                 batch_kwargs=item[0],
@@ -190,6 +188,7 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch_actions_results
 
+        # TODO: Note that the following code is unreachable
         result_object = {}
 
         for item in assets_to_validate:
@@ -283,27 +282,29 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
     """
 
-
     def __init__(self,
-        data_context,
-        action_list,
-        base_expectation_suite_name=None,
-        expectation_suite_name_suffixes=[".failure", ".warning"],
-        stop_on_first_error=False,
-        slack_webhook=None,
-        notify_on="all"
-    ):
+                 data_context,
+                 action_list,
+                 base_expectation_suite_name=None,
+                 expectation_suite_name_suffixes=None,
+                 stop_on_first_error=False,
+                 slack_webhook=None,
+                 notify_on="all"
+                 ):
         super(WarningAndFailureExpectationSuitesValidationOperator, self).__init__(
             data_context,
             action_list,
         )
+
+        if expectation_suite_name_suffixes is None:
+            expectation_suite_name_suffixes = [".failure", ".warning"]
 
         self.stop_on_first_error = stop_on_first_error
         self.base_expectation_suite_name = base_expectation_suite_name
 
         assert len(expectation_suite_name_suffixes) == 2
         for suffix in expectation_suite_name_suffixes:
-            assert isinstance(suffix, string_types)
+            assert isinstance(suffix, str)
         self.expectation_suite_name_suffixes = expectation_suite_name_suffixes
 
         self.slack_webhook = slack_webhook
@@ -448,7 +449,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             # it will catch any error in the Store, not just KeyErrors. In the longer term, a better
             # solution will be to have the Stores catch other known errors and raise KeyErrors,
             # so that methods like this can catch and handle a single error type.
-            except Exception as e:
+            except Exception:
                 logger.debug("Failure expectation suite not found: {}".format(failure_expectation_suite_identifier))
 
             if failure_expectation_suite:
@@ -484,7 +485,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                 warning_expectation_suite = self.data_context.stores[self.data_context.expectations_store_name].get(
                     warning_expectation_suite_identifier
                 )
-            except Exception as e:
+            except Exception:
                 logger.debug("Warning expectation suite not found: {}".format(warning_expectation_suite_identifier))
 
             if warning_expectation_suite:

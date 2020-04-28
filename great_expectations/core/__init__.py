@@ -1,11 +1,9 @@
 import logging
 import json
-# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
+
 from collections import namedtuple
 from copy import deepcopy
 import datetime
-
-from six import string_types
 
 from IPython import get_ipython
 from marshmallow import Schema, fields, ValidationError, post_load, pre_dump
@@ -97,7 +95,6 @@ def convert_to_json_serializable(data):
     """
     import numpy as np
     import pandas as pd
-    from six import string_types, integer_types
     import datetime
     import decimal
     import sys
@@ -118,7 +115,7 @@ def convert_to_json_serializable(data):
     except ValueError:
         pass
 
-    if isinstance(data, (string_types, integer_types, float, bool)):
+    if isinstance(data, (str, int, float, bool)):
         # No problem to encode json
         return data
 
@@ -204,7 +201,6 @@ def ensure_json_serializable(data):
     """
     import numpy as np
     import pandas as pd
-    from six import string_types, integer_types
     import datetime
     import decimal
 
@@ -224,7 +220,7 @@ def ensure_json_serializable(data):
     except ValueError:
         pass
 
-    if isinstance(data, (string_types, integer_types, float, bool)):
+    if isinstance(data, (str, int, float, bool)):
         # No problem to encode json
         return
 
@@ -339,7 +335,7 @@ class ExpectationConfiguration(DictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
     def __init__(self, expectation_type, kwargs, meta=None, success_on_last_run=None):
-        if not isinstance(expectation_type, string_types):
+        if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError("expectation_type must be a string")
         self._expectation_type = expectation_type
         if not isinstance(kwargs, dict):

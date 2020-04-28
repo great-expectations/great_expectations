@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class ExpectationSuiteIdentifier(DataContextKey):
-
     def __init__(self, expectation_suite_name):
         super(ExpectationSuiteIdentifier, self).__init__()
         self._expectation_suite_name = expectation_suite_name
@@ -44,7 +43,6 @@ class ExpectationSuiteIdentifierSchema(Schema):
 
 
 class BatchIdentifier(DataContextKey):
-
     def __init__(self, batch_identifier):
         super(BatchIdentifier, self).__init__()
         # batch_kwargs
@@ -184,9 +182,6 @@ class SiteSectionIdentifier(DataContextKey):
         return self._resource_identifier
 
     def to_tuple(self):
-        # if PY3:
-        #     return (self.site_section_name, *self.resource_identifier.to_tuple())
-        # else:
         site_section_identifier_tuple_list = [self.site_section_name] + list(self.resource_identifier.to_tuple())
         return tuple(site_section_identifier_tuple_list)
 
