@@ -18,9 +18,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as exceptions
 
-from faker import Faker
-fake = Faker()
-
 logger = logging.getLogger(__name__)
 
 
