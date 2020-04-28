@@ -18,10 +18,7 @@ from great_expectations.core import (
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier
 )
-from great_expectations.data_context.util import (
-    file_relative_path,
-    safe_mmkdir,
-)
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
 
@@ -606,7 +603,7 @@ def empty_data_context(tmp_path_factory):
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
-    safe_mmkdir(asset_config_path, exist_ok=True)
+    os.makedirs(asset_config_path, exist_ok=True)
     return context
 
 
@@ -614,9 +611,9 @@ def empty_data_context(tmp_path_factory):
 def titanic_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('titanic_data_context'))
     context_path = os.path.join(project_path, "great_expectations")
-    safe_mmkdir(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
     data_path = os.path.join(context_path, "../data")
-    safe_mmkdir(os.path.join(data_path), exist_ok=True)
+    os.makedirs(os.path.join(data_path), exist_ok=True)
     titanic_yml_path = file_relative_path(__file__, "./test_fixtures/great_expectations_titanic.yml")
     shutil.copy(titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml")))
     titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
@@ -715,9 +712,9 @@ def titanic_multibatch_data_context(tmp_path_factory):
     """
     project_path = str(tmp_path_factory.mktemp('titanic_data_context'))
     context_path = os.path.join(project_path, "great_expectations")
-    safe_mmkdir(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
     data_path = os.path.join(context_path, "../data/titanic")
-    safe_mmkdir(os.path.join(data_path), exist_ok=True)
+    os.makedirs(os.path.join(data_path), exist_ok=True)
     shutil.copy(file_relative_path(__file__, "./test_fixtures/great_expectations_titanic.yml"),
                 str(os.path.join(context_path, "great_expectations.yml")))
     shutil.copy(file_relative_path(__file__, "./test_sets/Titanic.csv"),
@@ -737,7 +734,7 @@ def data_context(tmp_path_factory):
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
-    safe_mmkdir(
+    os.makedirs(
         os.path.join(asset_config_path, "my_dag_node"),
         exist_ok=True,
     )
@@ -754,7 +751,7 @@ def data_context(tmp_path_factory):
             asset_config_path, "my_dag_node/default.json"
         ),
     )
-    safe_mmkdir(os.path.join(context_path, "plugins"))
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
     shutil.copy(
         os.path.join(fixture_dir, "custom_pandas_dataset.py"),
         str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
@@ -796,7 +793,7 @@ def filesystem_csv(tmp_path_factory):
     with open(os.path.join(base_dir, "f2.csv"), "w") as outfile:
         outfile.writelines(["a,b,c\n"])
 
-    safe_mmkdir(os.path.join(base_dir, "f3"))
+    os.makedirs(os.path.join(base_dir, "f3"), exist_ok=True)
     with open(os.path.join(base_dir, "f3", "f3_20190101.csv"), "w") as outfile:
         outfile.writelines(["a,b,c\n"])
     with open(os.path.join(base_dir, "f3", "f3_20190102.csv"), "w") as outfile:

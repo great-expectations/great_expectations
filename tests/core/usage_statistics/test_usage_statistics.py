@@ -1,5 +1,4 @@
 import shutil
-import time
 from copy import deepcopy
 
 import mock
@@ -10,7 +9,7 @@ import pytest
 from great_expectations.core.usage_statistics.usage_statistics import run_validation_operator_usage_statistics
 from great_expectations.data_context import BaseDataContext, DataContext
 from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.data_context.util import file_relative_path, safe_mmkdir
+from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_integration_usage_statistics import USAGE_STATISTICS_QA_URL
 
 
@@ -128,7 +127,7 @@ def test_opt_out_yml(tmp_path_factory, monkeypatch):
     monkeypatch.delenv("GE_USAGE_STATS", raising=False)  # Undo the project-wide test default
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, "great_expectations")
-    safe_mmkdir(context_path, exist_ok=True)
+    os.makedirs(context_path, exist_ok=True)
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
     shutil.copy(
@@ -196,7 +195,7 @@ def test_opt_out_env_var_overrides_yml(tmp_path_factory, monkeypatch):
     monkeypatch.delenv("GE_USAGE_STATS", raising=False)  # Undo the project-wide test default
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, "great_expectations")
-    safe_mmkdir(context_path, exist_ok=True)
+    os.makedirs(context_path, exist_ok=True)
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
     shutil.copy(
@@ -260,7 +259,7 @@ def test_opt_out_home_folder_overrides_yml(tmp_path_factory, monkeypatch):
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, "great_expectations")
-    safe_mmkdir(context_path, exist_ok=True)
+    os.makedirs(context_path, exist_ok=True)
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
     shutil.copy(
@@ -295,7 +294,7 @@ def test_opt_out_etc_overrides_yml(tmp_path_factory, monkeypatch):
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, "great_expectations")
-    safe_mmkdir(context_path, exist_ok=True)
+    os.makedirs(context_path, exist_ok=True)
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
     shutil.copy(

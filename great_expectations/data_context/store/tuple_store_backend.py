@@ -2,20 +2,15 @@ import os
 import random
 import re
 import logging
-# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 from abc import ABCMeta
 
-from six import string_types
-
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.data_context.util import safe_mmkdir
 from great_expectations.exceptions import StoreBackendError
 
 logger = logging.getLogger(__name__)
 
 
-class TupleStoreBackend(StoreBackend):
-    __metaclass__ = ABCMeta
+class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
     """
     If filepath_template is provided, the key to this StoreBackend abstract class must be a tuple with 
     fixed length equal to the number of unique components matching the regex r"{\d+}"
@@ -69,10 +64,10 @@ class TupleStoreBackend(StoreBackend):
                     ))
 
     def _validate_value(self, value):
-        if not isinstance(value, string_types) and not isinstance(value, bytes):
+        if not isinstance(value, str) and not isinstance(value, bytes):
             raise TypeError("Values in {0} must be instances of {1} or {2}, not {3}".format(
                 self.__class__.__name__,
-                string_types,
+                str,
                 bytes,
                 type(value),
             ))
@@ -206,14 +201,14 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             else:
                 self.full_base_directory = os.path.join(root_directory, base_directory)
 
-        safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
+        os.makedirs(str(os.path.dirname(self.full_base_directory)), exist_ok=True)
 
     def _get(self, key):
         filepath = os.path.join(
             self.full_base_directory,
             self._convert_key_to_filepath(key)
         )
-        with open(filepath, 'r') as infile:
+        with open(filepath) as infile:
             return infile.read()
 
     def _set(self, key, value, **kwargs):
@@ -225,14 +220,10 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         )
         path, filename = os.path.split(filepath)
 
-        safe_mmkdir(str(path))
+        os.makedirs(str(path), exist_ok=True)
         with open(filepath, "wb") as outfile:
-            if isinstance(value, string_types):
-                # Following try/except is to support py2, since both str and bytes objects pass above condition
-                try:
-                    outfile.write(value.encode("utf-8"))
-                except UnicodeDecodeError:
-                    outfile.write(value)
+            if isinstance(value, str):
+                outfile.write(value.encode("utf-8"))
             else:
                 outfile.write(value)
         return filepath
@@ -328,13 +319,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
         import boto3
         s3 = boto3.resource('s3')
         result_s3 = s3.Object(self.bucket, s3_object_key)
-        if isinstance(value, string_types):
-            # Following try/except is to support py2, since both str and bytes objects pass above condition
-            try:
-                result_s3.put(Body=value.encode(content_encoding), ContentEncoding=content_encoding,
-                              ContentType=content_type)
-            except TypeError:
-                result_s3.put(Body=value, ContentType=content_type)
+        if isinstance(value, str):
+            result_s3.put(Body=value.encode(content_encoding), ContentEncoding=content_encoding,
+                          ContentType=content_type)
         else:
             result_s3.put(Body=value, ContentType=content_type)
         return s3_object_key
@@ -445,13 +432,9 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
-        if isinstance(value, string_types):
-            # Following try/except is to support py2, since both str and bytes objects pass above condition
-            try:
-                blob.upload_from_string(value.encode(content_encoding), content_encoding=content_encoding,
-                                        content_type=content_type)
-            except TypeError:
-                blob.upload_from_string(value, content_type=content_type)
+        if isinstance(value, str):
+            blob.upload_from_string(value.encode(content_encoding), content_encoding=content_encoding,
+                                    content_type=content_type)
         else:
             blob.upload_from_string(value, content_type=content_type)
         return gcs_object_key

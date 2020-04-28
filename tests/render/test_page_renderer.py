@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 import mistune
 
 from great_expectations.core import ExpectationSuite, ExpectationConfiguration
