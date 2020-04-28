@@ -240,6 +240,7 @@ def test_suite_new_creates_empty_suite(
     citations[0].pop("citation_date")
     assert citations[0] == {
         "batch_kwargs": {
+            "data_asset_name": "f1",
             "datasource": "mydatasource",
             "path": csv,
             "reader_method": "read_csv",
@@ -310,6 +311,7 @@ def test_suite_new_empty_with_no_jupyter(
     citations[0].pop("citation_date")
     assert citations[0] == {
         "batch_kwargs": {
+            "data_asset_name": "f1",
             "datasource": "mydatasource",
             "path": csv,
             "reader_method": "read_csv",

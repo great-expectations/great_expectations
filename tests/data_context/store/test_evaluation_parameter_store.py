@@ -7,7 +7,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 
 
 from great_expectations.core import ExpectationSuiteValidationResult, ExpectationValidationResult, \
-    ExpectationConfiguration
+    ExpectationConfiguration, RunIdentifier
 
 
 @pytest.fixture(params=[
@@ -44,7 +44,7 @@ def param_store(request, test_backends):
 
 
 def test_evaluation_parameter_store_methods(data_context):
-    run_id = "20191125T000000.000000Z"
+    run_id = RunIdentifier(run_name="20191125T000000.000000Z")
     source_patient_data_results = ExpectationSuiteValidationResult(
         meta={
             "expectation_suite_name": "source_patient_data.default",
@@ -123,7 +123,7 @@ def test_evaluation_parameter_store_methods(data_context):
 
 
 def test_database_evaluation_parameter_store_basics(param_store):
-    run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+    run_id = RunIdentifier(run_name=datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ"))
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
         expectation_suite_identifier="asset.warning",
@@ -140,7 +140,7 @@ def test_database_evaluation_parameter_store_basics(param_store):
 def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that
-    run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+    run_id = RunIdentifier(run_name=datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ"))
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
         expectation_suite_identifier="asset.warning",

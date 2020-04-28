@@ -4,6 +4,7 @@ import shutil
 
 import pytest
 from click.testing import CliRunner
+from freezegun import freeze_time
 from sqlalchemy import create_engine
 
 from great_expectations import DataContext
@@ -37,6 +38,7 @@ def titanic_sqlite_db_file(tmp_path_factory):
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@freeze_time("09/26/2019 13:42:41")
 def test_cli_init_on_new_project(
     mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file
 ):
@@ -172,11 +174,13 @@ great_expectations/
                 validations/
                     warning/
                         9999.9999/
-                            foobarbazguid.html
+                            2019-09-26T13:42:41+00:00/
+                                foobarbazguid.html
         validations/
             warning/
                 9999.9999/
-                    foobarbazguid.json
+                    2019-09-26T13:42:41+00:00/
+                        foobarbazguid.json
 """
     )
 
