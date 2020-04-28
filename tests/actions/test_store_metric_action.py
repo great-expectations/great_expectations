@@ -1,11 +1,14 @@
+from freezegun import freeze_time
+
 from great_expectations.core import ExpectationSuiteValidationResult, ExpectationValidationResult, \
-    ExpectationConfiguration
+    ExpectationConfiguration, RunIdentifier
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier, \
     ExpectationSuiteIdentifier
 from great_expectations.validation_operators.actions import StoreMetricsAction
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator):
     action = StoreMetricsAction(
         data_context=basic_in_memory_data_context_for_validation_operator,
@@ -18,11 +21,13 @@ def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator
         target_store_name="metrics_store"
     )
 
+    run_id = RunIdentifier(run_name="bar")
+
     validation_result = ExpectationSuiteValidationResult(
         success=False,
         meta={
             "expectation_suite_name": "foo",
-            "run_id": "bar"
+            "run_id": run_id
         },
         statistics={
             "evaluated_expectations": 5,
@@ -37,7 +42,7 @@ def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator
         success=False,
         meta={
             "expectation_suite_name": "foo.warning",
-            "run_id": "bar"
+            "run_id": run_id
         },
         statistics={
             "evaluated_expectations": 8,
@@ -48,34 +53,35 @@ def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator
     action.run(validation_result, ValidationResultIdentifier.from_object(validation_result), data_asset=None)
 
     assert basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(ValidationMetricIdentifier(
-        run_id="bar",
+        run_id=run_id,
         expectation_suite_identifier=ExpectationSuiteIdentifier("foo"),
         metric_name="statistics.evaluated_expectations",
         metric_kwargs_id=None
     )) == 5
 
     assert basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(ValidationMetricIdentifier(
-        run_id="bar",
+        run_id=run_id,
         expectation_suite_identifier=ExpectationSuiteIdentifier("foo"),
         metric_name="statistics.successful_expectations",
         metric_kwargs_id=None
     )) == 3
 
     assert basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(ValidationMetricIdentifier(
-        run_id="bar",
+        run_id=run_id,
         expectation_suite_identifier=ExpectationSuiteIdentifier("foo.warning"),
         metric_name="statistics.evaluated_expectations",
         metric_kwargs_id=None
     )) == 8
 
     assert basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(ValidationMetricIdentifier(
-        run_id="bar",
+        run_id=run_id,
         expectation_suite_identifier=ExpectationSuiteIdentifier("foo.warning"),
         metric_name="statistics.successful_expectations",
         metric_kwargs_id=None
     )) == 4
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_StoreMetricsAction_column_metric(basic_in_memory_data_context_for_validation_operator):
     action = StoreMetricsAction(
         data_context=basic_in_memory_data_context_for_validation_operator,
@@ -93,11 +99,13 @@ def test_StoreMetricsAction_column_metric(basic_in_memory_data_context_for_valid
         target_store_name="metrics_store"
     )
 
+    run_id = RunIdentifier(run_name="bar")
+
     validation_result = ExpectationSuiteValidationResult(
         success=False,
         meta={
             "expectation_suite_name": "foo",
-            "run_id": "bar"
+            "run_id": run_id
         },
         results=[
             ExpectationValidationResult(
@@ -131,7 +139,7 @@ def test_StoreMetricsAction_column_metric(basic_in_memory_data_context_for_valid
     action.run(validation_result, ValidationResultIdentifier.from_object(validation_result), data_asset=None)
 
     assert basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(ValidationMetricIdentifier(
-        run_id="bar",
+        run_id=run_id,
         expectation_suite_identifier=ExpectationSuiteIdentifier("foo"),
         metric_name="expect_column_values_to_be_unique.result.unexpected_count",
         metric_kwargs_id="column=provider_id"
