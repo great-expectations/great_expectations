@@ -178,7 +178,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(titanic_profiled
             'styling': {'params': {'suite_title': {'classes': ['h6']},
                                    'status_title': {'classes': ['h6']},
                                    'expectation_suite_name': {'tag': 'a', 'attributes': {
-                                       'href': '../../../expectations/default.html'}}},
+                                       'href': '../../../../expectations/default.html'}}},
                         'classes': ['mb-0', 'mt-1']}}}}
 
     # print(validation_header)
@@ -198,7 +198,8 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
                                            'string_template': {'template': 'Info', 'tag': 'h6',
                                                                'styling': {'classes': ['m-0']}}},
                                 'table': [['Great Expectations Version', '0.9.7+17.g02805059.dirty'],
-                                          ['Run ID', '20200322T170247.671855Z']]}
+                                          ['Run Name', '20200322T170247.671855Z'],
+                                          ['Run Time', '2020-03-22T17:02:47.671855+00:00']]}
 
     assert validation_info == expected_validation_info
 
