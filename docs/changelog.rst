@@ -17,6 +17,7 @@ develop
   - no batches are passed
   - batches are of the the wrong type
   - no matching validation operator is found in the project
+* Clarified scaffolding language in scaffold notebook
 
 0.10.4
 -----------------
