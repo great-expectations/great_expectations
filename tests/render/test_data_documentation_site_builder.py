@@ -115,7 +115,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     # creating another validation result using the profiler's suite (no need to use a new expectation suite
     # for this test). having two validation results - one with run id "profiling" - allows us to test
-    # the logic of run_id_filter that helps filtering validation results to be included in
+    # the logic of run_name_filter that helps filtering validation results to be included in
     # the profiling and the validation sections.
     batch_kwargs = context.build_batch_kwargs(
         datasource=datasource_name,
@@ -317,7 +317,7 @@ def test_configuration_driven_site_builder_without_how_to_buttons(site_builder_d
 
     # creating another validation result using the profiler's suite (no need to use a new expectation suite
     # for this test). having two validation results - one with run id "profiling" - allows us to test
-    # the logic of run_id_filter that helps filtering validation results to be included in
+    # the logic of run_name_filter that helps filtering validation results to be included in
     # the profiling and the validation sections.
     batch_kwargs = context.build_batch_kwargs(
         datasource=datasource_name,
@@ -370,7 +370,7 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
     project_dir = os.path.join(base_dir, "project_path")
     os.mkdir(project_dir)
 
-    # fixture config swaps site section builder source stores and specifies custom run_id_filters
+    # fixture config swaps site section builder source stores and specifies custom run_name_filters
     shutil.copy(file_relative_path(__file__, "../test_fixtures/great_expectations_custom_local_site_config.yml"),
                 str(os.path.join(project_dir, "great_expectations.yml")))
     context = DataContext(context_root_dir=project_dir)
@@ -401,14 +401,14 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
         validations_site_section_builder.source_store,
         ExpectationsStore
     )
-    assert validations_site_section_builder.run_id_filter == {"ne": "custom_validations_filter"}
+    assert validations_site_section_builder.run_name_filter == {"ne": "custom_validations_filter"}
 
     profiling_site_section_builder = site_section_builders["profiling"]
     assert isinstance(
         validations_site_section_builder.source_store,
         ExpectationsStore
     )
-    assert profiling_site_section_builder.run_id_filter == {"eq": "custom_profiling_filter"}
+    assert profiling_site_section_builder.run_name_filter == {"eq": "custom_profiling_filter"}
 
 
 @freeze_time("09/24/2019 23:18:36")

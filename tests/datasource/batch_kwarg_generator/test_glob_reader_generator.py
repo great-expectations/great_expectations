@@ -140,7 +140,8 @@ def test_glob_reader_generator_partitioning(basic_pandas_datasource):
         assert batch_kwargs["reader_options"]["quoting"] == 3
         assert batch_kwargs["reader_method"] == "read_csv"
         assert batch_kwargs["datasource"] == "basic_pandas_datasource"
-        assert len(batch_kwargs) == 4
+        assert batch_kwargs["data_asset_name"] == "asset1"
+        assert len(batch_kwargs) == 5
 
     with mock.patch("glob.glob") as mock_glob, mock.patch("os.path.isdir") as is_dir:
         mock_glob_match = [
@@ -168,7 +169,8 @@ def test_glob_reader_generator_partitioning(basic_pandas_datasource):
         assert batch_kwargs["reader_options"]["sep"] == "|"
         assert batch_kwargs["reader_options"]["quoting"] == 3
         assert batch_kwargs["datasource"] == "basic_pandas_datasource"
-        assert len(batch_kwargs) == 4
+        assert batch_kwargs["data_asset_name"] == "no_partition_asset1"
+        assert len(batch_kwargs) == 5
 
         # When partition isn't really well defined, though, the preferred way is to use yield_batch_kwargs
         batch_kwargs = glob_generator.yield_batch_kwargs("no_partition_asset1")

@@ -39,7 +39,7 @@ def test_manual_generator(basic_pandas_datasource):
     assert kwargs['s3'] == "s3a://my_bucket/my_prefix/data/file.csv.gz"
 
     kwargs = generator.build_batch_kwargs(data_asset_name="asset1", partition_id=2)
-    assert len(kwargs) == 3
+    assert len(kwargs) == 4
     assert kwargs['path'] == '/data/file_2.csv'
     assert kwargs['reader_options'] == {'header': 0}
     assert kwargs['datasource'] == 'basic_pandas_datasource'
