@@ -414,11 +414,17 @@ class TestIO(unittest.TestCase):
         df = ge.read_json(
             script_path+'/test_sets/test_json_data_file.json',
         )
+        assert df["x"][0] == "i"
+        assert isinstance(df, PandasDataset)
+        assert sorted(list(df.keys())) == ['x', 'y', 'z']
 
         df = ge.read_json(
             script_path+'/test_sets/nested_test_json_data_file.json',
             accessor_func=lambda x: x["data"]
         )
+        assert df["x"][0] == "i"
+        assert isinstance(df, PandasDataset)
+        assert sorted(list(df.keys())) == ['x', 'y', 'z']
 
     def test_read_excel(self):
         script_path = os.path.dirname(os.path.realpath(__file__))

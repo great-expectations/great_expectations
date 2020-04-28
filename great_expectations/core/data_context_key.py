@@ -1,8 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 
-class DataContextKey(object):
-    __metaclass__ = ABCMeta
+class DataContextKey(object, metaclass=ABCMeta):
     """DataContextKey objects are used to uniquely identify resources used by the DataContext.
 
     A DataContextKey is designed to support clear naming with multiple representations including a hashable

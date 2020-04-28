@@ -2,8 +2,6 @@ import logging
 
 import traceback
 
-from six import string_types
-
 from ..renderer import Renderer
 from ...types import (
     RenderedMarkdownContent,
@@ -189,7 +187,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             notes = expectation.meta["notes"]
             note_content = None
 
-            if isinstance(notes, string_types):
+            if isinstance(notes, str):
                 note_content = [notes]
 
             elif isinstance(notes, list):
@@ -198,7 +196,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             elif isinstance(notes, dict):
                 if "format" in notes:
                     if notes["format"] == "string":
-                        if isinstance(notes["content"], string_types):
+                        if isinstance(notes["content"], str):
                             note_content = [notes["content"]]
                         elif isinstance(notes["content"], list):
                             note_content = notes["content"]
@@ -206,7 +204,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                             logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
 
                     elif notes["format"] == "markdown":
-                        if isinstance(notes["content"], string_types):
+                        if isinstance(notes["content"], str):
                             note_content = [
                                 RenderedMarkdownContent(**{
                                     "content_block_type": "markdown",
