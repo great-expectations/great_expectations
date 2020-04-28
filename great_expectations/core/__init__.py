@@ -21,6 +21,7 @@ from great_expectations.exceptions import (
     ParserError,
     InvalidCacheValueError,
 )
+from great_expectations.core.urn import ge_urn
 
 logger = logging.getLogger(__name__)
 
