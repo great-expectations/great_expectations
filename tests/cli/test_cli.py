@@ -161,10 +161,10 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
  
         # data_docs clean
         result = runner.invoke(
-            cli, ["suite", "clean_data_docs", "-d", "FAKE"], catch_exceptions=False
+            cli, ["docs", "clean_data_docs", "-d", "FAKE"], catch_exceptions=False
         )
         assert error_message in result.output
-        result = runner.invoke(cli, ["suite", "clean_data_docs"], catch_exceptions=False)
+        result = runner.invoke(cli, ["docs", "clean_data_docs"], catch_exceptions=False)
         assert error_message in result.output   
     
     except:
