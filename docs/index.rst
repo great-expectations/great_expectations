@@ -13,14 +13,12 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
    :maxdepth: 2
 
    intro
-   getting_started
+   tutorials
    how_to_guides
    expectation_glossary
    command_line
-   tutorials
    features
    reference
-   contributing
    community
    module_docs
    changelog

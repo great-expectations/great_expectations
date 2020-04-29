@@ -131,9 +131,9 @@ Table of contents for Getting Started:
 .. toctree::
    :maxdepth: 1
 
-   /getting_started/initialize_a_data_context
-   /getting_started/connect_to_data
-   /getting_started/create_your_first_expectations
-   /getting_started/set_up_data_docs
-   /getting_started/validate_data
-   /getting_started/pick_your_deployment_pattern
+   /tutorials/getting_started/initialize_a_data_context
+   /tutorials/getting_started/connect_to_data
+   /tutorials/getting_started/create_your_first_expectations
+   /tutorials/getting_started/set_up_data_docs
+   /tutorials/getting_started/validate_data
+   /tutorials/getting_started/pick_your_deployment_pattern
