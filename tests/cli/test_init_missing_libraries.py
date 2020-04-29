@@ -65,6 +65,7 @@ of this config file: great_expectations/uncommitted/config_variables.yml"""
 great_expectations/
     .gitignore
     great_expectations.yml
+    checkpoints/
     expectations/
     notebooks/
         pandas/
@@ -181,6 +182,7 @@ def test_cli_init_spark_without_library_installed_instructs_user(
 great_expectations/
     .gitignore
     great_expectations.yml
+    checkpoints/
     expectations/
     notebooks/
         pandas/

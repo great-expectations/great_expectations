@@ -85,6 +85,7 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
         == """great_expectations/
     .gitignore
     great_expectations.yml
+    checkpoints/
     expectations/
         Titanic/
             warning.json
@@ -560,6 +561,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
         == """great_expectations/
     .gitignore
     great_expectations.yml
+    checkpoints/
     expectations/
         Titanic/
             warning.json

@@ -5,7 +5,6 @@ from string import Template as pTemplate
 import datetime
 from collections import OrderedDict
 from uuid import uuid4
-import os
 
 
 from jinja2 import (
@@ -21,7 +20,6 @@ import mistune
 from great_expectations import __version__ as ge_version
 from great_expectations.render.types import (
     RenderedDocumentContent,
-    RenderedSectionContent,
     RenderedComponentContent,
     RenderedContent)
 

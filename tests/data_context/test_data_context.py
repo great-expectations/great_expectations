@@ -1,7 +1,6 @@
 import json
 import os
 import shutil
-from collections import OrderedDict
 
 import pytest
 from freezegun import freeze_time
@@ -32,7 +31,9 @@ from great_expectations.exceptions import (
     DataContextError,
 )
 from great_expectations.util import gen_directory_tree_str
-from tests.integration.usage_statistics.test_integration_usage_statistics import USAGE_STATISTICS_QA_URL
+from tests.integration.usage_statistics.test_integration_usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
+)
 from tests.test_utils import safe_remove
 
 try:
@@ -340,6 +341,7 @@ project_path/
     great_expectations/
         .gitignore
         great_expectations.yml
+        checkpoints/
         expectations/
             titanic/
                 subdir_reader/
@@ -823,6 +825,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(tmp_pat
 great_expectations/
     .gitignore
     great_expectations.yml
+    checkpoints/
     expectations/
     notebooks/
         pandas/
@@ -849,6 +852,7 @@ def test_data_context_create_does_nothing_if_all_uncommitted_dirs_exist(tmp_path
 great_expectations/
     .gitignore
     great_expectations.yml
+    checkpoints/
     expectations/
     notebooks/
         pandas/
@@ -910,6 +914,22 @@ uncommitted/
     assert not DataContext.all_uncommitted_directories_exist(project_path)
 
 
+def test_data_context_create_builds_base_directories(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context = DataContext.create(project_path)
+    assert isinstance(context, DataContext)
+
+    for directory in [
+        "expectations",
+        "notebooks",
+        "plugins",
+        "checkpoints",
+        "uncommitted",
+    ]:
+        base_dir = os.path.join(project_path, context.GE_DIR, directory)
+        assert os.path.isdir(base_dir)
+
+
 def test_data_context_create_does_not_overwrite_existing_config_variables_yml(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('data_context'))
     DataContext.create(project_path)
@@ -938,6 +958,7 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
 
     assert set(os.listdir(empty_directory)) == {
         'plugins',
+        "checkpoints",
         'expectations',
         '.gitignore',
         'uncommitted',

@@ -1,16 +1,11 @@
-import pytest
 import json
 
-from great_expectations.data_context import (
-    BaseDataContext,
-)
-from great_expectations.core import (
-    expectationSuiteSchema,
-)
+import pytest
 
-from great_expectations.data_context.util import (
-    file_relative_path,
-)
+from great_expectations.core import expectationSuiteSchema
+from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.exceptions import DataContextError
 
 
 @pytest.fixture()
@@ -52,6 +47,44 @@ def validation_operators_data_context(basic_data_context_config_for_validation_o
     data_context.save_expectation_suite(warning_expectations, expectation_suite_name="f1.warning")
 
     return data_context
+
+
+def test_run_validation_operator_raises_error_if_no_batches_are_passed(
+    validation_operators_data_context,
+):
+    context = validation_operators_data_context
+    with pytest.raises(DataContextError) as e:
+        context.run_validation_operator(
+            validation_operator_name="store_val_res_and_extract_eval_params",
+            assets_to_validate=[],
+        )
+    assert e.value.message == "No batches of data were passed in. These are required"
+
+
+def test_run_validation_operator_raises_error_if_non_batches_are_passed_in_list(
+    validation_operators_data_context,
+):
+    context = validation_operators_data_context
+    with pytest.raises(DataContextError) as e:
+        context.run_validation_operator(
+            validation_operator_name="store_val_res_and_extract_eval_params",
+            assets_to_validate=["foo"],
+        )
+    assert e.value.message == "Batches are required to be of type DataAsset"
+
+
+def test_run_validation_operator_raises_error_if_no_matching_validation_operator_is_found(
+    validation_operators_data_context,
+):
+    context = validation_operators_data_context
+    with pytest.raises(DataContextError) as e:
+        context.run_validation_operator(
+            validation_operator_name="blarg", assets_to_validate=[(1, 2)],
+        )
+    assert (
+        e.value.message
+        == "No validation operator `blarg` was found in your project. Please verify this in your great_expectations.yml"
+    )
 
 
 def test_validation_operator_evaluation_parameters(validation_operators_data_context, parameterized_expectation_suite):

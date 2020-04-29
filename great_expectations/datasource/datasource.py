@@ -85,7 +85,7 @@ class Datasource(object):
             A complete datasource configuration.
 
         """
-        verify_dynamic_loading_support(module_name=module_name, package_name=None)
+        verify_dynamic_loading_support(module_name=module_name)
         class_ = load_class(class_name=class_name, module_name=module_name)
         configuration = class_.build_configuration(data_asset_type=data_asset_type, batch_kwargs_generators=batch_kwargs_generators, **kwargs)
         return configuration

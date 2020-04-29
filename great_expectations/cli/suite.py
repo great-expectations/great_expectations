@@ -105,7 +105,7 @@ def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs, usage_event
 
     try:
         suite = load_expectation_suite(context, suite)
-        citations = suite.get_citations(sort=True, require_batch_kwargs=True)
+        citations = suite.get_citations(require_batch_kwargs=True)
 
         if batch_kwargs_json:
             try:
@@ -433,11 +433,9 @@ def suite_list(directory):
                 data_context=context, event="cli.suite.list", success=True
             )
             return
-
-        if len(suite_names) == 1:
+        elif len(suite_names) == 1:
             list_intro_string = "1 Expectation Suite found:"
-
-        if len(suite_names) > 1:
+        else:
             list_intro_string = "{} Expectation Suites found:".format(len(suite_names))
 
         cli_message_list(suite_names, list_intro_string)

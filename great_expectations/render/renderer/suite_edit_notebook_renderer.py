@@ -245,7 +245,7 @@ You can see all the available expectations in the **[expectation glossary](https
         if not citations:
             return self._fix_path_in_batch_kwargs(batch_kwargs)
 
-        citations = suite.get_citations(sort=True, require_batch_kwargs=True)
+        citations = suite.get_citations(require_batch_kwargs=True)
         if not citations:
             return None
 

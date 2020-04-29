@@ -4,10 +4,12 @@ from great_expectations.render.types import (
 
 
 class ProfilingOverviewTableContentBlockRenderer(ContentBlockRenderer):
-
     @classmethod
-    def render(cls, ge_object, header_row=[]):
+    def render(cls, ge_object, header_row=None):
         """Each expectation method should return a list of rows"""
+        if header_row is None:
+            header_row = []
+
         if isinstance(ge_object, list):
             table_entries = []
             for sub_object in ge_object:

@@ -1,4 +1,3 @@
-from datetime import datetime
 import json
 import sys
 from datetime import datetime, timezone
@@ -7,7 +6,6 @@ import click
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli.cli_logging import logger
 
 
 from great_expectations.cli.datasource import (
@@ -17,7 +15,6 @@ from great_expectations.cli.datasource import (
 from great_expectations.cli.util import (
     cli_message,
     load_expectation_suite,
-    cli_message_list,
     cli_message_dict
 )
 from great_expectations.core import RunIdentifier
@@ -31,7 +28,6 @@ except ImportError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
     SQLAlchemyError = ge_exceptions.ProfilerError
-()
 
 @click.group()
 def validation_operator():
@@ -60,11 +56,9 @@ def validation_operator_list(directory):
         if len(validation_operators) == 0:
             cli_message("No Validation Operators found")
             return
-
-        if len(validation_operators) == 1:
+        elif len(validation_operators) == 1:
             list_intro_string = "1 Validation Operator found:"
-
-        if len(validation_operators) > 1:
+        else:
             list_intro_string = "{} Validation Operators found:".format(len(validation_operators))
 
         cli_message(list_intro_string)

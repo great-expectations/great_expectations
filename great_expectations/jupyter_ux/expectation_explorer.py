@@ -302,7 +302,10 @@ class ExpectationExplorer(object):
             disabled=disabled
         )
 
-    def generate_radio_buttons_widget(self, value, options=[], description='', description_tooltip=''):
+    def generate_radio_buttons_widget(self, value, options=None, description='', description_tooltip=''):
+        if options is None:
+            options = []
+
         return widgets.RadioButtons(
             options=options,
             value=value,
@@ -581,7 +584,10 @@ class ExpectationExplorer(object):
 
         return widget_dict
 
-    def generate_regex_list_widget_dict(self, expectation_state, regex_list=[], column=None, **expectation_kwargs):
+    def generate_regex_list_widget_dict(self, expectation_state, regex_list=None, column=None, **expectation_kwargs):
+        if regex_list is None:
+            regex_list = []
+
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -640,7 +646,10 @@ class ExpectationExplorer(object):
 
         return widget_dict
 
-    def generate_column_list_widget_dict(self, expectation_state, column_list=[], column=None, **expectation_kwargs):
+    def generate_column_list_widget_dict(self, expectation_state, column_list=None, column=None, **expectation_kwargs):
+        if column_list is None:
+            column_list = []
+
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -1177,7 +1186,10 @@ class ExpectationExplorer(object):
 
         return max_value_widget_dict
 
-    def generate_value_set_widget_dict(self, expectation_state, value_set=[], column=None, **expectation_kwargs):
+    def generate_value_set_widget_dict(self, expectation_state, value_set=None, column=None, **expectation_kwargs):
+        if value_set is None:
+            value_set = []
+
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -1326,7 +1338,10 @@ class ExpectationExplorer(object):
                 layout=widgets.Layout(margin='10px', width='40%')
             )
 
-    def generate_expectation_result_detail_widgets(self, result={}):
+    def generate_expectation_result_detail_widgets(self, result=None):
+        if result is None:
+            result = {}
+
         result_detail_widgets = []
 
         for result_title, result_value in result.items():
