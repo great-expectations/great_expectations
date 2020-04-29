@@ -8,8 +8,37 @@ Expectations are the workhorse abstraction in Great Expectations. Like assertion
 Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests,
 Great Expectations applies Expectations to data instead of code.
 
+Great Expectations' built-in library include more than 50 common Expectations, such as:
+
+* expect_column_values_to_not_be_null
+* expect_column_values_to_match_regex
+* expect_column_values_to_be_unique
+* expect_column_values_to_match_strftime_format
+* expect_table_row_count_to_be_between
+* expect_column_median_to_be_between
+
+For a full list of available Expectations, please check out the :ref:`expectation_glossary`. Please note that not all Expectations are implemented on all :ref:`Execution engines` yet. You can see the grid of supported Expectations :ref:`here <#FIXME>`. We welcome :ref:`contributions <contributing>` to fill in the gaps.
+
+You can also extend Great Expectations by :ref:`creating your own custom Expectations <how_to__create_custom_expectations>`.
+
 Expectations *enhance communication* about your data and *amplify quality* in data applications. Using expectations
 helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."
+
+.. attention::
+
+  Not all Expectations are implemented on all execution engines yet. You can see the grid of supported Expectations :ref:`here <#FIXME>`. We welcome :ref:`contributions <contributing>` to fill in the gaps.
+
+
+Expectation Suites
+******************
+
+Expectation Suites combine multiple expectations into an overall description of a dataset. For example, a team can group all the expectations about its ``rating`` table in the movie ratings database from our previous example into an Expectation Suite and call it ``movieratings.ratings``. Note these names are completely flexible and the only constraint on the name of a suite is that it must be unique to a given project.
+
+Each Expectation Suite is saved as a JSON file in the ``great_expectations/expectations`` subdirectory of the Data Context. Users check these files into the version control each time they are updated, same way they treat their source files. This discipline allows data quality to be an integral part of versioned pipeline releases.
+
+The lifecycle of an Expectation Suite starts with creating it. Then it goes through an iterative loop of Review and Edit as the team's understanding of the data described by the suite evolves.
+
+
 
 **************************
 How to build expectations

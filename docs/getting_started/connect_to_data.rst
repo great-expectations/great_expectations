@@ -36,8 +36,15 @@ Although the concept of data validation is simple, carrying it out can require c
 
 Datasources solve this problem, by conceptually separating *what* you want to validate from *how* you to validate it.  Datasources give you full control over the process of bringing data and Expectations together, then abstract away that underlying complexity when you validate X data against Y Expectations.
 
-Configuration
--------------
+
+Execution Engines
+-----------------
+
+#FIXME: Need to explain Execution Engines here, very briefly.
+#FIMXE: The actual "Execution Engines" section should live in Reference, not here.
+
+Configuring Datasources
+-----------------------
 
 When you completed those last few steps in ``great_expectations init``, you told Great Expectations that
 
