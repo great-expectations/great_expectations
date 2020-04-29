@@ -16,7 +16,6 @@ from typing import Union
 
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
-from six import string_types
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import (
@@ -54,7 +53,6 @@ from great_expectations.data_context.util import (
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     load_class,
-    safe_mmkdir,
     substitute_all_config_variables,
 )
 from great_expectations.dataset import Dataset
@@ -107,7 +105,7 @@ class BaseDataContext(object):
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
     GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
-    FALSEY_STRINGS = ["FALSE", "False", "f", "F", "0"]
+    FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
     GLOBAL_CONFIG_PATHS = [
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf"
@@ -283,11 +281,18 @@ class BaseDataContext(object):
                 logger.warning("GE_USAGE_STATS environment variable must be one of: {}".format(BaseDataContext.FALSEY_STRINGS))
         for config_path in BaseDataContext.GLOBAL_CONFIG_PATHS:
             config = configparser.ConfigParser()
+            states = config.BOOLEAN_STATES
+            for falsey_string in BaseDataContext.FALSEY_STRINGS:
+                states[falsey_string] = False
+            states["TRUE"] = True
+            states["True"] = True
+            config.BOOLEAN_STATES = states
             config.read(config_path)
             try:
-                if not config.getboolean("anonymous_usage_statistics", "enabled"):
+                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
+                    # If stats are disabled, then opt out is true
                     return True
-            except Exception:
+            except (ValueError, configparser.Error):
                 pass
         return False
 
@@ -497,7 +502,7 @@ class BaseDataContext(object):
                 else:
                     root_directory = ""
                 var_path = os.path.join(root_directory, defined_path)
-                with open(var_path, "r") as config_variables_file:
+                with open(var_path) as config_variables_file:
                     return yaml.load(config_variables_file) or {}
             except IOError as e:
                 if e.errno != errno.ENOENT:
@@ -533,7 +538,7 @@ class BaseDataContext(object):
 
         config_variables_filepath = os.path.join(self.root_directory, config_variables_filepath)
 
-        safe_mmkdir(os.path.dirname(config_variables_filepath), exist_ok=True)
+        os.makedirs(os.path.dirname(config_variables_filepath), exist_ok=True)
         if not os.path.isfile(config_variables_filepath):
             logger.info("Creating new substitution_variables file at {config_variables_filepath}".format(
                 config_variables_filepath=config_variables_filepath)
@@ -569,7 +574,7 @@ class BaseDataContext(object):
         data_asset_names = {}
         if datasource_names is None:
             datasource_names = [datasource["name"] for datasource in self.list_datasources()]
-        elif isinstance(datasource_names, string_types):
+        elif isinstance(datasource_names, str):
             datasource_names = [datasource_names]
         elif not isinstance(datasource_names, list):
             raise ValueError(
@@ -577,7 +582,7 @@ class BaseDataContext(object):
             )
 
         if batch_kwargs_generator_names is not None:
-            if isinstance(batch_kwargs_generator_names, string_types):
+            if isinstance(batch_kwargs_generator_names, str):
                 batch_kwargs_generator_names = [batch_kwargs_generator_names]
             if len(batch_kwargs_generator_names) == len(datasource_names):  # Iterate over both together
                 for idx, datasource_name in enumerate(datasource_names):
@@ -699,17 +704,28 @@ class BaseDataContext(object):
         Returns:
             ValidationOperatorResult
         """
+        if not assets_to_validate:
+            raise ge_exceptions.DataContextError("No batches of data were passed in. These are required")
+
+        for batch in assets_to_validate:
+            if not isinstance(batch, (tuple, DataAsset)):
+                raise ge_exceptions.DataContextError("Batches are required to be of type DataAsset")
+        try:
+            validation_operator = self.validation_operators[validation_operator_name]
+        except KeyError:
+            raise ge_exceptions.DataContextError(f"No validation operator `{validation_operator_name}` was found in your project. Please verify this in your great_expectations.yml")
+
         if run_id is None:
             run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
             logger.info("Setting run_id to: {}".format(run_id))
         if evaluation_parameters is None:
-            return self.validation_operators[validation_operator_name].run(
+            return validation_operator.run(
                 assets_to_validate=assets_to_validate,
                 run_id=run_id,
                 **kwargs
             )
         else:
-            return self.validation_operators[validation_operator_name].run(
+            return validation_operator.run(
                 assets_to_validate=assets_to_validate,
                 run_id=run_id,
                 evaluation_parameters=evaluation_parameters,
@@ -734,7 +750,7 @@ class BaseDataContext(object):
         """
         logger.debug("Starting BaseDataContext.add_datasource for %s" % name)
         module_name = kwargs.get("module_name", "great_expectations.datasource")
-        verify_dynamic_loading_support(module_name=module_name, package_name=None)
+        verify_dynamic_loading_support(module_name=module_name)
         class_name = kwargs.get("class_name")
         datasource_class = load_class(
             module_name=module_name,
@@ -1567,7 +1583,7 @@ class DataContext(BaseDataContext):
             )
 
         ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
-        safe_mmkdir(ge_dir, exist_ok=True)
+        os.makedirs(ge_dir, exist_ok=True)
         cls.scaffold_directories(ge_dir)
 
         if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
@@ -1610,7 +1626,7 @@ class DataContext(BaseDataContext):
         path_to_yml = os.path.join(ge_dir, cls.GE_YML)
 
         # TODO this is so brittle and gross
-        with open(path_to_yml, "r") as f:
+        with open(path_to_yml) as f:
             config = yaml.load(f)
         config_var_path = config.get("config_variables_file_path")
         config_var_path = os.path.join(ge_dir, config_var_path)
@@ -1618,7 +1634,7 @@ class DataContext(BaseDataContext):
 
     @classmethod
     def write_config_variables_template_to_disk(cls, uncommitted_dir):
-        safe_mmkdir(uncommitted_dir)
+        os.makedirs(uncommitted_dir, exist_ok=True)
         config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
         with open(config_var_file, "w") as template:
             template.write(CONFIG_VARIABLES_TEMPLATE)
@@ -1635,33 +1651,33 @@ class DataContext(BaseDataContext):
     @classmethod
     def scaffold_directories(cls, base_dir):
         """Safely create GE directories for a new project."""
-        safe_mmkdir(base_dir, exist_ok=True)
+        os.makedirs(base_dir, exist_ok=True)
         open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
 
         for directory in cls.BASE_DIRECTORIES:
             if directory == "plugins":
                 plugins_dir = os.path.join(base_dir, directory)
-                safe_mmkdir(plugins_dir, exist_ok=True)
-                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs"), exist_ok=True)
-                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "views"), exist_ok=True)
-                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "renderers"), exist_ok=True)
-                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "styles"), exist_ok=True)
+                os.makedirs(plugins_dir, exist_ok=True)
+                os.makedirs(os.path.join(plugins_dir, "custom_data_docs"), exist_ok=True)
+                os.makedirs(os.path.join(plugins_dir, "custom_data_docs", "views"), exist_ok=True)
+                os.makedirs(os.path.join(plugins_dir, "custom_data_docs", "renderers"), exist_ok=True)
+                os.makedirs(os.path.join(plugins_dir, "custom_data_docs", "styles"), exist_ok=True)
                 cls.scaffold_custom_data_docs(plugins_dir)
             else:
-                safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
+                os.makedirs(os.path.join(base_dir, directory), exist_ok=True)
 
         uncommitted_dir = os.path.join(base_dir, cls.GE_UNCOMMITTED_DIR)
 
         for new_directory in cls.UNCOMMITTED_DIRECTORIES:
             new_directory_path = os.path.join(uncommitted_dir, new_directory)
-            safe_mmkdir(
+            os.makedirs(
                 new_directory_path,
                 exist_ok=True
             )
 
         notebook_path = os.path.join(base_dir, "notebooks")
         for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
-            safe_mmkdir(os.path.join(notebook_path, subdir), exist_ok=True)
+            os.makedirs(os.path.join(notebook_path, subdir), exist_ok=True)
 
     @classmethod
     def scaffold_custom_data_docs(cls, plugins_dir):
@@ -1714,7 +1730,7 @@ class DataContext(BaseDataContext):
         """
         path_to_yml = os.path.join(self.root_directory, self.GE_YML)
         try:
-            with open(path_to_yml, "r") as data:
+            with open(path_to_yml) as data:
                 config_dict = yaml.load(data)
 
         except YAMLError as err:
@@ -1757,7 +1773,7 @@ class DataContext(BaseDataContext):
     def find_context_root_dir(cls):
         result = None
         yml_path = None
-        ge_home_environment = os.getenv("GE_HOME", None)
+        ge_home_environment = os.getenv("GE_HOME")
         if ge_home_environment:
             ge_home_environment = os.path.expanduser(ge_home_environment)
             if os.path.isdir(ge_home_environment) and os.path.isfile(
@@ -1892,7 +1908,7 @@ def _get_metric_configuration_tuples(metric_configuration, base_kwargs=None):
     if base_kwargs is None:
         base_kwargs = {}
 
-    if isinstance(metric_configuration, string_types):
+    if isinstance(metric_configuration, str):
         return [(metric_configuration, base_kwargs)]
 
     metric_configurations_list = []

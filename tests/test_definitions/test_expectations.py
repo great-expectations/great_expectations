@@ -1,11 +1,10 @@
-import pytest
-
+import glob
 import os
 import json
-import glob
 import logging
 from collections import OrderedDict
 
+import pytest
 import pandas as pd
 
 from sqlalchemy.dialects.sqlite import dialect as sqliteDialect

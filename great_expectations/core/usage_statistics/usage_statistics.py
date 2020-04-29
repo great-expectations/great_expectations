@@ -258,7 +258,7 @@ def run_validation_operator_usage_statistics(
     payload = {}
     try:
         payload["anonymized_operator_name"] = anonymizer.anonymize(validation_operator_name)
-    except TypeError as e:
+    except TypeError:
         logger.debug("run_validation_operator_usage_statistics: Unable to create validation_operator_name hash")
     try:
         batch_anonymizer = data_context._usage_statistics_handler._batch_anonymizer

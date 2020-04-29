@@ -144,8 +144,7 @@ after this scaffold gets you close to what you want.**"""
         self.write_notebook_to_disk(self._notebook, notebook_file_path)
 
     def _add_scaffold_cell(self):
-        self.add_code_cell(
-            """\
+        self.add_code_cell("""\
 # Wipe the suite clean to prevent unwanted expectations on the batch
 suite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
 batch = context.get_batch(batch_kwargs, suite)
@@ -156,6 +155,4 @@ scaffold_config = {
     # "included_expectations": [],
     # "excluded_expectations": [],
 }
-suite, evr = BasicSuiteBuilderProfiler().profile(batch, profiler_configuration=scaffold_config)""",
-            lint=False,
-        )
+suite, evr = BasicSuiteBuilderProfiler().profile(batch, profiler_configuration=scaffold_config)""")
