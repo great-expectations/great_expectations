@@ -1,3 +1,40 @@
+h1,h1,h3,h4,h5,h6,p,body,a{
+    font-family: HKGroteskPro, serif !important;
+}
+
+body {
+    background-color: #edf1f5;
+    color: #2b354f;
+}
+
+a {
+    cursor: pointer;
+}
+
+@font-face {
+  font-family: HKGroteskPro;
+  font-weight: 400;
+    src: url(hk-grotesk-pro/HKGroteskPro-Regular.woff2) format("woff2"), url(hk-grotesk-pro/HKGroteskPro-Regular.woff) format("woff")
+ }
+
+@font-face {
+    font-family: HKGroteskPro;
+    font-weight: 600;
+    src: url(hk-grotesk-pro/HKGroteskPro-Medium.woff2) format("woff2"), url(hk-grotesk-pro/HKGroteskPro-Medium.woff) format("woff")
+}
+
+@font-face {
+  font-family: HKGroteskPro;
+  font-weight: 700;
+  src: url(hk-grotesk-pro/HKGroteskPro-SemiBold.woff2) format("woff2"), url(hk-grotesk-pro/HKGroteskPro-SemiBold.woff) format("woff")
+}
+
+@font-face {
+  font-family: HKGroteskPro;
+  font-weight: 800;
+  src: url(hk-grotesk-pro/HKGroteskPro-Bold.woff2) format("woff2"), url(hk-grotesk-pro/HKGroteskPro-Bold.woff) format("woff")
+}
+
 .wy-nav-content {
     width: auto !important;
     max-width: max-content !important;
@@ -49,39 +86,80 @@
     top: 50px;
 }
 
+/*GE HEADER STYLES*/
+
 .ge_header {
-    background: aquamarine;
+    background-color: #fff;
+    position: relative;
+    z-index: 10000;
+    height: 64px;
+    width: 100%;
 }
 
-h1,h1,h3,h4,h5,h6,p,body,a{
-    font-family: HKGroteskPro, serif !important;
+#header-logo {
+    overflow: hidden;
+    padding-left: 24px;
+    float: left;
+    line-height: 64px;
+    text-decoration: none;
+    height: auto;
 }
 
-body {
-    background-color: #edf1f5;
-    color: #2b354f;
+#header-logo img {
+    display: inline;
+    vertical-align: middle;
+    margin-right: 16px;
+    max-width: 224px;
+    width: 100%;
+    margin-bottom: 0;
 }
 
-@font-face {
-  font-family: HKGroteskPro;
-  font-weight: 400;
-    src: url(hk-grotesk-pro/HKGroteskPro-Regular.woff2) format("woff2"), url(hk-grotesk-pro/HKGroteskPro-Regular.woff) format("woff")
- }
-
-@font-face {
-    font-family: HKGroteskPro;
-    font-weight: 600;
-    src: url(hk-grotesk-pro/HKGroteskPro-Medium.woff2) format("woff2"), url(hk-grotesk-pro/HKGroteskPro-Medium.woff) format("woff")
+#header-actions {
+    float: right;
+    flex: 0 0 auto;
+    padding: 8px;
+    white-space: nowrap;
+    line-height: 46px;
+    font-size: 16px;
 }
 
-@font-face {
-  font-family: HKGroteskPro;
-  font-weight: 700;
-  src: url(hk-grotesk-pro/HKGroteskPro-SemiBold.woff2) format("woff2"), url(hk-grotesk-pro/HKGroteskPro-SemiBold.woff) format("woff")
+.header-item {
+    display: inline-block;
+    vertical-align: bottom;
+    padding: 0 20px;
+    display: block;
+    color: rgba(0,0,0,.65);
+    float: left;
+    border-bottom: 2px solid transparent;
+    transition: border-bottom .3s cubic-bezier(.645,.045,.355,1),background .3s cubic-bezier(.645,.045,.355,1),padding .15s cubic-bezier(.645,.045,.355,1);
 }
 
-@font-face {
-  font-family: HKGroteskPro;
-  font-weight: 800;
-  src: url(hk-grotesk-pro/HKGroteskPro-Bold.woff2) format("woff2"), url(hk-grotesk-pro/HKGroteskPro-Bold.woff) format("woff")
+#header-actions a:hover {
+    color: #00bfa5;
+    border-bottom: 2px solid #00bfa5;
+    transition: border-bottom .3s cubic-bezier(.645,.045,.355,1),background .3s cubic-bezier(.645,.045,.355,1),padding .15s cubic-bezier(.645,.045,.355,1);
 }
+
+#community-modal {
+    background: #fff;
+    min-width: 160px;
+    border-radius: 4px;
+}
+
+#community-modal ul {
+    margin:0;
+    padding: 0;
+    list-style: none;
+}
+
+#community-modal li {
+    margin-bottom: 8px;
+    padding: 0 16px 0 28px;
+    height: 40px;
+    margin-top: 4px;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 40px;
+    text-overflow: ellipsis;
+}
+

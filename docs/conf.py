@@ -104,7 +104,15 @@ html_theme_options = {
     'logo_only': True,
 }
 
-html_static_path = ['_static', '_static/style.css', '_static/hk-grotesk-pro/HKGroteskPro-Bold.woff2','_static/hk-grotesk-pro/HKGroteskPro-Regular.woff2','_static/hk-grotesk-pro/HKGroteskPro-SemiBold.woff2','_static/hk-grotesk-pro/HKGroteskPro-Medium.woff2']
+html_static_path = [
+    '_static', 
+    '_static/style.css', 
+    '_static/hk-grotesk-pro/HKGroteskPro-Bold.woff2',
+    '_static/hk-grotesk-pro/HKGroteskPro-Regular.woff2',
+    '_static/hk-grotesk-pro/HKGroteskPro-SemiBold.woff2',
+    '_static/hk-grotesk-pro/HKGroteskPro-Medium.woff2',
+    '_static/header-logo.png'
+]
 html_css_files = ['style.css']
 
 html_logo = '../pip-logo.png'
