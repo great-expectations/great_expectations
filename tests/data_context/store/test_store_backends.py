@@ -1,10 +1,10 @@
-import pytest
 import os
-import boto3
-from moto import mock_s3
-from mock import patch
 
-from great_expectations.exceptions import StoreBackendError
+import boto3
+import pytest
+from botocore.exceptions import ClientError
+from mock import patch
+from moto import mock_s3
 
 from great_expectations.data_context.store import (
     InMemoryStoreBackend,
@@ -12,10 +12,10 @@ from great_expectations.data_context.store import (
     TupleS3StoreBackend,
     TupleGCSStoreBackend,
 )
+from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import (
     gen_directory_tree_str,
 )
-from botocore.exceptions import ClientError
 
 
 def test_StoreBackendValidation():
@@ -205,16 +205,15 @@ def test_TupleS3StoreBackend_with_prefix():
     assert set(
         [s3_object_info['Key'] for s3_object_info in
          boto3.client('s3').list_objects(Bucket=bucket, Prefix=prefix)['Contents']]) == {
-        'this_is_a_test_prefix/my_file_AAA', 'this_is_a_test_prefix/my_file_BBB'}
-    
+               'this_is_a_test_prefix/my_file_AAA', 'this_is_a_test_prefix/my_file_BBB'}
+
     assert my_store.get_url_for_key(('AAA',)) == 'https://s3.amazonaws.com/%s/%s/my_file_AAA' % (bucket, prefix)
     assert my_store.get_url_for_key(('BBB',)) == 'https://s3.amazonaws.com/%s/%s/my_file_BBB' % (bucket, prefix)
 
     my_store.remove_key(("BBB",))
-    try:
-        assert my_store.get(("BBB",)) == None
-    except ClientError as ex:
-        assert ex.response['Error']['Code'] == 'NoSuchKey'
+    with pytest.raises(ClientError) as exc:
+        my_store.get(("BBB",))
+    assert exc.value.response['Error']['Code'] == 'NoSuchKey'
           
 
 @mock_s3
