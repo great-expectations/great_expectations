@@ -35,6 +35,7 @@ def checkpoint():
 
 
 @checkpoint.command(name="new")
+# TODO figure out if this is the right signature
 @click.argument("checkpoint")
 @click.argument("suite")
 @click.option("--datasource", default=None)
@@ -95,32 +96,6 @@ def checkpoint_new(checkpoint, directory, suite, datasource):
     cli_message(
         f"Yay! A checkpoint `{checkpoint}` was added to your project. To edit this..."
     )
-
-
-def _checkpoint_new(
-    suite, checkpoint_filename, directory, usage_event, datasource=None
-):
-    context = load_data_context_with_error_handling(directory)
-    try:
-        _validate_checkpoint_filename(checkpoint_filename)
-        context_directory = context.root_directory
-        datasource = _get_datasource(context, datasource)
-        suite = load_expectation_suite(context, suite, usage_event)
-        _, _, _, batch_kwargs = get_batch_kwargs(context, datasource.name)
-
-        checkpoint_filename = _write_tap_file_to_disk(
-            batch_kwargs, context_directory, suite, checkpoint_filename
-        )
-        cli_message(
-            f"""\
-<green>A new checkpoint has been generated!</green>
-To run this checkpoint, run: <green>python {checkpoint_filename}</green>
-You can edit this script or place this code snippet in your pipeline."""
-        )
-        send_usage_message(context, event=usage_event, success=True)
-    except Exception as e:
-        send_usage_message(context, event=usage_event, success=False)
-        raise e
 
 
 @checkpoint.command(name="list")
