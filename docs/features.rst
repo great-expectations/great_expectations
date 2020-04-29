@@ -23,3 +23,5 @@ and our `blog <https://greatexpectations.io/blog>`__ for more information on how
    /features/ge_on_teams
    /features/profiling
    /features/profilers
+   /features/expectation_glossary
+   /features/changelog
