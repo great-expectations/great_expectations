@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import re
@@ -197,11 +198,11 @@ def test_validate():
 
     del results.meta["great_expectations.__version__"]
 
-    assert expected_results == results
+    assert results.to_json_dict() == expected_results.to_json_dict()
 
     # Now, change the results and ensure they are no longer equal
     results.results[0] = ExpectationValidationResult()
-    assert expected_results != results
+    assert results.to_json_dict() != expected_results.to_json_dict()
 
     # Finally, confirm that only_return_failures works
     # and does not affect the "statistics" field.
@@ -211,7 +212,8 @@ def test_validate():
     expected_results = ExpectationSuiteValidationResult(
         meta={
             "expectation_suite_name": "titanic",
-            "run_id": "19551105T000000.000000Z",
+            "run_id": {"run_name": None, "run_time": "1955-11-05T00:00:00+00:00"},
+            "validation_time": "1955-11-05T00:00:00+00:00",
             "batch_kwargs": {"ge_batch_id": "1234"},
             "batch_markers": {},
             "batch_parameters": {}
@@ -239,7 +241,7 @@ def test_validate():
         success=expected_results.success,  # unaffected
         statistics=expected_results["statistics"]  # unaffected
     )
-    assert expected_results == validation_results
+    assert validation_results.to_json_dict() == expected_results.to_json_dict()
 
 
 @mock.patch('great_expectations.core.ExpectationValidationResult.validate_result_dict', return_value=False)
@@ -288,7 +290,7 @@ def test_validate_with_invalid_result(validate_result_dict):
     for result in results.results:
         result.exception_info.pop("exception_traceback")
 
-    assert expected_results == results
+    assert results.to_json_dict() == expected_results.to_json_dict()
 
 
 def test_validate_catch_non_existent_expectation():
