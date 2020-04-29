@@ -18,6 +18,7 @@ develop
   - batches are of the the wrong type
   - no matching validation operator is found in the project
 * Clarified scaffolding language in scaffold notebook
+* DataContext.create() adds an additional directory: `checkpoints`
 
 0.10.4
 -----------------
