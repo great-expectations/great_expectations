@@ -1,4 +1,3 @@
-import enum
 import importlib
 import json
 import logging
@@ -110,26 +109,26 @@ def datasource_new(directory):
     default=None,
     help="Datasource to delete"
 )
-def delete_datasource(self,datasource_name=None):
+@click.option(
+    "--datasource_name",
+    "-s",
+    help="The site that you want documentation cleaned for. See data_docs section in great_expectations.yml",
+)
+def delete_datasource(directory, datasource_name=None):
     """Delete data source"""
+    print(datasource_name) 
     context = load_data_context_with_error_handling(directory)
     if datasource_name is None:
         cli_message("<red>{}</red>".format("Datasource name must be a datasource name"))
         return
     else:
-        datasources = context.delete_datasource()
-        if not datasources.has_key(datasource_name):
-            cli_message("<red>{}</red>".format("Datasource name must be a datasource name"))
-            return
-        else:
-            #self._stores[self.expectations_store_name].remove_key(key)
-            del datasources[datasource_name]
-        if datasources.has_key(datasource_name):
-            cli_message("<red>{}</red>".format("Datasource not deleted"))
-            sys.exit(1)
-        else:
+        context.delete_datasource(datasource_name)
+        if context.get_datasource(datasource_name) is None: 
             cli_message("<green>{}</greem>".format("Datasource deleted successfully."))
             return True
+        else:
+            cli_message("<red>{}</red>".format("Datasource not deleted"))
+            sys.exit(1)
 
 
 @datasource.command(name="list")

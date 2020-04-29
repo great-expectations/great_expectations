@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import configparser
 import copy
 import datetime
@@ -552,8 +551,9 @@ class BaseDataContext(object):
             datasource = self.get_datasource(datasource_name)
             if datasource:
                #remove key until we have a delete method on project_config
-               self._project_config["datasources"][datasource_name] = None
-               self._datasources.remove(datasource_name)
+               #self._project_config_with_variables_substituted.datasources[datasource_name].remove()
+               #del self._project_config["datasources"][datasource_name]
+               del self._datasources[datasource_name]
             else:
                 raise ValueError(
                     "Datasource not found"
