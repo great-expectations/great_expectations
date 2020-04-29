@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import os
 import shutil
 from unittest import mock
@@ -202,6 +200,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
 great_expectations/
     .gitignore
     great_expectations.yml
+    checkpoints/
     expectations/
     notebooks/
         pandas/

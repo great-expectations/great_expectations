@@ -119,13 +119,9 @@ def init(target_directory, view, usage_stats):
             if len(datasources) == 1:
                 datasource_name = datasources[0]["name"]
 
-                success, suite_name = create_expectation_suite_impl(
-                    context,
-                    datasource_name=datasource_name,
-                    show_intro_message=False,
-                    additional_batch_kwargs={"limit": 1000},
-                    open_docs=view,
-                )
+                success, suite_name = create_expectation_suite_impl(context, datasource_name=datasource_name,
+                                                                    additional_batch_kwargs={"limit": 1000},
+                                                                    open_docs=view)
                 if success:
                     cli_message(
                         "A new Expectation suite '{}' was added to your project".format(suite_name)

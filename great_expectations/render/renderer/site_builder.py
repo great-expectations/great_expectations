@@ -342,7 +342,7 @@ class DefaultSiteSectionBuilder(object):
 
             try:
                 resource = self.source_store.get(resource_key)
-            except FileNotFoundError as e:
+            except FileNotFoundError:
                 logger.warning(f"File {resource_key.to_fixed_length_tuple()} could not be found. Skipping.")
                 continue
 
@@ -487,7 +487,6 @@ class DefaultSiteIndexBuilder(object):
 
         if run_id:
             path_components = ["validations"] + expectation_suite_name.split(".") + [run_id] + [batch_identifier]
-            # py2 doesn't support
             # filepath = os.path.join("validations", batch_identifier, *expectation_suite_name.split("."), run_id)
             filepath = os.path.join(*path_components)
             filepath += ".html"
@@ -642,7 +641,7 @@ class DefaultSiteIndexBuilder(object):
                     run_id=profiling_result_key.run_id,
                     validation_success=validation_success
                 )
-            except Exception as e:
+            except Exception:
                 error_msg = "Profiling result not found: {0:s} - skipping".format(str(profiling_result_key.to_tuple()))
                 logger.warning(error_msg)
 
@@ -664,7 +663,7 @@ class DefaultSiteIndexBuilder(object):
                     run_id=validation_result_key.run_id,
                     validation_success=validation_success
                 )
-            except Exception as e:
+            except Exception:
                 error_msg = "Validation result not found: {0:s} - skipping".format(str(validation_result_key.to_tuple()))
                 logger.warning(error_msg)
 

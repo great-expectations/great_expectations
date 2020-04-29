@@ -25,8 +25,8 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
    reference
    contributing
    community
-   roadmap_changelog
    module_docs
+   changelog
 
 *****
 Index

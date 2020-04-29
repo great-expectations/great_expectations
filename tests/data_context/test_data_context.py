@@ -1,7 +1,6 @@
 import json
 import os
 import shutil
-from collections import OrderedDict
 
 import pytest
 from ruamel.yaml import YAML
@@ -21,10 +20,7 @@ from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
-from great_expectations.data_context.util import (
-    file_relative_path,
-    safe_mmkdir,
-)
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
@@ -34,7 +30,9 @@ from great_expectations.exceptions import (
     DataContextError,
 )
 from great_expectations.util import gen_directory_tree_str
-from tests.integration.usage_statistics.test_integration_usage_statistics import USAGE_STATISTICS_QA_URL
+from tests.integration.usage_statistics.test_integration_usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
+)
 from tests.test_utils import safe_remove
 
 try:
@@ -336,6 +334,7 @@ project_path/
     great_expectations/
         .gitignore
         great_expectations.yml
+        checkpoints/
         expectations/
             titanic/
                 subdir_reader/
@@ -441,8 +440,8 @@ data_docs/
 """.format(f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id)
 
     # save data_docs locally
-    safe_mmkdir("./tests/data_context/output")
-    safe_mmkdir("./tests/data_context/output/data_docs")
+    os.makedirs("./tests/data_context/output", exist_ok=True)
+    os.makedirs("./tests/data_context/output/data_docs", exist_ok=True)
 
     if os.path.isdir("./tests/data_context/output/data_docs"):
         shutil.rmtree("./tests/data_context/output/data_docs")
@@ -545,7 +544,7 @@ def test_load_data_context_from_environment_variables(tmp_path_factory):
     try:
         project_path = str(tmp_path_factory.mktemp('data_context'))
         context_path = os.path.join(project_path, "great_expectations")
-        safe_mmkdir(context_path)
+        os.makedirs(context_path, exist_ok=True)
         os.chdir(context_path)
         with pytest.raises(DataContextError) as err:
             DataContext.find_context_root_dir()
@@ -808,6 +807,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(tmp_pat
 great_expectations/
     .gitignore
     great_expectations.yml
+    checkpoints/
     expectations/
     notebooks/
         pandas/
@@ -834,6 +834,7 @@ def test_data_context_create_does_nothing_if_all_uncommitted_dirs_exist(tmp_path
 great_expectations/
     .gitignore
     great_expectations.yml
+    checkpoints/
     expectations/
     notebooks/
         pandas/
@@ -895,6 +896,22 @@ uncommitted/
     assert not DataContext.all_uncommitted_directories_exist(project_path)
 
 
+def test_data_context_create_builds_base_directories(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context = DataContext.create(project_path)
+    assert isinstance(context, DataContext)
+
+    for directory in [
+        "expectations",
+        "notebooks",
+        "plugins",
+        "checkpoints",
+        "uncommitted",
+    ]:
+        base_dir = os.path.join(project_path, context.GE_DIR, directory)
+        assert os.path.isdir(base_dir)
+
+
 def test_data_context_create_does_not_overwrite_existing_config_variables_yml(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('data_context'))
     DataContext.create(project_path)
@@ -923,6 +940,7 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
 
     assert set(os.listdir(empty_directory)) == {
         'plugins',
+        "checkpoints",
         'expectations',
         '.gitignore',
         'uncommitted',
@@ -1049,7 +1067,7 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
 def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
     # Setup:
     base_path = str(tmp_path_factory.mktemp('test_load_config_variables_file'))
-    safe_mmkdir(os.path.join(base_path, "uncommitted"))
+    os.makedirs(os.path.join(base_path, "uncommitted"), exist_ok=True)
     with open(os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w") as outfile:
         yaml.dump({'env': 'dev'}, outfile)
     with open(os.path.join(base_path, "uncommitted", "prod_variables.yml"), "w") as outfile:

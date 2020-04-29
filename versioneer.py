@@ -276,7 +276,6 @@ https://creativecommons.org/publicdomain/zero/1.0/ .
 
 """
 
-from __future__ import print_function
 try:
     import configparser
 except ImportError:
@@ -1592,10 +1591,7 @@ def get_cmdclass():
         del cmds["build_py"]
 
     if 'py2exe' in sys.modules:  # py2exe enabled?
-        try:
-            from py2exe.distutils_buildexe import py2exe as _py2exe  # py3
-        except ImportError:
-            from py2exe.build_exe import py2exe as _py2exe  # py2
+        from py2exe.distutils_buildexe import py2exe as _py2exe  # py3
 
         class cmd_py2exe(_py2exe):
             def run(self):

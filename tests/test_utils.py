@@ -1,5 +1,3 @@
-from __future__ import division
-
 import copy
 import importlib
 import locale
@@ -589,7 +587,7 @@ def is_library_installed(library_name):
     try:
         importlib.import_module(library_name)
         return True
-    except ModuleNotFoundError as e:
+    except ModuleNotFoundError:
         return False
 
 
@@ -599,4 +597,3 @@ def safe_remove(path):
             os.remove(path)
         except OSError as e:
             print(e)
-            pass
