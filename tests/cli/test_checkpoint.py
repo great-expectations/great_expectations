@@ -11,8 +11,10 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_list(mock_emit, caplog, empty_context_with_checkpoint):
-    context = empty_context_with_checkpoint
+def test_checkpoint_list(
+    mock_emit, caplog, empty_context_with_checkpoint_stats_enabled
+):
+    context = empty_context_with_checkpoint_stats_enabled
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -39,10 +41,82 @@ def test_checkpoint_list(mock_emit, caplog, empty_context_with_checkpoint):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
-    mock_emit, caplog, empty_data_context
+def test_checkpoint_new_raises_error_on_existing_checkpoint(
+    mock_emit, caplog, empty_context_with_checkpoint_stats_enabled
 ):
-    context = empty_data_context
+    context = empty_context_with_checkpoint_stats_enabled
+    root_dir = context.root_directory
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        f"checkpoint new my_checkpoint suite -d {root_dir}",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 1
+    assert (
+        "A checkpoint named `my_checkpoint` already exists. Please choose a new name."
+        in stdout
+    )
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.checkpoint.new", "event_payload": {}, "success": False}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_new(mock_emit, caplog, titanic_data_context_stats_enabled):
+    context = titanic_data_context_stats_enabled
+    root_dir = context.root_directory
+    assert context.list_checkpoints() == []
+    mock_emit.reset_mock()
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli, f"checkpoint new passengers -d {root_dir}", catch_exceptions=False,
+    )
+
+    stdout = result.stdout
+    print(stdout)
+    assert result.exit_code == 0
+    # assert "stuff happened" in stdout
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.checkpoint.new", "event_payload": {}, "success": True}
+        ),
+    ]
+
+    # assert os.path.isfile()
+
+    # Newup a context for additional assertions
+    # context = DataContext(root_dir)
+    # assert set(context.list_checkpoints()) == {"passengers"}
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
+    mock_emit, caplog, empty_data_context_stats_enabled
+):
+    context = empty_data_context_stats_enabled
     root_dir = context.root_directory
 
     runner = CliRunner(mix_stderr=False)
@@ -72,9 +146,9 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_run_on_checkpoint_with_not_found_suite(
-    mock_emit, caplog, empty_context_with_checkpoint
+    mock_emit, caplog, empty_context_with_checkpoint_stats_enabled
 ):
-    context = empty_context_with_checkpoint
+    context = empty_context_with_checkpoint_stats_enabled
     root_dir = context.root_directory
 
     runner = CliRunner(mix_stderr=False)
@@ -103,9 +177,9 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_run_on_checkpoint_with_batch_load_problem(
-    mock_emit, caplog, titanic_data_context
+    mock_emit, caplog, titanic_data_context_stats_enabled
 ):
-    context = titanic_data_context
+    context = titanic_data_context_stats_enabled
     suite = context.create_expectation_suite("bar")
     context.save_expectation_suite(suite)
     assert context.list_expectation_suite_names() == ["bar"]
@@ -136,7 +210,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem(
     stdout = result.stdout
     assert result.exit_code == 1
 
-    assert "There was a problem loading a batch with these batch_kwargs" in stdout
+    assert "There was a problem loading a batch:" in stdout
     assert (
         "{'path': '/totally/not/a/file.csv', 'datasource': 'mydatasource', 'reader_method': 'read_csv'}"
         in stdout
@@ -163,9 +237,9 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_run_on_checkpoint_with_empty_suite_list(
-    mock_emit, caplog, titanic_data_context
+    mock_emit, caplog, titanic_data_context_stats_enabled
 ):
-    context = titanic_data_context
+    context = titanic_data_context_stats_enabled
     assert context.list_expectation_suite_names() == []
 
     root_dir = context.root_directory
@@ -223,9 +297,9 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_run_on_non_existent_validation_operator(
-    mock_emit, caplog, titanic_data_context
+    mock_emit, caplog, titanic_data_context_stats_enabled
 ):
-    context = titanic_data_context
+    context = titanic_data_context_stats_enabled
     root_dir = context.root_directory
     csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
 
