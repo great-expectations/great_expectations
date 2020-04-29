@@ -36,21 +36,22 @@ Although the concept of data validation is simple, carrying it out can require c
 
 Datasources solve this problem, by conceptually separating *what* you want to validate from *how* you to validate it.  Datasources give you full control over the process of bringing data and Expectations together, then abstract away that underlying complexity when you validate X data against Y Expectations.
 
+.. image:: ../../images/datasource-conceptual-diagram-B.png
 
-Execution Engines
------------------
+We call the layer that handles the actual computation an :ref:`Execution Engine`_. Currently, Great Expectations supports three execution environments: pandas, sqlalchemy, and pyspark. We will likely extend the library to support others in the future.
 
-#FIXME: Need to explain Execution Engines here, very briefly.
-#FIMXE: The actual "Execution Engines" section should live in Reference, not here.
+The layer that handles connecting to data is called a :ref:`Generator`_. Not all Generators can be used with all Execution Engines. It's also possible to configure a Datasource without a Generator.
+
+You can read more about the inner workings of Datasources, Execution Engines, and Generators :ref:`here`_.
 
 Configuring Datasources
 -----------------------
 
 When you completed those last few steps in ``great_expectations init``, you told Great Expectations that
 
-1. the data you want to connect to lives in a local filesystem,
-2. you want to use Pandas as your :ref:`execution engine`_,
-3. the specific path to your data is ``data/notable_works_by_charles_dickens/notable_works_by_charles_dickens.csv``.
+1. you want to use Pandas as your :ref:`execution engine`_,
+2. the data you want to connect to lives in a local filesystem, in the specific path to your data is ``data/notable_works_by_charles_dickens/notable_works_by_charles_dickens.csv``.
+3. 
 
 Based on that information, the CLI added the following entry into your ``great_expectations.yml`` file, under the ``datasources`` header:
 
@@ -63,10 +64,24 @@ Based on that information, the CLI added the following entry into your ``great_e
         module_name: great_expectations.dataset
         class_name: PandasDataset
 
+This configuration for a Datasource includes the following components:
 
-#FIXME: Links.
-In the future, you can modify or delete your configuration by editing your ``great_expectations.yml`` file directly. You can also use the :ref:`CLI to work with Datasources`_.
+* ``files_datasource`` is the name of the new Datasource.
 
-You can learn more about how Datasources work :ref:`here`_. For instructions on how to configure various Datasources, check out :ref:`How-to guides for configuring Datasources`_.
+* ``class_name`` : specifies the tool that will be used to connect to data, in this case `PandasDatasource`.
+
+* ``data_asset_type`` (required): specifies the execution environment in which Expectations will be executed, in this case `PandasDataset`.
+
+* This Datasource does not currently include a Generator, but if it did, it would include the path to the data: ``data/notable_works_by_charles_dickens/``
+
+
+.. attention::
+
+    We plan to upgrade this configuration API soon, with better names and more conceptual clarity. If at all possible, we will make those changes in a non-breaking way. If you have ideas, concerns or questions about this planned improvement, please join the :ref:`public discussion in Github issues <google.com>`__.
+
+
+In the future, you can modify or delete your configuration by editing your ``great_expectations.yml`` file directly. For instructions on how to configure various Datasources, check out :ref:`How-to guides for configuring Datasources`_.
+
+You can also use the :ref:`CLI to work with Datasources`_.
 
 For now, let's continue to :ref:`getting_started__create_your_first_expectations`.

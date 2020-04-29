@@ -20,7 +20,6 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
    how_to_guides
    features
    reference
-   <hr/>
    community
    module_docs
 
