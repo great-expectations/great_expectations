@@ -92,7 +92,9 @@ class BaseDataContext(object):
     PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
     UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
+    CHECKPOINTS_DIR = "checkpoints"
     BASE_DIRECTORIES = [
+        CHECKPOINTS_DIR,
         "expectations",
         "notebooks",
         "plugins",
@@ -102,7 +104,7 @@ class BaseDataContext(object):
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
     GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
-    FALSEY_STRINGS = ["FALSE", "False", "f", "F", "0"]
+    FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
     GLOBAL_CONFIG_PATHS = [
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf"
@@ -278,11 +280,18 @@ class BaseDataContext(object):
                 logger.warning("GE_USAGE_STATS environment variable must be one of: {}".format(BaseDataContext.FALSEY_STRINGS))
         for config_path in BaseDataContext.GLOBAL_CONFIG_PATHS:
             config = configparser.ConfigParser()
+            states = config.BOOLEAN_STATES
+            for falsey_string in BaseDataContext.FALSEY_STRINGS:
+                states[falsey_string] = False
+            states["TRUE"] = True
+            states["True"] = True
+            config.BOOLEAN_STATES = states
             config.read(config_path)
             try:
-                if not config.getboolean("anonymous_usage_statistics", "enabled"):
+                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
+                    # If stats are disabled, then opt out is true
                     return True
-            except Exception:
+            except (ValueError, configparser.Error):
                 pass
         return False
 
@@ -490,7 +499,7 @@ class BaseDataContext(object):
                 else:
                     root_directory = ""
                 var_path = os.path.join(root_directory, defined_path)
-                with open(var_path, "r") as config_variables_file:
+                with open(var_path) as config_variables_file:
                     return yaml.load(config_variables_file) or {}
             except IOError as e:
                 if e.errno != errno.ENOENT:
@@ -714,17 +723,28 @@ class BaseDataContext(object):
         Returns:
             ValidationOperatorResult
         """
+        if not assets_to_validate:
+            raise ge_exceptions.DataContextError("No batches of data were passed in. These are required")
+
+        for batch in assets_to_validate:
+            if not isinstance(batch, (tuple, DataAsset)):
+                raise ge_exceptions.DataContextError("Batches are required to be of type DataAsset")
+        try:
+            validation_operator = self.validation_operators[validation_operator_name]
+        except KeyError:
+            raise ge_exceptions.DataContextError(f"No validation operator `{validation_operator_name}` was found in your project. Please verify this in your great_expectations.yml")
+
         if run_id is None:
             run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
             logger.info("Setting run_id to: {}".format(run_id))
         if evaluation_parameters is None:
-            return self.validation_operators[validation_operator_name].run(
+            return validation_operator.run(
                 assets_to_validate=assets_to_validate,
                 run_id=run_id,
                 **kwargs
             )
         else:
-            return self.validation_operators[validation_operator_name].run(
+            return validation_operator.run(
                 assets_to_validate=assets_to_validate,
                 run_id=run_id,
                 evaluation_parameters=evaluation_parameters,
@@ -749,7 +769,7 @@ class BaseDataContext(object):
         """
         logger.debug("Starting BaseDataContext.add_datasource for %s" % name)
         module_name = kwargs.get("module_name", "great_expectations.datasource")
-        verify_dynamic_loading_support(module_name=module_name, package_name=None)
+        verify_dynamic_loading_support(module_name=module_name)
         class_name = kwargs.get("class_name")
         datasource_class = load_class(
             module_name=module_name,
@@ -1681,7 +1701,7 @@ class DataContext(BaseDataContext):
         path_to_yml = os.path.join(ge_dir, cls.GE_YML)
 
         # TODO this is so brittle and gross
-        with open(path_to_yml, "r") as f:
+        with open(path_to_yml) as f:
             config = yaml.load(f)
         config_var_path = config.get("config_variables_file_path")
         config_var_path = os.path.join(ge_dir, config_var_path)
@@ -1785,7 +1805,7 @@ class DataContext(BaseDataContext):
         """
         path_to_yml = os.path.join(self.root_directory, self.GE_YML)
         try:
-            with open(path_to_yml, "r") as data:
+            with open(path_to_yml) as data:
                 config_dict = yaml.load(data)
 
         except YAMLError as err:
@@ -1828,7 +1848,7 @@ class DataContext(BaseDataContext):
     def find_context_root_dir(cls):
         result = None
         yml_path = None
-        ge_home_environment = os.getenv("GE_HOME", None)
+        ge_home_environment = os.getenv("GE_HOME")
         if ge_home_environment:
             ge_home_environment = os.path.expanduser(ge_home_environment)
             if os.path.isdir(ge_home_environment) and os.path.isfile(

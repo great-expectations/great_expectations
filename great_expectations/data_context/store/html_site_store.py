@@ -29,7 +29,7 @@ class HtmlSiteStore(object):
     def __init__(self, store_backend=None, runtime_environment=None):
         store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
         store_backend_class_name = store_backend.get("class_name", "TupleFilesystemStoreBackend")
-        verify_dynamic_loading_support(module_name=store_backend_module_name, package_name=None)
+        verify_dynamic_loading_support(module_name=store_backend_module_name)
         store_class = load_class(store_backend_class_name, store_backend_module_name)
 
         # Store Class was loaded successfully; verify that it is of a correct subclass.

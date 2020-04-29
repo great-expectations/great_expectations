@@ -99,7 +99,6 @@ class ValidationMetric(Metric):
 
 
 class ValidationMetricIdentifier(MetricIdentifier):
-
     def __init__(self, run_id, expectation_suite_identifier, metric_name, metric_kwargs_id):
         super(ValidationMetricIdentifier, self).__init__(metric_name, metric_kwargs_id)
         if not isinstance(expectation_suite_identifier, ExpectationSuiteIdentifier):

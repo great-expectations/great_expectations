@@ -301,7 +301,7 @@ Much like the ``suite new`` and ``suite edit`` commands, you will be prompted in
 
     The suites generated here **are not meant to be production suites** - they are scaffolds to build upon.
 
-    Great Expectations will chooses which expectations **might make sense** for a column based on the type and cardinality of the data in each selected column.
+    Great Expectations will choose which expectations **might make sense** for a column based on the type and cardinality of the data in each selected column.
 
     You will definitely want to edit the suite to hone it after scaffolding.
 
