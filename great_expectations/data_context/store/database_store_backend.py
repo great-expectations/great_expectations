@@ -3,7 +3,6 @@ import logging
 try:
     import sqlalchemy
     from sqlalchemy import create_engine, Column, String, MetaData, Table, select, and_, column, text
-    from sqlalchemy.func import count
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
@@ -65,7 +64,7 @@ class DatabaseStoreBackend(StoreBackend):
         self.engine.execute(ins)
 
     def _has_key(self, key):
-        sel = select([count(column("value"))]).select_from(self._table).where(
+        sel = select([sqlalchemy.func.count(column("value"))]).select_from(self._table).where(
             and_(
                 *[getattr(self._table.columns, key_col) == val for key_col, val in zip(self.key_columns, key)]
             )
