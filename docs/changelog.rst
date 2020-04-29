@@ -6,6 +6,10 @@ Changelog
 
 develop
 -----------------
+
+0.10.5
+-----------------
+
 * new cli command noun `checkpoint` (in the next major release this tap will be deprecated
 * improvements to ge.read_json tests
 * tidy up the changelog
