@@ -14,7 +14,7 @@ For every expectation type there is a Python method that sets its arguments, eva
 
 The screenshot below shows the Python method and the Data Docs view for the same expectation (``expect_column_distinct_values_to_be_in_set``):
 
-.. image:: ../images/exp_html_python_side_by_side.png
+.. image:: ../../images/exp_html_python_side_by_side.png
 
 The Great Expectations :ref:`CLI <command_line>` command ``suite edit`` generates a Jupyter notebook to edit a suite.
 This command saves you time by generating boilerplate that loads a batch of data and builds a cell for every expectation in the suite.
@@ -31,4 +31,4 @@ These generated Jupyter notebooks can be discarded and should not be kept in sou
 To make this easier still, the Data Docs page for each Expectation Suite has the :ref:`CLI <command_line>` command syntax for you.
 Simply press the "How to Edit This Suite" button, and copy/paste the :ref:`CLI <command_line>` command into your terminal.
 
-.. image:: ../images/edit_e_s_popup.png
+.. image:: ../../images/edit_e_s_popup.png

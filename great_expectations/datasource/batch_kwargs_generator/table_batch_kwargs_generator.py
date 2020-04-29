@@ -224,3 +224,4 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
         raise BatchKwargsError("TableBatchKwargsGenerator cannot identify partitions, however any existing table may"
                                "already be referenced by accessing a data_asset with the name of the "
                                "table or of the form SCHEMA.TABLE", {})
+
