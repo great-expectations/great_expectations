@@ -7,6 +7,7 @@ import shutil
 import numpy as np
 import pandas as pd
 import pytest
+from freezegun import freeze_time
 
 import great_expectations as ge
 from great_expectations.core import (
@@ -637,6 +638,7 @@ def empty_sqlite_db():
 
 
 @pytest.fixture
+@freeze_time("09/26/2019 13:42:41")
 def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, filesystem_csv_3):
     base_dir = str(tmp_path_factory.mktemp("project_dir"))
     project_dir = os.path.join(base_dir, "project_path")

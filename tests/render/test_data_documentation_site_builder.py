@@ -7,6 +7,7 @@ import shutil
 from freezegun import freeze_time
 
 from great_expectations import DataContext
+from great_expectations.core import RunIdentifier
 from great_expectations.data_context.store import ExpectationsStore, ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier, \
     ExpectationSuiteIdentifier
@@ -81,6 +82,7 @@ def assert_how_to_buttons(context, index_page_locator_info: str, index_links_dic
                         assert how_to_element not in page
 
 
+@freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
 def test_configuration_driven_site_builder(site_builder_data_context_with_html_store_titanic_random):
     context = site_builder_data_context_with_html_store_titanic_random
@@ -134,7 +136,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         batch_kwargs=batch_kwargs,
         expectation_suite_name=expectation_suite_name,
     )
-    run_id = "test_run_id_12345"
+    run_id = RunIdentifier(run_name="test_run_id_12345")
     context.run_validation_operator(
         assets_to_validate=[batch],
         run_id=run_id,
@@ -194,8 +196,6 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     print(json.dumps(index_page_locator_info, indent=2))
     assert index_page_locator_info == "file://" + context.root_directory + '/uncommitted/data_docs/local_site/index.html'
 
-    print(json.dumps(index_links_dict, indent=2))
-
     assert "site_name" in index_links_dict
 
     assert "expectations_links" in index_links_dict
@@ -234,12 +234,13 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory,
         "validations",
         expectation_suite_path_component,
-        run_id,
+        run_id.run_name,
+        run_id.run_time.isoformat(),
         batch.batch_id + ".html")
 
     ts_last_mod_0 = os.path.getmtime(validation_result_page_path)
 
-    run_id = "test_run_id_12346"
+    run_id = RunIdentifier(run_name="test_run_id_12346")
     operator_result = context.run_validation_operator(
         assets_to_validate=[batch],
         run_id=run_id,
@@ -271,7 +272,8 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory,
         "validations",
         expectation_suite_path_component,
-        run_id,
+        run_id.run_name,
+        run_id.run_time.isoformat(),
         batch.batch_id + ".html")
 
     html_url = site_builder.get_resource_url(resource_identifier=validation_result_id)
