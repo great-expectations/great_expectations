@@ -3,6 +3,10 @@
     max-width: max-content !important;
 }
 
+.wy-body-for-nav {
+    background-color: #edf1f5;
+}
+
 .section {
     width: 800px;
 }
@@ -12,28 +16,26 @@
 }
 
 .wy-side-scroll {
-    background: #FFFFFF;
+    background: #edf1f5;
 }
 .wy-nav-top {
-    background: #FFFFFF;
+    background: #edf1f5;
 }
 
 .wy-nav-content {
-    font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
     color: #222222;
-    background: #FFFFFF;
+    background: #edf1f5;
 }
 
 .wy-nav-content-wrap {
-    background: #FFFFFF;
+    background: #edf1f5;
 }
 
 .wy-side-nav-search {
-    background: #FFFFFF;
+    background: #edf1f5;
 }
 
 .wy-menu-vertical a{
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     color: #222222;
 }
 
@@ -43,7 +45,7 @@
 }
 
 .wy-nav-side {
-    background: #FFFFFF;
+    background: #edf1f5;
     top: 50px;
 }
 
@@ -51,8 +53,13 @@
     background: aquamarine;
 }
 
-h1,h1,h3,h4,h5,h6,p{
-    font-family: HKGroteskPro !important;
+h1,h1,h3,h4,h5,h6,p,body,a{
+    font-family: HKGroteskPro, serif !important;
+}
+
+body {
+    background-color: #edf1f5;
+    color: #2b354f;
 }
 
 @font-face {

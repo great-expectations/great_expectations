@@ -105,9 +105,9 @@ html_theme_options = {
 }
 
 html_static_path = ['_static', '_static/style.css', '_static/hk-grotesk-pro/HKGroteskPro-Bold.woff2','_static/hk-grotesk-pro/HKGroteskPro-Regular.woff2','_static/hk-grotesk-pro/HKGroteskPro-SemiBold.woff2','_static/hk-grotesk-pro/HKGroteskPro-Medium.woff2']
-html_css_files = ['style.css', 'hk-grotesk-pro/HKGroteskPro-Bold.woff']
+html_css_files = ['style.css']
 
-html_logo = '../generic_dickens_protagonist.png'
+html_logo = '../pip-logo.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
