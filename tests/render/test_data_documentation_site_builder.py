@@ -282,6 +282,23 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
                                         ValidationResultIdentifier].full_base_directory,
                                         "index.html") == html_url
 
+    resource_dir = os.path.dirname(html_url) + "/"
+    #exercise clean_site
+    site_builder.clean_site()
+    assert "file://" + site_builder.site_index_builder.target_store.store_backends[\
+                                        ValidationResultIdentifier].full_base_directory == resource_dir
+
+    #restore site
+    context = site_builder_data_context_with_html_store_titanic_random
+    site_builder = SiteBuilder(
+            data_context=context, 
+            runtime_environment={ 
+                "root_directory": context.root_directory
+            },
+            **local_site_config
+        )
+    res = site_builder.build()
+
 
 @pytest.mark.rendered_output
 def test_configuration_driven_site_builder_without_how_to_buttons(site_builder_data_context_with_html_store_titanic_random):
