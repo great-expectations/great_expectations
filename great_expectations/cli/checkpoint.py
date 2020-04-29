@@ -83,19 +83,21 @@ def checkpoint_new(checkpoint, directory, suite, datasource):
     # TODO modify template
     template["batches"] = [
         {
-            "batch_kwargs": batch_kwargs,
+            "batch_kwargs": dict(batch_kwargs),
             "expectation_suite_names": [suite.expectation_suite_name],
         }
     ]
     # TODO write template as yml in dir
+    # TODO verify that checkpoint dir exists
     with open(checkpoint_file, "w") as f:
-        template = yaml.dump(template, f)
+        yaml.dump(template, f)
 
-    # TODO show how to run
-    # TODO print yay message
     cli_message(
-        f"Yay! A checkpoint `{checkpoint}` was added to your project. To edit this..."
+        f"""<green>A checkpoint named `{checkpoint}` was added to your project!</green>
+  - To edit this checkpoint edit the checkpoint file: {checkpoint_file}
+  - To run this checkpoint run `great_expectations checkpoint run {checkpoint}`"""
     )
+    send_usage_message(context, usage_event, success=True)
 
 
 @checkpoint.command(name="list")

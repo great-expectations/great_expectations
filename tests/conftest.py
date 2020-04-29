@@ -675,6 +675,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     shutil.copy(titanic_csv_path, str(os.path.join(context_path, "../data/Titanic.csv")))
     return ge.data_context.DataContext(context_path)
 
+
 @pytest.fixture
 def titanic_sqlite_db():
     from sqlalchemy import create_engine
@@ -682,6 +683,29 @@ def titanic_sqlite_db():
     engine = create_engine('sqlite:///{}'.format(titanic_db_path))
     assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
     return engine
+
+
+@pytest.fixture
+def titanic_expectation_suite():
+    return ExpectationSuite(
+        expectation_suite_name="Titanic.warning",
+        meta={},
+        data_asset_type="Dataset",
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={
+                    "column": "PClass"
+                }
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_not_be_null",
+                kwargs={
+                    "column": "Name"
+                }
+            )
+        ]
+    )
 
 
 @pytest.fixture
