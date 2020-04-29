@@ -394,12 +394,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
         s3_key = self._convert_key_to_filepath(key)
         if s3_key:
             try:
+                #s3.Object(boto3.client('s3').get_bucket_location(Bucket=self.bucket), s3_key).delete()
                 objects_to_delete = s3.meta.client.list_objects(Bucket=self.bucket, Prefix=self.prefix)
 
                 delete_keys = {'Objects' : []}
                 delete_keys['Objects'] = [{'Key' : k} for k in [obj['Key'] for obj in objects_to_delete.get('Contents', [])]]
-
-                s3.meta.client.delete_objects(Bucket="MyBucket", Delete=delete_keys)
+                s3.meta.client.delete_objects(Bucket=self.bucket, Delete=delete_keys)
                 return True
             except ClientError as e:
                 return False

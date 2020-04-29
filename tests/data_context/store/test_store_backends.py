@@ -15,6 +15,7 @@ from great_expectations.data_context.store import (
 from great_expectations.util import (
     gen_directory_tree_str,
 )
+from botocore.exceptions import ClientError
 
 
 def test_StoreBackendValidation():
@@ -90,17 +91,14 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
 
     tuple_ = ("A__a", "B-b", "C")
     converted_string = my_store._convert_key_to_filepath(tuple_)
-    print(converted_string)
     assert converted_string == "A__a/B-b/C/foo-C-expectations.txt"
 
     recovered_key = my_store._convert_filepath_to_key("A__a/B-b/C/foo-C-expectations.txt")
-    print(recovered_key)
     assert recovered_key == tuple_
     
     with pytest.raises(ValueError):
         tuple_ = ("A/a", "B-b", "C")
         converted_string = my_store._convert_key_to_filepath(tuple_)
-        print(converted_string)
 
 
 def test_TupleFilesystemStoreBackend(tmp_path_factory):
@@ -123,10 +121,8 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
     my_store.set(("BBB",), "bbb")
     assert my_store.get(("BBB",)) == "bbb"
 
-    print(my_store.list_keys())
     assert set(my_store.list_keys()) == {("AAA",), ("BBB",)}
 
-    print(gen_directory_tree_str(project_path))
     assert gen_directory_tree_str(project_path) == """\
 test_TupleFilesystemStoreBackend__dir0/
     my_file_AAA
@@ -163,7 +159,6 @@ things0/
         foo.json
 """
 
-    print(my_store.list_keys())
     assert set(my_store.list_keys()) == {("AAA", )}
 
 
@@ -216,7 +211,11 @@ def test_TupleS3StoreBackend_with_prefix():
     assert my_store.get_url_for_key(('BBB',)) == 'https://s3.amazonaws.com/%s/%s/my_file_BBB' % (bucket, prefix)
 
     my_store.remove_key(("BBB",))
-    assert my_store.get(("BBB",)) == None
+    try:
+        assert my_store.get(("BBB",)) == None
+    except ClientError as ex:
+        assert ex.response['Error']['Code'] == 'NoSuchKey'
+          
 
 @mock_s3
 def test_TupleS3StoreBackend_with_empty_prefixes():
