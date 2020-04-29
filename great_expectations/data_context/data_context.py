@@ -93,7 +93,9 @@ class BaseDataContext(object):
     PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
     UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
+    CHECKPOINTS_DIR = "checkpoints"
     BASE_DIRECTORIES = [
+        CHECKPOINTS_DIR,
         "expectations",
         "notebooks",
         "plugins",
