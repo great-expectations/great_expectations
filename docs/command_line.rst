@@ -29,7 +29,6 @@ This is a list of the most common commands you'll use in order of how much you'l
 * ``great_expectations suite delete``
 * ``great_expectations docs build``
 * ``great_expectations docs clean``
-* ``great_expectations checkpoint new``
 * ``great_expectations validation-operator run``
 * ``great_expectations datasource list``
 * ``great_expectations datasource new``
@@ -615,16 +614,16 @@ For details on profiling, see this :ref:`reference document<profiling_reference>
 
 .. caution:: Profiling is a beta feature and is not guaranteed to be stable. YMMV
 
-great_expectations checkpoint
+great_expectations tap
 ==============================
 
-All command line operations for working with checkpoints are here.
-A checkpoint is an executable python file that runs validations that you can create to aid deployment of validations.
+All command line operations for working with taps are here.
+A tap is an executable python file that runs validations that you can create to aid deployment of validations.
 
-``great_expectations checkpoint new``
+``great_expectations tap new``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Creating a checkpoint requires a valid suite name and checkpoint filename.
+Creating a tap requires a valid suite name and tap filename.
 This is the name of a python file that this command will write to.
 
 
@@ -637,16 +636,16 @@ This is the name of a python file that this command will write to.
 
 .. code-block:: bash
 
-    $ great_expectations checkpoint new npi.warning npi.warning.py
+    $ great_expectations tap new npi.warning npi.warning.py
     This is a BETA feature which may change.
 
     Enter the path (relative or absolute) of a data file
     : data/npi.csv
-    A new checkpoint has been generated!
-    To run this checkpoint, run: python npi.warning.py
+    A new tap has been generated!
+    To run this tap, run: python npi.warning.py
     You can edit this script or place this code snippet in your pipeline.
 
-You will now see a new checkpoint file on your filesystem.
+You will now see a new tap file on your filesystem.
 
 This can be run by invoking it with:
 
@@ -668,7 +667,7 @@ A failure will look like:
     $ echo $?
     1
 
-The :ref:`Typical Workflow <Typical Workflow>` document shows you how checkpoints can be embedded in your existing pipeline or used adjacent to a pipeline.
+The :ref:`Typical Workflow <Typical Workflow>` document shows you how taps can be embedded in your existing pipeline or used adjacent to a pipeline.
 
 If you are using a SQL datasource you will be guided through a series of prompts that helps you choose a table or write a SQL query.
 
@@ -681,18 +680,18 @@ If you have built a suite called ``churn_model_assumptions`` and a postgres data
 
 .. code-block:: bash
 
-    $ great_expectations checkpoint new churn_model_assumptions churn_model_assumptions.py
+    $ great_expectations tap new churn_model_assumptions churn_model_assumptions.py
     This is a BETA feature which may change.
 
     Which table would you like to use? (Choose one)
     1. user_events (table)
     Don't see the table in the list above? Just type the SQL query
     : SELECT * FROM user_events WHERE event_timestamp > now() - interval '14 day';
-    A new checkpoint has been generated!
-    To run this checkpoint, run: python churn_model_assumptions.py
+    A new tap has been generated!
+    To run this tap, run: python churn_model_assumptions.py
     You can edit this script or place this code snippet in your pipeline.
 
-This checkpoint can then be run nightly before your model makes churn predictions!
+This tap can then be run nightly before your model makes churn predictions!
 
 Miscellaneous
 ======================
