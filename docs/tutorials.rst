@@ -5,14 +5,12 @@
 Tutorials
 #########
 
-This is a collection of tutorials that walk you through a variety of useful Great Expectations workflows.
+These tutorials will teach you everything you need to know to get started with Great Expectations, as either a user of the project and/or a contributor to the project.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   /tutorials/create_expectations
-   /tutorials/validate_data
-   /tutorials/publishing_data_docs_to_s3
-   /tutorials/saving_metrics
+   /tutorials/getting_started
+   /tutorials/contributing
 
 
