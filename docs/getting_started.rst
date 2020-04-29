@@ -69,9 +69,9 @@ Please follow these steps to get started:
 
 .. container:: custom-indented-paragraph
 
-   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas varius purus odio, nec condimentum nisi viverra et. Ut eu ornare ex, sed finibus dolor. Suspendisse potenti. Nulla vel massa ornare, ultrices odio nec, porttitor sapien. Curabitur vehicula placerat porttitor. #FIXME
-   
-   Sed a sem tortor. Curabitur lobortis, massa vitae dignissim posuere, leo dolor hendrerit est, non sollicitudin eros metus quis velit. Curabitur ut enim vitae velit euismod ullamcorper. Duis vehicula vel metus at aliquet. Pellentesque lacinia mi id mollis pharetra. Donec at maximus erat. Praesent ut odio ante. #FIXME
+   Expectations are the workhorse abstraction in Great Expectations, a flexible, declarative language for describing the expected characteristics of data.
+
+   Click through to :ref:`getting_started__create_your_first_expectations`.
 
 .. raw:: html
 
