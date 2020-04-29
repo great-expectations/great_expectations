@@ -2,6 +2,7 @@ import os
 import sys
 
 import click
+from ruamel.yaml import YAML
 from sqlalchemy.exc import SQLAlchemyError
 
 from great_expectations import DataContext
@@ -16,6 +17,7 @@ from great_expectations.cli.util import (
     load_data_context_with_error_handling,
     load_expectation_suite,
 )
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import (
@@ -25,6 +27,8 @@ from great_expectations.exceptions import (
 )
 from great_expectations.util import lint_code
 
+yaml = YAML()
+
 
 @click.group()
 def checkpoint():
@@ -33,8 +37,8 @@ def checkpoint():
 
 
 @checkpoint.command(name="new")
+@click.argument("checkpoint")
 @click.argument("suite")
-@click.argument("checkpoint_filename")
 @click.option("--datasource", default=None)
 @click.option(
     "--directory",
@@ -43,14 +47,55 @@ def checkpoint():
     help="The project's great_expectations directory.",
 )
 @mark.cli_as_experimental
-def checkpoint_new(suite, checkpoint_filename, directory, datasource=None):
-    """Create a new checkpoint file for easy deployments. (Experimental)"""
-    _checkpoint_new(
-        suite,
-        checkpoint_filename,
-        directory,
-        usage_event="cli.checkpoint.new",
-        datasource=datasource,
+def checkpoint_new(checkpoint, directory, suite, datasource):
+    """Create a new checkpoint for easy deployments. (Experimental)"""
+    suite_name = suite
+    usage_event = "cli.checkpoint.new"
+    context = load_data_context_with_error_handling(directory)
+    if checkpoint in context.list_checkpoints():
+        _exit_with_failure_message(
+            context,
+            usage_event,
+            f"A checkpoint named `{checkpoint}` already exists. Please choose a new name.",
+        )
+
+    # TODO select datasource
+    datasource = toolkit.select_datasource(context)
+    if datasource is None:
+        send_usage_message(context, usage_event, success=False)
+        sys.exit(1)
+
+    checkpoint_file = os.path.join(
+        context.root_directory, context.CHECKPOINTS_DIR, f"{checkpoint}.yml"
+    )
+    # TODO get batch kwargs
+    _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
+
+    # TODO load suite
+    suite: ExpectationSuite = context.get_expectation_suite(suite_name)
+
+    # TODO load template with docs
+    # TODO this should be the responsibility of the DataContext
+    template_file = file_relative_path(
+        __file__, os.path.join("..", "data_context", "checkpoint_template.yml")
+    )
+    with open(template_file, "r") as f:
+        template = yaml.load(f)
+    # TODO modify template
+    template["batches"] = [
+        {
+            "batch_kwargs": batch_kwargs,
+            "expectation_suite_names": [suite.expectation_suite_name],
+        }
+    ]
+    # TODO write template as yml in dir
+    with open(checkpoint_file, "w") as f:
+        template = yaml.dump(template, f)
+
+    # TODO show how to run
+    # TODO print yay message
+    cli_message(
+        f"Yay! A checkpoint `{checkpoint}` was added to your project. To edit this..."
     )
 
 
