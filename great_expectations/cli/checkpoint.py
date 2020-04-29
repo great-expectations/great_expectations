@@ -7,9 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from great_expectations import DataContext
 from great_expectations.cli import toolkit
-from great_expectations.cli.datasource import (
-    select_datasource,
-)
+from great_expectations.cli.datasource import select_datasource
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import (
     cli_message,
