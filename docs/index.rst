@@ -18,12 +18,11 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
    intro
    tutorials
    how_to_guides
-   expectation_glossary
    features
    reference
+   <hr/>
    community
    module_docs
-   changelog
 
 *****
 Index
