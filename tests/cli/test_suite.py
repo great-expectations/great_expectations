@@ -17,12 +17,12 @@ def test_suite_help_output(caplog):
     assert result.exit_code == 0
     assert (
             """Commands:
-      delete    Delete an expectation suite from the expectation store.
-      demo      Create a new demo Expectation Suite.
-      edit      Generate a Jupyter notebook for editing an existing Expectation...
-      list      Lists available Expectation Suites.
-      new       Create a new Expectation Suite.
-      scaffold  Scaffold a new Expectation Suite."""
+  delete    Delete an expectation suite from the expectation store.
+  demo      Create a new demo Expectation Suite.
+  edit      Generate a Jupyter notebook for editing an existing Expectation...
+  list      Lists available Expectation Suites.
+  new       Create a new Expectation Suite.
+  scaffold  Scaffold a new Expectation Suite."""
             in result.stdout
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)
