@@ -1,21 +1,27 @@
 .. _getting_started__create_your_first_expectations:
 
 Create your first Expectations
-------------------------------
+==============================
 
-Expectation Suites combine multiple expectations into an overall description of a dataset. For example, a team can group all the expectations about its ``rating`` table in the movie ratings database from our previous example into an Expectation Suite and call it ``movieratings.ratings``. Note these names are completely flexible and the only constraint on the name of a suite is that it must be unique to a given project.
+:ref:`Expectations` are the workhorse abstraction in Great Expectations.
 
-Each Expectation Suite is saved as a JSON file in the ``great_expectations/expectations`` subdirectory of the Data Context. Users check these files into the version control each time they are updated, same way they treat their source files. This discipline allows data quality to be an integral part of versioned pipeline releases.
+The CLI will help you create your first Expectations. You can accept the defaults by typing [Enter] twice:
 
-The lifecycle of an Expectation Suite starts with creating it. Then it goes through an iterative loop of Review and Edit as the team's understanding of the data described by the suite evolves.
+.. code-block:: bash
 
-Review
-********************************************
+    Name the new expectation suite [religion-survey-results.warning]: 
 
-Reviewing expectations is best done visually in Data Docs. Here's an example of what that might look like:
+    Great Expectations will choose a couple of columns and generate expectations about them
+    to demonstrate some examples of assertions you can make about your data. 
+        
+    Press Enter to continue
+    :
 
-.. image:: ../images/sample_e_s_view.png
+    Generating example Expectation Suite...
 
-Note that many of these expectations might have meaningless ranges.
-Also note that all expectations will have passed, since this is an example suite only.
-When you interactively edit your suite you will likely see failures as you iterate.
+What just happened?
+-------------------
+
+Expectations are grouped together in :ref:`Expectation Suites`.
+
+
