@@ -1,8 +1,8 @@
 .. _command_line:
 
-###################################
-The Great Expectations Command Line
-###################################
+##############################################################
+How to use the Great Expectations command line interface (CLI)
+##############################################################
 
 .. toctree::
    :maxdepth: 2
