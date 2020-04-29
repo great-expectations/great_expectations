@@ -26,12 +26,15 @@ This is a list of the most common commands you'll use in order of how much you'l
 * ``great_expectations suite edit``
 * ``great_expectations suite new``
 * ``great_expectations suite list``
+* ``great_expectations suite delete``
 * ``great_expectations docs build``
+* ``great_expectations docs clean``
 * ``great_expectations checkpoint new``
 * ``great_expectations validation-operator run``
 * ``great_expectations datasource list``
 * ``great_expectations datasource new``
 * ``great_expectations datasource profile``
+* ``great_expectations datasource delete``
 * ``great_expectations init``
 
 You can get a list of Great Expectations commands available to you by typing ``great_expectations --help``.
@@ -106,6 +109,19 @@ You'll use this any time you want to view your expectations and validations in a
     The following Data Docs sites were built:
     - local_site:
        file:///Users/dickens/my_pipeline/great_expectations/uncommitted/data_docs/local_site/index.html
+
+``great_expectations docs clean``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``great_expectations docs clean`` command deletes your Data Docs site.
+Specify site_name to delete specific site or all to delete all
+To rebuild, just use the build command.
+
+.. code-block:: bash
+
+    $ great_expectations docs clean --site-name local_site
+
+    $ great_expectations docs clean --all=y
 
 great_expectations suite
 ==============================
@@ -221,6 +237,20 @@ If you prefer to skip the example expectations and start writing expectations in
 
     [I 14:55:15.992 NotebookApp] Serving notebooks from local directory: /Users/dickens/Desktop/great_expectations/uncommitted
     ... (jupyter opens)
+
+
+``great_expectations suite delete --suite <SUITE_NAME>``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you already know the name of the suite you want to delete you can skip one of the interactive prompts and specify the suite name directly.
+
+
+.. code-block:: bash
+
+    $ great_expectations suite delete --suite npi.warning
+    Enter the path (relative or absolute) of a data file
+    : data/npi.csv
+    ... (same as above)
 
 
 ``great_expectations suite new --empty --no-jupyter``
@@ -566,6 +596,16 @@ This interactive command helps you connect to your data.
     A new datasource 'npi_drops' was added to your project.
 
 If you are using a database you will be guided through a series of prompts that collects and verifies connection details and credentials.
+
+
+``great_expectations datasource delete <datasource_name>``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This command deletes specified datasources.
+
+.. code-block:: bash
+
+    $ great_expectations datasource delete files_datasource
 
 
 ``great_expectations datasource profile``
