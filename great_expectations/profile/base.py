@@ -31,14 +31,12 @@ class ProfilerCardinality(Enum):
 
 
 class DataAssetProfiler(object):
-
     @classmethod
     def validate(cls, data_asset):
         return isinstance(data_asset, DataAsset)
 
 
 class DatasetProfiler(DataAssetProfiler):
-
     @classmethod
     def validate(cls, dataset):
         return isinstance(dataset, Dataset)
@@ -65,7 +63,7 @@ class DatasetProfiler(DataAssetProfiler):
             exp) for exp in expectation_suite.expectations]
         expectation_suite.expectations = new_expectations
 
-        if not "notes" in expectation_suite.meta:
+        if "notes" not in expectation_suite.meta:
             expectation_suite.meta["notes"] = {
                 "format": "markdown",
                 "content": [

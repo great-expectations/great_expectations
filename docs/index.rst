@@ -3,9 +3,9 @@
 .. image:: ../generic_dickens_protagonist.png
    :align: right
 
-################################
+##############################
 Welcome to Great Expectations!
-################################
+##############################
 
 Great Expectations is a leading tool for :ref:`validating <expectations>`,
 :ref:`documenting <data_docs>`, and :ref:`profiling <profiling>`, your data to maintain quality and improve
@@ -24,12 +24,12 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
    reference
    contributing
    community
-   roadmap_changelog
    module_docs
+   changelog
 
-*******************
+*****
 Index
-*******************
+*****
 
 * :ref:`genindex`
 * :ref:`modindex`

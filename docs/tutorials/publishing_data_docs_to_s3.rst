@@ -1,11 +1,11 @@
 .. _publishing_data_docs_to_s3:
 
 
-##############################
+##########################
 Publishing Data Docs to S3
-##############################
+##########################
 
-In this tutorial we will cover publishing a data docs site directly to s3. Publishing a site this way makes
+In this tutorial we will cover publishing a data docs site directly to S3. Publishing a site this way makes
 reviewing and acting on validation results easy in a team, and provides a central location to review the expectations
 currently configured for data assets under test.
 
@@ -92,7 +92,7 @@ http://data-docs.my_org.s3.amazonaws.com/index.html
 
 
 Additional Resources
-======================
+====================
 
 Optionally, you may wish to update static hosting settings for your bucket to enable AWS to automatically serve your
 index.html file or a custom error file:

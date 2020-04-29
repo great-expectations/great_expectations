@@ -1,17 +1,17 @@
 .. _intro:
 
-###############
+############
 Introduction
-###############
+############
 
 .. toctree::
    :maxdepth: 2
 
 *Always know what to expect from your data.*
 
-***********************************
+***************************
 What is Great Expectations?
-***********************************
+***************************
 
 Great Expectations helps teams save time and promote analytic integrity by \
 offering a unique approach to automated testing: pipeline tests. Pipeline \
@@ -38,14 +38,14 @@ To get more done with data, faster. Teams use Great Expectations to
 -  Simplify debugging data pipelines if (when) they break.
 -  Codify assumptions used to build models when sharing with other
    teams or analysts.
--  Develop rich, shared data documention in the course of normal work.
+-  Develop rich, shared data documentation in the course of normal work.
 -  Make implicit knowledge explicit.
 -  ... and much more
 
 
-***********************************
+************
 Key features
-***********************************
+************
 
 **Expectations**
 
@@ -72,9 +72,9 @@ Key features
     As of v0.7.0, Great Expectations includes new classes and methods to `render` Expectations to clean, human-readable documentation. Since docs are compiled from tests and you are running tests against new data as it arrives, your documentation is guaranteed to never go stale.
 
 
-***********************************
+*******************
 Workflow advantages
-***********************************
+*******************
 
 Most data science and data engineering teams end up building some form of pipeline testing, eventually. Unfortunately, many teams don't get around to it until late in the game, long after early lessons from data exploration and model development have been forgotten.
 
@@ -93,9 +93,9 @@ It's the best tool we know of for managing the complexity that inevitably grows 
 Good night and good luck!
 
 
-*************************************
+************************************
 What does Great Expectations NOT do?
-*************************************
+************************************
 
 **Great Expectations is NOT a pipeline execution framework.**
 
@@ -107,11 +107,11 @@ What does Great Expectations NOT do?
 
 **Great Expectations currently works best in a Python/Bash environment.**
 
-   Great Expectations is Python-based. You can invoke it from the command line without using a Python programming environment, but if you're working in another ecosystem, other tools might be a better choice. If you're running in a pure R environment, you might consider `assertR <https://github.com/ropensci/assertr>`__ as an alternative. Within the Tensorflow ecosystem, `TFDV <https://www.tensorflow.org/tfx/guide/tfdv>`__ fulfills a similar function as Great Expectations.
+   Great Expectations is Python-based. You can invoke it from the command line without using a Python programming environment, but if you're working in another ecosystem, other tools might be a better choice. If you're running in a pure R environment, you might consider `assertR <https://github.com/ropensci/assertr>`__ as an alternative. Within the TensorFlow ecosystem, `TFDV <https://www.tensorflow.org/tfx/guide/tfdv>`__ fulfills a similar function as Great Expectations.
 
-***********************************
+*********************************
 Who maintains Great Expectations?
-***********************************
+*********************************
 
 Great Expectations is under active development by James Campbell, Abe Gong, Eugene Mandel and Rob Lim, with help from many others.
 
@@ -120,5 +120,3 @@ If you have questions, comments, or just want to have a good old-fashioned chat 
 If you'd like to contribute to Great Expectations, please head to the :ref:`community` section.
 
 If you'd like hands-on assistance setting up Great Expectations, establishing a healthy practice of data testing, or adding functionality to Great Expectations, please see options for consulting help `here <https://greatexpectations.io/consulting/>`__.
-
-

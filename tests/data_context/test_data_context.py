@@ -20,10 +20,7 @@ from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
-from great_expectations.data_context.util import (
-    file_relative_path,
-    safe_mmkdir,
-)
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
@@ -443,8 +440,8 @@ data_docs/
 """.format(f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id)
 
     # save data_docs locally
-    safe_mmkdir("./tests/data_context/output")
-    safe_mmkdir("./tests/data_context/output/data_docs")
+    os.makedirs("./tests/data_context/output", exist_ok=True)
+    os.makedirs("./tests/data_context/output/data_docs", exist_ok=True)
 
     if os.path.isdir("./tests/data_context/output/data_docs"):
         shutil.rmtree("./tests/data_context/output/data_docs")
@@ -547,7 +544,7 @@ def test_load_data_context_from_environment_variables(tmp_path_factory):
     try:
         project_path = str(tmp_path_factory.mktemp('data_context'))
         context_path = os.path.join(project_path, "great_expectations")
-        safe_mmkdir(context_path)
+        os.makedirs(context_path, exist_ok=True)
         os.chdir(context_path)
         with pytest.raises(DataContextError) as err:
             DataContext.find_context_root_dir()
@@ -1070,7 +1067,7 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
 def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
     # Setup:
     base_path = str(tmp_path_factory.mktemp('test_load_config_variables_file'))
-    safe_mmkdir(os.path.join(base_path, "uncommitted"))
+    os.makedirs(os.path.join(base_path, "uncommitted"), exist_ok=True)
     with open(os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w") as outfile:
         yaml.dump({'env': 'dev'}, outfile)
     with open(os.path.join(base_path, "uncommitted", "prod_variables.yml"), "w") as outfile:

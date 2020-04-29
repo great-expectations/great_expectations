@@ -91,7 +91,7 @@ def _get_datasource(context, datasource):
 
 
 def _load_template():
-    with open(file_relative_path(__file__, "checkpoint_template.py"), "r") as f:
+    with open(file_relative_path(__file__, "checkpoint_template.py")) as f:
         template = f.read()
     return template
 

@@ -5,7 +5,6 @@ from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
     RenderedDocumentContent,
     RenderedSectionContent,
-    RenderedComponentContent,
     RenderedHeaderContent, RenderedBulletListContent, RenderedTableContent, RenderedStringTemplateContent,
     RenderedGraphContent, ValueListContent)
 
@@ -190,7 +189,10 @@ class CustomPageRenderer(Renderer):
         })
     
     @classmethod
-    def render(cls, ge_dict={}):
+    def render(cls, ge_dict=None):
+        if ge_dict is None:
+            ge_dict = {}
+
         return RenderedDocumentContent(**{
             "renderer_type": "CustomValidationResultsPageRenderer",
             "data_asset_name": "my_data_asset_name",
