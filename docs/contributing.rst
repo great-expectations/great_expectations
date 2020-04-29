@@ -98,7 +98,6 @@ Table of contents for Contributing:
 
    /contributing/setting_up_your_dev_environment
    /contributing/contribution_checklist
-   /contributing/submitting_your_contribution
    /contributing/make_changes_through_github
    /contributing/testing
    /contributing/style_guide
