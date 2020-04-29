@@ -16,7 +16,6 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
    tutorials
    how_to_guides
    expectation_glossary
-   command_line
    features
    reference
    community
