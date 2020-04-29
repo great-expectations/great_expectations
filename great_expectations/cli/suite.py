@@ -6,10 +6,22 @@ import click
 
 from great_expectations.cli import toolkit as toolkit
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.core import (
+    ExpectationSuite,
+    get_metric_kwargs_id,
+)
 from great_expectations.cli.datasource import (
     get_batch_kwargs,
     select_datasource,
 )
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+)
+from great_expectations.cli.util import cli_message, load_expectation_suite, cli_message_list
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message, _anonymizers, \
+    edit_expectation_suite_usage_statistics
+from great_expectations.data_asset import DataAsset
+from great_expectations.render.renderer.suite_edit_notebook_renderer import SuiteEditNotebookRenderer
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.toolkit import (
     create_expectation_suite as create_expectation_suite_impl,
@@ -342,6 +354,32 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
     except Exception as e:
         send_usage_message(data_context=context, event=usage_event, success=False)
         raise e
+
+
+@suite.command(name="delete")
+@click.option("--suite", "-es", default=None, help="Expectation suite name.")
+@click.option(
+    "--directory",
+    "-d",
+    default=None,
+    help="Delete expectation suite.",
+)
+def suite_delete(suite, directory):
+    """Delete an expectation suite from the expectation store."""
+    context = load_data_context_with_error_handling(directory)
+    suite_names = context.list_expectation_suite_names()
+    if len(suite_names) == 0:
+        cli_message("No expectation suites found")
+        return
+
+    if len(suite_names) > 0:
+        expectation_suite = ExpectationSuite(expectation_suite_name=suite)
+        key = ExpectationSuiteIdentifier(expectation_suite_name=suite)
+        if key:
+            context.delete_expectation_suite(expectation_suite)
+        else:
+            cli_message("No matching expectation suites found")
+            sys.exit(1)
 
 
 @suite.command(name="scaffold")

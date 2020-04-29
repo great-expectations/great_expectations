@@ -68,3 +68,6 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         return [tuple(row) for row in self.engine.execute(sel).fetchall()]
+
+    def remove_key(self, key):
+        raise NotImplementedError

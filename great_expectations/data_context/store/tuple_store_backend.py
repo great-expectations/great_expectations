@@ -1,6 +1,9 @@
+import logging
 import os
 import random
 import re
+import shutil
+# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 import logging
 from abc import ABCMeta
 
@@ -255,6 +258,19 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return key_list
 
+    def remove_key(self, key):
+        if not isinstance(key, tuple):
+            key = key.to_tuple()
+        filepath = os.path.join(
+            self.full_base_directory,
+            self._convert_key_to_filepath(key)
+        )
+        path, filename = os.path.split(filepath)
+        if os.path.exists(filepath):
+            if shutil.rmtree(self.full_base_directory):
+                return True
+        return False
+       
     def get_url_for_key(self, key, protocol=None):
         path = self._convert_key_to_filepath(key)
         full_path = os.path.join(self.full_base_directory, path)
@@ -371,6 +387,25 @@ class TupleS3StoreBackend(TupleStoreBackend):
             return f"https://{location}.amazonaws.com/{self.bucket}/{s3_key}"
         return f"https://{location}.amazonaws.com/{self.bucket}/{self.prefix}/{s3_key}"
 
+    def remove_key(self, key):
+        import boto3
+        from botocore.exceptions import ClientError
+        s3 = boto3.resource('s3')
+        s3_key = self._convert_key_to_filepath(key)
+        if s3_key:
+            try:
+                #s3.Object(boto3.client('s3').get_bucket_location(Bucket=self.bucket), s3_key).delete()
+                objects_to_delete = s3.meta.client.list_objects(Bucket=self.bucket, Prefix=self.prefix)
+
+                delete_keys = {'Objects' : []}
+                delete_keys['Objects'] = [{'Key' : k} for k in [obj['Key'] for obj in objects_to_delete.get('Contents', [])]]
+                s3.meta.client.delete_objects(Bucket=self.bucket, Delete=delete_keys)
+                return True
+            except ClientError as e:
+                return False
+        else:
+            return False
+
     def _has_key(self, key):
         all_keys = self.list_keys()
         return key in all_keys
@@ -464,6 +499,17 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def get_url_for_key(self, key, protocol=None):
         path = self._convert_key_to_filepath(key)
         return "https://storage.googleapis.com/" + self.bucket + "/" + path
+
+    def remove_key(self, key):
+        from google.cloud import storage
+        gcs = storage.Client(self.project)
+        gcs_object_key = self._convert_key_to_filepath(key)
+        bucket = cloudStorageClient.bucket(self.bucket)
+        try:
+            bucket.delete_blobs(blobs=bucket.list_blobs(prefix=self.prefix))
+        except exceptions.NotFound as e:
+            return False
+        return True
 
     def _has_key(self, key):
         all_keys = self.list_keys()
