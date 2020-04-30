@@ -982,7 +982,7 @@ Enter an SQL query
 
     msg_prompt_enter_data_asset_name = "\nWhich table would you like to use? (Choose one)\n"
 
-    msg_prompt_enter_data_asset_name_suffix = "    Don't see the table in the list above? Just type the SQL query\n"
+    msg_prompt_enter_data_asset_name_suffix = "    Do not see the table in the list above? Just type the SQL query\n"
 
     if additional_batch_kwargs is None:
         additional_batch_kwargs = {}

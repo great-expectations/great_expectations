@@ -486,7 +486,7 @@ The command will help you specify the batch of data that you want the validation
 
     $ great_expectations validation-operator --name action_list_operator --suite npi.warning
 
-    Let's help you specify the batch of data your want the validation operator to validate.
+    Let us help you specify the batch of data your want the validation operator to validate.
 
     Enter the path (relative or absolute) of a data file
     : data/npi_small.csv
@@ -616,6 +616,108 @@ For details on profiling, see this :ref:`reference document<profiling_reference>
 great_expectations checkpoint
 ==============================
 
+A checkpoint is a bundle of one or more batches of data with one or more Expectation Suites.
+A checkpoint can be as simple as one batch of data paired with one Expectation Suite.
+A checkpoint can be as complex as many batches of data paired with one or more Expectation Suite each.
+
+.. tip::
+    Checkpoints are an ideal way to embed Great Expectations into your pipeline or use Great Expectations adjacent to your pipeline.
+    If you have shell access in your pipeline you can use the ``checkpoint run`` command.
+    If you do not have shell access or prefer a python script you can use the ``checkpoint script`` command to generate a python file to run a checkpoint.
+
+``great_expectations checkpoint new <CHECKPOINT> <SUITE>``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Interactively configure a new checkpoint.
+
+A checkpoint is stored in a yaml file in the ``great_expectations/checkpoints/`` directory in your project.
+After creation, a checkpoint can be run with the ``great_expectations checkpoint run`` command.
+
+Similar to other commands, this command interactively helps you choose some data for your checkpoint.
+
+If your project has a suite named ``npi.warning`` and you wish to create a checkpoint called ``source_tables`` in your project you run this as follows:
+
+.. code-block:: bash
+
+    $ great_expectations checkpoint new source_tables npi.warning
+    ...(Interactively choose some data)
+    A checkpoint named `source_tables` was added to your project!
+      - To edit this checkpoint edit the checkpoint file: great_expectations/checkpoints/source_tables.yml
+      - To run this checkpoint run `great_expectations checkpoint run source_tables`
+
+The checkpoint file (``great_expectations/checkpoints/source_tables.yml``) will look like this:
+
+.. code-block:: yaml
+
+    # This is a checkpoint file created with the command `great_expectations checkpoint new`
+    validation_operator_name: action_list_operator
+    # Batches are a list of batch_kwargs paired with a list of one or more suite names
+    batches:
+      - batch_kwargs:
+          path: /Users/me/pipeline/source_files/npi.csv
+          datasource: files_datasource
+          reader_method: read_csv
+        expectation_suite_names:
+          - npi.warning
+
+You can edit this file to add batches of data and expectation suites.
+For example to make this checkpoint validate multiple source files before and after their ingestion into your data lake your checkpoint might look like this:
+Note in this example we have 4 batches of data from 2 different datasources (files and a database) and multiple suites can be run against a given batch.
+
+.. code-block:: yaml
+
+    # This is a checkpoint file created with the command `great_expectations checkpoint new`
+    validation_operator_name: action_list_operator
+    # Batches are a list of batch_kwargs paired with a list of one or more suite names
+    batches:
+      - batch_kwargs:
+          path: /Users/me/pipeline/source_files/npi.csv
+          datasource: files_datasource
+          reader_method: read_csv
+        expectation_suite_names:
+          - npi.warning
+          - npi.critical
+      - batch_kwargs:
+          path: /Users/me/pipeline/source_files/claims.csv
+          datasource: files_datasource
+          reader_method: read_csv
+        expectation_suite_names:
+          - claims.warning
+      - batch_kwargs:
+          table: npi
+          datasource: data_lake
+        expectation_suite_names:
+          - npi.warning
+          - npi.critical
+      - batch_kwargs:
+          table: claims
+          datasource: data_lake
+        expectation_suite_names:
+          - claims.warning
+
+
+If you are using a SQL datasource you will be guided through a series of prompts that helps you choose a table or write a SQL query.
+
+.. tip:: A custom SQL query can be very handy if for example you wanted to validate all records in a table with timestamps.
+
+For example, imagine you want to protect a machine learning model that looks at insurance claims
+from last 90 days to predict costs with a checkpoint named ``cost_model_protection``.
+If you have built a suite called ``cost_model_assumptions`` and a have a postgres datasource with a ``claims`` table with an ``claim_timestamp`` column and you wanted validate claims that occurred in the last 90 days you might do something like:
+
+.. code-block:: bash
+
+    $ great_expectations checkpoint new cost_model_protection cost_model_assumptions
+    Heads up! This feature is Experimental. It may change. Please give us your feedback!
+
+    Which table would you like to use? (Choose one)
+    1. claims (table)
+    Do not see the table in the list above? Just type the SQL query
+    : SELECT * FROM claims WHERE claim_timestamp > now() - interval '90 day';
+    A checkpoint named `cost_model_protection` was added to your project!
+      - To edit this checkpoint edit the checkpoint file: great_expectations/checkpoints/cost_model_protection.yml
+      - To run this checkpoint run `great_expectations checkpoint run cost_model_protection`
+
+This checkpoint can then be run nightly before your model makes cost predictions!
+
 ``great_expectations checkpoint list``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 List the checkpoints found in the project.
@@ -624,20 +726,50 @@ List the checkpoints found in the project.
 
     $ great_expectations checkpoint list
     Found 1 checkpoint.
-    my_checkpoint
+    - my_checkpoint
 
 
 ``great_expectations checkpoint run <CHECKPOINT>``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Run an existing checkpoint.
 
+.. tip::
+    This is an ideal way to embed Great Expectations into your pipeline or use it adjacent to your pipeline if you have shell access in your pipeline.
+    If you do not have shell access or prefer a python script you can use the ``checkpoint script`` command to generate a python file to run a checkpoint.
+
+
+This command will return posix status codes and print messages as follows:
+
++-------------------------------+-----------------+-----------------------+
+| **Situation**                 | **Return code** | **Message**           |
++-------------------------------+-----------------+-----------------------+
+| all validations passed        | 0               | Validation Succeeded! |
++-------------------------------+-----------------+-----------------------+
+| one or more validation failed | 1               | Validation Failed!    |
++-------------------------------+-----------------+-----------------------+
+
+If there is a checkpoint named ``source_tables`` in your project you can run it as follows:
+
 .. code-block:: bash
 
-    $ great_expectations checkpoint run my_checkpoint
-    Validation Failed!
+    $ great_expectations checkpoint run source_tables
+    Validation Succeeded!
+
+``great_expectations checkpoint script <CHECKPOINT>``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Create a script for
+
+.. tip::
+    This is an ideal way to embed Great Expectations into your pipeline or use it adjacent to your pipeline if you have shell access in your pipeline.
+    If you do not have shell access or prefer a python script you can use the ``checkpoint script`` command to generate a python file to run a checkpoint.
 
 great_expectations tap
 ==============================
+
+.. attention::
+
+    The tap command will be deprecated in the next major release.
+    Please use the ``checkpoint new``, ``checkpoint run``, and ``checkpoint script`` commands going forward.
 
 All command line operations for working with taps are here.
 A tap is an executable python file that runs validations that you can create to aid deployment of validations.
@@ -650,7 +782,7 @@ This is the name of a python file that this command will write to.
 
 
 .. note::
-    Checkpoints are an experimental feature to speed up deployment.
+    Taps are an experimental feature to speed up deployment.
     Please
     `open a new issue <https://github.com/great-expectations/great_expectations/issues/new>`__
     if you discover a use case that does not yet work

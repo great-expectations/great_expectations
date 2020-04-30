@@ -229,7 +229,7 @@ Call `great_expectation validation-operator list` command to list the operators 
 
             cli_message(
             """
-Let's help you specify the batch of data your want the validation operator to validate."""
+Let us help you specify the batch of data your want the validation operator to validate."""
             )
 
             try:

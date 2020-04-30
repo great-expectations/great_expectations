@@ -20,6 +20,7 @@ from great_expectations.exceptions import DataContextError
 from great_expectations.util import lint_code
 
 yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
 
 
 @click.group()
