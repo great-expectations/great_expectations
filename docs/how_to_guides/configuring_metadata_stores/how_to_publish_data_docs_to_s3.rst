@@ -1,9 +1,9 @@
 .. _publishing_data_docs_to_s3:
 
 
-##########################
-Publishing Data Docs to S3
-##########################
+##############################
+How to publish Data Docs to S3
+##############################
 
 In this tutorial we will cover publishing a data docs site directly to S3. Publishing a site this way makes
 reviewing and acting on validation results easy in a team, and provides a central location to review the expectations

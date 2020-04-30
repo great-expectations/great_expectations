@@ -1,4 +1,4 @@
-.. _how_to_guides__create_and_edit_expectations:
+.. _how_to_guides__configuring_datasources:
 
 Configuring Datasources
 ===================================================
