@@ -29,6 +29,7 @@ This Profiler connected to your data (using the Datasource you configured in the
 Later, you should also take a look at other workflows for :ref:`creating and editing Expectations`_, such as:
 
     * :ref:`How to edit Expectations in a disposable notebook`
+    * :ref:`How to adjust Expectations in a disposable notebook after Validation`
     * :ref:`How to profile many tables at once`
     * :ref:`How to calibrate Expectation Suite parameters using multibatch profiling`
 
