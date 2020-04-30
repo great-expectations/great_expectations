@@ -259,30 +259,68 @@ Deploying automated testing adjacent to a data pipeline
 *******************************************************
 
 You might find yourself in a situation where you do not have the engineering resources, skills, desire, or permissions to embed Great Expectations into your pipeline.
-As long as your data is accessible you can still reap the benefits of automated data testing.
+As long as your data is accessible you can still reap the benefits of automated data testing!
 
-.. note:: This is a fast and convenient way to get the benefits of automated data testing without requiring engineering efforts to build Great Expectations into your pipelines.
+.. note:: Checkpoints are a fast and convenient way to get the benefits of automated data testing without requiring engineering efforts to embed Great Expectations into your pipelines.
 
-A checkpoint is an executable python file that runs validates a batch of data against an expectation suite.
-Taps are a convenient way to generate a data validation script that can be run manually or via a scheduler.
+A checkpoint is a list of one or more batches of data paired with one or more
+Expectation Suites.
 
 Let's make a new checkpoint using the ``checkpoint new`` command.
+Similar to other commands, this command interactively helps you choose some data for your checkpoint.
 
 To do this we\'ll specify the name of the suite and the name of the new python file we want to create.
-For this example, let\'s say we want to validate a batch of data against the ``movieratings.ratings`` expectation suite, and we want to make a new file called ``movieratings.ratings_tap.py``
+For this example, let\'s say we want to validate a batch of data against the ``movieratings.ratings`` expectation suite, and we want to make a new checkpoint called ``ratings_checkpoint``.
 
 .. code-block:: bash
 
-    $ great_expectations checkpoint new movieratings.ratings movieratings.ratings_tap.py
-    This is a BETA feature which may change.
+    $ great_expectations checkpoint new ratings_checkpoint movieratings.ratings
+    Heads up! This feature is Experimental. It may change. Please give us your feedback!
 
     Which table would you like to use? (Choose one)
-        1. ratings (table)
-        Don\'t see the table in the list above? Just type the SQL query
+    1. ratings (table)
+    Do not see the table in the list above? Just type the SQL query
     : 1
-    A new checkpoint has been generated!
-    To run this checkpoint, run: python movieratings.ratings_tap.py
-    You can edit this script or place this code snippet in your pipeline.
+    A checkpoint named `ratings_checkpoint` was added to your project!
+      - To edit this checkpoint edit the checkpoint file: great_expectations/checkpoints/ratings_checkpoint.yml
+      - To run this checkpoint run `great_expectations checkpoint run ratings_checkpoint`
+
+Great expectations saved this checkpoint as a yaml file in the ``greatexpectations/checkpoints`` directory.
+
+To invoke this checkpoint, run:
+
+.. code-block:: bash
+
+    $ great_expectations checkpoint run ratings_checkpoint
+    Validation Succeeded!
+
+
+You'll want to view the detailed data quality reports in Data Docs by running ``great_expectations docs build``.
+
+This can easily be run manually anytime you want to check your data.
+It can also easily be run on a schedule basis with a scheduler such as cron.
+
+For example, if you wanted to run this script nightly at 04:00, you'd add something like this to your crontab.
+
+.. code-block:: bash
+
+    $ crontab -e
+    0 4 * * * great_expectations checkpoint run ratings_checkpoint
+
+.. tip::
+    If you don't have access to a scheduler, you can always run a checkpoint as part of your daily routine.
+    Once you experience how much time and pain this saves you, we recommend getting engineering resources to embed Great Expectations validations into your pipeline.
+
+
+Embedding automated testing into a data pipeline
+************************************************
+
+
+#########
+TODO
+#########
+
+Checkpoints are a convenient way to generate a data validation script that can be run manually or via a scheduler.
 
 If you open the generated checkpoint file you'll see it's only a few lines of code to get validations running!
 It will look like this:
@@ -331,30 +369,10 @@ It will look like this:
     print("Validation Succeeded!")
     sys.exit(0)
 
-To run this and validate a batch of data, run:
+#########
+TODO
+#########
 
-.. code-block:: bash
-
-    $ python movieratings.ratings_tap.py
-    Validation Succeeded!
-
-This can easily be run manually anytime you want to check your data.
-It can also easily be run on a schedule basis with a scheduler such as cron.
-
-You'll want to view the detailed data quality reports in Data Docs by running ``great_expectations docs build``.
-
-For example, if you wanted to run this script nightly at 04:00, you'd add something like this to your crontab.
-
-.. code-block:: bash
-
-    $ crontab -e
-    0 4 * * * /full/path/to/python /full/path/to/movieratings.ratings_tap.py
-
-If you don't have access to a scheduler, you can always make checking your data part of your daily routine.
-Once you experience how much time and pain this saves you, we recommend geting engineering resources to embed Great Expectations validations into your pipeline.
-
-Embedding automated testing into a data pipeline
-************************************************
 
 .. note:: This is an ideal way to deploy automated data testing if you want to take automated interventions based on the results of data validation.
   For example, you may want your pipeline to quarantine data that does not meet your expectations.
