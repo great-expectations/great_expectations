@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import configparser
 import copy
 import datetime
@@ -57,13 +56,13 @@ from great_expectations.data_context.util import (
     load_class,
     substitute_all_config_variables,
 )
+from great_expectations.validator.validator import Validator
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource
 from great_expectations.profile.basic_dataset_profiler import (
     BasicDatasetProfiler,
 )
 from great_expectations.util import verify_dynamic_loading_support
-from great_expectations.validator.validator import Validator
 
 from urllib.parse import urlparse
 
@@ -413,9 +412,7 @@ class BaseDataContext(object):
                             package_name=None,
                             class_name=complete_site_config['class_name']
                         )
-
                     url = site_builder.get_resource_url(resource_identifier=resource_identifier)
-
                     site_urls.append({
                         "site_name": site_name,
                         "site_url": url
@@ -552,6 +549,28 @@ class BaseDataContext(object):
 
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
+
+    def delete_datasource(self,datasource_name=None):
+        """Delete data source 
+        Args:
+
+        Returns:
+        """
+        if datasource_name is None:
+            raise ValueError(
+                "Datasource names must be a datasource name"
+            )
+        else:
+            datasource = self.get_datasource(datasource_name)
+            if datasource:
+               #remove key until we have a delete method on project_config
+               #self._project_config_with_variables_substituted.datasources[datasource_name].remove()
+               #del self._project_config["datasources"][datasource_name]
+               del self._datasources[datasource_name]
+            else:
+                raise ValueError(
+                    "Datasource not found"
+                )
 
     def get_available_data_asset_names(self, datasource_names=None, batch_kwargs_generator_names=None):
         """Inspect datasource and batch kwargs generators to provide available data_asset objects.
@@ -923,6 +942,24 @@ class BaseDataContext(object):
 
         return expectation_suite
 
+    def delete_expectation_suite(self, expectation_suite_name):
+        """Delete specified expectation suite from data_context expectation store.
+
+        Args:
+            expectation_suite_name: The name of the expectation_suite to create
+
+        Returns:
+            True for Success and False for Failure.
+        """
+        if not self._stores[self.expectations_store_name].has_key(key):
+            raise ge_exceptions.DataContextError(
+                "expectation_suite with name {} does not exist."
+            )
+        else:
+            self._stores[self.expectations_store_name].remove_key(key)
+            return True
+        return False
+
     def get_expectation_suite(self, expectation_suite_name):
         """Get a named expectation suite for the provided data_asset_name.
 
@@ -1206,6 +1243,44 @@ class BaseDataContext(object):
             logger.debug("No data_docs_config found. No site(s) built.")
 
         return index_page_locator_infos
+
+    def clean_data_docs(self, site_name=None):
+        sites123 = self._project_config_with_variables_substituted.data_docs_sites
+        cleaned = False
+        for sname, site_config in sites123.items():
+            if site_name is None:
+                cleaned = False
+                complete_site_config = site_config
+                module_name = 'great_expectations.render.renderer.site_builder'
+                site_builder = instantiate_class_from_config(
+                    config=complete_site_config,
+                    runtime_environment={
+                        "data_context": self,
+                        "root_directory": self.root_directory
+                    },
+                    config_defaults={
+                        "module_name": module_name
+                    }
+                )
+                site_builder.clean_site()
+                cleaned = True
+            else:
+                if site_name == sname:
+                    complete_site_config = site_config
+                    module_name = 'great_expectations.render.renderer.site_builder'
+                    site_builder = instantiate_class_from_config(
+                        config=complete_site_config,
+                        runtime_environment={
+                            "data_context": self,
+                            "root_directory": self.root_directory
+                        },
+                        config_defaults={
+                            "module_name": module_name
+                        }
+                    )
+                    site_builder.clean_site()
+                    return True
+        return cleaned
 
     def profile_datasource(self,
                            datasource_name,

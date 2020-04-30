@@ -74,6 +74,10 @@ class StoreBackend(object, metaclass=ABCMeta):
     def list_keys(self, prefix=()):
         raise NotImplementedError
 
+    @abstractmethod
+    def remove_key(self, key):
+        raise NotImplementedError
+
     def _has_key(self, key):
         raise NotImplementedError
 
@@ -105,3 +109,6 @@ class InMemoryStoreBackend(StoreBackend):
 
     def _has_key(self, key):
         return key in self._store
+
+    def remove_key(self, key):
+        del self._store[key]

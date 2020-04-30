@@ -1,14 +1,12 @@
-import os
 import logging
+import os
 from mimetypes import guess_type
 
-from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
     SiteSectionIdentifier,
 )
-from .tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.util import (
     load_class,
     instantiate_class_from_config,
@@ -18,6 +16,8 @@ from great_expectations.exceptions import (
     DataContextError,
     ClassInstantiationError,
 )
+from great_expectations.util import verify_dynamic_loading_support
+from .tuple_store_backend import TupleStoreBackend
 from ...core.data_context_key import DataContextKey
 
 logger = logging.getLogger(__name__)
@@ -209,6 +209,12 @@ class HtmlSiteStore(object):
         """This third param_store has a special method, which uses a zero-length tuple as a key."""
         return self.store_backends["index_page"].set((), page, content_encoding='utf-8', content_type='text/html; '
                                                                                                       'charset=utf-8')
+
+    def clean_site(self):
+        for _, target_store_backend in self.store_backends.items():
+            keys = target_store_backend.list_keys()
+            for key in keys:
+                target_store_backend.remove_key(key)
 
     def copy_static_assets(self, static_assets_source_dir=None):
         """
