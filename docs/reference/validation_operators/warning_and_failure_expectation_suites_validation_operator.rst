@@ -70,7 +70,7 @@ This is an example of invoking an instance of a Validation Operator from Python:
         assets_to_validate=[batch0, batch1, ...],
         run_id=RunIdentifier(**{
           "run_name": "some_string_that_uniquely_identifies_this_run",
-          "run_time": "2020-04-29T10:46:03.197008"  # optional run timestamp, defaults to current time
+          "run_time": "2020-04-29T10:46:03.197008"  # optional run timestamp, defaults to current UTC datetime
         }),  # you may also pass in a dictionary with run_name and run_time keys
         validation_operator_name="operator_instance_name",
     )

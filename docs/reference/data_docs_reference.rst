@@ -60,7 +60,7 @@ Here is an example of a site configuration from great_expectations.yml with defa
           class_name: DefaultSiteSectionBuilder
           source_store_name: validations_store
           run_name_filter:
-            ne: profiling # exclude validations with run id "profiling" - reserved for profiling results
+            ne: profiling # exclude validations with run_name "profiling" - reserved for profiling results
           renderer:
             module_name: great_expectations.render.renderer
             class_name: ValidationResultsPageRenderer
@@ -69,7 +69,7 @@ Here is an example of a site configuration from great_expectations.yml with defa
           class_name: DefaultSiteSectionBuilder
           source_store_name: validations_store
           run_name_filter:
-            eq: profiling
+            eq: profiling # include ONLY validations with run_name "profiling" - reserved for profiling results
           renderer:
             module_name: great_expectations.render.renderer
             class_name: ProfilingResultsPageRenderer
@@ -420,7 +420,7 @@ Lastly, to compile your newly-customized Data Docs local site, you run ``great_e
         class_name: DefaultSiteSectionBuilder
         source_store_name: validations_store
         run_name_filter:
-          ne: profiling # exclude validations with run id "profiling" - reserved for profiling results
+          ne: profiling # exclude validations with run_name "profiling" - reserved for profiling results
         renderer:
           module_name: great_expectations.render.renderer
           class_name: ValidationResultsPageRenderer
@@ -429,7 +429,7 @@ Lastly, to compile your newly-customized Data Docs local site, you run ``great_e
         class_name: DefaultSiteSectionBuilder
         source_store_name: validations_store
         run_name_filter:
-          eq: profiling
+          eq: profiling # include ONLY validations with run_name "profiling" - reserved for profiling results
         renderer:
           module_name: great_expectations.render.renderer
           class_name: ProfilingResultsPageRenderer
