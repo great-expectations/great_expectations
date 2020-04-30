@@ -10,19 +10,19 @@ except ImportError:
 from great_expectations.datasource.batch_kwargs_generator import SubdirReaderBatchKwargsGenerator, GlobReaderBatchKwargsGenerator, DatabricksTableBatchKwargsGenerator
 
 
-def test_file_kwargs_generator(data_context, filesystem_csv):
+def test_file_kwargs_generator(data_context_parameterized_expectation_suite, filesystem_csv):
     base_dir = filesystem_csv
 
-    datasource = data_context.add_datasource("default",
-                                        module_name="great_expectations.datasource",
-                                        class_name="PandasDatasource",
-                                        batch_kwargs_generators={
+    datasource = data_context_parameterized_expectation_suite.add_datasource("default",
+                                                                             module_name="great_expectations.datasource",
+                                                                             class_name="PandasDatasource",
+                                                                             batch_kwargs_generators={
     "subdir_reader": {
         "class_name": "SubdirReaderBatchKwargsGenerator",
         "base_directory": str(base_dir),
     }
 }
-)
+                                                                             )
 
     generator = datasource.get_batch_kwargs_generator("subdir_reader")
     known_data_asset_names = datasource.get_available_data_asset_names()

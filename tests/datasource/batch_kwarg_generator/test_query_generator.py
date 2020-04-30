@@ -68,9 +68,9 @@ def test_get_available_data_asset_names_for_query_path(empty_data_context):
     sql_list = generator.get_available_data_asset_names()
     assert ("dummy", "query") in sql_list["names"]
 
-def test_build_batch_kwargs_for_query_path(basic_sqlalchemy_datasource, data_context):
-    base_directory = data_context.root_directory
-    basic_sqlalchemy_datasource._data_context = data_context
+def test_build_batch_kwargs_for_query_path(basic_sqlalchemy_datasource, data_context_parameterized_expectation_suite):
+    base_directory = data_context_parameterized_expectation_suite.root_directory
+    basic_sqlalchemy_datasource._data_context = data_context_parameterized_expectation_suite
     generator_name = 'my_generator'
     query_str = "SELECT * FROM my_table"
 

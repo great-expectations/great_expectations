@@ -78,7 +78,7 @@ def test_StoreAction():
     )
 
 
-def test_SlackNotificationAction(data_context):
+def test_SlackNotificationAction(data_context_parameterized_expectation_suite):
     renderer = {
         "module_name": "great_expectations.render.renderer.slack_renderer",
         "class_name": "SlackRenderer",
@@ -87,7 +87,7 @@ def test_SlackNotificationAction(data_context):
     notify_on = "all"
 
     slack_action = SlackNotificationAction(
-        data_context=data_context,
+        data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
         slack_webhook=slack_webhook,
         notify_on=notify_on

@@ -63,7 +63,7 @@ def test_suite_demo_on_context_with_no_datasources(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_enter_existing_suite_name_as_arg(
-    mock_webbrowser, mock_subprocess, caplog, data_context
+    mock_webbrowser, mock_subprocess, caplog, data_context_parameterized_expectation_suite
 ):
     """
     We call the "suite demo" command with the name of an existing expectation
@@ -75,7 +75,7 @@ def test_suite_demo_enter_existing_suite_name_as_arg(
     - NOT open jupyter
     """
 
-    not_so_empty_data_context = data_context
+    not_so_empty_data_context = data_context_parameterized_expectation_suite
     project_root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(project_root_dir, "uncommitted"))
 
@@ -117,7 +117,7 @@ def test_suite_demo_enter_existing_suite_name_as_arg(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
-    mock_webbrowser, mock_subprocess, caplog, data_context, filesystem_csv_2
+    mock_webbrowser, mock_subprocess, caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
 ):
     """
     We call the "suite demo" command without the suite name argument
@@ -132,7 +132,7 @@ def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
     - NOT open jupyter
     - open DataDocs to the new example suite page
     """
-    not_so_empty_data_context = data_context
+    not_so_empty_data_context = data_context_parameterized_expectation_suite
     root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(root_dir, "uncommitted"))
 
@@ -187,7 +187,7 @@ def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_creates_empty_suite(
-    mock_webbroser, mock_subprocess, caplog, data_context, filesystem_csv_2
+    mock_webbroser, mock_subprocess, caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
 ):
     """
     Running "suite new" should:
@@ -195,7 +195,7 @@ def test_suite_new_creates_empty_suite(
     - open jupyter
     - NOT open data docs
     """
-    project_root_dir = data_context.root_directory
+    project_root_dir = data_context_parameterized_expectation_suite.root_directory
     os.mkdir(os.path.join(project_root_dir, "uncommitted"))
     root_dir = project_root_dir
     os.chdir(root_dir)
@@ -263,7 +263,7 @@ def test_suite_new_creates_empty_suite(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_empty_with_no_jupyter(
-    mock_webbroser, mock_subprocess, caplog, data_context, filesystem_csv_2
+    mock_webbroser, mock_subprocess, caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
 ):
     """
     Running "suite new --no-jupyter" should:
@@ -271,8 +271,8 @@ def test_suite_new_empty_with_no_jupyter(
     - NOT open jupyter
     - NOT open data docs
     """
-    os.mkdir(os.path.join(data_context.root_directory, "uncommitted"))
-    root_dir = data_context.root_directory
+    os.mkdir(os.path.join(data_context_parameterized_expectation_suite.root_directory, "uncommitted"))
+    root_dir = data_context_parameterized_expectation_suite.root_directory
     runner = CliRunner(mix_stderr=False)
     csv = os.path.join(filesystem_csv_2, "f1.csv")
     # TODO this test must be updated to remove the --empty flag in the next major release

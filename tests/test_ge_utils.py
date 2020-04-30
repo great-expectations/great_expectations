@@ -41,26 +41,26 @@ def test_validate_dataset(dataset, basic_expectation_suite):
                         expectation_suite=basic_expectation_suite,  data_asset_class=ge.dataset.PandasDataset)
 
 
-def test_validate_using_data_context(dataset, data_context):
+def test_validate_using_data_context(dataset, data_context_parameterized_expectation_suite):
     # Before running, the data context should not have compiled parameters
-    assert data_context._evaluation_parameter_dependencies_compiled is False
+    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies_compiled is False
     res = ge.validate(
         dataset,
         expectation_suite_name="my_dag_node.default",
-        data_context=data_context
+        data_context=data_context_parameterized_expectation_suite
     )
 
     # Since the handling of evaluation parameters is no longer happening without an action,
     # the context should still be not compiles after validation.
-    assert data_context._evaluation_parameter_dependencies_compiled is False
+    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies_compiled is False
 
     # And, we should have validated the right number of expectations from the context-provided config
     assert res.success is False
     assert res.statistics["evaluated_expectations"] == 2
 
 
-def test_validate_using_data_context_path(dataset, data_context):
-    data_context_path = data_context.root_directory
+def test_validate_using_data_context_path(dataset, data_context_parameterized_expectation_suite):
+    data_context_path = data_context_parameterized_expectation_suite.root_directory
     res = ge.validate(
         dataset,
         expectation_suite_name="my_dag_node.default",
@@ -72,7 +72,7 @@ def test_validate_using_data_context_path(dataset, data_context):
     assert res["statistics"]["evaluated_expectations"] == 2
 
 
-def test_validate_invalid_parameters(dataset, basic_expectation_suite, data_context):
+def test_validate_invalid_parameters(dataset, basic_expectation_suite, data_context_parameterized_expectation_suite):
     with pytest.raises(ValueError, match="Either an expectation suite or a DataContext is required for validation."):
         ge.validate(dataset)
 

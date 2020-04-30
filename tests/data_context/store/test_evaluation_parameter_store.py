@@ -45,7 +45,7 @@ def param_store(request, test_backends):
     )
 
 
-def test_evaluation_parameter_store_methods(data_context):
+def test_evaluation_parameter_store_methods(data_context_parameterized_expectation_suite):
     run_id = RunIdentifier(run_name="20191125T000000.000000Z")
     source_patient_data_results = ExpectationSuiteValidationResult(
         meta={
@@ -76,9 +76,9 @@ def test_evaluation_parameter_store_methods(data_context):
         success=True
     )
 
-    data_context.store_evaluation_parameters(source_patient_data_results)
+    data_context_parameterized_expectation_suite.store_evaluation_parameters(source_patient_data_results)
 
-    bound_parameters = data_context.evaluation_parameter_store.get_bind_params(run_id)
+    bound_parameters = data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result'
         '.observed_value': 1024
@@ -114,8 +114,8 @@ def test_evaluation_parameter_store_methods(data_context):
         success=True
     )
 
-    data_context.store_evaluation_parameters(source_diabetes_data_results)
-    bound_parameters = data_context.evaluation_parameter_store.get_bind_params(run_id)
+    data_context_parameterized_expectation_suite.store_evaluation_parameters(source_diabetes_data_results)
+    bound_parameters = data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result'
         '.observed_value': 1024,
