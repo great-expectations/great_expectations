@@ -32,7 +32,7 @@ Configuration
 
 
 StoreValidationResultAction
------------
+---------------------------
 
 StoreValidationResultAction is a namespace-aware validation action that stores a validation result
 in the store.
@@ -101,5 +101,3 @@ Dependencies
 
 When configured inside action_list of an operator, StoreValidationResultAction action has to be configured before this action,
 since the building of data docs fetches validation results from the store.
-
-

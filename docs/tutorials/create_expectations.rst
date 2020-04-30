@@ -16,8 +16,7 @@ Once the initial setup of Great Expectations is complete, the workflow looks lik
 2. As new data arrives in the pipeline, Great Expectations evaluates it against these expectations.
 3. If the observed properties of the data are found to be different from the expected ones, the team responds by rejecting (or fixing) the data, updating the expectations, or both.
 
-For a broader understanding of the typical workflow read this article: :ref:`typical_workflow`.
-
+For a broader understanding of the typical workflow read this article:  :ref:`typical workflow <typical_workflow>`.
 
 Expectations are grouped into Expectations Suites. An Expectation Suite combines multiple expectations into an overall description of a dataset. For example, a team can group all the expectations about the ``rating`` table in the movie ratings database into an Expectation Suite and call it "movieratings.table.expectations".
 
@@ -223,7 +222,7 @@ The DataContext's ``get_batch`` method is used to load a batch of a data asset:
 
 Calling this method asks the Context to get a batch of data and attach the expectation suite ``expectation_suite_name`` to it. The ``batch_kwargs`` argument specifies which batch of the data asset should be loaded.
 
-|
+
 3. Author Expectations
 ********************************************
 
