@@ -111,7 +111,8 @@ html_static_path = [
     '_static/hk-grotesk-pro/HKGroteskPro-Regular.woff2',
     '_static/hk-grotesk-pro/HKGroteskPro-SemiBold.woff2',
     '_static/hk-grotesk-pro/HKGroteskPro-Medium.woff2',
-    '_static/header-logo.png'
+    '_static/header-logo.png',
+    '_static/discuss-logo.png'
 ]
 html_css_files = ['style.css']
 

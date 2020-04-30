@@ -45,7 +45,7 @@ a {
 }
 
 .section {
-    width: 800px;
+    max-width: 800px;
 }
 
 .widetable {
@@ -57,6 +57,18 @@ a {
 }
 .wy-nav-top {
     background: #edf1f5;
+    color: rgba(0,0,0,.65) !important;
+    position: fixed;
+    top: 63px;
+    font-size: 13px;
+}
+
+.wy-nav-top a {
+    display: none;
+}
+
+.wy-nav-top i {
+    font-size: 24px; 
 }
 
 .wy-nav-content {
@@ -94,6 +106,7 @@ a {
     z-index: 10000;
     height: 64px;
     width: 100%;
+    margin-bottom: 24px;
 }
 
 #header-logo {
@@ -128,22 +141,27 @@ a {
     vertical-align: bottom;
     padding: 0 20px;
     display: block;
-    color: rgba(0,0,0,.65);
+    color: rgba(0,0,0,.65) !important;
     float: left;
     border-bottom: 2px solid transparent;
     transition: border-bottom .3s cubic-bezier(.645,.045,.355,1),background .3s cubic-bezier(.645,.045,.355,1),padding .15s cubic-bezier(.645,.045,.355,1);
 }
 
 #header-actions a:hover {
-    color: #00bfa5;
+    color: #00bfa5 !important;
     border-bottom: 2px solid #00bfa5;
     transition: border-bottom .3s cubic-bezier(.645,.045,.355,1),background .3s cubic-bezier(.645,.045,.355,1),padding .15s cubic-bezier(.645,.045,.355,1);
 }
 
 #community-modal {
     background: #fff;
-    min-width: 160px;
+    min-width: 172px;
     border-radius: 4px;
+    height: 0px;
+    transition: all .3s ease-in-out;
+    overflow: hidden;
+    position: relative;
+    margin-right: -24px;
 }
 
 #community-modal ul {
@@ -156,10 +174,63 @@ a {
     margin-bottom: 8px;
     padding: 0 16px 0 28px;
     height: 40px;
+    border: none !important;
     margin-top: 4px;
     overflow: hidden;
     font-size: 14px;
     line-height: 40px;
     text-overflow: ellipsis;
+}
+
+#community-modal a {
+    border-bottom: none !important;
+} 
+
+#mobile-modal {
+    background: #fff;
+    border-radius: 4px;
+    height: 0px;
+    transition: all .3s ease-in-out;
+    overflow: hidden;
+    position: relative;
+    top: 37px;
+
+}
+
+#mobile-modal ul {
+    margin:0;
+    padding: 0;
+    list-style: none;
+}
+
+#mobile-modal li {
+    margin-bottom: 8px;
+    padding: 0 0px 0 16px;
+    height: 40px;
+    border: none !important;
+    margin-top: 4px;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 40px;
+    text-overflow: ellipsis;
+    float: left;
+}
+
+#mobile-modal a {
+    border-bottom: none !important;
+} 
+
+#header-mobile {
+    display: none;
+}
+
+@media only screen and (max-width: 768px){
+    #header-actions {
+        display: none;
+    }
+
+    #header-mobile {
+        display: block;
+    }
 }
 
