@@ -8,10 +8,7 @@ import click
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli.datasource import (
-    get_batch_kwargs,
-    select_datasource,
-)
+from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.util import cli_message
 from great_expectations.core import ExpectationSuite
@@ -21,6 +18,7 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
+from great_expectations.datasource import Datasource
 from great_expectations.exceptions import (
     CheckpointError,
     CheckpointNotFoundError,
@@ -287,3 +285,55 @@ def load_checkpoint(
         )
     except CheckpointError as e:
         exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
+
+
+def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:
+    """Select a datasource interactively."""
+    # TODO consolidate all the myriad CLI tests into this
+    data_source = None
+
+    if datasource_name is None:
+        data_sources = sorted(context.list_datasources(), key=lambda x: x["name"])
+        if len(data_sources) == 0:
+            cli_message(
+                "<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
+            )
+        elif len(data_sources) == 1:
+            datasource_name = data_sources[0]["name"]
+        else:
+            choices = "\n".join(
+                [
+                    "    {}. {}".format(i, data_source["name"])
+                    for i, data_source in enumerate(data_sources, 1)
+                ]
+            )
+            option_selection = click.prompt(
+                "Select a datasource" + "\n" + choices + "\n",
+                type=click.Choice(
+                    [str(i) for i, data_source in enumerate(data_sources, 1)]
+                ),
+                show_choices=False,
+            )
+            datasource_name = data_sources[int(option_selection) - 1]["name"]
+
+    if datasource_name is not None:
+        data_source = context.get_datasource(datasource_name)
+
+    return data_source
+
+
+def load_data_context_with_error_handling(directory: str) -> DataContext:
+    """Return a DataContext with good error handling and exit codes."""
+    # TODO consolidate all the myriad CLI tests into this
+    try:
+        context = DataContext(directory)
+        return context
+    except (ge_exceptions.ConfigNotFoundError, ge_exceptions.InvalidConfigError) as err:
+        cli_message("<red>{}</red>".format(err.message))
+        sys.exit(1)
+    except ge_exceptions.PluginModuleNotFoundError as err:
+        cli_message(err.cli_colored_message)
+        sys.exit(1)
+    except ge_exceptions.PluginClassNotFoundError as err:
+        cli_message(err.cli_colored_message)
+        sys.exit(1)

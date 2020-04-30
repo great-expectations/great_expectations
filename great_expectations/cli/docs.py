@@ -1,14 +1,11 @@
 import os
 import sys
-  
+
 import click
 
+import great_expectations.cli.toolkit as toolkit
 from great_expectations.cli.cli_logging import logger
-from great_expectations.cli.util import (
-    cli_message,
-    cli_message_list,
-    load_data_context_with_error_handling,
-)
+from great_expectations.cli.util import cli_message, cli_message_list
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message,
 )
@@ -39,7 +36,7 @@ def docs():
 )
 def docs_build(directory, site_name, view=True):
     """ Build Data Docs for a project."""
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
     build_docs(context, site_name=site_name, view=view)
     send_usage_message(data_context=context, event="cli.docs.build", success=True)
 
@@ -53,7 +50,7 @@ def docs_build(directory, site_name, view=True):
 )
 def docs_list(directory):
     """List known Data Docs Sites."""
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
 
     docs_sites_url_dicts = context.get_docs_sites_urls()
     docs_sites_strings = [
@@ -89,7 +86,7 @@ def docs_list(directory):
 )
 def clean_data_docs(directory, site_name=None, all=None):
     """Delete data docs"""
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
     failed = True
     if (site_name is None and all is None):
         cli_message("<red>{}</red>".format("Please specify --all y to remove all sites or specify specific site using site_name"))

@@ -228,6 +228,9 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
         """\
 # This checkpoint was created by the command `great_expectations checkpoint new`.
 #
+# A checkpoint is a list of one or more batches paired with one or more
+# Expectation Suites and a configurable Validation Operator.
+#
 # It can be run with the `great_expectations checkpoint run` command.
 # You can edit this file to add batches of data and expectation suites.
 #

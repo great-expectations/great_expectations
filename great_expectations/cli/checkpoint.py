@@ -5,14 +5,10 @@ import click
 from ruamel.yaml import YAML
 from sqlalchemy.exc import SQLAlchemyError
 
+import great_expectations.cli.toolkit as toolkit
 from great_expectations import DataContext
-from great_expectations.cli import toolkit
 from great_expectations.cli.mark import Mark as mark
-from great_expectations.cli.util import (
-    cli_message,
-    cli_message_list,
-    load_data_context_with_error_handling,
-)
+from great_expectations.cli.util import cli_message, cli_message_list
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.util import file_relative_path
@@ -30,7 +26,6 @@ def checkpoint():
 
 
 @checkpoint.command(name="new")
-# TODO figure out if this is the right signature
 @click.argument("checkpoint")
 @click.argument("suite")
 @click.option("--datasource", default=None)
@@ -45,7 +40,7 @@ def checkpoint_new(checkpoint, suite, directory, datasource):
     """Create a new checkpoint for easy deployments. (Experimental)"""
     suite_name = suite
     usage_event = "cli.checkpoint.new"
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
     _verify_checkpoint_does_not_exist(context, checkpoint, usage_event)
     suite: ExpectationSuite = toolkit.load_expectation_suite(
         context, suite_name, usage_event
@@ -113,7 +108,7 @@ def _load_checkpoint_yml_template() -> dict:
 @mark.cli_as_experimental
 def checkpoint_list(directory):
     """Run a checkpoint. (Experimental)"""
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
 
     checkpoints = context.list_checkpoints()
     if not checkpoints:
@@ -143,19 +138,19 @@ def checkpoint_list(directory):
 @mark.cli_as_experimental
 def checkpoint_run(checkpoint, directory):
     """Run a checkpoint. (Experimental)"""
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
     usage_event = "cli.checkpoint.run"
 
     checkpoint_config = toolkit.load_checkpoint(context, checkpoint, usage_event)
     checkpoint_file = f"great_expectations/checkpoints/{checkpoint}.yml"
 
+    # TODO loading batches will move into DataContext eventually
     batches_to_validate = []
     for batch in checkpoint_config["batches"]:
         _validate_at_least_one_suite_is_listed(context, batch, checkpoint_file)
         batch_kwargs = batch["batch_kwargs"]
         for suite_name in batch["expectation_suite_names"]:
             suite = toolkit.load_expectation_suite(context, suite_name, usage_event)
-            # TODO maybe move into toolkit utility
             try:
                 batch = toolkit.load_batch(context, suite, batch_kwargs)
             except (FileNotFoundError, SQLAlchemyError, IOError, DataContextError) as e:
@@ -181,12 +176,10 @@ def checkpoint_run(checkpoint, directory):
         )
 
     if not results["success"]:
-        # TODO maybe more verbose output (n of n passed)
         cli_message("Validation Failed!")
         send_usage_message(context, event=usage_event, success=True)
         sys.exit(1)
 
-    # TODO maybe more verbose output (n of n passed)
     cli_message("Validation Succeeded!")
     send_usage_message(context, event=usage_event, success=True)
     sys.exit(0)
@@ -210,7 +203,7 @@ def checkpoint_script(checkpoint, directory):
 
     This script is provided for those who wish to run checkpoints via python.
     """
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
     usage_event = "cli.checkpoint.script"
     # Attempt to load the checkpoint and deal with errors
     _ = toolkit.load_checkpoint(context, checkpoint, usage_event)

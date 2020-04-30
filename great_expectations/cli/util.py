@@ -1,8 +1,4 @@
 import re
-import sys
-
-from great_expectations import DataContext
-from great_expectations import exceptions as ge_exceptions
 
 try:
     from termcolor import colored
@@ -110,20 +106,3 @@ def is_sane_slack_webhook(url):
         return False
 
     return url.strip().startswith("https://hooks.slack.com/")
-
-
-# TODO consolidate all the myriad CLI tests into this
-def load_data_context_with_error_handling(directory: str) -> DataContext:
-    """Return a DataContext with good error handling and exit codes."""
-    try:
-        context = DataContext(directory)
-        return context
-    except (ge_exceptions.ConfigNotFoundError, ge_exceptions.InvalidConfigError) as err:
-        cli_message("<red>{}</red>".format(err.message))
-        sys.exit(1)
-    except ge_exceptions.PluginModuleNotFoundError as err:
-        cli_message(err.cli_colored_message)
-        sys.exit(1)
-    except ge_exceptions.PluginClassNotFoundError as err:
-        cli_message(err.cli_colored_message)
-        sys.exit(1)

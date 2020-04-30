@@ -4,21 +4,15 @@ from datetime import datetime
 
 import click
 
+import great_expectations.cli.toolkit as toolkit
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.mark import Mark as mark
-
-
-from great_expectations.cli.datasource import (
-    get_batch_kwargs,
-    select_datasource,
+from great_expectations.cli.util import cli_message, cli_message_dict
+from great_expectations.core.usage_statistics.usage_statistics import (
+    send_usage_message,
 )
-from great_expectations.cli.util import (
-    cli_message,
-    cli_message_dict
-)
-from great_expectations.cli.toolkit import load_expectation_suite
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 json_parse_exception = json.decoder.JSONDecodeError
 
@@ -195,7 +189,7 @@ Call `great_expectation suite list` command to list the expectation suites in yo
                 )
                 sys.exit(0)
 
-            suite = load_expectation_suite(context, suite, "cli.validation_operator.run")
+            suite = toolkit.load_expectation_suite(context, suite, "cli.validation_operator.run")
 
             if name is None:
                 cli_message(
@@ -233,7 +227,7 @@ Let us help you specify the batch of data your want the validation operator to v
             )
 
             try:
-                data_source = select_datasource(context)
+                data_source = toolkit.select_datasource(context)
             except ValueError as ve:
                 cli_message("<red>{}</red>".format(ve))
                 send_usage_message(
