@@ -33,8 +33,22 @@ Later, you should also take a look at other workflows for :ref:`creating and edi
     * :ref:`How to profile many tables at once`
     * :ref:`How to calibrate Expectation Suite parameters using multibatch profiling`
 
-The newly profiled Expectations are stored in an :ref:`Expectation Suite`. For now, they're stored in a JSON file in a subdirectory subdirectory of your ``great_expectations/`` folder. We'll take a look at the actual Expectations in the next step of the tutorial.
+A first look at real Expectations
+---------------------------------
+
+The newly profiled Expectations are stored in an :ref:`Expectation Suite`. For now, they're stored in a JSON file in a subdirectory subdirectory of your ``great_expectations/`` folder. 
 
 You can also configure Great Expectations to store Expectations to other locations, like S3, postgresql, etc. We'll come back to these options in the last step of the tutorial.
 
-For now, let's continue to :ref:`Setting up data docs`.
+
+If you open up the suite in ``great_expectations/expectations/something-something.json`` in a text editor, you'll see:
+
+.. code-block:: JSON
+
+
+
+There's a lot of information here. (This is good.) Everything Expectation in the file expresses a machine-executable test that can be validated against data at any time. (This is very good.) We were able to generate all of this information very quickly. (Also good.)
+
+However, as a human, dense JSON objects are very hard to read (This is bad.)
+
+In the next step of the tutorial, we'll show how to convert Expectations into more human-friendly formats: :ref:`Setting up data docs`.
