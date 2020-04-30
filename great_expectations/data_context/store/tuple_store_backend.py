@@ -265,12 +265,12 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             self.full_base_directory,
             self._convert_key_to_filepath(key)
         )
-        path, filename = os.path.split(filepath)
+
         if os.path.exists(filepath):
-            if shutil.rmtree(self.full_base_directory):
-                return True
+            os.remove(filepath)
+            return True
         return False
-       
+
     def get_url_for_key(self, key, protocol=None):
         path = self._convert_key_to_filepath(key)
         full_path = os.path.join(self.full_base_directory, path)
