@@ -57,12 +57,10 @@ def checkpoint_new(checkpoint, suite, directory, datasource):
     _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
 
     template = _load_checkpoint_yml_template()
-    template["batches"] = [
-        {
-            "batch_kwargs": dict(batch_kwargs),
-            "expectation_suite_names": [suite.expectation_suite_name],
-        }
-    ]
+    # This picky update helps template comments stay in place
+    template["batches"][0]["batch_kwargs"] = dict(batch_kwargs)
+    template["batches"][0]["expectation_suite_names"] = [suite.expectation_suite_name]
+
     checkpoint_file = _write_checkpoint_to_disk(context, template, checkpoint)
     cli_message(
         f"""<green>A checkpoint named `{checkpoint}` was added to your project!</green>

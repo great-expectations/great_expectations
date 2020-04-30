@@ -151,7 +151,7 @@ def test_checkpoint_new_raises_error_on_no_suite_found(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_new(
+def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
     mock_emit, caplog, titanic_data_context_stats_enabled, titanic_expectation_suite
 ):
     context = titanic_data_context_stats_enabled
@@ -190,6 +190,38 @@ def test_checkpoint_new(
     # Newup a context for additional assertions
     context = DataContext(root_dir)
     assert context.list_checkpoints() == ["passengers"]
+
+    with open(expected_checkpoint, "r") as f:
+        obs_file = f.read()
+
+    # This is snapshot-ish to prove that comments remain in place
+    assert (
+        """\
+# This checkpoint was created by the command `great_expectations checkpoint new`.
+#
+# It can be run with the `great_expectations checkpoint run` command.
+# You can edit this file to add batches of data and expectation suites.
+#
+# For more details please see
+# https://docs.greatexpectations.io/en/latest/command_line.html#great-expectations-checkpoint-new-checkpoint-suite
+validation_operator_name: action_list_operator
+# Batches are a list of batch_kwargs paired with a list of one or more suite
+# names. A checkpoint can have one or more batches. This makes deploying
+# Great Expectations in your pipelines easy!
+batches:
+  - batch_kwargs:"""
+        in obs_file
+    )
+
+    assert "/data/Titanic.csv" in obs_file
+
+    assert (
+        """datasource: mydatasource
+    expectation_suite_names: # one or more suites may validate against a single batch
+      - Titanic.warning
+"""
+        in obs_file
+    )
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 

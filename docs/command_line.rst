@@ -644,30 +644,38 @@ If your project has a suite named ``npi.warning`` and you wish to create a check
       - To edit this checkpoint edit the checkpoint file: great_expectations/checkpoints/source_tables.yml
       - To run this checkpoint run `great_expectations checkpoint run source_tables`
 
-The checkpoint file (``great_expectations/checkpoints/source_tables.yml``) will look like this:
+The new checkpoint file (``great_expectations/checkpoints/source_tables.yml``) will look like this:
 
 .. code-block:: yaml
 
-    # This is a checkpoint file created with the command `great_expectations checkpoint new`
+    # This checkpoint was created by the command `great_expectations checkpoint new`.
+    #
+    # It can be run with the `great_expectations checkpoint run` command.
+    # You can edit this file to add batches of data and expectation suites.
+    #
+    # For more details please see
+    # https://docs.greatexpectations.io/en/latest/command_line.html#great-expectations-checkpoint-new-checkpoint-suite
     validation_operator_name: action_list_operator
-    # Batches are a list of batch_kwargs paired with a list of one or more suite names
+    # Batches are a list of batch_kwargs paired with a list of one or more suite
+    # names. A checkpoint can have one or more batches. This makes deploying
+    # Great Expectations in your pipelines easy!
     batches:
       - batch_kwargs:
           path: /Users/me/pipeline/source_files/npi.csv
           datasource: files_datasource
           reader_method: read_csv
-        expectation_suite_names:
+        expectation_suite_names: # one or more suites may validate against a single batch
           - npi.warning
 
-You can edit this file to add batches of data and expectation suites.
-For example to make this checkpoint validate multiple source files before and after their ingestion into your data lake your checkpoint might look like this:
-Note in this example we have 4 batches of data from 2 different datasources (files and a database) and multiple suites can be run against a given batch.
+You can edit this file to add batches of data and expectation suites across your project.
+
+For example to make this checkpoint **validate multiple source files before and after their ingestion into your data lake** your checkpoint might look like this:
+
+.. note:: Note in this example we have 4 batches of data from 2 different datasources (files and a database) and multiple suites can be run against a given batch.
 
 .. code-block:: yaml
 
-    # This is a checkpoint file created with the command `great_expectations checkpoint new`
     validation_operator_name: action_list_operator
-    # Batches are a list of batch_kwargs paired with a list of one or more suite names
     batches:
       - batch_kwargs:
           path: /Users/me/pipeline/source_files/npi.csv
