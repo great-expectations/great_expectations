@@ -941,7 +941,12 @@ class BaseDataContext(object):
         Returns:
             True for Success and False for Failure.
         """
-        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+        key = None
+        keys = self.stores[self.expectations_store_name].list_keys()
+        for item in keys:
+            sval = repr(item)
+            if expectation_suite_name.expectation_suite_name in sval:
+                key=item
         if not self._stores[self.expectations_store_name].has_key(key):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
