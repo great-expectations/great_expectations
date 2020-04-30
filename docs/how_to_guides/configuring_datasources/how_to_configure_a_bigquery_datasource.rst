@@ -1,8 +1,8 @@
 .. _BigQuery:
 
-##############
-BigQuery
-##############
+######################################
+How to configure a BigQuery Datasource
+######################################
 
 How to set up BigQuery as a DataSource
 ======================================
