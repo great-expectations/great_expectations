@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import re
+import inspect
 import shutil
 # PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 import logging
@@ -258,16 +259,23 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return key_list
 
-    def remove_key(self, key):
+    def remove_key(self, key, scaller=None):
+        if scaller == "clean_site" :
+            if os.path.exists(self.full_base_directory):
+                if shutil.rmtree(self.full_base_directory):
+                    return True
+            #there are multiple calls in case of clean_site
+            return True
         if not isinstance(key, tuple):
             key = key.to_tuple()
+        
         filepath = os.path.join(
             self.full_base_directory,
             self._convert_key_to_filepath(key)
         )
         path, filename = os.path.split(filepath)
         if os.path.exists(filepath):
-            if shutil.rmtree(self.full_base_directory):
+            if os.remove(filepath):
                 return True
         return False
        
@@ -504,10 +512,10 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         from google.cloud import storage
         gcs = storage.Client(self.project)
         gcs_object_key = self._convert_key_to_filepath(key)
-        bucket = cloudStorageClient.bucket(self.bucket)
+        bucket = gcs.bucket(self.bucket)
         try:
             bucket.delete_blobs(blobs=bucket.list_blobs(prefix=self.prefix))
-        except exceptions.NotFound as e:
+        except Exception, e:
             return False
         return True
 
