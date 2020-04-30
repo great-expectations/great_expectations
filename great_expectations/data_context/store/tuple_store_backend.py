@@ -510,12 +510,12 @@ class TupleGCSStoreBackend(TupleStoreBackend):
 
     def remove_key(self, key):
         from google.cloud import storage
-        gcs = storage.Client(self.project)
-        gcs_object_key = self._convert_key_to_filepath(key)
-        bucket = gcs.bucket(self.bucket)
+        from gcloud.exceptions import NotFound
+        gcs = storage.Client(project=self.project)
+        bucket = gcs.get_bucket(self.bucket)
         try:
             bucket.delete_blobs(blobs=bucket.list_blobs(prefix=self.prefix))
-        except Exception, e:
+        except NotFound:
             return False
         return True
 
