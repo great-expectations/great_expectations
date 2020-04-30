@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import mock
 from click.testing import CliRunner
@@ -76,7 +77,41 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_new(mock_emit, caplog, titanic_data_context_stats_enabled, titanic_expectation_suite):
+def test_checkpoint_new_raises_error_on_no_suite_found(
+    mock_emit, caplog, titanic_data_context_stats_enabled
+):
+    context = titanic_data_context_stats_enabled
+    root_dir = context.root_directory
+    assert context.list_expectation_suite_names() == []
+    mock_emit.reset_mock()
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli, f"checkpoint new foo not_a_suite -d {root_dir}", catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 1
+    assert "Could not find a suite named `not_a_suite`" in stdout
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.checkpoint.new", "event_payload": {}, "success": False}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_new(
+    mock_emit, caplog, titanic_data_context_stats_enabled, titanic_expectation_suite
+):
     context = titanic_data_context_stats_enabled
     root_dir = context.root_directory
     assert context.list_checkpoints() == []
@@ -86,7 +121,8 @@ def test_checkpoint_new(mock_emit, caplog, titanic_data_context_stats_enabled, t
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint new passengers Titanic.warning -d {root_dir}",
+        cli,
+        f"checkpoint new passengers Titanic.warning -d {root_dir}",
         input="1\n1\n",
         catch_exceptions=False,
     )
@@ -104,7 +140,103 @@ def test_checkpoint_new(mock_emit, caplog, titanic_data_context_stats_enabled, t
             {"event": "cli.checkpoint.new", "event_payload": {}, "success": True}
         ),
     ]
-    expected_checkpoint = os.path.join(root_dir, context.CHECKPOINTS_DIR, "passengers.yml")
+    expected_checkpoint = os.path.join(
+        root_dir, context.CHECKPOINTS_DIR, "passengers.yml"
+    )
+    assert os.path.isfile(expected_checkpoint)
+
+    # Newup a context for additional assertions
+    context = DataContext(root_dir)
+    assert context.list_checkpoints() == ["passengers"]
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_new_specify_datasource(
+    mock_emit, caplog, titanic_data_context_stats_enabled, titanic_expectation_suite
+):
+    context = titanic_data_context_stats_enabled
+    root_dir = context.root_directory
+    assert context.list_checkpoints() == []
+    context.save_expectation_suite(titanic_expectation_suite)
+    assert context.list_expectation_suite_names() == ["Titanic.warning"]
+    mock_emit.reset_mock()
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        f"checkpoint new passengers Titanic.warning -d {root_dir} --datasource mydatasource",
+        input="1\n1\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 0
+    assert "A checkpoint named `passengers` was added to your project" in stdout
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.checkpoint.new", "event_payload": {}, "success": True}
+        ),
+    ]
+    expected_checkpoint = os.path.join(
+        root_dir, context.CHECKPOINTS_DIR, "passengers.yml"
+    )
+    assert os.path.isfile(expected_checkpoint)
+
+    # Newup a context for additional assertions
+    context = DataContext(root_dir)
+    assert context.list_checkpoints() == ["passengers"]
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_new_works_if_checkpoints_directory_is_missing(
+    mock_emit, caplog, titanic_data_context_stats_enabled, titanic_expectation_suite
+):
+    context = titanic_data_context_stats_enabled
+    root_dir = context.root_directory
+    checkpoints_dir = os.path.join(root_dir, context.CHECKPOINTS_DIR)
+    shutil.rmtree(checkpoints_dir)
+    assert not os.path.isdir(checkpoints_dir)
+    assert context.list_checkpoints() == []
+
+    context.save_expectation_suite(titanic_expectation_suite)
+    assert context.list_expectation_suite_names() == ["Titanic.warning"]
+    mock_emit.reset_mock()
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        f"checkpoint new passengers Titanic.warning -d {root_dir}",
+        input="1\n1\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 0
+    assert "A checkpoint named `passengers` was added to your project" in stdout
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.checkpoint.new", "event_payload": {}, "success": True}
+        ),
+    ]
+    expected_checkpoint = os.path.join(
+        root_dir, context.CHECKPOINTS_DIR, "passengers.yml"
+    )
     assert os.path.isfile(expected_checkpoint)
 
     # Newup a context for additional assertions

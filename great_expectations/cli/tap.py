@@ -7,7 +7,8 @@ from great_expectations.cli.datasource import get_batch_kwargs, \
     select_datasource
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import load_data_context_with_error_handling, \
-    load_expectation_suite, cli_message
+    cli_message
+from great_expectations.cli.toolkit import load_expectation_suite
 from great_expectations.core.usage_statistics.usage_statistics import \
     send_usage_message
 from great_expectations.data_context.util import file_relative_path
@@ -46,7 +47,7 @@ def _tap_new(suite, tap_filename, directory, usage_event, datasource=None):
         _validate_tap_filename(tap_filename)
         context_directory = context.root_directory
         datasource = _get_datasource(context, datasource)
-        suite = load_expectation_suite(context, suite)
+        suite = load_expectation_suite(context, suite, usage_event)
         _, _, _, batch_kwargs = get_batch_kwargs(context, datasource.name)
 
         tap_filename = _write_tap_file_to_disk(

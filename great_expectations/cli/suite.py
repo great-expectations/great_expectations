@@ -8,7 +8,6 @@ from great_expectations.cli import toolkit as toolkit
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.core import (
     ExpectationSuite,
-    get_metric_kwargs_id,
 )
 from great_expectations.cli.datasource import (
     get_batch_kwargs,
@@ -17,11 +16,6 @@ from great_expectations.cli.datasource import (
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
-from great_expectations.cli.util import cli_message, load_expectation_suite, cli_message_list
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message, _anonymizers, \
-    edit_expectation_suite_usage_statistics
-from great_expectations.data_asset import DataAsset
-from great_expectations.render.renderer.suite_edit_notebook_renderer import SuiteEditNotebookRenderer
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.toolkit import (
     create_expectation_suite as create_expectation_suite_impl,
@@ -30,7 +24,6 @@ from great_expectations.cli.util import (
     cli_message,
     cli_message_list,
     load_data_context_with_error_handling,
-    load_expectation_suite,
 )
 from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
@@ -116,7 +109,7 @@ def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs, usage_event
     context = load_data_context_with_error_handling(directory)
 
     try:
-        suite = load_expectation_suite(context, suite, usage_event)
+        suite = toolkit.load_expectation_suite(context, suite, usage_event)
         citations = suite.get_citations(require_batch_kwargs=True)
 
         if batch_kwargs_json:

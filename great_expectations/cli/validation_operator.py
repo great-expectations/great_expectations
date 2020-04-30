@@ -15,9 +15,9 @@ from great_expectations.cli.datasource import (
 )
 from great_expectations.cli.util import (
     cli_message,
-    load_expectation_suite,
     cli_message_dict
 )
+from great_expectations.cli.toolkit import load_expectation_suite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 json_parse_exception = json.decoder.JSONDecodeError
@@ -43,9 +43,7 @@ def validation_operator():
     default=None,
     help="The project's great_expectations directory."
 )
-@mark.cli_as_deprecation("""<yellow>In the next major release this command will be deprecated.
-Please consider using `checkpoint list` if you wish to configure a new checkpoint interactively
-  - `checkpoint run` if you wish to run a saved checkpoint</yellow>""")
+@mark.cli_as_experimental
 def validation_operator_list(directory):
     """List known Validation Operators."""
     try:

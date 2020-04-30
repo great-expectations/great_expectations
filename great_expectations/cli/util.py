@@ -3,9 +3,6 @@ import sys
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli.cli_logging import logger
-from great_expectations.core import ExpectationSuite
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 try:
     from termcolor import colored
@@ -113,31 +110,6 @@ def is_sane_slack_webhook(url):
         return False
 
     return url.strip().startswith("https://hooks.slack.com/")
-
-
-# TODO consolidate all the myriad CLI tests into this
-def load_expectation_suite(
-    context: DataContext, suite_name: str, usage_event: str
-) -> ExpectationSuite:
-    """
-    Load an expectation suite from a given context.
-
-    Handles a suite name with or without `.json`
-    :param usage_event:
-    """
-    if suite_name.endswith(".json"):
-        suite_name = suite_name[:-5]
-    try:
-        suite = context.get_expectation_suite(suite_name)
-        return suite
-    except ge_exceptions.DataContextError as e:
-        cli_message(
-            f"<red>Could not find a suite named `{suite_name}`.</red> Please check "
-            "the name by running `great_expectations suite list` and try again."
-        )
-        logger.info(e)
-        send_usage_message(context, event=usage_event, success=False)
-        sys.exit(1)
 
 
 # TODO consolidate all the myriad CLI tests into this

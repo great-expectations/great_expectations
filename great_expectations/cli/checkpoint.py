@@ -13,7 +13,6 @@ from great_expectations.cli.util import (
     cli_message,
     cli_message_list,
     load_data_context_with_error_handling,
-    load_expectation_suite,
 )
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
@@ -46,11 +45,40 @@ def checkpoint():
     help="The project's great_expectations directory.",
 )
 @mark.cli_as_experimental
-def checkpoint_new(checkpoint, directory, suite, datasource):
+def checkpoint_new(checkpoint, suite, directory, datasource):
     """Create a new checkpoint for easy deployments. (Experimental)"""
     suite_name = suite
     usage_event = "cli.checkpoint.new"
     context = load_data_context_with_error_handling(directory)
+    _verify_checkpoint_does_not_exist(context, checkpoint, usage_event)
+    suite: ExpectationSuite = toolkit.load_expectation_suite(
+        context, suite_name, usage_event
+    )
+    datasource = toolkit.select_datasource(context, datasource_name=datasource)
+    if datasource is None:
+        send_usage_message(context, usage_event, success=False)
+        sys.exit(1)
+    _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
+
+    template = _load_checkpoint_yml_template()
+    template["batches"] = [
+        {
+            "batch_kwargs": dict(batch_kwargs),
+            "expectation_suite_names": [suite.expectation_suite_name],
+        }
+    ]
+    checkpoint_file = _write_checkpoint_to_disk(context, template, checkpoint)
+    cli_message(
+        f"""<green>A checkpoint named `{checkpoint}` was added to your project!</green>
+  - To edit this checkpoint edit the checkpoint file: {checkpoint_file}
+  - To run this checkpoint run `great_expectations checkpoint run {checkpoint}`"""
+    )
+    send_usage_message(context, usage_event, success=True)
+
+
+def _verify_checkpoint_does_not_exist(
+    context: DataContext, checkpoint: str, usage_event: str
+) -> None:
     if checkpoint in context.list_checkpoints():
         _exit_with_failure_message(
             context,
@@ -58,46 +86,27 @@ def checkpoint_new(checkpoint, directory, suite, datasource):
             f"A checkpoint named `{checkpoint}` already exists. Please choose a new name.",
         )
 
-    # TODO select datasource
-    datasource = toolkit.select_datasource(context)
-    if datasource is None:
-        send_usage_message(context, usage_event, success=False)
-        sys.exit(1)
 
-    checkpoint_file = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, f"{checkpoint}.yml"
-    )
-    # TODO get batch kwargs
-    _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
+def _write_checkpoint_to_disk(
+    context: DataContext, checkpoint: dict, checkpoint_name: str
+) -> str:
+    # TODO this should be the responsibility of the DataContext
+    checkpoint_dir = os.path.join(context.root_directory, context.CHECKPOINTS_DIR,)
+    checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")
+    os.makedirs(checkpoint_dir, exist_ok=True)
+    with open(checkpoint_file, "w") as f:
+        yaml.dump(checkpoint, f)
+    return checkpoint_list
 
-    # TODO load suite
-    suite: ExpectationSuite = context.get_expectation_suite(suite_name)
 
-    # TODO load template with docs
+def _load_checkpoint_yml_template() -> dict:
     # TODO this should be the responsibility of the DataContext
     template_file = file_relative_path(
         __file__, os.path.join("..", "data_context", "checkpoint_template.yml")
     )
     with open(template_file, "r") as f:
         template = yaml.load(f)
-    # TODO modify template
-    template["batches"] = [
-        {
-            "batch_kwargs": dict(batch_kwargs),
-            "expectation_suite_names": [suite.expectation_suite_name],
-        }
-    ]
-    # TODO write template as yml in dir
-    # TODO verify that checkpoint dir exists
-    with open(checkpoint_file, "w") as f:
-        yaml.dump(template, f)
-
-    cli_message(
-        f"""<green>A checkpoint named `{checkpoint}` was added to your project!</green>
-  - To edit this checkpoint edit the checkpoint file: {checkpoint_file}
-  - To run this checkpoint run `great_expectations checkpoint run {checkpoint}`"""
-    )
-    send_usage_message(context, usage_event, success=True)
+    return template
 
 
 @checkpoint.command(name="list")
@@ -161,7 +170,7 @@ def checkpoint_run(checkpoint, directory):
         _validate_at_least_one_suite_is_listed(context, batch, checkpoint_file)
         batch_kwargs = batch["batch_kwargs"]
         for suite_name in batch["expectation_suite_names"]:
-            suite = load_expectation_suite(context, suite_name, usage_event)
+            suite = toolkit.load_expectation_suite(context, suite_name, usage_event)
             # TODO maybe move into toolkit utility
             try:
                 batch = toolkit.load_batch(context, suite, batch_kwargs)
