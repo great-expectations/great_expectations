@@ -1,8 +1,8 @@
 .. _redshift:
 
-##############
-Redshift
-##############
+######################################
+How to configure a Redshift Datasource
+######################################
 
 To add a Redshift datasource do this:
 
