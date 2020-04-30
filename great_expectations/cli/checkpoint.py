@@ -117,7 +117,10 @@ def checkpoint_list(directory):
 
     checkpoints = context.list_checkpoints()
     if not checkpoints:
-        cli_message("No checkpoints found.")
+        cli_message(
+            "No checkpoints found.\n"
+            "  - Use the command `great_expectations checkpoint new` to create one."
+        )
         send_usage_message(context, event="cli.checkpoint.list", success=True)
         sys.exit(0)
 

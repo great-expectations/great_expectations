@@ -55,6 +55,36 @@ def titanic_data_context_with_checkpoint_suite_and_stats_enabled(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+def test_checkpoint_list_with_no_checkpoints(
+    mock_emit, caplog, empty_data_context_stats_enabled
+):
+    context = empty_data_context_stats_enabled
+    root_dir = context.root_directory
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli, f"checkpoint list -d {root_dir}", catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 0
+    assert "No checkpoints found." in stdout
+    assert "Use the command `great_expectations checkpoint new` to create one" in stdout
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.checkpoint.list", "event_payload": {}, "success": True}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_checkpoint_list_with_single_checkpoint(
     mock_emit, caplog, empty_context_with_checkpoint_stats_enabled
 ):
@@ -76,6 +106,38 @@ def test_checkpoint_list_with_single_checkpoint(
         ),
         mock.call(
             {"event": "cli.checkpoint.list", "event_payload": {}, "success": True}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_new_raises_error_on_no_suite_found(
+    mock_emit, caplog, titanic_data_context_stats_enabled
+):
+    context = titanic_data_context_stats_enabled
+    root_dir = context.root_directory
+    assert context.list_expectation_suite_names() == []
+    mock_emit.reset_mock()
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli, f"checkpoint new foo not_a_suite -d {root_dir}", catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 1
+    assert "Could not find a suite named `not_a_suite`" in stdout
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.checkpoint.new", "event_payload": {}, "success": False}
         ),
     ]
 
@@ -119,38 +181,6 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_new_raises_error_on_no_suite_found(
-    mock_emit, caplog, titanic_data_context_stats_enabled
-):
-    context = titanic_data_context_stats_enabled
-    root_dir = context.root_directory
-    assert context.list_expectation_suite_names() == []
-    mock_emit.reset_mock()
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli, f"checkpoint new foo not_a_suite -d {root_dir}", catch_exceptions=False,
-    )
-    stdout = result.stdout
-    assert result.exit_code == 1
-    assert "Could not find a suite named `not_a_suite`" in stdout
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {"event": "cli.checkpoint.new", "event_payload": {}, "success": False}
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(caplog, result)
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
     mock_emit, caplog, titanic_data_context_stats_enabled, titanic_expectation_suite
 ):
@@ -169,7 +199,6 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
         catch_exceptions=False,
     )
     stdout = result.stdout
-    print(stdout)
     assert result.exit_code == 0
     assert "A checkpoint named `passengers` was added to your project" in stdout
 
@@ -696,7 +725,6 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
         cli, f"checkpoint script my_checkpoint -d {root_dir}", catch_exceptions=False,
     )
     stdout = result.stdout
-    print(stdout)
     assert (
         "Warning! A script named run_my_checkpoint.py already exists and this command will not overwrite it."
         in stdout
@@ -723,7 +751,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_script_happy_path(
+def test_checkpoint_script_happy_path_generates_script(
     mock_emit, caplog, titanic_data_context_with_checkpoint_suite_and_stats_enabled
 ):
     context = titanic_data_context_with_checkpoint_suite_and_stats_enabled
@@ -735,7 +763,6 @@ def test_checkpoint_script_happy_path(
         cli, f"checkpoint script my_checkpoint -d {root_dir}", catch_exceptions=False,
     )
     stdout = result.stdout
-    print(stdout)
     assert result.exit_code == 0
     assert (
         "A python script was created that runs the checkpoint named: `my_checkpoint`"
