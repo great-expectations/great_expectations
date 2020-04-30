@@ -1,6 +1,6 @@
 import click
 
-import great_expectations.cli.toolkit as toolkit
+from great_expectations.cli import toolkit
 from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message,

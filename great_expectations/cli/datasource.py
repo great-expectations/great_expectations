@@ -9,9 +9,9 @@ import uuid
 
 import click
 
-import great_expectations.cli.toolkit as toolkit
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext, rtd_url_ge_version
+from great_expectations.cli import toolkit
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.mark import Mark as mark

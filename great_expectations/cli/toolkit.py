@@ -13,7 +13,9 @@ from great_expectations.cli.docs import build_docs
 from great_expectations.cli.util import cli_message
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.core.usage_statistics.usage_statistics import (
+    send_usage_message,
+)
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,

@@ -3,7 +3,7 @@ import sys
 
 import click
 
-import great_expectations.cli.toolkit as toolkit
+from great_expectations.cli import toolkit
 from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message

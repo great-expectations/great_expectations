@@ -3,9 +3,9 @@ import sys
 
 import click
 
-import great_expectations.cli.toolkit as toolkit
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.cli import toolkit
 from great_expectations.cli.datasource import \
     add_datasource as add_datasource_impl
 from great_expectations.cli.docs import build_docs
