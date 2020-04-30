@@ -11,7 +11,7 @@ It helps to keep your entire team on the same page as data evolves.
 
 Here is what the ``expect_column_distinct_values_to_be_in_set`` expectation about the `rating` column of the movie ratings table from the earlier example looks like in Data Docs:
 
-.. image:: ../images/exp_ratings_col_dist_val_set.png
+.. image:: ../../images/exp_ratings_col_dist_val_set.png
 
 This approach to data documentation has two significant advantages.
 
