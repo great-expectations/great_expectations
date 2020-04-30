@@ -8,7 +8,6 @@ import click
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.datasource import (
     get_batch_kwargs,
     select_datasource,
@@ -21,6 +20,10 @@ from great_expectations.core.usage_statistics.usage_statistics import send_usage
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
+)
+from great_expectations.exceptions import (
+    CheckpointError,
+    CheckpointNotFoundError,
 )
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
@@ -250,10 +253,37 @@ def load_expectation_suite(
         suite = context.get_expectation_suite(suite_name)
         return suite
     except ge_exceptions.DataContextError as e:
-        cli_message(
+        exit_with_failure_message_and_stats(
+            context,
+            usage_event,
             f"<red>Could not find a suite named `{suite_name}`.</red> Please check "
-            "the name by running `great_expectations suite list` and try again."
+            "the name by running `great_expectations suite list` and try again.",
         )
-        logger.info(e)
-        send_usage_message(context, event=usage_event, success=False)
-        sys.exit(1)
+
+
+def exit_with_failure_message_and_stats(
+    context: DataContext, usage_event: str, message: str
+) -> None:
+    cli_message(message)
+    send_usage_message(context, event=usage_event, success=False)
+    sys.exit(1)
+
+
+def load_checkpoint(
+    context: DataContext, checkpoint_name: str, usage_event: str
+) -> dict:
+    """Load a checkpoint or raise helpful errors."""
+    try:
+        checkpoint_config = context.get_checkpoint(checkpoint_name)
+        return checkpoint_config
+    except CheckpointNotFoundError as e:
+        exit_with_failure_message_and_stats(
+            context,
+            usage_event,
+            f"""\
+<red>Could not find checkpoint `{checkpoint_name}`.</red> Try running:
+  - `<green>great_expectations checkpoint list</green>` to verify your checkpoint exists
+  - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
+        )
+    except CheckpointError as e:
+        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")

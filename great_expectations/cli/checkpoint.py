@@ -7,7 +7,6 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from great_expectations import DataContext
 from great_expectations.cli import toolkit
-from great_expectations.cli.datasource import select_datasource
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import (
     cli_message,
@@ -17,11 +16,7 @@ from great_expectations.cli.util import (
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import (
-    CheckpointError,
-    CheckpointNotFoundError,
-    DataContextError,
-)
+from great_expectations.exceptions import DataContextError
 from great_expectations.util import lint_code
 
 yaml = YAML()
@@ -80,7 +75,7 @@ def _verify_checkpoint_does_not_exist(
     context: DataContext, checkpoint: str, usage_event: str
 ) -> None:
     if checkpoint in context.list_checkpoints():
-        _exit_with_failure_message(
+        toolkit.exit_with_failure_message_and_stats(
             context,
             usage_event,
             f"A checkpoint named `{checkpoint}` already exists. Please choose a new name.",
@@ -96,7 +91,7 @@ def _write_checkpoint_to_disk(
     os.makedirs(checkpoint_dir, exist_ok=True)
     with open(checkpoint_file, "w") as f:
         yaml.dump(checkpoint, f)
-    return checkpoint_list
+    return checkpoint_file
 
 
 def _load_checkpoint_yml_template() -> dict:
@@ -130,7 +125,8 @@ def checkpoint_list(directory):
     number_found = len(checkpoints)
     plural = "s" if number_found > 1 else ""
     message = f"Found {number_found} checkpoint{plural}."
-    cli_message_list(checkpoints, list_intro_string=message)
+    pretty_list = [f" - <cyan>{cp}</cyan>" for cp in checkpoints]
+    cli_message_list(pretty_list, list_intro_string=message)
     send_usage_message(context, event="cli.checkpoint.list", success=True)
 
 
@@ -148,21 +144,7 @@ def checkpoint_run(checkpoint, directory):
     context = load_data_context_with_error_handling(directory)
     usage_event = "cli.checkpoint.run"
 
-    checkpoint_config = {}
-    # TODO factor down into toolkit
-    try:
-        checkpoint_config = context.get_checkpoint(checkpoint)
-    except CheckpointNotFoundError as e:
-        _exit_with_failure_message(
-            context,
-            usage_event,
-            f"""\
-<red>Could not find checkpoint `{checkpoint}`.</red> Try running:
-  - `<green>great_expectations checkpoint list</green>` to verify your checkpoint exists
-  - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
-        )
-    except CheckpointError as e:
-        _exit_with_failure_message(context, usage_event, f"<red>{e}</red>")
+    checkpoint_config = toolkit.load_checkpoint(context, checkpoint, usage_event)
     checkpoint_file = f"great_expectations/checkpoints/{checkpoint}.yml"
 
     batches_to_validate = []
@@ -175,7 +157,7 @@ def checkpoint_run(checkpoint, directory):
             try:
                 batch = toolkit.load_batch(context, suite, batch_kwargs)
             except (FileNotFoundError, SQLAlchemyError, IOError, DataContextError) as e:
-                _exit_with_failure_message(
+                toolkit.exit_with_failure_message_and_stats(
                     context,
                     usage_event,
                     f"""<red>There was a problem loading a batch:
@@ -192,7 +174,9 @@ def checkpoint_run(checkpoint, directory):
             # run_id=RunID(checkpoint)
         )
     except DataContextError as e:
-        _exit_with_failure_message(context, usage_event, f"<red>{e}</red>")
+        toolkit.exit_with_failure_message_and_stats(
+            context, usage_event, f"<red>{e}</red>"
+        )
 
     if not results["success"]:
         # TODO maybe more verbose output (n of n passed)
@@ -206,11 +190,58 @@ def checkpoint_run(checkpoint, directory):
     sys.exit(0)
 
 
-def _validate_at_least_one_suite_is_listed(context, batch, checkpoint_file):
+@checkpoint.command(name="script")
+@click.argument("checkpoint")
+@click.option(
+    "--directory",
+    "-d",
+    default=None,
+    help="The project's great_expectations directory.",
+)
+@mark.cli_as_experimental
+def checkpoint_script(checkpoint, directory):
+    """
+    Create a python script to run a checkpoint. (Experimental)
+
+    Checkpoints can be run directly without this script using the
+    `great_expectations checkpoint run` command.
+
+    This script is provided for those who wish to run checkpoints via python.
+    """
+    context = load_data_context_with_error_handling(directory)
+    usage_event = "cli.checkpoint.script"
+    # Attempt to load the checkpoint and deal with errors
+    _ = toolkit.load_checkpoint(context, checkpoint, usage_event)
+
+    script_name = f"run_{checkpoint}.py"
+    script_path = os.path.join(
+        context.root_directory, context.GE_UNCOMMITTED_DIR, script_name
+    )
+
+    if os.path.isfile(script_path):
+        toolkit.exit_with_failure_message_and_stats(
+            context,
+            usage_event,
+            f"""<red>Warning! A script named {script_name} already exists and this command will not overwrite it.</red>
+  - Existing file path: {script_path}""",
+        )
+
+    _write_checkpoint_script_to_disk(context.root_directory, checkpoint, script_path)
+    cli_message(
+        f"""<green>A python script was created that runs the checkpoint named: `{checkpoint}`</green>
+  - The script is located in `great_expectations/uncommitted/run_{checkpoint}.py`
+  - The script can be run with `python great_expectations/uncommitted/run_{checkpoint}.py`"""
+    )
+    send_usage_message(context, event=usage_event, success=True)
+
+
+def _validate_at_least_one_suite_is_listed(
+    context: DataContext, batch: dict, checkpoint_file: str
+) -> None:
     batch_kwargs = batch["batch_kwargs"]
     suites = batch["expectation_suite_names"]
     if not suites:
-        _exit_with_failure_message(
+        toolkit.exit_with_failure_message_and_stats(
             context,
             "cli.checkpoint.run",
             f"""<red>A batch has no suites associated with it. At least one suite is required.
@@ -219,51 +250,17 @@ def _validate_at_least_one_suite_is_listed(context, batch, checkpoint_file):
         )
 
 
-def _exit_with_failure_message(
-    context: DataContext, usage_event: str, message: str
-) -> None:
-    cli_message(message)
-    send_usage_message(context, event=usage_event, success=False)
-    sys.exit(1)
-
-
-def _validate_checkpoint_filename(checkpoint_filename):
-    if not checkpoint_filename.endswith(".py"):
-        cli_message(
-            "<red>Tap filename must end in .py. Please correct and re-run</red>"
-        )
-        sys.exit(1)
-
-
-def _get_datasource(context, datasource):
-    datasource = select_datasource(context, datasource_name=datasource)
-    if not datasource:
-        cli_message("<red>No datasources found in the context.</red>")
-        sys.exit(1)
-    return datasource
-
-
-def _load_template():
-    with open(file_relative_path(__file__, "checkpoint_template.py")) as f:
+def _load_script_template() -> str:
+    with open(file_relative_path(__file__, "checkpoint_script_template.py")) as f:
         template = f.read()
     return template
 
 
-def _write_tap_file_to_disk(
-    batch_kwargs, context_directory, suite, checkpoint_filename
-):
-    tap_file_path = os.path.abspath(
-        os.path.join(context_directory, "..", checkpoint_filename)
-    )
-
-    template = _load_template().format(
-        checkpoint_filename,
-        context_directory,
-        suite.expectation_suite_name,
-        batch_kwargs,
-    )
+def _write_checkpoint_script_to_disk(
+    context_directory: str, checkpoint_name: str, script_path: str
+) -> None:
+    script_full_path = os.path.abspath(os.path.join(script_path))
+    template = _load_script_template().format(checkpoint_name, context_directory)
     linted_code = lint_code(template)
-    with open(tap_file_path, "w") as f:
+    with open(script_full_path, "w") as f:
         f.write(linted_code)
-
-    return tap_file_path
