@@ -1,19 +1,10 @@
 .. _data_asset_features:
 
+###############################################################
+How to create Expectations with interactive evaluation disabled
+###############################################################
 
-#########################
-Data Asset Features Guide
-#########################
-
-This document describes useful features of the DataAsset object. A :ref:`DataAsset <data_asset_module>` in Great
-Expectations is the root class that enables declaring and validating expectations; it brings together data and
-expectation evaluation logic.
-
-**********************
-Interactive Evaluation
-**********************
-
-Setting the `interactive_evaluation` flag on a DataAsset make it possible to declare expectations and store
+Setting the `interactive_evaluation` flag on a DataAsset to false makes it possible to declare expectations and store
 expectations without immediately evaluating them. When interactive evaluation is disabled, the running an
 expectation method on a DataAsset will return the configuration just added to its expectation suite rather than a
 result object.
