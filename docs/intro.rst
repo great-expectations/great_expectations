@@ -109,14 +109,19 @@ What does Great Expectations NOT do?
 
    Great Expectations is Python-based. You can invoke it from the command line without using a Python programming environment, but if you're working in another ecosystem, other tools might be a better choice. If you're running in a pure R environment, you might consider `assertR <https://github.com/ropensci/assertr>`__ as an alternative. Within the TensorFlow ecosystem, `TFDV <https://www.tensorflow.org/tfx/guide/tfdv>`__ fulfills a similar function as Great Expectations.
 
-*********************************
-Who maintains Great Expectations?
-*********************************
 
-Great Expectations is under active development by James Campbell, Abe Gong, Eugene Mandel and Rob Lim, with help from many others.
+*********************
+How do I get started?
+*********************
+
+
+Check out :ref:`Getting started` to set up your first deployment of Great Expectations, and learn important concepts along the way. Estimated time: 15 minutes.
+
+If you'd like to contribute to Great Expectations, we very happy! Please head to the :ref:`Contributing` section.
 
 If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public Slack channel: https://greatexpectations.io/slack
 
-If you'd like to contribute to Great Expectations, please head to the :ref:`community` section.
+If you have how-do-I-solve-it-type questions, please post them in the public discussion forum: https://discuss.greatexpectations.io.
 
 If you'd like hands-on assistance setting up Great Expectations, establishing a healthy practice of data testing, or adding functionality to Great Expectations, please see options for consulting help `here <https://greatexpectations.io/consulting/>`__.
+
