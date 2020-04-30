@@ -1,4 +1,3 @@
-import logging
 import os
 import random
 import re
@@ -15,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
     """
-    If filepath_template is provided, the key to this StoreBackend abstract class must be a tuple with 
+    If filepath_template is provided, the key to this StoreBackend abstract class must be a tuple with
     fixed length equal to the number of unique components matching the regex r"{\d+}"
 
     For example, in the following template path: expectations/{0}/{1}/{2}/prefix-{2}.json, keys must have
@@ -231,6 +230,25 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 outfile.write(value)
         return filepath
 
+    def _move(self, source_key, dest_key, **kwargs):
+        source_path = os.path.join(
+            self.full_base_directory,
+            self._convert_key_to_filepath(source_key)
+        )
+
+        dest_path = os.path.join(
+            self.full_base_directory,
+            self._convert_key_to_filepath(dest_key)
+        )
+        dest_dir, dest_filename = os.path.split(dest_path)
+
+        if os.path.exists(source_path):
+            os.makedirs(dest_dir, exist_ok=True)
+            shutil.move(source_path, dest_path)
+            return dest_key
+
+        return False
+
     def list_keys(self, prefix=()):
         key_list = []
         for root, dirs, files in os.walk(os.path.join(self.full_base_directory, *prefix)):
@@ -342,6 +360,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
             result_s3.put(Body=value, ContentType=content_type)
         return s3_object_key
 
+    def _move(self, source_key, dest_key, **kwargs):
+        pass
+
     def list_keys(self):
         key_list = []
 
@@ -444,6 +465,9 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         self.bucket = bucket
         self.prefix = prefix
         self.project = project
+
+    def _move(self, source_key, dest_key, **kwargs):
+        pass
 
     def _get(self, key):
         gcs_object_key = os.path.join(

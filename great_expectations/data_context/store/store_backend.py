@@ -33,6 +33,11 @@ class StoreBackend(object, metaclass=ABCMeta):
         # Allow the implementing setter to return something (e.g. a path used for its key)
         return self._set(key, value, **kwargs)
 
+    def move(self, source_key, dest_key, **kwargs):
+        self._validate_key(source_key)
+        self._validate_key(dest_key)
+        return self._move(source_key, dest_key, **kwargs)
+
     def has_key(self, key):
         self._validate_key(key)
         return self._has_key(key)
@@ -71,6 +76,10 @@ class StoreBackend(object, metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
+    def _move(self, source_key, dest_key, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
     def list_keys(self, prefix=()):
         raise NotImplementedError
 
@@ -103,6 +112,10 @@ class InMemoryStoreBackend(StoreBackend):
 
     def _set(self, key, value, **kwargs):
         self._store[key] = value
+
+    def _move(self, source_key, dest_key, **kwargs):
+        self._store[dest_key] = self._store[source_key]
+        self._store.pop(source_key)
 
     def list_keys(self, prefix=()):
         return [key for key in self._store.keys() if key[:len(prefix)] == prefix]
