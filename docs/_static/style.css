@@ -3,7 +3,7 @@ h1,h1,h3,h4,h5,h6,p,body,a{
 }
 
 body {
-    background-color: #E6E8EA;
+    background-color: #eaedf1;
     color: #2b354f;
 }
 
@@ -41,7 +41,7 @@ a {
 }
 
 .wy-body-for-nav {
-    background-color: #E6E8EA;
+    background-color: #eaedf1;
 }
 
 .section {
@@ -53,10 +53,10 @@ a {
 }
 
 .wy-side-scroll {
-    background: #E6E8EA;
+    background: #eaedf1;
 }
 .wy-nav-top {
-    background: #E6E8EA;
+    background: #eaedf1;
     color: rgba(0,0,0,.65) !important;
     position: fixed;
     top: 63px;
@@ -73,15 +73,15 @@ a {
 
 .wy-nav-content {
     color: #222222;
-    background: #E6E8EA;
+    background: #eaedf1;
 }
 
 .wy-nav-content-wrap {
-    background: #E6E8EA;
+    background: #eaedf1;
 }
 
 .wy-side-nav-search {
-    background: #E6E8EA;
+    background: #eaedf1;
 }
 
 .wy-menu-vertical a{
@@ -94,7 +94,7 @@ a {
 }
 
 .wy-nav-side {
-    background: #E6E8EA;
+    background: #eaedf1;
     top: 50px;
 }
 
