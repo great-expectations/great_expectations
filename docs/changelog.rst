@@ -6,6 +6,17 @@ Changelog
 
 develop
 -----------------
+* Checkpoints: a new feature to ease deployment of suites into your pipelines
+  - DataContext.list_checkpoints() returns a list of checkpoint names found in the project
+  - DataContext.get_checkpoint() returns a validated dictionary loaded from yml
+  - new cli commands
+    - `checkpoint new`
+    - `checkpoint list`
+    - `checkpoint run`
+    - `checkpoint script`
+* marked cli `tap` commands as deprecating on next release
+* marked cli `validation-operator run` command as deprecating
+* internal improvements in the cli code
 
 0.10.5
 -----------------

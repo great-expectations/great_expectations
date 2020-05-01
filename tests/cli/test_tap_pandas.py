@@ -8,6 +8,8 @@ from great_expectations.cli import cli
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
+# TODO When deprecating tap, many of these tests can be simplified to test the toolkit functions
+
 def test_tap_help_output(caplog,):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, ["tap"], catch_exceptions=False)

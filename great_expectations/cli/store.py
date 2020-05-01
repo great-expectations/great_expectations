@@ -1,10 +1,7 @@
 import click
 
-from great_expectations.cli.util import (
-    cli_message,
-    cli_message_dict,
-    load_data_context_with_error_handling,
-)
+from great_expectations.cli import toolkit
+from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message,
 )
@@ -25,7 +22,7 @@ def store():
 )
 def store_list(directory):
     """List known Stores."""
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
 
     try:
         stores = context.list_stores()
