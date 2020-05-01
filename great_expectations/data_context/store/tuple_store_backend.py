@@ -361,7 +361,22 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return s3_object_key
 
     def _move(self, source_key, dest_key, **kwargs):
-        pass
+        import boto3
+        s3 = boto3.resource('s3')
+
+        source_filepath = self._convert_key_to_filepath(source_key)
+        if not source_filepath.startswith(self.prefix):
+            source_filepath = os.path.join(self.prefix, source_filepath)
+        dest_filepath = self._convert_key_to_filepath(dest_key)
+        if not dest_filepath.startswith(self.prefix):
+            dest_filepath = os.path.join(self.prefix, dest_filepath)
+
+        s3.Bucket(self.bucket).copy(
+            {"Bucket": self.bucket, "Key": source_filepath},
+            dest_filepath
+        )
+
+        s3.Object(self.bucket, source_filepath).delete()
 
     def list_keys(self):
         key_list = []
