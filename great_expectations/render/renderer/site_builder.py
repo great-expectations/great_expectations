@@ -124,35 +124,6 @@ class SiteBuilder(object):
             runtime_environment=runtime_environment
         )
 
-        if site_index_builder is None:
-            site_index_builder = {
-                "class_name": "DefaultSiteIndexBuilder"
-            }
-        module_name = site_index_builder.get('module_name') or 'great_expectations.render.renderer.site_builder'
-        class_name = site_index_builder.get('class_name') or 'DefaultSiteIndexBuilder'
-        self.site_index_builder = instantiate_class_from_config(
-            config=site_index_builder,
-            runtime_environment={
-                "data_context": data_context,
-                "custom_styles_directory": custom_styles_directory,
-                "show_how_to_buttons": self.show_how_to_buttons,
-                "target_store": self.target_store,
-                "site_name": self.site_name,
-                "data_context_id": self.data_context_id
-            },
-            config_defaults={
-                "name": "site_index_builder",
-                "module_name": module_name,
-                "class_name": class_name
-            }
-        )
-        if not self.site_index_builder:
-            raise exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=site_index_builder['class_name']
-            )
-
         default_site_section_builders_config = {
             "expectations": {
                 "class_name": "DefaultSiteSectionBuilder",
@@ -213,6 +184,39 @@ class SiteBuilder(object):
                     module_name=module_name,
                     package_name=None,
                     class_name=site_section_config['class_name']
+                )
+
+            if site_index_builder is None:
+                site_index_builder = {
+                    "class_name": "DefaultSiteIndexBuilder"
+                }
+            module_name = site_index_builder.get('module_name') or 'great_expectations.render.renderer.site_builder'
+            class_name = site_index_builder.get('class_name') or 'DefaultSiteIndexBuilder'
+            self.site_index_builder = instantiate_class_from_config(
+                config=site_index_builder,
+                runtime_environment={
+                    "data_context": data_context,
+                    "custom_styles_directory": custom_styles_directory,
+                    "show_how_to_buttons": self.show_how_to_buttons,
+                    "target_store": self.target_store,
+                    "site_name": self.site_name,
+                    "data_context_id": self.data_context_id,
+                    "source_stores": {
+                        section_name: section_config.get("source_store_name")
+                        for (section_name, section_config) in site_section_builders.items()
+                    }
+                },
+                config_defaults={
+                    "name": "site_index_builder",
+                    "module_name": module_name,
+                    "class_name": class_name
+                }
+            )
+            if not self.site_index_builder:
+                raise exceptions.ClassInstantiationError(
+                    module_name=module_name,
+                    package_name=None,
+                    class_name=site_index_builder['class_name']
                 )
 
     def clean_site(self):
@@ -419,6 +423,7 @@ class DefaultSiteIndexBuilder(object):
             renderer=None,
             view=None,
             data_context_id=None,
+            source_stores=None,
             **kwargs
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
@@ -429,6 +434,7 @@ class DefaultSiteIndexBuilder(object):
         self.validation_results_limit = validation_results_limit
         self.data_context_id = data_context_id
         self.show_how_to_buttons = show_how_to_buttons
+        self.source_stores = source_stores or {}
 
         if renderer is None:
             renderer = {
@@ -644,7 +650,8 @@ class DefaultSiteIndexBuilder(object):
                 validation = self.data_context.get_validation_result(
                     batch_identifier=profiling_result_key.batch_identifier,
                     expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
-                    run_id=profiling_result_key.run_id
+                    run_id=profiling_result_key.run_id,
+                    validations_store_name=self.source_stores.get("profiling")
                 )
 
                 batch_kwargs = validation.meta.get("batch_kwargs", {})
@@ -669,7 +676,8 @@ class DefaultSiteIndexBuilder(object):
                 validation = self.data_context.get_validation_result(
                     batch_identifier=validation_result_key.batch_identifier,
                     expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
-                    run_id=validation_result_key.run_id
+                    run_id=validation_result_key.run_id,
+                    validations_store_name=self.source_stores.get("validations")
                 )
 
                 validation_success = validation.success
