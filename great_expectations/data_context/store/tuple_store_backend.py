@@ -259,7 +259,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return key_list
     
-     def remove_key(self, key):
+    def remove_key(self, key):
         if not isinstance(key, tuple):
             key = key.to_tuple()
 
