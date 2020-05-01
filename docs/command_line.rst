@@ -486,7 +486,7 @@ The command will help you specify the batch of data that you want the validation
 
     $ great_expectations validation-operator --name action_list_operator --suite npi.warning
 
-    Let us help you specify the batch of data your want the validation operator to validate.
+    Let us help you specify the batch of data you want the validation operator to validate.
 
     Enter the path (relative or absolute) of a data file
     : data/npi_small.csv
