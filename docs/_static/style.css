@@ -3,7 +3,7 @@ h1,h2,h3,h4,h5,h6,p,body,a{
 }
 
 body {
-    background-color: #eaedf1;
+    background-color: #efefef;
     color: #2b354f;
 }
 
@@ -41,7 +41,7 @@ a {
 }
 
 .wy-body-for-nav {
-    background-color: #eaedf1;
+    background-color: #efefef;
 }
 
 .section {
@@ -53,10 +53,10 @@ a {
 }
 
 .wy-side-scroll {
-    background: #eaedf1;
+    background: #efefef;
 }
 .wy-nav-top {
-    background: #eaedf1;
+    background: #efefef;
     color: rgba(0,0,0,.65) !important;
     position: fixed;
     top: 63px;
@@ -73,15 +73,15 @@ a {
 
 .wy-nav-content {
     color: #222222;
-    background: #eaedf1;
+    background: #efefef;
 }
 
 .wy-nav-content-wrap {
-    background: #eaedf1;
+    background: #efefef;
 }
 
 .wy-side-nav-search {
-    background: #eaedf1;
+    background: #efefef;
 }
 
 .wy-menu-vertical a{
@@ -94,7 +94,7 @@ a {
 }
 
 .wy-nav-side {
-    background: #eaedf1;
+    background: #efefef;
     top: 50px;
 }
 
