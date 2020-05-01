@@ -2,7 +2,6 @@ import logging
 import os
 import random
 import re
-import inspect
 import shutil
 # PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 import logging
