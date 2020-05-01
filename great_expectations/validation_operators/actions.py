@@ -1,9 +1,10 @@
 import logging
+import warnings
 
 from great_expectations.data_context.util import instantiate_class_from_config
+from .util import send_slack_notification
 from ..data_context.store.metric_store import MetricStore
 from ..data_context.types.resource_identifiers import ValidationResultIdentifier
-from .util import send_slack_notification
 from ..exceptions import (
     DataContextError,
     ClassInstantiationError,
@@ -246,13 +247,19 @@ class UpdateDataDocsAction(ValidationAction):
     that a validation result should be added to the data docs.
     """
 
-    def __init__(self, data_context, target_site_names=None):
+    def __init__(self, data_context, site_names=None, target_site_names=None):
         """
         :param data_context: data context
-        :param target_site_names: *optional* List of site names for building data docs
+        :param site_names: *optional* List of site names for building data docs
         """
         super(UpdateDataDocsAction, self).__init__(data_context)
-        self._target_site_names = target_site_names
+        if target_site_names:
+            warnings.warn("target_site_names is deprecated. Please use site_names instead.", DeprecationWarning)
+            if site_names:
+                raise DataContextError("Invalid configuration: legacy key target_site_names and site_names key are "
+                                       "both present in UpdateDataDocsAction configuration")
+            site_names = target_site_names
+        self._site_names = site_names
 
     def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
         logger.debug("UpdateDataDocsAction.run")
@@ -266,6 +273,6 @@ class UpdateDataDocsAction(ValidationAction):
             ))
 
         self.data_context.build_data_docs(
-            site_names=self._target_site_names,
+            site_names=self._site_names,
             resource_identifiers=[validation_result_suite_identifier]
         )
