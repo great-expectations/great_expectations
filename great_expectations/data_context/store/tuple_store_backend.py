@@ -258,27 +258,21 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                     key_list.append(key)
 
         return key_list
-
-    def remove_key(self, key, scaller=None):
-        if scaller == "clean_site" :
-            if os.path.exists(self.full_base_directory):
-                if shutil.rmtree(self.full_base_directory):
-                    return True
-            #there are multiple calls in case of clean_site
-            return True
+    
+     def remove_key(self, key):
         if not isinstance(key, tuple):
             key = key.to_tuple()
-        
+
         filepath = os.path.join(
             self.full_base_directory,
             self._convert_key_to_filepath(key)
         )
         path, filename = os.path.split(filepath)
         if os.path.exists(filepath):
-            if os.remove(filepath):
+            if shutil.rmtree(self.full_base_directory):
                 return True
         return False
-       
+
     def get_url_for_key(self, key, protocol=None):
         path = self._convert_key_to_filepath(key)
         full_path = os.path.join(self.full_base_directory, path)
