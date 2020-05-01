@@ -506,12 +506,29 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
+
         if isinstance(value, str):
-            blob.upload_from_string(value.encode(content_encoding), content_encoding=content_encoding,
+            blob.content_encoding = content_encoding
+            blob.upload_from_string(value.encode(content_encoding),
                                     content_type=content_type)
         else:
             blob.upload_from_string(value, content_type=content_type)
         return gcs_object_key
+
+    def _move(self, source_key, dest_key, **kwargs):
+        from google.cloud import storage
+        gcs = storage.Client(project=self.project)
+        bucket = gcs.get_bucket(self.bucket)
+
+        source_filepath = self._convert_key_to_filepath(source_key)
+        if not source_filepath.startswith(self.prefix):
+            source_filepath = os.path.join(self.prefix, source_filepath)
+        dest_filepath = self._convert_key_to_filepath(dest_key)
+        if not dest_filepath.startswith(self.prefix):
+            dest_filepath = os.path.join(self.prefix, dest_filepath)
+
+        blob = bucket.blob(source_filepath)
+        new_blob = bucket.rename_blob(blob, dest_filepath)
 
     def list_keys(self):
         key_list = []
@@ -537,6 +554,8 @@ class TupleGCSStoreBackend(TupleStoreBackend):
 
     def get_url_for_key(self, key, protocol=None):
         path = self._convert_key_to_filepath(key)
+        if not path.startswith(self.prefix):
+            path = os.path.join(self.prefix, path)
         return "https://storage.googleapis.com/" + self.bucket + "/" + path
 
     def remove_key(self, key):
