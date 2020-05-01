@@ -4,37 +4,18 @@ import sys
 
 import click
 
-from great_expectations.cli import toolkit as toolkit
 from great_expectations import exceptions as ge_exceptions
-from great_expectations.core import (
-    ExpectationSuite,
-    get_metric_kwargs_id,
-)
-from great_expectations.cli.datasource import (
-    get_batch_kwargs,
-    select_datasource,
-)
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-)
-from great_expectations.cli.util import cli_message, load_expectation_suite, cli_message_list
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message, _anonymizers, \
-    edit_expectation_suite_usage_statistics
-from great_expectations.data_asset import DataAsset
-from great_expectations.render.renderer.suite_edit_notebook_renderer import SuiteEditNotebookRenderer
+from great_expectations.cli import toolkit
+from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.mark import Mark as mark
-from great_expectations.cli.toolkit import (
-    create_expectation_suite as create_expectation_suite_impl,
-)
-from great_expectations.cli.util import (
-    cli_message,
-    cli_message_list,
-    load_data_context_with_error_handling,
-    load_expectation_suite,
-)
+from great_expectations.cli.util import cli_message, cli_message_list
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
     send_usage_message,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
 )
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
@@ -113,10 +94,10 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
 def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs, usage_event):
     batch_kwargs_json = batch_kwargs
     batch_kwargs = None
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
 
     try:
-        suite = load_expectation_suite(context, suite)
+        suite = toolkit.load_expectation_suite(context, suite, usage_event)
         citations = suite.get_citations(require_batch_kwargs=True)
 
         if batch_kwargs_json:
@@ -165,7 +146,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
             additional_batch_kwargs = None
             try:
-                data_source = select_datasource(context, datasource_name=datasource)
+                data_source = toolkit.select_datasource(context, datasource_name=datasource)
             except ValueError as ve:
                 cli_message("<red>{}</red>".format(ve))
                 send_usage_message(
@@ -303,7 +284,7 @@ def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
 
 def _suite_new(suite: str, directory: str, empty: bool, jupyter: bool, view: bool, batch_kwargs, usage_event: str) -> None:
     # TODO break this up into demo and new
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
 
     datasource_name = None
     generator_name = None
@@ -313,7 +294,7 @@ def _suite_new(suite: str, directory: str, empty: bool, jupyter: bool, view: boo
         if batch_kwargs is not None:
             batch_kwargs = json.loads(batch_kwargs)
 
-        success, suite_name = create_expectation_suite_impl(context, datasource_name=datasource_name,
+        success, suite_name = toolkit.create_expectation_suite(context, datasource_name=datasource_name,
                                                             batch_kwargs_generator_name=generator_name,
                                                             generator_asset=generator_asset, batch_kwargs=batch_kwargs,
                                                             expectation_suite_name=suite,
@@ -366,7 +347,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 )
 def suite_delete(suite, directory):
     """Delete an expectation suite from the expectation store."""
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
     suite_names = context.list_expectation_suite_names()
     if len(suite_names) == 0:
         cli_message("No expectation suites found")
@@ -405,7 +386,7 @@ def suite_scaffold(suite, directory, jupyter):
 def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
     usage_event = "cli.suite.scaffold"
     suite_name = suite
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
     notebook_filename = f"scaffold_{suite_name}.ipynb"
     notebook_path = _get_notebook_path(context, notebook_filename)
 
@@ -447,7 +428,7 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
 )
 def suite_list(directory):
     """Lists available Expectation Suites."""
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
 
     try:
         suite_names = [
