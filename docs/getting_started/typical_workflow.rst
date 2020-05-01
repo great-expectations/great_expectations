@@ -315,71 +315,8 @@ For example, if you wanted to run this script nightly at 04:00, you'd add someth
 Embedding automated testing into a data pipeline
 ************************************************
 
-
-#########
-TODO
-#########
-
-Checkpoints are a convenient way to generate a data validation script that can be run manually or via a scheduler.
-
-If you open the generated checkpoint file you'll see it's only a few lines of code to get validations running!
-It will look like this:
-
-.. code-block:: python
-
-    """
-    A basic generated Great Expectations checkpoint that validates a single batch of data.
-
-    Data that is validated is controlled by BatchKwargs, which can be adjusted in
-    this script.
-
-    Data are validated by use of the `ActionListValidationOperator` which is
-    configured by default. The default configuration of this Validation Operator
-    saves validation results to your results store and then updates Data Docs.
-
-    This makes viewing validation results easy for you and your team.
-
-    Usage:
-    - Run this file: `python movieratings.ratings_tap.py`.
-    - This can be run manually or via a scheduler such as cron.
-    - If your pipeline runner supports python snippets you can paste this into your
-    pipeline.
-    """
-    import sys
-    import great_expectations as ge
-
-    # checkpoint configuration
-    context = ge.DataContext()
-    suite = context.get_expectation_suite("movieratings.ratings_tap")
-    # You can modify your BatchKwargs to select different data
-    batch_kwargs = {
-        "table": "ratings",
-        "schema": "movieratings",
-        "datasource": "movieratings",
-    }
-
-    # checkpoint validation process
-    batch = context.get_batch(batch_kwargs, suite)
-    results = context.run_validation_operator("action_list_operator", [batch])
-
-    if not results["success"]:
-        print("Validation Failed!")
-        sys.exit(1)
-
-    print("Validation Succeeded!")
-    sys.exit(0)
-
-#########
-TODO
-#########
-
-
-.. note:: This is an ideal way to deploy automated data testing if you want to take automated interventions based on the results of data validation.
-  For example, you may want your pipeline to quarantine data that does not meet your expectations.
-
-
-A data engineer can add a :ref:`Validation Operator<validation_operators_and_actions>` to your pipeline and configure it.
-These :ref:`Validation Operators<validation_operators_and_actions>` evaluate the new batches of data that flow through your pipeline against the expectations your team defined in the previous sections.
+A data engineer can add a Checkpoint or a :ref:`Validation Operator<validation_operators_and_actions>` to your pipeline and configure it to run validations of one or more batches of data against one or more expectation suites for each batch.
+These Checkpoints and :ref:`Validation Operators<validation_operators_and_actions>` evaluate the new batches of data that flow through your pipeline against the expectations your team defined in the previous sections.
 
 While data pipelines can be implemented with various technologies, at their core they are all DAGs (directed acyclic graphs) of computations and transformations over data.
 
@@ -390,6 +327,10 @@ This drawing shows an example of a node in a pipeline that loads data from a CSV
 - The second suite validates the pipeline's output - the data loaded into the table.
 
 .. image:: ../images/pipeline_diagram_two_nodes.png
+
+.. note::
+    This pattern is an ideal way to deploy automated data testing if you want to take automated interventions based on the results of data validation.
+    For example, you may want your pipeline to quarantine data that does not meet your expectations.
 
 To implement this validation logic, a data engineer inserts a Python code snippet into the pipeline - before and after the node. The code snippet prepares the data for the GE Validation Operator and calls the operator to perform the validation.
 
@@ -443,6 +384,106 @@ Below is an example of this code snippet, with comments that explain what each l
         # Decide what your pipeline should do in case the data does not
         # meet your expectations.
 
+#########
+TODO
+#########
+
+It will look like this:
+
+.. code-block:: python
+
+    """
+    A basic generated Great Expectations checkpoint that validates a single batch of data.
+
+    Data that is validated is controlled by BatchKwargs, which can be adjusted in
+    this script.
+
+    Data are validated by use of the `ActionListValidationOperator` which is
+    configured by default. The default configuration of this Validation Operator
+    saves validation results to your results store and then updates Data Docs.
+
+    This makes viewing validation results easy for you and your team.
+
+    Usage:
+    - Run this file: `python movieratings.ratings_tap.py`.
+    - This can be run manually or via a scheduler such as cron.
+    - If your pipeline runner supports python snippets you can paste this into your
+    pipeline.
+    """
+    import sys
+    import great_expectations as ge
+
+    # checkpoint configuration
+    context = ge.DataContext()
+    suite = context.get_expectation_suite("movieratings.ratings_tap")
+    # You can modify your BatchKwargs to select different data
+    batch_kwargs = {
+        "table": "ratings",
+        "schema": "movieratings",
+        "datasource": "movieratings",
+    }
+
+    # checkpoint validation process
+    batch = context.get_batch(batch_kwargs, suite)
+    results = context.run_validation_operator("action_list_operator", [batch])
+
+    if not results["success"]:
+        print("Validation Failed!")
+        sys.exit(1)
+
+    print("Validation Succeeded!")
+    sys.exit(0)
+
+####
+TODO
+####
+
+If you open the checkpoint yaml file you'll see it's only a few lines of configurations to add validations of data from across your pipeline.
+
+For example to make this checkpoint **validate multiple source files before and after their ingestion into your data lake** your checkpoint might look like this:
+
+.. note:: Note in this example we have 4 batches of data from 2 different datasources (files and a database) and multiple suites can be run against a given batch.
+
+.. code-block:: yaml
+
+    validation_operator_name: action_list_operator
+    batches:
+      - batch_kwargs:
+          path: /Users/me/pipeline/source_files/npi.csv
+          datasource: files_datasource
+          reader_method: read_csv
+        expectation_suite_names:
+          - npi.warning
+          - npi.critical
+      - batch_kwargs:
+          path: /Users/me/pipeline/source_files/claims.csv
+          datasource: files_datasource
+          reader_method: read_csv
+        expectation_suite_names:
+          - claims.warning
+      - batch_kwargs:
+          table: npi
+          datasource: data_lake
+        expectation_suite_names:
+          - npi.warning
+          - npi.critical
+      - batch_kwargs:
+          table: claims
+          datasource: data_lake
+        expectation_suite_names:
+          - claims.warning
+
+
+####
+TODO
+####
+
+
+
+
+#########
+TODO
+#########
 
 Responding to Validation Results
 ----------------------------------------
@@ -462,12 +503,17 @@ In the world of software testing, if a program does not pass a test, it usually 
 In pipeline and data testing, if data does not meet expectations, the response to a failing test is triaged into 3 categories:
 
 1. **The data is fine, and the validation result revealed a characteristic that the team was not aware of.**
+
   The team's data scientists or domain experts update the expectations to reflect this new discovery.
   They use the process described above in the Review and Edit sections to update the expectations while testing them against the data batch that failed validation.
+
 2. **The data is "broken"**, and **can be recovered.**
+
   For example, the users table could have dates in an incorrect format.
   Data engineers update the pipeline code to deal with this brokenness and fix it on the fly.
+
 3. **The data is "broken beyond repair".**
+
   The owners of the pipeline go upstream to the team (or external partner) who produced the data and address it with them.
   For example, columns in the users table could be missing entirely.
   The validation results in Data Docs makes it easy to communicate exactly what is broken, since it shows the expectation that was not met and observed examples of non-conforming data.
