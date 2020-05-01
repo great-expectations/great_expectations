@@ -1,15 +1,12 @@
-import pytest
-
 import datetime
 
+import pytest
 from freezegun import freeze_time
-
-from great_expectations.core.metric import ValidationMetricIdentifier
-from great_expectations.data_context.util import instantiate_class_from_config
-
 
 from great_expectations.core import ExpectationSuiteValidationResult, ExpectationValidationResult, \
     ExpectationConfiguration, RunIdentifier
+from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.data_context.util import instantiate_class_from_config
 
 
 @pytest.fixture(params=[
@@ -146,28 +143,34 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
     run_id = RunIdentifier(run_name=datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ"))
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
+        data_asset_name=None,
         expectation_suite_identifier="asset.warning",
         metric_name="expect_column_values_to_match_regex.result.unexpected_percent",
         metric_kwargs_id="column=mycol"
     )
+    param_store.remove_key(metric_identifier)  # We have to remove the key in case a previous run left it here
     metric_value = 12.3456789
     param_store.set(metric_identifier, metric_value)
 
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
+        data_asset_name=None,
         expectation_suite_identifier="asset.warning",
         metric_name="expect_table_row_count_to_be_between.result.observed_value",
         metric_kwargs_id=None
     )
+    param_store.remove_key(metric_identifier)  # We have to remove the key in case a previous run left it here
     metric_value = 512
     param_store.set(metric_identifier, metric_value)
 
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
+        data_asset_name=None,
         expectation_suite_identifier="asset2.warning",
         metric_name="expect_column_values_to_match_regex.result.unexpected_percent",
         metric_kwargs_id="column=mycol"
     )
+    param_store.remove_key(metric_identifier)  # We have to remove the key in case a previous run left it here
     metric_value = 12.3456789
     param_store.set(metric_identifier, metric_value)
 

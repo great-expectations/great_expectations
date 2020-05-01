@@ -1,20 +1,20 @@
-import logging
+import datetime
 import json
+import logging
+import warnings
 # PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 from collections import namedtuple
 from copy import deepcopy
-import datetime
-from dateutil.parser import parse
-import warnings
 
 from IPython import get_ipython
+from dateutil.parser import parse
 from marshmallow import Schema, fields, ValidationError, post_load, pre_dump
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import nested_update
-from great_expectations.types import DictDot
 from great_expectations.exceptions import (
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
@@ -22,7 +22,7 @@ from great_expectations.exceptions import (
     ParserError,
     InvalidCacheValueError,
 )
-from great_expectations.core.urn import ge_urn
+from great_expectations.types import DictDot
 
 logger = logging.getLogger(__name__)
 
@@ -314,6 +314,9 @@ class RunIdentifier(DataContextKey):
     def to_tuple(self):
         return self._run_name or "__none__", self._run_time.isoformat()
 
+    def to_fixed_length_tuple(self):
+        return self._run_name or "__none__", self._run_time.isoformat()
+
     def __repr__(self):
         return json.dumps(self.to_json_dict())
 
@@ -328,6 +331,9 @@ class RunIdentifier(DataContextKey):
     def from_tuple(cls, tuple_):
         return cls(tuple_[0], tuple_[1])
 
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        return cls(tuple_[0], tuple_[1])
 
 class RunIdentifierSchema(Schema):
     run_name = fields.Str()

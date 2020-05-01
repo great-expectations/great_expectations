@@ -43,7 +43,11 @@ class DatabaseStoreBackend(StoreBackend):
         drivername = credentials.pop("drivername")
         options = URL(drivername, **credentials)
         self.engine = create_engine(options)
-        meta.create_all(self.engine)
+        try:
+            meta.create_all(self.engine)
+        except SQLAlchemyError as e:
+            raise ge_exceptions.StoreBackendError(
+                f"Unable to connect to table {table_name} because of an error. It is possible your table needs to be migrated to a new schema.  SqlAlchemyError: {str(e)}")
 
     def _get(self, key):
         sel = select([column("value")]).select_from(self._table).where(
@@ -88,4 +92,15 @@ class DatabaseStoreBackend(StoreBackend):
         return [tuple(row) for row in self.engine.execute(sel).fetchall()]
 
     def remove_key(self, key):
-        raise NotImplementedError
+        delete_statement = self._table.delete().where(
+            and_(
+                *[getattr(self._table.columns, key_col) == val for key_col, val in
+                  zip(self.key_columns, key)]
+            )
+        )
+        try:
+            return self.engine.execute(delete_statement)
+        except SQLAlchemyError as e:
+            raise ge_exceptions.StoreBackendError(f"Unable to delete key: got sqlalchemy error {str(e)}")
+
+    _move = None
