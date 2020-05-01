@@ -63,6 +63,9 @@ class DatabaseStoreBackend(StoreBackend):
         ins = self._table.insert().values(**cols)
         self.engine.execute(ins)
 
+    def _move(self):
+        raise NotImplementedError
+
     def _has_key(self, key):
         sel = select([sqlalchemy.func.count(column("value"))]).select_from(self._table).where(
             and_(
