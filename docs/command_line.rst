@@ -709,7 +709,7 @@ If you are using a SQL datasource you will be guided through a series of prompts
 
 For example, imagine you want to protect a machine learning model that looks at insurance claims
 from last 90 days to predict costs with a checkpoint named ``cost_model_protection``.
-If you have built a suite called ``cost_model_assumptions`` and a have a postgres datasource with a ``claims`` table with an ``claim_timestamp`` column and you wanted validate claims that occurred in the last 90 days you might do something like:
+If you have built a suite called ``cost_model_assumptions`` and a have a postgres datasource with a ``claims`` table with an ``claim_timestamp`` column and you wanted to validate claims that occurred in the last 90 days you might do something like:
 
 .. code-block:: bash
 
