@@ -18,7 +18,6 @@
 #
 import os
 import sys
-import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath('../'))
 
@@ -33,7 +32,7 @@ sys.path.insert(0, os.path.abspath('../'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx_rtd_theme',
+    # 'sphinx_rtd_theme',
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
@@ -84,11 +83,10 @@ language = None
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'paraiso-dark'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
-
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -102,12 +100,27 @@ html_theme = 'sphinx_rtd_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    'logo_only': True,
+}
+
+html_static_path = [
+    '_static', 
+    '_static/style.css', 
+    '_static/hk-grotesk-pro/HKGroteskPro-Bold.woff2',
+    '_static/hk-grotesk-pro/HKGroteskPro-Regular.woff2',
+    '_static/hk-grotesk-pro/HKGroteskPro-SemiBold.woff2',
+    '_static/hk-grotesk-pro/HKGroteskPro-Medium.woff2',
+    '_static/header-logo.png',
+    '_static/discuss-logo.png'
+]
+html_css_files = ['style.css']
+
+html_logo = '../pip-logo.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
 
 
 # -- Options for Napoleon Extension --------------------------------------------
