@@ -214,7 +214,6 @@ class HtmlSiteStore(object):
     def clean_site(self):
         for _, target_store_backend in self.store_backends.items():
             keys = target_store_backend.list_keys()
-            #if no keys are found, still remove default site
             for key in keys:
                 target_store_backend.remove_key(key)
 
