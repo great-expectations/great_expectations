@@ -7,6 +7,10 @@ Changelog
 develop
 -----------------
 
+0.10.7
+-----------------
+*crud delete suite bug fix
+
 0.10.6
 -----------------
 
