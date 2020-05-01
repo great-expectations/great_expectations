@@ -11,14 +11,11 @@ import click
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext, rtd_url_ge_version
+from great_expectations.cli import toolkit
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
-from great_expectations.cli.util import (
-    cli_message,
-    cli_message_dict,
-    load_data_context_with_error_handling,
-)
 from great_expectations.cli.mark import Mark as mark
+from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message,
@@ -84,7 +81,7 @@ def datasource():
 )
 def datasource_new(directory):
     """Add a new datasource to the data context."""
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
     datasource_name, data_source_type = add_datasource(context)
 
     if datasource_name:
@@ -118,7 +115,7 @@ def datasource_new(directory):
 def delete_datasource(directory, datasource_name=None):
     """Delete data source"""
     print(datasource_name) 
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
     if datasource_name is None:
         cli_message("<red>{}</red>".format("Datasource name must be a datasource name"))
         return
@@ -141,7 +138,7 @@ def delete_datasource(directory, datasource_name=None):
 )
 def datasource_list(directory):
     """List known datasources."""
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
     datasources = context.list_datasources()
     datasource_count = len(datasources)
 
@@ -204,7 +201,7 @@ def datasource_profile(datasource, batch_kwargs_generator_name, data_assets, pro
     prompt the user to either specify the list of data assets to profile or to profile all.
     If the limit is not exceeded, the profiler will profile all data assets in the datasource.
     """
-    context = load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(directory)
 
     try:
         if additional_batch_kwargs is not None:
@@ -684,35 +681,6 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
 
 
 # TODO consolidate all the myriad CLI tests into this
-def select_datasource(context, datasource_name=None):
-    msg_prompt_select_data_source = "Select a datasource"
-    msg_no_datasources_configured = "<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
-
-    data_source = None
-
-    if datasource_name is None:
-        data_sources = sorted(context.list_datasources(), key=lambda x: x["name"])
-        if len(data_sources) == 0:
-            cli_message(msg_no_datasources_configured)
-        elif len(data_sources) == 1:
-            datasource_name = data_sources[0]["name"]
-        else:
-            choices = "\n".join(
-                ["    {}. {}".format(i, data_source["name"]) for i, data_source in enumerate(data_sources, 1)])
-            option_selection = click.prompt(
-                msg_prompt_select_data_source + "\n" + choices + "\n",
-                type=click.Choice([str(i) for i, data_source in enumerate(data_sources, 1)]),
-                show_choices=False
-            )
-            datasource_name = data_sources[int(option_selection) - 1]["name"]
-
-    if datasource_name is not None:
-        data_source = context.get_datasource(datasource_name)
-
-    return data_source
-
-
-# TODO consolidate all the myriad CLI tests into this
 def select_batch_kwargs_generator(context, datasource_name, available_data_assets_dict=None):
     msg_prompt_select_generator = "Select batch kwarg generator"
 
@@ -785,7 +753,7 @@ def get_batch_kwargs(context,
         # the datasource has no batch_kwargs_generators
         available_data_assets_dict = {datasource_name: {}}
 
-    data_source = select_datasource(context, datasource_name=datasource_name)
+    data_source = toolkit.select_datasource(context, datasource_name=datasource_name)
     datasource_name = data_source.name
 
     if batch_kwargs_generator_name is None:
@@ -982,7 +950,7 @@ Enter an SQL query
 
     msg_prompt_enter_data_asset_name = "\nWhich table would you like to use? (Choose one)\n"
 
-    msg_prompt_enter_data_asset_name_suffix = "    Don't see the table in the list above? Just type the SQL query\n"
+    msg_prompt_enter_data_asset_name_suffix = "    Do not see the table in the list above? Just type the SQL query\n"
 
     if additional_batch_kwargs is None:
         additional_batch_kwargs = {}

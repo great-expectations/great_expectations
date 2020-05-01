@@ -608,6 +608,31 @@ def empty_data_context(tmp_path_factory):
 
 
 @pytest.fixture
+def empty_context_with_checkpoint(empty_data_context):
+    context = empty_data_context
+    root_dir = empty_data_context.root_directory
+    fixture_name = "my_checkpoint.yml"
+    fixture_path = file_relative_path(__file__, f"./data_context/fixtures/contexts/{fixture_name}")
+    checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
+    shutil.copy(fixture_path, checkpoints_file)
+    assert os.path.isfile(checkpoints_file)
+    return context
+
+
+@pytest.fixture
+def empty_context_with_checkpoint_stats_enabled(empty_data_context_stats_enabled):
+    context = empty_data_context_stats_enabled
+    root_dir = context.root_directory
+    fixture_name = "my_checkpoint.yml"
+    fixture_path = file_relative_path(
+        __file__, f"./data_context/fixtures/contexts/{fixture_name}"
+    )
+    checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
+    shutil.copy(fixture_path, checkpoints_file)
+    return context
+
+
+@pytest.fixture
 def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     # Reenable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
@@ -624,6 +649,7 @@ def titanic_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('titanic_data_context'))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
     data_path = os.path.join(context_path, "../data")
     os.makedirs(os.path.join(data_path), exist_ok=True)
     titanic_yml_path = file_relative_path(__file__, "./test_fixtures/great_expectations_titanic.yml")
@@ -640,6 +666,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     project_path = str(tmp_path_factory.mktemp('titanic_data_context'))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
     data_path = os.path.join(context_path, "../data")
     os.makedirs(os.path.join(data_path), exist_ok=True)
     titanic_yml_path = file_relative_path(__file__, "./test_fixtures/great_expectations_titanic.yml")
@@ -648,6 +675,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     shutil.copy(titanic_csv_path, str(os.path.join(context_path, "../data/Titanic.csv")))
     return ge.data_context.DataContext(context_path)
 
+
 @pytest.fixture
 def titanic_sqlite_db():
     from sqlalchemy import create_engine
@@ -655,6 +683,29 @@ def titanic_sqlite_db():
     engine = create_engine('sqlite:///{}'.format(titanic_db_path))
     assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
     return engine
+
+
+@pytest.fixture
+def titanic_expectation_suite():
+    return ExpectationSuite(
+        expectation_suite_name="Titanic.warning",
+        meta={},
+        data_asset_type="Dataset",
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={
+                    "column": "PClass"
+                }
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_not_be_null",
+                kwargs={
+                    "column": "Name"
+                }
+            )
+        ]
+    )
 
 
 @pytest.fixture
