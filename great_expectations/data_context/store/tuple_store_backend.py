@@ -257,10 +257,11 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                     key_list.append(key)
 
         return key_list
-
+    
     def remove_key(self, key):
         if not isinstance(key, tuple):
             key = key.to_tuple()
+
         filepath = os.path.join(
             self.full_base_directory,
             self._convert_key_to_filepath(key)
@@ -270,7 +271,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             if shutil.rmtree(self.full_base_directory):
                 return True
         return False
-       
+
     def get_url_for_key(self, key, protocol=None):
         path = self._convert_key_to_filepath(key)
         full_path = os.path.join(self.full_base_directory, path)
@@ -502,12 +503,12 @@ class TupleGCSStoreBackend(TupleStoreBackend):
 
     def remove_key(self, key):
         from google.cloud import storage
-        gcs = storage.Client(self.project)
-        gcs_object_key = self._convert_key_to_filepath(key)
-        bucket = cloudStorageClient.bucket(self.bucket)
+        from gcloud.exceptions import NotFound
+        gcs = storage.Client(project=self.project)
+        bucket = gcs.get_bucket(self.bucket)
         try:
             bucket.delete_blobs(blobs=bucket.list_blobs(prefix=self.prefix))
-        except exceptions.NotFound as e:
+        except NotFound:
             return False
         return True
 
