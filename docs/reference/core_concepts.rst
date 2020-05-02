@@ -1,9 +1,9 @@
 .. _reference__core_concepts:
 
 
-###################################
-Core concepts in Great Expectations
-###################################
+#############
+Core concepts
+#############
 
 
 *************
