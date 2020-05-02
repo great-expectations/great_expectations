@@ -4,6 +4,9 @@
 Reference
 #########
 
+These pages provide a high-level overview of key great expectations features, with an emphasis on explaining
+the thinking behind the tools.
+
 .. toctree::
    :maxdepth: 2
 
