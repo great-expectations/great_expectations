@@ -26,10 +26,12 @@ Suites should have names corresponding to the kind of data they define, like “
 .. toctree::
    :maxdepth: 2
 
-   /reference/core_concepts/custom_expectations.rst
-   /reference/core_concepts/expectations.rst
-   /reference/core_concepts/result_format.rst
-   /reference/core_concepts/standard_arguments.rst
+   /reference/core_concepts/expectations/expectations.rst
+   /reference/core_concepts/expectations/distributional_expectations.rst
+   /reference/core_concepts/expectations/standard_arguments.rst
+   /reference/core_concepts/expectations/result_format.rst
+   /reference/core_concepts/expectations/glossary_of_expectations.rst
+   /reference/core_concepts/expectations/implemented_expectations.rst
 
 *************
 Data Contexts
@@ -89,6 +91,7 @@ can also identify data assets and partitions by inspecting a storage environment
 **********
 Validation
 **********
+
 In addition to specifying Expectations, Great Expectations also allows you to validate your data against an Expectation Suite. Validation produces a detailed report of how the data meets your expectations -- and where it doesn’t.
 
 DataAssets and Validations, answer the questions:
@@ -140,9 +143,10 @@ specific expected values. It provides a detailed look into what Great Expectatio
 
    /reference/core_concepts/data_docs.rst
 
-**************************
+*********
 Profiling
-**************************
+*********
+
 Profiling helps you understand your data by describing it and even building expectation suites based on previous batches of data. Profiling lets you ask:
 
 - What is this dataset like?
