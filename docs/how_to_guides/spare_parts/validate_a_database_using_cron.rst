@@ -1,5 +1,8 @@
 .. _how_to_guides__salck_validationaction
 
+.. warning:: This doc is spare parts: leftover pieces of old documentation.
+  It's potentially helpful, but may be incomplete, incorrect, or confusing.
+
 
 How to validate tables in a database using cron
 =================================================================

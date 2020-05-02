@@ -1,5 +1,8 @@
 .. _command_line:
 
+.. warning:: This doc is spare parts: leftover pieces of old documentation.
+  It's potentially helpful, but may be incomplete, incorrect, or confusing.
+
 ##############################################################
 How to use the Great Expectations command line interface (CLI)
 ##############################################################
