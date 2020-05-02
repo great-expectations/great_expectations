@@ -114,7 +114,6 @@ def datasource_new(directory):
 )
 def delete_datasource(directory, datasource_name=None):
     """Delete data source"""
-    print(datasource_name) 
     context = toolkit.load_data_context_with_error_handling(directory)
     if datasource_name is None:
         cli_message("<red>{}</red>".format("Datasource name must be a datasource name"))
@@ -122,7 +121,7 @@ def delete_datasource(directory, datasource_name=None):
     else:
         context.delete_datasource(datasource_name)
         if context.get_datasource(datasource_name) is None: 
-            cli_message("<green>{}</greem>".format("Datasource deleted successfully."))
+            cli_message("<green>{}</green>".format("Datasource deleted successfully."))
             return True
         else:
             cli_message("<red>{}</red>".format("Datasource not deleted"))
