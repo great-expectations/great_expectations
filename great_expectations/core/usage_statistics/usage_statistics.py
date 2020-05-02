@@ -109,8 +109,10 @@ class UsageStatisticsHandler(object):
             "platform.release": platform.release(),
             "version_info": str(sys.version_info),
             "anonymized_datasources": [
-                self._datasource_anonymizer.anonymize_datasource_info(datasource)
-                for datasource in self._data_context.datasources.values()
+                self._datasource_anonymizer.anonymize_datasource_info(
+                    datasource_name, datasource_config
+                )
+                for datasource_name, datasource_config in self._data_context._project_config_with_variables_substituted.datasources.items()
             ],
             "anonymized_stores": [
                 self._store_anonymizer.anonymize_store_info(store_name, store_obj)
