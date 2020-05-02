@@ -1,7 +1,7 @@
 .. _migrating_versions:
 
 ###################################
-Migrating Between Versions
+Migrating between versions
 ###################################
 
 While we are committed to keeping Great Expectations as stable as possible,
@@ -16,9 +16,9 @@ Since expectation semantics are usually consistent across versions, there is
 little change required when upgrading great expectations, with some exceptions
 noted here.
 
-***************************************
-Using the project check-config Command
-***************************************
+***********************************************
+How to use the project ``check-config`` command
+***********************************************
 
 To facilitate this substantial config format change, starting with version 0.8.0
 we introduced ``project check-config`` to sanity check your config files. From your
@@ -36,9 +36,9 @@ your original yaml file will be archived automatically for you. Even so, it's
 in your source control system already, right? ;-)
 
 .. _Upgrading to 0.10.x:
-*************************
-Upgrading to 0.10.x
-*************************
+************************
+How to upgrade to 0.10.x
+************************
 
 In the 0.10.0 release, there are several breaking changes to the DataContext API.
 
@@ -55,9 +55,9 @@ If you are using ``BatchKwargsGenerators`` in your project config, follow these 
 * Run a simple command such as: ``great_expectations datasource list`` and ensure you see a list of datasources.
 
 
-*************************
-Upgrading to 0.9.x
-*************************
+***********************
+How to upgrade to 0.9.x
+***********************
 
 In the 0.9.0 release, there are several changes to the DataContext API.
 
@@ -259,9 +259,9 @@ CODE CHANGES:
   GreatExpectations. These should be transparent to users.
 
 
-*************************
-Upgrading to 0.8.x
-*************************
+***********************
+How to upgrade to 0.8.x
+***********************
 
 In the 0.8.0 release, our DataContext config format has changed dramatically to
 enable new features including extensibility.
@@ -294,9 +294,9 @@ Pre-0.8.x configuration files ``great_expectations.yml`` are not compatible with
 
 If you run into any issues, please ask for help on `Slack <https://greatexpectations.io/slack>`__.
 
-*************************
-Upgrading to 0.7.x
-*************************
+***********************
+How to upgrade to 0.7.x
+***********************
 
 In version 0.7, GE introduced several new features, and significantly changed the way DataContext objects work:
 
