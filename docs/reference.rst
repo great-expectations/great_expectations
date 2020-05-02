@@ -11,7 +11,6 @@ the thinking behind the tools.
    :maxdepth: 2
 
    /reference/core_concepts
-   /reference/types_of_expectations
    /reference/supporting_resources
 
 .. toctree::
