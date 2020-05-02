@@ -13,12 +13,4 @@ How-to guides
    /how_to_guides/create_and_edit_expectations
    /how_to_guides/validation
    /how_to_guides/migrating_versions
-
-Other
------
-
-.. toctree::
-   :maxdepth: 2
-   :glob:
-
-   /how_to_guides/*
+   /how_to_guides/spare_parts
