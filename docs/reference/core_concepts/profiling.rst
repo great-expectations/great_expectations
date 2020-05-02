@@ -17,11 +17,11 @@ and max_value to both be None: essentially only saying that it expects a mean to
 
 The default BasicDatasetProfiler will thus produce a page for each table or DataFrame including an overview section:
 
-.. image:: ../images/movie_db_profiling_screenshot_2.jpg
+.. image:: ../../images/movie_db_profiling_screenshot_2.jpg
 
 And then detailed statistics for each column:
 
-.. image:: ../images/movie_db_profiling_screenshot_1.jpg
+.. image:: ../../images/movie_db_profiling_screenshot_1.jpg
 
 Profiling is still a beta feature in Great Expectations. Over time, we plan to extend and improve the
 ``BasicDatasetProfiler`` and also add additional profilers.
