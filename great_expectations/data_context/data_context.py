@@ -168,7 +168,6 @@ class BaseDataContext(object):
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
 
-
     def _build_store(self, store_name, store_config):
         module_name = 'great_expectations.data_context.store'
         new_store = instantiate_class_from_config(
@@ -858,7 +857,7 @@ class BaseDataContext(object):
         """
         if datasource_name in self._cached_datasources:
             return self._cached_datasources[datasource_name]
-        elif datasource_name in self._project_config_with_variables_substituted.datasources:
+        if datasource_name in self._project_config_with_variables_substituted.datasources:
             datasource_config = copy.deepcopy(
                 self._project_config_with_variables_substituted.datasources[datasource_name])
         else:
