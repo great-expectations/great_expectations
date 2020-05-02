@@ -15,11 +15,11 @@ a clearer picture of your data, and keep your entire team on the same page as da
 For example, the default BasicDatasetProfiler in GE will produce validation_results which compile to a page for each
 table or DataFrame including an overview section:
 
-.. image:: ../images/movie_db_profiling_screenshot_2.jpg
+.. image:: ../../images/movie_db_profiling_screenshot_2.jpg
 
 And then detailed statistics for each column:
 
-.. image:: ../images/movie_db_profiling_screenshot_1.jpg
+.. image:: ../../images/movie_db_profiling_screenshot_1.jpg
 
 The Great Expectations DataContext uses a configurable "data documentation site" to define which artifacts to compile
 and how to render them as documentation. Multiple sites can be configured inside a project, each suitable for a
@@ -44,7 +44,7 @@ sites can be configured inside a project, each suitable for a particular data do
 
 Here is an example of a site:
 
-.. image:: ../images/data_doc_site_index_page.png
+.. image:: ../../images/data_doc_site_index_page.png
 
 The behavior of a site is controlled by configuration in the DataContext's great_expectations.yml file.
 

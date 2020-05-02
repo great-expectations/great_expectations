@@ -159,33 +159,3 @@ describe the data. A profiler can create a “stub” of high-level expectations
 
    /reference/core_concepts/profilers.rst
    /reference/core_concepts/profiling.rst
-
-
-------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 2
-
-   /reference/core_concepts/custom_expectations.rst
-   /reference/core_concepts/expectations.rst
-   /reference/core_concepts/result_format.rst
-   /reference/core_concepts/standard_arguments.rst
-
-   /reference/core_concepts/data_context.rst
-   /reference/core_concepts/evaluation_parameters.rst
-
-   /reference/core_concepts/datasource.rst
-   /reference/core_concepts/datasource_reference.rst
-   /reference/core_concepts/batch_kwargs_generator.rst
-
-   /reference/core_concepts/validation.rst
-   /reference/core_concepts/validation_operators_and_actions.rst
-   /reference/core_concepts/validation_result.rst
-   /reference/core_concepts/metric_reference.rst
-   /reference/core_concepts/metrics.rst
-
-   /reference/core_concepts/data_docs.rst
-
-   /reference/core_concepts/profilers.rst
-   /reference/core_concepts/profiling.rst
-
