@@ -1,9 +1,9 @@
-.. _glossary:
+.. _reference__core_concepts:
 
 
-###########################
-Great Expectations Glossary
-###########################
+###################################
+Core concepts in Great Expectations
+###################################
 
 
 *************
@@ -23,28 +23,25 @@ parameters to make it possible to evaluate whether the expectation is true on a 
 **Expectation Suites** combine multiple Expectation Configurations into an overall description of a dataset. Expectation
 Suites should have names corresponding to the kind of data they define, like “NPI” for National Provider Identifier data or “company.users” for a users table.
 
-**************************
-DataAssets and Validation
-**************************
-In addition to specifying Expectations, Great Expectations also allows you to validate your data against an Expectation Suite. Validation produces a detailed report of how the data meets your expectations -- and where it doesn’t.
+*************
+Data Contexts
+*************
 
-DataAssets and Validations, answer the questions:
+A **Data Context** stitches together all the features available with Great Expectations, making it possible to easily 
+manage configurations for datasources, and data docs sites and to store expectation suites and validations. Data Contexts also unlock more powerful features such as Evaluation Parameter Stores.
 
-- How do I describe my Expectations to Great Expectations?
-- Does my data meet my Expectations?
+A **Data Context Configuration** is a yaml file that can be committed to source control to ensure that all the settings 
+related to your validation are appropriately versioned and visible to your team. It can flexibly describe plugins and other customizations for accessing datasources or building data docs sites.
 
-A **DataAsset** is a Great Expectations object that can create and validate Expectations against specific data. 
-DataAssets are connected to data. They can evaluate Expectations wherever you access your data, using Pandas, Spark, or SqlAlchemy.
+A **Store** allows you to manage access to Expectations, Validations and other Great Expectations assets in a 
+standardized way, making it easy to share resources across a team that uses AWS, Azure, GCP, local storage, or something else entirely.
 
-An •Expectation Validation Result** captures the output of checking an expectation against data. It describes whether 
-the data met the expectation, and additional metrics from the data such as the percentage of unique values or observed mean.
+An **Evaluation Parameter** Store makes it possible to build expectation suites that depend on values from other batches
+of data, such as ensuring that the number of rows in a downstream dataset equals the number of unique values from an upstream one. A Data Context can manage a store to facilitate that validation scenario.
 
-An **Expectation Suite Validation Result** combines multiple Expectation Validation Results and metadata about the 
-validation into a single report.
-
-**************************
-Datasources and Batches
-**************************
+***********
+Datasources
+***********
 
 Great Expectations lets you focus on your data, not writing tests. It validates your expectations no matter where the data is located.
 
@@ -68,15 +65,31 @@ partitions, deliveries, or slices of logical data assets.
 A **Batch Kwargs Generator** translates Batch Parameters to datasource-specific Batch Kwargs. A Batch Kwargs Generator 
 can also identify data assets and partitions by inspecting a storage environment.
 
-**************************
-Profiling
-**************************
-Profiling helps you understand your data by describing it and even building expectation suites based on previous batches of data. Profiling lets you ask:
 
-- What is this dataset like?
+**********
+Validation
+**********
+In addition to specifying Expectations, Great Expectations also allows you to validate your data against an Expectation Suite. Validation produces a detailed report of how the data meets your expectations -- and where it doesn’t.
 
-A **Profiler** reviews data assets and produces new Expectation Suites and Expectation Suite Validation Results that 
-describe the data. A profiler can create a “stub” of high-level expectations based on what it sees in the data. Profilers can also be extended to create more specific expectations based on team conventions or statistical properties. Finally, Profilers can take advantage of metrics produced by Great Expectations when validating data to create useful overviews of data.
+DataAssets and Validations, answer the questions:
+
+- How do I describe my Expectations to Great Expectations?
+- Does my data meet my Expectations?
+
+A **DataAsset** is a Great Expectations object that can create and validate Expectations against specific data. 
+DataAssets are connected to data. They can evaluate Expectations wherever you access your data, using Pandas, Spark, or SqlAlchemy.
+
+An **Expectation Validation Result** captures the output of checking an expectation against data. It describes whether 
+the data met the expectation, and additional metrics from the data such as the percentage of unique values or observed mean.
+
+An **Expectation Suite Validation Result** combines multiple Expectation Validation Results and metadata about the 
+validation into a single report.
+
+A **Metric** is simply a value produced by Great Expectations when evaluating one or more batches of data, such as an 
+observed mean or distribution of data.
+
+A **Validation Operator** stitches together resources provided by the Data Context to build mini-programs that 
+demonstrate the full potential of Great Expectations. They take configurable Actions such as updating Data Docs, sending a notification to your team about validation results, or storing a result in a shared S3 bucket.
 
 **************************
 Data Docs
@@ -94,30 +107,12 @@ A **Profiling Renderer** details the observed metrics produced from a validation
 specific expected values. It provides a detailed look into what Great Expectations learned about your data.
 
 **************************
-Data Context
+Profiling
 **************************
+Profiling helps you understand your data by describing it and even building expectation suites based on previous batches of data. Profiling lets you ask:
 
-A **Data Context** stitches together all the features available with Great Expectations, making it possible to easily 
-manage configurations for datasources, and data docs sites and to store expectation suites and validations. Data Contexts also unlock more powerful features such as Evaluation Parameter Stores.
+- What is this dataset like?
 
-
-A **Data Context Configuration** is a yaml file that can be committed to source control to ensure that all the settings 
-related to your validation are appropriately versioned and visible to your team. It can flexibly describe plugins and other customizations for accessing datasources or building data docs sites.
-
-
-A **Store** allows you to manage access to Expectations, Validations and other Great Expectations assets in a 
-standardized way, making it easy to share resources across a team that uses AWS, Azure, GCP, local storage, or something else entirely.
-
-A **Metric** is simply a value produced by Great Expectations when evaluating one or more batches of data, such as an 
-observed mean or distribution of data.
-
-An **Evaluation Parameter** Store makes it possible to build expectation suites that depend on values from other batches
-of data, such as ensuring that the number of rows in a downstream dataset equals the number of unique values from an upstream one. A Data Context can manage a store to facilitate that validation scenario.
-
-**************************
-Validation Operators
-**************************
-
-A **Validation Operator** stitches together resources provided by the Data Context to build mini-programs that 
-demonstrate the full potential of Great Expectations. They take configurable Actions such as updating Data Docs, sending a notification to your team about validation results, or storing a result in a shared S3 bucket.
+A **Profiler** reviews data assets and produces new Expectation Suites and Expectation Suite Validation Results that 
+describe the data. A profiler can create a “stub” of high-level expectations based on what it sees in the data. Profilers can also be extended to create more specific expectations based on team conventions or statistical properties. Finally, Profilers can take advantage of metrics produced by Great Expectations when validating data to create useful overviews of data.
 
