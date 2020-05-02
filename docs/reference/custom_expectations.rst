@@ -199,10 +199,14 @@ A similar implementation for SqlAlchemy would also import the base decorator:
 
             # We will assume that these are already HISTOGRAMS created as a check_dataset
             # either of binned values or of (ordered) value counts
-            rows = sa.select([
-                sa.column(column_A).label("col_A_counts"),
-                sa.column(column_B).label("col_B_counts")
-            ]).select_from(self._table).fetchall()
+            rows = self.engine.execute(
+                sa.select(
+                    [
+                        sa.column(column_A).label("col_A_counts"),
+                        sa.column(column_B).label("col_B_counts"),
+                    ]
+                ).select_from(self._table)
+            ).fetchall()
 
             cols = [col for col in zip(*rows)]
             cdf1 = np.array(cols[0])
