@@ -1,5 +1,7 @@
 .. _how_to_guides__validate_data_in_a_pipeline_with_a_checkpoint
 
+.. warning:: This doc is spare parts: leftover pieces of old documentation.
+  It's potentially helpful, but may be incomplete, incorrect, or confusing.
 
 How to validate data in a pipeline with a Checkpoint
 =================================================================
