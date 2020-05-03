@@ -216,6 +216,7 @@ Edit
 
 Editing an Expectation Suite means adding, removing, and modifying the arguments of existing expectations.
 
+.. note:: If you wish to override the default jupyter notebook command then you can set GE_JUPYTER_CMD environement variable. This is specially useful for running great expectations inside dockerized environements. For dockerized GE, use `export GE_JUPYTER_CMD='jupyter notebook --ip 0.0.0.0'`
 
 Similar to writing SQL queries, Expectations are best edited interactively against your data.
 The best interface for this is in a Jupyter notebook where you can get instant feedback as you iterate.
