@@ -117,7 +117,7 @@ How do I get started?
 
 Check out :ref:`Getting started` to set up your first deployment of Great Expectations, and learn important concepts along the way. Estimated time: 15 minutes.
 
-If you'd like to contribute to Great Expectations, we very happy! Please head to the :ref:`Contributing` section.
+If you'd like to contribute to Great Expectations, we very happy! Please head to the :ref:`Contribute to Great Expectations` tutorial.
 
 If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public Slack channel: https://greatexpectations.io/slack
 

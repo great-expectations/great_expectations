@@ -1,6 +1,6 @@
-############
-Contributing
-############
+################################
+Contribute to Great Expectations
+################################
 
 Welcome to the Great Expectations project! We're very glad you want to help out by contributing.
 
@@ -87,20 +87,3 @@ Our goal is to make your experience as great as possible. Please follow these st
 
 ..
    Each :ref:`type of contribution <contributing_types_of_contributions>` has its own development flow and testing requirements.
-
-
------
-
-Table of contents for Contributing:
-
-.. toctree::
-   :maxdepth: 1
-
-   /tutorials/contributing/setting_up_your_dev_environment
-   /tutorials/contributing/contribution_checklist
-   /tutorials/contributing/make_changes_through_github
-   /tutorials/contributing/testing
-   /tutorials/contributing/style_guide
-   /tutorials/contributing/miscellaneous
-
-
