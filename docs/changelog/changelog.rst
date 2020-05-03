@@ -4,6 +4,7 @@ develop
 -----------------
 * new cli command noun `checkpoint` (in the next major release this tap will be deprecated
 * improvements to ge.read_json tests
+* added support for overriding the default jupyter command via a GE_JUPYTER_COMMAND environment variable
 
 0.10.4
 -----------------
