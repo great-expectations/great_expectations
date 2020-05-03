@@ -10,7 +10,7 @@ import numpy as np
 from functools import wraps
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite, ExpectationValidationResult, \
-    ExpectationKwargs, ExpectationSuiteValidationResult
+    ExpectationSuiteValidationResult
 
 
 def parse_result_format(result_format):
@@ -112,9 +112,7 @@ def recursively_convert_to_json_serializable(test_obj):
             # np.isnan is functionally vectorized, but we only want to apply this to single objects
             # Hence, why we test for `not isinstance(list))`
             return None
-    except TypeError:
-        pass
-    except ValueError:
+    except (TypeError, ValueError):
         pass
 
     if isinstance(test_obj, (str, int, float, bool)):

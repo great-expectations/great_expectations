@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def verify_dynamic_loading_support(module_name, package_name=None):
     try:
         module_spec = importlib.util.find_spec(module_name, package=package_name)
-    except ModuleNotFoundError as e:
+    except ModuleNotFoundError:
         module_spec = None
     if not module_spec:
         if not package_name:
@@ -26,12 +26,12 @@ templates, and assets is supported in your execution environment.  This error is
 
 
 def load_class(class_name, module_name):
-    verify_dynamic_loading_support(module_name=module_name, package_name=None)
+    verify_dynamic_loading_support(module_name=module_name)
     # Get the class object itself from strings.
     loaded_module = importlib.import_module(module_name)
     try:
         class_ = getattr(loaded_module, class_name)
-    except AttributeError as e:
+    except AttributeError:
         raise AttributeError("Module : {} has no class named : {}".format(
             module_name,
             class_name,
@@ -85,7 +85,7 @@ def _load_and_convert_to_dataset_class(df, class_name, module_name, expectation_
     Returns:
         A new Dataset object
     """
-    verify_dynamic_loading_support(module_name=module_name, package_name=None)
+    verify_dynamic_loading_support(module_name=module_name)
     dataset_class = load_class(class_name, module_name)
     return _convert_to_dataset_class(df, dataset_class, expectation_suite, profiler)
 
@@ -152,6 +152,7 @@ def read_json(
         dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
             if not specified, try to load the class named via the class_name and module_name parameters
         expectation_suite (string): path to great_expectations expectation suite file
+        accessor_func (Callable): functions to transform the json object in the file
         profiler (Profiler class): profiler to use when creating the dataset (default is None)
 
     Returns:
@@ -183,6 +184,7 @@ def read_json(
             profiler=profiler
         )
 
+
 def read_excel(
     filename,
     class_name="PandasDataset",
@@ -211,7 +213,7 @@ def read_excel(
 
     df = pd.read_excel(filename, *args, **kwargs)
     if dataset_class is None:
-        verify_dynamic_loading_support(module_name=module_name, package_name=None)
+        verify_dynamic_loading_support(module_name=module_name)
         dataset_class = load_class(class_name=class_name, module_name=module_name)
     if isinstance(df, dict):
         for key in df:
@@ -457,7 +459,7 @@ def validate(
 
     # Otherwise, try to convert and validate the dataset
     if data_asset_class is None:
-        verify_dynamic_loading_support(module_name=data_asset_module_name, package_name=None)
+        verify_dynamic_loading_support(module_name=data_asset_module_name)
         data_asset_class = load_class(data_asset_class_name, data_asset_module_name)
 
     import pandas as pd
@@ -483,8 +485,8 @@ def validate(
             raise ValueError(
                 "The validate util method only supports validation for subtypes of the provided data_asset_type.")
 
-    data_asset_ = _convert_to_dataset_class(
-        data_asset, dataset_class=data_asset_class, expectation_suite=expectation_suite, profiler=None)
+    data_asset_ = _convert_to_dataset_class(data_asset, dataset_class=data_asset_class,
+                                            expectation_suite=expectation_suite)
     return data_asset_.validate(*args, data_context=data_context, **kwargs)
 
 
@@ -509,7 +511,7 @@ def gen_directory_tree_str(startpath):
 
     for root, dirs, files in tuples:
         level = root.replace(startpath, '').count(os.sep)
-        indent = ' ' * 4 * (level)
+        indent = ' ' * 4 * level
         output_str += '{}{}/\n'.format(indent, os.path.basename(root))
         subindent = ' ' * 4 * (level + 1)
 

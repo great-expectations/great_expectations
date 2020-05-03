@@ -16,7 +16,7 @@ class ValidationsStore(Store):
         if store_backend is not None:
             store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
             store_backend_class_name = store_backend.get("class_name", "InMemoryStoreBackend")
-            verify_dynamic_loading_support(module_name=store_backend_module_name, package_name=None)
+            verify_dynamic_loading_support(module_name=store_backend_module_name)
             store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
 
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.

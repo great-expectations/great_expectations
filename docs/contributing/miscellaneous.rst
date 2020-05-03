@@ -41,6 +41,9 @@ GE core team members use this checklist to ship releases.
 * In this branch, update the version number in the ``.travis.yml`` file (look in the deploy section). (This sed snippet is handy if you change the numbers ``sed -i '' 's/0\.9\.6/0\.9\.7/g' .travis.yml``)
 
 * Update the ``changelog.rst``: move all things under ``develop`` under a new heading with the new release number.
+
+  * Verify that any changes to requirements are specifically identified in the changelog
+  
 * Submit this as a PR against ``develop``
 * After successful checks, get it approved and merged.
 * Update your local branches and switch to master: ``git fetch --all; git checkout master; git pull``. 
@@ -57,4 +60,5 @@ GE core team members use this checklist to ship releases.
 * `Create the release on GitHub <https://github.com/great-expectations/great_expectations/releases>`__ with the version number. Copy the changelog notes into the release notes, and update any rst-specific links to use github issue numbers.
 * Notify kyle@superconductive.com about any community-contributed PRs that should be celebrated.
 * Socialize the release on GE slack by copying the changelog with an optional nice personal message (thank people if you can)
+* Review the automatically-generated PR for conda-forge (https://github.com/conda-forge/great-expectations-feedstock/pulls), updating requirements as necessary and verifying the build status.
 

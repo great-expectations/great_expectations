@@ -22,9 +22,9 @@ def load_class(class_name, module_name):
     try:
         loaded_module = importlib.import_module(module_name)
         class_ = getattr(loaded_module, class_name)
-    except ModuleNotFoundError as e:
+    except ModuleNotFoundError:
         raise PluginModuleNotFoundError(module_name)
-    except AttributeError as e:
+    except AttributeError:
         raise PluginClassNotFoundError(
             module_name=module_name,
             class_name=class_name
@@ -46,7 +46,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     if module_name is None:
         try:
             module_name = config_defaults.pop("module_name")
-        except KeyError as e:
+        except KeyError:
             raise KeyError("Neither config : {} nor config_defaults : {} contains a module_name key.".format(
                 config, config_defaults,
             ))
@@ -54,7 +54,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
         config_defaults.pop("module_name", None)
 
-    verify_dynamic_loading_support(module_name=module_name, package_name=None)
+    verify_dynamic_loading_support(module_name=module_name)
 
     class_name = config.pop("class_name", None)
     if class_name is None:
@@ -62,7 +62,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
                        "an explicit class_name for %s" % config.get("name"))
         try:
             class_name = config_defaults.pop("class_name")
-        except KeyError as e:
+        except KeyError:
             raise KeyError("Neither config : {} nor config_defaults : {} contains a class_name key.".format(
                 config, config_defaults,
             ))

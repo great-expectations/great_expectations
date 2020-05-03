@@ -391,7 +391,8 @@ class DataAsset(object):
 
         self._expectation_suite.append_expectation(expectation_config)
 
-    def _copy_and_clean_up_expectation(self,
+    def _copy_and_clean_up_expectation(
+        self,
         expectation,
         discard_result_format_kwargs=True,
         discard_include_config_kwargs=True,
@@ -405,8 +406,8 @@ class DataAsset(object):
             discard_catch_exceptions_kwargs=discard_catch_exceptions_kwargs,
         )
 
-
-    def _copy_and_clean_up_expectations_from_indexes(self,
+    def _copy_and_clean_up_expectations_from_indexes(
+        self,
         match_indexes,
         discard_result_format_kwargs=True,
         discard_include_config_kwargs=True,
@@ -420,7 +421,8 @@ class DataAsset(object):
             discard_catch_exceptions_kwargs=discard_catch_exceptions_kwargs,
         )
 
-    def find_expectation_indexes(self,
+    def find_expectation_indexes(
+        self,
         expectation_type=None,
         column=None,
         expectation_kwargs=None
@@ -793,7 +795,7 @@ class DataAsset(object):
                 )
             elif isinstance(expectation_suite, str):
                 try:
-                    with open(expectation_suite, 'r') as infile:
+                    with open(expectation_suite) as infile:
                         expectation_suite = expectationSuiteSchema.loads(infile.read())
                 except ValidationError:
                     raise

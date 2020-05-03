@@ -355,9 +355,9 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             )
             try:
                 min_value = min_value + datetime.timedelta(days=-365)
-            except OverflowError as o_err:
+            except OverflowError:
                 min_value = datetime.datetime.min
-            except TypeError as o_err:
+            except TypeError:
                 min_value = parse(min_value) + datetime.timedelta(days=-365)
 
         max_value = dataset.expect_column_max_to_be_between(
@@ -369,9 +369,9 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             )
             try:
                 max_value = max_value + datetime.timedelta(days=365)
-            except OverflowError as o_err:
+            except OverflowError:
                 max_value = datetime.datetime.max
-            except TypeError as o_err:
+            except TypeError:
                 max_value = parse(max_value) + datetime.timedelta(days=365)
 
         if min_value is not None or max_value is not None:
@@ -430,7 +430,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             return suite
 
         dataset.set_default_expectation_argument("catch_exceptions", False)
-        dataset = cls._build_table_row_count_expectation(dataset, tolerance=0.1)
+        dataset = cls._build_table_row_count_expectation(dataset)
         dataset.set_config_value("interactive_evaluation", True)
         dataset = cls._build_table_column_expectations(dataset)
 
@@ -499,7 +499,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     @classmethod
     def _demo_profile(cls, dataset):
         dataset.set_default_expectation_argument("catch_exceptions", False)
-        dataset = cls._build_table_row_count_expectation(dataset, tolerance=0.1)
+        dataset = cls._build_table_row_count_expectation(dataset)
         dataset.set_config_value("interactive_evaluation", True)
         dataset = cls._build_table_column_expectations(dataset)
 

@@ -875,7 +875,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
             try:
                 temp_column = column.map(parse)
-            except TypeError as e:
+            except TypeError:
                 temp_column = column
 
         else:
@@ -889,8 +889,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             # Ensure types can be compared since some types in Python 3 cannot be logically compared.
             # print type(val), type(min_value), type(max_value), val, min_value, max_value
 
-            if type(val) == None:
+            if type(val) is None:
                 return False
+
             if min_value is not None and max_value is not None:
                 if allow_cross_type_comparisons:
                     try:
@@ -1128,10 +1129,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             try:
                 datetime.strptime(val, strftime_format)
                 return True
-            except TypeError as e:
+            except TypeError:
                 raise TypeError("Values passed to expect_column_values_to_match_strftime_format must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format.")
-
-            except ValueError as e:
+            except ValueError:
                 return False
 
         return column.map(is_parseable_by_format)
@@ -1210,7 +1210,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             raise e
 
         # Format arguments for scipy.kstest
-        if (isinstance(params, dict)):
+        if isinstance(params, dict):
             positional_parameters = _scipy_distribution_positional_args_from_dict(
                 distribution, params)
         else:
@@ -1265,9 +1265,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             bootstrap_sample_size = len(partition_object['weights']) * 2
 
         results = [stats.kstest(
-            np.random.choice(column, size=bootstrap_sample_size, replace=True),
+            np.random.choice(column, size=bootstrap_sample_size),
             estimated_cdf)[1]
-            for k in range(bootstrap_samples)]
+            for _ in range(bootstrap_samples)]
 
         test_result = (1 + sum(x >= p for x in results)) / \
             (bootstrap_samples + 1)
