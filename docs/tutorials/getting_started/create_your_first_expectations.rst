@@ -19,6 +19,10 @@ The CLI will help you create your first Expectations. You can accept the default
 
     Generating example Expectation Suite...
 
+.. admonition:: Admonition from Mr. Dickens.
+
+    "Take nothing on its looks; take everything on evidence. There's no better rule."
+
 What just happened?
 -------------------
 
