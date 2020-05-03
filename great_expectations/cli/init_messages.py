@@ -17,6 +17,7 @@ First, Great Expectations will create a new directory:
     great_expectations
     |-- expectations
     |-- great_expectations.yml
+    |-- checkpoints
     |-- notebooks
     |   |-- pandas
     |   |-- spark

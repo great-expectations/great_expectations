@@ -119,6 +119,7 @@ def test_cli_init_on_new_project(
 great_expectations/
     .gitignore
     great_expectations.yml
+    checkpoints/
     expectations/
         warning.json
     notebooks/

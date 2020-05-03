@@ -1,12 +1,10 @@
 import pytest
-import os
 
 from great_expectations.data_context.util import (
     instantiate_class_from_config
 )
 
 def test_instantiate_class_from_config():
-
     # This config structure feels very tidy to me.
     instantiate_class_from_config(
         config = {

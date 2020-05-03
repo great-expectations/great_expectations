@@ -5,9 +5,8 @@ from ...core.id_dict import BatchKwargs
 
 
 class SlackRenderer(Renderer):
-    
     def __init__(self):
-        pass
+        super().__init__()
     
     def render(self, validation_result=None):
         # Defaults

@@ -1,10 +1,9 @@
 import logging
-
-from collections import OrderedDict
 import os
-
 import traceback
+from collections import OrderedDict
 
+import great_expectations.exceptions as exceptions
 from great_expectations.core import nested_update
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
@@ -14,9 +13,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-
 from great_expectations.data_context.util import instantiate_class_from_config
-import great_expectations.exceptions as exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -218,6 +215,9 @@ class SiteBuilder(object):
                     class_name=site_section_config['class_name']
                 )
 
+    def clean_site(self):
+        self.target_store.clean_site()
+
     def build(self, resource_identifiers=None):
         """
 
@@ -342,7 +342,7 @@ class DefaultSiteSectionBuilder(object):
 
             try:
                 resource = self.source_store.get(resource_key)
-            except FileNotFoundError as e:
+            except FileNotFoundError:
                 logger.warning(f"File {resource_key.to_fixed_length_tuple()} could not be found. Skipping.")
                 continue
 
@@ -641,7 +641,7 @@ class DefaultSiteIndexBuilder(object):
                     run_id=profiling_result_key.run_id,
                     validation_success=validation_success
                 )
-            except Exception as e:
+            except Exception:
                 error_msg = "Profiling result not found: {0:s} - skipping".format(str(profiling_result_key.to_tuple()))
                 logger.warning(error_msg)
 
@@ -663,7 +663,7 @@ class DefaultSiteIndexBuilder(object):
                     run_id=validation_result_key.run_id,
                     validation_success=validation_success
                 )
-            except Exception as e:
+            except Exception:
                 error_msg = "Validation result not found: {0:s} - skipping".format(str(validation_result_key.to_tuple()))
                 logger.warning(error_msg)
 

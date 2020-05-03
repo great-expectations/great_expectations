@@ -2,7 +2,6 @@
 import json
 import os
 
-import mock
 from click.testing import CliRunner
 
 from great_expectations import DataContext
@@ -210,7 +209,7 @@ def test_validation_operator_list_with_one_validation_operator(caplog, empty_dat
     project_dir = empty_data_context.root_directory
     runner = CliRunner(mix_stderr=False)
 
-    expected_result = """\
+    expected_result = """[33mHeads up! This feature is Experimental. It may change. Please give us your feedback![0m[0m
 1 Validation Operator found:[0m
 [0m
  - [36mname:[0m action_list_operator[0m
@@ -221,6 +220,7 @@ def test_validation_operator_list_with_one_validation_operator(caplog, empty_dat
         cli, "validation-operator list -d {}".format(project_dir), catch_exceptions=False,
     )
     assert result.exit_code == 0
+    # _capture_ansi_codes_to_file(result)
     assert result.output.strip() == expected_result
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -259,7 +259,7 @@ def test_validation_operator_list_with_multiple_validation_operators(caplog, emp
         }
     )
     context._save_project_config()
-    expected_result = """\
+    expected_result = """[33mHeads up! This feature is Experimental. It may change. Please give us your feedback![0m[0m
 2 Validation Operators found:[0m
 [0m
  - [36mname:[0m action_list_operator[0m
@@ -276,6 +276,16 @@ def test_validation_operator_list_with_multiple_validation_operators(caplog, emp
         cli, "validation-operator list -d {}".format(project_dir), catch_exceptions=False,
     )
     assert result.exit_code == 0
+    # _capture_ansi_codes_to_file(result)
     assert result.output.strip() == expected_result
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def _capture_ansi_codes_to_file(result):
+    """
+    Use this to capture the ANSI color codes when updating snapshots.
+    NOT DEAD CODE.
+    """
+    with open("ansi.txt", "w") as f:
+        f.write(result.output.strip())

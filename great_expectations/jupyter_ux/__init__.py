@@ -14,7 +14,6 @@ from great_expectations.render.renderer import (
     ProfilingResultsColumnSectionRenderer,
     ValidationResultsColumnSectionRenderer,
 )
-from great_expectations.render.types import RenderedSectionContent
 from great_expectations.render.view import DefaultJinjaSectionView
 
 
@@ -160,6 +159,8 @@ def show_available_data_asset_names(context, data_source_name=None):
                 data_asset_names = sorted([name[0] for name in mystery_object["names"]])
             elif isinstance(mystery_object, list):
                 data_asset_names = sorted(mystery_object)
+            else:
+                data_asset_names = []
 
             if len(data_asset_names) > 0:
                 html += "<h3 style='margin: 0.2em 0'>Data Assets Found:</h3>"
