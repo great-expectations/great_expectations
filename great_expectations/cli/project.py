@@ -5,7 +5,9 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.util import cli_message
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.core.usage_statistics.usage_statistics import (
+    send_usage_message,
+)
 
 
 @click.group()

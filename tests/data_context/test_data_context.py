@@ -1,7 +1,6 @@
 import json
 import os
 import shutil
-from collections import OrderedDict
 
 import pytest
 from ruamel.yaml import YAML
@@ -29,9 +28,13 @@ from great_expectations.exceptions import (
     BatchKwargsError,
     ConfigNotFoundError,
     DataContextError,
+    CheckpointError,
+    CheckpointNotFoundError,
 )
 from great_expectations.util import gen_directory_tree_str
-from tests.integration.usage_statistics.test_integration_usage_statistics import USAGE_STATISTICS_QA_URL
+from tests.integration.usage_statistics.test_integration_usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
+)
 from tests.test_utils import safe_remove
 
 try:
@@ -241,6 +244,14 @@ def test_data_context_get_datasource(titanic_data_context):
     isinstance(titanic_data_context.get_datasource("mydatasource"), Datasource)
 
 
+def test_data_context_expectation_suite_delete(empty_data_context):
+    assert empty_data_context.create_expectation_suite(expectation_suite_name="titanic.test_create_expectation_suite")
+    expectation_suites = empty_data_context.list_expectation_suite_names()
+    assert len(expectation_suites) == 1
+    empty_data_context.delete_expectation_suite(expectation_suite_name=expectation_suites[0])
+    expectation_suites = empty_data_context.list_expectation_suite_names()
+    assert len(expectation_suites) == 0
+
 def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(titanic_data_context):
     with pytest.raises(ValueError):
         _ = titanic_data_context.get_datasource("fakey_mc_fake")
@@ -333,6 +344,7 @@ project_path/
     great_expectations/
         .gitignore
         great_expectations.yml
+        checkpoints/
         expectations/
             titanic/
                 subdir_reader/
@@ -805,6 +817,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(tmp_pat
 great_expectations/
     .gitignore
     great_expectations.yml
+    checkpoints/
     expectations/
     notebooks/
         pandas/
@@ -831,6 +844,7 @@ def test_data_context_create_does_nothing_if_all_uncommitted_dirs_exist(tmp_path
 great_expectations/
     .gitignore
     great_expectations.yml
+    checkpoints/
     expectations/
     notebooks/
         pandas/
@@ -892,6 +906,22 @@ uncommitted/
     assert not DataContext.all_uncommitted_directories_exist(project_path)
 
 
+def test_data_context_create_builds_base_directories(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context = DataContext.create(project_path)
+    assert isinstance(context, DataContext)
+
+    for directory in [
+        "expectations",
+        "notebooks",
+        "plugins",
+        "checkpoints",
+        "uncommitted",
+    ]:
+        base_dir = os.path.join(project_path, context.GE_DIR, directory)
+        assert os.path.isdir(base_dir)
+
+
 def test_data_context_create_does_not_overwrite_existing_config_variables_yml(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('data_context'))
     DataContext.create(project_path)
@@ -920,6 +950,7 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
 
     assert set(os.listdir(empty_directory)) == {
         'plugins',
+        "checkpoints",
         'expectations',
         '.gitignore',
         'uncommitted',
@@ -1145,3 +1176,187 @@ def test_list_validation_operators_data_context_with_none_returns_empty_list(tit
 
 def test_list_validation_operators_data_context_with_one(titanic_data_context):
     assert titanic_data_context.list_validation_operator_names() == ["action_list_operator"]
+def test_list_checkpoints_on_empty_context_returns_empty_list(empty_data_context):
+    assert empty_data_context.list_checkpoints() == []
+
+
+def test_list_checkpoints_on_context_with_checkpoint(empty_context_with_checkpoint):
+    context = empty_context_with_checkpoint
+    assert context.list_checkpoints() == ["my_checkpoint"]
+
+
+def test_list_checkpoints_on_context_with_twwo_checkpoints(
+    empty_context_with_checkpoint,
+):
+    context = empty_context_with_checkpoint
+    checkpoints_file = os.path.join(
+        context.root_directory, context.CHECKPOINTS_DIR, "my_checkpoint.yml"
+    )
+    shutil.copy(
+        checkpoints_file, os.path.join(os.path.dirname(checkpoints_file), "another.yml")
+    )
+    assert set(context.list_checkpoints()) == {"another", "my_checkpoint"}
+
+
+def test_list_checkpoints_on_context_with_checkpoint_and_other_files_in_checkpoints_dir(
+    empty_context_with_checkpoint,
+):
+    context = empty_context_with_checkpoint
+
+    for extension in [".json", ".txt", "", ".py"]:
+        path = os.path.join(
+            context.root_directory, context.CHECKPOINTS_DIR, f"foo{extension}"
+        )
+        with open(path, "w") as f:
+            f.write("foo: bar")
+        assert os.path.isfile(path)
+
+    assert context.list_checkpoints() == ["my_checkpoint"]
+
+
+def test_get_checkpoint_raises_error_on_not_found_checkpoint(
+    empty_context_with_checkpoint,
+):
+    context = empty_context_with_checkpoint
+    with pytest.raises(CheckpointNotFoundError):
+        context.get_checkpoint("not_a_checkpoint")
+
+
+def test_get_checkpoint_raises_error_empty_checkpoint(
+    empty_context_with_checkpoint,
+):
+    context = empty_context_with_checkpoint
+    checkpoint_file_path = os.path.join(
+        context.root_directory, context.CHECKPOINTS_DIR, "my_checkpoint.yml"
+    )
+    with open(checkpoint_file_path, "w") as f:
+        f.write("# Not a checkpoint file")
+    assert os.path.isfile(checkpoint_file_path)
+    assert context.list_checkpoints() == ["my_checkpoint"]
+
+    with pytest.raises(CheckpointError):
+        context.get_checkpoint("my_checkpoint")
+
+
+def test_get_checkpoint(empty_context_with_checkpoint):
+    context = empty_context_with_checkpoint
+    obs = context.get_checkpoint("my_checkpoint")
+    assert isinstance(obs, dict)
+    assert {
+        "validation_operator_name": "action_list_operator",
+        "batches": [
+            {
+                "batch_kwargs": {
+                    "path": "/Users/me/projects/my_project/data/data.csv",
+                    "datasource": "my_filesystem_datasource",
+                    "reader_method": "read_csv",
+                },
+                "expectation_suite_names": ["suite_one", "suite_two"],
+            },
+            {
+                "batch_kwargs": {
+                    "query": "SELECT * FROM users WHERE status = 1",
+                    "datasource": "my_redshift_datasource",
+                },
+                "expectation_suite_names": ["suite_three"],
+            },
+        ],
+    }
+
+
+def test_get_checkpoint_default_validation_operator(empty_data_context):
+    yaml = YAML(typ="safe")
+    context = empty_data_context
+
+    checkpoint = {"batches": []}
+    checkpoint_file_path = os.path.join(
+        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+    )
+    with open(checkpoint_file_path, "w") as f:
+        yaml.dump(checkpoint, f)
+    assert os.path.isfile(checkpoint_file_path)
+
+    obs = context.get_checkpoint("foo")
+    assert isinstance(obs, dict)
+    expected = {
+        "validation_operator_name": "action_list_operator",
+        "batches": [],
+    }
+    assert expected == obs
+
+
+def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
+    yaml = YAML(typ="safe")
+    context = empty_data_context
+
+    checkpoint = {
+        "validation_operator_name": "action_list_operator",
+    }
+    checkpoint_file_path = os.path.join(
+        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+    )
+    with open(checkpoint_file_path, "w") as f:
+        yaml.dump(checkpoint, f)
+    assert os.path.isfile(checkpoint_file_path)
+
+    with pytest.raises(CheckpointError) as e:
+        context.get_checkpoint("foo")
+
+
+def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
+    yaml = YAML(typ="safe")
+    context = empty_data_context
+
+    checkpoint = {
+        "validation_operator_name": "action_list_operator",
+        "batches": {"stuff": 33},
+    }
+    checkpoint_file_path = os.path.join(
+        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+    )
+    with open(checkpoint_file_path, "w") as f:
+        yaml.dump(checkpoint, f)
+    assert os.path.isfile(checkpoint_file_path)
+
+    with pytest.raises(CheckpointError) as e:
+        context.get_checkpoint("foo")
+
+
+def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
+    empty_data_context,
+):
+    yaml = YAML(typ="safe")
+    context = empty_data_context
+
+    checkpoint = {
+        "validation_operator_name": "action_list_operator",
+        "batches": [{"batch_kwargs": {"foo": 33},}],
+    }
+    checkpoint_file_path = os.path.join(
+        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+    )
+    with open(checkpoint_file_path, "w") as f:
+        yaml.dump(checkpoint, f)
+    assert os.path.isfile(checkpoint_file_path)
+
+    with pytest.raises(CheckpointError) as e:
+        context.get_checkpoint("foo")
+
+
+def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context):
+    yaml = YAML(typ="safe")
+    context = empty_data_context
+
+    checkpoint = {
+        "validation_operator_name": "action_list_operator",
+        "batches": [{"expectation_suite_names": ["foo"]}],
+    }
+    checkpoint_file_path = os.path.join(
+        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+    )
+    with open(checkpoint_file_path, "w") as f:
+        yaml.dump(checkpoint, f)
+    assert os.path.isfile(checkpoint_file_path)
+
+    with pytest.raises(CheckpointError) as e:
+        context.get_checkpoint("foo")

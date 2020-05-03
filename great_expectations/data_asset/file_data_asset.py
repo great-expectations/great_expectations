@@ -56,8 +56,8 @@ class MetaFileDataAsset(DataAsset):
         @wraps(func)
         def inner_wrapper(self, skip=None, mostly=None, null_lines_regex=r"^\s*$", result_format=None, *args, **kwargs):
             try:
-                f = open(self._path, "r")
-            except:
+                f = open(self._path)
+            except OSError:
                 raise
 
             if result_format is None:
@@ -71,7 +71,7 @@ class MetaFileDataAsset(DataAsset):
                 try:
                     assert float(skip).is_integer()
                     assert float(skip) >= 0
-                except:
+                except (AssertionError, ValueError):
                     raise ValueError("skip must be a positive integer")
 
                 for i in range(1, skip+1):
@@ -91,8 +91,7 @@ class MetaFileDataAsset(DataAsset):
                     boolean_mapped_success_lines = np.array(
                         func(self, _lines=nonnull_lines, *args, **kwargs))
                     success_count = np.count_nonzero(boolean_mapped_success_lines)
-                    unexpected_list = list(compress(nonnull_lines, \
-                        np.invert(boolean_mapped_success_lines)))
+                    unexpected_list = list(compress(nonnull_lines, np.invert(boolean_mapped_success_lines)))
                     nonnull_lines_index = range(0, len(nonnull_lines)+1)
                     unexpected_index_list = list(compress(nonnull_lines_index,
                                                           np.invert(boolean_mapped_success_lines)))
@@ -210,46 +209,40 @@ class FileDataAsset(MetaFileDataAsset):
         """
         try:
             comp_regex = re.compile(regex)
-        except:
+        except (ValueError, TypeError):
             raise ValueError("Must enter valid regular expression for regex")
 
-        if expected_min_count != None:
+        if expected_min_count is not None:
             try:
                 assert float(expected_min_count).is_integer()
                 assert float(expected_min_count) >= 0
-            except:
+            except (AssertionError, ValueError):
                 raise ValueError("expected_min_count must be a non-negative \
                                  integer or None")
 
-        if expected_max_count != None:
+        if expected_max_count is not None:
             try:
                 assert float(expected_max_count).is_integer()
                 assert float(expected_max_count) >= 0
-            except:
+            except (AssertionError, ValueError):
                 raise ValueError("expected_max_count must be a non-negative \
                                  integer or None")
 
-        if expected_max_count != None and expected_min_count != None:
+        if expected_max_count is not None and expected_min_count is not None:
             try:
                 assert expected_max_count >= expected_min_count
-            except:
+            except (AssertionError, ValueError):
                 raise ValueError("expected_max_count must be greater than or \
                                  equal to expected_min_count")
 
-        if expected_max_count != None and expected_min_count != None:
-            truth_list = [True if(len(comp_regex.findall(line)) >= expected_min_count and \
-                                len(comp_regex.findall(line)) <= expected_max_count) else False \
-                                for line in _lines]
-
-        elif expected_max_count != None:
-            truth_list = [True if(len(comp_regex.findall(line)) <= expected_max_count) else False \
-                                for line in _lines]
-
-        elif expected_min_count != None:
-              truth_list = [True if(len(comp_regex.findall(line)) >= expected_min_count) else False \
-                                for line in _lines]
+        if expected_max_count is not None and expected_min_count is not None:
+            truth_list = [expected_min_count <= len(comp_regex.findall(line)) <= expected_max_count for line in _lines]
+        elif expected_max_count is not None:
+            truth_list = [len(comp_regex.findall(line)) <= expected_max_count for line in _lines]
+        elif expected_min_count is not None:
+            truth_list = [len(comp_regex.findall(line)) >= expected_min_count for line in _lines]
         else:
-            truth_list = [True for line in _lines]
+            truth_list = [True for _ in _lines]
 
         return truth_list
 
@@ -286,7 +279,7 @@ class FileDataAsset(MetaFileDataAsset):
                 of unexpected lines is less than mostly, the method still returns
                 true even if all lines don't match the expectation criteria.
 
-            null_lines_regex (valid regular expression or None): \
+            nonnull_lines_regex (valid regular expression or None): \
                 If not none, a regex to skip lines as null. Defaults to empty or whitespace-only lines.
 
         Other Parameters:
@@ -317,18 +310,16 @@ class FileDataAsset(MetaFileDataAsset):
         """
         try:
             comp_regex = re.compile(regex)
-        except:
+        except (ValueError, TypeError):
             raise ValueError("Must enter valid regular expression for regex")
 
         try:
             assert float(expected_count).is_integer()
             assert float(expected_count) >= 0
-
-        except:
+        except (AssertionError, ValueError):
             raise ValueError("expected_count must be a non-negative integer")
 
-        return [True if(len(comp_regex.findall(line)) == expected_count) else False \
-                                for line in _lines]
+        return [len(comp_regex.findall(line)) == expected_count for line in _lines]
 
     @DataAsset.expectation(["value"])
     def expect_file_hash_to_equal(self, value, hash_alg='md5', result_format=None,
@@ -370,19 +361,19 @@ class FileDataAsset(MetaFileDataAsset):
             hash = hashlib.new(hash_alg)
 
         # Limit file reads to 64 KB chunks at a time
-            BLOCKSIZE = 65536
+            BLOCK_SIZE = 65536
             try:
                 with open(self._path, 'rb') as file:
-                    file_buffer = file.read(BLOCKSIZE)
+                    file_buffer = file.read(BLOCK_SIZE)
                     while file_buffer:
                         hash.update(file_buffer)
-                        file_buffer = file.read(BLOCKSIZE)
+                        file_buffer = file.read(BLOCK_SIZE)
                     success = hash.hexdigest() == value
             except IOError:
                 raise
         except ValueError:
             raise
-        return {"success":success}
+        return {"success": success}
 
     @DataAsset.expectation(["minsize", "maxsize"])
     def expect_file_size_to_be_between(self, minsize=0, maxsize=None, result_format=None,
@@ -506,7 +497,7 @@ class FileDataAsset(MetaFileDataAsset):
         else:
             success = False
 
-        return {"success":success}
+        return {"success": success}
 
     @DataAsset.expectation([])
     def expect_file_to_have_valid_table_header(self, regex, skip=None,
@@ -558,7 +549,7 @@ class FileDataAsset(MetaFileDataAsset):
         success = False
 
         try:
-            with open(self._path, 'r') as f:
+            with open(self._path) as f:
                 lines = f.readlines() #Read in file lines
 
         except IOError:
@@ -569,7 +560,7 @@ class FileDataAsset(MetaFileDataAsset):
             try:
                 assert float(skip).is_integer()
                 assert float(skip) >= 0
-            except:
+            except (AssertionError, ValueError):
                 raise ValueError("skip must be a positive integer")
 
             lines = lines[skip:]
@@ -579,7 +570,7 @@ class FileDataAsset(MetaFileDataAsset):
         if len(set(header_names)) == len(header_names):
             success = True
 
-        return {"success":success}
+        return {"success": success}
 
     @DataAsset.expectation([])
     def expect_file_to_be_valid_json(self, schema=None, result_format=None,
@@ -616,20 +607,19 @@ class FileDataAsset(MetaFileDataAsset):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
-        success = False
         if schema is None:
             try:
-                with open(self._path, 'r') as f:
+                with open(self._path) as f:
                     json.load(f)
                 success = True
             except ValueError:
                 success = False
         else:
             try:
-                with open(schema, 'r') as s:
+                with open(schema) as s:
                     schema_data = s.read()
                 sdata = json.loads(schema_data)
-                with open(self._path, 'r') as f:
+                with open(self._path) as f:
                     json_data = f.read()
                 jdata = json.loads(json_data)
                 jsonschema.validate(jdata, sdata)
@@ -640,4 +630,4 @@ class FileDataAsset(MetaFileDataAsset):
                 raise
             except:
                 raise
-        return {"success":success}
+        return {"success": success}
