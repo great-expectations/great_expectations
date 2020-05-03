@@ -1,0 +1,14 @@
+validation_operator_name: action_list_operator
+batches:
+  - batch_kwargs:
+      path: /Users/me/projects/my_project/data/data.csv
+      datasource: my_filesystem_datasource
+      reader_method: read_csv
+    expectation_suite_names:
+      - suite_one
+      - suite_two
+  - batch_kwargs:
+      query: SELECT * FROM users WHERE status = 1
+      datasource: my_redshift_datasource
+    expectation_suite_names:
+      - suite_three
