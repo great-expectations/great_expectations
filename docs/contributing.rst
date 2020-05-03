@@ -11,6 +11,7 @@ Table of contents for Contributing:
    /contributing/contribution_checklist
    /contributing/make_changes_through_github
    /contributing/testing
+   /contributing/levels_of_maturity
    /contributing/style_guide
    /contributing/miscellaneous
 

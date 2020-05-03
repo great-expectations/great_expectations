@@ -2,7 +2,6 @@
 Quick start
 ###########
 
-
 .. admonition:: Admonition from Mr. Dickens.
 
     "What is before you is a fight with the world; and the sooner you begin it, the better."
