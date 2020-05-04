@@ -6,7 +6,11 @@ Changelog
 
 develop
 -----------------
-* added support for overriding the default jupyter command via a GE_JUPYTER_COMMAND environment variable
+
+0.10.8
+-----------------
+* added support for overriding the default jupyter command via a GE_JUPYTER_COMMAND environment variable (#1347) @nehiljain
+* Bugfix for checkpoint missing template (#1379)
 
 0.10.7
 -----------------
