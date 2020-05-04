@@ -11,7 +11,7 @@ import sys
 import uuid
 import warnings
 import webbrowser
-from typing import Union, List
+from typing import Union, List, Dict
 
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
@@ -54,6 +54,7 @@ from great_expectations.data_context.util import (
     load_class,
     substitute_all_config_variables,
 )
+from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.validator.validator import Validator
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource
@@ -366,7 +367,9 @@ class BaseDataContext(object):
                 resource_store["base_directory"] = os.path.join(self.root_directory, resource_store["base_directory"])
         return resource_store
 
-    def get_docs_sites_urls(self, resource_identifier=None):
+    def get_docs_sites_urls(
+        self, resource_identifier=None, site_name: str = None
+    ) -> List[Dict[str, str]]:
         """
         Get URLs for a resource for all data docs sites.
 
@@ -376,57 +379,75 @@ class BaseDataContext(object):
         :param resource_identifier: optional. It can be an identifier of ExpectationSuite's,
                 ValidationResults and other resources that have typed identifiers.
                 If not provided, the method will return the URLs of the index page.
+        :param site_name: Optionally specify which site to open. If not
+                specified, return all urls in the project.
         :return: a list of URLs. Each item is the URL for the resource for a data docs site
         """
+        sites = self._project_config_with_variables_substituted.data_docs_sites
+        if not sites:
+            logger.debug("Found no data_docs_sites.")
+            return []
+        logger.debug(f"Found {len(sites)} data_docs_sites.")
+
+        if site_name:
+            if site_name not in sites.keys():
+                raise ge_exceptions.DataContextError(f"Could not find site named {site_name}. Please check your configurations")
+            site = sites[site_name]
+            site_builder = self._load_site_builder_from_site_config(site)
+            url = site_builder.get_resource_url(resource_identifier=resource_identifier)
+            return [{"site_name": site_name, "site_url": url}]
 
         site_urls = []
-
-        site_names = None
-        sites = self._project_config_with_variables_substituted.data_docs_sites
-        if sites:
-            logger.debug("Found data_docs_sites.")
-
-            for site_name, site_config in sites.items():
-                if (site_names and site_name in site_names) or not site_names:
-                    complete_site_config = site_config
-                    module_name = 'great_expectations.render.renderer.site_builder'
-                    site_builder = instantiate_class_from_config(
-                        config=complete_site_config,
-                        runtime_environment={
-                            "data_context": self,
-                            "root_directory": self.root_directory
-                        },
-                        config_defaults={
-                            "module_name": module_name
-                        }
-                    )
-                    if not site_builder:
-                        raise ge_exceptions.ClassInstantiationError(
-                            module_name=module_name,
-                            package_name=None,
-                            class_name=complete_site_config['class_name']
-                        )
-                    url = site_builder.get_resource_url(resource_identifier=resource_identifier)
-                    site_urls.append({
-                        "site_name": site_name,
-                        "site_url": url
-                    })
+        for _site_name, site_config in sites.items():
+            site_builder = self._load_site_builder_from_site_config(site_config)
+            url = site_builder.get_resource_url(resource_identifier=resource_identifier)
+            site_urls.append({"site_name": _site_name, "site_url": url})
 
         return site_urls
 
+    def _load_site_builder_from_site_config(self, site_config) -> SiteBuilder:
+        default_module_name = "great_expectations.render.renderer.site_builder"
+        site_builder = instantiate_class_from_config(
+            config=site_config,
+            runtime_environment={
+                "data_context": self,
+                "root_directory": self.root_directory,
+            },
+            config_defaults={"module_name": default_module_name},
+        )
+        if not site_builder:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name=default_module_name,
+                package_name=None,
+                class_name=site_config["class_name"],
+            )
+        return site_builder
+
     @usage_statistics_enabled_method(event_name="data_context.open_data_docs",)
-    def open_data_docs(self, resource_identifier=None):
+    def open_data_docs(self, resource_identifier=None, site_name=None):
         """
         A stdlib cross-platform way to open a file in a browser.
 
         :param resource_identifier: ExpectationSuiteIdentifier, ValidationResultIdentifier
                 or any other type's identifier. The argument is optional - when
                 not supplied, the method returns the URL of the index page.
+        :param site_name: Optionally specify which site to open. If not
+                specified, open all docs found in the project.
         """
-        data_docs_urls = self.get_docs_sites_urls(resource_identifier=resource_identifier)
-        for site_dict in data_docs_urls:
-            logger.debug("Opening Data Docs found here: {}".format(site_dict["site_url"]))
-            webbrowser.open(site_dict["site_url"])
+        data_docs_urls = self.get_docs_sites_urls(
+            resource_identifier=resource_identifier,
+            site_name=site_name,
+        )
+        urls_to_open = [site["site_url"] for site in data_docs_urls]
+
+        if site_name:
+            for site in data_docs_urls:
+                if site["site_name"] == site_name:
+                    urls_to_open = [site["site_url"]]
+
+        for url in urls_to_open:
+            logger.debug(f"Opening Data Docs found here: {url}")
+            webbrowser.open(url)
 
     @property
     def root_directory(self):

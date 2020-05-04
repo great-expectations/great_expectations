@@ -112,6 +112,19 @@ You'll use this any time you want to view your expectations and validations in a
     - local_site:
        file:///Users/dickens/my_pipeline/great_expectations/uncommitted/data_docs/local_site/index.html
 
+``great_expectations docs build --site_name <YOUR_SITE>``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By default, ``great_expectations docs build`` command builds all the Data Docs sites in a project.
+If you wish to only build once site you may use the ``--site_name`` argument and pass in the name of the site from your configuration.
+
+.. code-block:: bash
+
+    $ great_expectations docs build --site_name s3_site
+    Building Data Docs...
+    The following Data Docs sites were built:
+       - s3_site: https://s3.amazonaws.com/my-ge-bucket/index.html
+
 ``great_expectations docs clean``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

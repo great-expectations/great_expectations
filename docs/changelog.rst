@@ -6,6 +6,8 @@ Changelog
 
 develop
 -----------------
+* DataContext.get_docs_sites_urls now raises error if non-existent site_name is specified
+* Bugfix for the CLI command `docs build` ignoring the --site_name argument (#1378)
 
 0.10.8
 -----------------
