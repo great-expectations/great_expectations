@@ -313,7 +313,7 @@ An example ``run_id``:
 
     run_id = RunIdentifier(**{
       "run_name": "some_string_that_uniquely_identifies_this_run",
-      "run_time": "1588207802"
+      "run_time": "2020-04-30T00:50:02.222372+00:00"
     })
 
 When you integrate a validation in your pipeline, your pipeline runner probably has a run id that can be inserted here as a ``run_name`` to make smoother integration.
