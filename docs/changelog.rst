@@ -32,9 +32,6 @@ develop
 -----------------
 
 * improvements to ge.read_json tests
-<<<<<<< HEAD:docs/changelog/changelog.rst
-* added support for overriding the default jupyter command via a GE_JUPYTER_COMMAND environment variable
-=======
 * tidy up the changelog
 
   - Fix bullet list spacing issues
