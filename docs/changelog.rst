@@ -6,6 +6,7 @@ Changelog
 
 develop
 -----------------
+* added support for overriding the default jupyter command via a GE_JUPYTER_COMMAND environment variable
 
 0.10.7
 -----------------
