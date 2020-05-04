@@ -6,6 +6,7 @@ Changelog
 
 develop
 -----------------
+* added BigQuery as an option in the list of databases in the CLI
 
 0.10.8
 -----------------
