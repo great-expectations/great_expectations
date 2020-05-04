@@ -1,8 +1,8 @@
 .. _getting_started__set_up_data_docs:
 
 
-Setting Up Data Docs
-===============================================
+Set Up data documentation
+=========================
 
 :ref:`Data Docs<data_docs>` is a feature of Great Expectations that creates data documentation by compiling expectations and validation results into HTML.
 

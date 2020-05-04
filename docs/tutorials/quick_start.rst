@@ -18,6 +18,6 @@ From the root of the directory where you want to deploy Great Expectations:
 
     great_expectations init
 
-The :ref:`CLI`_ will guide you through all the steps to set up a basic deployment of Great Expectations.
+The CLI will guide you through all the steps to set up a basic deployment of Great Expectations.
 
 After that, if you want to understand what just happened, check out :ref:`Getting started`. Alternatively, you can :ref:`Customize your deployment`.

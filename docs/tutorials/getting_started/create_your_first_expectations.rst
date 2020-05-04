@@ -40,15 +40,15 @@ Later, you should also take a look at other workflows for :ref:`creating and edi
 A first look at real Expectations
 ---------------------------------
 
-The newly profiled Expectations are stored in an :ref:`Expectation Suite`. For now, they're stored in a JSON file in a subdirectory subdirectory of your ``great_expectations/`` folder. 
+The newly profiled Expectations are stored in an :ref:`Expectation Suite`_.
 
-You can also configure Great Expectations to store Expectations to other locations, like S3, postgresql, etc. We'll come back to these options in the last step of the tutorial.
-
+For now, they're stored in a JSON file in a subdirectory subdirectory of your ``great_expectations/`` folder. You can also configure Great Expectations to store Expectations to other locations, like S3, postgresql, etc. We'll come back to these options in the last step of the tutorial.
 
 If you open up the suite in ``great_expectations/expectations/something-something.json`` in a text editor, you'll see:
 
 .. code-block:: JSON
 
+    #FIXME
 
 
 There's a lot of information here. (This is good.) Everything Expectation in the file expresses a machine-executable test that can be validated against data at any time. (This is very good.) We were able to generate all of this information very quickly. (Also good.)

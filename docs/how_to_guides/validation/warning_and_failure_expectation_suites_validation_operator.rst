@@ -1,7 +1,7 @@
 .. _warning_and_failure_expectation_suites_validation_operator:
 
 ================================================================================
-WarningAndFailureExpectationSuitesValidationOperator
+How to configure a WarningAndFailureExpectationSuitesValidationOperator
 ================================================================================
 
 WarningAndFailureExpectationSuitesValidationOperator implements a business logic pattern that many data practitioners consider useful - grouping the expectations about a data asset into two expectation suites.

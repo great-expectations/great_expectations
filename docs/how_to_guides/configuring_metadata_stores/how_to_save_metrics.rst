@@ -1,8 +1,8 @@
 .. _saving_metrics:
 
-##############
-Saving Metrics
-##############
+###############################
+How to configure a MetricsStore
+###############################
 
 Saving metrics during Validation makes it easy to construct a new data series based on observed
 dataset characteristics computed by Great Expectations. That data series can serve as the source for a dashboard or
