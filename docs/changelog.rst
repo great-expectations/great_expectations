@@ -47,7 +47,6 @@ develop
 * Clarified scaffolding language in scaffold notebook
 * DataContext.create() adds an additional directory: `checkpoints`
 * Marked tap command for deprecation in next major release
->>>>>>> bd57b9f537ec597807e2824b925b01c4e166208d:docs/changelog.rst
 
 0.10.4
 -----------------
