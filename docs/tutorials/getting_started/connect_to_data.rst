@@ -38,7 +38,7 @@ Datasources solve this problem, by conceptually separating *what* you want to va
 
 .. image:: ../../images/datasource-conceptual-diagram.png
 
-We call the layer that handles the actual computation a :ref:`Validation Engine`_. Currently, Great Expectations supports three Validation Engines: pandas, sqlalchemy, and pyspark. We will likely extend the library to support others in the future.
+We call the layer that handles the actual computation a :ref:`Validation Engine`_. Currently, Great Expectations supports three Validation Engines: pandas, sqlalchemy, and pyspark. We plan to extend the library to support others in the future.
 
 The layer that handles connecting to data is called a :ref:`Batch Kwarg Generator`_. Not all Batch Kwarg Generators can be used with all Validation Engines. It's also possible to configure a Datasource without a Batch Kwargs Generator.
 

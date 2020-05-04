@@ -289,9 +289,6 @@ further customize HTML documentation:
   * jQuery
   * Altair
 
-Getting Started
-===============
-
 Making Minor Adjustments
 -------------------------
 Many of the HTML elements in the default Data Docs pages have pre-configured classes that you may use to make

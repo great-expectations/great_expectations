@@ -1,8 +1,8 @@
 .. _community:
 
-#########
-Community
-#########
+###################
+Community resources
+###################
 
 We're committed to supporting and growing the community around Great Expectations.
 It's not enough to build a great tool. We want to build a great community as well.

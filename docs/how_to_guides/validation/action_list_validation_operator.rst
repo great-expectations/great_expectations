@@ -1,9 +1,8 @@
 .. _action_list_validation_operator:
 
 ================================================================================
-ActionListValidationOperator
+How to configure an ActionListValidationOperator
 ================================================================================
-
 
 ActionListValidationOperator validates each batch in its `run` method's `assets_to_validate` argument against the expectation suite included within that batch.
 

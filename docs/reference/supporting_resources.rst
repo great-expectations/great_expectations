@@ -1,7 +1,7 @@
 .. _supporting_resources:
 
 ####################
-Supporting Resources
+Supporting resources
 ####################
 
 Great Expectations requires a python compute environment and access to data, either locally or
