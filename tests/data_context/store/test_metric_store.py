@@ -45,7 +45,10 @@ def param_store(request, test_backends):
 
 
 def test_metric_store_remove_key(param_store):
-    run_id = RunIdentifier(run_name=datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ"))
+    run_id = RunIdentifier(
+        run_name="test_metric_store_remove_key",
+        run_time=datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+    )
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
         data_asset_name=None,
