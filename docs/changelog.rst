@@ -6,6 +6,9 @@ Changelog
 
 develop
 -----------------
+* Bugfix and refactor for `datasource delete` CLI command (#1386) @mzjp2
+* Instantiate datasources and validate config only when datasource is used (#1374) @mzjp2
+
 
 0.10.8
 -----------------
