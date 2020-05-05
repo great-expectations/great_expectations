@@ -150,10 +150,8 @@ class BaseDataContext(object):
         self._in_memory_instance_id = None  # This variable *may* be used in case we cannot save an instance id
         self._initialize_usage_statistics(project_config.anonymous_usage_statistics)
 
-        # Init data sources
-        self._datasources = {}
-        for datasource in self._project_config_with_variables_substituted.datasources.keys():
-            self.get_datasource(datasource)
+        # Store cached datasources but don't init them
+        self._cached_datasources = {}
 
         # Init stores
         self._stores = dict()
@@ -459,7 +457,9 @@ class BaseDataContext(object):
     @property
     def datasources(self):
         """A single holder for all Datasources in this context"""
-        return self._datasources
+        return {
+            datasource: self.get_datasource(datasource) for datasource in self._project_config_with_variables_substituted.datasources
+        }
 
     @property
     def expectations_store_name(self):
@@ -546,11 +546,13 @@ class BaseDataContext(object):
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def delete_datasource(self,datasource_name=None):
-        """Delete data source 
+    def delete_datasource(self, datasource_name=None):
+        """Delete a data source
         Args:
+            datasource_name: The name of the datasource to delete.
 
-        Returns:
+        Raises:
+            ValueError: If the datasource name isn't provided or cannot be found.
         """
         if datasource_name is None:
             raise ValueError(
@@ -562,10 +564,10 @@ class BaseDataContext(object):
                #remove key until we have a delete method on project_config
                #self._project_config_with_variables_substituted.datasources[datasource_name].remove()
                #del self._project_config["datasources"][datasource_name]
-               del self._datasources[datasource_name]
+               del self._cached_datasources[datasource_name]
             else:
                 raise ValueError(
-                    "Datasource not found"
+                    "Datasource {} not found".format(datasource_name)
                 )
 
     def get_available_data_asset_names(self, datasource_names=None, batch_kwargs_generator_names=None):
@@ -792,7 +794,7 @@ class BaseDataContext(object):
         if initialize:
             datasource = self._build_datasource_from_config(
                 name, self._project_config_with_variables_substituted.datasources[name])
-            self._datasources[name] = datasource
+            self._cached_datasources[name] = datasource
         else:
             datasource = None
 
@@ -853,9 +855,9 @@ class BaseDataContext(object):
         Returns:
             datasource (Datasource)
         """
-        if datasource_name in self._datasources:
-            return self._datasources[datasource_name]
-        elif datasource_name in self._project_config_with_variables_substituted.datasources:
+        if datasource_name in self._cached_datasources:
+            return self._cached_datasources[datasource_name]
+        if datasource_name in self._project_config_with_variables_substituted.datasources:
             datasource_config = copy.deepcopy(
                 self._project_config_with_variables_substituted.datasources[datasource_name])
         else:
@@ -864,7 +866,7 @@ class BaseDataContext(object):
             )
         datasource_config = datasourceConfigSchema.load(datasource_config)
         datasource = self._build_datasource_from_config(datasource_name, datasource_config)
-        self._datasources[datasource_name] = datasource
+        self._cached_datasources[datasource_name] = datasource
         return datasource
 
     def list_expectation_suites(self):

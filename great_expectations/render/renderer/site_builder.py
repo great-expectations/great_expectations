@@ -515,7 +515,7 @@ class DefaultSiteIndexBuilder(object):
         #     last_datasource_class_by_name = datasource_classes_by_name[-1]
         #     last_datasource_class_name = last_datasource_class_by_name["class_name"]
         #     last_datasource_name = last_datasource_class_by_name["name"]
-        #     last_datasource = self.data_context.datasources[last_datasource_name]
+        #     last_datasource = self.data_context.get_datasource(last_datasource_name)
         #
         #     if last_datasource_class_name == "SqlAlchemyDatasource":
         #         try:
