@@ -159,7 +159,7 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
 
         # datasource delete
         result = runner.invoke(
-            cli, ["datasource", "delete", "-s", "new"], catch_exceptions=False
+            cli, ["datasource", "delete", "new"], catch_exceptions=False
         )
         assert error_message in result.output
         #create new before delete again
