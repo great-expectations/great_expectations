@@ -259,7 +259,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if table_name is None:
             raise ValueError("No table_name provided.")
 
-        self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
+        if engine.dialect.name.lower() == "bigquery":
+            # In BigQuery the table name is already qualified with its schema name
+            self._table = sa.Table(table_name, sa.MetaData(), schema=None)
+        else:
+            self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
         if engine is None and connection_string is None:
             raise ValueError("Engine or connection_string must be provided.")
