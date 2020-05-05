@@ -144,4 +144,4 @@ def build_docs(context, site_name=None, view=True):
     cli_message(msg)
 
     if view:
-        context.open_data_docs()
+        context.open_data_docs(site_name=site_name)
