@@ -338,29 +338,38 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 
 
 @suite.command(name="delete")
-@click.option("--suite", "-es", default=None, help="Expectation suite name.")
+@click.argument("suite")
 @click.option(
     "--directory",
     "-d",
     default=None,
-    help="Delete expectation suite.",
+    help="Delete an expectation suite.",
 )
+@mark.cli_as_experimental
 def suite_delete(suite, directory):
-    """Delete an expectation suite from the expectation store."""
+    """
+    Delete an expectation suite from the expectation store.
+    """
+    usage_event = "cli.suite.delete"
     context = toolkit.load_data_context_with_error_handling(directory)
     suite_names = context.list_expectation_suite_names()
     if len(suite_names) == 0:
-        cli_message("No expectation suites found")
-        return
+        toolkit.exit_with_failure_message_and_stats(
+            context,
+            usage_event,
+            "</red>No expectation suites found in the project.</red>"
+        )
 
-    if len(suite_names) > 0:
-        expectation_suite = ExpectationSuite(expectation_suite_name=suite)
-        key = ExpectationSuiteIdentifier(expectation_suite_name=suite)
-        if key:
-            context.delete_expectation_suite(expectation_suite)
-        else:
-            cli_message("No matching expectation suites found")
-            sys.exit(1)
+    if suite not in suite_names:
+        toolkit.exit_with_failure_message_and_stats(
+            context,
+            usage_event,
+            f"No expectation suite named {suite} found."
+        )
+
+    context.delete_expectation_suite(suite)
+    cli_message(f"Deleted the expectation suite named: {suite}")
+    send_usage_message(data_context=context, event=usage_event, success=True)
 
 
 @suite.command(name="scaffold")
