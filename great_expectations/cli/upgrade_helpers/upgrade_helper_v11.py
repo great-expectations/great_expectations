@@ -4,19 +4,43 @@ import os
 from dateutil.parser import parse, ParserError
 
 from great_expectations import DataContext
+from great_expectations.cli.util import cli_message
 from great_expectations.data_context.store import ValidationsStore, HtmlSiteStore, TupleFilesystemStoreBackend, \
-    TupleS3StoreBackend, TupleGCSStoreBackend
+    TupleS3StoreBackend, TupleGCSStoreBackend, MetricStore
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 
 
-class MigratorV11:
+class UpgradeHelperV11:
     def __init__(self, data_context=None, context_root_dir=None):
         assert data_context or context_root_dir, "Please provide a data_context object or a context_root_dir."
 
         self.data_context = data_context or DataContext(context_root_dir=context_root_dir)
+
+        self.upgrade_log = {
+            "skipped_validations_store_backends": {
+                "database_store_backends": [],
+                "unrecognized": []
+            },
+            "skipped_docs_validations_store_backends": {
+                "database_store_backends": [],
+                "unrecognized": []
+            },
+            "skipped_metrics_store_backends": {
+                "database_store_backends": [],
+                "unrecognized": []
+            },
+            "upgraded_validations_store_backends": [],
+            "upgraded_docs_validations_store_backends": [],
+            ""
+        }
+
         self.validations_store_backends = {
             store_name: store.store_backend for (store_name, store) in self.data_context.stores.items()
             if isinstance(store, ValidationsStore)
+        }
+        self.metrics_store_backends = {
+            store_name: store.store_backend for (store_name, store) in self.data_context.stores.items()
+            if isinstance(store, MetricStore)
         }
         self.docs_validations_store_backends = {}
         self.validation_run_times = {}
@@ -42,7 +66,7 @@ class MigratorV11:
             TupleGCSStoreBackend: self.set_tuple_gcs_store_backend_run_time
         }
 
-    def migrate_store_backend(self, store_backend):
+    def upgrade_store_backend(self, store_backend):
         validation_source_keys = store_backend.list_keys()
 
         for source_key in validation_source_keys:
@@ -102,8 +126,8 @@ class MigratorV11:
 
             self.validation_run_times[run_name] = source_blob_created_time
 
-    def migrate_project(self):
+    def upgrade_project(self):
         for (store_name, store_backend) in self.validations_store_backends.items():
-            self.migrate_store_backend(store_backend)
+            self.upgrade_store_backend(store_backend)
         for (site_name, store_backend) in self.docs_validations_store_backends.items():
-            self.migrate_store_backend(store_backend)
+            self.upgrade_store_backend(store_backend)
