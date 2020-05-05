@@ -6,7 +6,7 @@ from dateutil.parser import parse, ParserError
 from great_expectations import DataContext
 from great_expectations.cli.util import cli_message
 from great_expectations.data_context.store import ValidationsStore, HtmlSiteStore, TupleFilesystemStoreBackend, \
-    TupleS3StoreBackend, TupleGCSStoreBackend, MetricStore
+    TupleS3StoreBackend, TupleGCSStoreBackend, MetricStore, DatabaseStoreBackend, InMemoryStoreBackend
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 
 
@@ -17,54 +17,97 @@ class UpgradeHelperV11:
         self.data_context = data_context or DataContext(context_root_dir=context_root_dir)
 
         self.upgrade_log = {
-            "skipped_validations_store_backends": {
+            "skipped_validations_stores": {
                 "database_store_backends": [],
-                "unrecognized": []
+                "unsupported": []
             },
-            "skipped_docs_validations_store_backends": {
+            "skipped_docs_validations_stores": {
+                "unsupported": []
+            },
+            "skipped_metrics_stores": {
                 "database_store_backends": [],
-                "unrecognized": []
+                "unsupported": []
             },
-            "skipped_metrics_store_backends": {
-                "database_store_backends": [],
-                "unrecognized": []
-            },
-            "upgraded_validations_store_backends": [],
-            "upgraded_docs_validations_store_backends": [],
-            ""
+            "upgraded_validations_stores": {},
+            "upgraded_docs_site_validations_stores": {},
         }
 
-        self.validations_store_backends = {
-            store_name: store.store_backend for (store_name, store) in self.data_context.stores.items()
-            if isinstance(store, ValidationsStore)
+        self.upgrade_checklist = {
+            "validations_store_backends": {},
+            "docs_validations_store_backends": {}
         }
-        self.metrics_store_backends = {
-            store_name: store.store_backend for (store_name, store) in self.data_context.stores.items()
-            if isinstance(store, MetricStore)
-        }
-        self.docs_validations_store_backends = {}
+
         self.validation_run_times = {}
+
+        self.run_time_setters_by_backend_type = {
+            TupleFilesystemStoreBackend: self._get_tuple_filesystem_store_backend_run_time,
+            TupleS3StoreBackend: self._get_tuple_s3_store_backend_run_time,
+            TupleGCSStoreBackend: self._get_tuple_gcs_store_backend_run_time
+        }
+
+    def _generate_upgrade_checklist(self):
+        for (store_name, store) in self.data_context.stores.items():
+            if not isinstance(store, (ValidationsStore, MetricStore)):
+                continue
+            elif isinstance(store, ValidationsStore):
+                self._process_validations_store_for_checklist(store_name, store)
+            elif isinstance(store, MetricStore):
+                self._process_metrics_store_for_checklist(store_name, store)
 
         sites = self.data_context._project_config_with_variables_substituted.data_docs_sites
 
         if sites:
             for site_name, site_config in sites.items():
-                site_html_store = HtmlSiteStore(
-                    store_backend=site_config.get("store_backend"),
-                    runtime_environment={
-                        "data_context": self.data_context,
-                        "root_directory": self.data_context.root_directory,
-                        "site_name": site_name
-                    }
-                )
-                site_validations_store_backend = site_html_store.store_backends[ValidationResultIdentifier]
-                self.docs_validations_store_backends[site_name] = site_validations_store_backend
+                self._process_docs_site_for_checklist(site_name, site_config)
 
-        self.run_time_setters_by_backend_type = {
-            TupleFilesystemStoreBackend: self.set_tuple_filesystem_store_backend_run_time,
-            TupleS3StoreBackend: self.set_tuple_s3_store_backend_run_time,
-            TupleGCSStoreBackend: self.set_tuple_gcs_store_backend_run_time
-        }
+    def _process_docs_site_for_checklist(self, site_name, site_config):
+        site_html_store = HtmlSiteStore(
+            store_backend=site_config.get("store_backend"),
+            runtime_environment={
+                "data_context": self.data_context,
+                "root_directory": self.data_context.root_directory,
+                "site_name": site_name
+            }
+        )
+        site_validations_store_backend = site_html_store.store_backends[ValidationResultIdentifier]
+
+        if isinstance(site_validations_store_backend, tuple(list(self.run_time_setters_by_backend_type.keys()))):
+            self.upgrade_checklist["docs_validations_store_backends"][site_name] = site_validations_store_backend
+        else:
+            self.upgrade_log["skipped_docs_validations_stores"]["unsupported"].append({
+                "site_name": site_name,
+                "validations_store_backend_class": type(site_validations_store_backend).__name__
+            })
+
+    def _process_validations_store_for_checklist(self, store_name, store):
+        store_backend = store.store_backend
+        if isinstance(store_backend, DatabaseStoreBackend):
+            self.upgrade_log["skipped_validations_stores"]["database_store_backends"].append({
+                "store_name": store_name,
+                "store_backend_class": type(store_backend).__name__
+            })
+        elif isinstance(store_backend, tuple(list(self.run_time_setters_by_backend_type.keys()))):
+            self.upgrade_checklist["validations_store_backends"][store_name] = store_backend
+        else:
+            self.upgrade_log["skipped_validations_stores"]["unsupported"].append({
+                "store_name": store_name,
+                "store_backend_class": type(store_backend).__name__
+            })
+
+    def _process_metrics_store_for_checklist(self, store_name, store):
+        store_backend = store.store_backend
+        if isinstance(store_backend, DatabaseStoreBackend):
+            self.upgrade_log["skipped_metrics_stores"]["database_store_backends"].append({
+                "store_name": store_name,
+                "store_backend_class": type(store_backend).__name__
+            })
+        elif isinstance(store_backend, InMemoryStoreBackend):
+            pass
+        else:
+            self.upgrade_log["skipped_metrics_stores"]["unsupported"].append({
+                "store_name": store_name,
+                "store_backend_class": type(store_backend).__name__
+            })
 
     def upgrade_store_backend(self, store_backend):
         validation_source_keys = store_backend.list_keys()
@@ -78,7 +121,7 @@ class UpgradeHelperV11:
             dest_key = tuple(dest_key_list)
             store_backend.move(source_key, dest_key)
 
-    def set_tuple_filesystem_store_backend_run_time(self, source_key, store_backend):
+    def _get_tuple_filesystem_store_backend_run_time(self, source_key, store_backend):
         run_name = source_key[-2]
         try:
             self.validation_run_times[run_name] = parse(run_name).isoformat()
@@ -94,7 +137,7 @@ class UpgradeHelperV11:
             ).isoformat()
             self.validation_run_times[run_name] = path_mod_iso_str
 
-    def set_tuple_s3_store_backend_run_time(self, source_key, store_backend):
+    def _get_tuple_s3_store_backend_run_time(self, source_key, store_backend):
         import boto3
         s3 = boto3.resource('s3')
         run_name = source_key[-2]
@@ -110,7 +153,7 @@ class UpgradeHelperV11:
 
             self.validation_run_times[run_name] = source_object_last_mod
 
-    def set_tuple_gcs_store_backend_run_time(self, source_key, store_backend):
+    def _get_tuple_gcs_store_backend_run_time(self, source_key, store_backend):
         from google.cloud import storage
         gcs = storage.Client(project=store_backend.project)
         bucket = gcs.get_bucket(store_backend.bucket)
@@ -126,8 +169,15 @@ class UpgradeHelperV11:
 
             self.validation_run_times[run_name] = source_blob_created_time
 
+    def _generate_upgrade_prompt(self):
+        stores_with_database_backends = (self.upgrade_log["skipped_validations_stores"]["database_store_backends"] +
+                                         self.upgrade_log["skipped_metrics_stores"]["database_store_backends"])
+        unsupported_stores = (self.upgrade_log["skipped_validations_stores"]["unsupported"] +
+                              self.upgrade_log["skipped_metrics_stores"]["unsupported"])
+        unsupported_doc_sites = self.upgrade_log["skipped_docs_validations_stores"]["unsupported"]
+
     def upgrade_project(self):
-        for (store_name, store_backend) in self.validations_store_backends.items():
+        for (store_name, store_backend) in self.upgrade_checklist["validations_store_backends"].items():
             self.upgrade_store_backend(store_backend)
-        for (site_name, store_backend) in self.docs_validations_store_backends.items():
+        for (site_name, store_backend) in self.upgrade_checklist["docs_validations_store_backends"].items():
             self.upgrade_store_backend(store_backend)
