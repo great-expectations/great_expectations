@@ -26,10 +26,10 @@ from great_expectations.datasource import Datasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.exceptions import (
     BatchKwargsError,
-    ConfigNotFoundError,
-    DataContextError,
     CheckpointError,
     CheckpointNotFoundError,
+    ConfigNotFoundError,
+    DataContextError,
 )
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -892,7 +892,6 @@ uncommitted/
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
     DataContext.create(project_path)
     fixture = gen_directory_tree_str(uncommitted_dir)
-    print(fixture)
     assert fixture == expected
 
     # Test that all exist
@@ -939,7 +938,6 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(tm
 
     with open(config_vars_yml, "r") as ff:
         obs = ff.read()
-    print(obs)
     assert "# LOOK I WAS MODIFIED" in obs
 
 
@@ -1024,7 +1022,6 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     assert os.path.isfile(expected_path)
 
     obs = context.get_docs_sites_urls()
-    print(obs)
     assert obs == [{'site_name': 'my_rad_site', 'site_url': "file://{}".format(expected_path)}]
 
 

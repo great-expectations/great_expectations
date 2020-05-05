@@ -4,7 +4,7 @@ on:
  issues:
    types: [reopened]
  schedule:
-   - cron: "5 0 1 * *"
+   - cron: "0 0 * * *"
 
 jobs:
   stale:
@@ -22,6 +22,7 @@ jobs:
         stale-issue-label: stale
         stale-pr-label: stale
         exempt-issue-label: stalebot-exempt
+        exempt-pr-labels: stalebot-exempt
         operations-per-run: 30
         main: 'lib/main.js'
-        debug-only: true
+        debug-only: false

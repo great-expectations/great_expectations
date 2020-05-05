@@ -9,7 +9,11 @@ develop
 * added BigQuery as an option in the list of databases in the CLI
 * added special cases for handling BigQuery - table names are already qualified with schema name, so we must make sure that we do not prepend the schema name twice
 * changed the prompt for the name of the temp table in BigQuery in the CLI to hint that a fully qualified name (project.dataset.table) should be provided
-* fixed a bug: expect_column_quantile_values_to_be_between expectation throws an "unexpected keyword WITHIN" on BigQuery (#1391)
+* Bugfix for: expect_column_quantile_values_to_be_between expectation throws an "unexpected keyword WITHIN" on BigQuery (#1391)
+* DataContext.get_docs_sites_urls now raises error if non-existent site_name is specified
+* Bugfix for the CLI command `docs build` ignoring the --site_name argument (#1378)
+* Bugfix and refactor for `datasource delete` CLI command (#1386) @mzjp2
+* Instantiate datasources and validate config only when datasource is used (#1374) @mzjp2
 
 0.10.8
 -----------------
