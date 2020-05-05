@@ -25,8 +25,6 @@ Finally, your static site includes a set of pages for future data validations. T
 <<<SCREENSHOT GOES HERE>>>
 
 
-This ability to translate between machine- and human-readable formats makes Great Expectations a powerful tool for both testing and communicating about data.
-
 The Auto Docs build chain
 -------------------------
 
@@ -43,7 +41,9 @@ Possibilities to keep in mind for the future:
 
 <<<DIAGRAM>>>
 
-In the next step, we'll show how to render a disposable Validation notebook that you can use to review data and Validation Results and edit your Expectations.
+This ability to translate between machine- and human-readable formats makes Great Expectations a powerful tool---not just for data testing, but also data communication and collaboration.
+
+In the next step, we will complete set up by showing you how to Validate data, review the results, and edit your Expectations. Incidentally, this step will use another kind of renderer: a disposable notebook generated specifically to support this workflow.
 
 .. attention:: Great Expectations Renderers are still an experimental feature. They're very useful, but expect changes in API, behavior, and XXX.
 
