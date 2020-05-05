@@ -6,11 +6,11 @@ from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.util import cli_message
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
-from great_expectations.migration_tools import MigratorV11
+from great_expectations.cli.upgrade_helpers import UpgradeHelperV11
 from great_expectations import __version__ as ge_version
 
-GE_MIGRATORS = {
-    "0.10": MigratorV11
+GE_UPGRADE_HELPERS = {
+    "0.10": UpgradeHelperV11
 }
 
 
@@ -56,7 +56,7 @@ def project_upgrade(directory):
     """Check a config for validity and help with migrations."""
     cli_message("Migrating your project...\n")
     try:
-        upgrade_helper = GE_MIGRATORS.get(ge_version[:4])
+        upgrade_helper = GE_UPGRADE_HELPERS.get(ge_version[:4])
         context = DataContext(context_root_dir=directory)
         upgrade_helper(context).upgrade_project()
     except Exception as e:
