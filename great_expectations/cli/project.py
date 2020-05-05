@@ -45,20 +45,20 @@ def project_check_config(directory):
     cli_message("<green>Your config file appears valid!</green>")
 
 
-@project.command(name="migrate")
+@project.command(name="upgrade")
 @click.option(
     "--directory",
     "-d",
     default="./great_expectations",
     help="The project's great_expectations directory.",
 )
-def project_migrate(directory):
+def project_upgrade(directory):
     """Check a config for validity and help with migrations."""
     cli_message("Migrating your project...\n")
     try:
-        migrator = GE_MIGRATORS.get(ge_version[:4])
+        upgrade_helper = GE_MIGRATORS.get(ge_version[:4])
         context = DataContext(context_root_dir=directory)
-        migrator(context).migrate_project()
+        upgrade_helper(context).upgrade_project()
     except Exception as e:
         cli_message("BLARGH!!!!!!!:\n")
         cli_message("<red>{}</red>".format(e.message))
