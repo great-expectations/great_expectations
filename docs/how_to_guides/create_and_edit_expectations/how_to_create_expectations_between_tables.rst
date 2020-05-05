@@ -10,17 +10,11 @@ Unfortunately, no Expectations natively support cross-table comparisons today (b
 1. Use "Check Assets", where you create a new table that joins the two tables; or
 2. Use :ref:`Evaluation Parameters`_ to supply relevant metrics to expectations.
 
+Check Asset Pattern
+-------------------------
 
-Build a Check Asset
--------------------
 
-A Check Asset helps express your expectations against a data object that more naturally reflects the meaning of the expectation. For example, a Check Asset for event data might be built as an aggregate rollup binning events by the hour in which they occurred. Then, you can easily express expectations about how many events should happen in teh day versus the night.
-
-Similarly, when working with data from multiple tables or data assets, a check asset might consist of joining the tables on an id to facilitate comparing values in two now-adjacent columns.
-
-Using a Check Asset introduces a new node into your data pipeline. You should clearly name the expectations about a check asset in a way that makes it easy to understand how it is used in the pipeline, for example by creating an expectation suite with the name ``event_data.time_rollup_check.warning``.
-
-You should ensure that the code that produces your check asset is clearly linked to the asset.
+See :ref:`how_to__use_check_assets` for more information on the check asset pattern.
 
 Use Evaluation Parameters
 -------------------------
