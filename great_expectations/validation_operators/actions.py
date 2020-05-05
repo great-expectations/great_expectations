@@ -43,7 +43,7 @@ class NoOpAction(ValidationAction):
 
     def __init__(self, data_context,):
         super(NoOpAction, self).__init__(data_context)
-    
+
     def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
         print("Happily doing nothing")
 
@@ -51,7 +51,7 @@ class NoOpAction(ValidationAction):
 class SlackNotificationAction(ValidationAction):
     """
     SlackNotificationAction sends a Slack notification to a given webhook.
-    
+
     Example config:
     {
         "renderer": {
@@ -97,20 +97,20 @@ class SlackNotificationAction(ValidationAction):
         self.slack_webhook = slack_webhook
         assert slack_webhook, "No Slack webhook found in action config."
         self.notify_on = notify_on
-        
+
     def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset=None):
         logger.debug("SlackNotificationAction.run")
-    
+
         if validation_result_suite is None:
             return
-        
+
         if not isinstance(validation_result_suite_identifier, ValidationResultIdentifier):
             raise TypeError("validation_result_suite_id must be of type ValidationResultIdentifier, not {0}".format(
                 type(validation_result_suite_identifier)
             ))
 
         validation_success = validation_result_suite.success
-        
+
         if self.notify_on == "all" or \
                 self.notify_on == "success" and validation_success or \
                 self.notify_on == "failure" and not validation_success:

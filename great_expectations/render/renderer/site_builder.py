@@ -124,35 +124,6 @@ class SiteBuilder(object):
             runtime_environment=runtime_environment
         )
 
-        if site_index_builder is None:
-            site_index_builder = {
-                "class_name": "DefaultSiteIndexBuilder"
-            }
-        module_name = site_index_builder.get('module_name') or 'great_expectations.render.renderer.site_builder'
-        class_name = site_index_builder.get('class_name') or 'DefaultSiteIndexBuilder'
-        self.site_index_builder = instantiate_class_from_config(
-            config=site_index_builder,
-            runtime_environment={
-                "data_context": data_context,
-                "custom_styles_directory": custom_styles_directory,
-                "show_how_to_buttons": self.show_how_to_buttons,
-                "target_store": self.target_store,
-                "site_name": self.site_name,
-                "data_context_id": self.data_context_id
-            },
-            config_defaults={
-                "name": "site_index_builder",
-                "module_name": module_name,
-                "class_name": class_name
-            }
-        )
-        if not self.site_index_builder:
-            raise exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=site_index_builder['class_name']
-            )
-
         default_site_section_builders_config = {
             "expectations": {
                 "class_name": "DefaultSiteSectionBuilder",
@@ -164,7 +135,7 @@ class SiteBuilder(object):
             "validations": {
                 "class_name": "DefaultSiteSectionBuilder",
                 "source_store_name": data_context.validations_store_name,
-                "run_id_filter": {
+                "run_name_filter": {
                     "ne": "profiling"
                 },
                 "renderer": {
@@ -175,7 +146,7 @@ class SiteBuilder(object):
             "profiling": {
                 "class_name": "DefaultSiteSectionBuilder",
                 "source_store_name":  data_context.validations_store_name,
-                "run_id_filter": {
+                "run_name_filter": {
                     "eq": "profiling"
                 },
                 "renderer": {
@@ -213,6 +184,39 @@ class SiteBuilder(object):
                     module_name=module_name,
                     package_name=None,
                     class_name=site_section_config['class_name']
+                )
+
+            if site_index_builder is None:
+                site_index_builder = {
+                    "class_name": "DefaultSiteIndexBuilder"
+                }
+            module_name = site_index_builder.get('module_name') or 'great_expectations.render.renderer.site_builder'
+            class_name = site_index_builder.get('class_name') or 'DefaultSiteIndexBuilder'
+            self.site_index_builder = instantiate_class_from_config(
+                config=site_index_builder,
+                runtime_environment={
+                    "data_context": data_context,
+                    "custom_styles_directory": custom_styles_directory,
+                    "show_how_to_buttons": self.show_how_to_buttons,
+                    "target_store": self.target_store,
+                    "site_name": self.site_name,
+                    "data_context_id": self.data_context_id,
+                    "source_stores": {
+                        section_name: section_config.get("source_store_name")
+                        for (section_name, section_config) in site_section_builders.items()
+                    }
+                },
+                config_defaults={
+                    "name": "site_index_builder",
+                    "module_name": module_name,
+                    "class_name": class_name
+                }
+            )
+            if not self.site_index_builder:
+                raise exceptions.ClassInstantiationError(
+                    module_name=module_name,
+                    package_name=None,
+                    class_name=site_index_builder['class_name']
                 )
 
     def clean_site(self):
@@ -263,7 +267,7 @@ class DefaultSiteSectionBuilder(object):
             source_store_name,
             custom_styles_directory=None,
             show_how_to_buttons=True,
-            run_id_filter=None,
+            run_name_filter=None,
             validation_results_limit=None,
             renderer=None,
             view=None,
@@ -273,7 +277,7 @@ class DefaultSiteSectionBuilder(object):
         self.name = name
         self.source_store = data_context.stores[source_store_name]
         self.target_store = target_store
-        self.run_id_filter = run_id_filter
+        self.run_name_filter = run_name_filter
         self.validation_results_limit = validation_results_limit
         self.data_context_id = data_context_id
         self.show_how_to_buttons = show_how_to_buttons
@@ -325,7 +329,7 @@ class DefaultSiteSectionBuilder(object):
     def build(self, resource_identifiers=None):
         source_store_keys = self.source_store.list_keys()
         if self.name == "validations" and self.validation_results_limit:
-            source_store_keys = sorted(source_store_keys, key=lambda x: x.run_id, reverse=True)[:self.validation_results_limit]
+            source_store_keys = sorted(source_store_keys, key=lambda x: x.run_id.run_time, reverse=True)[:self.validation_results_limit]
 
         for resource_key in source_store_keys:
 
@@ -336,8 +340,8 @@ class DefaultSiteSectionBuilder(object):
             if resource_identifiers and resource_key not in resource_identifiers:
                 continue
 
-            if self.run_id_filter:
-                if not self._resource_key_passes_run_id_filter(resource_key):
+            if self.run_name_filter:
+                if not self._resource_key_passes_run_name_filter(resource_key):
                     continue
 
             try:
@@ -351,14 +355,17 @@ class DefaultSiteSectionBuilder(object):
                 logger.debug("        Rendering expectation suite {}".format(expectation_suite_name))
             elif isinstance(resource_key, ValidationResultIdentifier):
                 run_id = resource_key.run_id
+                run_name = run_id.run_name
+                run_time = run_id.run_time
                 expectation_suite_name = resource_key.expectation_suite_identifier.expectation_suite_name
-                if run_id == "profiling":
+                if run_name == "profiling":
                     logger.debug("        Rendering profiling for batch {}".format(resource_key.batch_identifier))
                 else:
 
                     logger.debug(
-                        "        Rendering validation: run id: {}, suite {} for batch {}".format(
-                            run_id,
+                        "        Rendering validation: run name: {}, run time: {}, suite {} for batch {}".format(
+                            run_name,
+                            run_time,
                             expectation_suite_name,
                             resource_key.batch_identifier
                         )
@@ -389,17 +396,17 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 viewable_content
             )
 
-    def _resource_key_passes_run_id_filter(self, resource_key):
+    def _resource_key_passes_run_name_filter(self, resource_key):
         if type(resource_key) == ValidationResultIdentifier:
-            run_id = resource_key.run_id
+            run_name = resource_key.run_id.run_name
         else:
-            raise TypeError("run_id_filter filtering is only implemented for ValidationResultResources.")
+            raise TypeError("run_name_filter filtering is only implemented for ValidationResultResources.")
 
-        if self.run_id_filter.get("eq"):
-            return self.run_id_filter.get("eq") == run_id
+        if self.run_name_filter.get("eq"):
+            return self.run_name_filter.get("eq") == run_name
 
-        elif self.run_id_filter.get("ne"):
-            return self.run_id_filter.get("ne") != run_id
+        elif self.run_name_filter.get("ne"):
+            return self.run_name_filter.get("ne") != run_name
 
 
 class DefaultSiteIndexBuilder(object):
@@ -416,6 +423,7 @@ class DefaultSiteIndexBuilder(object):
             renderer=None,
             view=None,
             data_context_id=None,
+            source_stores=None,
             **kwargs
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
@@ -426,6 +434,7 @@ class DefaultSiteIndexBuilder(object):
         self.validation_results_limit = validation_results_limit
         self.data_context_id = data_context_id
         self.show_how_to_buttons = show_how_to_buttons
+        self.source_stores = source_stores or {}
 
         if renderer is None:
             renderer = {
@@ -478,7 +487,11 @@ class DefaultSiteIndexBuilder(object):
                                               section_name,
                                               batch_identifier=None,
                                               run_id=None,
-                                              validation_success=None
+                                              validation_success=None,
+                                              run_time=None,
+                                              run_name=None,
+                                              asset_name=None,
+                                              batch_kwargs=None
                                               ):
         import os
 
@@ -486,7 +499,8 @@ class DefaultSiteIndexBuilder(object):
             index_links_dict[section_name + "_links"] = []
 
         if run_id:
-            path_components = ["validations"] + expectation_suite_name.split(".") + [run_id] + [batch_identifier]
+            path_components = ["validations"] + expectation_suite_name.split(".") + list(run_id.to_tuple()) + [batch_identifier]
+            # py2 doesn't support
             # filepath = os.path.join("validations", batch_identifier, *expectation_suite_name.split("."), run_id)
             filepath = os.path.join(*path_components)
             filepath += ".html"
@@ -494,13 +508,21 @@ class DefaultSiteIndexBuilder(object):
             filepath = os.path.join("expectations", *expectation_suite_name.split("."))
             filepath += ".html"
 
+        expectation_suite_filepath = os.path.join("expectations", *expectation_suite_name.split("."))
+        expectation_suite_filepath += ".html"
+
         index_links_dict[section_name + "_links"].append(
             {
                 "expectation_suite_name": expectation_suite_name,
                 "filepath": filepath,
                 "run_id": run_id,
                 "batch_identifier": batch_identifier,
-                "validation_success": validation_success
+                "validation_success": validation_success,
+                "run_time": run_time,
+                "run_name": run_name,
+                "asset_name": asset_name,
+                "batch_kwargs": batch_kwargs,
+                "expectation_suite_filepath": expectation_suite_filepath if run_id else None
             }
         )
 
@@ -600,13 +622,13 @@ class DefaultSiteIndexBuilder(object):
         ]
         profiling_result_keys = [
             validation_result_key for validation_result_key in validation_and_profiling_result_keys
-            if validation_result_key.run_id == "profiling"
+            if validation_result_key.run_id.run_name == "profiling"
         ]
         validation_result_keys = [
             validation_result_key for validation_result_key in validation_and_profiling_result_keys
-            if validation_result_key.run_id != "profiling"
+            if validation_result_key.run_id.run_name != "profiling"
         ]
-        validation_result_keys = sorted(validation_result_keys, key=lambda x: x.run_id, reverse=True)
+        validation_result_keys = sorted(validation_result_keys, key=lambda x: x.run_id.run_time, reverse=True)
         if self.validation_results_limit:
             validation_result_keys = validation_result_keys[:self.validation_results_limit]
 
@@ -628,10 +650,11 @@ class DefaultSiteIndexBuilder(object):
                 validation = self.data_context.get_validation_result(
                     batch_identifier=profiling_result_key.batch_identifier,
                     expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
-                    run_id=profiling_result_key.run_id
+                    run_id=profiling_result_key.run_id,
+                    validations_store_name=self.source_stores.get("profiling")
                 )
 
-                validation_success = validation.success
+                batch_kwargs = validation.meta.get("batch_kwargs", {})
 
                 self.add_resource_info_to_index_links_dict(
                     index_links_dict=index_links_dict,
@@ -639,7 +662,10 @@ class DefaultSiteIndexBuilder(object):
                     section_name="profiling",
                     batch_identifier=profiling_result_key.batch_identifier,
                     run_id=profiling_result_key.run_id,
-                    validation_success=validation_success
+                    run_time=profiling_result_key.run_id.run_time,
+                    run_name=profiling_result_key.run_id.run_name,
+                    asset_name=batch_kwargs.get("data_asset_name"),
+                    batch_kwargs=batch_kwargs
                 )
             except Exception:
                 error_msg = "Profiling result not found: {0:s} - skipping".format(str(profiling_result_key.to_tuple()))
@@ -650,10 +676,12 @@ class DefaultSiteIndexBuilder(object):
                 validation = self.data_context.get_validation_result(
                     batch_identifier=validation_result_key.batch_identifier,
                     expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
-                    run_id=validation_result_key.run_id
+                    run_id=validation_result_key.run_id,
+                    validations_store_name=self.source_stores.get("validations")
                 )
 
                 validation_success = validation.success
+                batch_kwargs = validation.meta.get("batch_kwargs", {})
 
                 self.add_resource_info_to_index_links_dict(
                     index_links_dict=index_links_dict,
@@ -661,7 +689,11 @@ class DefaultSiteIndexBuilder(object):
                     section_name="validations",
                     batch_identifier=validation_result_key.batch_identifier,
                     run_id=validation_result_key.run_id,
-                    validation_success=validation_success
+                    validation_success=validation_success,
+                    run_time=validation_result_key.run_id.run_time,
+                    run_name=validation_result_key.run_id.run_name,
+                    asset_name=batch_kwargs.get("data_asset_name"),
+                    batch_kwargs=batch_kwargs
                 )
             except Exception:
                 error_msg = "Validation result not found: {0:s} - skipping".format(str(validation_result_key.to_tuple()))

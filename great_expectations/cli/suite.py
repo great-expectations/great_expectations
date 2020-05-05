@@ -167,8 +167,13 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                     batch_kwargs_generator,
                     data_asset,
                     batch_kwargs,
-                ) = get_batch_kwargs(context, datasource_name=data_source.name,
-                                     additional_batch_kwargs=additional_batch_kwargs)
+                ) = get_batch_kwargs(
+                    context,
+                    datasource_name=data_source.name,
+                    batch_kwargs_generator_name=None,
+                    data_asset_name=None,
+                    additional_batch_kwargs=additional_batch_kwargs,
+                )
 
         notebook_name = "edit_{}.ipynb".format(suite.expectation_suite_name)
         notebook_path = _get_notebook_path(context, notebook_name)
@@ -288,18 +293,24 @@ def _suite_new(suite: str, directory: str, empty: bool, jupyter: bool, view: boo
 
     datasource_name = None
     generator_name = None
-    generator_asset = None
+    data_asset_name = None
 
     try:
         if batch_kwargs is not None:
             batch_kwargs = json.loads(batch_kwargs)
 
-        success, suite_name = toolkit.create_expectation_suite(context, datasource_name=datasource_name,
-                                                            batch_kwargs_generator_name=generator_name,
-                                                            generator_asset=generator_asset, batch_kwargs=batch_kwargs,
-                                                            expectation_suite_name=suite,
-                                                            additional_batch_kwargs={"limit": 1000}, empty_suite=empty,
-                                                            open_docs=view)
+        success, suite_name = create_expectation_suite_impl(
+            context,
+            datasource_name=datasource_name,
+            batch_kwargs_generator_name=generator_name,
+            data_asset_name=data_asset_name,
+            batch_kwargs=batch_kwargs,
+            expectation_suite_name=suite,
+            additional_batch_kwargs={"limit": 1000},
+            empty_suite=empty,
+            show_intro_message=False,
+            open_docs=view,
+        )
         if success:
             cli_message(
                 "A new Expectation suite '{}' was added to your project".format(

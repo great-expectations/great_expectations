@@ -15,7 +15,10 @@ For example:
       "meta": {
         "data_asset_name": "data__dir/default/titanic",
         "expectation_suite_name": "default",
-        "run_id": "2019-07-01T123434.12345Z"
+        "run_id": {
+          "run_name": "my_run_name",
+          "run_time": "2019-07-01T123434.12345Z"
+        }
       },
       "results": [
         {

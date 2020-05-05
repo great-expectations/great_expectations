@@ -38,7 +38,7 @@ def test_parquet_folder_connection_path(tmp_path_factory):
     return basepath
 
 
-def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connection_path, spark_session):
+def test_sparkdf_datasource_custom_data_asset(data_context_parameterized_expectation_suite, test_folder_connection_path, spark_session):
     assert spark_session  # Ensure a spark session exists
     name = "test_sparkdf_datasource"
     # type_ = "spark"
@@ -48,33 +48,33 @@ def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connecti
         "module_name": "custom_sparkdf_dataset",
         "class_name": "CustomSparkDFDataset"
     }
-    data_context.add_datasource(name,
-                                class_name=class_name,
-                                data_asset_type=data_asset_type_config,
-                                batch_kwargs_generators={
+    data_context_parameterized_expectation_suite.add_datasource(name,
+                                                                class_name=class_name,
+                                                                data_asset_type=data_asset_type_config,
+                                                                batch_kwargs_generators={
     "subdir_reader": {
         "class_name": "SubdirReaderBatchKwargsGenerator",
         "base_directory": test_folder_connection_path
     }
 }
-)
+                                                                )
 
 
     # We should now see updated configs
-    with open(os.path.join(data_context.root_directory, "great_expectations.yml"), "r") as data_context_config_file:
+    with open(os.path.join(data_context_parameterized_expectation_suite.root_directory, "great_expectations.yml"), "r") as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
     assert data_context_file_config["datasources"][name]["data_asset_type"]["module_name"] == "custom_sparkdf_dataset"
     assert data_context_file_config["datasources"][name]["data_asset_type"]["class_name"] == "CustomSparkDFDataset"
 
     # We should be able to get a dataset of the correct type from the datasource.
-    data_context.create_expectation_suite("test_sparkdf_datasource.default")
-    batch_kwargs = data_context.build_batch_kwargs(name, "subdir_reader", "test")
+    data_context_parameterized_expectation_suite.create_expectation_suite("test_sparkdf_datasource.default")
+    batch_kwargs = data_context_parameterized_expectation_suite.build_batch_kwargs(name, "subdir_reader", "test")
     batch_kwargs["reader_options"] = {
             'header': True,
             'inferSchema': True
         }
-    batch = data_context.get_batch(
+    batch = data_context_parameterized_expectation_suite.get_batch(
         batch_kwargs=batch_kwargs,
         expectation_suite_name="test_sparkdf_datasource.default"
     )
@@ -86,7 +86,7 @@ def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connecti
     assert res.success is True
 
 
-def test_create_sparkdf_datasource(data_context, tmp_path_factory, test_backends):
+def test_create_sparkdf_datasource(data_context_parameterized_expectation_suite, tmp_path_factory, test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
     base_dir = tmp_path_factory.mktemp('test_create_sparkdf_datasource')
@@ -94,15 +94,15 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory, test_backends
     # type_ = "spark"
     class_name = "SparkDFDatasource"
 
-    data_context.add_datasource(name, class_name=class_name,
-                                batch_kwargs_generators={
+    data_context_parameterized_expectation_suite.add_datasource(name, class_name=class_name,
+                                                                batch_kwargs_generators={
                                     "default": {
                                         "class_name": "SubdirReaderBatchKwargsGenerator",
                                         "base_directory": str(base_dir)
                                     }
                                 }
-                                )
-    data_context_config = data_context.get_config()
+                                                                )
+    data_context_config = data_context_parameterized_expectation_suite.get_config()
 
     assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["class_name"] == class_name
@@ -111,9 +111,9 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory, test_backends
     base_dir = tmp_path_factory.mktemp('test_create_sparkdf_datasource-2')
     name = "test_sparkdf_datasource"
 
-    data_context.add_datasource(name,
-                                class_name=class_name,
-                                batch_kwargs_generators={
+    data_context_parameterized_expectation_suite.add_datasource(name,
+                                                                class_name=class_name,
+                                                                batch_kwargs_generators={
                                     "default": {
                                         "class_name": "SubdirReaderBatchKwargsGenerator",
                                         "reader_options":
@@ -123,15 +123,15 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory, test_backends
                                             }
                                     }
                                     }
-                                )
-    data_context_config = data_context.get_config()
+                                                                )
+    data_context_config = data_context_parameterized_expectation_suite.get_config()
 
     assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["class_name"] == class_name
     assert data_context_config["datasources"][name]["batch_kwargs_generators"]["default"]["reader_options"]["sep"] == "|"
 
     # Note that pipe is special in yml, so let's also check to see that it was properly serialized
-    with open(os.path.join(data_context.root_directory, "great_expectations.yml"), "r") as configfile:
+    with open(os.path.join(data_context_parameterized_expectation_suite.root_directory, "great_expectations.yml"), "r") as configfile:
         lines = configfile.readlines()
         assert "          sep: '|'\n" in lines
         assert "          header: false\n" in lines
@@ -192,36 +192,36 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path, test_backe
     assert batch.data.head()['col_1'] == '1'
 
 
-def test_standalone_spark_passthrough_datasource(data_context, dataset, test_backends):
+def test_standalone_spark_passthrough_datasource(data_context_parameterized_expectation_suite, dataset, test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
-    datasource = data_context.add_datasource("spark_source",
-                                             module_name="great_expectations.datasource",
-                                             class_name="SparkDFDatasource")
+    datasource = data_context_parameterized_expectation_suite.add_datasource("spark_source",
+                                                                             module_name="great_expectations.datasource",
+                                                                             class_name="SparkDFDatasource")
 
     # We want to ensure that an externally-created spark DataFrame can be successfully instantiated using the
     # datasource built in a data context
     # Our dataset fixture is parameterized by all backends. The spark source should only accept a spark dataset
-    data_context.create_expectation_suite("new_suite")
+    data_context_parameterized_expectation_suite.create_expectation_suite("new_suite")
     batch_kwargs = InMemoryBatchKwargs(datasource="spark_source", dataset=dataset)
 
     if isinstance(dataset, SparkDFDataset):
         # We should be smart enough to figure out this is a batch:
-        batch = data_context.get_batch(batch_kwargs=batch_kwargs, expectation_suite_name="new_suite")
+        batch = data_context_parameterized_expectation_suite.get_batch(batch_kwargs=batch_kwargs, expectation_suite_name="new_suite")
         res = batch.expect_column_to_exist("infinities")
         assert res.success is True
         res = batch.expect_column_to_exist("not_a_column")
         assert res.success is False
         batch.save_expectation_suite()
         assert os.path.isfile(os.path.join(
-            data_context.root_directory,
+            data_context_parameterized_expectation_suite.root_directory,
             "expectations/new_suite.json")
         )
 
     else:
         with pytest.raises(BatchKwargsError) as exc:
             # noinspection PyUnusedLocal
-            batch = data_context.get_batch(batch_kwargs=batch_kwargs, expectation_suite_name="new_suite")
+            batch = data_context_parameterized_expectation_suite.get_batch(batch_kwargs=batch_kwargs, expectation_suite_name="new_suite")
             assert "Unrecognized batch_kwargs for spark_source" in exc.value.message
 
 

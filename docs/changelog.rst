@@ -6,6 +6,10 @@ Changelog
 
 develop
 -----------------
+* updated the dateutil dependency
+* RUN_ID description
+* Added QueryStore
+
 
 0.10.8
 -----------------

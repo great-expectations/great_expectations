@@ -24,12 +24,12 @@ data_docs:
       validations_store:
         type: filesystem
         base_directory: uncommitted/validations/
-        run_id_filter:
+        run_name_filter:
           ne: profiling
       profiling_store:
         type: filesystem
         base_directory: uncommitted/validations/
-        run_id_filter:
+        run_name_filter:
           eq: profiling
 
       datasources: '*'

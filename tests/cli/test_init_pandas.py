@@ -4,6 +4,7 @@ import shutil
 
 import pytest
 from click.testing import CliRunner
+from freezegun import freeze_time
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -19,6 +20,7 @@ except ImportError:
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@freeze_time("09/26/2019 13:42:41")
 def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     os.makedirs(os.path.join(project_dir, "data"))
@@ -77,6 +79,7 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
     guid_safe_obs_tree = re.sub(
         r"[a-z0-9]{32}(?=\.(json|html))", "foobarbazguid", date_safe_obs_tree
     )
+    # print(guid_safe_obs_tree)
     assert (
         guid_safe_obs_tree
         == """great_expectations/
@@ -129,6 +132,8 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
                         short-logo-vector.svg
                         short-logo.png
                         validation_failed_unexpected_values.gif
+                    scripts/
+                        bootstrap-table-filter-control.min.js
                     styles/
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
@@ -136,12 +141,14 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
                     Titanic/
                         warning/
                             9999.9999/
-                                foobarbazguid.html
+                                2019-09-26T13:42:41+00:00/
+                                    foobarbazguid.html
         validations/
             Titanic/
                 warning/
                     9999.9999/
-                        foobarbazguid.json
+                        2019-09-26T13:42:41+00:00/
+                            foobarbazguid.json
 """
     )
 
@@ -470,6 +477,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@freeze_time("09/26/2019 13:42:41")
 def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different_file(
     mock_webbrowser, caplog, tmp_path_factory
 ):
@@ -547,6 +555,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     guid_safe_obs_tree = re.sub(
         r"[a-z0-9]{32}(?=\.(json|html))", "foobarbazguid", date_safe_obs_tree
     )
+    # print(guid_safe_obs_tree)
     assert (
         guid_safe_obs_tree
         == """great_expectations/
@@ -599,6 +608,8 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
                         short-logo-vector.svg
                         short-logo.png
                         validation_failed_unexpected_values.gif
+                    scripts/
+                        bootstrap-table-filter-control.min.js
                     styles/
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
@@ -606,12 +617,14 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
                     Titanic/
                         warning/
                             9999.9999/
-                                foobarbazguid.html
+                                2019-09-26T13:42:41+00:00/
+                                    foobarbazguid.html
         validations/
             Titanic/
                 warning/
                     9999.9999/
-                        foobarbazguid.json
+                        2019-09-26T13:42:41+00:00/
+                            foobarbazguid.json
 """
     )
 

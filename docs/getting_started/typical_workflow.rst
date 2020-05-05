@@ -420,7 +420,10 @@ Below is an example of this code snippet, with comments that explain what each l
     results = context.run_validation_operator(
         "action_list_operator",
         assets_to_validate=[batch],
-        run_id=run_id) # e.g., Airflow run id or some run identifier that your pipeline uses.
+        run_id={
+          "run_name": "some_string_that_uniquely_identifies_this_run",  # e.g., Airflow run id or some run identifier that your pipeline uses.
+          "run_time": "2020-04-30T00:50:02.222372+00:00"  # optional, defaults to current UTC datetime
+        })
 
     if not results["success"]:
         # Decide what your pipeline should do in case the data does not

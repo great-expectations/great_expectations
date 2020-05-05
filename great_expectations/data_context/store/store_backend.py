@@ -1,5 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
+from great_expectations.exceptions import StoreError
+
 
 class StoreBackend(object, metaclass=ABCMeta):
     """A store backend acts as a key-value store that can accept tuples as keys, to abstract away
@@ -31,12 +33,17 @@ class StoreBackend(object, metaclass=ABCMeta):
         # Allow the implementing setter to return something (e.g. a path used for its key)
         return self._set(key, value, **kwargs)
 
+    def move(self, source_key, dest_key, **kwargs):
+        self._validate_key(source_key)
+        self._validate_key(dest_key)
+        return self._move(source_key, dest_key, **kwargs)
+
     def has_key(self, key):
         self._validate_key(key)
         return self._has_key(key)
 
     def get_url_for_key(self, key, protocol=None):
-        raise NotImplementedError(
+        raise StoreError(
             "Store backend of type {0:s} does not have an implementation of get_url_for_key".format(
                 type(self).__name__))
 
@@ -66,6 +73,10 @@ class StoreBackend(object, metaclass=ABCMeta):
 
     @abstractmethod
     def _set(self, key, value, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _move(self, source_key, dest_key, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
@@ -101,6 +112,10 @@ class InMemoryStoreBackend(StoreBackend):
 
     def _set(self, key, value, **kwargs):
         self._store[key] = value
+
+    def _move(self, source_key, dest_key, **kwargs):
+        self._store[dest_key] = self._store[source_key]
+        self._store.pop(source_key)
 
     def list_keys(self, prefix=()):
         return [key for key in self._store.keys() if key[:len(prefix)] == prefix]

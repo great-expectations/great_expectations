@@ -2,6 +2,7 @@ import datetime
 import os
 import subprocess
 import sys
+import warnings
 from typing import Union
 
 import click
@@ -28,24 +29,20 @@ from great_expectations.exceptions import (
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
 
-def create_expectation_suite(
-    context,
-    datasource_name=None,
-    batch_kwargs_generator_name=None,
-    generator_asset=None,
-    batch_kwargs=None,
-    expectation_suite_name=None,
-    additional_batch_kwargs=None,
-    empty_suite=False,
-    show_intro_message=False,
-    open_docs=False,
-    profiler_configuration="demo",
-):
+def create_expectation_suite(context, datasource_name=None, batch_kwargs_generator_name=None, generator_asset=None,
+                             batch_kwargs=None, expectation_suite_name=None, additional_batch_kwargs=None,
+                             empty_suite=False, show_intro_message=False, open_docs=False,
+                             profiler_configuration="demo", data_asset_name=None):
     """
     Create a new expectation suite.
 
     :return: a tuple: (success, suite name)
     """
+    if generator_asset:
+        warnings.warn("The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
+                      "Please update code accordingly.", DeprecationWarning)
+        data_asset_name = generator_asset
+
     if show_intro_message and not empty_suite:
         cli_message(
             "\n<cyan>========== Create sample Expectations ==========</cyan>\n\n"
@@ -64,28 +61,26 @@ def create_expectation_suite(
 
     if (
         batch_kwargs_generator_name is None
-        or generator_asset is None
+        or data_asset_name is None
         or batch_kwargs is None
     ):
         (
             datasource_name,
             batch_kwargs_generator_name,
-            generator_asset,
+            data_asset_name,
             batch_kwargs,
         ) = get_batch_kwargs(
             context,
             datasource_name=datasource_name,
             batch_kwargs_generator_name=batch_kwargs_generator_name,
-            generator_asset=generator_asset,
+            data_asset_name=data_asset_name,
             additional_batch_kwargs=additional_batch_kwargs,
         )
         # In this case, we have "consumed" the additional_batch_kwargs
         additional_batch_kwargs = {}
 
     if expectation_suite_name is None:
-        default_expectation_suite_name = _get_default_expectation_suite_name(
-            batch_kwargs, generator_asset
-        )
+        default_expectation_suite_name = _get_default_expectation_suite_name(batch_kwargs, data_asset_name)
         while True:
             expectation_suite_name = click.prompt(
                 "\nName the new expectation suite",
@@ -100,16 +95,9 @@ def create_expectation_suite(
         create_empty_suite(context, expectation_suite_name, batch_kwargs)
         return True, expectation_suite_name
 
-    profiling_results = _profile_to_create_a_suite(
-        additional_batch_kwargs,
-        batch_kwargs,
-        batch_kwargs_generator_name,
-        context,
-        datasource_name,
-        expectation_suite_name,
-        generator_asset,
-        profiler_configuration,
-    )
+    profiling_results = _profile_to_create_a_suite(additional_batch_kwargs, batch_kwargs, batch_kwargs_generator_name,
+                                                   context, datasource_name, expectation_suite_name, data_asset_name,
+                                                   profiler_configuration)
 
     build_docs(context, view=False)
     if open_docs:
@@ -118,16 +106,8 @@ def create_expectation_suite(
     return True, expectation_suite_name
 
 
-def _profile_to_create_a_suite(
-    additional_batch_kwargs,
-    batch_kwargs,
-    batch_kwargs_generator_name,
-    context,
-    datasource_name,
-    expectation_suite_name,
-    generator_asset,
-    profiler_configuration,
-):
+def _profile_to_create_a_suite(additional_batch_kwargs, batch_kwargs, batch_kwargs_generator_name, context,
+                               datasource_name, expectation_suite_name, data_asset_name, profiler_configuration):
     click.prompt(
         """
 Great Expectations will choose a couple of columns and generate expectations about them
@@ -144,7 +124,7 @@ Press Enter to continue
     profiling_results = context.profile_data_asset(
         datasource_name,
         batch_kwargs_generator_name=batch_kwargs_generator_name,
-        data_asset_name=generator_asset,
+        data_asset_name=data_asset_name,
         batch_kwargs=batch_kwargs,
         profiler=BasicSuiteBuilderProfiler,
         profiler_configuration=profiler_configuration,
@@ -185,9 +165,9 @@ def _attempt_to_open_validation_results_in_data_docs(context, profiling_results)
         context.open_data_docs()
 
 
-def _get_default_expectation_suite_name(batch_kwargs, generator_asset):
-    if generator_asset:
-        suite_name = f"{generator_asset}.warning"
+def _get_default_expectation_suite_name(batch_kwargs, data_asset_name):
+    if data_asset_name:
+        suite_name = f"{data_asset_name}.warning"
     elif "query" in batch_kwargs:
         suite_name = "query.warning"
     elif "path" in batch_kwargs:

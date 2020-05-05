@@ -94,7 +94,7 @@ data_docs_sites:
       validations:
         class_name: DefaultSiteSectionBuilder
         source_store_name: validations_store
-        run_id_filter:
+        run_name_filter:
           ne: profiling
         renderer:
           module_name: great_expectations.render.renderer
@@ -103,7 +103,7 @@ data_docs_sites:
       profiling:
         class_name: DefaultSiteSectionBuilder
         source_store_name: validations_store
-        run_id_filter:
+        run_name_filter:
           eq: profiling
         renderer:
           module_name: great_expectations.render.renderer

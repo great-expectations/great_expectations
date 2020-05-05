@@ -1,4 +1,6 @@
-from great_expectations.core import ExpectationSuiteValidationResult
+from freezegun import freeze_time
+
+from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
 
 try:
     from unittest import mock
@@ -18,6 +20,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_StoreAction():
     fake_in_memory_store = ValidationsStore(
         store_backend={
@@ -55,17 +58,19 @@ def test_StoreAction():
         data_asset=None
     )
 
+    expected_run_id = RunIdentifier(run_name="prod_20190801", run_time="2019-09-26T13:42:41+00:00")
+
     assert len(fake_in_memory_store.list_keys()) == 1
     stored_identifier = fake_in_memory_store.list_keys()[0]
     assert stored_identifier.batch_identifier == "1234"
     assert stored_identifier.expectation_suite_identifier.expectation_suite_name == "default_expectations"
-    assert stored_identifier.run_id == "prod_20190801"
+    assert stored_identifier.run_id == expected_run_id
 
     assert fake_in_memory_store.get(ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
             expectation_suite_name="default_expectations"
         ),
-        run_id="prod_20190801",
+        run_id=expected_run_id,
         batch_identifier="1234"
     )) == ExpectationSuiteValidationResult(
         success=False,
@@ -73,7 +78,7 @@ def test_StoreAction():
     )
 
 
-def test_SlackNotificationAction(data_context):
+def test_SlackNotificationAction(data_context_parameterized_expectation_suite):
     renderer = {
         "module_name": "great_expectations.render.renderer.slack_renderer",
         "class_name": "SlackRenderer",
@@ -82,7 +87,7 @@ def test_SlackNotificationAction(data_context):
     notify_on = "all"
 
     slack_action = SlackNotificationAction(
-        data_context=data_context,
+        data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
         slack_webhook=slack_webhook,
         notify_on=notify_on

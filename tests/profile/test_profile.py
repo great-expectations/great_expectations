@@ -280,6 +280,7 @@ def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
         "expectation_suite_name",
         "great_expectations.__version__",
         "run_id",
+        "validation_time"
     }
 
 

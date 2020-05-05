@@ -12,7 +12,7 @@ def read_config_file_from_disk(config_filepath):
         return config_file
 
 
-def test_preserve_comments_in_yml_after_adding_datasource(data_context):
+def test_preserve_comments_in_yml_after_adding_datasource(data_context_parameterized_expectation_suite):
     ### THIS TEST FAILING IS A KNOWN ISSUE.
     ### A TICKET IS OPEN
 
@@ -26,14 +26,14 @@ def test_preserve_comments_in_yml_after_adding_datasource(data_context):
     #####
 
     config_filepath = os.path.join(
-        data_context.root_directory, "great_expectations.yml"
+        data_context_parameterized_expectation_suite.root_directory, "great_expectations.yml"
     )
     initial_config = read_config_file_from_disk(config_filepath)
     print("++++++++++++++++ initial config +++++++++++++++++++++++")
     print(initial_config)
     print("----------------------------------------")
 
-    data_context.add_datasource(
+    data_context_parameterized_expectation_suite.add_datasource(
         "test_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",

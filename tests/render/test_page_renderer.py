@@ -178,7 +178,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(titanic_profiled
             'styling': {'params': {'suite_title': {'classes': ['h6']},
                                    'status_title': {'classes': ['h6']},
                                    'expectation_suite_name': {'tag': 'a', 'attributes': {
-                                       'href': '../../../expectations/default.html'}}},
+                                       'href': '../../../../expectations/default.html'}}},
                         'classes': ['mb-0', 'mt-1']}}}}
 
     # print(validation_header)
@@ -191,22 +191,27 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
 
     expected_validation_info = {'content_block_type': 'table',
                                 'styling': {'classes': ['col-12', 'table-responsive', 'mt-1'],
-                                            'body': {'classes': ['table', 'table-sm']}},
+                                            'body': {'classes': ['table', 'table-sm'],
+                                                     'styles': {'margin-bottom': '0.5rem !important',
+                                                                'margin-top': '0.5rem !important'}}},
                                 'header': {'content_block_type': 'string_template',
                                            'string_template': {'template': 'Info', 'tag': 'h6',
                                                                'styling': {'classes': ['m-0']}}},
-                                'table': [['Great Expectations Version', "0.9.7+17.g02805059.dirty"],
-                                          ['Run ID', "20200322T170247.671855Z"]]}
+                                'table': [['Great Expectations Version', '0.9.7+17.g02805059.dirty'],
+                                          ['Run Name', '20200322T170247.671855Z'],
+                                          ['Run Time', '2020-03-22T17:02:47.671855+00:00']]}
 
     assert validation_info == expected_validation_info
 
 
 def test_ValidationResultsPageRenderer_render_validation_statistics(titanic_profiled_evrs_1):
     validation_statistics = ValidationResultsPageRenderer._render_validation_statistics(titanic_profiled_evrs_1).to_json_dict()
-    # print(validation_statistics)
+    print(validation_statistics)
     expected_validation_statistics = {'content_block_type': 'table',
                                       'styling': {'classes': ['col-6', 'table-responsive', 'mt-1', 'p-1'],
-                                                  'body': {'classes': ['table', 'table-sm']}},
+                                                  'body': {'classes': ['table', 'table-sm'],
+                                                           'styles': {'margin-bottom': '0.5rem !important',
+                                                                      'margin-top': '0.5rem !important'}}},
                                       'header': {'content_block_type': 'string_template',
                                                  'string_template': {'template': 'Statistics', 'tag': 'h6',
                                                                      'styling': {'classes': ['m-0']}}},
@@ -231,8 +236,12 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
 
     expected_batch_kwarg_table = {
         'content_block_type': 'table',
-        'styling': {'classes': ['col-6', 'table-responsive', 'mt-1'],
-                    'body': {'classes': ['table', 'table-sm']}},
+        'styling': {
+            'body': {
+                'classes': ['table', 'table-sm'],
+                'styles': {
+                    'margin-bottom': '0.5rem !important',
+                    'margin-top': '0.5rem !important'}}},
         'header': {'content_block_type': 'string_template',
                    'string_template': {'template': 'Batch Kwargs', 'tag': 'h6',
                                        'styling': {'classes': ['m-0']}}}, 'table': [[{

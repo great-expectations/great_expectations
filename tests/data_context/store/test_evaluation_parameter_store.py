@@ -1,13 +1,12 @@
-import pytest
-
 import datetime
 
-from great_expectations.core.metric import ValidationMetricIdentifier
-from great_expectations.data_context.util import instantiate_class_from_config
-
+import pytest
+from freezegun import freeze_time
 
 from great_expectations.core import ExpectationSuiteValidationResult, ExpectationValidationResult, \
-    ExpectationConfiguration
+    ExpectationConfiguration, RunIdentifier
+from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.data_context.util import instantiate_class_from_config
 
 
 @pytest.fixture(params=[
@@ -43,8 +42,8 @@ def param_store(request, test_backends):
     )
 
 
-def test_evaluation_parameter_store_methods(data_context):
-    run_id = "20191125T000000.000000Z"
+def test_evaluation_parameter_store_methods(data_context_parameterized_expectation_suite):
+    run_id = RunIdentifier(run_name="20191125T000000.000000Z")
     source_patient_data_results = ExpectationSuiteValidationResult(
         meta={
             "expectation_suite_name": "source_patient_data.default",
@@ -74,9 +73,9 @@ def test_evaluation_parameter_store_methods(data_context):
         success=True
     )
 
-    data_context.store_evaluation_parameters(source_patient_data_results)
+    data_context_parameterized_expectation_suite.store_evaluation_parameters(source_patient_data_results)
 
-    bound_parameters = data_context.evaluation_parameter_store.get_bind_params(run_id)
+    bound_parameters = data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result'
         '.observed_value': 1024
@@ -112,8 +111,8 @@ def test_evaluation_parameter_store_methods(data_context):
         success=True
     )
 
-    data_context.store_evaluation_parameters(source_diabetes_data_results)
-    bound_parameters = data_context.evaluation_parameter_store.get_bind_params(run_id)
+    data_context_parameterized_expectation_suite.store_evaluation_parameters(source_diabetes_data_results)
+    bound_parameters = data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result'
         '.observed_value': 1024,
@@ -123,7 +122,7 @@ def test_evaluation_parameter_store_methods(data_context):
 
 
 def test_database_evaluation_parameter_store_basics(param_store):
-    run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+    run_id = RunIdentifier(run_name=datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ"))
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
         expectation_suite_identifier="asset.warning",
@@ -137,34 +136,41 @@ def test_database_evaluation_parameter_store_basics(param_store):
     assert value == metric_value
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that
-    run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+    run_id = RunIdentifier(run_name=datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ"))
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
+        data_asset_name=None,
         expectation_suite_identifier="asset.warning",
         metric_name="expect_column_values_to_match_regex.result.unexpected_percent",
         metric_kwargs_id="column=mycol"
     )
+    param_store.remove_key(metric_identifier)  # We have to remove the key in case a previous run left it here
     metric_value = 12.3456789
     param_store.set(metric_identifier, metric_value)
 
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
+        data_asset_name=None,
         expectation_suite_identifier="asset.warning",
         metric_name="expect_table_row_count_to_be_between.result.observed_value",
         metric_kwargs_id=None
     )
+    param_store.remove_key(metric_identifier)  # We have to remove the key in case a previous run left it here
     metric_value = 512
     param_store.set(metric_identifier, metric_value)
 
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
+        data_asset_name=None,
         expectation_suite_identifier="asset2.warning",
         metric_name="expect_column_values_to_match_regex.result.unexpected_percent",
         metric_kwargs_id="column=mycol"
     )
+    param_store.remove_key(metric_identifier)  # We have to remove the key in case a previous run left it here
     metric_value = 12.3456789
     param_store.set(metric_identifier, metric_value)
 
