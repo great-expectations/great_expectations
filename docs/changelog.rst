@@ -8,6 +8,8 @@ develop
 -----------------
 * DataContext.get_docs_sites_urls now raises error if non-existent site_name is specified
 * Bugfix for the CLI command `docs build` ignoring the --site_name argument (#1378)
+* Bugfix and refactor for `datasource delete` CLI command (#1386) @mzjp2
+* Instantiate datasources and validate config only when datasource is used (#1374) @mzjp2
 
 0.10.8
 -----------------
