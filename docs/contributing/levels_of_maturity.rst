@@ -15,7 +15,7 @@ Features and code within Great Expectations are separated into three levels of m
       </div></section>
 
 
-Being explicit about these levels allows us to enable experimentation, without creating unecessary thrash when features and APIs evolve. It also helps streamline development, by giving contriubtors a clear, incremental path to create and improve the Great Expectations code base.
+Being explicit about these levels allows us to enable experimentation, without creating unecessary thrash when features and APIs evolve. It also helps streamline development, by giving contributors a clear, incremental path to create and improve the Great Expectations code base.
 
 For users of Great Expectations, our goal is to enable informed decisions about when to adopt which features.
 

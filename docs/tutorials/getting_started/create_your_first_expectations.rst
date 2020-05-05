@@ -37,6 +37,8 @@ Later, you should also take a look at other workflows for :ref:`creating and edi
     * :ref:`How to profile many tables at once`
     * :ref:`How to calibrate Expectation Suite parameters using multibatch profiling`
 
+Note: the Profiler also validated the source data using the new Expectations, producing a set of :ref:`Validation Results`. We'll explain why in the next step of the tutorial.
+
 A first look at real Expectations
 ---------------------------------
 
@@ -51,8 +53,12 @@ If you open up the suite in ``great_expectations/expectations/something-somethin
     #FIXME
 
 
-There's a lot of information here. (This is good.) Everything Expectation in the file expresses a machine-executable test that can be validated against data at any time. (This is very good.) We were able to generate all of this information very quickly. (Also good.)
+There's a lot of information here. (This is good.)
+
+Every Expectation in the file expresses a test that can be validated against data. (This is very good.)
+
+We were able to generate all of this information very quickly. (Also good.)
 
 However, as a human, dense JSON objects are very hard to read (This is bad.)
 
-In the next step of the tutorial, we'll show how to convert Expectations into more human-friendly formats: :ref:`Setting up data docs`.
+In the next step of the tutorial, we'll show how to convert Expectations into more human-friendly formats: :ref:`Set up Auto Docs`.
