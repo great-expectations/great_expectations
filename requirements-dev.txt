@@ -14,7 +14,7 @@ tzlocal>=1.2
 pypandoc>=1.4
 future>=0.16
 jinja2>=2.10
-marshmallow>3.0
+marshmallow=2.20.3
 sqlalchemy>=1.2
 pyspark>=2.3.2
 psycopg2-binary>=2.7.6
