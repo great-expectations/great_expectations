@@ -4,7 +4,6 @@ import logging
 import click
 
 from great_expectations import __version__ as ge_version
-from great_expectations.cli.checkpoint import checkpoint
 from great_expectations.cli.cli_logging import _set_up_logger
 from great_expectations.cli.datasource import datasource
 from great_expectations.cli.docs import docs
@@ -60,7 +59,6 @@ cli.add_command(suite)
 cli.add_command(validation_operator)
 cli.add_command(store)
 cli.add_command(tap)
-cli.add_command(checkpoint)
 
 
 def main():

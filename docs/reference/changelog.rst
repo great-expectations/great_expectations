@@ -6,7 +6,10 @@ Changelog
 
 develop
 -----------------
-* new cli command noun `checkpoint` (in the next major release this tap will be deprecated
+
+0.10.5
+-----------------
+
 * improvements to ge.read_json tests
 * tidy up the changelog
 
@@ -19,6 +22,7 @@ develop
   - no matching validation operator is found in the project
 * Clarified scaffolding language in scaffold notebook
 * DataContext.create() adds an additional directory: `checkpoints`
+* Marked tap command for deprecation in next major release
 
 0.10.4
 -----------------

@@ -44,7 +44,6 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  checkpoint           Checkpoint operations
   datasource           Datasource operations
   docs                 Data Docs operations
   init                 Initialize a new Great Expectations project.
@@ -142,6 +141,59 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
         assert error_message in result.output
         result = runner.invoke(cli, ["suite", "edit", "FAKE"], catch_exceptions=False)
         assert error_message in result.output
+
+        # expectation suite delete
+        result = runner.invoke(
+            cli, ["suite", "delete", "-d", "FAKE"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        #expectation create new
+        # suite new
+        result = runner.invoke(
+            cli, ["suite", "new", "-d", "./"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        result = runner.invoke(cli, ["suite", "delete"], catch_exceptions=False)
+        assert error_message in result.output
+
+        # datasource delete
+        result = runner.invoke(
+            cli, ["datasource", "delete", "-s", "new"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        #create new before delete again
+        # datasource new
+        result = runner.invoke(
+            cli, ["datasource", "new", "-d", "./"], catch_exceptions=False
+        )
+          
+        assert error_message in result.output
+        result = runner.invoke(cli, ["datasource", "delete"], catch_exceptions=False)
+        assert error_message in result.output
+ 
+        # data_docs clean
+        result = runner.invoke(
+            cli, ["docs", "clean", "-d", "FAKE"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        #build docs before deleting again
+        result = runner.invoke(
+            cli, ["docs", "build", "-d", "./", "--no-view"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        result = runner.invoke(cli, ["docs", "clean"], catch_exceptions=False)
+        assert error_message in result.output
+
+        # leave with docs built
+        result = runner.invoke(
+            cli, ["docs", "build", "-d", "./", "--no-view"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        result = runner.invoke(
+            cli, ["docs", "build", "--no-view"], catch_exceptions=False
+        )
+        assert error_message in result.output   
+    
     except:
         raise
     finally:

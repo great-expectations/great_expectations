@@ -53,8 +53,7 @@ Configuration
 StoreEvaluationParametersAction
 -------------------------------------
 
-StoreEvaluationParametersAction is a namespace-aware validation action that
-extracts evaluation parameters from a validation result and stores them in the store
+``StoreEvaluationParametersAction`` extracts evaluation parameters from a validation result and stores them in the store
 configured for this action.
 
 Evaluation parameters allow expectations to refer to statistics/metrics computed
@@ -75,7 +74,7 @@ Configuration
 UpdateDataDocsAction
 --------------------
 
-UpdateDataDocsAction is a validation action that
+``UpdateDataDocsAction`` is a validation action that
 notifies the site builders of all the data docs sites of the data context
 that a validation result should be added to the data docs.
 
@@ -87,8 +86,15 @@ Configuration
     - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction
-      # this action has no additional configuration properties
 
+You can also instruct ``UpdateDataDocsAction`` to build only certain sites by providing a ``site_names`` key with a
+list of sites to update:
+
+    - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names:
+        - production_site
 
 Dependencies
 ~~~~~~~~~~~~

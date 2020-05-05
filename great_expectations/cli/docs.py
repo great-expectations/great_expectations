@@ -1,5 +1,6 @@
 import os
-
+import sys
+  
 import click
 
 from great_expectations.cli.cli_logging import logger
@@ -67,6 +68,48 @@ def docs_list(directory):
         cli_message_list(docs_sites_strings, list_intro_string)
 
     send_usage_message(data_context=context, event="cli.docs.list", success=True)
+
+
+@docs.command(name="clean")
+@click.option(
+    '--directory',
+    '-d',
+    default=None,
+    help="Clean data docs"
+)
+@click.option(
+    "--site-name",
+    "-s",
+    help="The site that you want documentation cleaned for. See data_docs section in great_expectations.yml",
+)
+@click.option(
+    "--all",
+    "-a",
+    help="With this, all sites will get their data docs cleaned out. See data_docs section in great_expectations.yml",
+)
+def clean_data_docs(directory, site_name=None, all=None):
+    """Delete data docs"""
+    context = load_data_context_with_error_handling(directory)
+    failed = True
+    if (site_name is None and all is None):
+        cli_message("<red>{}</red>".format("Please specify --all y to remove all sites or specify specific site using site_name"))
+        sys.exit(1)
+    context.clean_data_docs(site_name=site_name)
+    failed = False
+    if failed == False and context is not None:
+        send_usage_message(
+            data_context=context,
+            event="cli.docs.clean",
+            success=True
+        )
+        cli_message("<green>{}</green>".format("Cleaned data docs"))
+     
+    if failed and context is not None:
+        send_usage_message(
+            data_context=context,
+            event="cli.docs.clean",
+            success=False
+        )
 
 
 def _build_intro_string(docs_sites_strings):

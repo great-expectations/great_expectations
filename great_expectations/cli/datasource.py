@@ -103,6 +103,35 @@ def datasource_new(directory):
         sys.exit(1)
 
 
+@datasource.command(name="delete")
+@click.option(
+    '--directory',
+    '-d',
+    default=None,
+    help="Datasource to delete"
+)
+@click.option(
+    "--datasource_name",
+    "-s",
+    help="The site that you want documentation cleaned for. See data_docs section in great_expectations.yml",
+)
+def delete_datasource(directory, datasource_name=None):
+    """Delete data source"""
+    print(datasource_name) 
+    context = load_data_context_with_error_handling(directory)
+    if datasource_name is None:
+        cli_message("<red>{}</red>".format("Datasource name must be a datasource name"))
+        return
+    else:
+        context.delete_datasource(datasource_name)
+        if context.get_datasource(datasource_name) is None: 
+            cli_message("<green>{}</greem>".format("Datasource deleted successfully."))
+            return True
+        else:
+            cli_message("<red>{}</red>".format("Datasource not deleted"))
+            sys.exit(1)
+
+
 @datasource.command(name="list")
 @click.option(
     '--directory',
