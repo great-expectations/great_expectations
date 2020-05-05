@@ -11,7 +11,7 @@ import sys
 import uuid
 import warnings
 import webbrowser
-from typing import Union, List, Dict
+from typing import Union, List, Dict, Optional
 
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
@@ -368,20 +368,25 @@ class BaseDataContext(object):
         return resource_store
 
     def get_docs_sites_urls(
-        self, resource_identifier=None, site_name: str = None
+        self, resource_identifier=None, site_name: Optional[str] = None
     ) -> List[Dict[str, str]]:
         """
         Get URLs for a resource for all data docs sites.
 
-        This function will return URLs for any configured site even if the sites have not
-        been built yet.
+        This function will return URLs for any configured site even if the sites
+        have not been built yet.
 
-        :param resource_identifier: optional. It can be an identifier of ExpectationSuite's,
-                ValidationResults and other resources that have typed identifiers.
-                If not provided, the method will return the URLs of the index page.
-        :param site_name: Optionally specify which site to open. If not
-                specified, return all urls in the project.
-        :return: a list of URLs. Each item is the URL for the resource for a data docs site
+        Args:
+            resource_identifier (object): optional. It can be an identifier of
+                ExpectationSuite's, ValidationResults and other resources that
+                have typed identifiers. If not provided, the method will return
+                the URLs of the index page.
+            site_name: Optionally specify which site to open. If not specified,
+                return all urls in the project.
+
+        Returns:
+            list: a list of URLs. Each item is the URL for the resource for a
+                data docs site
         """
         sites = self._project_config_with_variables_substituted.data_docs_sites
         if not sites:
@@ -424,26 +429,24 @@ class BaseDataContext(object):
         return site_builder
 
     @usage_statistics_enabled_method(event_name="data_context.open_data_docs",)
-    def open_data_docs(self, resource_identifier=None, site_name=None):
+    def open_data_docs(
+        self, resource_identifier: Optional[str] = None, site_name: Optional[str] = None
+    ) -> None:
         """
         A stdlib cross-platform way to open a file in a browser.
 
-        :param resource_identifier: ExpectationSuiteIdentifier, ValidationResultIdentifier
-                or any other type's identifier. The argument is optional - when
-                not supplied, the method returns the URL of the index page.
-        :param site_name: Optionally specify which site to open. If not
-                specified, open all docs found in the project.
+        Args:
+            resource_identifier: ExpectationSuiteIdentifier,
+                ValidationResultIdentifier or any other type's identifier. The
+                argument is optional - when not supplied, the method returns the
+                URL of the index page.
+            site_name: Optionally specify which site to open. If not specified,
+                open all docs found in the project.
         """
         data_docs_urls = self.get_docs_sites_urls(
-            resource_identifier=resource_identifier,
-            site_name=site_name,
+            resource_identifier=resource_identifier, site_name=site_name,
         )
         urls_to_open = [site["site_url"] for site in data_docs_urls]
-
-        if site_name:
-            for site in data_docs_urls:
-                if site["site_name"] == site_name:
-                    urls_to_open = [site["site_url"]]
 
         for url in urls_to_open:
             logger.debug(f"Opening Data Docs found here: {url}")
