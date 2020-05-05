@@ -14,9 +14,6 @@ These tutorials will teach you everything you need to know to get up and running
    If you're interested in contributing to the open source project, thank you! Please check out :ref:`Contribute to Great Expectations` to learn how.
 
 
-Tutorials table of contents
----------------------------
-
 .. toctree::
    :maxdepth: 2
 

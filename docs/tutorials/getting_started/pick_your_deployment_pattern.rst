@@ -1,13 +1,13 @@
 .. _getting_started__pick_your_deployment_pattern:
 
-Pick your deployment pattern
-===============================================
+Upgrade components of your deployment
+=====================================
 
 At this point, you have your first, working deployment of Great Expectations. It's pretty basic: most of the storage and execution are handled locally.
 
-The next step is to pick your deployment pattern. DataContexts make this modular, so that you can add or swap out one component at a time. Most of these changes are quick, incremental steps---so you can upgrade from a basic demo deployment to a full production deployment at your own pace and be confident that your DataContext will continue to work at every step along the way.
+The next step is to updgrade compontents of your deployment. :ref:`Data Contexts` make this modular, so that you can add or swap out one component at a time. Most of these changes are quick, incremental steps---so you can upgrade from a basic demo deployment to a full production deployment at your own pace and be confident that your Data Context will continue to work at every step along the way.
 
-This last section of the :ref:`getting_started` tutorial is designed to present you with clear options. For specific implementation steps, please check out the linked :ref:`how_to_guides`.
+This last section of the :ref:`getting_started` tutorial is designed to present you with clear options for upgrading your deployment. For specific implementation steps, please check out the linked :ref:`how_to_guides`.
 
 Components
 --------------------------------------------------
