@@ -116,6 +116,11 @@ class SiteBuilder(object):
         if plugins_directory and os.path.isdir(os.path.join(plugins_directory, "custom_data_docs", "styles")):
             custom_styles_directory = os.path.join(plugins_directory, "custom_data_docs", "styles")
 
+        if site_index_builder is None:
+            site_index_builder = {
+                "class_name": "DefaultSiteIndexBuilder"
+            }
+
         # The site builder is essentially a frontend store. We'll open up three types of backends using the base
         # type of the configuration defined in the store_backend section
 
@@ -186,38 +191,34 @@ class SiteBuilder(object):
                     class_name=site_section_config['class_name']
                 )
 
-            if site_index_builder is None:
-                site_index_builder = {
-                    "class_name": "DefaultSiteIndexBuilder"
+        module_name = site_index_builder.get('module_name') or 'great_expectations.render.renderer.site_builder'
+        class_name = site_index_builder.get('class_name') or 'DefaultSiteIndexBuilder'
+        self.site_index_builder = instantiate_class_from_config(
+            config=site_index_builder,
+            runtime_environment={
+                "data_context": data_context,
+                "custom_styles_directory": custom_styles_directory,
+                "show_how_to_buttons": self.show_how_to_buttons,
+                "target_store": self.target_store,
+                "site_name": self.site_name,
+                "data_context_id": self.data_context_id,
+                "source_stores": {
+                    section_name: section_config.get("source_store_name")
+                    for (section_name, section_config) in site_section_builders.items()
                 }
-            module_name = site_index_builder.get('module_name') or 'great_expectations.render.renderer.site_builder'
-            class_name = site_index_builder.get('class_name') or 'DefaultSiteIndexBuilder'
-            self.site_index_builder = instantiate_class_from_config(
-                config=site_index_builder,
-                runtime_environment={
-                    "data_context": data_context,
-                    "custom_styles_directory": custom_styles_directory,
-                    "show_how_to_buttons": self.show_how_to_buttons,
-                    "target_store": self.target_store,
-                    "site_name": self.site_name,
-                    "data_context_id": self.data_context_id,
-                    "source_stores": {
-                        section_name: section_config.get("source_store_name")
-                        for (section_name, section_config) in site_section_builders.items()
-                    }
-                },
-                config_defaults={
-                    "name": "site_index_builder",
-                    "module_name": module_name,
-                    "class_name": class_name
-                }
+            },
+            config_defaults={
+                "name": "site_index_builder",
+                "module_name": module_name,
+                "class_name": class_name
+            }
+        )
+        if not self.site_index_builder:
+            raise exceptions.ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=site_index_builder['class_name']
             )
-            if not self.site_index_builder:
-                raise exceptions.ClassInstantiationError(
-                    module_name=module_name,
-                    package_name=None,
-                    class_name=site_index_builder['class_name']
-                )
 
     def clean_site(self):
         self.target_store.clean_site()
