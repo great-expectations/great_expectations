@@ -268,7 +268,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         )
         path, filename = os.path.split(filepath)
         if os.path.exists(filepath):
-            if shutil.rmtree(self.full_base_directory):
+            if os.remove(filepath):
                 return True
         return False
 
