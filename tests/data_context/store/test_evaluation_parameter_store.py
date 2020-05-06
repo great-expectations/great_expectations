@@ -125,6 +125,7 @@ def test_database_evaluation_parameter_store_basics(param_store):
     run_id = RunIdentifier(run_name=datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ"))
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
+        data_asset_name=None,
         expectation_suite_identifier="asset.warning",
         metric_name="expect_column_values_to_match_regex.result.unexpected_percent",
         metric_kwargs_id="column=mycol"

@@ -54,6 +54,7 @@ def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator
 
     assert basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(ValidationMetricIdentifier(
         run_id=run_id,
+        data_asset_name=None,
         expectation_suite_identifier=ExpectationSuiteIdentifier("foo"),
         metric_name="statistics.evaluated_expectations",
         metric_kwargs_id=None
@@ -61,6 +62,7 @@ def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator
 
     assert basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(ValidationMetricIdentifier(
         run_id=run_id,
+        data_asset_name=None,
         expectation_suite_identifier=ExpectationSuiteIdentifier("foo"),
         metric_name="statistics.successful_expectations",
         metric_kwargs_id=None
@@ -68,6 +70,7 @@ def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator
 
     assert basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(ValidationMetricIdentifier(
         run_id=run_id,
+        data_asset_name=None,
         expectation_suite_identifier=ExpectationSuiteIdentifier("foo.warning"),
         metric_name="statistics.evaluated_expectations",
         metric_kwargs_id=None
@@ -75,6 +78,7 @@ def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator
 
     assert basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(ValidationMetricIdentifier(
         run_id=run_id,
+        data_asset_name=None,
         expectation_suite_identifier=ExpectationSuiteIdentifier("foo.warning"),
         metric_name="statistics.successful_expectations",
         metric_kwargs_id=None
@@ -140,6 +144,7 @@ def test_StoreMetricsAction_column_metric(basic_in_memory_data_context_for_valid
 
     assert basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(ValidationMetricIdentifier(
         run_id=run_id,
+        data_asset_name=None,
         expectation_suite_identifier=ExpectationSuiteIdentifier("foo"),
         metric_name="expect_column_values_to_be_unique.result.unexpected_count",
         metric_kwargs_id="column=provider_id"
