@@ -33,7 +33,7 @@ class ExpectationsStore(Store):
         super().__init__(store_backend=store_backend, runtime_environment=runtime_environment)
 
     def remove_key(self, key):
-        return super().store_backend.remove_key(key)
+        return self.store_backend.remove_key(key)
 
     def serialize(self, key, value):
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)

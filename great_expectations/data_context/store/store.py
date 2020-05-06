@@ -91,4 +91,6 @@ class Store(object):
         return [self.tuple_to_key(key) for key in self._store_backend.list_keys()]
 
     def has_key(self, key):
+         if self._use_fixed_length_key:
+            return self._store_backend.has_key(key.to_fixed_length_tuple()) 
         return self._store_backend.has_key(key.to_tuple())
