@@ -11,6 +11,7 @@ develop
 * Bugfix and refactor for `datasource delete` CLI command (#1386) @mzjp2
 * Instantiate datasources and validate config only when datasource is used (#1374) @mzjp2
 * suite delete changed from an optional argument to a required one
+* bugfix for uploading objects to GCP #1393
 
 0.10.8
 -----------------
