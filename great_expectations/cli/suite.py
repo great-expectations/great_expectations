@@ -353,7 +353,7 @@ def suite_delete(suite, directory):
     usage_event = "cli.suite.delete"
     context = toolkit.load_data_context_with_error_handling(directory)
     suite_names = context.list_expectation_suite_names()
-    if len(suite_names) == 0:
+    if not suite_names
         toolkit.exit_with_failure_message_and_stats(
             context,
             usage_event,
