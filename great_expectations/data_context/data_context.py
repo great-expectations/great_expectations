@@ -551,7 +551,7 @@ class BaseDataContext(object):
             yaml.dump(config_variables, config_variables_file)
 
     def delete_datasource(self,datasource_name=None):
-        """Delete data source 
+        """Delete data source
         Args:
 
         Returns:
@@ -1032,6 +1032,7 @@ class BaseDataContext(object):
         """
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         run_id = validation_results.meta["run_id"]
+        data_asset_name = validation_results.meta.get("batch_kwargs", {}).get("data_asset_name")
 
         for expectation_suite_dependency, metrics_list in requested_metrics.items():
             if (expectation_suite_dependency != "*") and (expectation_suite_dependency != expectation_suite_name):
@@ -1049,6 +1050,7 @@ class BaseDataContext(object):
                         self.stores[target_store_name].set(
                             ValidationMetricIdentifier(
                                 run_id=run_id,
+                                data_asset_name=data_asset_name,
                                 expectation_suite_identifier=ExpectationSuiteIdentifier(expectation_suite_name),
                                 metric_name=metric_name,
                                 metric_kwargs_id=get_metric_kwargs_id(metric_name, metric_kwargs)
