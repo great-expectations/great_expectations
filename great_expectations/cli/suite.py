@@ -343,7 +343,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
     "--directory",
     "-d",
     default=None,
-    help="Delete an expectation suite.",
+    help="The project's great_expectations directory.",
 )
 @mark.cli_as_experimental
 def suite_delete(suite, directory):
