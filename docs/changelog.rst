@@ -6,10 +6,40 @@ Changelog
 
 develop
 -----------------
+* DataContext.get_docs_sites_urls now raises error if non-existent site_name is specified
+* Bugfix for the CLI command `docs build` ignoring the --site_name argument (#1378)
+* Bugfix and refactor for `datasource delete` CLI command (#1386) @mzjp2
+* Instantiate datasources and validate config only when datasource is used (#1374) @mzjp2
+* suite delete changed from an optional argument to a required one
+* bugfix for uploading objects to GCP #1393
 * updated the dateutil dependency
 * RUN_ID description
 * Added QueryStore
 
+0.10.8
+-----------------
+* added support for overriding the default jupyter command via a GE_JUPYTER_COMMAND environment variable (#1347) @nehiljain
+* Bugfix for checkpoint missing template (#1379)
+
+0.10.7
+-----------------
+*crud delete suite bug fix
+
+0.10.6
+-----------------
+
+* Checkpoints: a new feature to ease deployment of suites into your pipelines
+  - DataContext.list_checkpoints() returns a list of checkpoint names found in the project
+  - DataContext.get_checkpoint() returns a validated dictionary loaded from yml
+  - new cli commands
+    - `checkpoint new`
+    - `checkpoint list`
+    - `checkpoint run`
+    - `checkpoint script`
+* marked cli `tap` commands as deprecating on next release
+* marked cli `validation-operator run` command as deprecating
+* internal improvements in the cli code
+* Improve UpdateDataDocsAction docs
 
 0.10.5
 -----------------

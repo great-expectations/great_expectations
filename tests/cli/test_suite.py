@@ -1147,6 +1147,104 @@ def test_suite_list_with_multiple_suites(caplog, empty_data_context):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+def test_suite_delete_with_zero_suites(mock_emit, caplog, empty_data_context_stats_enabled):
+    project_dir = empty_data_context_stats_enabled.root_directory
+    runner = CliRunner(mix_stderr=False)
+
+    result = runner.invoke(
+        cli, f"suite delete not_a_suite -d {project_dir}", catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+    assert "No expectation suites found in the project" in result.output
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__",
+             "success": True}
+        ),
+        mock.call(
+            {"event": "cli.suite.delete", "event_payload": {},
+             "success": False}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_suite_delete_with_non_existent_suite(mock_emit, caplog, empty_data_context_stats_enabled):
+    context = empty_data_context_stats_enabled
+    project_dir = context.root_directory
+    suite = context.create_expectation_suite("foo")
+    context.save_expectation_suite(suite)
+    mock_emit.reset_mock()
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli, f"suite delete not_a_suite -d {project_dir}", catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+    assert "No expectation suite named not_a_suite found" in result.output
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__",
+             "success": True}
+        ),
+        mock.call(
+            {"event": "cli.suite.delete", "event_payload": {},
+             "success": False}
+        ),
+    ]
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_suite_delete_with_one_suite(mock_emit, caplog, empty_data_context_stats_enabled):
+    project_dir = empty_data_context_stats_enabled.root_directory
+    context = DataContext(project_dir)
+    suite = context.create_expectation_suite("a.warning")
+    context.save_expectation_suite(suite)
+    mock_emit.reset_mock()
+
+    suite_dir = os.path.join(project_dir, "expectations", "a")
+    suite_path = os.path.join(suite_dir, "warning.json")
+    assert os.path.isfile(suite_path)
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli, "suite delete a.warning -d {}".format(project_dir), catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert "Deleted the expectation suite named: a.warning" in result.output
+
+    assert not os.path.isdir(suite_dir)
+    assert not os.path.isfile(suite_path)
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__",
+             "success": True}
+        ),
+        mock.call(
+            {"event": "cli.suite.delete", "event_payload": {},
+             "success": True}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_scaffold_on_context_with_no_datasource_raises_error(
         mock_subprocess, mock_emit, caplog, empty_data_context_stats_enabled

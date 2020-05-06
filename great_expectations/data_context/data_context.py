@@ -11,8 +11,7 @@ import sys
 import uuid
 import warnings
 import webbrowser
-
-from typing import Union
+from typing import Union, List, Dict, Optional
 
 from dateutil.parser import parse, ParserError
 from marshmallow import ValidationError
@@ -56,6 +55,7 @@ from great_expectations.data_context.util import (
     load_class,
     substitute_all_config_variables,
 )
+from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.validator.validator import Validator
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource
@@ -154,10 +154,8 @@ class BaseDataContext(object):
         self._in_memory_instance_id = None  # This variable *may* be used in case we cannot save an instance id
         self._initialize_usage_statistics(project_config.anonymous_usage_statistics)
 
-        # Init data sources
-        self._datasources = {}
-        for datasource in self._project_config_with_variables_substituted.datasources.keys():
-            self.get_datasource(datasource)
+        # Store cached datasources but don't init them
+        self._cached_datasources = {}
 
         # Init stores
         self._stores = dict()
@@ -372,67 +370,90 @@ class BaseDataContext(object):
                 resource_store["base_directory"] = os.path.join(self.root_directory, resource_store["base_directory"])
         return resource_store
 
-    def get_docs_sites_urls(self, resource_identifier=None):
+    def get_docs_sites_urls(
+        self, resource_identifier=None, site_name: Optional[str] = None
+    ) -> List[Dict[str, str]]:
         """
         Get URLs for a resource for all data docs sites.
 
-        This function will return URLs for any configured site even if the sites have not
-        been built yet.
+        This function will return URLs for any configured site even if the sites
+        have not been built yet.
 
-        :param resource_identifier: optional. It can be an identifier of ExpectationSuite's,
-                ValidationResults and other resources that have typed identifiers.
-                If not provided, the method will return the URLs of the index page.
-        :return: a list of URLs. Each item is the URL for the resource for a data docs site
+        Args:
+            resource_identifier (object): optional. It can be an identifier of
+                ExpectationSuite's, ValidationResults and other resources that
+                have typed identifiers. If not provided, the method will return
+                the URLs of the index page.
+            site_name: Optionally specify which site to open. If not specified,
+                return all urls in the project.
+
+        Returns:
+            list: a list of URLs. Each item is the URL for the resource for a
+                data docs site
         """
+        sites = self._project_config_with_variables_substituted.data_docs_sites
+        if not sites:
+            logger.debug("Found no data_docs_sites.")
+            return []
+        logger.debug(f"Found {len(sites)} data_docs_sites.")
+
+        if site_name:
+            if site_name not in sites.keys():
+                raise ge_exceptions.DataContextError(f"Could not find site named {site_name}. Please check your configurations")
+            site = sites[site_name]
+            site_builder = self._load_site_builder_from_site_config(site)
+            url = site_builder.get_resource_url(resource_identifier=resource_identifier)
+            return [{"site_name": site_name, "site_url": url}]
 
         site_urls = []
-
-        site_names = None
-        sites = self._project_config_with_variables_substituted.data_docs_sites
-        if sites:
-            logger.debug("Found data_docs_sites.")
-
-            for site_name, site_config in sites.items():
-                if (site_names and site_name in site_names) or not site_names:
-                    complete_site_config = site_config
-                    module_name = 'great_expectations.render.renderer.site_builder'
-                    site_builder = instantiate_class_from_config(
-                        config=complete_site_config,
-                        runtime_environment={
-                            "data_context": self,
-                            "root_directory": self.root_directory
-                        },
-                        config_defaults={
-                            "module_name": module_name
-                        }
-                    )
-                    if not site_builder:
-                        raise ge_exceptions.ClassInstantiationError(
-                            module_name=module_name,
-                            package_name=None,
-                            class_name=complete_site_config['class_name']
-                        )
-                    url = site_builder.get_resource_url(resource_identifier=resource_identifier)
-                    site_urls.append({
-                        "site_name": site_name,
-                        "site_url": url
-                    })
+        for _site_name, site_config in sites.items():
+            site_builder = self._load_site_builder_from_site_config(site_config)
+            url = site_builder.get_resource_url(resource_identifier=resource_identifier)
+            site_urls.append({"site_name": _site_name, "site_url": url})
 
         return site_urls
 
+    def _load_site_builder_from_site_config(self, site_config) -> SiteBuilder:
+        default_module_name = "great_expectations.render.renderer.site_builder"
+        site_builder = instantiate_class_from_config(
+            config=site_config,
+            runtime_environment={
+                "data_context": self,
+                "root_directory": self.root_directory,
+            },
+            config_defaults={"module_name": default_module_name},
+        )
+        if not site_builder:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name=default_module_name,
+                package_name=None,
+                class_name=site_config["class_name"],
+            )
+        return site_builder
+
     @usage_statistics_enabled_method(event_name="data_context.open_data_docs",)
-    def open_data_docs(self, resource_identifier=None):
+    def open_data_docs(
+        self, resource_identifier: Optional[str] = None, site_name: Optional[str] = None
+    ) -> None:
         """
         A stdlib cross-platform way to open a file in a browser.
 
-        :param resource_identifier: ExpectationSuiteIdentifier, ValidationResultIdentifier
-                or any other type's identifier. The argument is optional - when
-                not supplied, the method returns the URL of the index page.
+        Args:
+            resource_identifier: ExpectationSuiteIdentifier,
+                ValidationResultIdentifier or any other type's identifier. The
+                argument is optional - when not supplied, the method returns the
+                URL of the index page.
+            site_name: Optionally specify which site to open. If not specified,
+                open all docs found in the project.
         """
-        data_docs_urls = self.get_docs_sites_urls(resource_identifier=resource_identifier)
-        for site_dict in data_docs_urls:
-            logger.debug("Opening Data Docs found here: {}".format(site_dict["site_url"]))
-            webbrowser.open(site_dict["site_url"])
+        data_docs_urls = self.get_docs_sites_urls(
+            resource_identifier=resource_identifier, site_name=site_name,
+        )
+        urls_to_open = [site["site_url"] for site in data_docs_urls]
+
+        for url in urls_to_open:
+            logger.debug(f"Opening Data Docs found here: {url}")
+            webbrowser.open(url)
 
     @property
     def root_directory(self):
@@ -463,7 +484,9 @@ class BaseDataContext(object):
     @property
     def datasources(self):
         """A single holder for all Datasources in this context"""
-        return self._datasources
+        return {
+            datasource: self.get_datasource(datasource) for datasource in self._project_config_with_variables_substituted.datasources
+        }
 
     @property
     def expectations_store_name(self):
@@ -550,11 +573,13 @@ class BaseDataContext(object):
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def delete_datasource(self,datasource_name=None):
-        """Delete data source
+    def delete_datasource(self, datasource_name=None):
+        """Delete a data source
         Args:
+            datasource_name: The name of the datasource to delete.
 
-        Returns:
+        Raises:
+            ValueError: If the datasource name isn't provided or cannot be found.
         """
         if datasource_name is None:
             raise ValueError(
@@ -566,10 +591,10 @@ class BaseDataContext(object):
                #remove key until we have a delete method on project_config
                #self._project_config_with_variables_substituted.datasources[datasource_name].remove()
                #del self._project_config["datasources"][datasource_name]
-               del self._datasources[datasource_name]
+               del self._cached_datasources[datasource_name]
             else:
                 raise ValueError(
-                    "Datasource not found"
+                    "Datasource {} not found".format(datasource_name)
                 )
 
     def get_available_data_asset_names(self, datasource_names=None, batch_kwargs_generator_names=None):
@@ -802,7 +827,7 @@ class BaseDataContext(object):
         if initialize:
             datasource = self._build_datasource_from_config(
                 name, self._project_config_with_variables_substituted.datasources[name])
-            self._datasources[name] = datasource
+            self._cached_datasources[name] = datasource
         else:
             datasource = None
 
@@ -863,9 +888,9 @@ class BaseDataContext(object):
         Returns:
             datasource (Datasource)
         """
-        if datasource_name in self._datasources:
-            return self._datasources[datasource_name]
-        elif datasource_name in self._project_config_with_variables_substituted.datasources:
+        if datasource_name in self._cached_datasources:
+            return self._cached_datasources[datasource_name]
+        if datasource_name in self._project_config_with_variables_substituted.datasources:
             datasource_config = copy.deepcopy(
                 self._project_config_with_variables_substituted.datasources[datasource_name])
         else:
@@ -874,7 +899,7 @@ class BaseDataContext(object):
             )
         datasource_config = datasourceConfigSchema.load(datasource_config)
         datasource = self._build_datasource_from_config(datasource_name, datasource_config)
-        self._datasources[datasource_name] = datasource
+        self._cached_datasources[datasource_name] = datasource
         return datasource
 
     def list_expectation_suites(self):
@@ -951,6 +976,7 @@ class BaseDataContext(object):
         Returns:
             True for Success and False for Failure.
         """
+        key = ExpectationSuiteIdentifier(expectation_suite_name)
         if not self._stores[self.expectations_store_name].has_key(key):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
@@ -1859,6 +1885,34 @@ class DataContext(BaseDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
+    def list_checkpoints(self) -> List[str]:
+        """List checkpoints. (Experimental)"""
+        # TODO mark experimental
+        files = self._list_ymls_in_checkpoints_directory()
+        return [os.path.basename(f).rstrip(".yml") for f in files]
+
+    def get_checkpoint(self, checkpoint_name: str) -> dict:
+        """Load a checkpoint. (Experimental)"""
+        # TODO mark experimental
+        yaml = YAML(typ="safe")
+        # TODO make a serializable class with a schema
+        checkpoint_path = os.path.join(
+            self.root_directory, self.CHECKPOINTS_DIR, f"{checkpoint_name}.yml"
+        )
+        try:
+            with open(checkpoint_path, "r") as f:
+                checkpoint = yaml.load(f.read())
+                return self._validate_checkpoint(checkpoint)
+        except FileNotFoundError:
+            raise ge_exceptions.CheckpointNotFoundError(
+                f"Could not find checkpoint `{checkpoint_name}`."
+            )
+
+    def _list_ymls_in_checkpoints_directory(self):
+        checkpoints_dir = os.path.join(self.root_directory, self.CHECKPOINTS_DIR)
+        files = glob.glob(os.path.join(checkpoints_dir, "*.yml"), recursive=False)
+        return files
+
     def _save_project_config(self):
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
@@ -1982,6 +2036,32 @@ class DataContext(BaseDataContext):
             ge_exceptions.InvalidDataContextConfigError
         ) as e:
             logger.debug(e)
+
+    @staticmethod
+    def _validate_checkpoint(checkpoint: dict) -> dict:
+        if checkpoint is None:
+            raise ge_exceptions.CheckpointError(
+                "Checkpoint has no contents. Please fix this."
+            )
+        if "validation_operator_name" not in checkpoint:
+            checkpoint["validation_operator_name"] = "action_list_operator"
+
+        if "batches" not in checkpoint:
+            raise ge_exceptions.CheckpointError(
+                f"Checkpoint {checkpoint} is missing required key: `batches`"
+            )
+        batches = checkpoint["batches"]
+        if not isinstance(batches, list):
+            raise ge_exceptions.CheckpointError(f"`batches` must be a list")
+
+        for batch in batches:
+            for required in ["expectation_suite_names", "batch_kwargs"]:
+                if required not in batch:
+                    raise ge_exceptions.CheckpointError(
+                        f"Items in `batches` must have a key `{required}`"
+                    )
+
+        return checkpoint
 
 
 class ExplorerDataContext(DataContext):

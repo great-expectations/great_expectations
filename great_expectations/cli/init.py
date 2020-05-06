@@ -5,6 +5,7 @@ import click
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.cli import toolkit
 from great_expectations.cli.datasource import \
     add_datasource as add_datasource_impl
 from great_expectations.cli.docs import build_docs
@@ -22,8 +23,6 @@ from great_expectations.cli.init_messages import (
     SLACK_SETUP_PROMPT,
     SLACK_WEBHOOK_PROMPT,
 )
-from great_expectations.cli.toolkit import \
-    create_expectation_suite as create_expectation_suite_impl
 from great_expectations.cli.util import cli_message, is_sane_slack_webhook
 from great_expectations.exceptions import (
     DataContextError,
@@ -119,7 +118,7 @@ def init(target_directory, view, usage_stats):
             if len(datasources) == 1:
                 datasource_name = datasources[0]["name"]
 
-                success, suite_name = create_expectation_suite_impl(context, datasource_name=datasource_name,
+                success, suite_name = toolkit.create_expectation_suite(context, datasource_name=datasource_name,
                                                                     additional_batch_kwargs={"limit": 1000},
                                                                     open_docs=view)
                 if success:
