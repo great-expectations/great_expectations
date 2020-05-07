@@ -6,6 +6,14 @@ Changelog
 
 develop
 -----------------
+* (BREAKING) ``run_id`` is now typed using the new ``RunIdentifier`` class, which consists of a ``run_time`` and \
+``run_name``. Existing projects that have Expectation Suite Validation Results must be migrated. See :ref:`Upgrading to 0.11.x-beta` for instructions.
+* (BREAKING) ``ValidationMetric`` and ``ValidationMetricIdentifier`` objects now have a ``data_asset_name`` attribute. \
+Existing projects with evaluation parameter stores that have store backend of type ``DatabaseStoreBackend`` must be migrated. See :ref:`Upgrading to 0.11.x-beta` for instructions.
+* Data Docs: redesigned index page with paginated/sortable/searchable/filterable tables
+* Data Docs: searchable tables on Expectation Suite Validation Result pages
+* ``data_asset_name`` is now added to batch_kwargs by batch_kwargs_generators (if available) and surfaced in Data Docs
+* Renamed all ``generator_asset`` parameters to ``data_asset_name``
 * DataContext.get_docs_sites_urls now raises error if non-existent site_name is specified
 * Bugfix for the CLI command `docs build` ignoring the --site_name argument (#1378)
 * Bugfix and refactor for `datasource delete` CLI command (#1386) @mzjp2
@@ -13,7 +21,6 @@ develop
 * suite delete changed from an optional argument to a required one
 * bugfix for uploading objects to GCP #1393
 * updated the dateutil dependency
-* RUN_ID description
 * Added QueryStore
 
 0.10.8
@@ -23,7 +30,7 @@ develop
 
 0.10.7
 -----------------
-*crud delete suite bug fix
+* crud delete suite bug fix
 
 0.10.6
 -----------------
