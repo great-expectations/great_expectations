@@ -153,7 +153,7 @@ def test_cli_datasorce_new_connection_string(
     result = runner.invoke(
         cli,
         ["datasource", "new", "-d", project_root_dir],
-        input="2\n5\nmynewsource\n{}\n".format(str(empty_sqlite_db.url)),
+        input="2\n6\nmynewsource\n{}\n".format(str(empty_sqlite_db.url)),
         catch_exceptions=False,
     )
     stdout = result.stdout
