@@ -214,7 +214,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
     @classmethod
     def from_tuple(cls, tuple_):
         if len(tuple_) < 6:
-            raise GreatExpectationsError("ValidationMetricIdentifier tuple must have at least five components.")
+            raise GreatExpectationsError("ValidationMetricIdentifier tuple must have at least six components.")
         if tuple_[2] == "__":
             tuple_data_asset_name = None
         else:
@@ -231,7 +231,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
         if len(tuple_) != 6:
-            raise GreatExpectationsError("ValidationMetricIdentifier fixed length tuple must have exactly five "
+            raise GreatExpectationsError("ValidationMetricIdentifier fixed length tuple must have exactly six "
                                          "components.")
         if tuple_[2] == "__":
             tuple_data_asset_name = None
