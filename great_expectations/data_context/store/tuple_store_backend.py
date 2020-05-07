@@ -264,7 +264,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         recursively removes empty dirs between curpath and mroot inclusive
         """
         try:
-            while not os.listdir(curpath) and os.path.exists(curpath):
+            while not os.listdir(curpath) and os.path.exists(curpath) and mroot!=curpath:
                 d2=curpath
                 f2=os.path.dirname(d2)
                 if os.path.isfile(curpath):
@@ -273,7 +273,6 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                     if os.path.isdir(curpath):
                         shutil.rmtree(curpath)
                 curpath=f2
-                self.rrmdir(mroot,curpath)
         except (NotADirectoryError, FileNotFoundError):
             pass
 
