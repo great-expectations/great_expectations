@@ -265,13 +265,9 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         """
         try:
             while not os.listdir(curpath) and os.path.exists(curpath) and mroot!=curpath:
-                d2=curpath
-                f2=os.path.dirname(d2)
-                if os.path.isfile(curpath):
-                    os.remove(curpath)
-                else: 
-                    if os.path.isdir(curpath):
-                        shutil.rmtree(curpath)
+                f2=os.path.dirname(curpath)
+                if os.path.isdir(curpath):
+                    shutil.rmdir(curpath)
                 curpath=f2
         except (NotADirectoryError, FileNotFoundError):
             pass
