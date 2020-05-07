@@ -290,7 +290,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             d_path = os.path.dirname(filepath)
             os.remove(filepath)
             self.rrmdir(self.full_base_directory, d_path)
-                return True
+            return True
         return False
 
     def get_url_for_key(self, key, protocol=None):
