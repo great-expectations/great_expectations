@@ -20,14 +20,24 @@ Use the CLI:
 1. Run ``great_expectations datasource new``
 2. Choose "Big Query" from the list of database engines, when prompted.
 3. Consult the `PyBigQuery <https://github.com/mxmzdlv/pybigquery`_ docs
-   for help building a connection string for your BigQuery cluster. It will look
-   something like this:
+   for help building a connection string for your BigQuery cluster.
+
+    If you want GE to connect to your BigQuery project (without specifying a particular dataset), the URL should be:
 
     .. code-block:: python
 
         "bigquery://project-name"
 
-   If you want GE to connect to one of the Google's public datasets, the URL should be:
+
+    If you want GE to connect to a particular dataset inside your BigQuery project, the URL should be:
+
+
+    .. code-block:: python
+
+        "bigquery://project-name/dataset-name"
+
+
+    If you want GE to connect to one of the Google's public datasets, the URL should be:
 
     .. code-block:: python
 
@@ -39,6 +49,28 @@ Use the CLI:
 
 
 Note: environment variables can be used to store the SQLAlchemy URL instead of the file, if preferred - search documentation for "Managing Environment and Secrets".
+
+How to specify a table as a batch
+==========================================
+
+When you specify a table in one of the datasets in your project as a batch to be validated, use the full name of the table
+in batch_kwargs if the SQLAlchemy URL that you provided to GE has only the project name, but no dataset name:
+
+    .. code-block:: python
+
+        batch_kwargs = {
+            "table": "dataset-name.my-table",
+        }
+
+
+If the URL had both project name and dataset name, you may specify the short name of the table:
+
+    .. code-block:: python
+
+        batch_kwargs = {
+            "table": "my-table",
+        }
+
 
 How to specify a query result as a batch
 ==========================================
@@ -57,8 +89,8 @@ Here is an example:
     .. code-block:: python
 
         batch_kwargs = {
-            "query": "SELECT * FROM `my-project.my_dataset.my_table`",
-            "bigquery_temp_table": "my-project.my_other_dataset.temp_table"
+            "query": "SELECT * FROM `project-name.dataset-name.my-table`",
+            "bigquery_temp_table": "project-name.other-dataset-name.temp-table"
         }
 
 It is safest to specify the fully qualified name for this "temporary" table.
