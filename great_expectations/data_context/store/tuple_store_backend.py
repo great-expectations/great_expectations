@@ -469,8 +469,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         bucket = gcs.get_bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
         if isinstance(value, str):
-            blob.upload_from_string(value.encode(content_encoding), content_encoding=content_encoding,
-                                    content_type=content_type)
+            blob.upload_from_string(value.encode(content_encoding), content_type=content_type)
         else:
             blob.upload_from_string(value, content_type=content_type)
         return gcs_object_key

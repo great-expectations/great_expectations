@@ -236,7 +236,7 @@ for how to profile a single batch of data and build documentation from the valid
   document_model = ProfilingResultsPageRenderer().render(validation_result)
 
   # use a view to render the document model (produced by the renderer) into a HTML document
-  os.makedirs(os.path.dirname(profiling_html_filepath), exits_ok=True)
+  os.makedirs(os.path.dirname(profiling_html_filepath), exist_ok=True)
   with open(profiling_html_filepath, 'w') as writer:
       writer.write(DefaultJinjaPageView().render(document_model))
 
