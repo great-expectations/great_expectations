@@ -12,7 +12,7 @@ For nontrivial changes, we will conduct both a design review and a code review.
 
 Design Review will include ensuring that the PR is consistent with our relationship to the open source community and partner developers, with our software architecture and abstractions, and with our users' needs and expectations. We try to effectively conduct design review as early as possible, often well before a PR. Please find us via issues, discuss, or slack to engage, and then succinctly describe those interactions in the "design review" section below.
 
-Previous Design Review:
+Previous Design Review notes:
 -
 -
 -
