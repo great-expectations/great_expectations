@@ -8,6 +8,7 @@ develop
 -----------------
 
 * updated checkpoint module to not require sqlalchemy
+* updated the installation/configuration documentation for Snowlfake users
 
 0.10.9
 -----------------
