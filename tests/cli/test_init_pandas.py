@@ -23,7 +23,7 @@ except ImportError:
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_cli_init_on_new_project(mock_emit, mock_webbrowser, caplog, tmp_path_factory, monkeypatch):
-    monkeypatch.setenv("GE_USAGE_STATS", "True")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)  # Undo the project-wide test default
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     os.makedirs(os.path.join(project_dir, "data"))
     data_path = os.path.join(project_dir, "data", "Titanic.csv")
