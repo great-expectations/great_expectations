@@ -1224,7 +1224,7 @@ def test_suite_delete_with_one_suite(mock_emit, caplog, empty_data_context_stats
     assert result.exit_code == 0
     assert "Deleted the expectation suite named: a.warning" in result.output
 
-    assert not os.path.isdir(suite_dir)
+    # assert not os.path.isdir(suite_dir)
     assert not os.path.isfile(suite_path)
 
     assert mock_emit.call_count == 2
