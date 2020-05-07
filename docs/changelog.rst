@@ -6,6 +6,12 @@ Changelog
 
 develop
 -----------------
+
+* updated checkpoint module to not require sqlalchemy
+
+0.10.9
+-----------------
+
 * DataContext.get_docs_sites_urls now raises error if non-existent site_name is specified
 * Bugfix for the CLI command `docs build` ignoring the --site_name argument (#1378)
 * Bugfix and refactor for `datasource delete` CLI command (#1386) @mzjp2
