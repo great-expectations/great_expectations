@@ -31,35 +31,6 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
-  local_site_html_store:
-    module_name: great_expectations.data_context.store
-    class_name: HtmlSiteStore
-    base_directory: uncommitted/data_docs/local_site/
-
-  # These next three blocks are never used in tests.
-
-  # local_profiling_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: FilesystemStore
-  #   store_config:
-  #     base_directory: uncommitted/profiling/
-  #     serialization_type: json
-  #     file_extension: .json
-
-  # local_workbench_site_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: FilesystemStore
-  #   store_config:
-  #     base_directory: uncommitted/data_docs/local_site
-  #     file_extension: .html
-
-  # shared_team_site_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: FilesystemStore
-  #   store_config:
-  #     base_directory: uncommitted/data_docs/team_site
-  #     file_extension: .html
-
   fixture_validation_results_store:
     class_name: ValidationsStore
     store_backend:
@@ -78,8 +49,10 @@ data_docs_sites:
 
     module_name: great_expectations.render.renderer.site_builder
     class_name: SiteBuilder
-    target_store_name: local_site_html_store
-
+    show_how_to_buttons: true
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 
@@ -118,8 +91,9 @@ data_docs_sites:
     module_name: great_expectations.render.renderer.site_builder
     class_name: SiteBuilder
     show_how_to_buttons: true
-    target_store_name: team_site_html_store
-
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/team_site/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 

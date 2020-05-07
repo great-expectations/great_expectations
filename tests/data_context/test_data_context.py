@@ -252,7 +252,7 @@ def test_data_context_expectation_suite_delete(empty_data_context):
     expectation_suites = empty_data_context.list_expectation_suite_names()
     assert len(expectation_suites) == 0
 
-def test_data_context_expectation_spchars_suite_delete(empty_data_context):
+def test_data_context_expectation_nested_suite_delete(empty_data_context):
     assert empty_data_context.create_expectation_suite(expectation_suite_name="titanic.test.create_expectation_suite")
     expectation_suites = empty_data_context.list_expectation_suite_names()
     assert len(expectation_suites) == 1
