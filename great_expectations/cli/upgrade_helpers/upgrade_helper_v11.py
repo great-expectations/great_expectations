@@ -45,6 +45,12 @@ class UpgradeHelperV11:
             TupleGCSStoreBackend: self._get_tuple_gcs_store_backend_run_time
         }
 
+        self.run_id_updaters_by_backend_type = {
+            TupleFilesystemStoreBackend: self._update_tuple_filesystem_store_backend_run_id,
+            TupleS3StoreBackend: self._update_tuple_s3_store_backend_run_id,
+            TupleGCSStoreBackend: self._update_tuple_gcs_store_backend_run_id
+        }
+
     def _generate_upgrade_checklist(self):
         for (store_name, store) in self.data_context.stores.items():
             if not isinstance(store, (ValidationsStore, MetricStore)):
@@ -109,6 +115,7 @@ class UpgradeHelperV11:
                 "store_backend_class": type(store_backend).__name__
             })
 
+    # TODO: add logic that changes old run_id to typed run_id in validation json files
     def upgrade_store_backend(self, store_backend):
         validation_source_keys = store_backend.list_keys()
 
@@ -120,6 +127,15 @@ class UpgradeHelperV11:
             dest_key_list.insert(-1, self.validation_run_times[run_name])
             dest_key = tuple(dest_key_list)
             store_backend.move(source_key, dest_key)
+
+    def _update_tuple_filesystem_store_backend_run_id(self):
+        pass
+
+    def _update_tuple_s3_store_backend_run_id(self):
+        pass
+
+    def _update_tuple_gcs_store_backend_run_id(self):
+        pass
 
     def _get_tuple_filesystem_store_backend_run_time(self, source_key, store_backend):
         run_name = source_key[-2]
