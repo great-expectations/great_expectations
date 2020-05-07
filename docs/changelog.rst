@@ -11,6 +11,8 @@ develop
 * return url for resource only if key exists
 * Test added for the period special char case
 
+* updated checkpoint module to not require sqlalchemy
+
 0.10.9
 -----------------
 
