@@ -259,8 +259,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if table_name is None:
             raise ValueError("No table_name provided.")
 
-        self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
-
         if engine is None and connection_string is None:
             raise ValueError("Engine or connection_string must be provided.")
 
@@ -272,6 +270,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             except Exception as err:
                 # Currently we do no error handling if the engine doesn't work out of the box.
                 raise err
+
+        if self.engine.dialect.name.lower() == "bigquery":
+            # In BigQuery the table name is already qualified with its schema name
+            self._table = sa.Table(table_name, sa.MetaData(), schema=None)
+        else:
+            self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
         # Get the dialect **for purposes of identifying types**
         if self.engine.dialect.name.lower() in ["postgresql", "mysql", "sqlite", "oracle", "mssql", "oracle"]:
@@ -489,26 +493,33 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return column_median
 
     def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
-        if self.engine.dialect.name.lower() != "mssql":
-            selects = [sa.func.percentile_disc(quantile).within_group(
-                sa.column(column).asc()) for quantile in quantiles]
-        else:
+        selects = None
+        if self.engine.dialect.name.lower() == "mssql":
             # mssql requires over(), so we add an empty over() clause
             selects = [sa.func.percentile_disc(quantile).within_group(
                 sa.column(column).asc()).over() for quantile in quantiles]
-        try:
-            if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
-                # Redshift does not have a percentile_disc method, but does support an approximate version
-                if allow_relative_error is True:
-                    selects = [sa.text(
-                        ", ".join(["approximate " + str(stmt.compile(dialect=self.engine.dialect, compile_kwargs={
-                            'literal_binds': True})) for stmt in selects])
-                    )]
-                else:
-                    raise ValueError("Redshift does not support computing quantiles without approximation error; "
-                                     "set allow_relative_error to True to allow approximate quantiles.")
-        except (AttributeError, TypeError):
-            pass
+        elif self.engine.dialect.name.lower() == "bigquery":
+            # BigQuery does not support "WITHIN", so we need a special case for it
+            selects = [sa.func.percentile_disc(sa.column(column), quantile).over() for quantile in quantiles]
+        else:
+            try:
+                if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+                    # Redshift does not have a percentile_disc method, but does support an approximate version
+                    if allow_relative_error is True:
+                        selects = [sa.text(
+                            ", ".join(["approximate " + str(stmt.compile(dialect=self.engine.dialect, compile_kwargs={
+                                'literal_binds': True})) for stmt in selects])
+                        )]
+                    else:
+                        raise ValueError("Redshift does not support computing quantiles without approximation error; "
+                                         "set allow_relative_error to True to allow approximate quantiles.")
+            except (AttributeError, TypeError):
+                pass
+
+        if not selects:
+            selects = [sa.func.percentile_disc(quantile).within_group(
+                sa.column(column).asc()) for quantile in quantiles]
+
         quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
         return list(quantiles)
 
