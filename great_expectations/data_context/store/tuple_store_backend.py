@@ -259,9 +259,9 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         return key_list
    
     
-    def hsrrmdir(self, mroot, curpath):
+    def rrmdir(self, mroot, curpath):
         """
-        recursively remove curpath dir until mroot
+        recursively removes empty dirs between curpath and mroot inclusive
         """
         try:
             while not os.listdir(curpath) and os.path.exists(curpath):
@@ -273,7 +273,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                     if os.path.isdir(curpath):
                         shutil.rmtree(curpath)
                 curpath=f2
-                self.hsrrmdir(mroot,curpath)
+                self.rrmdir(mroot,curpath)
         except (NotADirectoryError, FileNotFoundError):
             pass
 
@@ -290,7 +290,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         if os.path.exists(filepath):
             d_path = os.path.dirname(filepath)
             os.remove(filepath)
-            self.hsrrmdir(self.full_base_directory, d_path)
+            self.rrmdir(self.full_base_directory, d_path)
                 return True
         return False
 
