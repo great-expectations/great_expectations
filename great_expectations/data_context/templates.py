@@ -29,7 +29,7 @@ CONFIG_VARIABLES_INTRO = """# This config file supports variable substitution wh
 # corresponding key read from the file specified using
 # `config_variables_file_path`. Environment variables take precedence.
 #
-# If the substitution value comes from the config variables file, it can be a
+# `If the substitution value comes from the config variables file, it can be a
 # simple (non-nested) value or a nested value such as a dictionary. If it comes
 # from an environment variable, it must be a simple value. Read more at:
 # https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets
