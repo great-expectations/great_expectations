@@ -7,6 +7,8 @@ Changelog
 develop
 -----------------
 
+* updated checkpoint module to not require sqlalchemy
+
 0.10.9
 -----------------
 
