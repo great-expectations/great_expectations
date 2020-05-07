@@ -143,8 +143,6 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     data_docs_config = context._project_config.data_docs_sites
     local_site_config = data_docs_config['local_site']
-    # local_site_config.pop('module_name')  # This isn't necessary
-    local_site_config.pop('class_name')
 
     validations_set = set(context.stores["validations_store"].list_keys())
     assert len(validations_set) == 4
@@ -291,21 +289,19 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
             **team_site_config
         )
     team_site_builder.clean_site()
-    obs = context.get_docs_sites_urls("team_site")
+    obs = [url_dict for url_dict in context.get_docs_sites_urls(site_name="team_site") if url_dict.get("site_url")]
     assert len(obs) == 0
 
- 
-    resource_dir = os.path.dirname(html_url) + "/"
     #exercise clean_site
     site_builder.clean_site()
-    obs = context.get_docs_sites_urls()
+    obs = [url_dict for url_dict in context.get_docs_sites_urls() if url_dict.get("site_url")]
     assert len(obs) == 0
 
     #restore site
     context = site_builder_data_context_with_html_store_titanic_random
     site_builder = SiteBuilder(
-            data_context=context, 
-            runtime_environment={ 
+            data_context=context,
+            runtime_environment={
                 "root_directory": context.root_directory
             },
             **local_site_config
@@ -375,7 +371,7 @@ def test_configuration_driven_site_builder_without_how_to_buttons(site_builder_d
 
     data_docs_config = context._project_config.data_docs_sites
     local_site_config = data_docs_config['local_site']
-    local_site_config.pop('class_name')
+
     # set this flag to false in config to hide how-to buttons and related elements
     local_site_config["show_how_to_buttons"] = False
 
