@@ -255,10 +255,12 @@ def test_data_context_expectation_suite_delete(empty_data_context):
 def test_data_context_expectation_nested_suite_delete(empty_data_context):
     assert empty_data_context.create_expectation_suite(expectation_suite_name="titanic.test.create_expectation_suite")
     expectation_suites = empty_data_context.list_expectation_suite_names()
-    assert len(expectation_suites) == 1
+    assert empty_data_context.create_expectation_suite(expectation_suite_name="titanic.test.a.create_expectation_suite")
+    expectation_suites = empty_data_context.list_expectation_suite_names()
+    assert len(expectation_suites) == 2
     empty_data_context.delete_expectation_suite(expectation_suite_name=expectation_suites[0])
     expectation_suites = empty_data_context.list_expectation_suite_names()
-    assert len(expectation_suites) == 0
+    assert len(expectation_suites) == 1
 
 def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(titanic_data_context):
     with pytest.raises(ValueError):
