@@ -100,7 +100,7 @@ def init(target_directory, view, usage_stats):
 
         try:
             context = DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
-            send_usage_message(data_context=context, event="cli.init.ctx_new", success=True)
+            send_usage_message(data_context=context, event="cli.init.create", success=True)
         except DataContextError as e:
             # TODO ensure this is covered by a test
             cli_message("<red>{}</red>".format(e))
