@@ -282,11 +282,24 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
                                         ValidationResultIdentifier].full_base_directory,
                                         "index.html") == html_url
 
+    team_site_config = data_docs_config['team_site']
+    team_site_builder = SiteBuilder(
+            data_context=context,
+            runtime_environment={
+                "root_directory": context.root_directory
+            },
+            **team_site_config
+        )
+    team_site_builder.clean_site()
+    obs = context.get_docs_sites_urls("team_site")
+    assert len(obs) == 0
+
+ 
     resource_dir = os.path.dirname(html_url) + "/"
     #exercise clean_site
     site_builder.clean_site()
-    assert "file://" + site_builder.site_index_builder.target_store.store_backends[\
-                                        ValidationResultIdentifier].full_base_directory == resource_dir
+    obs = context.get_docs_sites_urls()
+    assert len(obs) == 0
 
     #restore site
     context = site_builder_data_context_with_html_store_titanic_random
