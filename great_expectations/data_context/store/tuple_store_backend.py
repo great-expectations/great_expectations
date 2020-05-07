@@ -257,7 +257,23 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                     key_list.append(key)
 
         return key_list
+   
     
+    def crmdir(self, mroot, curpath):
+        try:
+            while not os.listdir(curpath) and os.path.exists(curpath):
+                d2=curpath
+                f2=os.path.dirname(d2)
+                if os.path.isdir(curpath):
+                    shutil.rmtree(curpath)
+                else:
+                    os.remove(curpath)
+                curpath=f2
+                self.crmdir(mroot,curpath)
+        except (NotADirectoryError, FileNotFoundError):
+            pass
+
+
     def remove_key(self, key):
         if not isinstance(key, tuple):
             key = key.to_tuple()
@@ -268,7 +284,9 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         )
         path, filename = os.path.split(filepath)
         if os.path.exists(filepath):
-            if os.remove(filepath):
+            d_path = os.path.dirname(filepath)
+            os.remove(filepath)
+            self.crmdir(self.full_base_directory, d_path)
                 return True
         return False
 
