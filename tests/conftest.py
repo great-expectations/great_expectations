@@ -745,7 +745,7 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
 
     shutil.copy(file_relative_path(__file__, "./test_fixtures/great_expectations_site_builder.yml"),
                 str(os.path.join(project_dir, "great_expectations.yml")))
-    context = ge.data_context.DataContext.create(project_dir)
+    context = ge.data_context.DataContext(project_dir)
 
     context.add_datasource(
         "titanic",
