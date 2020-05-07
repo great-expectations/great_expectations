@@ -149,7 +149,10 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
         metric_name="expect_column_values_to_match_regex.result.unexpected_percent",
         metric_kwargs_id="column=mycol"
     )
-    param_store.remove_key(metric_identifier)  # We have to remove the key in case a previous run left it here
+    try:
+        param_store.remove_key(metric_identifier)  # We have to remove the key in case a previous run left it here
+    except KeyError:
+        pass
     metric_value = 12.3456789
     param_store.set(metric_identifier, metric_value)
 
@@ -160,7 +163,10 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
         metric_name="expect_table_row_count_to_be_between.result.observed_value",
         metric_kwargs_id=None
     )
-    param_store.remove_key(metric_identifier)  # We have to remove the key in case a previous run left it here
+    try:
+        param_store.remove_key(metric_identifier)  # We have to remove the key in case a previous run left it here
+    except KeyError:
+        pass
     metric_value = 512
     param_store.set(metric_identifier, metric_value)
 
@@ -171,7 +177,10 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
         metric_name="expect_column_values_to_match_regex.result.unexpected_percent",
         metric_kwargs_id="column=mycol"
     )
-    param_store.remove_key(metric_identifier)  # We have to remove the key in case a previous run left it here
+    try:
+        param_store.remove_key(metric_identifier)  # We have to remove the key in case a previous run left it here
+    except KeyError:
+        pass
     metric_value = 12.3456789
     param_store.set(metric_identifier, metric_value)
 
