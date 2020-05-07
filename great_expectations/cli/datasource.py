@@ -64,7 +64,6 @@ class SupportedDatabases(enum.Enum):
     BIGQUERY = 'BigQuery'
     OTHER = 'other - Do you have a working SQLAlchemy connection string?'
     # TODO MSSQL
-    # TODO BigQuery
 
 
 @click.group()
