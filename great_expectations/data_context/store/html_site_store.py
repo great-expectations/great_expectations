@@ -143,7 +143,7 @@ class HtmlSiteStore(object):
         ].set(key.resource_identifier.to_tuple(), serialized_value,
               content_encoding='utf-8', content_type='text/html; charset=utf-8')
 
-    def get_url_for_resource(self, resource_identifier=None):
+    def get_url_for_resource(self, only_if_exists=True, resource_identifier=None):
         """
         Return the URL of the HTML document that renders a resource
         (e.g., an expectation suite or a validation result).
