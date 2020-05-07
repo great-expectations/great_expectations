@@ -166,7 +166,9 @@ class HtmlSiteStore(object):
             # this method does not support getting the URL of static assets
             raise ValueError("Cannot get URL for resource {0:s}".format(str(resource_identifier)))
 
-        return store_backend.get_url_for_key(key) if store_backend is not None and only_if_exists and store_backend.has_key(key) else None
+        if only_if_exists:
+            return store_backend.get_url_for_key(key) if store_backend.has_key(key) else None
+        return store_backend.get_url_for_key(key)
 
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):
