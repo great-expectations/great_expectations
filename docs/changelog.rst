@@ -12,6 +12,7 @@ develop
 * Instantiate datasources and validate config only when datasource is used (#1374) @mzjp2
 * suite delete changed from an optional argument to a required one
 * bugfix for uploading objects to GCP #1393
+* added a new usage stats event for the case when a data context is created through CLI
 
 0.10.8
 -----------------
