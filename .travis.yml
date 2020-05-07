@@ -97,7 +97,7 @@ jobs:
   - stage: deploy
     python: 3.6
     script:
-      - git tag --annotate 0.10.8 -m "0.10.8" || echo "tag exists, skipping"
+      - git tag --annotate 0.10.9 -m "0.10.9" || echo "tag exists, skipping"
     deploy:
       provider: pypi
       edge: true
