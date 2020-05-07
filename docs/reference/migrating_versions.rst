@@ -35,6 +35,26 @@ You will most likely be prompted to install a new template. Rest assured that
 your original yaml file will be archived automatically for you. Even so, it's
 in your source control system already, right? ;-)
 
+.. _Upgrading to 0.11.x-beta:
+*************************
+Upgrading to 0.11.x-beta
+*************************
+
+The 0.11.0-beta release has several breaking changes related to run_ids and newly exposed data_asset_name in batch kwargs.
+
+``run_id`` is now typed using the new ``RunIdentifier`` class, with optional ``run_name`` and ``run_time`` instantiation
+arguments. The ``run_name`` can be any string (this could come from your pipeline runner, e.g. Airflow run id). The ``run_time``
+can be either a dateutil parsable string or a datetime object. If no instantiation arguments are given, ``run_name`` will be
+``None`` (and appear as "__none__" in stores) and ``run_time`` will default to the current UTC datetime. If you are using
+Great Expectations methods that accept a ``run_id`` argument, you should update your code to pass in the new ``RunIdentifier``
+type (or a dictionary with ``run_name`` and ``run_time`` keys). For now, methods with a ``run_id`` parameter will continue to
+accept strings - in this case, the provided ``run_id`` string will be converted to a ``RunIdentifier``
+
+ Existing projects that have Expectation Suite Validation Results must be migrated.
+``ValidationMetric`` and ``ValidationMetricIdentifier`` objects now have a ``data_asset_name`` attribute. \
+Existing projects with evaluation parameter stores that have store backend of type ``DatabaseStoreBackend`` must be migrated.
+
+
 .. _Upgrading to 0.10.x:
 *************************
 Upgrading to 0.10.x
