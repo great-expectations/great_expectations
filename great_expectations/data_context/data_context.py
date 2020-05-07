@@ -406,10 +406,7 @@ class BaseDataContext(object):
         for _site_name, site_config in sites.items():
             site_builder = self._load_site_builder_from_site_config(site_config)
             url = site_builder.get_resource_url(resource_identifier=resource_identifier)
-            if url is not None:
-                site_urls.append({"site_name": _site_name, "site_url": url})
-            if url is None:
-                site_urls.append({"site_name": _site_name, "site_url": ""})
+            site_urls.append({"site_name": _site_name, "site_url": url})
 
         return site_urls
 
