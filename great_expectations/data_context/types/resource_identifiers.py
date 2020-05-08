@@ -59,7 +59,7 @@ class BatchIdentifier(DataContextKey):
 
     @property
     def batch_identifier(self):
-        return self._batch_identifier or "__none__"
+        return self._batch_identifier
 
     def to_tuple(self):
         return self.batch_identifier,
