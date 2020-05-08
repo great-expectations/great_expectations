@@ -19,6 +19,8 @@ class ExpectationSuiteIdentifier(DataContextKey):
         return self._expectation_suite_name
 
     def to_tuple(self):
+        if self._expectation_suite_name is None:
+            return None,
         return tuple(self.expectation_suite_name.split("."))
 
     def to_fixed_length_tuple(self):
@@ -32,6 +34,10 @@ class ExpectationSuiteIdentifier(DataContextKey):
     def from_fixed_length_tuple(cls, tuple_):
         return cls(expectation_suite_name=tuple_[0])
 
+    def __repr__(self):
+        if self._expectation_suite_name is None:
+            return self.__class__.__name__ + "::__none__"
+        return self.__class__.__name__ + "::" + self._expectation_suite_name
 
 class ExpectationSuiteIdentifierSchema(Schema):
     expectation_suite_name = fields.Str()
@@ -53,7 +59,7 @@ class BatchIdentifier(DataContextKey):
 
     @property
     def batch_identifier(self):
-        return self._batch_identifier
+        return self._batch_identifier or "__none__"
 
     def to_tuple(self):
         return self.batch_identifier,
