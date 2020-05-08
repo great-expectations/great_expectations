@@ -6,6 +6,10 @@ Changelog
 
 develop
 -----------------
+* tuplefilestore backend, expectationstore backend remove_key bugs fixed
+* no url is returned on empty data_docs site
+* return url for resource only if key exists
+* Test added for the period special char case
 
 * updated checkpoint module to not require sqlalchemy
 * added BigQuery as an option in the list of databases in the CLI
