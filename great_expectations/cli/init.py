@@ -115,7 +115,10 @@ def init(target_directory, view, usage_stats):
         else:
             datasources = context.list_datasources()
             if len(datasources) == 0:
-                datasource_name, data_source_type = add_datasource_impl(context, choose_one_data_asset=True)
+                if not click.confirm("\nWould you like to configure a Datasource?", default=True):
+                    cli_message("Okay, bye!")
+                    sys.exit(1)
+                datasource_name, data_source_type = add_datasource_impl(context, choose_one_data_asset=False)
                 if not datasource_name:  # no datasource was created
                     sys.exit(1)
 
@@ -123,13 +126,28 @@ def init(target_directory, view, usage_stats):
             if len(datasources) == 1:
                 datasource_name = datasources[0]["name"]
 
-                success, suite_name = toolkit.create_expectation_suite(context, datasource_name=datasource_name,
+                if not click.confirm("\nWould you like to profile new Expectations for a single data asset within your new Datasource?", default=True):
+                    cli_message("Okay, bye!")
+                    sys.exit(1)
+
+                success, suite_name, profiling_results = toolkit.create_expectation_suite(context, datasource_name=datasource_name,
                                                                     additional_batch_kwargs={"limit": 1000},
-                                                                    open_docs=view)
+                                                                    flag_build_docs=False, open_docs=False)
                 if success:
                     cli_message(
                         "A new Expectation suite '{}' was added to your project".format(suite_name)
                     )
+
+                if not click.confirm("\nWould you like to build Auto Docs?", default=True):
+                    cli_message("Okay, bye!")
+                    sys.exit(1)
+
+                build_docs(context, view=False)
+
+                if not click.confirm("\nWould you like to view your new Expectations in Auto Docs?", default=True):
+                    cli_message("Okay, bye!")
+                    sys.exit(1)
+                toolkit.attempt_to_open_validation_results_in_data_docs(context, profiling_results)
 
                 cli_message(SETUP_SUCCESS)
                 sys.exit(0)

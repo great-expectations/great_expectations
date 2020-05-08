@@ -15,18 +15,15 @@ LETS_BEGIN_PROMPT = """In a few minutes you will see Great Expectations in actio
 First, Great Expectations will create a new directory:
 
     great_expectations
-    |-- expectations
-    |-- great_expectations.yml
-    |-- checkpoints
-    |-- notebooks
-    |   |-- pandas
-    |   |-- spark
-    |   |-- sql
-    |-- plugins
-    |   |-- ...
-    |-- uncommitted
-        |-- config_variables.yml
-        |-- ...
+    ├── great_expectations.yml
+    ├── expectations
+    ├── notebooks
+    ├── plugins
+    ├── .gitignore
+    └── uncommitted
+        ├── config_variables.yml
+        ├── documentation
+        └── validations
 
 OK to proceed?"""
 
@@ -77,4 +74,4 @@ NO_DATASOURCES_FOUND = """<red>Error: No datasources were found.</red> Please ad
   - by editing the {} file
 """.format(DataContext.GE_YML)
 
-SETUP_SUCCESS = "\n<cyan>Great Expectations is now set up.</cyan>"
+SETUP_SUCCESS = "\n<cyan>Congratulations! Great Expectations is now set up.</cyan>"

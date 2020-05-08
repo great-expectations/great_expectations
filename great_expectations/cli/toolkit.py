@@ -38,6 +38,7 @@ def create_expectation_suite(
     additional_batch_kwargs=None,
     empty_suite=False,
     show_intro_message=False,
+    flag_build_docs=True,
     open_docs=False,
     profiler_configuration="demo",
 ):
@@ -111,11 +112,12 @@ def create_expectation_suite(
         profiler_configuration,
     )
 
-    build_docs(context, view=False)
-    if open_docs:
-        _attempt_to_open_validation_results_in_data_docs(context, profiling_results)
+    if flag_build_docs:
+        build_docs(context, view=False)
+        if open_docs:
+            attempt_to_open_validation_results_in_data_docs(context, profiling_results)
 
-    return True, expectation_suite_name
+    return True, expectation_suite_name, profiling_results
 
 
 def _profile_to_create_a_suite(
@@ -173,7 +175,7 @@ def _raise_profiling_errors(profiling_results):
     )
 
 
-def _attempt_to_open_validation_results_in_data_docs(context, profiling_results):
+def attempt_to_open_validation_results_in_data_docs(context, profiling_results):
     try:
         # TODO this is really brittle and not covered in tests
         validation_result = profiling_results["results"][0][1]
