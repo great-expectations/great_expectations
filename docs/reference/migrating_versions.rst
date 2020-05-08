@@ -50,6 +50,7 @@ you will need to update that code to use the more precise name ``batch_kwargs_ge
 For example, in the method ``DataContext.get_available_data_asset_names`` the parameter ``generator_names`` is now ``batch_kwargs_generator_names``.
 
 If you are using ``BatchKwargsGenerators`` in your project config, follow these steps to upgrade your existing Great Expectations project:
+
 * Edit your ``great_expectations.yml`` file and change the key ``generators`` to ``batch_kwargs_generators``.
 
 * Run a simple command such as: ``great_expectations datasource list`` and ensure you see a list of datasources.
