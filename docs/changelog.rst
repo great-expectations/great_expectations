@@ -8,6 +8,10 @@ develop
 -----------------
 
 * updated checkpoint module to not require sqlalchemy
+* added BigQuery as an option in the list of databases in the CLI
+* added special cases for handling BigQuery - table names are already qualified with schema name, so we must make sure that we do not prepend the schema name twice
+* changed the prompt for the name of the temp table in BigQuery in the CLI to hint that a fully qualified name (project.dataset.table) should be provided
+* Bugfix for: expect_column_quantile_values_to_be_between expectation throws an "unexpected keyword WITHIN" on BigQuery (#1391)
 
 0.10.9
 -----------------
