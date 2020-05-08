@@ -1,0 +1,241 @@
+[
+  {
+    "section_title": "Infrastructure",
+    "section_features": [
+      {
+        "title": "Where is your data stored?",
+        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "cases": [
+          {
+            "id": "datasource_filesystem"
+          },
+          {
+            "id": "datasource_s3"
+          },
+          {
+            "id": "datasource_gcs"
+          },
+          {
+            "id": "datasource_azure"
+          },
+          {
+            "id": "datasource_postgreql"
+          },
+          {
+            "id": "datasource_bigquery"
+          },
+          {
+            "id": "datasource_redshift"
+          },
+          {
+            "id": "datasource_snowflake"
+          },
+          {
+            "id": "datasource_mssql"
+          },
+          {
+            "id": "datasource_mysql"
+          },
+          {
+            "id": "datasource_mariadb"
+          }
+        ]
+      },
+      {
+        "title": "What computation engine(s) do you want to use for validation?",
+        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "cases": [
+          {
+            "id": "compute_pandas"
+          },
+          {
+            "id": "compute_pyspark_self_managed"
+          },
+          {
+            "id": "compute_databricks"
+          },
+          {
+            "id": "compute_emr_spark"
+          },
+          {
+            "id": "compute_spark_other"
+          },
+          {
+            "id": "compute_sqlalchemy"
+          }
+        ]
+      },
+      {
+        "title": "Where do you want to store and share your expectations?",
+        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "cases": [
+          {
+            "id": "expectations_store_git",
+          },
+          {
+            "id": "expectations_store_filesystem"
+          },
+          {
+            "id": "expectations_store_s3"
+          },
+          {
+            "id": "expectations_store_gcs"
+          },
+          {
+            "id": "expectations_store_azure"
+          }
+        ]
+      },
+      {
+        "title": "Where do you want to store validation results?",
+        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "cases": [
+          {
+            "id": "validations_store_git",
+          },
+          {
+            "id": "validations_store_filesystem"
+          },
+          {
+            "id": "validations_store_s3"
+          },
+          {
+            "id": "validations_store_gcs"
+          },
+          {
+            "id": "validations_store_azure"
+          }
+        ]
+      },
+      {
+        "title": "How do you want to host and share your Data Documentation?",
+        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "cases": [
+          {
+            "id": "data_docs_store_git",
+          },
+          {
+            "id": "data_docs_store_filesystem"
+          },
+          {
+            "id": "data_docs_store_s3"
+          },
+          {
+            "id": "data_docs_store_gcs"
+          },
+          {
+            "id": "data_docs_store_azure"
+          }
+        ]
+      },
+      {
+        "title": "How do you want to trigger validation?",
+        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "cases": [
+          {
+            "id": "trigger_validation_notebook"
+          },
+          {
+            "id": "trigger_validation_command_line"
+          },
+          {
+            "id": "trigger_validation_cron_job"
+          },
+          {
+            "id": "trigger_validation_airflow_dag"
+          },
+          {
+            "id": "trigger_validation_kedro"
+          },
+          {
+            "id": "trigger_validation_prefect"
+          },
+          {
+            "id": "trigger_validation_within_dbt"
+          },
+          {
+            "id": "trigger_validation_adjacent_to_dbt"
+          },
+          {
+            "id": "trigger_validation_other_pipeline_runner"
+          }
+        ]
+      },
+      {
+        "title": "What operating systems do your development team and data infrastructure use?",
+        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "cases": [
+          {
+            "id": "os_linux"
+          },
+          {
+            "id": "os_macos"
+          },
+          {
+            "id": "os_windows"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "section_title": "Workflow",
+    "section_features": [
+      {
+        "title": "How do you want to create and edit Expectations?",
+        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "cases": [
+          {
+            "id": "worfklow_create_edit_expectations_cli_scaffold"
+          },
+          {
+            "id": "worfklow_create_edit_expectations_cli_new"
+          },
+          {
+            "id": "worfklow_create_edit_expectations_json"
+          }
+        ]
+      },
+      {
+        "title": "What would you want to do after validating data?",
+        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "cases": [
+          {
+            "id": "worfklow_action_after_validation_review_in_notebook"
+          },
+          {
+            "id": "worfklow_action_after_validation_adjust_expectations"
+          },
+          {
+            "id": "worfklow_action_after_validation_fix_data_problems"
+          },
+          {
+            "id": "worfklow_action_after_validation_send_slack_notification"
+          },
+          {
+            "id": "worfklow_action_after_validation_save_results_snippets"
+          },
+          {
+            "id": "worfklow_action_after_validation_quarantine_failed_results"
+          }
+        ]
+      },
+      {
+        "title": "Other",
+        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "cases": [
+          {
+            "id": "other_configure_expectations_and_val_ops_to_handle_warnings_and_errors"
+          },
+          {
+            "id": "other_create_custom_renderers"
+          },
+          {
+            "id": "other_add_custom_styling_to_data_docs"
+          }
+        ]
+      }
+    ]
+  }
+]
+
