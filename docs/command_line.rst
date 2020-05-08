@@ -957,6 +957,34 @@ If you have built a suite called ``churn_model_assumptions`` and a postgres data
 
 This tap can then be run nightly before your model makes churn predictions!
 
+Shell autocompletion for the CLI
+=================================
+
+If you want to enable autocompletion for the Great Expectations CLI, you can execute following commands in your shell (or add them to your .bashrc/.zshrc or ~/.config/fish/completions/):
+
+.. code-block:: bash
+
+   $ eval "$(_GREAT_EXPECTATIONS_COMPLETE=source_bash great_expectations)"
+   
+for bash
+
+.. code-block:: zsh
+
+   $ eval "$(_GREAT_EXPECTATIONS_COMPLETE=source_zsh great_expectations)"
+
+for zsh, and
+
+.. code-block:: fish
+
+   $ eval (env _GREAT_EXPECTATIONS_COMPLETE=source_fish great_expectations)
+
+for fish (you'll have to create a ~/.config/fish/completions/great_expectations.fish file).
+
+Alternatively, if you don't want the eval command to slow down your shell startup time, you can instead add the commands as a script to your shell profile. For more info, see the official `Click documentation`_.
+
+.. _Click documentation: https://click.palletsprojects.com/en/7.x/bashcomplete/
+
+
 Miscellaneous
 ======================
 
