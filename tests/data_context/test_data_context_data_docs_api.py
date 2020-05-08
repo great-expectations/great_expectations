@@ -25,7 +25,7 @@ def test_open_docs_with_non_existent_site_raises_error(
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_open_docs_with_single_local_site(mock_webbrowser, empty_data_context):
     context = empty_data_context
-    obs = context.get_docs_sites_urls()
+    obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 1
     assert obs[0]["site_url"].endswith(
         "great_expectations/uncommitted/data_docs/local_site/index.html"
@@ -65,7 +65,7 @@ def context_with_multiple_sites(empty_data_context):
     }
     config.data_docs_sites = multi_sites
     context._project_config = config
-    obs = context.get_docs_sites_urls()
+    obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 2
     assert obs[0]["site_url"].endswith(
         "great_expectations/uncommitted/data_docs/local_site/index.html"
@@ -127,7 +127,7 @@ def context_with_multiple_local_sites_and_s3_site(empty_data_context):
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_open_docs_with_two_local_sites(mock_webbrowser, context_with_multiple_sites):
     context = context_with_multiple_sites
-    context.open_data_docs()
+    context.open_data_docs(only_if_exists=False)
     assert mock_webbrowser.call_count == 2
     first_call = mock_webbrowser.call_args_list[0][0][0]
     assert first_call.startswith("file:///")
@@ -183,7 +183,7 @@ def test_get_docs_sites_urls_with_two_local_sites_specify_one(
     context_with_multiple_sites,
 ):
     context = context_with_multiple_sites
-    obs = context.get_docs_sites_urls(site_name="another_local_site")
+    obs = context.get_docs_sites_urls(site_name="another_local_site", only_if_exists=False)
     assert len(obs) == 1
     assert obs[0]["site_name"] == "another_local_site"
 
