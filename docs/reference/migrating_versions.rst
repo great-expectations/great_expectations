@@ -40,20 +40,66 @@ in your source control system already, right? ;-)
 Upgrading to 0.11.x-beta
 *************************
 
-The 0.11.0-beta release has several breaking changes related to run_ids and newly exposed data_asset_name in batch kwargs.
+The 0.11.0-beta release has several breaking changes related to ``run_id`` and ``ValidationMetric`` objects.
+Existing projects that have Expectation Suite Validation Results or evaluation parameter stores with DatabaseStoreBackend backends
+must be migrated.
+
+run_id and ValidationMetric Changes
+===================================
 
 ``run_id`` is now typed using the new ``RunIdentifier`` class, with optional ``run_name`` and ``run_time`` instantiation
 arguments. The ``run_name`` can be any string (this could come from your pipeline runner, e.g. Airflow run id). The ``run_time``
-can be either a dateutil parsable string or a datetime object. If no instantiation arguments are given, ``run_name`` will be
-``None`` (and appear as "__none__" in stores) and ``run_time`` will default to the current UTC datetime. If you are using
-Great Expectations methods that accept a ``run_id`` argument, you should update your code to pass in the new ``RunIdentifier``
-type (or a dictionary with ``run_name`` and ``run_time`` keys). For now, methods with a ``run_id`` parameter will continue to
-accept strings - in this case, the provided ``run_id`` string will be converted to a ``RunIdentifier``
+can be either a dateutil parsable string or a datetime object. If no instantiation arguments are provided, ``run_name`` will be
+``None`` (and appear as "__none__" in stores) and ``run_time`` will default to the current UTC datetime.
 
- Existing projects that have Expectation Suite Validation Results must be migrated.
-``ValidationMetric`` and ``ValidationMetricIdentifier`` objects now have a ``data_asset_name`` attribute. \
-Existing projects with evaluation parameter stores that have store backend of type ``DatabaseStoreBackend`` must be migrated.
+Because of the newly exposed ``data_asset_name`` key in ``batch_kwargs``, ``ValidationMetric`` and associated
+``ValidationMetricIdentifier`` objects now have a ``data_asset_name`` attribute.
 
+Migrating Your 0.10.x Project
+==============================
+
+**Code That Uses Great Expectations**
+
+If you are using any Great Expectations methods that accept a ``run_id`` argument, you should update your code to pass in
+the new ``RunIdentifier`` type (or a dictionary with ``run_name`` and ``run_time`` keys). For now, methods with a
+``run_id`` parameter will continue to accept strings. In this case, the provided ``run_id`` string will be converted to
+a ``RunIdentifier`` object, acting as the ``run_name``. If the ``run_id`` string can also be parsed as a datetime, it
+will also be used for the ``run_time`` attribute, otherwise, the current UTC time is used.
+
+**Validations Store Backends**
+
+Apply the following changes to the store backends of every Validations Store.
+
+For TupleFilesystemStoreBackend, TupleS3StoreBackend, and TupleGCSStoreBackend:
+
+* Rename paths of all Expectation Suite Validation Result json files
+  * Before: ``great_expectations/uncommitted/validations/my_expectation_suite_name/my_run_id/batch_identifier.json``
+  * After: ``great_expectations/uncommitted/validations/my_expectation_suite_name/my_run_id/my_run_time/batch_identifier.json``
+
+For DatabaseStoreBackend:
+
+* Perform the following database migration
+  * add string column with name ``run_name``; copy values from ``run_id`` column
+  * add string column with name ``run_time``; fill with appropriate dateutil parsable values
+  * delete run_id column
+
+**Data Docs Validations Store Backends**
+
+For TupleFilesystemStoreBackend, TupleS3StoreBackend, and TupleGCSStoreBackend:
+
+* Rename paths of all Expectation Suite Validation Result html files
+  * Before: ``great_expectations/uncommitted/data_docs/my_site_name/validations/my_expectation_suite_name/my_run_id/batch_identifier.html``
+  * After: ``great_expectations/uncommitted/data_docs/my_site_name/validations/my_expectation_suite_name/my_run_id/my_run_time/batch_identifier.html``
+
+**Evaluation Parameter Store Backends**
+
+If you have any configured evaluation parameter stores that use a DatabaseStoreBackend backend, you must perform the following
+migration for each database backend:
+
+* add string column with name ``data_asset_name``; fill with appropriate values or use "__none__"
+* add string column with name ``run_name``; copy values from ``run_id`` column
+* add string column with name ``run_time``; fill with appropriate dateutil parsable values
+* delete run_id column
 
 .. _Upgrading to 0.10.x:
 *************************

@@ -7,11 +7,11 @@ Changelog
 develop
 -----------------
 * (BREAKING) ``run_id`` is now typed using the new ``RunIdentifier`` class, which consists of a ``run_time`` and
-``run_name``. Existing projects that have Expectation Suite Validation Results must be migrated.
-See :ref:`Upgrading to 0.11.x-beta` for instructions.
+  ``run_name``. Existing projects that have Expectation Suite Validation Results must be migrated.
+  See :ref:`Upgrading to 0.11.x-beta` for instructions.
 * (BREAKING) ``ValidationMetric`` and ``ValidationMetricIdentifier`` objects now have a ``data_asset_name`` attribute.
-Existing projects with evaluation parameter stores that have store backend of type ``DatabaseStoreBackend`` must be
-migrated. See :ref:`Upgrading to 0.11.x-beta` for instructions.
+  Existing projects with evaluation parameter stores that have database backends must be migrated.
+  See :ref:`Upgrading to 0.11.x-beta` for instructions.
 * Data Docs: redesigned index page with paginated/sortable/searchable/filterable tables
 * Data Docs: searchable tables on Expectation Suite Validation Result pages
 * ``data_asset_name`` is now added to batch_kwargs by batch_kwargs_generators (if available) and surfaced in Data Docs
