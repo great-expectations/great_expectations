@@ -252,6 +252,16 @@ def test_data_context_expectation_suite_delete(empty_data_context):
     expectation_suites = empty_data_context.list_expectation_suite_names()
     assert len(expectation_suites) == 0
 
+def test_data_context_expectation_nested_suite_delete(empty_data_context):
+    assert empty_data_context.create_expectation_suite(expectation_suite_name="titanic.test.create_expectation_suite")
+    expectation_suites = empty_data_context.list_expectation_suite_names()
+    assert empty_data_context.create_expectation_suite(expectation_suite_name="titanic.test.a.create_expectation_suite")
+    expectation_suites = empty_data_context.list_expectation_suite_names()
+    assert len(expectation_suites) == 2
+    empty_data_context.delete_expectation_suite(expectation_suite_name=expectation_suites[0])
+    expectation_suites = empty_data_context.list_expectation_suite_names()
+    assert len(expectation_suites) == 1
+
 def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(titanic_data_context):
     with pytest.raises(ValueError):
         _ = titanic_data_context.get_datasource("fakey_mc_fake")
@@ -991,7 +1001,7 @@ def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasource
     DataContext.create(empty_directory)
     context = DataContext(os.path.join(empty_directory, DataContext.GE_DIR))
 
-    obs = context.get_docs_sites_urls()
+    obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 1
     assert obs[0]["site_url"].endswith("great_expectations/uncommitted/data_docs/local_site/index.html")
 

@@ -143,7 +143,7 @@ class HtmlSiteStore(object):
         ].set(key.resource_identifier.to_tuple(), serialized_value,
               content_encoding='utf-8', content_type='text/html; charset=utf-8')
 
-    def get_url_for_resource(self, resource_identifier=None):
+    def get_url_for_resource(self, resource_identifier=None, only_if_exists=True):
         """
         Return the URL of the HTML document that renders a resource
         (e.g., an expectation suite or a validation result).
@@ -166,6 +166,8 @@ class HtmlSiteStore(object):
             # this method does not support getting the URL of static assets
             raise ValueError("Cannot get URL for resource {0:s}".format(str(resource_identifier)))
 
+        if only_if_exists:
+            return store_backend.get_url_for_key(key) if store_backend.has_key(key) else None
         return store_backend.get_url_for_key(key)
 
     def _validate_key(self, key):
