@@ -146,7 +146,7 @@ def test_open_docs_with_two_local_sites_specify_open_one(
     mock_webbrowser, context_with_multiple_sites
 ):
     context = context_with_multiple_sites
-    context.open_data_docs(site_name="another_local_site")
+    context.open_data_docs(site_name="another_local_site", only_if_exists=False)
 
     assert mock_webbrowser.call_count == 1
     call = mock_webbrowser.call_args_list[0][0][0]
