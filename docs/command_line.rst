@@ -958,7 +958,7 @@ If you have built a suite called ``churn_model_assumptions`` and a postgres data
 This tap can then be run nightly before your model makes churn predictions!
 
 Shell autocompletion for the CLI
-======================
+=================================
 
 If you want to enable autocompletion for the Great Expectations CLI, you can execute following commands in your shell (or add them to your .bashrc/.zshrc or ~/.config/fish/completions/):
 
