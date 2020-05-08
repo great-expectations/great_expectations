@@ -112,6 +112,19 @@ You'll use this any time you want to view your expectations and validations in a
     - local_site:
        file:///Users/dickens/my_pipeline/great_expectations/uncommitted/data_docs/local_site/index.html
 
+``great_expectations docs build --site_name <YOUR_SITE>``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By default, ``great_expectations docs build`` command builds all the Data Docs sites in a project.
+If you wish to only build once site you may use the ``--site_name`` argument and pass in the name of the site from your configuration.
+
+.. code-block:: bash
+
+    $ great_expectations docs build --site_name s3_site
+    Building Data Docs...
+    The following Data Docs sites were built:
+       - s3_site: https://s3.amazonaws.com/my-ge-bucket/index.html
+
 ``great_expectations docs clean``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -943,6 +956,34 @@ If you have built a suite called ``churn_model_assumptions`` and a postgres data
     You can edit this script or place this code snippet in your pipeline.
 
 This tap can then be run nightly before your model makes churn predictions!
+
+Shell autocompletion for the CLI
+=================================
+
+If you want to enable autocompletion for the Great Expectations CLI, you can execute following commands in your shell (or add them to your .bashrc/.zshrc or ~/.config/fish/completions/):
+
+.. code-block:: bash
+
+   $ eval "$(_GREAT_EXPECTATIONS_COMPLETE=source_bash great_expectations)"
+   
+for bash
+
+.. code-block:: zsh
+
+   $ eval "$(_GREAT_EXPECTATIONS_COMPLETE=source_zsh great_expectations)"
+
+for zsh, and
+
+.. code-block:: fish
+
+   $ eval (env _GREAT_EXPECTATIONS_COMPLETE=source_fish great_expectations)
+
+for fish (you'll have to create a ~/.config/fish/completions/great_expectations.fish file).
+
+Alternatively, if you don't want the eval command to slow down your shell startup time, you can instead add the commands as a script to your shell profile. For more info, see the official `Click documentation`_.
+
+.. _Click documentation: https://click.palletsprojects.com/en/7.x/bashcomplete/
+
 
 Miscellaneous
 ======================

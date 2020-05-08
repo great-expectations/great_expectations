@@ -54,7 +54,12 @@ def docs_list(directory):
 
     docs_sites_url_dicts = context.get_docs_sites_urls()
     docs_sites_strings = [
-        " - <cyan>{}</cyan>: {}".format(docs_site_dict["site_name"], docs_site_dict["site_url"])\
+        " - <cyan>{}</cyan>: {}".format(
+            docs_site_dict["site_name"],
+            docs_site_dict.get("site_url") or
+            f'site configured but does not exist. Run the following command to build site: great_expectations '
+            f'docs build --site-name {docs_site_dict["site_name"]}'
+        )
         for docs_site_dict in docs_sites_url_dicts
     ]
 
@@ -100,7 +105,7 @@ def clean_data_docs(directory, site_name=None, all=None):
             success=True
         )
         cli_message("<green>{}</green>".format("Cleaned data docs"))
-     
+
     if failed and context is not None:
         send_usage_message(
             data_context=context,
@@ -112,9 +117,9 @@ def clean_data_docs(directory, site_name=None, all=None):
 def _build_intro_string(docs_sites_strings):
     doc_string_count = len(docs_sites_strings)
     if doc_string_count == 1:
-        list_intro_string = "1 Data Docs site found:"
+        list_intro_string = "1 Data Docs site configured:"
     elif doc_string_count > 1:
-        list_intro_string = f"{doc_string_count} Data Docs sites found:"
+        list_intro_string = f"{doc_string_count} Data Docs sites configured:"
     return list_intro_string
 
 
@@ -144,4 +149,4 @@ def build_docs(context, site_name=None, view=True):
     cli_message(msg)
 
     if view:
-        context.open_data_docs()
+        context.open_data_docs(site_name=site_name)

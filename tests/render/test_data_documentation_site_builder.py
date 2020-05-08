@@ -145,11 +145,9 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     data_docs_config = context._project_config.data_docs_sites
     local_site_config = data_docs_config['local_site']
-    # local_site_config.pop('module_name')  # This isn't necessary
-    local_site_config.pop('class_name')
 
     validations_set = set(context.stores["validations_store"].list_keys())
-    assert len(validations_set) == 4
+    assert len(validations_set) == 6
     assert ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
             expectation_suite_name=expectation_suite_name
@@ -193,13 +191,13 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     # assert that how-to buttons and related elements are rendered (default behavior)
     assert_how_to_buttons(context, index_page_locator_info, index_links_dict)
-    print(json.dumps(index_page_locator_info, indent=2))
+    #print(json.dumps(index_page_locator_info, indent=2))
     assert index_page_locator_info == "file://" + context.root_directory + '/uncommitted/data_docs/local_site/index.html'
 
     assert "site_name" in index_links_dict
 
     assert "expectations_links" in index_links_dict
-    assert len(index_links_dict["expectations_links"]) == 3
+    assert len(index_links_dict["expectations_links"]) == 5
 
     assert "validations_links" in index_links_dict
     assert len(index_links_dict["validations_links"]) == 1, \
@@ -208,7 +206,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     """
 
     assert "profiling_links" in index_links_dict
-    assert len(index_links_dict["profiling_links"]) == 3
+    assert len(index_links_dict["profiling_links"]) == 5
 
     # save documentation locally
     os.makedirs("./tests/render/output", exist_ok=True)
@@ -284,17 +282,28 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
                                         ValidationResultIdentifier].full_base_directory,
                                         "index.html") == html_url
 
-    resource_dir = os.path.dirname(html_url) + "/"
+    team_site_config = data_docs_config['team_site']
+    team_site_builder = SiteBuilder(
+            data_context=context,
+            runtime_environment={
+                "root_directory": context.root_directory
+            },
+            **team_site_config
+        )
+    team_site_builder.clean_site()
+    obs = [url_dict for url_dict in context.get_docs_sites_urls(site_name="team_site") if url_dict.get("site_url")]
+    assert len(obs) == 0
+
     #exercise clean_site
     site_builder.clean_site()
-    assert "file://" + site_builder.site_index_builder.target_store.store_backends[\
-                                        ValidationResultIdentifier].full_base_directory == resource_dir
+    obs = [url_dict for url_dict in context.get_docs_sites_urls() if url_dict.get("site_url")]
+    assert len(obs) == 0
 
     #restore site
     context = site_builder_data_context_with_html_store_titanic_random
     site_builder = SiteBuilder(
-            data_context=context, 
-            runtime_environment={ 
+            data_context=context,
+            runtime_environment={
                 "root_directory": context.root_directory
             },
             **local_site_config
@@ -364,7 +373,7 @@ def test_configuration_driven_site_builder_without_how_to_buttons(site_builder_d
 
     data_docs_config = context._project_config.data_docs_sites
     local_site_config = data_docs_config['local_site']
-    local_site_config.pop('class_name')
+
     # set this flag to false in config to hide how-to buttons and related elements
     local_site_config["show_how_to_buttons"] = False
 

@@ -11,7 +11,7 @@ datasources:
     batch_kwargs_generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
-        type: subdir_reader
+        class_name: SubdirReaderBatchKwargsGenerator
         base_directory: ../data
 plugins_directory: plugins/
 
@@ -31,35 +31,6 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
-  local_site_html_store:
-    module_name: great_expectations.data_context.store
-    class_name: HtmlSiteStore
-    base_directory: uncommitted/data_docs/local_site/
-
-  # These next three blocks are never used in tests.
-
-  # local_profiling_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: FilesystemStore
-  #   store_config:
-  #     base_directory: uncommitted/profiling/
-  #     serialization_type: json
-  #     file_extension: .json
-
-  # local_workbench_site_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: FilesystemStore
-  #   store_config:
-  #     base_directory: uncommitted/data_docs/local_site
-  #     file_extension: .html
-
-  # shared_team_site_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: FilesystemStore
-  #   store_config:
-  #     base_directory: uncommitted/data_docs/team_site
-  #     file_extension: .html
-
   fixture_validation_results_store:
     class_name: ValidationsStore
     store_backend:
@@ -67,7 +38,6 @@ stores:
       base_directory: fixtures/validations
 
   evaluation_parameter_store:
-      module_name: great_expectations.data_context.store
       class_name: EvaluationParameterStore
 
 data_docs_sites:
@@ -76,38 +46,13 @@ data_docs_sites:
   # The site includes expectation suites and profiling and validation results from uncommitted directory.
   # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
 
-    module_name: great_expectations.render.renderer.site_builder
     class_name: SiteBuilder
-    target_store_name: local_site_html_store
-
+    show_how_to_buttons: true
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-
-    site_section_builders:
-      expectations:
-        class_name: DefaultSiteSectionBuilder
-        source_store_name: expectations_store
-        renderer:
-          module_name: great_expectations.render.renderer
-          class_name: ExpectationSuitePageRenderer
-
-      validations:
-        class_name: DefaultSiteSectionBuilder
-        source_store_name: validations_store
-        run_name_filter:
-          ne: profiling
-        renderer:
-          module_name: great_expectations.render.renderer
-          class_name: ValidationResultsPageRenderer
-
-      profiling:
-        class_name: DefaultSiteSectionBuilder
-        source_store_name: validations_store
-        run_name_filter:
-          eq: profiling
-        renderer:
-          module_name: great_expectations.render.renderer
-          class_name: ProfilingResultsPageRenderer
 
   team_site:
   # "team_site" is meant to support the "shared source of truth for a team" use case.
@@ -115,21 +60,13 @@ data_docs_sites:
   #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and validations_store attributes based on the team's decisions where these are stored (a local filesystem or S3).
   # Reach out on Slack (https://greatexpectations.io/slack>) if you would like to discuss the best way to configure a team site.
 
-    module_name: great_expectations.render.renderer.site_builder
     class_name: SiteBuilder
     show_how_to_buttons: true
-    target_store_name: team_site_html_store
-
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/team_site/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-
-    site_section_builders:
-      expectations:
-        class_name: DefaultSiteSectionBuilder
-        source_store_name: expectations_store
-        renderer:
-          module_name: great_expectations.render.renderer
-          class_name: ExpectationSuitePageRenderer
 
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
@@ -139,11 +76,12 @@ validation_operators:
       - name: store_validation_result
         action:
           class_name: StoreValidationResultAction
-          target_store_name: validations_store
       - name: store_evaluation_params
         action:
           class_name: StoreEvaluationParametersAction
-          target_store_name: evaluation_parameter_store
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
       # Uncomment the notify_slack action below to send notifications during evaluation
       # - name: notify_slack
       #   action:

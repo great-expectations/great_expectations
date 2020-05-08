@@ -61,9 +61,9 @@ class SupportedDatabases(enum.Enum):
     POSTGRES = 'Postgres'
     REDSHIFT = 'Redshift'
     SNOWFLAKE = 'Snowflake'
+    BIGQUERY = 'BigQuery'
     OTHER = 'other - Do you have a working SQLAlchemy connection string?'
     # TODO MSSQL
-    # TODO BigQuery
 
 
 @click.group()
@@ -105,28 +105,23 @@ def datasource_new(directory):
     '--directory',
     '-d',
     default=None,
-    help="Datasource to delete"
+    help="The project's great_expectations directory."
 )
-@click.option(
-    "--datasource_name",
-    "-s",
-    help="The site that you want documentation cleaned for. See data_docs section in great_expectations.yml",
-)
-def delete_datasource(directory, datasource_name=None):
-    """Delete data source"""
-    print(datasource_name) 
+@click.argument("datasource")
+def delete_datasource(directory, datasource):
+    """Delete the datasource specified as an argument"""
     context = toolkit.load_data_context_with_error_handling(directory)
-    if datasource_name is None:
-        cli_message("<red>{}</red>".format("Datasource name must be a datasource name"))
-        return
+    try:
+        context.delete_datasource(datasource)
+    except ValueError:
+        cli_message("<red>{}</red>".format("Datasource {} could not be found".format(datasource)))
+        sys.exit(1)
     else:
-        context.delete_datasource(datasource_name)
-        if context.get_datasource(datasource_name) is None: 
-            cli_message("<green>{}</greem>".format("Datasource deleted successfully."))
-            return True
-        else:
-            cli_message("<red>{}</red>".format("Datasource not deleted"))
-            sys.exit(1)
+        cli_message("<green>{}</green>".format("Datasource deleted successfully."))
+
+    if context.get_datasource(datasource) is None:
+        cli_message("<red>{}</red>".format("Datasource not deleted"))
+        sys.exit(1)
 
 
 @datasource.command(name="list")
@@ -433,6 +428,10 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             if not load_library("snowflake", install_instructions_string="pip install snowflake-sqlalchemy"):
                 return None
             credentials = _collect_snowflake_credentials(default_credentials=credentials)
+        elif selected_database == SupportedDatabases.BIGQUERY:
+            if not load_library("pybigquery", install_instructions_string="pip install pybigquery"):
+                return None
+            credentials = _collect_bigquery_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.OTHER:
             sqlalchemy_url = click.prompt(
                 """What is the url/connection string for the sqlalchemy connection?
@@ -573,6 +572,17 @@ def _collect_snowflake_credentials(default_credentials=None):
 
     return credentials
 
+def _collect_bigquery_credentials(default_credentials=None):
+    sqlalchemy_url = click.prompt(
+"""What is the SQLAlchemy url/connection string for the BigQuery connection?
+(reference: https://github.com/mxmzdlv/pybigquery#connection-string-parameters)
+""",
+        show_default=False).strip()
+    credentials = {
+        "url": sqlalchemy_url
+    }
+
+    return credentials
 
 def _collect_mysql_credentials(default_credentials=None):
     # We are insisting on pymysql driver when adding a MySQL datasource through the CLI
@@ -996,9 +1006,9 @@ Enter an SQL query
         }
     elif datasource.engine.dialect.name.lower() == "bigquery":
         # bigquery also requires special handling
-        table_name = click.prompt("GE will create a table based on your query to use for "
+        table_name = click.prompt("GE will create a table to use for "
                                   "validation." + os.linesep + "Please enter a name for this table: ",
-                                  default="ge_tmp_" + str(uuid.uuid4())[:8])
+                                  default="SOME_PROJECT.SOME_DATASET.ge_tmp_" + str(uuid.uuid4())[:8])
         temp_table_kwargs = {
             "bigquery_temp_table": table_name,
         }

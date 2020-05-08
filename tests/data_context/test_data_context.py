@@ -27,10 +27,10 @@ from great_expectations.datasource import Datasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.exceptions import (
     BatchKwargsError,
-    ConfigNotFoundError,
-    DataContextError,
     CheckpointError,
     CheckpointNotFoundError,
+    ConfigNotFoundError,
+    DataContextError,
 )
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -254,6 +254,16 @@ def test_data_context_expectation_suite_delete(empty_data_context):
     empty_data_context.delete_expectation_suite(expectation_suite_name=expectation_suites[0])
     expectation_suites = empty_data_context.list_expectation_suite_names()
     assert len(expectation_suites) == 0
+
+def test_data_context_expectation_nested_suite_delete(empty_data_context):
+    assert empty_data_context.create_expectation_suite(expectation_suite_name="titanic.test.create_expectation_suite")
+    expectation_suites = empty_data_context.list_expectation_suite_names()
+    assert empty_data_context.create_expectation_suite(expectation_suite_name="titanic.test.a.create_expectation_suite")
+    expectation_suites = empty_data_context.list_expectation_suite_names()
+    assert len(expectation_suites) == 2
+    empty_data_context.delete_expectation_suite(expectation_suite_name=expectation_suites[0])
+    expectation_suites = empty_data_context.list_expectation_suite_names()
+    assert len(expectation_suites) == 1
 
 def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(titanic_data_context):
     with pytest.raises(ValueError):
@@ -910,7 +920,6 @@ uncommitted/
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
     DataContext.create(project_path)
     fixture = gen_directory_tree_str(uncommitted_dir)
-    print(fixture)
     assert fixture == expected
 
     # Test that all exist
@@ -957,7 +966,6 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(tm
 
     with open(config_vars_yml, "r") as ff:
         obs = ff.read()
-    print(obs)
     assert "# LOOK I WAS MODIFIED" in obs
 
 
@@ -1011,7 +1019,7 @@ def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasource
     DataContext.create(empty_directory)
     context = DataContext(os.path.join(empty_directory, DataContext.GE_DIR))
 
-    obs = context.get_docs_sites_urls()
+    obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 1
     assert obs[0]["site_url"].endswith("great_expectations/uncommitted/data_docs/local_site/index.html")
 
@@ -1042,7 +1050,6 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     assert os.path.isfile(expected_path)
 
     obs = context.get_docs_sites_urls()
-    print(obs)
     assert obs == [{'site_name': 'my_rad_site', 'site_url': "file://{}".format(expected_path)}]
 
 

@@ -243,7 +243,7 @@ class SiteBuilder(object):
         index_page_resource_identifier_tuple = self.site_index_builder.build()
         return self.get_resource_url(), index_page_resource_identifier_tuple[1]
 
-    def get_resource_url(self, resource_identifier=None):
+    def get_resource_url(self, resource_identifier=None, only_if_exists=True):
         """
         Return the URL of the HTML document that renders a resource
         (e.g., an expectation suite or a validation result).
@@ -254,7 +254,7 @@ class SiteBuilder(object):
         :return: URL (string)
         """
 
-        return self.target_store.get_url_for_resource(resource_identifier=resource_identifier)
+        return self.target_store.get_url_for_resource(resource_identifier=resource_identifier, only_if_exists=only_if_exists)
 
 
 class DefaultSiteSectionBuilder(object):
@@ -537,7 +537,7 @@ class DefaultSiteIndexBuilder(object):
         #     last_datasource_class_by_name = datasource_classes_by_name[-1]
         #     last_datasource_class_name = last_datasource_class_by_name["class_name"]
         #     last_datasource_name = last_datasource_class_by_name["name"]
-        #     last_datasource = self.data_context.datasources[last_datasource_name]
+        #     last_datasource = self.data_context.get_datasource(last_datasource_name)
         #
         #     if last_datasource_class_name == "SqlAlchemyDatasource":
         #         try:

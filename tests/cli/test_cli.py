@@ -145,7 +145,7 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
 
         # expectation suite delete
         result = runner.invoke(
-            cli, ["suite", "delete", "-d", "FAKE"], catch_exceptions=False
+            cli, ["suite", "delete", "deleteme", "-d", "FAKE"], catch_exceptions=False
         )
         assert error_message in result.output
         #expectation create new
@@ -154,12 +154,12 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
             cli, ["suite", "new", "-d", "./"], catch_exceptions=False
         )
         assert error_message in result.output
-        result = runner.invoke(cli, ["suite", "delete"], catch_exceptions=False)
+        result = runner.invoke(cli, ["suite", "delete", "deleteme"], catch_exceptions=False)
         assert error_message in result.output
 
         # datasource delete
         result = runner.invoke(
-            cli, ["datasource", "delete", "-s", "new"], catch_exceptions=False
+            cli, ["datasource", "delete", "new"], catch_exceptions=False
         )
         assert error_message in result.output
         #create new before delete again
@@ -167,10 +167,6 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
         result = runner.invoke(
             cli, ["datasource", "new", "-d", "./"], catch_exceptions=False
         )
-          
-        assert error_message in result.output
-        result = runner.invoke(cli, ["datasource", "delete"], catch_exceptions=False)
-        assert error_message in result.output
  
         # data_docs clean
         result = runner.invoke(

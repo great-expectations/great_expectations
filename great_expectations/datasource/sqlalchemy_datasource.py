@@ -161,20 +161,26 @@ class SqlAlchemyDatasource(Datasource):
             batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query, table_name=query_support_table_name,
                                                        schema=batch_kwargs.get("schema"))
         elif "table" in batch_kwargs:
+            table = batch_kwargs['table']
             limit = batch_kwargs.get('limit')
             offset = batch_kwargs.get('offset')
             if limit is not None or offset is not None:
                 logger.info("Generating query from table batch_kwargs based on limit and offset")
+                # In BigQuery the table name is already qualified with its schema name
+                if self.engine.dialect.name.lower() == "bigquery":
+                    schema = None
+                else:
+                    schema = batch_kwargs.get("schema")
                 raw_query = sqlalchemy.select([sqlalchemy.text("*")])\
-                    .select_from(sqlalchemy.schema.Table(batch_kwargs['table'], sqlalchemy.MetaData(),
-                                                         schema=batch_kwargs.get("schema")))\
+                    .select_from(sqlalchemy.schema.Table(table, sqlalchemy.MetaData(),
+                                                         schema=schema))\
                     .offset(offset)\
                     .limit(limit)
                 query = str(raw_query.compile(self.engine, compile_kwargs={"literal_binds": True}))
                 batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query, table_name=query_support_table_name,
                                                            schema=batch_kwargs.get("schema"))
             else:
-                batch_reference = SqlAlchemyBatchReference(engine=self.engine, table_name=batch_kwargs["table"],
+                batch_reference = SqlAlchemyBatchReference(engine=self.engine, table_name=table,
                                                            schema=batch_kwargs.get("schema"))
         else:
             raise ValueError("Invalid batch_kwargs: exactly one of 'table' or 'query' must be specified")
