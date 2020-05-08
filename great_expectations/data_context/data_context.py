@@ -368,7 +368,7 @@ class BaseDataContext(object):
         return resource_store
 
     def get_docs_sites_urls(
-        self, resource_identifier=None, site_name: Optional[str] = None
+        self, resource_identifier=None, site_name: Optional[str] = None, only_if_exists=True
     ) -> List[Dict[str, str]]:
         """
         Get URLs for a resource for all data docs sites.
@@ -399,13 +399,13 @@ class BaseDataContext(object):
                 raise ge_exceptions.DataContextError(f"Could not find site named {site_name}. Please check your configurations")
             site = sites[site_name]
             site_builder = self._load_site_builder_from_site_config(site)
-            url = site_builder.get_resource_url(resource_identifier=resource_identifier)
+            url = site_builder.get_resource_url(resource_identifier=resource_identifier, only_if_exists=only_if_exists)
             return [{"site_name": site_name, "site_url": url}]
 
         site_urls = []
         for _site_name, site_config in sites.items():
             site_builder = self._load_site_builder_from_site_config(site_config)
-            url = site_builder.get_resource_url(resource_identifier=resource_identifier)
+            url = site_builder.get_resource_url(resource_identifier=resource_identifier, only_if_exists=only_if_exists)
             site_urls.append({"site_name": _site_name, "site_url": url})
 
         return site_urls
@@ -430,7 +430,7 @@ class BaseDataContext(object):
 
     @usage_statistics_enabled_method(event_name="data_context.open_data_docs",)
     def open_data_docs(
-        self, resource_identifier: Optional[str] = None, site_name: Optional[str] = None
+        self, resource_identifier: Optional[str] = None, site_name: Optional[str] = None, only_if_exists=True
     ) -> None:
         """
         A stdlib cross-platform way to open a file in a browser.
@@ -444,7 +444,7 @@ class BaseDataContext(object):
                 open all docs found in the project.
         """
         data_docs_urls = self.get_docs_sites_urls(
-            resource_identifier=resource_identifier, site_name=site_name,
+            resource_identifier=resource_identifier, site_name=site_name, only_if_exists=only_if_exists
         )
         urls_to_open = [site["site_url"] for site in data_docs_urls]
 

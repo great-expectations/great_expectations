@@ -215,10 +215,9 @@ Variable substitution enables: 1) keeping secrets out of source control & 2)
 environment-based configuration changes such as staging vs prod.
 
 When GE encounters substitution syntax (like ``my_key: ${my_value}`` or
-``my_key: $my_value``) in the config file it will attempt to replace the value
+``my_key: $my_value``) in the great_expectations.yml config file it will attempt to replace the value
 of ``my_key`` with the value from an environment variable ``my_value`` or a
-corresponding key read from the file specified using ``config_variables_file_path``.
-
+corresponding key read from the file specified using ``config_variables_file_path``, which is located in uncommitted/config_variables.yml by default. This is an example of a config_variables.yml file:
 
 
 .. code-block:: yaml
@@ -248,6 +247,8 @@ Environment Variable Substitution
 
 Environment variables will be substituted into a DataContext config with higher priority than values from the
 config variables file.
+
+**Note**: Substitution of environment variables is currently only supported in the great_expectations.yml, but not in a config variables file. See [this Discuss post](https://discuss.greatexpectations.io/t/environment-variable-substitution-is-not-working-for-me-when-connecting-ge-to-my-database/72) for an example.
 
 ****************************************************
 Default Out of Box Config File
