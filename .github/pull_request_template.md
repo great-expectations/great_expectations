@@ -10,7 +10,7 @@ After submitting your PR, CI checks will run and @tiny-tim-bot will check for yo
 
 For a PR with nontrivial changes, we review with both design-centric and code-centric lenses.
 
-In a design review, we aim to ensure that the PR is consistent with our relationship to the open source community, with our software architecture and abstractions, and with our users' needs and expectations. That review often starts well before a PR, for example in github issues or slack, so please link to relevant conversations in notes below to help reviewers understand and approve your PR more quickly (e.g. "closes #123").
+In a design review, we aim to ensure that the PR is consistent with our relationship to the open source community, with our software architecture and abstractions, and with our users' needs and expectations. That review often starts well before a PR, for example in github issues or slack, so please link to relevant conversations in notes below to help reviewers understand and approve your PR more quickly (e.g. `closes #123`).
 
 Previous Design Review notes:
 -
