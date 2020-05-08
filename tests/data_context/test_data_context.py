@@ -1001,7 +1001,7 @@ def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasource
     DataContext.create(empty_directory)
     context = DataContext(os.path.join(empty_directory, DataContext.GE_DIR))
 
-    obs = context.get_docs_sites_urls()
+    obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 1
     assert obs[0]["site_url"].endswith("great_expectations/uncommitted/data_docs/local_site/index.html")
 
