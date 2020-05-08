@@ -145,7 +145,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     local_site_config = data_docs_config['local_site']
 
     validations_set = set(context.stores["validations_store"].list_keys())
-    assert len(validations_set) == 4
+    assert len(validations_set) == 6
     assert ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
             expectation_suite_name=expectation_suite_name
@@ -189,15 +189,15 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     # assert that how-to buttons and related elements are rendered (default behavior)
     assert_how_to_buttons(context, index_page_locator_info, index_links_dict)
-    print(json.dumps(index_page_locator_info, indent=2))
+    #print(json.dumps(index_page_locator_info, indent=2))
     assert index_page_locator_info == "file://" + context.root_directory + '/uncommitted/data_docs/local_site/index.html'
 
-    print(json.dumps(index_links_dict, indent=2))
+    #print(json.dumps(index_links_dict, indent=2))
 
     assert "site_name" in index_links_dict
 
     assert "expectations_links" in index_links_dict
-    assert len(index_links_dict["expectations_links"]) == 3
+    assert len(index_links_dict["expectations_links"]) == 5
 
     assert "validations_links" in index_links_dict
     assert len(index_links_dict["validations_links"]) == 1, \
@@ -206,7 +206,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     """
 
     assert "profiling_links" in index_links_dict
-    assert len(index_links_dict["profiling_links"]) == 3
+    assert len(index_links_dict["profiling_links"]) == 5
 
     # save documentation locally
     os.makedirs("./tests/render/output", exist_ok=True)

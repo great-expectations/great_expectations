@@ -32,7 +32,7 @@ def test_open_docs_with_single_local_site(mock_webbrowser, empty_data_context):
     )
     assert obs[0]["site_name"] == "local_site"
 
-    context.open_data_docs()
+    context.open_data_docs(only_if_exists=False)
     assert mock_webbrowser.call_count == 1
     call = mock_webbrowser.call_args_list[0][0][0]
     assert call.startswith("file:///")
