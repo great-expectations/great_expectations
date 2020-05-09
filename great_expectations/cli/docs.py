@@ -82,6 +82,7 @@ def docs_list(directory):
 @click.option(
     "--all",
     "-a",
+    is_flag=True,
     help="With this, all sites will get their data docs cleaned out. See data_docs section in great_expectations.yml",
 )
 def clean_data_docs(directory, site_name=None, all=None):
@@ -89,7 +90,8 @@ def clean_data_docs(directory, site_name=None, all=None):
     context = toolkit.load_data_context_with_error_handling(directory)
     failed = True
     if (site_name is None and all is None):
-        cli_message("<red>{}</red>".format("Please specify --all y to remove all sites or specify specific site using site_name"))
+        cli_message("<red>{}</red>".format("Please specify --all to remove all sites or specify specific site using "
+                                           "--site_name"))
         sys.exit(1)
     context.clean_data_docs(site_name=site_name)
     failed = False
@@ -100,7 +102,7 @@ def clean_data_docs(directory, site_name=None, all=None):
             success=True
         )
         cli_message("<green>{}</green>".format("Cleaned data docs"))
-     
+
     if failed and context is not None:
         send_usage_message(
             data_context=context,
