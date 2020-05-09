@@ -42,24 +42,3 @@ def param_store(request, test_backends):
         },
         runtime_environment={}
     )
-
-
-def test_metric_store_remove_key(param_store):
-    run_id = RunIdentifier(
-        run_name="test_metric_store_remove_key",
-        run_time=datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-    )
-    metric_identifier = ValidationMetricIdentifier(
-        run_id=run_id,
-        data_asset_name=None,
-        expectation_suite_identifier="asset.warning",
-        metric_name="expect_column_values_to_match_regex.result.unexpected_percent",
-        metric_kwargs_id="column=mycol"
-    )
-    metric_value = 12.3456789
-    assert not param_store.has_key(metric_identifier)
-    param_store.set(metric_identifier, metric_value)
-    assert param_store.has_key(metric_identifier)
-    assert param_store.get(metric_identifier) == metric_value
-    param_store.remove_key(metric_identifier)
-    assert not param_store.has_key(metric_identifier)
