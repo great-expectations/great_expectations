@@ -19,9 +19,13 @@ except ImportError:
     import mock
 
 
-@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @freeze_time("09/26/2019 13:42:41")
-def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_cli_init_on_new_project(mock_emit, mock_webbrowser, caplog, tmp_path_factory, monkeypatch):
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)  # Undo the project-wide test default
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     os.makedirs(os.path.join(project_dir, "data"))
     data_path = os.path.join(project_dir, "data", "Titanic.csv")
@@ -151,6 +155,12 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
                             foobarbazguid.json
 """
     )
+
+    assert mock_emit.call_count == 7
+    assert mock_emit.call_args_list[1] ==\
+        mock.call(
+            {"event_payload": {}, "event": "cli.init.create", "success": True}
+        )
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 

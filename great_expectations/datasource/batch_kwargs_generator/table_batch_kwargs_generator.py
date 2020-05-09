@@ -120,7 +120,10 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             split_data_asset_name = data_asset_name.split(".")
             if len(split_data_asset_name) == 2:
                 schema_name = split_data_asset_name[0]
-                table_name = split_data_asset_name[1]
+                if self.engine.dialect.name.lower() == "bigquery":
+                    table_name = data_asset_name
+                else:
+                    table_name = split_data_asset_name[1]
             elif len(split_data_asset_name) == 1:
                 schema_name = self.inspector.default_schema_name
                 table_name = split_data_asset_name[0]
@@ -170,13 +173,21 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 if schema_name in known_information_schemas:
                     continue
 
-                tables.extend(
-                    [(table_name, "table") if self.inspector.default_schema_name == schema_name else
-                     (schema_name + "." + table_name, "table")
-                     for table_name in self.inspector.get_table_names(schema=schema_name)
-                     if table_name not in known_system_tables
-                     ]
-                )
+                if self.engine.dialect.name.lower() == "bigquery":
+                    tables.extend(
+                        [(table_name, "table")
+                         for table_name in self.inspector.get_table_names(schema=schema_name)
+                         if table_name not in known_system_tables
+                         ]
+                    )
+                else:
+                    tables.extend(
+                        [(table_name, "table") if self.inspector.default_schema_name == schema_name else
+                         (schema_name + "." + table_name, "table")
+                         for table_name in self.inspector.get_table_names(schema=schema_name)
+                         if table_name not in known_system_tables
+                         ]
+                    )
                 try:
                     tables.extend(
                         [(table_name, "view") if self.inspector.default_schema_name == schema_name else

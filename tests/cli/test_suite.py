@@ -430,21 +430,22 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
         catch_exceptions=False,
     )
     stdout = result.stdout
-
     assert result.exit_code == 0
     assert (
         """Select a datasource
-    1. random
-    2. titanic"""
+    1. mydatasource
+    2. random
+    3. titanic"""
         in stdout
     )
     assert (
         """Which data would you like to use?
-    1. f1 (file)
-    2. f2 (file)"""
+    1. random (directory)
+    2. titanic (directory)"""
         in stdout
     )
-    assert "Name the new expectation suite [f1.warning]" in stdout
+    
+    assert "Name the new expectation suite [random.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
@@ -456,7 +457,7 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
 
     obs_urls = context.get_docs_sites_urls()
 
-    assert len(obs_urls) == 1
+    assert len(obs_urls) == 2
     assert (
         "great_expectations/uncommitted/data_docs/local_site/index.html"
         in obs_urls[0]["site_url"]
@@ -470,7 +471,7 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
     assert os.path.isfile(expected_suite_path)
 
-    assert mock_webbrowser.call_count == 1
+    assert mock_webbrowser.call_count == 2
     assert mock_subprocess.call_count == 0
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -519,7 +520,7 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
 
     obs_urls = context.get_docs_sites_urls()
 
-    assert len(obs_urls) == 1
+    assert len(obs_urls) == 2 
     assert (
         "great_expectations/uncommitted/data_docs/local_site/index.html"
         in obs_urls[0]["site_url"]
@@ -533,7 +534,7 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
     assert os.path.isfile(expected_suite_path)
 
-    assert mock_webbrowser.call_count == 1
+    assert mock_webbrowser.call_count == 2
     assert mock_subprocess.call_count == 0
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -715,7 +716,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert mock_webbrowser.call_count == 1
+    assert mock_webbrowser.call_count == 2
     assert mock_subprocess.call_count == 0
     mock_webbrowser.reset_mock()
     mock_subprocess.reset_mock()
@@ -787,7 +788,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
-    assert mock_webbrowser.call_count == 1
+    assert mock_webbrowser.call_count == 2
     assert mock_subprocess.call_count == 0
     mock_subprocess.reset_mock()
     mock_webbrowser.reset_mock()

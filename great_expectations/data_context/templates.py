@@ -19,19 +19,24 @@ config_version: 1
 datasources: {}
 """
 
-CONFIG_VARIABLES_INTRO = """# This config file supports variable substitution which enables: 1) keeping
+CONFIG_VARIABLES_INTRO = """
+# This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes
 # such as staging vs prod.
 #
 # When GE encounters substitution syntax (like `my_key: ${my_value}` or 
-# `my_key: $my_value`) in the config file, it will attempt to replace the value
-# of `my_key` with the value from an environment variable `my_value` or a
-# corresponding key read from the file specified using
-# `config_variables_file_path`. Environment variables take precedence.
+# `my_key: $my_value`) in the great_expectations.yml file, it will attempt
+# to replace the value of `my_key` with the value from an environment
+# variable `my_value` or a corresponding key read from this config file,
+# which is defined through the `config_variables_file_path`.
+# Environment variables take precedence over variables defined here.
 #
-# If the substitution value comes from the config variables file, it can be a
-# simple (non-nested) value or a nested value such as a dictionary. If it comes
-# from an environment variable, it must be a simple value. Read more at:
+# Substitution values defined here can be a simple (non-nested) value,
+# or a nested value such as a dictionary.
+#
+# NOTE: Environment variables are currently *only* supported in
+# great_expectations.yml, but not in this config file!
+#
 # https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets
 
 """
