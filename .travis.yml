@@ -103,7 +103,7 @@ jobs:
       provider: pypi
       edge: true
       on:
-        branch: master
+        branch: master OR v0.11.x
       distributions: sdist bdist_wheel
       skip_existing: true
       username: __token__
