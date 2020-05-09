@@ -62,7 +62,7 @@ The affected classes that are relevant to existing projects are ``ValidationResu
 ``ValidationMetricIdentifier``, as well as any configured stores that rely on these classes for keys, namely
 stores of type ``ValidationsStore`` (or subclasses) and ``EvaluationParameterStore`` (or other subclasses of
 ``MetricStore``). In addition, because Expectation Suite Validation Result json objects have a ``run_id`` key,
-exiting validation result json files must be updated with a new typed ``run_id``.
+existing validation result json files must be updated with a new typed ``run_id``.
 
 Migrating Your 0.10.x Project
 ==============================
