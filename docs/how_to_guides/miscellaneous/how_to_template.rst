@@ -1,11 +1,11 @@
-.. _how_to_guides__salck_validationaction
-
 .. attention:: This doc is a template. Please do not attempt to follow these instructions.
+
+.. _how_to_guides__miscellaneous__how_to_template
 
 TEMPLATE: How to {do something}
 ===============================
 
-This guide will show you how to {do something.} {That something is important or useful, because of some reason.}
+This guide will help you {do something.} {That something is important or useful, because of some reason.}
 
 Steps
 -----
