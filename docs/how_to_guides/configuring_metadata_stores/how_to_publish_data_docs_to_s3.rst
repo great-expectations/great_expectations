@@ -1,9 +1,46 @@
 .. _publishing_data_docs_to_s3:
 
-
 ##############################
 How to publish Data Docs to S3
 ##############################
+
+.. raw:: html
+
+  <div class="custom-sidebar" style="float:right; border: 2px solid #ddd; width: 240px; padding: 12px; margin:10px; line-height: 1.5; font-weight: 700; font-size: 10pt;">
+
+    This guide is <br/>
+    <i class="fas fa-circle text-warning"></i> <a href="asdfasdf.com">Beta : Ready for early adopters</a>
+    <br/>
+    <br/>
+
+    Find more discussion <a href="https://discuss.greatexpectations.io/t/ge-with-databricks-delta/82/3">here</a>.
+    <br/>
+    </br>
+
+    Thanks to contributors
+    <ul>
+      <li><a href="google.com">@joe_gargery</a>
+      <li><a href="google.com">@jaggers</a>
+      <li><a href="google.com">@esthav2002</a>
+    </ul>
+  </div>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+  <style>
+      .text-danger {
+          color: #dc3545;
+      }
+      .text-warning {
+          color: #ffc107;
+      }
+      .text-success {
+          color: #28a745;
+      }
+      .legend-table td{
+          border: 1px solid #ddd;
+          padding: 5px;
+      }
+  </style>
 
 In this tutorial we will cover publishing a data docs site directly to S3. Publishing a site this way makes
 reviewing and acting on validation results easy in a team, and provides a central location to review the expectations
@@ -102,8 +139,11 @@ index.html file or a custom error file:
     > aws s3 website s3://data-docs.my_org/ --index-document index.html
 
 For more information on static site hosting in AWS, see the following:
+
  - `AWS Website Hosting <https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteHosting.html>`_
  - `AWS Static Site Access Permissions <https://docs.aws.amazon.com/en_pv/AmazonS3/latest/dev/WebsiteAccessPermissionsReqd.html>`_
  - `AWS Website configuration <https://docs.aws.amazon.com/AmazonS3/latest/dev/HowDoIWebsiteConfiguration.html>`_
 
+To discuss with the Great Expectations community, please visit this topic in our community discussion forum:
 
+ - `https://discuss.greatexpectations.io/t/ge-with-databricks-delta/82/3 <https://discuss.greatexpectations.io/t/ge-with-databricks-delta/82/3>`_
