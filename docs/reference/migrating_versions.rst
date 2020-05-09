@@ -68,11 +68,14 @@ Migrating Your 0.10.x Project
 ==============================
 
 Before performing any of the following migration steps, please make sure you have appropriate backups of your project.
-When Great Expectations 0.11.0 is released, there will be a CLI tool to help automate all or most of this process. This CLI
-tool will make use of a new class called UpgradeHelperV11. In the meantime, you may use or reference the draft implementation of
-this class when developing your own migration scripts - it is located at ``great_expectations.cli.upgrade_helpers.upgrade_helper_v11``.
+When Great Expectations 0.11.0 is released, there will be a CLI tool to help automate all or most of this process (affected
+stores with database backends will still have to be migrated manually). The CLI tool will make use of a new class called
+UpgradeHelperV11. In the meantime, you may use or reference the draft implementation of this class when developing your
+own migration scripts - it is located at ``great_expectations.cli.upgrade_helpers.upgrade_helper_v11``.
 
-Code That Uses Great Expectations
+.. note:: The migration steps are written in the order they should be completed.
+
+0. Code That Uses Great Expectations
 -------------------------------------
 
 If you are using any Great Expectations methods that accept a ``run_id`` argument, you should update your code to pass in
@@ -81,7 +84,7 @@ the new ``RunIdentifier`` type (or a dictionary with ``run_name`` and ``run_time
 a ``RunIdentifier`` object, acting as the ``run_name``. If the ``run_id`` string can also be parsed as a datetime, it
 will also be used for the ``run_time`` attribute, otherwise, the current UTC time is used.
 
-Expectation Suite Validation Result JSONs
+1. Expectation Suite Validation Result JSONs
 --------------------------------------------
 
 Each existing Expectation Suite Validation Result JSON in your project should be updated with a typed ``run_id``. The ``run_id``
@@ -89,7 +92,10 @@ key is found under the top-level ``meta`` key. You can use the current ``run_id`
 (or select a different one). If the current ``run_id`` is already a datetime string, you can also use it for the ``run_time``
 as well, otherwise, we suggest using the last modified datetime of the validation result.
 
-.. note:: Subsequent migration steps will make use of this new ``run_time``.
+.. note:: Subsequent migration steps will make use of this new ``run_time`` when generating new paths/keys for validation
+  result jsons and their Data Docs html pages. Please ensure the ``run_time`` in these paths/keys match the ``run_time``
+  in the corresponding validation result. Similarly, if you decide to use a different value for ``run_name`` instead of
+  reusing an existing ``run_id`` string, make sure this is reflected in the new paths/keys.
 
 For example, an existing validation result json with ``run_id="my_run"`` should be updated to look like the following::
 
@@ -106,7 +112,7 @@ For example, an existing validation result json with ``run_id="my_run"`` should 
   ...
   }
 
-Stores and their Backends
+2. Stores and their Backends
 ------------------------------
 
 Stores rely on special identifier classes to serve as keys when getting or setting values. When the signature of an
@@ -142,9 +148,9 @@ validation result, you might move the file like this::
   os.makedirs(v11_filepath, exist_ok=True)  # create missing directories from v11 filepath
   shutil.move(v10_filepath, v11_filepath)  # move validation result json file
 
-The following sections detail the changes you must make to existing store backends, in the order they should be completed.
+The following sections detail the changes you must make to existing store backends.
 
-**Validations Store Backends**
+**2a. Validations Store Backends**
 
 For validations stores with backends of type ``TupleFilesystemStoreBackend``, ``TupleS3StoreBackend``, or ``TupleGCSStoreBackend``,
 rename paths (or object keys) of all existing Expectation Suite Validation Result json files:
@@ -163,7 +169,7 @@ For validations stores with backends of type ``DatabaseStoreBackend``, perform t
 * add string column with name ``run_time``; fill with appropriate dateutil parsable values
 * delete ``run_id`` column
 
-**Evaluation Parameter Store Backends**
+**2b. Evaluation Parameter Store Backends**
 
 If you have any configured evaluation parameter stores that use a ``DatabaseStoreBackend`` backend, you must perform the
 following migration for each database backend:
@@ -173,7 +179,7 @@ following migration for each database backend:
 * add string column with name ``run_time``; fill with appropriate dateutil parsable values
 * delete ``run_id`` column
 
-**Data Docs Validations Store Backends**
+**2c. Data Docs Validations Store Backends**
 
 .. note:: If you are okay with rebuilding your Data Docs sites, you can skip the migration steps in this section. Instead,
   you should should run the following CLI command, but **only after** you have completed the above migration steps:
