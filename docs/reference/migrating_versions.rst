@@ -60,14 +60,19 @@ objects now have a ``data_asset_name`` attribute.
 
 The affected classes that are relevant to existing projects are ``ValidationResultIdentifier`` and
 ``ValidationMetricIdentifier``, as well as any configured stores that rely on these classes for keys, namely
-stores of type ``ValidationsStore`` (or subclasses) or ``EvaluationParameterStore`` (or other subclasses of
+stores of type ``ValidationsStore`` (or subclasses) and ``EvaluationParameterStore`` (or other subclasses of
 ``MetricStore``). In addition, because Expectation Suite Validation Result json objects have a ``run_id`` key,
 exiting validation result json files must be updated with a new typed ``run_id``.
 
 Migrating Your 0.10.x Project
 ==============================
 
-*Code That Uses Great Expectations*
+Before performing any of the following migration steps, please make sure you have appropriate backups of your project.
+When Great Expectations 0.11.0 is released, there will be a CLI tool to help automate all or most of this process. This CLI
+tool will make use of a new class called UpgradeHelperV11. In the meantime, you may use or reference the draft implementation of
+this class when developing your own migration scripts - it is located at ``great_expectations.cli.upgrade_helpers.upgrade_helper_v11``.
+
+Code That Uses Great Expectations
 -------------------------------------
 
 If you are using any Great Expectations methods that accept a ``run_id`` argument, you should update your code to pass in
@@ -76,7 +81,32 @@ the new ``RunIdentifier`` type (or a dictionary with ``run_name`` and ``run_time
 a ``RunIdentifier`` object, acting as the ``run_name``. If the ``run_id`` string can also be parsed as a datetime, it
 will also be used for the ``run_time`` attribute, otherwise, the current UTC time is used.
 
-*Stores and their Backends*
+Expectation Suite Validation Result JSONs
+--------------------------------------------
+
+Each existing Expectation Suite Validation Result JSON in your project should be updated with a typed ``run_id``. The ``run_id``
+key is found under the top-level ``meta`` key. You can use the current ``run_id`` string as the new ``run_name``
+(or select a different one). If the current ``run_id`` is already a datetime string, you can also use it for the ``run_time``
+as well, otherwise, we suggest using the last modified datetime of the validation result.
+
+.. note:: Subsequent migration steps will make use of this new ``run_time``.
+
+For example, an existing validation result json with ``run_id="my_run"`` should be updated to look like the following::
+
+  {
+  "meta": {
+    "great_expectations.__version__": "0.10.8",
+    "expectation_suite_name": "diabetic_data.warning",
+    "run_id": {
+      "run_name": "my_run",
+      "run_time": "20200507T065044.404158Z"
+    },
+    ...
+  },
+  ...
+  }
+
+Stores and their Backends
 ------------------------------
 
 Stores rely on special identifier classes to serve as keys when getting or setting values. When the signature of an
@@ -112,17 +142,12 @@ validation result, you might move the file like this::
   os.makedirs(v11_filepath, exist_ok=True)  # create missing directories from v11 filepath
   shutil.move(v10_filepath, v11_filepath)  # move validation result json file
 
-.. note:: v0.11.x validation result paths are essentially nested one level deeper, in a new ``run_time`` directory.
-  When generating v0.11.x paths, you will have to generate this ``run_time`` - we suggest using the last modified datetime
-  of the validation result json file.
+The following sections detail the changes you must make to existing store backends, in the order they should be completed.
 
 **Validations Store Backends**
 
-Apply the following changes to the store backends of each Validations Store with existing Expectation Suite Validation
-Results.
-
-For store backends of type ``TupleFilesystemStoreBackend``, ``TupleS3StoreBackend``, or ``TupleGCSStoreBackend``, rename
-paths (or object keys) of all Expectation Suite Validation Result json files:
+For validations stores with backends of type ``TupleFilesystemStoreBackend``, ``TupleS3StoreBackend``, or ``TupleGCSStoreBackend``,
+rename paths (or object keys) of all existing Expectation Suite Validation Result json files:
 
 Before::
 
@@ -132,28 +157,11 @@ After::
 
   great_expectations/uncommitted/validations/my_suite_name/my_run_id/my_run_time/batch_identifier.json
 
-For store backends of type ``DatabaseStoreBackend``, perform the following database migration:
+For validations stores with backends of type ``DatabaseStoreBackend``, perform the following database migration:
 
 * add string column with name ``run_name``; copy values from ``run_id`` column
 * add string column with name ``run_time``; fill with appropriate dateutil parsable values
 * delete ``run_id`` column
-
-**Data Docs Validations Store Backends**
-
-Apply the following changes to the store backends of each Data Docs site with existing Expectation Suite Validation
-Result pages.
-
-For store backends of type ``TupleFilesystemStoreBackend``, ``TupleS3StoreBackend``, or ``TupleGCSStoreBackend``, rename
-paths (or object keys) of all Expectation Suite Validation Result html files:
-
-Before::
-
-  great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/my_run_id/some_batch_identifier.html
-
-After::
-
-  great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/my_run_id/my_run_time/batch_identifier.html
-
 
 **Evaluation Parameter Store Backends**
 
@@ -164,6 +172,23 @@ following migration for each database backend:
 * add string column with name ``run_name``; copy values from ``run_id`` column
 * add string column with name ``run_time``; fill with appropriate dateutil parsable values
 * delete ``run_id`` column
+
+**Data Docs Validations Store Backends**
+
+.. note:: If you are okay with rebuilding your Data Docs sites, you can skip the migration steps in this section. Instead,
+  you should should run the following CLI command, but **only after** you have completed the above migration steps:
+  ``great_expectations docs clean --all && great_expectations docs build``.
+
+For Data Docs sites with store backends of type ``TupleFilesystemStoreBackend``, ``TupleS3StoreBackend``, or ``TupleGCSStoreBackend``, rename
+paths (or object keys) of all existing Expectation Suite Validation Result html files:
+
+Before::
+
+  great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/my_run_id/some_batch_identifier.html
+
+After::
+
+  great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/my_run_id/my_run_time/batch_identifier.html
 
 .. _Upgrading to 0.10.x:
 *************************
