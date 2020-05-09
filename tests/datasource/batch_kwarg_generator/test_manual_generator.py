@@ -28,8 +28,8 @@ def test_manual_generator(basic_pandas_datasource):
     assert generator.get_available_data_asset_names() == {"names": [("asset1", "manual"), ("logs", "manual")]}
 
     # We should be able to get partition ids
-    assert generator.get_available_partition_ids("asset1") == [1, 2]
-    assert generator.get_available_partition_ids("logs") == []
+    assert generator.get_available_partition_ids(data_asset_name="asset1") == [1, 2]
+    assert generator.get_available_partition_ids(data_asset_name="logs") == []
 
     # We should be able to iterate over manually-specified kwargs
     kwargs = generator.yield_batch_kwargs("logs", limit=5)
@@ -38,8 +38,8 @@ def test_manual_generator(basic_pandas_datasource):
     # and *because we used a PandasDatasource was translated into reader_options
     assert kwargs['s3'] == "s3a://my_bucket/my_prefix/data/file.csv.gz"
 
-    kwargs = generator.build_batch_kwargs("asset1", partition_id=2)
-    assert len(kwargs) == 3
+    kwargs = generator.build_batch_kwargs(data_asset_name="asset1", partition_id=2)
+    assert len(kwargs) == 4
     assert kwargs['path'] == '/data/file_2.csv'
     assert kwargs['reader_options'] == {'header': 0}
     assert kwargs['datasource'] == 'basic_pandas_datasource'

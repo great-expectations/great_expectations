@@ -870,30 +870,58 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
     assert result == {
         'content_block_type': 'table',
         'styling': {
-            'body': {'classes': ['table']},
-            'classes': ['ml-2', 'mr-2', 'mt-0', 'mb-0',
-                        'table-responsive',
-                        'hide-succeeded-validations-column-section-target-child']},
-        'table': [[{'content_block_type': 'string_template',
-                    'styling': {'parent': {'classes': ['hide-succeeded-validation-target-child']}},
-                    'string_template': {'template': '$icon', 'params': {'icon': ''}, 'styling': {
-                        'params': {'icon': {'classes': ['fas', 'fa-check-circle', 'text-success'],
-                                            'tag': 'i'}}}}}, {'content_block_type': 'string_template',
-                                                              'string_template': {
-                                                                  'template': '$column minimum value may have any numerical value.',
-                                                                  'params': {"column": "live",
-                                                                             "min_value": None,
-                                                                             "max_value": None,
-                                                                             "result_format": "SUMMARY",
-                                                                             "parse_strings_as_datetimes": None},
-                                                                  'styling': {'default': {
-                                                                      'classes': ['badge',
-                                                                                  'badge-secondary']},
-                                                                      'params': {'column': {
-                                                                          'classes': ['badge',
-                                                                                      'badge-primary']}}}}},
-                   'True']], 'header_row': ['Status', 'Expectation', 'Observed Value']}
-
+            'body': {
+                'classes': ['table']
+            },
+            'classes': [
+                'ml-2',
+                'mr-2',
+                'mt-0',
+                'mb-0',
+                'table-responsive',
+                'hide-succeeded-validations-column-section-target-child'
+            ]
+        },
+        'table': [
+            [
+                {
+                    'content_block_type': 'string_template',
+                    'styling': {
+                        'parent': {
+                            'classes': ['hide-succeeded-validation-target-child']
+                        }
+                    },
+                    'string_template': {
+                        'template': '$icon',
+                        'params': {'icon': ''},
+                        'styling': {
+                            'params': {
+                                'icon': {
+                                    'classes': ['fas', 'fa-check-circle', 'text-success'],
+                                    'tag': 'i'
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    'content_block_type': 'string_template',
+                    'string_template': {
+                        'template': '$column minimum value may have any numerical value.',
+                        'params': {"column": "live",
+                                   "min_value": None,
+                                   "max_value": None,
+                                   "result_format": "SUMMARY",
+                                   "parse_strings_as_datetimes": None},
+                        'styling': {'default': {
+                            'classes': ['badge',
+                                        'badge-secondary']},
+                            'params': {'column': {
+                                'classes': ['badge',
+                                            'badge-primary']}}}}},
+                'True']], 'header_row': ['Status', 'Expectation', 'Observed Value'],
+        'header_row_options': {'Status': {'sortable': True}},
+        'table_options': {'search': True, 'icon-size': 'sm'}}
 
 # noinspection PyPep8Naming
 def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():

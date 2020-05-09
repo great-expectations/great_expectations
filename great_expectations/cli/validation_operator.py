@@ -1,6 +1,6 @@
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 import click
 
@@ -10,9 +10,8 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message, cli_message_dict
-from great_expectations.core.usage_statistics.usage_statistics import (
-    send_usage_message,
-)
+from great_expectations.core import RunIdentifier
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 json_parse_exception = json.decoder.JSONDecodeError
 
@@ -95,10 +94,10 @@ def validation_operator_list(directory):
     help="""The name of the expectation suite. """,
 )
 @click.option(
-    "--run_id",
+    "--run_name",
     "-r",
     default=None,
-    help="""Run id. If not specified, a timestamp-based run id will be automatically generated. """,
+    help="""Run name. If not specified, a timestamp-based run id will be automatically generated. """,
 )
 @click.option(
     "--directory",
@@ -112,7 +111,7 @@ Please consider using either:
   - `checkpoint new` if you wish to configure a new checkpoint interactively
   - `checkpoint run` if you wish to run a saved checkpoint</yellow>"""
 )
-def validation_operator_run(name, run_id, validation_config_file, suite, directory):
+def validation_operator_run(name, run_name, validation_config_file, suite, directory):
     # Note though the long lines here aren't pythonic, they look best if Click does the line wraps.
     """
     Run a validation operator against some data.
@@ -252,7 +251,13 @@ Let us help you specify the batch of data your want the validation operator to v
                     batch_kwargs_generator,
                     data_asset,
                     batch_kwargs,
-                ) = get_batch_kwargs(context, datasource_name=data_source.name)
+                ) = get_batch_kwargs(
+                    context,
+                    datasource_name=data_source.name,
+                    batch_kwargs_generator_name=None,
+                    data_asset_name=None,
+                    additional_batch_kwargs=None,
+                )
 
             validation_config = {
                 "validation_operator_name": name,
@@ -272,8 +277,10 @@ Let us help you specify the batch of data your want the validation operator to v
                     batch = context.get_batch(entry["batch_kwargs"], expectation_suite_name)
                     batches_to_validate.append(batch)
 
-            if run_id is None:
-                run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+            if run_name is None:
+                run_name = datetime.now(timezone.utc).isoformat()
+
+            run_id = RunIdentifier(run_name=run_name)
 
             if suite is None:
                 results = context.run_validation_operator(

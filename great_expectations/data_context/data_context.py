@@ -13,6 +13,7 @@ import warnings
 import webbrowser
 from typing import Union, List, Dict, Optional
 
+from dateutil.parser import parse, ParserError
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
 
@@ -20,7 +21,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import (
     ExpectationSuite,
     get_metric_kwargs_id,
-)
+    RunIdentifier)
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -62,6 +63,8 @@ from great_expectations.profile.basic_dataset_profiler import (
     BasicDatasetProfiler,
 )
 from great_expectations.util import verify_dynamic_loading_support
+
+from urllib.parse import urlparse
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -368,7 +371,7 @@ class BaseDataContext(object):
         return resource_store
 
     def get_docs_sites_urls(
-        self, resource_identifier=None, site_name: Optional[str] = None
+        self, resource_identifier=None, site_name: Optional[str] = None, only_if_exists=True
     ) -> List[Dict[str, str]]:
         """
         Get URLs for a resource for all data docs sites.
@@ -399,13 +402,13 @@ class BaseDataContext(object):
                 raise ge_exceptions.DataContextError(f"Could not find site named {site_name}. Please check your configurations")
             site = sites[site_name]
             site_builder = self._load_site_builder_from_site_config(site)
-            url = site_builder.get_resource_url(resource_identifier=resource_identifier)
+            url = site_builder.get_resource_url(resource_identifier=resource_identifier, only_if_exists=only_if_exists)
             return [{"site_name": site_name, "site_url": url}]
 
         site_urls = []
         for _site_name, site_config in sites.items():
             site_builder = self._load_site_builder_from_site_config(site_config)
-            url = site_builder.get_resource_url(resource_identifier=resource_identifier)
+            url = site_builder.get_resource_url(resource_identifier=resource_identifier, only_if_exists=only_if_exists)
             site_urls.append({"site_name": _site_name, "site_url": url})
 
         return site_urls
@@ -430,7 +433,7 @@ class BaseDataContext(object):
 
     @usage_statistics_enabled_method(event_name="data_context.open_data_docs",)
     def open_data_docs(
-        self, resource_identifier: Optional[str] = None, site_name: Optional[str] = None
+        self, resource_identifier: Optional[str] = None, site_name: Optional[str] = None, only_if_exists=True
     ) -> None:
         """
         A stdlib cross-platform way to open a file in a browser.
@@ -444,7 +447,7 @@ class BaseDataContext(object):
                 open all docs found in the project.
         """
         data_docs_urls = self.get_docs_sites_urls(
-            resource_identifier=resource_identifier, site_name=site_name,
+            resource_identifier=resource_identifier, site_name=site_name, only_if_exists=only_if_exists
         )
         urls_to_open = [site["site_url"] for site in data_docs_urls]
 
@@ -732,6 +735,8 @@ class BaseDataContext(object):
             assets_to_validate,
             run_id=None,
             evaluation_parameters=None,
+            run_name=None,
+            run_time=None,
             **kwargs
     ):
         """
@@ -743,7 +748,7 @@ class BaseDataContext(object):
             assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
                 the list can be either batches, or a tuple that will allow the operator to fetch the batch:
                 (batch_kwargs, expectation_suite_name)
-            run_id: The run_id for the validation; if None, a default value will be used
+            run_name: The run_name for the validation; if None, a default value will be used
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:
@@ -760,13 +765,15 @@ class BaseDataContext(object):
         except KeyError:
             raise ge_exceptions.DataContextError(f"No validation operator `{validation_operator_name}` was found in your project. Please verify this in your great_expectations.yml")
 
-        if run_id is None:
-            run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-            logger.info("Setting run_id to: {}".format(run_id))
+        if run_id is None and run_name is None:
+            run_name = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+            logger.info("Setting run_name to: {}".format(run_name))
         if evaluation_parameters is None:
             return validation_operator.run(
                 assets_to_validate=assets_to_validate,
                 run_id=run_id,
+                run_name=run_name,
+                run_time=run_time,
                 **kwargs
             )
         else:
@@ -774,6 +781,8 @@ class BaseDataContext(object):
                 assets_to_validate=assets_to_validate,
                 run_id=run_id,
                 evaluation_parameters=evaluation_parameters,
+                run_name=run_name,
+                run_time=run_time,
                 **kwargs
             )
 
@@ -1049,6 +1058,7 @@ class BaseDataContext(object):
         """
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         run_id = validation_results.meta["run_id"]
+        data_asset_name = validation_results.meta.get("batch_kwargs", {}).get("data_asset_name")
 
         for expectation_suite_dependency, metrics_list in requested_metrics.items():
             if (expectation_suite_dependency != "*") and (expectation_suite_dependency != expectation_suite_name):
@@ -1066,6 +1076,7 @@ class BaseDataContext(object):
                         self.stores[target_store_name].set(
                             ValidationMetricIdentifier(
                                 run_id=run_id,
+                                data_asset_name=data_asset_name,
                                 expectation_suite_identifier=ExpectationSuiteIdentifier(expectation_suite_name),
                                 metric_name=metric_name,
                                 metric_kwargs_id=get_metric_kwargs_id(metric_name, metric_kwargs)
@@ -1308,8 +1319,11 @@ class BaseDataContext(object):
                            profiler=BasicDatasetProfiler,
                            profiler_configuration=None,
                            dry_run=False,
-                           run_id="profiling",
-                           additional_batch_kwargs=None):
+                           run_id=None,
+                           additional_batch_kwargs=None,
+                           run_name=None,
+                           run_time=None
+                           ):
         """Profile the named datasource using the named profiler.
 
         Args:
@@ -1456,7 +1470,9 @@ class BaseDataContext(object):
                             profiler=profiler,
                             profiler_configuration=profiler_configuration,
                             run_id=run_id,
-                            additional_batch_kwargs=additional_batch_kwargs
+                            additional_batch_kwargs=additional_batch_kwargs,
+                            run_name=run_name,
+                            run_time=run_time
                         )["results"][0]
                     )
 
@@ -1496,8 +1512,11 @@ class BaseDataContext(object):
                            expectation_suite_name=None,
                            profiler=BasicDatasetProfiler,
                            profiler_configuration=None,
-                           run_id="profiling",
-                           additional_batch_kwargs=None):
+                           run_id=None,
+                           additional_batch_kwargs=None,
+                           run_name=None,
+                           run_time=None
+                           ):
         """
         Profile a data asset
 
@@ -1507,7 +1526,7 @@ class BaseDataContext(object):
         :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the batch kwargs generator (generator_name arg) will choose a batch
         :param profiler: the profiler class to use
         :param profiler_configuration: Optional profiler configuration dict
-        :param run_id: optional - if set, the validation result created by the profiler will be under the provided run_id
+        :param run_name: optional - if set, the validation result created by the profiler will be under the provided run_name
         :param additional_batch_kwargs:
         :returns
             A dictionary::
@@ -1519,6 +1538,24 @@ class BaseDataContext(object):
 
             When success = False, the error details are under "error" key
         """
+
+        assert not (run_id and run_name) and not (run_id and run_time), \
+            "Please provide either a run_id or run_name and/or run_time."
+        if isinstance(run_id, str) and not run_name:
+            warnings.warn("String run_ids will be deprecated in the future. Please provide a run_id of type "
+                          "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
+                          "and run_time (both optional). Instead of providing a run_id, you may also provide"
+                          "run_name and run_time separately.", DeprecationWarning)
+            try:
+                run_time = parse(run_id)
+            except ParserError:
+                pass
+            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
+        elif isinstance(run_id, dict):
+            run_id = RunIdentifier(**run_id)
+        elif not isinstance(run_id, RunIdentifier):
+            run_name = run_name or "profiling"
+            run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
         logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
 
@@ -1642,7 +1679,7 @@ class DataContext(BaseDataContext):
     existing infrastructure and work environment.
 
     DataContexts use a datasource-based namespace, where each accessible type of data has a three-part
-    normalized *data_asset_name*, consisting of *datasource/generator/generator_asset*.
+    normalized *data_asset_name*, consisting of *datasource/generator/data_asset_name*.
 
     - The datasource actually connects to a source of materialized data and returns Great Expectations DataAssets \
       connected to a compute environment and ready for validation.
@@ -1650,7 +1687,7 @@ class DataContext(BaseDataContext):
     - The BatchKwargGenerator knows how to introspect datasources and produce identifying "batch_kwargs" that define \
       particular slices of data.
 
-    - The generator_asset is a specific name -- often a table name or other name familiar to users -- that \
+    - The data_asset_name is a specific name -- often a table name or other name familiar to users -- that \
       batch kwargs generators can slice into batches.
 
     An expectation suite is a collection of expectations ready to be applied to a batch of data. Since

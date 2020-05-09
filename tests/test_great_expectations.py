@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import re
@@ -6,6 +7,7 @@ from datetime import datetime
 
 import pandas as pd
 import pytest
+from freezegun import freeze_time
 
 import great_expectations as ge
 from great_expectations.core import (
@@ -176,8 +178,8 @@ def test_base_class_expectation():
     assert df.expect_column_values_to_be_between("aaa", min_value=1, max_value=5).success is True
 
 
+@freeze_time("11/05/1955")
 def test_validate():
-
     with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
         my_expectation_suite = expectationSuiteSchema.loads(f.read())
 
@@ -189,32 +191,29 @@ def test_validate():
         )
     my_df.set_default_expectation_argument("result_format", "COMPLETE")
 
-    with mock.patch("datetime.datetime") as mock_datetime:
-        mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
-        results = my_df.validate(catch_exceptions=False)
+    results = my_df.validate(catch_exceptions=False)
 
     with open(file_relative_path(__file__, './test_sets/titanic_expected_data_asset_validate_results.json')) as f:
         expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
     del results.meta["great_expectations.__version__"]
 
-    assert expected_results == results
+    assert results.to_json_dict() == expected_results.to_json_dict()
 
     # Now, change the results and ensure they are no longer equal
     results.results[0] = ExpectationValidationResult()
-    assert expected_results != results
+    assert results.to_json_dict() != expected_results.to_json_dict()
 
     # Finally, confirm that only_return_failures works
     # and does not affect the "statistics" field.
-    with mock.patch("datetime.datetime") as mock_datetime:
-        mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
-        validation_results = my_df.validate(only_return_failures=True)
-        del validation_results.meta["great_expectations.__version__"]
+    validation_results = my_df.validate(only_return_failures=True)
+    del validation_results.meta["great_expectations.__version__"]
 
     expected_results = ExpectationSuiteValidationResult(
         meta={
             "expectation_suite_name": "titanic",
-            "run_id": "19551105T000000.000000Z",
+            "run_id": {"run_name": None, "run_time": "1955-11-05T00:00:00+00:00"},
+            "validation_time": "1955-11-05T00:00:00+00:00",
             "batch_kwargs": {"ge_batch_id": "1234"},
             "batch_markers": {},
             "batch_parameters": {}
@@ -242,7 +241,7 @@ def test_validate():
         success=expected_results.success,  # unaffected
         statistics=expected_results["statistics"]  # unaffected
     )
-    assert expected_results == validation_results
+    assert validation_results.to_json_dict() == expected_results.to_json_dict()
 
 
 @mock.patch('great_expectations.core.ExpectationValidationResult.validate_result_dict', return_value=False)
@@ -263,6 +262,7 @@ def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dic
         my_df.validate(catch_exceptions=False)
 
 
+@freeze_time("11/05/1955")
 @mock.patch('great_expectations.core.ExpectationValidationResult.validate_result_dict', return_value=False)
 def test_validate_with_invalid_result(validate_result_dict):
     with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
@@ -276,9 +276,7 @@ def test_validate_with_invalid_result(validate_result_dict):
         )
     my_df.set_default_expectation_argument("result_format", "COMPLETE")
 
-    with mock.patch("datetime.datetime") as mock_datetime:
-        mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
-        results = my_df.validate()  # catch_exceptions=True is default
+    results = my_df.validate()  # catch_exceptions=True is default
 
     with open(
             file_relative_path(
@@ -292,7 +290,7 @@ def test_validate_with_invalid_result(validate_result_dict):
     for result in results.results:
         result.exception_info.pop("exception_traceback")
 
-    assert expected_results == results
+    assert results.to_json_dict() == expected_results.to_json_dict()
 
 
 def test_validate_catch_non_existent_expectation():

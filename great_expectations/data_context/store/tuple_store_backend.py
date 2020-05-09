@@ -1,4 +1,3 @@
-import logging
 import os
 import random
 import re
@@ -15,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
     """
-    If filepath_template is provided, the key to this StoreBackend abstract class must be a tuple with 
+    If filepath_template is provided, the key to this StoreBackend abstract class must be a tuple with
     fixed length equal to the number of unique components matching the regex r"{\d+}"
 
     For example, in the following template path: expectations/{0}/{1}/{2}/prefix-{2}.json, keys must have
@@ -231,6 +230,25 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 outfile.write(value)
         return filepath
 
+    def _move(self, source_key, dest_key, **kwargs):
+        source_path = os.path.join(
+            self.full_base_directory,
+            self._convert_key_to_filepath(source_key)
+        )
+
+        dest_path = os.path.join(
+            self.full_base_directory,
+            self._convert_key_to_filepath(dest_key)
+        )
+        dest_dir, dest_filename = os.path.split(dest_path)
+
+        if os.path.exists(source_path):
+            os.makedirs(dest_dir, exist_ok=True)
+            shutil.move(source_path, dest_path)
+            return dest_key
+
+        return False
+
     def list_keys(self, prefix=()):
         key_list = []
         for root, dirs, files in os.walk(os.path.join(self.full_base_directory, *prefix)):
@@ -257,7 +275,21 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                     key_list.append(key)
 
         return key_list
+   
     
+    def rrmdir(self, mroot, curpath):
+        """
+        recursively removes empty dirs between curpath and mroot inclusive
+        """
+        try:
+            while not os.listdir(curpath) and os.path.exists(curpath) and mroot!=curpath:
+                f2=os.path.dirname(curpath)
+                os.rmdir(curpath)
+                curpath=f2
+        except (NotADirectoryError, FileNotFoundError):
+            pass
+
+
     def remove_key(self, key):
         if not isinstance(key, tuple):
             key = key.to_tuple()
@@ -266,10 +298,12 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             self.full_base_directory,
             self._convert_key_to_filepath(key)
         )
-        path, filename = os.path.split(filepath)
+
         if os.path.exists(filepath):
-            if shutil.rmtree(self.full_base_directory):
-                return True
+            d_path = os.path.dirname(filepath)
+            os.remove(filepath)
+            self.rrmdir(self.full_base_directory, d_path)
+            return True
         return False
 
     def get_url_for_key(self, key, protocol=None):
@@ -342,6 +376,24 @@ class TupleS3StoreBackend(TupleStoreBackend):
         else:
             result_s3.put(Body=value, ContentType=content_type)
         return s3_object_key
+
+    def _move(self, source_key, dest_key, **kwargs):
+        import boto3
+        s3 = boto3.resource('s3')
+
+        source_filepath = self._convert_key_to_filepath(source_key)
+        if not source_filepath.startswith(self.prefix):
+            source_filepath = os.path.join(self.prefix, source_filepath)
+        dest_filepath = self._convert_key_to_filepath(dest_key)
+        if not dest_filepath.startswith(self.prefix):
+            dest_filepath = os.path.join(self.prefix, dest_filepath)
+
+        s3.Bucket(self.bucket).copy(
+            {"Bucket": self.bucket, "Key": source_filepath},
+            dest_filepath
+        )
+
+        s3.Object(self.bucket, source_filepath).delete()
 
     def list_keys(self):
         key_list = []
@@ -446,6 +498,9 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         self.prefix = prefix
         self.project = project
 
+    def _move(self, source_key, dest_key, **kwargs):
+        pass
+
     def _get(self, key):
         gcs_object_key = os.path.join(
             self.prefix,
@@ -468,11 +523,29 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
+
         if isinstance(value, str):
-            blob.upload_from_string(value.encode(content_encoding), content_type=content_type)
+            blob.content_encoding = content_encoding
+            blob.upload_from_string(value.encode(content_encoding),
+                                    content_type=content_type)
         else:
             blob.upload_from_string(value, content_type=content_type)
         return gcs_object_key
+
+    def _move(self, source_key, dest_key, **kwargs):
+        from google.cloud import storage
+        gcs = storage.Client(project=self.project)
+        bucket = gcs.get_bucket(self.bucket)
+
+        source_filepath = self._convert_key_to_filepath(source_key)
+        if not source_filepath.startswith(self.prefix):
+            source_filepath = os.path.join(self.prefix, source_filepath)
+        dest_filepath = self._convert_key_to_filepath(dest_key)
+        if not dest_filepath.startswith(self.prefix):
+            dest_filepath = os.path.join(self.prefix, dest_filepath)
+
+        blob = bucket.blob(source_filepath)
+        new_blob = bucket.rename_blob(blob, dest_filepath)
 
     def list_keys(self):
         key_list = []
@@ -498,6 +571,8 @@ class TupleGCSStoreBackend(TupleStoreBackend):
 
     def get_url_for_key(self, key, protocol=None):
         path = self._convert_key_to_filepath(key)
+        if not path.startswith(self.prefix):
+            path = os.path.join(self.prefix, path)
         return "https://storage.googleapis.com/" + self.bucket + "/" + path
 
     def remove_key(self, key):

@@ -47,10 +47,10 @@ GE core team members use this checklist to ship releases.
 * Update the ``changelog.rst``: move all things under ``develop`` under a new heading with the new release number.
 
   * Verify that any changes to requirements are specifically identified in the changelog
-  
+
 * Submit this as a PR against ``develop``
 * After successful checks, get it approved and merged.
-* Update your local branches and switch to master: ``git fetch --all; git checkout master; git pull``. 
+* Update your local branches and switch to master: ``git fetch --all; git checkout master; git pull``.
 * Merge the now-updated ``develop`` branch into ``master`` and trigger the release: ``git merge origin/develop; git push``
 * Wait for all the builds to complete (including the deploy job).
 * Check `PyPI <https://pypi.org/project/great-expectations/#history>`__ for the new release
@@ -66,3 +66,7 @@ GE core team members use this checklist to ship releases.
 * Socialize the release on GE slack by copying the changelog with an optional nice personal message (thank people if you can)
 * Review the automatically-generated PR for conda-forge (https://github.com/conda-forge/great-expectations-feedstock/pulls), updating requirements as necessary and verifying the build status.
 
+Beta Release Notes
+
+* To ship a beta release, follow the above checklist, but use the branch name ``v0.11.x`` as the equivalent of ``develop``
+* Ship the release using beta version numbers when updating the ``.travis.yml`` and when creating the annotated tag (e.g. `0.11.0b0`)

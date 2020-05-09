@@ -1,6 +1,8 @@
+import datetime
 import json
 
 import pytest
+from freezegun import freeze_time
 from moto import mock_s3
 import boto3
 
@@ -16,6 +18,7 @@ from great_expectations.util import (
 )
 
 
+@freeze_time("09/26/2019 13:42:41")
 @mock_s3
 def test_ValidationsStore_with_TupleS3StoreBackend():
     bucket = "test_validation_store_bucket"
@@ -63,8 +66,10 @@ def test_ValidationsStore_with_TupleS3StoreBackend():
         [s3_object_info['Key'] for s3_object_info in
          boto3.client('s3').list_objects(Bucket=bucket, Prefix=prefix)['Contents']
          ]
-    ) == {'test/prefix/asset/quarantine/20191007T151224.1234Z_prod_100/batch_id.json',
-          'test/prefix/asset/quarantine/20191007T151224.1234Z_prod_200/batch_id.json'}
+    ) == {
+        'test/prefix/asset/quarantine/20191007T151224.1234Z_prod_100/2019-09-26T13:42:41+00:00/batch_id.json',
+        'test/prefix/asset/quarantine/20191007T151224.1234Z_prod_200/2019-09-26T13:42:41+00:00/batch_id.json'
+    }
 
     print(my_store.list_keys())
     assert set(my_store.list_keys()) == {
@@ -73,6 +78,7 @@ def test_ValidationsStore_with_TupleS3StoreBackend():
     }
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_ValidationsStore_with_InMemoryStoreBackend():
     my_store = ValidationsStore(
         store_backend={
@@ -84,11 +90,11 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
 
-    ns_1 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-100"))
+    ns_1 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", datetime.datetime.now(), "prod-100"))
     my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
     assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
 
-    ns_2 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-200"))
+    ns_2 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", datetime.datetime.now(), "prod-200"))
     my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
     assert my_store.get(ns_2) == ExpectationSuiteValidationResult(success=False, statistics={}, results=[])
 
@@ -98,6 +104,7 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
     }
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
     path = str(tmp_path_factory.mktemp('test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir'))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
@@ -116,11 +123,16 @@ def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
 
-    ns_1 = ValidationResultIdentifier(expectation_suite_identifier=ExpectationSuiteIdentifier("asset.quarantine"), run_id="prod-100", batch_identifier="batch_id")
+    ns_1 = ValidationResultIdentifier(
+        expectation_suite_identifier=ExpectationSuiteIdentifier("asset.quarantine"),
+        run_id="prod-100",
+        batch_identifier="batch_id"
+    )
     my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
     assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
 
-    ns_2 = ValidationResultIdentifier.from_tuple(("asset", "quarantine", "prod-20", "batch_id"))
+    ns_2 = ValidationResultIdentifier.from_tuple(
+        ("asset", "quarantine", "prod-20", datetime.datetime.now(), "batch_id"))
     my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
     assert my_store.get(ns_2) == ExpectationSuiteValidationResult(success=False, statistics={}, results=[])
 
@@ -137,9 +149,11 @@ test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir0/
         asset/
             quarantine/
                 prod-100/
-                    batch_id.json
+                    2019-09-26T13:42:41+00:00/
+                        batch_id.json
                 prod-20/
-                    batch_id.json
+                    2019-09-26T13:42:41/
+                        batch_id.json
 """
 
 

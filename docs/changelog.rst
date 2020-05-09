@@ -6,8 +6,18 @@ Changelog
 
 develop
 -----------------
-
-* updated checkpoint module to not require sqlalchemy
+* (BREAKING) ``run_id`` is now typed using the new ``RunIdentifier`` class, which consists of a ``run_time`` and
+  ``run_name``. Existing projects that have Expectation Suite Validation Results must be migrated.
+  See :ref:`Upgrading to 0.11.x-beta` for instructions.
+* (BREAKING) ``ValidationMetric`` and ``ValidationMetricIdentifier`` objects now have a ``data_asset_name`` attribute.
+  Existing projects with evaluation parameter stores that have database backends must be migrated.
+  See :ref:`Upgrading to 0.11.x-beta` for instructions.
+* Data Docs: redesigned index page with paginated/sortable/searchable/filterable tables
+* Data Docs: searchable tables on Expectation Suite Validation Result pages
+* ``data_asset_name`` is now added to batch_kwargs by batch_kwargs_generators (if available) and surfaced in Data Docs
+* Renamed all ``generator_asset`` parameters to ``data_asset_name``
+* Updated the dateutil dependency
+* Added QueryStore
 
 0.10.9
 -----------------
@@ -18,6 +28,16 @@ develop
 * Instantiate datasources and validate config only when datasource is used (#1374) @mzjp2
 * suite delete changed from an optional argument to a required one
 * bugfix for uploading objects to GCP #1393
+* added a new usage stats event for the case when a data context is created through CLI
+* tuplefilestore backend, expectationstore backend remove_key bugs fixed
+* no url is returned on empty data_docs site
+* return url for resource only if key exists
+* Test added for the period special char case
+* updated checkpoint module to not require sqlalchemy
+* added BigQuery as an option in the list of databases in the CLI
+* added special cases for handling BigQuery - table names are already qualified with schema name, so we must make sure that we do not prepend the schema name twice
+* changed the prompt for the name of the temp table in BigQuery in the CLI to hint that a fully qualified name (project.dataset.table) should be provided
+* Bugfix for: expect_column_quantile_values_to_be_between expectation throws an "unexpected keyword WITHIN" on BigQuery (#1391)
 
 0.10.8
 -----------------
@@ -26,7 +46,7 @@ develop
 
 0.10.7
 -----------------
-*crud delete suite bug fix
+* crud delete suite bug fix
 
 0.10.6
 -----------------

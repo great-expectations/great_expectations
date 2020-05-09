@@ -63,7 +63,7 @@ def test_suite_demo_on_context_with_no_datasources(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_enter_existing_suite_name_as_arg(
-    mock_webbrowser, mock_subprocess, caplog, data_context
+    mock_webbrowser, mock_subprocess, caplog, data_context_parameterized_expectation_suite
 ):
     """
     We call the "suite demo" command with the name of an existing expectation
@@ -75,7 +75,7 @@ def test_suite_demo_enter_existing_suite_name_as_arg(
     - NOT open jupyter
     """
 
-    not_so_empty_data_context = data_context
+    not_so_empty_data_context = data_context_parameterized_expectation_suite
     project_root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(project_root_dir, "uncommitted"))
 
@@ -117,7 +117,7 @@ def test_suite_demo_enter_existing_suite_name_as_arg(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
-    mock_webbrowser, mock_subprocess, caplog, data_context, filesystem_csv_2
+    mock_webbrowser, mock_subprocess, caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
 ):
     """
     We call the "suite demo" command without the suite name argument
@@ -132,7 +132,7 @@ def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
     - NOT open jupyter
     - open DataDocs to the new example suite page
     """
-    not_so_empty_data_context = data_context
+    not_so_empty_data_context = data_context_parameterized_expectation_suite
     root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(root_dir, "uncommitted"))
 
@@ -187,7 +187,7 @@ def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_creates_empty_suite(
-    mock_webbroser, mock_subprocess, caplog, data_context, filesystem_csv_2
+    mock_webbroser, mock_subprocess, caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
 ):
     """
     Running "suite new" should:
@@ -195,7 +195,7 @@ def test_suite_new_creates_empty_suite(
     - open jupyter
     - NOT open data docs
     """
-    project_root_dir = data_context.root_directory
+    project_root_dir = data_context_parameterized_expectation_suite.root_directory
     os.mkdir(os.path.join(project_root_dir, "uncommitted"))
     root_dir = project_root_dir
     os.chdir(root_dir)
@@ -239,6 +239,7 @@ def test_suite_new_creates_empty_suite(
     citations[0].pop("citation_date")
     assert citations[0] == {
         "batch_kwargs": {
+            "data_asset_name": "f1",
             "datasource": "mydatasource",
             "path": csv,
             "reader_method": "read_csv",
@@ -262,7 +263,7 @@ def test_suite_new_creates_empty_suite(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_empty_with_no_jupyter(
-    mock_webbroser, mock_subprocess, caplog, data_context, filesystem_csv_2
+    mock_webbroser, mock_subprocess, caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
 ):
     """
     Running "suite new --no-jupyter" should:
@@ -270,8 +271,8 @@ def test_suite_new_empty_with_no_jupyter(
     - NOT open jupyter
     - NOT open data docs
     """
-    os.mkdir(os.path.join(data_context.root_directory, "uncommitted"))
-    root_dir = data_context.root_directory
+    os.mkdir(os.path.join(data_context_parameterized_expectation_suite.root_directory, "uncommitted"))
+    root_dir = data_context_parameterized_expectation_suite.root_directory
     runner = CliRunner(mix_stderr=False)
     csv = os.path.join(filesystem_csv_2, "f1.csv")
     # TODO this test must be updated to remove the --empty flag in the next major release
@@ -309,6 +310,7 @@ def test_suite_new_empty_with_no_jupyter(
     citations[0].pop("citation_date")
     assert citations[0] == {
         "batch_kwargs": {
+            "data_asset_name": "f1",
             "datasource": "mydatasource",
             "path": csv,
             "reader_method": "read_csv",
@@ -428,21 +430,22 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
         catch_exceptions=False,
     )
     stdout = result.stdout
-
     assert result.exit_code == 0
     assert (
         """Select a datasource
-    1. random
-    2. titanic"""
+    1. mydatasource
+    2. random
+    3. titanic"""
         in stdout
     )
     assert (
         """Which data would you like to use?
-    1. f1 (file)
-    2. f2 (file)"""
+    1. random (directory)
+    2. titanic (directory)"""
         in stdout
     )
-    assert "Name the new expectation suite [f1.warning]" in stdout
+    
+    assert "Name the new expectation suite [random.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
@@ -454,7 +457,7 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
 
     obs_urls = context.get_docs_sites_urls()
 
-    assert len(obs_urls) == 1
+    assert len(obs_urls) == 2
     assert (
         "great_expectations/uncommitted/data_docs/local_site/index.html"
         in obs_urls[0]["site_url"]
@@ -468,7 +471,7 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
     assert os.path.isfile(expected_suite_path)
 
-    assert mock_webbrowser.call_count == 1
+    assert mock_webbrowser.call_count == 2
     assert mock_subprocess.call_count == 0
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -517,7 +520,7 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
 
     obs_urls = context.get_docs_sites_urls()
 
-    assert len(obs_urls) == 1
+    assert len(obs_urls) == 2 
     assert (
         "great_expectations/uncommitted/data_docs/local_site/index.html"
         in obs_urls[0]["site_url"]
@@ -531,7 +534,7 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
     assert os.path.isfile(expected_suite_path)
 
-    assert mock_webbrowser.call_count == 1
+    assert mock_webbrowser.call_count == 2
     assert mock_subprocess.call_count == 0
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -713,7 +716,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert mock_webbrowser.call_count == 1
+    assert mock_webbrowser.call_count == 2
     assert mock_subprocess.call_count == 0
     mock_webbrowser.reset_mock()
     mock_subprocess.reset_mock()
@@ -785,7 +788,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
-    assert mock_webbrowser.call_count == 1
+    assert mock_webbrowser.call_count == 2
     assert mock_subprocess.call_count == 0
     mock_subprocess.reset_mock()
     mock_webbrowser.reset_mock()
@@ -1222,7 +1225,7 @@ def test_suite_delete_with_one_suite(mock_emit, caplog, empty_data_context_stats
     assert result.exit_code == 0
     assert "Deleted the expectation suite named: a.warning" in result.output
 
-    assert not os.path.isdir(suite_dir)
+    # assert not os.path.isdir(suite_dir)
     assert not os.path.isfile(suite_path)
 
     assert mock_emit.call_count == 2

@@ -4,6 +4,8 @@ import boto3
 import pytest
 from botocore.exceptions import ClientError
 from mock import patch
+
+from great_expectations.exceptions import StoreBackendError, StoreError
 from moto import mock_s3
 
 from great_expectations.data_context.store import (
@@ -43,7 +45,7 @@ def test_InMemoryStoreBackend():
     my_key = ("A",)
     with pytest.raises(KeyError):
         my_store.get(my_key)
-    
+
     my_store.set(my_key, "aaa")
     assert my_store.get(my_key) == "aaa"
 
@@ -55,7 +57,7 @@ def test_InMemoryStoreBackend():
     assert my_store.has_key(("C",)) is False
     assert my_store.list_keys() == [("A",), ("B",)]
 
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(StoreError):
         my_store.get_url_for_key(my_key)
 
 
@@ -95,7 +97,7 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
 
     recovered_key = my_store._convert_filepath_to_key("A__a/B-b/C/foo-C-expectations.txt")
     assert recovered_key == tuple_
-    
+
     with pytest.raises(ValueError):
         tuple_ = ("A/a", "B-b", "C")
         converted_string = my_store._convert_key_to_filepath(tuple_)
@@ -114,7 +116,7 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
     # OPPORTUNITY: potentially standardize error instead of allowing each StoreBackend to raise its own error types
     with pytest.raises(FileNotFoundError):
         my_store.get(("AAA",))
-    
+
     my_store.set(("AAA",), "aaa")
     assert my_store.get(("AAA",)) == "aaa"
 
@@ -202,10 +204,13 @@ def test_TupleS3StoreBackend_with_prefix():
     assert my_store.get(("BBB",)) == 'bbb'
 
     assert set(my_store.list_keys()) == {("AAA",), ("BBB",)}
-    assert set(
-        [s3_object_info['Key'] for s3_object_info in
-         boto3.client('s3').list_objects(Bucket=bucket, Prefix=prefix)['Contents']]) == {
-               'this_is_a_test_prefix/my_file_AAA', 'this_is_a_test_prefix/my_file_BBB'}
+    assert set([
+        s3_object_info['Key'] for s3_object_info in
+        boto3.client('s3').list_objects(Bucket=bucket, Prefix=prefix)['Contents']
+        ]) == {
+            'this_is_a_test_prefix/my_file_AAA',
+            'this_is_a_test_prefix/my_file_BBB'
+            }
 
     assert my_store.get_url_for_key(('AAA',)) == 'https://s3.amazonaws.com/%s/%s/my_file_AAA' % (bucket, prefix)
     assert my_store.get_url_for_key(('BBB',)) == 'https://s3.amazonaws.com/%s/%s/my_file_BBB' % (bucket, prefix)
@@ -291,7 +296,7 @@ def test_TupleGCSStoreBackend():
     )
 
     with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
-        
+
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.get_bucket.return_value
         mock_blob = mock_bucket.blob.return_value
@@ -307,9 +312,9 @@ def test_TupleGCSStoreBackend():
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.get_bucket.return_value
         mock_blob = mock_bucket.blob.return_value
-    
+
         my_store_with_no_filepath_template.set(("AAA",), b"aaa", content_encoding=None, content_type="image/png")
-    
+
         mock_gcs_client.assert_called_once_with('dummy-project')
         mock_client.get_bucket.assert_called_once_with("leakybucket")
         mock_bucket.blob.assert_called_once_with("this_is_a_test_prefix/AAA")

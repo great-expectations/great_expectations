@@ -87,52 +87,72 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
     )
     slack_query = vo._build_slack_query(return_obj)
     expected_slack_query = {
-        'blocks': [
-            {'type': 'divider'},
-            {'type': 'section',
-             'text': {
-                 'type': 'mrkdwn',
-                 'text': '*FailureVsWarning Validation Operator Completed.*'}},
-            {'type': 'divider'},
-            {'type': 'section',
-             'text': {
-                 'type': 'mrkdwn',
-                 'text': '*Status*: Failed :x:'
-             }
-             },
-            {'type': 'section',
-             'text': {
-                 'type': 'mrkdwn',
-                 'text': "*Batch Id List:* ['ge_batch_id=82a8de83-e063-11e9-8226-acde48001122', "
-                         "'ge_batch_id=82a8de83-e063-11e9-8133-acde48001122', "
-                         "'ge_batch_id=82a8de83-e063-11e9-a53d-acde48001122']"
-             }
-             },
-            {'type': 'section',
-             'text': {''
-                      'type': 'mrkdwn',
-                      'text': "*Failed Batches:* ['f1.failure-ge_batch_id=82a8de83-e063-11e9-8133-acde48001122']"
-                      }
-             },
-            {'type': 'section',
-             'text': {
-                 'type': 'mrkdwn', 'text': '*Run ID:* test_100'
-             }
-             },
-            {'type': 'section',
-             'text': {
-                 'type': 'mrkdwn',
-                 'text': '*Timestamp:* 09/26/2019 13:42:41'
-             }
-             },
-            {'type': 'divider'},
-            {'type': 'context', 'elements': [
-                {'type': 'mrkdwn',
-                 'text': 'Learn about FailureVsWarning Validation Operators at https://docs.greatexpectations.io/en/latest/reference/validation_operators/warning_and_failure_expectation_suites_validation_operator.html'
-                 }
-            ]
-             }
-        ]}
+        "blocks": [
+            {
+                "type": "divider"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*FailureVsWarning Validation Operator Completed.*"
+                }
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Status*: Failed :x:"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Batch Id List:* ['ge_batch_id=82a8de83-e063-11e9-8226-acde48001122', 'ge_batch_id=82a8de"
+                            "83-e063-11e9-8133-acde48001122', 'ge_batch_id=82a8de83-e063-11e9-a53d-acde48001122']"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Failed Batches:* ['f1.failure-ge_batch_id=82a8de83-e063-11e9-8133-acde48001122']"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Run Name:* test_100"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Run Time:* LOCALEDATE"
+                }
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": "Learn about FailureVsWarning Validation Operators at https://docs.greatexpectations.i"
+                                "o/en/latest/reference/validation_operators/warning_and_failure_expectation_suites_val"
+                                "idation_operator.html"
+                    }
+                ]
+            }
+        ]
+    }
 
     # We're okay with system variation in locales (OS X likes 24 hour, but not Travis)
     slack_query['blocks'][7]['text']['text'] = \

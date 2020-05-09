@@ -7,6 +7,7 @@ import shutil
 from freezegun import freeze_time
 
 from great_expectations import DataContext
+from great_expectations.core import RunIdentifier
 from great_expectations.data_context.store import ExpectationsStore, ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier, \
     ExpectationSuiteIdentifier
@@ -81,6 +82,7 @@ def assert_how_to_buttons(context, index_page_locator_info: str, index_links_dic
                         assert how_to_element not in page
 
 
+@freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
 def test_configuration_driven_site_builder(site_builder_data_context_with_html_store_titanic_random):
     context = site_builder_data_context_with_html_store_titanic_random
@@ -115,7 +117,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     # creating another validation result using the profiler's suite (no need to use a new expectation suite
     # for this test). having two validation results - one with run id "profiling" - allows us to test
-    # the logic of run_id_filter that helps filtering validation results to be included in
+    # the logic of run_name_filter that helps filtering validation results to be included in
     # the profiling and the validation sections.
     batch_kwargs = context.build_batch_kwargs(
         datasource=datasource_name,
@@ -134,7 +136,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         batch_kwargs=batch_kwargs,
         expectation_suite_name=expectation_suite_name,
     )
-    run_id = "test_run_id_12345"
+    run_id = RunIdentifier(run_name="test_run_id_12345")
     context.run_validation_operator(
         assets_to_validate=[batch],
         run_id=run_id,
@@ -143,11 +145,9 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     data_docs_config = context._project_config.data_docs_sites
     local_site_config = data_docs_config['local_site']
-    # local_site_config.pop('module_name')  # This isn't necessary
-    local_site_config.pop('class_name')
 
     validations_set = set(context.stores["validations_store"].list_keys())
-    assert len(validations_set) == 4
+    assert len(validations_set) == 6
     assert ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
             expectation_suite_name=expectation_suite_name
@@ -191,15 +191,15 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     # assert that how-to buttons and related elements are rendered (default behavior)
     assert_how_to_buttons(context, index_page_locator_info, index_links_dict)
-    print(json.dumps(index_page_locator_info, indent=2))
+    #print(json.dumps(index_page_locator_info, indent=2))
     assert index_page_locator_info == "file://" + context.root_directory + '/uncommitted/data_docs/local_site/index.html'
 
-    print(json.dumps(index_links_dict, indent=2))
+    #print(json.dumps(index_links_dict, indent=2))
 
     assert "site_name" in index_links_dict
 
     assert "expectations_links" in index_links_dict
-    assert len(index_links_dict["expectations_links"]) == 3
+    assert len(index_links_dict["expectations_links"]) == 5
 
     assert "validations_links" in index_links_dict
     assert len(index_links_dict["validations_links"]) == 1, \
@@ -208,7 +208,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     """
 
     assert "profiling_links" in index_links_dict
-    assert len(index_links_dict["profiling_links"]) == 3
+    assert len(index_links_dict["profiling_links"]) == 5
 
     # save documentation locally
     os.makedirs("./tests/render/output", exist_ok=True)
@@ -234,12 +234,13 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory,
         "validations",
         expectation_suite_path_component,
-        run_id,
+        run_id.run_name,
+        run_id.run_time.isoformat(),
         batch.batch_id + ".html")
 
     ts_last_mod_0 = os.path.getmtime(validation_result_page_path)
 
-    run_id = "test_run_id_12346"
+    run_id = RunIdentifier(run_name="test_run_id_12346")
     operator_result = context.run_validation_operator(
         assets_to_validate=[batch],
         run_id=run_id,
@@ -271,7 +272,8 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory,
         "validations",
         expectation_suite_path_component,
-        run_id,
+        run_id.run_name,
+        run_id.run_time.isoformat(),
         batch.batch_id + ".html")
 
     html_url = site_builder.get_resource_url(resource_identifier=validation_result_id)
@@ -282,17 +284,28 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
                                         ValidationResultIdentifier].full_base_directory,
                                         "index.html") == html_url
 
-    resource_dir = os.path.dirname(html_url) + "/"
+    team_site_config = data_docs_config['team_site']
+    team_site_builder = SiteBuilder(
+            data_context=context,
+            runtime_environment={
+                "root_directory": context.root_directory
+            },
+            **team_site_config
+        )
+    team_site_builder.clean_site()
+    obs = [url_dict for url_dict in context.get_docs_sites_urls(site_name="team_site") if url_dict.get("site_url")]
+    assert len(obs) == 0
+
     #exercise clean_site
     site_builder.clean_site()
-    assert "file://" + site_builder.site_index_builder.target_store.store_backends[\
-                                        ValidationResultIdentifier].full_base_directory == resource_dir
+    obs = [url_dict for url_dict in context.get_docs_sites_urls() if url_dict.get("site_url")]
+    assert len(obs) == 0
 
     #restore site
     context = site_builder_data_context_with_html_store_titanic_random
     site_builder = SiteBuilder(
-            data_context=context, 
-            runtime_environment={ 
+            data_context=context,
+            runtime_environment={
                 "root_directory": context.root_directory
             },
             **local_site_config
@@ -334,7 +347,7 @@ def test_configuration_driven_site_builder_without_how_to_buttons(site_builder_d
 
     # creating another validation result using the profiler's suite (no need to use a new expectation suite
     # for this test). having two validation results - one with run id "profiling" - allows us to test
-    # the logic of run_id_filter that helps filtering validation results to be included in
+    # the logic of run_name_filter that helps filtering validation results to be included in
     # the profiling and the validation sections.
     batch_kwargs = context.build_batch_kwargs(
         datasource=datasource_name,
@@ -362,7 +375,7 @@ def test_configuration_driven_site_builder_without_how_to_buttons(site_builder_d
 
     data_docs_config = context._project_config.data_docs_sites
     local_site_config = data_docs_config['local_site']
-    local_site_config.pop('class_name')
+
     # set this flag to false in config to hide how-to buttons and related elements
     local_site_config["show_how_to_buttons"] = False
 
@@ -387,7 +400,7 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
     project_dir = os.path.join(base_dir, "project_path")
     os.mkdir(project_dir)
 
-    # fixture config swaps site section builder source stores and specifies custom run_id_filters
+    # fixture config swaps site section builder source stores and specifies custom run_name_filters
     shutil.copy(file_relative_path(__file__, "../test_fixtures/great_expectations_custom_local_site_config.yml"),
                 str(os.path.join(project_dir, "great_expectations.yml")))
     context = DataContext(context_root_dir=project_dir)
@@ -418,14 +431,14 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
         validations_site_section_builder.source_store,
         ExpectationsStore
     )
-    assert validations_site_section_builder.run_id_filter == {"ne": "custom_validations_filter"}
+    assert validations_site_section_builder.run_name_filter == {"ne": "custom_validations_filter"}
 
     profiling_site_section_builder = site_section_builders["profiling"]
     assert isinstance(
         validations_site_section_builder.source_store,
         ExpectationsStore
     )
-    assert profiling_site_section_builder.run_id_filter == {"eq": "custom_profiling_filter"}
+    assert profiling_site_section_builder.run_name_filter == {"eq": "custom_profiling_filter"}
 
 
 @freeze_time("09/24/2019 23:18:36")

@@ -54,7 +54,12 @@ def docs_list(directory):
 
     docs_sites_url_dicts = context.get_docs_sites_urls()
     docs_sites_strings = [
-        " - <cyan>{}</cyan>: {}".format(docs_site_dict["site_name"], docs_site_dict["site_url"])\
+        " - <cyan>{}</cyan>: {}".format(
+            docs_site_dict["site_name"],
+            docs_site_dict.get("site_url") or
+            f'site configured but does not exist. Run the following command to build site: great_expectations '
+            f'docs build --site-name {docs_site_dict["site_name"]}'
+        )
         for docs_site_dict in docs_sites_url_dicts
     ]
 
@@ -82,6 +87,7 @@ def docs_list(directory):
 @click.option(
     "--all",
     "-a",
+    is_flag=True,
     help="With this, all sites will get their data docs cleaned out. See data_docs section in great_expectations.yml",
 )
 def clean_data_docs(directory, site_name=None, all=None):
@@ -89,7 +95,8 @@ def clean_data_docs(directory, site_name=None, all=None):
     context = toolkit.load_data_context_with_error_handling(directory)
     failed = True
     if (site_name is None and all is None):
-        cli_message("<red>{}</red>".format("Please specify --all y to remove all sites or specify specific site using site_name"))
+        cli_message("<red>{}</red>".format("Please specify --all to remove all sites or specify specific site using "
+                                           "--site_name"))
         sys.exit(1)
     context.clean_data_docs(site_name=site_name)
     failed = False
@@ -100,7 +107,7 @@ def clean_data_docs(directory, site_name=None, all=None):
             success=True
         )
         cli_message("<green>{}</green>".format("Cleaned data docs"))
-     
+
     if failed and context is not None:
         send_usage_message(
             data_context=context,
@@ -112,9 +119,9 @@ def clean_data_docs(directory, site_name=None, all=None):
 def _build_intro_string(docs_sites_strings):
     doc_string_count = len(docs_sites_strings)
     if doc_string_count == 1:
-        list_intro_string = "1 Data Docs site found:"
+        list_intro_string = "1 Data Docs site configured:"
     elif doc_string_count > 1:
-        list_intro_string = f"{doc_string_count} Data Docs sites found:"
+        list_intro_string = f"{doc_string_count} Data Docs sites configured:"
     return list_intro_string
 
 

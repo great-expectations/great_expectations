@@ -249,6 +249,7 @@ batches:
 
     assert (
         """datasource: mydatasource
+      data_asset_name: Titanic
     expectation_suite_names: # one or more suites may validate against a single batch
       - Titanic.warning
 """
