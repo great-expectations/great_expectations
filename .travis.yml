@@ -2,6 +2,7 @@ branches:
   only:
   - master
   - develop
+  - v0.11.x
   - "/^\\d.*/"
 language: python
 cache: pip
