@@ -378,14 +378,20 @@ class MetaSparkDFDataset(Dataset):
             element_count = self.get_row_count()
 
             if ignore_row_if == "all_values_are_missing":
-                boolean_mapped_skip_values = temp_df.selectExpr(*column_list,
-                                                                "{0} AS `__null_val`".format(" AND ".join("ISNULL(`{0}`)".format(c) for c in column_list)))
+                boolean_mapped_skip_values = temp_df.select([
+                    *column_list,
+                    reduce(lambda a, b: a & b, [col(c).isNull() for c in column_list]).alias("__null_val")
+                ])
             elif ignore_row_if == "any_value_is_missing":
-                boolean_mapped_skip_values = temp_df.selectExpr(*column_list,
-                                                                "{0} AS `__null_val`".format(" OR ".join("ISNULL(`{0}`)".format(c) for c in column_list)))
+                boolean_mapped_skip_values = temp_df.select([
+                    *column_list,
+                    reduce(lambda a, b: a | b, [col(c).isNull() for c in column_list]).alias("__null_val")
+                ])
             elif ignore_row_if == "never":
-                boolean_mapped_skip_values = temp_df.selectExpr(*column_list,
-                                                                lit(False).alias("__null_val"))
+                boolean_mapped_skip_values = temp_df.select([
+                    *column_list,
+                    lit(False).alias("__null_val")
+                ])
             else:
                 raise ValueError(
                     "Unknown value of ignore_row_if: %s", (ignore_row_if,))
