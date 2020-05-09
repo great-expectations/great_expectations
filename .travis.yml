@@ -16,7 +16,7 @@ env:
 stages:
   - name: test
   - name: deploy
-    if: (branch = master AND type != pull_request) or (branch = v0.11.x AND type != pull_request)
+    if: (branch = master AND type != pull_request) OR (branch = v0.11.x AND type != pull_request)
   - name: experimental
     if: branch != master AND head_branch != release-prep
 jobs:
