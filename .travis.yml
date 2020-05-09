@@ -16,7 +16,7 @@ env:
 stages:
   - name: test
   - name: deploy
-    if: branch = master AND type != pull_request
+    if: (branch = master AND type != pull_request) or (branch = v0.11.x AND type != pull_request)
   - name: experimental
     if: branch != master AND head_branch != release-prep
 jobs:
@@ -97,7 +97,7 @@ jobs:
   - stage: deploy
     python: 3.6
     script:
-      - git tag --annotate 0.10.9 -m "0.10.9" || echo "tag exists, skipping"
+      - git tag --annotate 0.11.0b0 -m "0.11.0b0" || echo "tag exists, skipping"
     deploy:
       provider: pypi
       edge: true
