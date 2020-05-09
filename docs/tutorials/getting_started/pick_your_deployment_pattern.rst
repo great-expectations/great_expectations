@@ -1,11 +1,11 @@
-.. _getting_started__pick_your_deployment_pattern:
+.. _getting_started__customize_your_deployment:
 
-Upgrade components of your deployment
-=====================================
+Customize your deployment
+=========================
 
 At this point, you have your first, working deployment of Great Expectations. It's pretty basic: most of the storage and execution are handled locally.
 
-The next step is to updgrade compontents of your deployment. :ref:`Data Contexts` make this modular, so that you can add or swap out one component at a time. Most of these changes are quick, incremental steps---so you can upgrade from a basic demo deployment to a full production deployment at your own pace and be confident that your Data Context will continue to work at every step along the way.
+The next step is to customize your deployment by upgrading specific components of your deployment. :ref:`Data Contexts` make this modular, so that you can add or swap out one component at a time. Most of these changes are quick, incremental steps---so you can upgrade from a basic demo deployment to a full production deployment at your own pace and be confident that your Data Context will continue to work at every step along the way.
 
 This last section of the :ref:`getting_started` tutorial is designed to present you with clear options for upgrading your deployment. For specific implementation steps, please check out the linked :ref:`how_to_guides`.
 
@@ -23,16 +23,18 @@ Here's an overview of the components of a typical Great Expectations deployment:
 * Integrations to related systems
 
     * Additional DataSources and Generators
-    * Other options for hosting data documentation
-    * Other options for triggering validation
+    * Options for hosting data documentation
     * Additional ValidationActions
 
-Caveats on work in development
---------------------------------------------------
+* Key workflows
 
-We wish everything worked seamlessly today, but the Great Expectations ecosystem is expanding rapidly and `good things take time`_ #FIXME: Find an actual Dickens quote.
+    * Creating and editing Expectations
+    * Triggering validation
 
-You will 
+Levels of maturity
+------------------
+
+The Great Expectations ecosystem is expanding rapidly, which means that there's always a leading edge of integrations and workflows that aren't yet fully mature. We're committed to (1) shipping early, so that the community can benefit from new tools as soon as possible, and (2) clearly communicating levels of maturity, so that you can make good decisions about which components to use.
 
 .. raw:: html
 
@@ -41,45 +43,91 @@ You will
    </embed>
 
    <embed>
-      <p>First, some components are still at the <span class="fas fa-circle" style="color:red"></span> experimental or <span class="fas fa-circle" style="color:yellow"></span> beta stage. In that case, they are marked with one of these icons: <span class="fas fa-circle" style="color:yellow"></span> <span class="fas fa-circle" style="color:red"></span>.
+      <p>Components at the <span class="fas fa-circle" style="color:red"></span> experimental or <span class="fas fa-circle" style="color:yellow"></span> beta stage are marked with one of these icons: <span class="fas fa-circle" style="color:yellow"></span> <span class="fas fa-circle" style="color:red"></span>.
       
       Please see `Feature maturity grid`_ and `Levels of maturity`_ for more details.
       </p>
    </embed>
 
 
-Second, in some cases, tutorials are stubbed out. In that case, please vote with your
-
-Great Expectation is an open source community. If you really want it built, please join the community and help us build it!
-
-In the meantime, we're committed to `making levels of maturity transparent`_, and `streamlining the process for contribution and partnership`_.
+One of the awesome things about open source is that anyone can help improve the ecosystem. If you really want something built, please join the Great Expectations community and help us build it!
 
 
-.. code-block:: bash
+Options for storing Great Expectations configuration
+----------------------------------------------------
 
-    great_expectations
-    ...
-    ├── expectations
-    ...
-    ├── great_expectations.yml
-    ├── notebooks
-    ...
-    ├── .gitignore
-    └── uncommitted
-        ├── config_variables.yml
-        ├── documentation
-        │   └── local_site
-        └── validations
+* How to instantiate a DataContext without a yml file
+* How to use environment variables to populate credentials
+* How to populate credentials from a secrets store
 
-This ``great_expectations/`` directory contains all of the important components of a Great Expectations deployment, in miniature:
 
-* The ``great_expectations.yml`` configuration file defines how to access the project's Data Sources, Expectations, Validation Results, etc.
-* The ``expectations/`` directory stores all your Expectations as JSON files.
-* The ``uncommitted/`` directory contains files that shouldn't live in version control. It has a ``.gitignore`` configured to exclude all its contents from version control. The main contents of the default ``uncommitted/`` directory are:
 
-  * ``uncommitted/config_variables.yml``, which should hold sensitive information, such as database credentials and other secrets.
-  * ``uncommitted/validations``, which will hold Validation Results.
-  * ``uncommitted/documentation``, which will hold contains data documentation generated from Expectations and Validation Results.
+Options for storing Expectations
+--------------------------------
 
-A note on git: many teams find it convenient to store Expectations and their ``great_expectations.yml`` in git . Essentially, this approach treats Expectations like test fixtures: they live adjacent to code and are stored within version control. git acts as a collaboration tool and source of record. Other alternatives, such as storing Expectations in a file store, or database are also possible. We'll discuss these more at the end of this tutorial.
+Many teams find it convenient to store Expectations in git. Essentially, this approach treats Expectations like test fixtures: they live adjacent to code and are stored within version control. git acts as a collaboration tool and source of record.
 
+Alternatively, you can treat Expectations like configs, and store them in a blob store. Finally, you can store them in a database.
+
+* How to store Expectations to S3
+* How to store Expectations to GCS
+* How to store Expectations to Azure blob store
+* How to store Expectations to postgresql
+
+
+
+Options for storing Validation Results
+--------------------------------------
+By default, Validation Results are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. The most common pattern is to use a cloud-based blob store such as S3, GCS, or Azure blob store. You can also store Validation Results in a database.
+
+* How to store Validation Results to S3
+* How to store Validation Results to GCS
+* How to store Validation Results to Azure blob store
+* How to store Validation Results to postgresql
+
+Additional DataSources and Generators
+-------------------------------------
+
+Great Expectations plugs into a wide variety of Datasources, and the list is constantly getting longer. If you have an idea for a Datasource not listed here, please speak up at [Some location].
+
+#FIXME: Finalize this list after tidying up our How-to Guides
+
+* How to configure a AAAAA Datasource
+* How to configure a AAAAA Datasource
+* How to configure a AAAAA Datasource
+* How to configure a AAAAA Datasource
+* How to configure a AAAAA Datasource
+
+
+Options for hosting Auto Docs
+-----------------------------
+
+By default, Auto Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure blob store), configured to share a static website.
+
+* How to store Validation Results to S3
+* How to store Validation Results to GCS
+* How to store Validation Results to Azure blob store
+* How to store Validation Results to postgresql
+
+
+Additional Validation Actions
+-----------------------------
+
+* How to store Validation Results as a Validation Action
+* How to re-render Auto docs as a Validation Action
+* How to trigger slack notifications as a Validation Action
+
+
+
+Creating and editing Expectations
+---------------------------------
+
+
+Triggering validation
+---------------------
+
+As we saw in the previous step of the tutorial, the basic Great Expectations deployment allows you to trigger validation from a notebook. This is great for getting started, but not usually the approach you
+
+There are two primary paths 
+
+* How to validate data using an Airflow BashOperator

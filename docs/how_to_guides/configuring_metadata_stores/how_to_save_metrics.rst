@@ -1,5 +1,38 @@
 .. _saving_metrics:
 
+.. role:: raw-html(raw)
+   :format: html
+
+.. raw:: html
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+  <style>
+      .text-danger {
+          color: #dc3545;
+      }
+      .text-warning {
+          color: #ffc107;
+      }
+      .text-success {
+          color: #28a745;
+      }
+      .legend-table td{
+          border: 1px solid #ddd;
+          padding: 5px;
+      }
+  </style>
+
+.. sidebar:: This guide is :raw-html:`<br/><i class="fas fa-circle text-warning"></i> <a href="asdfasdf.com">Beta: Ready for early adopters</a>`
+
+  Find more discussion `here <https://discuss.greatexpectations.io/t/ge-with-databricks-delta/82/3>`_
+
+  Thanks to contributors
+
+    * `@joe_gargery <google.com>`_
+    * `@jaggers <google.com>`_
+    * `@esthav2002 <google.com>`_
+
+
 ###############################
 How to configure a MetricsStore
 ###############################
@@ -78,3 +111,5 @@ Now, when your operator is executed, the requested metrics will be available in 
     context.run_validation_operator('action_list_operator', (batch_kwargs, expectation_suite_name))
 
 
+.. note::
+  To discuss with the Great Expectations community, please visit this topic in our community discussion forum: `https://discuss.greatexpectations.io/t/ge-with-databricks-delta/82/3 <https://discuss.greatexpectations.io/t/ge-with-databricks-delta/82/3>`_

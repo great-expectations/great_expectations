@@ -20,4 +20,4 @@ From the root of the directory where you want to deploy Great Expectations:
 
 The CLI will guide you through all the steps to set up a basic deployment of Great Expectations.
 
-After that, if you want to understand what just happened, check out :ref:`Getting started`. Alternatively, you can :ref:`Customize your deployment`.
+After that, if you want to understand what just happened, check out :ref:`Getting started`. Alternatively, you can :ref:`Customize your deployment <getting_started__customize_your_deployment>`.

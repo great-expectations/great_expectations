@@ -1,7 +1,7 @@
 .. _tutorial_create_expectations:
 
-Create Expectations
-===================
+How to create Expectations
+==========================
 
 This tutorial covers the workflow of creating and editing expectations.
 
