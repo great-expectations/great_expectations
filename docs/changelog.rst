@@ -6,6 +6,9 @@ Changelog
 
 develop
 -----------------
+
+0.11.0b0
+-----------------
 * (BREAKING) ``run_id`` is now typed using the new ``RunIdentifier`` class, which consists of a ``run_time`` and
   ``run_name``. Existing projects that have Expectation Suite Validation Results must be migrated.
   See :ref:`Upgrading to 0.11.x-beta` for instructions.
