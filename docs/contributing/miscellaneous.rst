@@ -68,5 +68,5 @@ GE core team members use this checklist to ship releases.
 
 Beta Release Notes
 
-* To ship a beta release, follow the above checklist, but use the branch name ``v0.11.x`` as the equivalent of ``develop``
+* To ship a beta release, follow the above checklist, but use the branch name ``v0.11.x`` as the equivalent of ``master`` and ``v0.11.x-develop`` as the equivalent of ``master``
 * Ship the release using beta version numbers when updating the ``.travis.yml`` and when creating the annotated tag (e.g. `0.11.0b0`)
