@@ -13,4 +13,5 @@ How-to guides
    /how_to_guides/create_and_edit_expectations
    /how_to_guides/validation
    /how_to_guides/migrating_versions
+   /how_to_guides/miscellaneous
    /how_to_guides/spare_parts
