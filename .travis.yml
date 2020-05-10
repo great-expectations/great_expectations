@@ -19,7 +19,7 @@ stages:
   - name: deploy
     if: (branch = master AND type != pull_request) OR (branch = v0.11.x AND type != pull_request)
   - name: experimental
-    if: branch != master AND branch!= v0.11.x AND head_branch != release-prep
+    if: branch != master AND branch != v0.11.x AND head_branch != release-prep
 jobs:
   allow_failures:
     - if: os = windows OR os = osx
