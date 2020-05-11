@@ -40,8 +40,17 @@ class RenderedComponentContent(RenderedContent):
 
 
 class RenderedHeaderContent(RenderedComponentContent):
-    def __init__(self, header, subheader=None, header_row=None, styling=None, content_block_type="header"):
-        super(RenderedHeaderContent, self).__init__(content_block_type=content_block_type, styling=styling)
+    def __init__(
+        self,
+        header,
+        subheader=None,
+        header_row=None,
+        styling=None,
+        content_block_type="header",
+    ):
+        super(RenderedHeaderContent, self).__init__(
+            content_block_type=content_block_type, styling=styling
+        )
         self.header = header
         self.header_row = header_row
         self.subheader = subheader
@@ -63,8 +72,17 @@ class RenderedHeaderContent(RenderedComponentContent):
 
 
 class RenderedGraphContent(RenderedComponentContent):
-    def __init__(self, graph, header=None, subheader=None, styling=None, content_block_type="graph"):
-        super(RenderedGraphContent, self).__init__(content_block_type=content_block_type, styling=styling)
+    def __init__(
+        self,
+        graph,
+        header=None,
+        subheader=None,
+        styling=None,
+        content_block_type="graph",
+    ):
+        super(RenderedGraphContent, self).__init__(
+            content_block_type=content_block_type, styling=styling
+        )
         self.graph = graph
         self.header = header
         self.subheader = subheader
@@ -86,8 +104,18 @@ class RenderedGraphContent(RenderedComponentContent):
 
 
 class RenderedTableContent(RenderedComponentContent):
-    def __init__(self, table, header=None, subheader=None, header_row=None, styling=None, content_block_type="table"):
-        super(RenderedTableContent, self).__init__(content_block_type=content_block_type, styling=styling)
+    def __init__(
+        self,
+        table,
+        header=None,
+        subheader=None,
+        header_row=None,
+        styling=None,
+        content_block_type="table",
+    ):
+        super(RenderedTableContent, self).__init__(
+            content_block_type=content_block_type, styling=styling
+        )
         self.header = header
         self.subheader = subheader
         self.table = table
@@ -107,24 +135,34 @@ class RenderedTableContent(RenderedComponentContent):
                 d["subheader"] = self.subheader
         d["table"] = RenderedContent.rendered_content_list_to_json(self.table)
         if self.header_row is not None:
-            d["header_row"] = RenderedContent.rendered_content_list_to_json(self.header_row)
+            d["header_row"] = RenderedContent.rendered_content_list_to_json(
+                self.header_row
+            )
         return d
 
 
 class RenderedContentBlockContainer(RenderedComponentContent):
-    def __init__(self, content_blocks, styling=None, content_block_type="content_block_container"):
-        super(RenderedContentBlockContainer, self).__init__(content_block_type=content_block_type, styling=styling)
+    def __init__(
+        self, content_blocks, styling=None, content_block_type="content_block_container"
+    ):
+        super(RenderedContentBlockContainer, self).__init__(
+            content_block_type=content_block_type, styling=styling
+        )
         self.content_blocks = content_blocks
 
     def to_json_dict(self):
         d = super(RenderedContentBlockContainer, self).to_json_dict()
-        d["content_blocks"] = RenderedContent.rendered_content_list_to_json(self.content_blocks)
+        d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
+            self.content_blocks
+        )
         return d
 
 
 class RenderedMarkdownContent(RenderedComponentContent):
     def __init__(self, markdown, styling=None, content_block_type="markdown"):
-        super(RenderedMarkdownContent, self).__init__(content_block_type=content_block_type, styling=styling)
+        super(RenderedMarkdownContent, self).__init__(
+            content_block_type=content_block_type, styling=styling
+        )
         self.markdown = markdown
 
     def to_json_dict(self):
@@ -134,8 +172,12 @@ class RenderedMarkdownContent(RenderedComponentContent):
 
 
 class RenderedStringTemplateContent(RenderedComponentContent):
-    def __init__(self, string_template, styling=None, content_block_type="string_template"):
-        super(RenderedStringTemplateContent, self).__init__(content_block_type=content_block_type, styling=styling)
+    def __init__(
+        self, string_template, styling=None, content_block_type="string_template"
+    ):
+        super(RenderedStringTemplateContent, self).__init__(
+            content_block_type=content_block_type, styling=styling
+        )
         self.string_template = string_template
 
     def to_json_dict(self):
@@ -145,15 +187,26 @@ class RenderedStringTemplateContent(RenderedComponentContent):
 
 
 class RenderedBulletListContent(RenderedComponentContent):
-    def __init__(self, bullet_list, header=None, subheader=None, styling=None, content_block_type="bullet_list"):
-        super(RenderedBulletListContent, self).__init__(content_block_type=content_block_type, styling=styling)
+    def __init__(
+        self,
+        bullet_list,
+        header=None,
+        subheader=None,
+        styling=None,
+        content_block_type="bullet_list",
+    ):
+        super(RenderedBulletListContent, self).__init__(
+            content_block_type=content_block_type, styling=styling
+        )
         self.header = header
         self.subheader = subheader
         self.bullet_list = bullet_list
 
     def to_json_dict(self):
         d = super(RenderedBulletListContent, self).to_json_dict()
-        d["bullet_list"] = RenderedContent.rendered_content_list_to_json(self.bullet_list)
+        d["bullet_list"] = RenderedContent.rendered_content_list_to_json(
+            self.bullet_list
+        )
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
                 d["header"] = self.header.to_json_dict()
@@ -168,8 +221,17 @@ class RenderedBulletListContent(RenderedComponentContent):
 
 
 class ValueListContent(RenderedComponentContent):
-    def __init__(self, value_list, header=None, subheader=None, styling=None, content_block_type="value_list"):
-        super(ValueListContent, self).__init__(content_block_type=content_block_type, styling=styling)
+    def __init__(
+        self,
+        value_list,
+        header=None,
+        subheader=None,
+        styling=None,
+        content_block_type="value_list",
+    ):
+        super(ValueListContent, self).__init__(
+            content_block_type=content_block_type, styling=styling
+        )
         self.header = header
         self.subheader = subheader
         self.value_list = value_list
@@ -191,8 +253,12 @@ class ValueListContent(RenderedComponentContent):
 
 
 class TextContent(RenderedComponentContent):
-    def __init__(self, text, header=None, subheader=None, styling=None, content_block_type="text"):
-        super(TextContent, self).__init__(content_block_type=content_block_type, styling=styling)
+    def __init__(
+        self, text, header=None, subheader=None, styling=None, content_block_type="text"
+    ):
+        super(TextContent, self).__init__(
+            content_block_type=content_block_type, styling=styling
+        )
         self.text = text
         self.header = header
         self.subheader = subheader
@@ -215,9 +281,19 @@ class TextContent(RenderedComponentContent):
 
 
 class CollapseContent(RenderedComponentContent):
-    def __init__(self, collapse, collapse_toggle_link=None, header=None, subheader=None, styling=None,
-                 content_block_type="collapse", inline_link=False):
-        super(CollapseContent, self).__init__(content_block_type=content_block_type, styling=styling)
+    def __init__(
+        self,
+        collapse,
+        collapse_toggle_link=None,
+        header=None,
+        subheader=None,
+        styling=None,
+        content_block_type="collapse",
+        inline_link=False,
+    ):
+        super(CollapseContent, self).__init__(
+            content_block_type=content_block_type, styling=styling
+        )
         self.collapse_toggle_link = collapse_toggle_link
         self.header = header
         self.subheader = subheader
@@ -249,12 +325,25 @@ class CollapseContent(RenderedComponentContent):
 
 class RenderedDocumentContent(RenderedContent):
     # NOTE: JPC 20191028 - review these keys to consolidate and group
-    def __init__(self, sections, data_asset_name=None, full_data_asset_identifier=None, renderer_type=None,
-                 page_title=None, utm_medium=None, cta_footer=None, expectation_suite_name=None, batch_kwargs=None):
-        if not isinstance(sections, list) and all([isinstance(section, RenderedSectionContent) for section in
-                                                   sections]):
-            raise InvalidRenderedContentError("RenderedDocumentContent requires a list of RenderedSectionContent for "
-                                              "sections.")
+    def __init__(
+        self,
+        sections,
+        data_asset_name=None,
+        full_data_asset_identifier=None,
+        renderer_type=None,
+        page_title=None,
+        utm_medium=None,
+        cta_footer=None,
+        expectation_suite_name=None,
+        batch_kwargs=None,
+    ):
+        if not isinstance(sections, list) and all(
+            [isinstance(section, RenderedSectionContent) for section in sections]
+        ):
+            raise InvalidRenderedContentError(
+                "RenderedDocumentContent requires a list of RenderedSectionContent for "
+                "sections."
+            )
         self.sections = sections
         self.data_asset_name = data_asset_name
         self.full_data_asset_identifier = full_data_asset_identifier
@@ -281,15 +370,23 @@ class RenderedDocumentContent(RenderedContent):
 
 class RenderedSectionContent(RenderedContent):
     def __init__(self, content_blocks, section_name=None):
-        if not isinstance(content_blocks, list) and all([isinstance(content_block, RenderedComponentContent) for
-                                                         content_block in content_blocks]):
-            raise InvalidRenderedContentError("Rendered section content requires a list of RenderedComponentContent "
-                                              "for content blocks.")
+        if not isinstance(content_blocks, list) and all(
+            [
+                isinstance(content_block, RenderedComponentContent)
+                for content_block in content_blocks
+            ]
+        ):
+            raise InvalidRenderedContentError(
+                "Rendered section content requires a list of RenderedComponentContent "
+                "for content blocks."
+            )
         self.content_blocks = content_blocks
         self.section_name = section_name
 
     def to_json_dict(self):
         d = super(RenderedSectionContent, self).to_json_dict()
-        d["content_blocks"] = RenderedContent.rendered_content_list_to_json(self.content_blocks)
+        d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
+            self.content_blocks
+        )
         d["section_name"] = self.section_name
         return d

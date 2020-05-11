@@ -5,10 +5,7 @@ from dateutil.parser import parse
 
 from great_expectations.dataset.util import build_categorical_partition_object
 from great_expectations.exceptions import ProfilerError
-from great_expectations.profile.base import (
-    ProfilerCardinality,
-    ProfilerDataType,
-)
+from great_expectations.profile.base import ProfilerCardinality, ProfilerDataType
 from great_expectations.profile.basic_dataset_profiler import (
     BasicDatasetProfilerBase,
     logger,

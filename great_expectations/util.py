@@ -1,7 +1,7 @@
-import os
 import importlib
 import json
 import logging
+import os
 
 import black
 
@@ -17,11 +17,11 @@ def verify_dynamic_loading_support(module_name, package_name=None):
         module_spec = None
     if not module_spec:
         if not package_name:
-            package_name = ''
-        message = f'''No module named "{package_name + module_name}" could be found in the repository. Please \
+            package_name = ""
+        message = f"""No module named "{package_name + module_name}" could be found in the repository. Please \
 make sure that the file, corresponding to this package and module, exists and that dynamic loading of code modules, \
 templates, and assets is supported in your execution environment.  This error is unrecoverable.
-        '''
+        """
         raise FileNotFoundError(message)
 
 
@@ -32,18 +32,13 @@ def load_class(class_name, module_name):
     try:
         class_ = getattr(loaded_module, class_name)
     except AttributeError:
-        raise AttributeError("Module : {} has no class named : {}".format(
-            module_name,
-            class_name,
-        ))
+        raise AttributeError(
+            "Module : {} has no class named : {}".format(module_name, class_name,)
+        )
     return class_
 
 
-def _convert_to_dataset_class(
-        df,
-        dataset_class,
-        expectation_suite=None,
-        profiler=None):
+def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, profiler=None):
     """
     Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
 
@@ -71,7 +66,9 @@ def _convert_to_dataset_class(
     return new_df
 
 
-def _load_and_convert_to_dataset_class(df, class_name, module_name, expectation_suite=None, profiler=None):
+def _load_and_convert_to_dataset_class(
+    df, class_name, module_name, expectation_suite=None, profiler=None
+):
     """
     Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
 
@@ -97,7 +94,8 @@ def read_csv(
     dataset_class=None,
     expectation_suite=None,
     profiler=None,
-    *args, **kwargs
+    *args,
+    **kwargs,
 ):
     """Read a file using Pandas read_csv and return a great_expectations dataset.
 
@@ -121,7 +119,7 @@ def read_csv(
             df=df,
             dataset_class=dataset_class,
             expectation_suite=expectation_suite,
-            profiler=profiler
+            profiler=profiler,
         )
     else:
         return _load_and_convert_to_dataset_class(
@@ -129,7 +127,7 @@ def read_csv(
             class_name=class_name,
             module_name=module_name,
             expectation_suite=expectation_suite,
-            profiler=profiler
+            profiler=profiler,
         )
 
 
@@ -141,7 +139,8 @@ def read_json(
     expectation_suite=None,
     accessor_func=None,
     profiler=None,
-    *args, **kwargs
+    *args,
+    **kwargs,
 ):
     """Read a file using Pandas read_json and return a great_expectations dataset.
 
@@ -161,7 +160,7 @@ def read_json(
     import pandas as pd
 
     if accessor_func is not None:
-        json_obj = json.load(open(filename, 'rb'))
+        json_obj = json.load(open(filename, "rb"))
         json_obj = accessor_func(json_obj)
         df = pd.read_json(json.dumps(json_obj), *args, **kwargs)
 
@@ -173,7 +172,7 @@ def read_json(
             df=df,
             dataset_class=dataset_class,
             expectation_suite=expectation_suite,
-            profiler=profiler
+            profiler=profiler,
         )
     else:
         return _load_and_convert_to_dataset_class(
@@ -181,7 +180,7 @@ def read_json(
             class_name=class_name,
             module_name=module_name,
             expectation_suite=expectation_suite,
-            profiler=profiler
+            profiler=profiler,
         )
 
 
@@ -192,7 +191,8 @@ def read_excel(
     dataset_class=None,
     expectation_suite=None,
     profiler=None,
-    *args, **kwargs
+    *args,
+    **kwargs,
 ):
     """Read a file using Pandas read_excel and return a great_expectations dataset.
 
@@ -221,13 +221,15 @@ def read_excel(
                 df=df[key],
                 dataset_class=dataset_class,
                 expectation_suite=expectation_suite,
-                profiler=profiler)
+                profiler=profiler,
+            )
     else:
         df = _convert_to_dataset_class(
             df=df,
             dataset_class=dataset_class,
             expectation_suite=expectation_suite,
-            profiler=profiler)
+            profiler=profiler,
+        )
     return df
 
 
@@ -238,7 +240,8 @@ def read_table(
     dataset_class=None,
     expectation_suite=None,
     profiler=None,
-    *args, **kwargs
+    *args,
+    **kwargs,
 ):
     """Read a file using Pandas read_table and return a great_expectations dataset.
 
@@ -262,7 +265,7 @@ def read_table(
             df=df,
             dataset_class=dataset_class,
             expectation_suite=expectation_suite,
-            profiler=profiler
+            profiler=profiler,
         )
     else:
         return _load_and_convert_to_dataset_class(
@@ -270,7 +273,7 @@ def read_table(
             class_name=class_name,
             module_name=module_name,
             expectation_suite=expectation_suite,
-            profiler=profiler
+            profiler=profiler,
         )
 
 
@@ -281,7 +284,8 @@ def read_parquet(
     dataset_class=None,
     expectation_suite=None,
     profiler=None,
-    *args, **kwargs
+    *args,
+    **kwargs,
 ):
     """Read a file using Pandas read_parquet and return a great_expectations dataset.
 
@@ -305,7 +309,7 @@ def read_parquet(
             df=df,
             dataset_class=dataset_class,
             expectation_suite=expectation_suite,
-            profiler=profiler
+            profiler=profiler,
         )
     else:
         return _load_and_convert_to_dataset_class(
@@ -313,16 +317,18 @@ def read_parquet(
             class_name=class_name,
             module_name=module_name,
             expectation_suite=expectation_suite,
-            profiler=profiler)
+            profiler=profiler,
+        )
 
 
-def from_pandas(pandas_df,
-                class_name="PandasDataset",
-                module_name="great_expectations.dataset",
-                dataset_class=None,
-                expectation_suite=None,
-                profiler=None
-                ):
+def from_pandas(
+    pandas_df,
+    class_name="PandasDataset",
+    module_name="great_expectations.dataset",
+    dataset_class=None,
+    expectation_suite=None,
+    profiler=None,
+):
     """Read a Pandas data frame and return a great_expectations dataset.
 
     Args:
@@ -332,7 +338,7 @@ def from_pandas(pandas_df,
         dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
             if not specified, try to load the class named via the class_name and module_name parameters
         expectation_suite (string) = None: path to great_expectations expectation suite file
-        profiler (profiler class) = None: The profiler that should 
+        profiler (profiler class) = None: The profiler that should
             be run on the dataset to establish a baseline expectation suite.
 
     Returns:
@@ -343,7 +349,7 @@ def from_pandas(pandas_df,
             df=pandas_df,
             dataset_class=dataset_class,
             expectation_suite=expectation_suite,
-            profiler=profiler
+            profiler=profiler,
         )
     else:
         return _load_and_convert_to_dataset_class(
@@ -351,7 +357,7 @@ def from_pandas(pandas_df,
             class_name=class_name,
             module_name=module_name,
             expectation_suite=expectation_suite,
-            profiler=profiler
+            profiler=profiler,
         )
 
 
@@ -362,7 +368,8 @@ def read_pickle(
     dataset_class=None,
     expectation_suite=None,
     profiler=None,
-    *args, **kwargs
+    *args,
+    **kwargs,
 ):
     """Read a file using Pandas read_pickle and return a great_expectations dataset.
 
@@ -386,7 +393,7 @@ def read_pickle(
             df=df,
             dataset_class=dataset_class,
             expectation_suite=expectation_suite,
-            profiler=profiler
+            profiler=profiler,
         )
     else:
         return _load_and_convert_to_dataset_class(
@@ -394,19 +401,22 @@ def read_pickle(
             class_name=class_name,
             module_name=module_name,
             expectation_suite=expectation_suite,
-            profiler=profiler)
+            profiler=profiler,
+        )
 
 
 def validate(
-        data_asset,
-        expectation_suite=None,
-        data_asset_name=None,
-        expectation_suite_name=None,
-        data_context=None,
-        data_asset_class_name=None,
-        data_asset_module_name="great_expectations.dataset",
-        data_asset_class=None,
-        *args, **kwargs):
+    data_asset,
+    expectation_suite=None,
+    data_asset_name=None,
+    expectation_suite_name=None,
+    data_context=None,
+    data_asset_class_name=None,
+    data_asset_module_name="great_expectations.dataset",
+    data_asset_class=None,
+    *args,
+    **kwargs,
+):
     """Validate the provided data asset. Validate can accept an optional data_asset_name to apply, data_context to use
     to fetch an expectation_suite if one is not provided, and data_asset_class_name/data_asset_module_name or
     data_asset_class to use to provide custom expectations.
@@ -429,13 +439,15 @@ def validate(
     # Get an expectation suite if not provided
     if expectation_suite is None and data_context is None:
         raise ValueError(
-            "Either an expectation suite or a DataContext is required for validation.")
+            "Either an expectation suite or a DataContext is required for validation."
+        )
 
     if expectation_suite is None:
         logger.info("Using expectation suite from DataContext.")
         # Allow data_context to be a string, and try loading it from path in that case
         if isinstance(data_context, str):
             from great_expectations.data_context import DataContext
+
             data_context = DataContext(data_context)
         expectation_suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
@@ -444,18 +456,27 @@ def validate(
         if isinstance(expectation_suite, dict):
             expectation_suite = expectationSuiteSchema.load(expectation_suite)
         if data_asset_name is not None:
-            raise ValueError("When providing an expectation suite, data_asset_name cannot also be provided.")
+            raise ValueError(
+                "When providing an expectation suite, data_asset_name cannot also be provided."
+            )
         if expectation_suite_name is not None:
-            raise ValueError("When providing an expectation suite, expectation_suite_name cannot also be provided.")
+            raise ValueError(
+                "When providing an expectation suite, expectation_suite_name cannot also be provided."
+            )
         logger.info(
-            "Validating data_asset_name %s with expectation_suite_name %s" % (data_asset_name,
-                                                                              expectation_suite.expectation_suite_name)
+            "Validating data_asset_name %s with expectation_suite_name %s"
+            % (data_asset_name, expectation_suite.expectation_suite_name)
         )
 
     # If the object is already a DataAsset type, then this is purely a convenience method
     # and no conversion is needed; try to run validate on the given object
     if data_asset_class_name is None and data_asset_class is None:
-        return data_asset.validate(expectation_suite=expectation_suite, data_context=data_context, *args, **kwargs)
+        return data_asset.validate(
+            expectation_suite=expectation_suite,
+            data_context=data_context,
+            *args,
+            **kwargs,
+        )
 
     # Otherwise, try to convert and validate the dataset
     if data_asset_class is None:
@@ -464,6 +485,7 @@ def validate(
 
     import pandas as pd
     from great_expectations.dataset import Dataset, PandasDataset
+
     if data_asset_class is None:
         # Guess the GE data_asset_type based on the type of the data_asset
         if isinstance(data_asset, pd.DataFrame):
@@ -479,14 +501,18 @@ def validate(
         )
 
     if not issubclass(type(data_asset), data_asset_class):
-        if isinstance(data_asset, pd.DataFrame) and issubclass(data_asset_class, PandasDataset):
+        if isinstance(data_asset, pd.DataFrame) and issubclass(
+            data_asset_class, PandasDataset
+        ):
             pass  # This is a special type of allowed coercion
         else:
             raise ValueError(
-                "The validate util method only supports validation for subtypes of the provided data_asset_type.")
+                "The validate util method only supports validation for subtypes of the provided data_asset_type."
+            )
 
-    data_asset_ = _convert_to_dataset_class(data_asset, dataset_class=data_asset_class,
-                                            expectation_suite=expectation_suite)
+    data_asset_ = _convert_to_dataset_class(
+        data_asset, dataset_class=data_asset_class, expectation_suite=expectation_suite
+    )
     return data_asset_.validate(*args, data_context=data_context, **kwargs)
 
 
@@ -510,15 +536,15 @@ def gen_directory_tree_str(startpath):
     tuples.sort()
 
     for root, dirs, files in tuples:
-        level = root.replace(startpath, '').count(os.sep)
-        indent = ' ' * 4 * level
-        output_str += '{}{}/\n'.format(indent, os.path.basename(root))
-        subindent = ' ' * 4 * (level + 1)
+        level = root.replace(startpath, "").count(os.sep)
+        indent = " " * 4 * level
+        output_str += "{}{}/\n".format(indent, os.path.basename(root))
+        subindent = " " * 4 * (level + 1)
 
         files.sort()
         for f in files:
-            output_str += '{}{}\n'.format(subindent, f)
-    
+            output_str += "{}{}\n".format(subindent, f)
+
     return output_str
 
 
@@ -528,9 +554,7 @@ def lint_code(code):
     if not isinstance(code, str):
         raise TypeError
     try:
-        linted_code = black.format_file_contents(
-            code, fast=True, mode=black_file_mode
-        )
+        linted_code = black.format_file_contents(code, fast=True, mode=black_file_mode)
         return linted_code
     except (black.NothingChanged, RuntimeError):
         return code

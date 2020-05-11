@@ -2,18 +2,17 @@
 
 import copy
 import logging
+import warnings
 
 from ruamel.yaml import YAML
 
-import warnings
-
-from great_expectations.data_context.util import verify_dynamic_loading_support
 from great_expectations.data_context.util import (
+    instantiate_class_from_config,
     load_class,
-    instantiate_class_from_config
+    verify_dynamic_loading_support,
 )
-from great_expectations.types import ClassConfig
 from great_expectations.exceptions import ClassInstantiationError
+from great_expectations.types import ClassConfig
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -46,7 +45,8 @@ class Datasource(object):
     When adding custom expectations by subclassing an existing DataAsset type, use the data_asset_type parameter
     to configure the datasource to load and return DataAssets of the custom type.
     """
-    recognized_batch_parameters = {'limit'}
+
+    recognized_batch_parameters = {"limit"}
 
     @classmethod
     def from_configuration(cls, **kwargs):
@@ -64,12 +64,12 @@ class Datasource(object):
 
     @classmethod
     def build_configuration(
-            cls,
-            class_name,
-            module_name="great_expectations.datasource",
-            data_asset_type=None,
-            batch_kwargs_generators=None,
-            **kwargs
+        cls,
+        class_name,
+        module_name="great_expectations.datasource",
+        data_asset_type=None,
+        batch_kwargs_generators=None,
+        **kwargs
     ):
         """
         Build a full configuration object for a datasource, potentially including batch kwargs generators with defaults.
@@ -87,10 +87,21 @@ class Datasource(object):
         """
         verify_dynamic_loading_support(module_name=module_name)
         class_ = load_class(class_name=class_name, module_name=module_name)
-        configuration = class_.build_configuration(data_asset_type=data_asset_type, batch_kwargs_generators=batch_kwargs_generators, **kwargs)
+        configuration = class_.build_configuration(
+            data_asset_type=data_asset_type,
+            batch_kwargs_generators=batch_kwargs_generators,
+            **kwargs
+        )
         return configuration
 
-    def __init__(self, name, data_context=None, data_asset_type=None, batch_kwargs_generators=None, **kwargs):
+    def __init__(
+        self,
+        name,
+        data_context=None,
+        data_asset_type=None,
+        batch_kwargs_generators=None,
+        **kwargs
+    ):
         """
         Build a new datasource.
 
@@ -105,7 +116,8 @@ class Datasource(object):
         if isinstance(data_asset_type, str):
             warnings.warn(
                 "String-only configuration for data_asset_type is deprecated. Use module_name and class_name instead.",
-                DeprecationWarning)
+                DeprecationWarning,
+            )
         self._data_asset_type = data_asset_type
         self._datasource_config = kwargs
         self._batch_kwargs_generators = {}
@@ -168,18 +180,16 @@ class Datasource(object):
         """Build a BatchKwargGenerator using the provided configuration and return the newly-built generator."""
         generator = instantiate_class_from_config(
             config=kwargs,
-            runtime_environment={
-                "datasource": self
-            },
+            runtime_environment={"datasource": self},
             config_defaults={
                 "module_name": "great_expectations.datasource.batch_kwargs_generator"
-            }
+            },
         )
         if not generator:
             raise ClassInstantiationError(
                 module_name="great_expectations.datasource.batch_kwargs_generator",
                 package_name=None,
-                class_name=kwargs['class_name']
+                class_name=kwargs["class_name"],
             )
 
         return generator
@@ -195,11 +205,17 @@ class Datasource(object):
         """
         if name in self._batch_kwargs_generators:
             return self._batch_kwargs_generators[name]
-        elif "batch_kwargs_generators" in self._datasource_config and name in self._datasource_config["batch_kwargs_generators"]:
-            generator_config = copy.deepcopy(self._datasource_config["batch_kwargs_generators"][name])
+        elif (
+            "batch_kwargs_generators" in self._datasource_config
+            and name in self._datasource_config["batch_kwargs_generators"]
+        ):
+            generator_config = copy.deepcopy(
+                self._datasource_config["batch_kwargs_generators"][name]
+            )
         else:
             raise ValueError(
-                "Unable to load batch kwargs generator %s -- no configuration found or invalid configuration." % name
+                "Unable to load batch kwargs generator %s -- no configuration found or invalid configuration."
+                % name
             )
         generator = self._build_batch_kwargs_generator(**generator_config)
         self._batch_kwargs_generators[name] = generator
@@ -214,11 +230,10 @@ class Datasource(object):
         generators = []
 
         if "batch_kwargs_generators" in self._datasource_config:
-            for key, value in self._datasource_config["batch_kwargs_generators"].items():
-                generators.append({
-                    "name": key,
-                    "class_name": value["class_name"]
-                })
+            for key, value in self._datasource_config[
+                "batch_kwargs_generators"
+            ].items():
+                generators.append({"name": key, "class_name": value["class_name"]})
 
         return generators
 
@@ -287,16 +302,22 @@ class Datasource(object):
         """
         available_data_asset_names = {}
         if batch_kwargs_generator_names is None:
-            batch_kwargs_generator_names = [generator["name"] for generator in self.list_batch_kwargs_generators()]
+            batch_kwargs_generator_names = [
+                generator["name"] for generator in self.list_batch_kwargs_generators()
+            ]
         elif isinstance(batch_kwargs_generator_names, str):
             batch_kwargs_generator_names = [batch_kwargs_generator_names]
 
         for generator_name in batch_kwargs_generator_names:
             generator = self.get_batch_kwargs_generator(generator_name)
-            available_data_asset_names[generator_name] = generator.get_available_data_asset_names()
+            available_data_asset_names[
+                generator_name
+            ] = generator.get_available_data_asset_names()
         return available_data_asset_names
 
-    def build_batch_kwargs(self, batch_kwargs_generator, name=None, partition_id=None, **kwargs):
+    def build_batch_kwargs(
+        self, batch_kwargs_generator, name=None, partition_id=None, **kwargs
+    ):
         generator_obj = self.get_batch_kwargs_generator(batch_kwargs_generator)
         if partition_id is not None:
             kwargs["partition_id"] = partition_id

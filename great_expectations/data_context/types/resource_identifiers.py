@@ -4,7 +4,7 @@ from marshmallow import Schema, fields, post_load
 
 from great_expectations.core import IDDict
 from great_expectations.core.data_context_key import DataContextKey
-from great_expectations.exceptions import InvalidDataContextKeyError, DataContextError
+from great_expectations.exceptions import DataContextError, InvalidDataContextKeyError
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class ExpectationSuiteIdentifier(DataContextKey):
         return tuple(self.expectation_suite_name.split("."))
 
     def to_fixed_length_tuple(self):
-        return self.expectation_suite_name,
+        return (self.expectation_suite_name,)
 
     @classmethod
     def from_tuple(cls, tuple_):
@@ -38,6 +38,7 @@ class ExpectationSuiteIdentifier(DataContextKey):
 
     def __repr__(self):
         return self.__class__.__name__ + "::" + self._expectation_suite_name
+
 
 class ExpectationSuiteIdentifierSchema(Schema):
     expectation_suite_name = fields.Str()
@@ -62,7 +63,7 @@ class BatchIdentifier(DataContextKey):
         return self._batch_identifier
 
     def to_tuple(self):
-        return self.batch_identifier,
+        return (self.batch_identifier,)
 
     @classmethod
     def from_tuple(cls, tuple_):
@@ -110,19 +111,22 @@ class ValidationResultIdentifier(DataContextKey):
 
     def to_tuple(self):
         return tuple(
-            list(self.expectation_suite_identifier.to_tuple()) + [
-                self.run_id or "__none__",
-                self.batch_identifier or "__none__"
-            ]
+            list(self.expectation_suite_identifier.to_tuple())
+            + [self.run_id or "__none__", self.batch_identifier or "__none__"]
         )
 
     def to_fixed_length_tuple(self):
-        return self.expectation_suite_identifier.expectation_suite_name, self.run_id or "__none__", \
-               self.batch_identifier or "__none__"
+        return (
+            self.expectation_suite_identifier.expectation_suite_name,
+            self.run_id or "__none__",
+            self.batch_identifier or "__none__",
+        )
 
     @classmethod
     def from_tuple(cls, tuple_):
-        return cls(ExpectationSuiteIdentifier.from_tuple(tuple_[0:-2]), tuple_[-2], tuple_[-1])
+        return cls(
+            ExpectationSuiteIdentifier.from_tuple(tuple_[0:-2]), tuple_[-2], tuple_[-1]
+        )
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
@@ -136,19 +140,32 @@ class ValidationResultIdentifier(DataContextKey):
         elif isinstance(batch_kwargs, dict):
             batch_identifier = IDDict(batch_kwargs).to_id()
         else:
-            raise DataContextError("Unable to construct ValidationResultIdentifier from provided object.")
+            raise DataContextError(
+                "Unable to construct ValidationResultIdentifier from provided object."
+            )
         return cls(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(validation_result.meta["expectation_suite_name"]),
+            expectation_suite_identifier=ExpectationSuiteIdentifier(
+                validation_result.meta["expectation_suite_name"]
+            ),
             run_id=validation_result.meta.get("run_id"),
-            batch_identifier=batch_identifier
+            batch_identifier=batch_identifier,
         )
 
 
 class ValidationResultIdentifierSchema(Schema):
-    expectation_suite_identifier = fields.Nested(ExpectationSuiteIdentifierSchema, required=True, error_messages={
-        'required': 'expectation_suite_identifier is required for a ValidationResultIdentifier'})
-    run_id = fields.Str(required=True, error_messages={'required': "run_id is required for a "
-                                                                   "ValidationResultIdentifier"})
+    expectation_suite_identifier = fields.Nested(
+        ExpectationSuiteIdentifierSchema,
+        required=True,
+        error_messages={
+            "required": "expectation_suite_identifier is required for a ValidationResultIdentifier"
+        },
+    )
+    run_id = fields.Str(
+        required=True,
+        error_messages={
+            "required": "run_id is required for a " "ValidationResultIdentifier"
+        },
+    )
     batch_identifier = fields.Nested(BatchIdentifierSchema, required=True)
 
     # noinspection PyUnusedLocal
@@ -164,16 +181,24 @@ class SiteSectionIdentifier(DataContextKey):
             if isinstance(resource_identifier, ValidationResultIdentifier):
                 self._resource_identifier = resource_identifier
             elif isinstance(resource_identifier, (tuple, list)):
-                self._resource_identifier = ValidationResultIdentifier(*resource_identifier)
+                self._resource_identifier = ValidationResultIdentifier(
+                    *resource_identifier
+                )
             else:
-                self._resource_identifier = ValidationResultIdentifier(**resource_identifier)
+                self._resource_identifier = ValidationResultIdentifier(
+                    **resource_identifier
+                )
         elif site_section_name == "expectations":
             if isinstance(resource_identifier, ExpectationSuiteIdentifier):
                 self._resource_identifier = resource_identifier
             elif isinstance(resource_identifier, (tuple, list)):
-                self._resource_identifier = ExpectationSuiteIdentifier(*resource_identifier)
+                self._resource_identifier = ExpectationSuiteIdentifier(
+                    *resource_identifier
+                )
             else:
-                self._resource_identifier = ExpectationSuiteIdentifier(**resource_identifier)
+                self._resource_identifier = ExpectationSuiteIdentifier(
+                    **resource_identifier
+                )
         else:
             raise InvalidDataContextKeyError(
                 "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
@@ -188,7 +213,9 @@ class SiteSectionIdentifier(DataContextKey):
         return self._resource_identifier
 
     def to_tuple(self):
-        site_section_identifier_tuple_list = [self.site_section_name] + list(self.resource_identifier.to_tuple())
+        site_section_identifier_tuple_list = [self.site_section_name] + list(
+            self.resource_identifier.to_tuple()
+        )
         return tuple(site_section_identifier_tuple_list)
 
     @classmethod
@@ -196,12 +223,12 @@ class SiteSectionIdentifier(DataContextKey):
         if tuple_[0] == "validations":
             return cls(
                 site_section_name=tuple_[0],
-                resource_identifier=ValidationResultIdentifier.from_tuple(tuple_[1:])
+                resource_identifier=ValidationResultIdentifier.from_tuple(tuple_[1:]),
             )
         elif tuple_[0] == "expectations":
             return cls(
                 site_section_name=tuple_[0],
-                resource_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[1:])
+                resource_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[1:]),
             )
         else:
             raise InvalidDataContextKeyError(
