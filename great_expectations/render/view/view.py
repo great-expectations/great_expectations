@@ -240,7 +240,12 @@ class DefaultJinjaView(object):
         if not isinstance(template, (dict, OrderedDict)):
             return template
 
+        if template.get("params"):
+            for key, val in template["params"].items():
+                if "$" in str(val):
+                    template["params"][key] = str(val).replace("$", "$$")
         tag = template.get("tag", "span")
+        template["template"] = template.get("template", "").replace("$PARAMETER", "$$PARAMETER")
         template["template"] = template.get("template", "").replace("\n", "<br>")
 
         if "tooltip" in template:
