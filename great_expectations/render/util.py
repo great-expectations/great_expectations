@@ -40,24 +40,24 @@ def num_to_str(f, precision=DEFAULT_PRECISION, use_locale=False, no_scientific=F
     # So, if it's not already a float, we will append a decimal point to the string representation
     s = repr(f)
     if not isinstance(f, float):
-        s += locale.localeconv().get('decimal_point') + "0"
+        s += locale.localeconv().get("decimal_point") + "0"
     d = local_context.create_decimal(s)
     if no_scientific:
-        result = format(d, 'f')
+        result = format(d, "f")
     elif use_locale:
-        result = format(d, 'n')
+        result = format(d, "n")
     else:
-        result = format(d, 'g')
+        result = format(d, "g")
     if f != locale.atof(result):
         # result = '≈' + result
         #  ≈  # \u2248
-        result = '≈' + result
-    if 'e' not in result and 'E' not in result:
-        result = result.rstrip('0').rstrip(locale.localeconv().get('decimal_point'))
+        result = "≈" + result
+    if "e" not in result and "E" not in result:
+        result = result.rstrip("0").rstrip(locale.localeconv().get("decimal_point"))
     return result
 
 
-SUFFIXES = {1: 'st', 2: 'nd', 3: 'rd'}
+SUFFIXES = {1: "st", 2: "nd", 3: "rd"}
 
 
 def ordinal(num):
@@ -65,8 +65,8 @@ def ordinal(num):
     # Taken from https://codereview.stackexchange.com/questions/41298/producing-ordinal-numbers/41301
     # Consider a library like num2word when internationalization comes
     if 10 <= num % 100 <= 20:
-        suffix = 'th'
+        suffix = "th"
     else:
         # the second parameter is a default.
-        suffix = SUFFIXES.get(num % 10, 'th')
+        suffix = SUFFIXES.get(num % 10, "th")
     return str(num) + suffix

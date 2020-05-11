@@ -17,9 +17,7 @@ from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.usage_statistics.usage_statistics import (
-    send_usage_message,
-)
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.datasource import (
     PandasDatasource,
     SparkDFDatasource,
@@ -57,12 +55,12 @@ MANUAL_GENERATOR_CLASSES = ManualBatchKwargsGenerator
 
 
 class SupportedDatabases(enum.Enum):
-    MYSQL = 'MySQL'
-    POSTGRES = 'Postgres'
-    REDSHIFT = 'Redshift'
-    SNOWFLAKE = 'Snowflake'
-    BIGQUERY = 'BigQuery'
-    OTHER = 'other - Do you have a working SQLAlchemy connection string?'
+    MYSQL = "MySQL"
+    POSTGRES = "Postgres"
+    REDSHIFT = "Redshift"
+    SNOWFLAKE = "Snowflake"
+    BIGQUERY = "BigQuery"
+    OTHER = "other - Do you have a working SQLAlchemy connection string?"
     # TODO MSSQL
 
 
@@ -74,10 +72,10 @@ def datasource():
 
 @datasource.command(name="new")
 @click.option(
-    '--directory',
-    '-d',
+    "--directory",
+    "-d",
     default=None,
-    help="The project's great_expectations directory."
+    help="The project's great_expectations directory.",
 )
 def datasource_new(directory):
     """Add a new datasource to the data context."""
@@ -85,27 +83,25 @@ def datasource_new(directory):
     datasource_name, data_source_type = add_datasource(context)
 
     if datasource_name:
-        cli_message("A new datasource '{}' was added to your project.".format(datasource_name))
+        cli_message(
+            "A new datasource '{}' was added to your project.".format(datasource_name)
+        )
         send_usage_message(
-            data_context=context,
-            event="cli.datasource.new",
-            success=True
+            data_context=context, event="cli.datasource.new", success=True
         )
     else:  # no datasource was created
         send_usage_message(
-            data_context=context,
-            event="cli.datasource.new",
-            success=False
+            data_context=context, event="cli.datasource.new", success=False
         )
         sys.exit(1)
 
 
 @datasource.command(name="delete")
 @click.option(
-    '--directory',
-    '-d',
+    "--directory",
+    "-d",
     default=None,
-    help="The project's great_expectations directory."
+    help="The project's great_expectations directory.",
 )
 @click.argument("datasource")
 def delete_datasource(directory, datasource):
@@ -114,7 +110,11 @@ def delete_datasource(directory, datasource):
     try:
         context.delete_datasource(datasource)
     except ValueError:
-        cli_message("<red>{}</red>".format("Datasource {} could not be found".format(datasource)))
+        cli_message(
+            "<red>{}</red>".format(
+                "Datasource {} could not be found".format(datasource)
+            )
+        )
         sys.exit(1)
     else:
         cli_message("<green>{}</green>".format("Datasource deleted successfully."))
@@ -126,10 +126,10 @@ def delete_datasource(directory, datasource):
 
 @datasource.command(name="list")
 @click.option(
-    '--directory',
-    '-d',
+    "--directory",
+    "-d",
     default=None,
-    help="The project's great_expectations directory."
+    help="The project's great_expectations directory.",
 )
 def datasource_list(directory):
     """List known datasources."""
@@ -159,35 +159,54 @@ def _build_datasource_intro_string(datasource_count):
 
 
 @datasource.command(name="profile")
-@click.argument('datasource', default=None, required=False)
+@click.argument("datasource", default=None, required=False)
 @click.option(
     "--batch-kwargs-generator-name",
     "-g",
     default=None,
     help="The name of the batch kwargs generator configured in the datasource. It will list data assets in the "
-         "datasource"
+    "datasource",
 )
-@click.option('--data-assets', '-l', default=None,
-              help='Comma-separated list of the names of data assets that should be profiled. Requires datasource specified.')
-@click.option('--profile_all_data_assets', '-A', is_flag=True, default=False,
-              help='Profile ALL data assets within the target data source. '
-                   'If True, this will override --max_data_assets.')
+@click.option(
+    "--data-assets",
+    "-l",
+    default=None,
+    help="Comma-separated list of the names of data assets that should be profiled. Requires datasource specified.",
+)
+@click.option(
+    "--profile_all_data_assets",
+    "-A",
+    is_flag=True,
+    default=False,
+    help="Profile ALL data assets within the target data source. "
+    "If True, this will override --max_data_assets.",
+)
 @click.option(
     "--directory",
     "-d",
     default=None,
-    help="The project's great_expectations directory."
+    help="The project's great_expectations directory.",
 )
 @click.option(
     "--view/--no-view",
     help="By default open in browser unless you specify the --no-view flag",
-    default=True
+    default=True,
 )
-@click.option('--additional-batch-kwargs', default=None,
-              help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
+@click.option(
+    "--additional-batch-kwargs",
+    default=None,
+    help="Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary",
+)
 @mark.cli_as_experimental
-def datasource_profile(datasource, batch_kwargs_generator_name, data_assets, profile_all_data_assets, directory, view,
-                       additional_batch_kwargs):
+def datasource_profile(
+    datasource,
+    batch_kwargs_generator_name,
+    data_assets,
+    profile_all_data_assets,
+    directory,
+    view,
+    additional_batch_kwargs,
+):
     """
     Profile a datasource (Experimental)
 
@@ -205,13 +224,13 @@ def datasource_profile(datasource, batch_kwargs_generator_name, data_assets, pro
             # TODO refactor batch load check in suite edit and add here
 
         if datasource is None:
-            datasources = [_datasource["name"] for _datasource in context.list_datasources()]
+            datasources = [
+                _datasource["name"] for _datasource in context.list_datasources()
+            ]
             if not datasources:
                 cli_message(NO_DATASOURCES_FOUND)
                 send_usage_message(
-                    data_context=context,
-                    event="cli.datasource.profile",
-                    success=False
+                    data_context=context, event="cli.datasource.profile", success=False
                 )
                 sys.exit(1)
             elif len(datasources) > 1:
@@ -220,9 +239,7 @@ def datasource_profile(datasource, batch_kwargs_generator_name, data_assets, pro
                     "Available datasources: " + ", ".join(datasources) + "</red>"
                 )
                 send_usage_message(
-                    data_context=context,
-                    event="cli.datasource.profile",
-                    success=False
+                    data_context=context, event="cli.datasource.profile", success=False
                 )
                 sys.exit(1)
             else:
@@ -233,12 +250,10 @@ def datasource_profile(datasource, batch_kwargs_generator_name, data_assets, pro
                     data_assets=data_assets,
                     profile_all_data_assets=profile_all_data_assets,
                     open_docs=view,
-                    additional_batch_kwargs=additional_batch_kwargs
+                    additional_batch_kwargs=additional_batch_kwargs,
                 )
                 send_usage_message(
-                    data_context=context,
-                    event="cli.datasource.profile",
-                    success=True
+                    data_context=context, event="cli.datasource.profile", success=True
                 )
         else:
             profile_datasource(
@@ -248,18 +263,14 @@ def datasource_profile(datasource, batch_kwargs_generator_name, data_assets, pro
                 data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 open_docs=view,
-                additional_batch_kwargs=additional_batch_kwargs
+                additional_batch_kwargs=additional_batch_kwargs,
             )
             send_usage_message(
-                data_context=context,
-                event="cli.datasource.profile",
-                success=True
+                data_context=context, event="cli.datasource.profile", success=True
             )
     except Exception as e:
         send_usage_message(
-            data_context=context,
-            event="cli.datasource.profile",
-            success=False
+            data_context=context, event="cli.datasource.profile", success=False
         )
         raise e
 
@@ -276,7 +287,7 @@ def add_datasource(context, choose_one_data_asset=False):
     """
 
     msg_prompt_where_is_your_data = """
-What data would you like Great Expectations to connect to?    
+What data would you like Great Expectations to connect to?
     1. Files on a filesystem (for processing with Pandas or Spark)
     2. Relational database (SQL)
 """
@@ -288,9 +299,7 @@ What are you processing your files with?
 """
 
     data_source_location_selection = click.prompt(
-        msg_prompt_where_is_your_data,
-        type=click.Choice(["1", "2"]),
-        show_choices=False
+        msg_prompt_where_is_your_data, type=click.Choice(["1", "2"]), show_choices=False
     )
 
     datasource_name = None
@@ -300,20 +309,24 @@ What are you processing your files with?
         data_source_compute_selection = click.prompt(
             msg_prompt_files_compute_engine,
             type=click.Choice(["1", "2"]),
-            show_choices=False
+            show_choices=False,
         )
 
         if data_source_compute_selection == "1":  # pandas
 
             data_source_type = DatasourceTypes.PANDAS
 
-            datasource_name = _add_pandas_datasource(context, passthrough_generator_only=choose_one_data_asset)
+            datasource_name = _add_pandas_datasource(
+                context, passthrough_generator_only=choose_one_data_asset
+            )
 
         elif data_source_compute_selection == "2":  # Spark
 
             data_source_type = DatasourceTypes.SPARK
 
-            datasource_name = _add_spark_datasource(context, passthrough_generator_only=choose_one_data_asset)
+            datasource_name = _add_spark_datasource(
+                context, passthrough_generator_only=choose_one_data_asset
+            )
     else:
         data_source_type = DatasourceTypes.SQL
         datasource_name = _add_sqlalchemy_datasource(context)
@@ -321,13 +334,18 @@ What are you processing your files with?
     return datasource_name, data_source_type
 
 
-def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_datasource_name=True):
+def _add_pandas_datasource(
+    context, passthrough_generator_only=True, prompt_for_datasource_name=True
+):
     if passthrough_generator_only:
         datasource_name = "files_datasource"
         configuration = PandasDatasource.build_configuration()
 
     else:
-        path = click.prompt(msg_prompt_filesys_enter_base_path, type=click.Path(exists=True, file_okay=False))
+        path = click.prompt(
+            msg_prompt_filesys_enter_base_path,
+            type=click.Path(exists=True, file_okay=False),
+        )
 
         if path.startswith("./"):
             path = path[2:]
@@ -339,7 +357,9 @@ def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_
 
         datasource_name = os.path.basename(basenamepath) + "__dir"
         if prompt_for_datasource_name:
-            datasource_name = click.prompt(msg_prompt_datasource_name, default=datasource_name)
+            datasource_name = click.prompt(
+                msg_prompt_datasource_name, default=datasource_name
+            )
 
         configuration = PandasDatasource.build_configuration(
             batch_kwargs_generators={
@@ -350,7 +370,9 @@ def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_
             }
         )
 
-    context.add_datasource(name=datasource_name, class_name='PandasDatasource', **configuration)
+    context.add_datasource(
+        name=datasource_name, class_name="PandasDatasource", **configuration
+    )
     return datasource_name
 
 
@@ -368,29 +390,42 @@ def load_library(library_name, install_instructions_string=None):
         return True
     except ModuleNotFoundError:
         if install_instructions_string:
-            cli_message("""<red>ERROR: Great Expectations relies on the library `{}` to connect to your data.</red>
-            - Please `{}` before trying again.""".format(library_name, install_instructions_string))
+            cli_message(
+                """<red>ERROR: Great Expectations relies on the library `{}` to connect to your data.</red>
+            - Please `{}` before trying again.""".format(
+                    library_name, install_instructions_string
+                )
+            )
         else:
-            cli_message("""<red>ERROR: Great Expectations relies on the library `{}` to connect to your data.</red>
-      - Please `pip install {}` before trying again.""".format(library_name, library_name))
+            cli_message(
+                """<red>ERROR: Great Expectations relies on the library `{}` to connect to your data.</red>
+      - Please `pip install {}` before trying again.""".format(
+                    library_name, library_name
+                )
+            )
 
         return False
 
 
 def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
-    msg_success_database = "\n<green>Great Expectations connected to your database!</green>"
+    msg_success_database = (
+        "\n<green>Great Expectations connected to your database!</green>"
+    )
 
     if not load_library("sqlalchemy"):
         return None
 
     db_choices = [str(x) for x in list(range(1, 1 + len(SupportedDatabases)))]
-    selected_database = int(
-        click.prompt(
-            msg_prompt_choose_database,
-            type=click.Choice(db_choices),
-            show_choices=False
+    selected_database = (
+        int(
+            click.prompt(
+                msg_prompt_choose_database,
+                type=click.Choice(db_choices),
+                show_choices=False,
+            )
         )
-    ) - 1  # don't show user a zero index list :)
+        - 1
+    )  # don't show user a zero index list :)
 
     selected_database = list(SupportedDatabases)[selected_database]
 
@@ -398,7 +433,9 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
     if selected_database == SupportedDatabases.OTHER:
         datasource_name = "my_database"
     if prompt_for_datasource_name:
-        datasource_name = click.prompt(msg_prompt_datasource_name, default=datasource_name)
+        datasource_name = click.prompt(
+            msg_prompt_datasource_name, default=datasource_name
+        )
 
     credentials = {}
     # Since we don't want to save the database credentials in the config file that will be
@@ -430,11 +467,18 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                 "https://docs.greatexpectations.io/en/latest/reference/integrations/snowflake.html for helpful "
                 "information regarding connecting Great Expectations to Snowflake.</yellow>\n"
             )
-            if not load_library("snowflake", install_instructions_string="pip install snowflake-sqlalchemy"):
+            if not load_library(
+                "snowflake",
+                install_instructions_string="pip install snowflake-sqlalchemy",
+            ):
                 return None
-            credentials = _collect_snowflake_credentials(default_credentials=credentials)
+            credentials = _collect_snowflake_credentials(
+                default_credentials=credentials
+            )
         elif selected_database == SupportedDatabases.BIGQUERY:
-            if not load_library("pybigquery", install_instructions_string="pip install pybigquery"):
+            if not load_library(
+                "pybigquery", install_instructions_string="pip install pybigquery"
+            ):
                 return None
             credentials = _collect_bigquery_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.OTHER:
@@ -442,10 +486,9 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                 """What is the url/connection string for the sqlalchemy connection?
 (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
 """,
-                show_default=False).strip()
-            credentials = {
-                "url": sqlalchemy_url
-            }
+                show_default=False,
+            ).strip()
+            credentials = {"url": sqlalchemy_url}
 
         context.save_config_variable(datasource_name, credentials)
 
@@ -454,9 +497,15 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
   - Please check your environment and the configuration you provided.
   - Database Error: {0:s}"""
         try:
-            cli_message("<cyan>Attempting to connect to your database. This may take a moment...</cyan>")
-            configuration = SqlAlchemyDatasource.build_configuration(credentials="${" + datasource_name + "}")
-            context.add_datasource(name=datasource_name, class_name='SqlAlchemyDatasource', **configuration)
+            cli_message(
+                "<cyan>Attempting to connect to your database. This may take a moment...</cyan>"
+            )
+            configuration = SqlAlchemyDatasource.build_configuration(
+                credentials="${" + datasource_name + "}"
+            )
+            context.add_datasource(
+                name=datasource_name, class_name="SqlAlchemyDatasource", **configuration
+            )
             cli_message(msg_success_database)
             break
         except ModuleNotFoundError as de:
@@ -465,18 +514,15 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
 
         except DatasourceInitializationError as de:
             cli_message(message.format(str(de)))
-            if not click.confirm(
-                    "Enter the credentials again?",
-                    default=True
-            ):
-                context.add_datasource(datasource_name,
-                                       initialize=False,
-                                       module_name="great_expectations.datasource",
-                                       class_name="SqlAlchemyDatasource",
-                                       data_asset_type={
-                                           "class_name": "SqlAlchemyDataset"},
-                                       credentials="${" + datasource_name + "}",
-                                       )
+            if not click.confirm("Enter the credentials again?", default=True):
+                context.add_datasource(
+                    datasource_name,
+                    initialize=False,
+                    module_name="great_expectations.datasource",
+                    class_name="SqlAlchemyDatasource",
+                    data_asset_type={"class_name": "SqlAlchemyDataset"},
+                    credentials="${" + datasource_name + "}",
+                )
                 # TODO this message about continuing may not be accurate
                 cli_message(
                     """
@@ -486,11 +532,12 @@ Since we could not connect to the database, you can complete troubleshooting in 
 
 After you connect to the datasource, run great_expectations init to continue.
 
-""".format
-                    (
-                        datasource_name, DataContext.GE_YML,
-                        context.get_config()["config_variables_file_path"], rtd_url_ge_version,
-                        selected_database.value.lower()
+""".format(
+                        datasource_name,
+                        DataContext.GE_YML,
+                        context.get_config()["config_variables_file_path"],
+                        rtd_url_ge_version,
+                        selected_database.value.lower(),
                     )
                 )
                 return None
@@ -503,7 +550,7 @@ def _should_hide_input():
         This is a workaround to help identify Windows and adjust the prompts accordingly
         since hidden prompts may freeze in certain Windows terminals
     """
-    if 'windows' in platform.platform().lower():
+    if "windows" in platform.platform().lower():
         return False
     return True
 
@@ -512,24 +559,33 @@ def _collect_postgres_credentials(default_credentials=None):
     if default_credentials is None:
         default_credentials = {}
 
-    credentials = {
-        "drivername": "postgres"
-    }
+    credentials = {"drivername": "postgres"}
 
-    credentials["host"] = click.prompt("What is the host for the postgres connection?",
-                                       default=default_credentials.get("host", "localhost")).strip()
-    credentials["port"] = click.prompt("What is the port for the postgres connection?",
-                                       default=default_credentials.get("port", "5432")).strip()
-    credentials["username"] = click.prompt("What is the username for the postgres connection?",
-                                           default=default_credentials.get("username", "postgres")).strip()
+    credentials["host"] = click.prompt(
+        "What is the host for the postgres connection?",
+        default=default_credentials.get("host", "localhost"),
+    ).strip()
+    credentials["port"] = click.prompt(
+        "What is the port for the postgres connection?",
+        default=default_credentials.get("port", "5432"),
+    ).strip()
+    credentials["username"] = click.prompt(
+        "What is the username for the postgres connection?",
+        default=default_credentials.get("username", "postgres"),
+    ).strip()
     # This is a minimal workaround we're doing to deal with hidden input problems using Git Bash on Windows
     # TODO: Revisit this if we decide to fully support Windows and identify if there is a better solution
-    credentials["password"] = click.prompt("What is the password for the postgres connection?",
-                                           default="",
-                                           show_default=False, hide_input=_should_hide_input())
-    credentials["database"] = click.prompt("What is the database name for the postgres connection?",
-                                           default=default_credentials.get("database", "postgres"),
-                                           show_default=True).strip()
+    credentials["password"] = click.prompt(
+        "What is the password for the postgres connection?",
+        default="",
+        show_default=False,
+        hide_input=_should_hide_input(),
+    )
+    credentials["database"] = click.prompt(
+        "What is the database name for the postgres connection?",
+        default=default_credentials.get("database", "postgres"),
+        show_default=True,
+    ).strip()
 
     return credentials
 
@@ -538,56 +594,73 @@ def _collect_snowflake_credentials(default_credentials=None):
     if default_credentials is None:
         default_credentials = {}
 
-    credentials = {
-        "drivername": "snowflake"
-    }
+    credentials = {"drivername": "snowflake"}
 
     # required
 
-    credentials["username"] = click.prompt("What is the user login name for the snowflake connection?",
-                                           default=default_credentials.get("username", "")).strip()
-    credentials["password"] = click.prompt("What is the password for the snowflake connection?",
-                                           default="",
-                                           show_default=False, hide_input=True)
-    credentials["host"] = click.prompt("What is the account name for the snowflake connection (include region -- ex "
-                                       "'ABCD.us-east-1')?", default=default_credentials.get("host", "")).strip()
+    credentials["username"] = click.prompt(
+        "What is the user login name for the snowflake connection?",
+        default=default_credentials.get("username", ""),
+    ).strip()
+    credentials["password"] = click.prompt(
+        "What is the password for the snowflake connection?",
+        default="",
+        show_default=False,
+        hide_input=True,
+    )
+    credentials["host"] = click.prompt(
+        "What is the account name for the snowflake connection (include region -- ex "
+        "'ABCD.us-east-1')?",
+        default=default_credentials.get("host", ""),
+    ).strip()
 
     # optional
-    database = click.prompt("What is database name for the snowflake connection? (optional -- leave blank for none)",
-                            default=default_credentials.get("database", "")).strip()
+    database = click.prompt(
+        "What is database name for the snowflake connection? (optional -- leave blank for none)",
+        default=default_credentials.get("database", ""),
+    ).strip()
     if len(database) > 0:
         credentials["database"] = database
 
     credentials["query"] = {}
-    schema = click.prompt("What is schema name for the snowflake connection? (optional -- leave "
-                          "blank for none)", default=default_credentials.get("schema_name", "")).strip()
+    schema = click.prompt(
+        "What is schema name for the snowflake connection? (optional -- leave "
+        "blank for none)",
+        default=default_credentials.get("schema_name", ""),
+    ).strip()
 
     if len(schema) > 0:
         credentials["query"]["schema"] = schema
-    warehouse = click.prompt("What is warehouse name for the snowflake connection? (optional "
-                             "-- leave blank for none)", default=default_credentials.get("warehouse", "")).strip()
+    warehouse = click.prompt(
+        "What is warehouse name for the snowflake connection? (optional "
+        "-- leave blank for none)",
+        default=default_credentials.get("warehouse", ""),
+    ).strip()
 
     if len(warehouse) > 0:
         credentials["query"]["warehouse"] = warehouse
 
-    role = click.prompt("What is role name for the snowflake connection? (optional -- leave blank for none)",
-                        default=default_credentials.get("role", "")).strip()
+    role = click.prompt(
+        "What is role name for the snowflake connection? (optional -- leave blank for none)",
+        default=default_credentials.get("role", ""),
+    ).strip()
     if len(role) > 0:
         credentials["query"]["role"] = role
 
     return credentials
 
+
 def _collect_bigquery_credentials(default_credentials=None):
     sqlalchemy_url = click.prompt(
-"""What is the SQLAlchemy url/connection string for the BigQuery connection?
+        """What is the SQLAlchemy url/connection string for the BigQuery connection?
 (reference: https://github.com/mxmzdlv/pybigquery#connection-string-parameters)
 """,
-        show_default=False).strip()
-    credentials = {
-        "url": sqlalchemy_url
-    }
+        show_default=False,
+    ).strip()
+    credentials = {"url": sqlalchemy_url}
 
     return credentials
+
 
 def _collect_mysql_credentials(default_credentials=None):
     # We are insisting on pymysql driver when adding a MySQL datasource through the CLI
@@ -597,21 +670,30 @@ def _collect_mysql_credentials(default_credentials=None):
     if default_credentials is None:
         default_credentials = {}
 
-    credentials = {
-        "drivername": "mysql+pymysql"
-    }
+    credentials = {"drivername": "mysql+pymysql"}
 
-    credentials["host"] = click.prompt("What is the host for the MySQL connection?",
-                                       default=default_credentials.get("host", "localhost")).strip()
-    credentials["port"] = click.prompt("What is the port for the MySQL connection?",
-                                       default=default_credentials.get("port", "3306")).strip()
-    credentials["username"] = click.prompt("What is the username for the MySQL connection?",
-                                           default=default_credentials.get("username", "")).strip()
-    credentials["password"] = click.prompt("What is the password for the MySQL connection?",
-                                           default="",
-                                           show_default=False, hide_input=True)
-    credentials["database"] = click.prompt("What is the database name for the MySQL connection?",
-                                           default=default_credentials.get("database", "")).strip()
+    credentials["host"] = click.prompt(
+        "What is the host for the MySQL connection?",
+        default=default_credentials.get("host", "localhost"),
+    ).strip()
+    credentials["port"] = click.prompt(
+        "What is the port for the MySQL connection?",
+        default=default_credentials.get("port", "3306"),
+    ).strip()
+    credentials["username"] = click.prompt(
+        "What is the username for the MySQL connection?",
+        default=default_credentials.get("username", ""),
+    ).strip()
+    credentials["password"] = click.prompt(
+        "What is the password for the MySQL connection?",
+        default="",
+        show_default=False,
+        hide_input=True,
+    )
+    credentials["database"] = click.prompt(
+        "What is the database name for the MySQL connection?",
+        default=default_credentials.get("database", ""),
+    ).strip()
 
     return credentials
 
@@ -624,36 +706,49 @@ def _collect_redshift_credentials(default_credentials=None):
     if default_credentials is None:
         default_credentials = {}
 
-    credentials = {
-        "drivername": "postgresql+psycopg2"
-    }
+    credentials = {"drivername": "postgresql+psycopg2"}
 
     # required
 
-    credentials["host"] = click.prompt("What is the host for the Redshift connection?",
-                                       default=default_credentials.get("host", "")).strip()
-    credentials["port"] = click.prompt("What is the port for the Redshift connection?",
-                                       default=default_credentials.get("port", "5439")).strip()
-    credentials["username"] = click.prompt("What is the username for the Redshift connection?",
-                                           default=default_credentials.get("username", "")).strip()
+    credentials["host"] = click.prompt(
+        "What is the host for the Redshift connection?",
+        default=default_credentials.get("host", ""),
+    ).strip()
+    credentials["port"] = click.prompt(
+        "What is the port for the Redshift connection?",
+        default=default_credentials.get("port", "5439"),
+    ).strip()
+    credentials["username"] = click.prompt(
+        "What is the username for the Redshift connection?",
+        default=default_credentials.get("username", ""),
+    ).strip()
     # This is a minimal workaround we're doing to deal with hidden input problems using Git Bash on Windows
     # TODO: Revisit this if we decide to fully support Windows and identify if there is a better solution
-    credentials["password"] = click.prompt("What is the password for the Redshift connection?",
-                                           default="",
-                                           show_default=False, hide_input=_should_hide_input())
-    credentials["database"] = click.prompt("What is the database name for the Redshift connection?",
-                                           default=default_credentials.get("database", "")).strip()
+    credentials["password"] = click.prompt(
+        "What is the password for the Redshift connection?",
+        default="",
+        show_default=False,
+        hide_input=_should_hide_input(),
+    )
+    credentials["database"] = click.prompt(
+        "What is the database name for the Redshift connection?",
+        default=default_credentials.get("database", ""),
+    ).strip()
 
     # optional
 
     credentials["query"] = {}
-    credentials["query"]["sslmode"] = click.prompt("What is sslmode name for the Redshift connection?",
-                                                   default=default_credentials.get("sslmode", "prefer"))
+    credentials["query"]["sslmode"] = click.prompt(
+        "What is sslmode name for the Redshift connection?",
+        default=default_credentials.get("sslmode", "prefer"),
+    )
 
     return credentials
 
 
-def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_datasource_name=True):
+def _add_spark_datasource(
+    context, passthrough_generator_only=True, prompt_for_datasource_name=True
+):
     if not load_library("pyspark"):
         return None
 
@@ -669,7 +764,10 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
         configuration = SparkDFDatasource.build_configuration()
 
     else:
-        path = click.prompt(msg_prompt_filesys_enter_base_path, type=click.Path(exists=True, file_okay=False)).strip()
+        path = click.prompt(
+            msg_prompt_filesys_enter_base_path,
+            type=click.Path(exists=True, file_okay=False),
+        ).strip()
         if path.startswith("./"):
             path = path[2:]
 
@@ -680,27 +778,35 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
 
         datasource_name = os.path.basename(basenamepath) + "__dir"
         if prompt_for_datasource_name:
-            datasource_name = click.prompt(msg_prompt_datasource_name, default=datasource_name)
+            datasource_name = click.prompt(
+                msg_prompt_datasource_name, default=datasource_name
+            )
 
         configuration = SparkDFDatasource.build_configuration(
             batch_kwargs_generators={
                 "subdir_reader": {
                     "class_name": "SubdirReaderBatchKwargsGenerator",
-                    "base_directory": os.path.join("..", path)
+                    "base_directory": os.path.join("..", path),
                 }
             }
         )
 
-    context.add_datasource(name=datasource_name, class_name='SparkDFDatasource', **configuration)
+    context.add_datasource(
+        name=datasource_name, class_name="SparkDFDatasource", **configuration
+    )
     return datasource_name
 
 
 # TODO consolidate all the myriad CLI tests into this
-def select_batch_kwargs_generator(context, datasource_name, available_data_assets_dict=None):
+def select_batch_kwargs_generator(
+    context, datasource_name, available_data_assets_dict=None
+):
     msg_prompt_select_generator = "Select batch kwarg generator"
 
     if available_data_assets_dict is None:
-        available_data_assets_dict = context.get_available_data_asset_names(datasource_names=datasource_name)
+        available_data_assets_dict = context.get_available_data_asset_names(
+            datasource_names=datasource_name
+        )
 
     available_data_asset_names_by_generator = {}
     for key, value in available_data_assets_dict[datasource_name].items():
@@ -714,11 +820,17 @@ def select_batch_kwargs_generator(context, datasource_name, available_data_asset
     else:  # multiple batch_kwargs_generators
         generator_names = list(available_data_asset_names_by_generator.keys())
         choices = "\n".join(
-            ["    {}. {}".format(i, generator_name) for i, generator_name in enumerate(generator_names, 1)])
+            [
+                "    {}. {}".format(i, generator_name)
+                for i, generator_name in enumerate(generator_names, 1)
+            ]
+        )
         option_selection = click.prompt(
             msg_prompt_select_generator + "\n" + choices,
-            type=click.Choice([str(i) for i, generator_name in enumerate(generator_names, 1)]),
-            show_choices=False
+            type=click.Choice(
+                [str(i) for i, generator_name in enumerate(generator_names, 1)]
+            ),
+            show_choices=False,
         )
         batch_kwargs_generator_name = generator_names[int(option_selection) - 1]
 
@@ -727,11 +839,13 @@ def select_batch_kwargs_generator(context, datasource_name, available_data_asset
 
 # TODO this method needs testing
 # TODO this method has different numbers of returned objects
-def get_batch_kwargs(context,
-                     datasource_name=None,
-                     batch_kwargs_generator_name=None,
-                     generator_asset=None,
-                     additional_batch_kwargs=None):
+def get_batch_kwargs(
+    context,
+    datasource_name=None,
+    batch_kwargs_generator_name=None,
+    generator_asset=None,
+    additional_batch_kwargs=None,
+):
     """
     This method manages the interaction with user necessary to obtain batch_kwargs for a batch of a data asset.
 
@@ -763,7 +877,9 @@ def get_batch_kwargs(context,
                 that the batch_kwargs_generator will know to yield batch_kwargs when called.
     """
     try:
-        available_data_assets_dict = context.get_available_data_asset_names(datasource_names=datasource_name)
+        available_data_assets_dict = context.get_available_data_asset_names(
+            datasource_names=datasource_name
+        )
     except ValueError:
         # the datasource has no batch_kwargs_generators
         available_data_assets_dict = {datasource_name: {}}
@@ -773,43 +889,57 @@ def get_batch_kwargs(context,
 
     if batch_kwargs_generator_name is None:
         batch_kwargs_generator_name = select_batch_kwargs_generator(
-            context, datasource_name, available_data_assets_dict=available_data_assets_dict
+            context,
+            datasource_name,
+            available_data_assets_dict=available_data_assets_dict,
         )
 
     # if the user provided us with the batch kwargs generator name and the generator asset, we have everything we need -
     # let's ask the generator to build batch kwargs for this asset - we are done.
     if batch_kwargs_generator_name is not None and generator_asset is not None:
         generator = datasource.get_batch_kwargs_generator(batch_kwargs_generator_name)
-        batch_kwargs = generator.build_batch_kwargs(generator_asset, **additional_batch_kwargs)
+        batch_kwargs = generator.build_batch_kwargs(
+            generator_asset, **additional_batch_kwargs
+        )
         return batch_kwargs
 
-    if isinstance(context.get_datasource(datasource_name), (PandasDatasource, SparkDFDatasource)):
-        generator_asset, batch_kwargs = _get_batch_kwargs_from_generator_or_from_file_path(
+    if isinstance(
+        context.get_datasource(datasource_name), (PandasDatasource, SparkDFDatasource)
+    ):
+        (
+            generator_asset,
+            batch_kwargs,
+        ) = _get_batch_kwargs_from_generator_or_from_file_path(
             context,
             datasource_name,
             batch_kwargs_generator_name=batch_kwargs_generator_name,
         )
 
     elif isinstance(context.get_datasource(datasource_name), SqlAlchemyDatasource):
-        generator_asset, batch_kwargs = _get_batch_kwargs_for_sqlalchemy_datasource(context,
-                                                                                    datasource_name,
-                                                                                    additional_batch_kwargs=additional_batch_kwargs)
+        generator_asset, batch_kwargs = _get_batch_kwargs_for_sqlalchemy_datasource(
+            context, datasource_name, additional_batch_kwargs=additional_batch_kwargs
+        )
     else:
         raise ge_exceptions.DataContextError(
             "Datasource {0:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {1:s}".format(
-                datasource_name, str(type(context.get_datasource(datasource_name)))))
+                datasource_name, str(type(context.get_datasource(datasource_name)))
+            )
+        )
 
     return datasource_name, batch_kwargs_generator_name, generator_asset, batch_kwargs
 
 
-def _get_batch_kwargs_from_generator_or_from_file_path(context, datasource_name,
-                                                       batch_kwargs_generator_name=None,
-                                                       additional_batch_kwargs=None):
+def _get_batch_kwargs_from_generator_or_from_file_path(
+    context,
+    datasource_name,
+    batch_kwargs_generator_name=None,
+    additional_batch_kwargs=None,
+):
     if additional_batch_kwargs is None:
         additional_batch_kwargs = {}
 
     msg_prompt_generator_or_file_path = """
-Would you like to: 
+Would you like to:
     1. choose from a list of data assets in this datasource
     2. enter the path of a data file
 """
@@ -819,7 +949,9 @@ Enter the path (relative or absolute) of a data file
 
     msg_prompt_enter_data_asset_name = "\nWhich data would you like to use?\n"
 
-    msg_prompt_enter_data_asset_name_suffix = "    Don't see the name of the data asset in the list above? Just type it\n"
+    msg_prompt_enter_data_asset_name_suffix = (
+        "    Don't see the name of the data asset in the list above? Just type it\n"
+    )
 
     msg_prompt_file_type = """
 We could not determine the format of the file. What is it?
@@ -845,19 +977,34 @@ We could not determine the format of the file. What is it?
         option_selection = click.prompt(
             msg_prompt_generator_or_file_path,
             type=click.Choice(["1", "2"]),
-            show_choices=False
+            show_choices=False,
         )
 
         if option_selection == "1":
 
-            available_data_asset_names = sorted(generator.get_available_data_asset_names()["names"], key=lambda x: x[0])
-            available_data_asset_names_str = ["{} ({})".format(name[0], name[1]) for name in
-                                              available_data_asset_names]
+            available_data_asset_names = sorted(
+                generator.get_available_data_asset_names()["names"], key=lambda x: x[0]
+            )
+            available_data_asset_names_str = [
+                "{} ({})".format(name[0], name[1])
+                for name in available_data_asset_names
+            ]
 
             data_asset_names_to_display = available_data_asset_names_str[:50]
-            choices = "\n".join(["    {}. {}".format(i, name) for i, name in enumerate(data_asset_names_to_display, 1)])
-            prompt = msg_prompt_enter_data_asset_name + choices + "\n" + msg_prompt_enter_data_asset_name_suffix.format(
-                len(data_asset_names_to_display))
+            choices = "\n".join(
+                [
+                    "    {}. {}".format(i, name)
+                    for i, name in enumerate(data_asset_names_to_display, 1)
+                ]
+            )
+            prompt = (
+                msg_prompt_enter_data_asset_name
+                + choices
+                + "\n"
+                + msg_prompt_enter_data_asset_name_suffix.format(
+                    len(data_asset_names_to_display)
+                )
+            )
 
             generator_asset_selection = click.prompt(prompt, show_default=False)
 
@@ -865,14 +1012,17 @@ We could not determine the format of the file. What is it?
             try:
                 data_asset_index = int(generator_asset_selection) - 1
                 try:
-                    generator_asset = \
-                        [name[0] for name in available_data_asset_names][data_asset_index]
+                    generator_asset = [name[0] for name in available_data_asset_names][
+                        data_asset_index
+                    ]
                 except IndexError:
                     pass
             except ValueError:
                 generator_asset = generator_asset_selection
 
-            batch_kwargs = generator.build_batch_kwargs(generator_asset, **additional_batch_kwargs)
+            batch_kwargs = generator.build_batch_kwargs(
+                generator_asset, **additional_batch_kwargs
+            )
             return generator_asset, batch_kwargs
 
     # No generator name was passed or the user chose to enter a file path
@@ -882,18 +1032,21 @@ We could not determine the format of the file. What is it?
 
     path = None
     while True:
-        path = click.prompt(msg_prompt_file_path, type=click.Path(exists=True, dir_okay=dir_okay), default=path)
+        path = click.prompt(
+            msg_prompt_file_path,
+            type=click.Path(exists=True, dir_okay=dir_okay),
+            default=path,
+        )
 
         path = os.path.abspath(path)
 
-        batch_kwargs = {
-            "path": path,
-            "datasource": datasource_name
-        }
+        batch_kwargs = {"path": path, "datasource": datasource_name}
 
         reader_method = None
         try:
-            reader_method = datasource.guess_reader_method_from_path(path)["reader_method"]
+            reader_method = datasource.guess_reader_method_from_path(path)[
+                "reader_method"
+            ]
         except BatchKwargsError:
             pass
 
@@ -904,25 +1057,26 @@ We could not determine the format of the file. What is it?
                 option_selection = click.prompt(
                     msg_prompt_file_type,
                     type=click.Choice(["1", "2", "3", "4"]),
-                    show_choices=False
+                    show_choices=False,
                 )
 
                 try:
                     reader_method = datasource.guess_reader_method_from_path(
-                        path + "." + reader_method_file_extensions[option_selection])["reader_method"]
+                        path + "." + reader_method_file_extensions[option_selection]
+                    )["reader_method"]
                 except BatchKwargsError:
                     pass
 
                 if reader_method is not None:
                     batch_kwargs["reader_method"] = reader_method
-                    if isinstance(datasource, SparkDFDatasource) and reader_method == "csv":
+                    if (
+                        isinstance(datasource, SparkDFDatasource)
+                        and reader_method == "csv"
+                    ):
                         header_row = click.confirm(
-                            "\nDoes this file contain a header row?",
-                            default=True
+                            "\nDoes this file contain a header row?", default=True
                         )
-                        batch_kwargs["reader_options"] = {
-                            "header": header_row
-                        }
+                        batch_kwargs["reader_options"] = {"header": header_row}
                     batch = datasource.get_batch(batch_kwargs=batch_kwargs)
                     break
         else:
@@ -931,12 +1085,9 @@ We could not determine the format of the file. What is it?
                 batch_kwargs["reader_method"] = reader_method
                 if isinstance(datasource, SparkDFDatasource) and reader_method == "csv":
                     header_row = click.confirm(
-                        "\nDoes this file contain a header row?",
-                        default=True
+                        "\nDoes this file contain a header row?", default=True
                     )
-                    batch_kwargs["reader_options"] = {
-                        "header": header_row
-                    }
+                    batch_kwargs["reader_options"] = {"header": header_row}
                 batch = datasource.get_batch(batch_kwargs=batch_kwargs)
                 break
             except Exception as e:
@@ -945,27 +1096,31 @@ We could not determine the format of the file. What is it?
   - Please check the file and try again or select a different data file.
   - Error: {0:s}"""
                 cli_message(file_load_error_message.format(str(e)))
-                if not click.confirm(
-                        "\nTry again?",
-                        default=True
-                ):
-                    cli_message("""
+                if not click.confirm("\nTry again?", default=True):
+                    cli_message(
+                        """
 We have saved your setup progress. When you are ready, run great_expectations init to continue.
-""")
+"""
+                    )
                     sys.exit(1)
 
     return generator_asset, batch_kwargs
 
 
-def _get_batch_kwargs_for_sqlalchemy_datasource(context, datasource_name,
-                                                additional_batch_kwargs=None):
+def _get_batch_kwargs_for_sqlalchemy_datasource(
+    context, datasource_name, additional_batch_kwargs=None
+):
     msg_prompt_query = """
 Enter an SQL query
 """
 
-    msg_prompt_enter_data_asset_name = "\nWhich table would you like to use? (Choose one)\n"
+    msg_prompt_enter_data_asset_name = (
+        "\nWhich table would you like to use? (Choose one)\n"
+    )
 
-    msg_prompt_enter_data_asset_name_suffix = "    Do not see the table in the list above? Just type the SQL query\n"
+    msg_prompt_enter_data_asset_name_suffix = (
+        "    Do not see the table in the list above? Just type the SQL query\n"
+    )
 
     if additional_batch_kwargs is None:
         additional_batch_kwargs = {}
@@ -976,14 +1131,28 @@ Enter an SQL query
 
     temp_generator = TableBatchKwargsGenerator(name="temp", datasource=datasource)
 
-    available_data_asset_names = temp_generator.get_available_data_asset_names()["names"]
-    available_data_asset_names_str = ["{} ({})".format(name[0], name[1]) for name in
-                                      available_data_asset_names]
+    available_data_asset_names = temp_generator.get_available_data_asset_names()[
+        "names"
+    ]
+    available_data_asset_names_str = [
+        "{} ({})".format(name[0], name[1]) for name in available_data_asset_names
+    ]
 
     data_asset_names_to_display = available_data_asset_names_str[:5]
-    choices = "\n".join(["    {}. {}".format(i, name) for i, name in enumerate(data_asset_names_to_display, 1)])
-    prompt = msg_prompt_enter_data_asset_name + choices + os.linesep + msg_prompt_enter_data_asset_name_suffix.format(
-        len(data_asset_names_to_display))
+    choices = "\n".join(
+        [
+            "    {}. {}".format(i, name)
+            for i, name in enumerate(data_asset_names_to_display, 1)
+        ]
+    )
+    prompt = (
+        msg_prompt_enter_data_asset_name
+        + choices
+        + os.linesep
+        + msg_prompt_enter_data_asset_name_suffix.format(
+            len(data_asset_names_to_display)
+        )
+    )
 
     # Some backends require named temporary table parameters. We specifically elicit those and add them
     # where appropriate.
@@ -991,17 +1160,23 @@ Enter an SQL query
     datasource = context.get_datasource(datasource_name)
     if datasource.engine.dialect.name.lower() == "snowflake":
         # snowflake requires special handling
-        table_name = click.prompt("In Snowflake, GE may need to create a transient table "
-                                  "to use for validation." + os.linesep + "Please enter a name to use for that table: ",
-                                  default="ge_tmp_" + str(uuid.uuid4())[:8])
+        table_name = click.prompt(
+            "In Snowflake, GE may need to create a transient table "
+            "to use for validation."
+            + os.linesep
+            + "Please enter a name to use for that table: ",
+            default="ge_tmp_" + str(uuid.uuid4())[:8],
+        )
         temp_table_kwargs = {
             "snowflake_transient_table": table_name,
         }
     elif datasource.engine.dialect.name.lower() == "bigquery":
         # bigquery also requires special handling
-        table_name = click.prompt("GE will create a table to use for "
-                                  "validation." + os.linesep + "Please enter a name for this table: ",
-                                  default="SOME_PROJECT.SOME_DATASET.ge_tmp_" + str(uuid.uuid4())[:8])
+        table_name = click.prompt(
+            "GE will create a table to use for "
+            "validation." + os.linesep + "Please enter a name for this table: ",
+            default="SOME_PROJECT.SOME_DATASET.ge_tmp_" + str(uuid.uuid4())[:8],
+        )
         temp_table_kwargs = {
             "bigquery_temp_table": table_name,
         }
@@ -1017,8 +1192,9 @@ Enter an SQL query
                 try:
                     data_asset_index = int(selection) - 1
                     try:
-                        generator_asset = \
-                            [name[0] for name in available_data_asset_names][data_asset_index]
+                        generator_asset = [
+                            name[0] for name in available_data_asset_names
+                        ][data_asset_index]
                     except IndexError:
                         pass
                 except ValueError:
@@ -1028,16 +1204,17 @@ Enter an SQL query
                 query = click.prompt(msg_prompt_query, show_default=False)
 
             if query is None:
-                batch_kwargs = temp_generator.build_batch_kwargs(generator_asset, **additional_batch_kwargs)
+                batch_kwargs = temp_generator.build_batch_kwargs(
+                    generator_asset, **additional_batch_kwargs
+                )
                 batch_kwargs.update(temp_table_kwargs)
             else:
-                batch_kwargs = {
-                    "query": query,
-                    "datasource": datasource_name
-                }
+                batch_kwargs = {"query": query, "datasource": datasource_name}
                 batch_kwargs.update(temp_table_kwargs)
-                Validator(batch=datasource.get_batch(batch_kwargs),
-                          expectation_suite=ExpectationSuite("throwaway")).get_dataset()
+                Validator(
+                    batch=datasource.get_batch(batch_kwargs),
+                    expectation_suite=ExpectationSuite("throwaway"),
+                ).get_dataset()
 
             break
         except ge_exceptions.GreatExpectationsError as error:
@@ -1049,43 +1226,45 @@ Enter an SQL query
 
 
 def profile_datasource(
-        context,
-        datasource_name,
-        batch_kwargs_generator_name=None,
-        data_assets=None,
-        profile_all_data_assets=False,
-        max_data_assets=20,
-        additional_batch_kwargs=None,
-        open_docs=False,
+    context,
+    datasource_name,
+    batch_kwargs_generator_name=None,
+    data_assets=None,
+    profile_all_data_assets=False,
+    max_data_assets=20,
+    additional_batch_kwargs=None,
+    open_docs=False,
 ):
     """"Profile a named datasource using the specified context"""
     # Note we are explicitly not using a logger in all CLI output to have
     # more control over console UI.
-    logging.getLogger(
-        "great_expectations.profile.basic_dataset_profiler"
-    ).setLevel(logging.INFO)
+    logging.getLogger("great_expectations.profile.basic_dataset_profiler").setLevel(
+        logging.INFO
+    )
     msg_intro = "Profiling '{0:s}' will create expectations and documentation."
 
     msg_confirm_ok_to_proceed = """Would you like to profile '{0:s}'?"""
 
-    msg_skipping = "Skipping profiling for now. You can always do this later " \
-                   "by running `<green>great_expectations datasource profile</green>`."
+    msg_skipping = (
+        "Skipping profiling for now. You can always do this later "
+        "by running `<green>great_expectations datasource profile</green>`."
+    )
 
-    msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
+    msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}
 """
 
-    msg_too_many_data_assets = """There are {0:d} data assets in {1:s}. Profiling all of them might take too long.    
+    msg_too_many_data_assets = """There are {0:d} data assets in {1:s}. Profiling all of them might take too long.
 """
 
     msg_error_multiple_generators_found = """<red>More than one batch kwargs generator found in datasource {0:s}.
-Specify the one you want the profiler to use in batch_kwargs_generator_name argument.</red>      
+Specify the one you want the profiler to use in batch_kwargs_generator_name argument.</red>
 """
 
-    msg_error_no_generators_found = """<red>No batch kwargs generators can list available data assets in datasource 
-    {0:s}. The datasource might be empty or a batch kwargs generator not configured in the config file.</red>    
+    msg_error_no_generators_found = """<red>No batch kwargs generators can list available data assets in datasource
+    {0:s}. The datasource might be empty or a batch kwargs generator not configured in the config file.</red>
 """
 
-    msg_prompt_enter_data_asset_list = """Enter comma-separated list of data asset names (e.g., {0:s})   
+    msg_prompt_enter_data_asset_list = """Enter comma-separated list of data asset names (e.g., {0:s})
 """
 
     msg_options = """Choose how to proceed:
@@ -1112,12 +1291,19 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         profile_all_data_assets=profile_all_data_assets,
         max_data_assets=max_data_assets,
         dry_run=True,
-        additional_batch_kwargs=additional_batch_kwargs
+        additional_batch_kwargs=additional_batch_kwargs,
     )
 
-    if profiling_results["success"] is True:  # data context is ready to profile - run profiling
-        if data_assets or profile_all_data_assets or click.confirm(msg_confirm_ok_to_proceed.format(datasource_name),
-                                                                   default=True):
+    if (
+        profiling_results["success"] is True
+    ):  # data context is ready to profile - run profiling
+        if (
+            data_assets
+            or profile_all_data_assets
+            or click.confirm(
+                msg_confirm_ok_to_proceed.format(datasource_name), default=True
+            )
+        ):
             profiling_results = context.profile_datasource(
                 datasource_name,
                 batch_kwargs_generator_name=batch_kwargs_generator_name,
@@ -1125,7 +1311,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 profile_all_data_assets=profile_all_data_assets,
                 max_data_assets=max_data_assets,
                 dry_run=False,
-                additional_batch_kwargs=additional_batch_kwargs
+                additional_batch_kwargs=additional_batch_kwargs,
             )
         else:
             cli_message(msg_skipping)
@@ -1133,35 +1319,60 @@ Great Expectations is building Data Docs from the data you just profiled!"""
     else:  # we need to get arguments from user interactively
         do_exit = False
         while not do_exit:
-            if profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND:
-                cli_message(msg_some_data_assets_not_found.format(
-                    ",".join(profiling_results['error']['not_found_data_assets'])))
-            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS:
+            if (
+                profiling_results["error"]["code"]
+                == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
+            ):
                 cli_message(
-                    msg_too_many_data_assets.format(profiling_results['error']['num_data_assets'], datasource_name))
-            elif profiling_results['error']['code'] \
-                    == DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND:
+                    msg_some_data_assets_not_found.format(
+                        ",".join(profiling_results["error"]["not_found_data_assets"])
+                    )
+                )
+            elif (
+                profiling_results["error"]["code"]
+                == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS
+            ):
                 cli_message(
-                    msg_error_multiple_generators_found.format(datasource_name))
+                    msg_too_many_data_assets.format(
+                        profiling_results["error"]["num_data_assets"], datasource_name
+                    )
+                )
+            elif (
+                profiling_results["error"]["code"]
+                == DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
+            ):
+                cli_message(msg_error_multiple_generators_found.format(datasource_name))
                 sys.exit(1)
-            elif profiling_results['error']['code'] \
-                    == DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND:
-                cli_message(
-                    msg_error_no_generators_found.format(datasource_name))
+            elif (
+                profiling_results["error"]["code"]
+                == DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
+            ):
+                cli_message(msg_error_no_generators_found.format(datasource_name))
                 sys.exit(1)
             else:  # unknown error
-                raise ValueError("Unknown profiling error code: " + profiling_results['error']['code'])
+                raise ValueError(
+                    "Unknown profiling error code: "
+                    + profiling_results["error"]["code"]
+                )
 
             option_selection = click.prompt(
-                msg_options,
-                type=click.Choice(["1", "2", "3"]),
-                show_choices=False
+                msg_options, type=click.Choice(["1", "2", "3"]), show_choices=False
             )
 
             if option_selection == "1":
-                data_assets = click.prompt(msg_prompt_enter_data_asset_list.format(
-                    ", ".join([data_asset[0] for data_asset in profiling_results['error']['data_assets']][:3])),
-                    show_default=False)
+                data_assets = click.prompt(
+                    msg_prompt_enter_data_asset_list.format(
+                        ", ".join(
+                            [
+                                data_asset[0]
+                                for data_asset in profiling_results["error"][
+                                    "data_assets"
+                                ]
+                            ][:3]
+                        )
+                    ),
+                    show_default=False,
+                )
                 if data_assets:
                     data_assets = [item.strip() for item in data_assets.split(",")]
             elif option_selection == "3":
@@ -1182,7 +1393,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 profile_all_data_assets=profile_all_data_assets,
                 max_data_assets=max_data_assets,
                 dry_run=False,
-                additional_batch_kwargs=additional_batch_kwargs
+                additional_batch_kwargs=additional_batch_kwargs,
             )
 
             if profiling_results["success"]:  # data context is ready to profile
@@ -1204,7 +1415,11 @@ msg_prompt_choose_datasource = """Configure a datasource:
 msg_prompt_choose_database = """
 Which database backend are you using?
 {}
-""".format("\n".join(["    {}. {}".format(i, db.value) for i, db in enumerate(SupportedDatabases, 1)]))
+""".format(
+    "\n".join(
+        ["    {}. {}".format(i, db.value) for i, db in enumerate(SupportedDatabases, 1)]
+    )
+)
 
 msg_prompt_filesys_enter_base_path = """
 Enter the path (relative or absolute) of the root directory where the data files are stored.

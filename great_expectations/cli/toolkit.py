@@ -13,18 +13,13 @@ from great_expectations.cli.docs import build_docs
 from great_expectations.cli.util import cli_message
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.usage_statistics.usage_statistics import (
-    send_usage_message,
-)
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.datasource import Datasource
-from great_expectations.exceptions import (
-    CheckpointError,
-    CheckpointNotFoundError,
-)
+from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
 
@@ -131,8 +126,8 @@ def _profile_to_create_a_suite(
     click.prompt(
         """
 Great Expectations will choose a couple of columns and generate expectations about them
-to demonstrate some examples of assertions you can make about your data. 
-    
+to demonstrate some examples of assertions you can make about your data.
+
 Press Enter to continue
 """,
         default=True,
@@ -163,7 +158,7 @@ def _raise_profiling_errors(profiling_results):
         == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
     ):
         raise ge_exceptions.DataContextError(
-            """Some of the data assets you specified were not found: {0:s}    
+            """Some of the data assets you specified were not found: {0:s}
             """.format(
                 ",".join(profiling_results["error"]["not_found_data_assets"])
             )
@@ -220,10 +215,10 @@ def create_empty_suite(
 
 
 def launch_jupyter_notebook(notebook_path: str) -> None:
-    jupyter_command_override = os.getenv('GE_JUPYTER_CMD', None)
+    jupyter_command_override = os.getenv("GE_JUPYTER_CMD", None)
     if jupyter_command_override:
         subprocess.call(f"{jupyter_command_override} {notebook_path}", shell=True)
-    else:        
+    else:
         subprocess.call(["jupyter", "notebook", notebook_path])
 
 
