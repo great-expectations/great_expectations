@@ -3,7 +3,10 @@ import sys
 
 import click
 from ruamel.yaml import YAML
-from sqlalchemy.exc import SQLAlchemyError
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    SQLAlchemyError = RuntimeError
 
 from great_expectations import DataContext
 from great_expectations.cli import toolkit
