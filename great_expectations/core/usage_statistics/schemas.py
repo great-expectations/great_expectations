@@ -514,7 +514,8 @@ usage_statistics_record_schema = {
                         "cli.datasource.list",
                         "cli.datasource.new",
                         "data_context.open_data_docs",
-                        "data_context.build_data_docs"
+                        "data_context.build_data_docs",
+                        "cli.init.ctx_new"
                     ],
                 },
                 "event_payload": {

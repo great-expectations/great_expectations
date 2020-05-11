@@ -51,7 +51,7 @@ def test_cli_init_on_new_project(
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(
+        input="Y\n2\n6\ntitanic\n{}\n1\nwarning\n\n".format(
             engine.url, catch_exceptions=False
         ),
     )
@@ -206,7 +206,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(
+        input="Y\n2\n6\ntitanic\n{}\n1\nwarning\n\n".format(
             engine_url_with_added_whitespace, catch_exceptions=False
         ),
     )
@@ -290,7 +290,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
         result = runner.invoke(
             cli,
             ["init", "-d", project_dir],
-            input="2\n5\nsqlite\nsqlite:///{}\n1\nmy_suite\n\n".format(
+            input="2\n6\nsqlite\nsqlite:///{}\n1\nmy_suite\n\n".format(
                 titanic_sqlite_db_file
             ),
             catch_exceptions=False,

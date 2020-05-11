@@ -148,7 +148,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
     result = runner.invoke(
         cli,
         ["init"],
-        input="Y\n2\n5\nmy_db\nsqlite:////not_a_real.db\nn\n",
+        input="Y\n2\n6\nmy_db\nsqlite:////not_a_real.db\nn\n",
         catch_exceptions=False,
     )
     stdout = result.output
