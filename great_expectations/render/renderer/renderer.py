@@ -1,4 +1,7 @@
-from great_expectations.core import ExpectationConfiguration, ExpectationValidationResult
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 
 
 class Renderer(object):
@@ -20,25 +23,26 @@ class Renderer(object):
             # This is a validation
             return ge_object.expectation_config.expectation_type
 
-    #TODO: When we implement a ValidationResultSuite class, this method will move there.
+    # TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _find_evr_by_type(cls, evrs, type_):
         for evr in evrs:
             if evr.expectation_config.expectation_type == type_:
                 return evr
 
-    #TODO: When we implement a ValidationResultSuite class, this method will move there.
+    # TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _find_all_evrs_by_type(cls, evrs, type_, column_=None):
         ret = []
         for evr in evrs:
-            if evr.expectation_config.expectation_type == type_\
-                    and (not column_ or column_ == evr.expectation_config.kwargs.get("column")):
+            if evr.expectation_config.expectation_type == type_ and (
+                not column_ or column_ == evr.expectation_config.kwargs.get("column")
+            ):
                 ret.append(evr)
 
         return ret
 
-    #TODO: When we implement a ValidationResultSuite class, this method will move there.
+    # TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _get_column_list_from_evrs(cls, evrs):
         """
@@ -53,13 +57,26 @@ class Renderer(object):
         """
         evrs_ = evrs if isinstance(evrs, list) else evrs.results
 
-        expect_table_columns_to_match_ordered_list_evr = cls._find_evr_by_type(evrs_, "expect_table_columns_to_match_ordered_list")
+        expect_table_columns_to_match_ordered_list_evr = cls._find_evr_by_type(
+            evrs_, "expect_table_columns_to_match_ordered_list"
+        )
         # Group EVRs by column
-        sorted_columns = sorted(list(set([evr.expectation_config.kwargs["column"] for evr in evrs_ if "column" in
-                                          evr.expectation_config.kwargs])))
+        sorted_columns = sorted(
+            list(
+                set(
+                    [
+                        evr.expectation_config.kwargs["column"]
+                        for evr in evrs_
+                        if "column" in evr.expectation_config.kwargs
+                    ]
+                )
+            )
+        )
 
         if expect_table_columns_to_match_ordered_list_evr:
-            ordered_columns = expect_table_columns_to_match_ordered_list_evr.result["observed_value"]
+            ordered_columns = expect_table_columns_to_match_ordered_list_evr.result[
+                "observed_value"
+            ]
         else:
             ordered_columns = []
 
@@ -70,7 +87,7 @@ class Renderer(object):
         else:
             return sorted_columns
 
-    #TODO: When we implement a ValidationResultSuite class, this method will move there.
+    # TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _group_evrs_by_column(cls, validation_results):
         columns = {}
@@ -86,7 +103,7 @@ class Renderer(object):
 
         return columns
 
-    #TODO: When we implement an ExpectationSuite class, this method will move there.
+    # TODO: When we implement an ExpectationSuite class, this method will move there.
     @classmethod
     def _group_and_order_expectations_by_column(cls, expectations):
         """Group expectations by column."""
@@ -103,7 +120,10 @@ class Renderer(object):
             expectations_by_column[column].append(expectation)
 
             # if possible, get the order of columns from expect_table_columns_to_match_ordered_list
-            if expectation.expectation_type == "expect_table_columns_to_match_ordered_list":
+            if (
+                expectation.expectation_type
+                == "expect_table_columns_to_match_ordered_list"
+            ):
                 exp_column_list = expectation.kwargs["column_list"]
                 if exp_column_list and len(exp_column_list) > 0:
                     ordered_columns = exp_column_list

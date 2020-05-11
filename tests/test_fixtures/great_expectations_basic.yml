@@ -72,5 +72,3 @@ validation_operators:
         action:
           class_name: StoreEvaluationParametersAction
           target_store_name: evaluation_parameter_store
-
-

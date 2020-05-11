@@ -1,22 +1,23 @@
-import traceback
 import copy
 import logging
 import math
 import operator
+import traceback
 
 from pyparsing import (
-    Literal,
-    Word,
-    Group,
-    Forward,
-    alphas,
-    alphanums,
-    Regex,
-    ParseException,
     CaselessKeyword,
+    Combine,
+    Forward,
+    Group,
+    Literal,
+    ParseException,
+    Regex,
     Suppress,
+    Word,
+    alphanums,
+    alphas,
     delimitedList,
-    Combine)
+)
 
 from great_expectations.exceptions import EvaluationParameterError
 
@@ -40,6 +41,7 @@ class EvaluationParameterParser:
 
     The parser is modified from: https://github.com/pyparsing/pyparsing/blob/master/examples/fourFn.py
     """
+
     # map operator symbols to corresponding arithmetic operations
     opn = {
         "+": operator.add,
@@ -91,7 +93,9 @@ class EvaluationParameterParser:
             # or use provided pyparsing_common.number, but convert back to str:
             # fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
             fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
-            ge_urn = Combine(Literal("urn:great_expectations:") + Word(alphas, alphanums + "_$:?=%."))
+            ge_urn = Combine(
+                Literal("urn:great_expectations:") + Word(alphas, alphanums + "_$:?=%.")
+            )
             variable = Word(alphas, alphanums + "_$")
             ident = ge_urn | variable
 
@@ -155,7 +159,9 @@ class EvaluationParameterParser:
                 return float(op)
 
 
-def build_evaluation_parameters(expectation_args, evaluation_parameters=None, interactive_evaluation=True):
+def build_evaluation_parameters(
+    expectation_args, evaluation_parameters=None, interactive_evaluation=True
+):
     """Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,
     AND mutate expectation_args by removing any parameter values passed in as temporary values during
     exploratory work.
@@ -165,7 +171,7 @@ def build_evaluation_parameters(expectation_args, evaluation_parameters=None, in
     # Iterate over arguments, and replace $PARAMETER-defined args with their
     # specified parameters.
     for key, value in evaluation_args.items():
-        if isinstance(value, dict) and '$PARAMETER' in value:
+        if isinstance(value, dict) and "$PARAMETER" in value:
             # We do not even need to search for a value if we are not going to do interactive evaluation
             if not interactive_evaluation:
                 continue
@@ -173,18 +179,22 @@ def build_evaluation_parameters(expectation_args, evaluation_parameters=None, in
             # First, check to see whether an argument was supplied at runtime
             # If it was, use that one, but remove it from the stored config
             if "$PARAMETER." + value["$PARAMETER"] in value:
-                evaluation_args[key] = evaluation_args[key]["$PARAMETER." +
-                                                            value["$PARAMETER"]]
-                del expectation_args[key]["$PARAMETER." +
-                                          value["$PARAMETER"]]
+                evaluation_args[key] = evaluation_args[key][
+                    "$PARAMETER." + value["$PARAMETER"]
+                ]
+                del expectation_args[key]["$PARAMETER." + value["$PARAMETER"]]
 
             elif evaluation_parameters is not None:
                 # parse_evaluation_parameter will raise EvaluationParameterError if we cannot find a suitable value
-                evaluation_args[key] = parse_evaluation_parameter(value['$PARAMETER'], evaluation_parameters)
+                evaluation_args[key] = parse_evaluation_parameter(
+                    value["$PARAMETER"], evaluation_parameters
+                )
 
             else:
                 # If we haven't been able to continue already, we failed to find a parameter
-                raise EvaluationParameterError("No value found for $PARAMETER " + value["$PARAMETER"])
+                raise EvaluationParameterError(
+                    "No value found for $PARAMETER " + value["$PARAMETER"]
+                )
 
     return evaluation_args
 
@@ -242,8 +252,12 @@ def parse_evaluation_parameter(parameter_expression, evaluation_parameters=None)
         result = expr.evaluate_stack(expr.exprStack)
     except Exception as e:
         exception_traceback = traceback.format_exc()
-        exception_message = f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+        exception_message = (
+            f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+        )
         logger.debug(exception_message, e, exc_info=True)
-        raise EvaluationParameterError("Error while evaluating evaluation parameter expression: " + str(e))
+        raise EvaluationParameterError(
+            "Error while evaluating evaluation parameter expression: " + str(e)
+        )
 
     return result
