@@ -44,9 +44,9 @@ jobs:
     - stage: test
       dist: xenial
       install:
-        - pip install black==19.10b0 isort==4.3.21
+        - pip install black==19.10b0
       script:
-        - isort --check-only --skip-glob "docs/*"
+        # NOTE: we could also consider isort, but its sort order depends on installed libraries or else libraries must be explicitly declared individually in its configuration
         - black --check --exclude docs/ .
     - stage: test
       dist: trusty

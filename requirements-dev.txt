@@ -6,7 +6,7 @@ coveralls>=2.0.0
 freezegun>=0.3.15
 google-cloud-storage>=1.28.0
 ipywidgets>=7.5.1
-isort==4.3.21
+isort[requirements]==4.3.21
 jinja2>=2.10
 jsonschema>=2.5.1
 marshmallow>3.0
