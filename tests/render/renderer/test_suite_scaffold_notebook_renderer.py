@@ -31,7 +31,7 @@ def test_render_snapshot_test(titanic_data_context):
                 "source": """# Scaffold a new Expectation Suite (BETA)
 This process helps you avoid writing lots of boilerplate when authoring suites by allowing you to select columns you care about and letting a profiler write some candidate expectations for you to adjust.
 
-**Expectation Suite Name**: `bar`
+**Expectation Suite Name**: `my_suite`
 
 We'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)""",
                 "metadata": {},
