@@ -88,16 +88,17 @@ class SiteBuilder(object):
                         class_name: DefaultJinjaIndexPageView
     """
 
-    def __init__(self,
-                 data_context,
-                 store_backend,
-                 site_name=None,
-                 site_index_builder=None,
-                 show_how_to_buttons=True,
-                 site_section_builders=None,
-                 runtime_environment=None,
-                 **kwargs
-                 ):
+    def __init__(
+        self,
+        data_context,
+        store_backend,
+        site_name=None,
+        site_index_builder=None,
+        show_how_to_buttons=True,
+        site_section_builders=None,
+        runtime_environment=None,
+        **kwargs,
+    ):
         self.site_name = site_name
         self.data_context = data_context
         self.store_backend = store_backend
@@ -105,7 +106,11 @@ class SiteBuilder(object):
 
         usage_statistics_config = data_context.anonymous_usage_statistics
         data_context_id = None
-        if usage_statistics_config and usage_statistics_config.enabled and usage_statistics_config.data_context_id:
+        if (
+            usage_statistics_config
+            and usage_statistics_config.enabled
+            and usage_statistics_config.data_context_id
+        ):
             data_context_id = usage_statistics_config.data_context_id
 
         self.data_context_id = data_context_id
@@ -113,23 +118,27 @@ class SiteBuilder(object):
         # set custom_styles_directory if present
         custom_styles_directory = None
         plugins_directory = data_context.plugins_directory
-        if plugins_directory and os.path.isdir(os.path.join(plugins_directory, "custom_data_docs", "styles")):
-            custom_styles_directory = os.path.join(plugins_directory, "custom_data_docs", "styles")
+        if plugins_directory and os.path.isdir(
+            os.path.join(plugins_directory, "custom_data_docs", "styles")
+        ):
+            custom_styles_directory = os.path.join(
+                plugins_directory, "custom_data_docs", "styles"
+            )
 
         # The site builder is essentially a frontend store. We'll open up three types of backends using the base
         # type of the configuration defined in the store_backend section
 
         self.target_store = HtmlSiteStore(
-            store_backend=store_backend,
-            runtime_environment=runtime_environment
+            store_backend=store_backend, runtime_environment=runtime_environment
         )
 
         if site_index_builder is None:
-            site_index_builder = {
-                "class_name": "DefaultSiteIndexBuilder"
-            }
-        module_name = site_index_builder.get('module_name') or 'great_expectations.render.renderer.site_builder'
-        class_name = site_index_builder.get('class_name') or 'DefaultSiteIndexBuilder'
+            site_index_builder = {"class_name": "DefaultSiteIndexBuilder"}
+        module_name = (
+            site_index_builder.get("module_name")
+            or "great_expectations.render.renderer.site_builder"
+        )
+        class_name = site_index_builder.get("class_name") or "DefaultSiteIndexBuilder"
         self.site_index_builder = instantiate_class_from_config(
             config=site_index_builder,
             runtime_environment={
@@ -138,63 +147,69 @@ class SiteBuilder(object):
                 "show_how_to_buttons": self.show_how_to_buttons,
                 "target_store": self.target_store,
                 "site_name": self.site_name,
-                "data_context_id": self.data_context_id
+                "data_context_id": self.data_context_id,
             },
             config_defaults={
                 "name": "site_index_builder",
                 "module_name": module_name,
-                "class_name": class_name
-            }
+                "class_name": class_name,
+            },
         )
         if not self.site_index_builder:
             raise exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
-                class_name=site_index_builder['class_name']
+                class_name=site_index_builder["class_name"],
             )
 
         default_site_section_builders_config = {
             "expectations": {
                 "class_name": "DefaultSiteSectionBuilder",
-                "source_store_name":  data_context.expectations_store_name,
-                "renderer": {
-                    "class_name": "ExpectationSuitePageRenderer"
-                }
+                "source_store_name": data_context.expectations_store_name,
+                "renderer": {"class_name": "ExpectationSuitePageRenderer"},
             },
             "validations": {
                 "class_name": "DefaultSiteSectionBuilder",
                 "source_store_name": data_context.validations_store_name,
-                "run_id_filter": {
-                    "ne": "profiling"
-                },
-                "renderer": {
-                    "class_name": "ValidationResultsPageRenderer"
-                },
-                "validation_results_limit": site_index_builder.get("validation_results_limit")
+                "run_id_filter": {"ne": "profiling"},
+                "renderer": {"class_name": "ValidationResultsPageRenderer"},
+                "validation_results_limit": site_index_builder.get(
+                    "validation_results_limit"
+                ),
             },
             "profiling": {
                 "class_name": "DefaultSiteSectionBuilder",
-                "source_store_name":  data_context.validations_store_name,
-                "run_id_filter": {
-                    "eq": "profiling"
-                },
-                "renderer": {
-                    "class_name": "ProfilingResultsPageRenderer"
-                }
-            }
+                "source_store_name": data_context.validations_store_name,
+                "run_id_filter": {"eq": "profiling"},
+                "renderer": {"class_name": "ProfilingResultsPageRenderer"},
+            },
         }
 
         if site_section_builders is None:
             site_section_builders = default_site_section_builders_config
         else:
-            site_section_builders = nested_update(default_site_section_builders_config, site_section_builders)
+            site_section_builders = nested_update(
+                default_site_section_builders_config, site_section_builders
+            )
         self.site_section_builders = {}
         for site_section_name, site_section_config in site_section_builders.items():
-            if not site_section_config or site_section_config in \
-                    ['0', 'None', 'False', 'false', 'FALSE', 'none', 'NONE']:
+            if not site_section_config or site_section_config in [
+                "0",
+                "None",
+                "False",
+                "false",
+                "FALSE",
+                "none",
+                "NONE",
+            ]:
                 continue
-            module_name = site_section_config.get('module_name') or 'great_expectations.render.renderer.site_builder'
-            self.site_section_builders[site_section_name] = instantiate_class_from_config(
+            module_name = (
+                site_section_config.get("module_name")
+                or "great_expectations.render.renderer.site_builder"
+            )
+            self.site_section_builders[
+                site_section_name
+            ] = instantiate_class_from_config(
                 config=site_section_config,
                 runtime_environment={
                     "data_context": data_context,
@@ -203,16 +218,13 @@ class SiteBuilder(object):
                     "data_context_id": self.data_context_id,
                     "show_how_to_buttons": self.show_how_to_buttons,
                 },
-                config_defaults={
-                    "name": site_section_name,
-                    "module_name": module_name
-                }
+                config_defaults={"name": site_section_name, "module_name": module_name},
             )
             if not self.site_section_builders[site_section_name]:
                 raise exceptions.ClassInstantiationError(
                     module_name=module_name,
                     package_name=None,
-                    class_name=site_section_config['class_name']
+                    class_name=site_section_config["class_name"],
                 )
 
     def clean_site(self):
@@ -250,25 +262,26 @@ class SiteBuilder(object):
         :return: URL (string)
         """
 
-        return self.target_store.get_url_for_resource(resource_identifier=resource_identifier, only_if_exists=only_if_exists)
+        return self.target_store.get_url_for_resource(
+            resource_identifier=resource_identifier, only_if_exists=only_if_exists
+        )
 
 
 class DefaultSiteSectionBuilder(object):
-
     def __init__(
-            self,
-            name,
-            data_context,
-            target_store,
-            source_store_name,
-            custom_styles_directory=None,
-            show_how_to_buttons=True,
-            run_id_filter=None,
-            validation_results_limit=None,
-            renderer=None,
-            view=None,
-            data_context_id=None,
-            **kwargs
+        self,
+        name,
+        data_context,
+        target_store,
+        source_store_name,
+        custom_styles_directory=None,
+        show_how_to_buttons=True,
+        run_id_filter=None,
+        validation_results_limit=None,
+        renderer=None,
+        view=None,
+        data_context_id=None,
+        **kwargs,
     ):
         self.name = name
         self.source_store = data_context.stores[source_store_name]
@@ -282,50 +295,46 @@ class DefaultSiteSectionBuilder(object):
             raise exceptions.InvalidConfigError(
                 "SiteSectionBuilder requires a renderer configuration with a class_name key."
             )
-        module_name = renderer.get('module_name') or 'great_expectations.render.renderer'
+        module_name = (
+            renderer.get("module_name") or "great_expectations.render.renderer"
+        )
         self.renderer_class = instantiate_class_from_config(
             config=renderer,
-            runtime_environment={
-                "data_context": data_context
-            },
-            config_defaults={
-                "module_name": module_name
-            }
+            runtime_environment={"data_context": data_context},
+            config_defaults={"module_name": module_name},
         )
         if not self.renderer_class:
             raise exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
-                class_name=renderer['class_name']
+                class_name=renderer["class_name"],
             )
 
-        module_name = 'great_expectations.render.view'
+        module_name = "great_expectations.render.view"
         if view is None:
             view = {
                 "module_name": module_name,
                 "class_name": "DefaultJinjaPageView",
             }
-        module_name = view.get('module_name') or module_name
+        module_name = view.get("module_name") or module_name
         self.view_class = instantiate_class_from_config(
             config=view,
-            runtime_environment={
-                "custom_styles_directory": custom_styles_directory
-            },
-            config_defaults={
-                "module_name": module_name
-            }
+            runtime_environment={"custom_styles_directory": custom_styles_directory},
+            config_defaults={"module_name": module_name},
         )
         if not self.view_class:
             raise exceptions.ClassInstantiationError(
-                module_name=view['module_name'],
+                module_name=view["module_name"],
                 package_name=None,
-                class_name=view['class_name']
+                class_name=view["class_name"],
             )
 
     def build(self, resource_identifiers=None):
         source_store_keys = self.source_store.list_keys()
         if self.name == "validations" and self.validation_results_limit:
-            source_store_keys = sorted(source_store_keys, key=lambda x: x.run_id, reverse=True)[:self.validation_results_limit]
+            source_store_keys = sorted(
+                source_store_keys, key=lambda x: x.run_id, reverse=True
+            )[: self.validation_results_limit]
 
         for resource_key in source_store_keys:
 
@@ -343,24 +352,36 @@ class DefaultSiteSectionBuilder(object):
             try:
                 resource = self.source_store.get(resource_key)
             except FileNotFoundError:
-                logger.warning(f"File {resource_key.to_fixed_length_tuple()} could not be found. Skipping.")
+                logger.warning(
+                    f"File {resource_key.to_fixed_length_tuple()} could not be found. Skipping."
+                )
                 continue
 
             if isinstance(resource_key, ExpectationSuiteIdentifier):
                 expectation_suite_name = resource_key.expectation_suite_name
-                logger.debug("        Rendering expectation suite {}".format(expectation_suite_name))
+                logger.debug(
+                    "        Rendering expectation suite {}".format(
+                        expectation_suite_name
+                    )
+                )
             elif isinstance(resource_key, ValidationResultIdentifier):
                 run_id = resource_key.run_id
-                expectation_suite_name = resource_key.expectation_suite_identifier.expectation_suite_name
+                expectation_suite_name = (
+                    resource_key.expectation_suite_identifier.expectation_suite_name
+                )
                 if run_id == "profiling":
-                    logger.debug("        Rendering profiling for batch {}".format(resource_key.batch_identifier))
+                    logger.debug(
+                        "        Rendering profiling for batch {}".format(
+                            resource_key.batch_identifier
+                        )
+                    )
                 else:
 
                     logger.debug(
                         "        Rendering validation: run id: {}, suite {} for batch {}".format(
                             run_id,
                             expectation_suite_name,
-                            resource_key.batch_identifier
+                            resource_key.batch_identifier,
                         )
                     )
 
@@ -369,31 +390,32 @@ class DefaultSiteSectionBuilder(object):
                 viewable_content = self.view_class.render(
                     rendered_content,
                     data_context_id=self.data_context_id,
-                    show_how_to_buttons=self.show_how_to_buttons
+                    show_how_to_buttons=self.show_how_to_buttons,
                 )
             except Exception as e:
-                exception_message = f'''\
+                exception_message = f"""\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
-diagnose and repair the underlying issue.  Detailed information follows:  
-                '''
+diagnose and repair the underlying issue.  Detailed information follows:
+                """
                 exception_traceback = traceback.format_exc()
                 exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 logger.error(exception_message, e, exc_info=True)
 
             self.target_store.set(
                 SiteSectionIdentifier(
-                    site_section_name=self.name,
-                    resource_identifier=resource_key,
+                    site_section_name=self.name, resource_identifier=resource_key,
                 ),
-                viewable_content
+                viewable_content,
             )
 
     def _resource_key_passes_run_id_filter(self, resource_key):
         if type(resource_key) == ValidationResultIdentifier:
             run_id = resource_key.run_id
         else:
-            raise TypeError("run_id_filter filtering is only implemented for ValidationResultResources.")
+            raise TypeError(
+                "run_id_filter filtering is only implemented for ValidationResultResources."
+            )
 
         if self.run_id_filter.get("eq"):
             return self.run_id_filter.get("eq") == run_id
@@ -403,20 +425,19 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
 
 class DefaultSiteIndexBuilder(object):
-
     def __init__(
-            self,
-            name,
-            site_name,
-            data_context,
-            target_store,
-            custom_styles_directory=None,
-            show_how_to_buttons=True,
-            validation_results_limit=None,
-            renderer=None,
-            view=None,
-            data_context_id=None,
-            **kwargs
+        self,
+        name,
+        site_name,
+        data_context,
+        target_store,
+        custom_styles_directory=None,
+        show_how_to_buttons=True,
+        validation_results_limit=None,
+        renderer=None,
+        view=None,
+        data_context_id=None,
+        **kwargs,
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
         self.name = name
@@ -432,61 +453,61 @@ class DefaultSiteIndexBuilder(object):
                 "module_name": "great_expectations.render.renderer",
                 "class_name": "SiteIndexPageRenderer",
             }
-        module_name = renderer.get('module_name') or 'great_expectations.render.renderer'
+        module_name = (
+            renderer.get("module_name") or "great_expectations.render.renderer"
+        )
         self.renderer_class = instantiate_class_from_config(
             config=renderer,
-            runtime_environment={
-                "data_context": data_context
-            },
-            config_defaults={
-                "module_name": module_name
-            }
+            runtime_environment={"data_context": data_context},
+            config_defaults={"module_name": module_name},
         )
         if not self.renderer_class:
             raise exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
-                class_name=renderer['class_name']
+                class_name=renderer["class_name"],
             )
 
-        module_name = 'great_expectations.render.view'
+        module_name = "great_expectations.render.view"
         if view is None:
             view = {
                 "module_name": module_name,
                 "class_name": "DefaultJinjaIndexPageView",
             }
-        module_name = view.get('module_name') or module_name
+        module_name = view.get("module_name") or module_name
         self.view_class = instantiate_class_from_config(
             config=view,
-            runtime_environment={
-                "custom_styles_directory": custom_styles_directory
-            },
-            config_defaults={
-                "module_name": module_name
-            }
+            runtime_environment={"custom_styles_directory": custom_styles_directory},
+            config_defaults={"module_name": module_name},
         )
         if not self.view_class:
             raise exceptions.ClassInstantiationError(
-                module_name=view['module_name'],
+                module_name=view["module_name"],
                 package_name=None,
-                class_name=view['class_name']
+                class_name=view["class_name"],
             )
 
-    def add_resource_info_to_index_links_dict(self,
-                                              index_links_dict,
-                                              expectation_suite_name,
-                                              section_name,
-                                              batch_identifier=None,
-                                              run_id=None,
-                                              validation_success=None
-                                              ):
+    def add_resource_info_to_index_links_dict(
+        self,
+        index_links_dict,
+        expectation_suite_name,
+        section_name,
+        batch_identifier=None,
+        run_id=None,
+        validation_success=None,
+    ):
         import os
 
         if section_name + "_links" not in index_links_dict:
             index_links_dict[section_name + "_links"] = []
 
         if run_id:
-            path_components = ["validations"] + expectation_suite_name.split(".") + [run_id] + [batch_identifier]
+            path_components = (
+                ["validations"]
+                + expectation_suite_name.split(".")
+                + [run_id]
+                + [batch_identifier]
+            )
             # filepath = os.path.join("validations", batch_identifier, *expectation_suite_name.split("."), run_id)
             filepath = os.path.join(*path_components)
             filepath += ".html"
@@ -500,7 +521,7 @@ class DefaultSiteIndexBuilder(object):
                 "filepath": filepath,
                 "run_id": run_id,
                 "batch_identifier": batch_identifier,
-                "validation_success": validation_success
+                "validation_success": validation_success,
             }
         )
 
@@ -534,7 +555,7 @@ class DefaultSiteIndexBuilder(object):
 
         return {
             "header": "To continue exploring Great Expectations check out one of these tutorials...",
-            "buttons": self._get_call_to_action_buttons(usage_statistics)
+            "buttons": self._get_call_to_action_buttons(usage_statistics),
         }
 
     def _get_call_to_action_buttons(self, usage_statistics):
@@ -547,24 +568,24 @@ class DefaultSiteIndexBuilder(object):
         create_expectations = CallToActionButton(
             "How To Create Expectations",
             # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html"
+            "https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html",
         )
         see_glossary = CallToActionButton(
             "See more kinds of Expectations",
-            "http://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html"
+            "http://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html",
         )
         validation_playground = CallToActionButton(
             "How To Validate data",
             # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/tutorials/validate_data.html"
+            "https://docs.greatexpectations.io/en/latest/tutorials/validate_data.html",
         )
         customize_data_docs = CallToActionButton(
             "How To Customize Data Docs",
-            "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs"
+            "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs",
         )
         s3_team_site = CallToActionButton(
             "How To Set up a team site on AWS S3",
-            "https://docs.greatexpectations.io/en/latest/tutorials/publishing_data_docs_to_s3.html"
+            "https://docs.greatexpectations.io/en/latest/tutorials/publishing_data_docs_to_s3.html",
         )
         # TODO gallery does not yet exist
         # gallery = CallToActionButton(
@@ -591,24 +612,34 @@ class DefaultSiteIndexBuilder(object):
         logger.debug("DefaultSiteIndexBuilder.build")
 
         expectation_suite_keys = [
-            ExpectationSuiteIdentifier.from_tuple(expectation_suite_tuple) for expectation_suite_tuple in
-            self.target_store.store_backends[ExpectationSuiteIdentifier].list_keys()
+            ExpectationSuiteIdentifier.from_tuple(expectation_suite_tuple)
+            for expectation_suite_tuple in self.target_store.store_backends[
+                ExpectationSuiteIdentifier
+            ].list_keys()
         ]
         validation_and_profiling_result_keys = [
-            ValidationResultIdentifier.from_tuple(validation_result_tuple) for validation_result_tuple in
-            self.target_store.store_backends[ValidationResultIdentifier].list_keys()
+            ValidationResultIdentifier.from_tuple(validation_result_tuple)
+            for validation_result_tuple in self.target_store.store_backends[
+                ValidationResultIdentifier
+            ].list_keys()
         ]
         profiling_result_keys = [
-            validation_result_key for validation_result_key in validation_and_profiling_result_keys
+            validation_result_key
+            for validation_result_key in validation_and_profiling_result_keys
             if validation_result_key.run_id == "profiling"
         ]
         validation_result_keys = [
-            validation_result_key for validation_result_key in validation_and_profiling_result_keys
+            validation_result_key
+            for validation_result_key in validation_and_profiling_result_keys
             if validation_result_key.run_id != "profiling"
         ]
-        validation_result_keys = sorted(validation_result_keys, key=lambda x: x.run_id, reverse=True)
+        validation_result_keys = sorted(
+            validation_result_keys, key=lambda x: x.run_id, reverse=True
+        )
         if self.validation_results_limit:
-            validation_result_keys = validation_result_keys[:self.validation_results_limit]
+            validation_result_keys = validation_result_keys[
+                : self.validation_results_limit
+            ]
 
         index_links_dict = OrderedDict()
         index_links_dict["site_name"] = self.site_name
@@ -620,7 +651,7 @@ class DefaultSiteIndexBuilder(object):
             self.add_resource_info_to_index_links_dict(
                 index_links_dict=index_links_dict,
                 expectation_suite_name=expectation_suite_key.expectation_suite_name,
-                section_name="expectations"
+                section_name="expectations",
             )
 
         for profiling_result_key in profiling_result_keys:
@@ -628,7 +659,7 @@ class DefaultSiteIndexBuilder(object):
                 validation = self.data_context.get_validation_result(
                     batch_identifier=profiling_result_key.batch_identifier,
                     expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
-                    run_id=profiling_result_key.run_id
+                    run_id=profiling_result_key.run_id,
                 )
 
                 validation_success = validation.success
@@ -639,10 +670,12 @@ class DefaultSiteIndexBuilder(object):
                     section_name="profiling",
                     batch_identifier=profiling_result_key.batch_identifier,
                     run_id=profiling_result_key.run_id,
-                    validation_success=validation_success
+                    validation_success=validation_success,
                 )
             except Exception:
-                error_msg = "Profiling result not found: {0:s} - skipping".format(str(profiling_result_key.to_tuple()))
+                error_msg = "Profiling result not found: {0:s} - skipping".format(
+                    str(profiling_result_key.to_tuple())
+                )
                 logger.warning(error_msg)
 
         for validation_result_key in validation_result_keys:
@@ -650,7 +683,7 @@ class DefaultSiteIndexBuilder(object):
                 validation = self.data_context.get_validation_result(
                     batch_identifier=validation_result_key.batch_identifier,
                     expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
-                    run_id=validation_result_key.run_id
+                    run_id=validation_result_key.run_id,
                 )
 
                 validation_success = validation.success
@@ -661,10 +694,12 @@ class DefaultSiteIndexBuilder(object):
                     section_name="validations",
                     batch_identifier=validation_result_key.batch_identifier,
                     run_id=validation_result_key.run_id,
-                    validation_success=validation_success
+                    validation_success=validation_success,
                 )
             except Exception:
-                error_msg = "Validation result not found: {0:s} - skipping".format(str(validation_result_key.to_tuple()))
+                error_msg = "Validation result not found: {0:s} - skipping".format(
+                    str(validation_result_key.to_tuple())
+                )
                 logger.warning(error_msg)
 
         try:
@@ -672,22 +707,21 @@ class DefaultSiteIndexBuilder(object):
             viewable_content = self.view_class.render(
                 rendered_content,
                 data_context_id=self.data_context_id,
-                show_how_to_buttons=self.show_how_to_buttons
+                show_how_to_buttons=self.show_how_to_buttons,
             )
         except Exception as e:
-            exception_message = f'''\
+            exception_message = f"""\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
-diagnose and repair the underlying issue.  Detailed information follows:  
-            '''
+diagnose and repair the underlying issue.  Detailed information follows:
+            """
             exception_traceback = traceback.format_exc()
-            exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+            exception_message += (
+                f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+            )
             logger.error(exception_message, e, exc_info=True)
 
-        return (
-            self.target_store.write_index_page(viewable_content),
-            index_links_dict
-        )
+        return (self.target_store.write_index_page(viewable_content), index_links_dict)
 
 
 class CallToActionButton(object):

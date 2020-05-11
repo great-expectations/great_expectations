@@ -1,7 +1,9 @@
 import logging
 from copy import deepcopy
 
-from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import BatchKwargsGenerator
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
+    BatchKwargsGenerator,
+)
 from great_expectations.exceptions import BatchKwargsError, InvalidBatchKwargsError
 
 logger = logging.getLogger(__name__)
@@ -32,11 +34,10 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
                 logs:
                   path: data/log.csv
     """
+
     recognized_batch_parameters = {"name", "partition_id"}
 
-    def __init__(self, name="default",
-                 datasource=None,
-                 assets=None):
+    def __init__(self, name="default", datasource=None, assets=None):
         logger.debug("Constructing ManualBatchKwargsGenerator {!r}".format(name))
         super(ManualBatchKwargsGenerator, self).__init__(name, datasource=datasource)
 
@@ -59,7 +60,9 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
         elif generator_asset in self.assets:
             return self.assets[generator_asset]
 
-        raise InvalidBatchKwargsError("No asset definition for requested asset %s" % generator_asset)
+        raise InvalidBatchKwargsError(
+            "No asset definition for requested asset %s" % generator_asset
+        )
 
     def _get_iterator(self, generator_asset, **kwargs):
         datasource_batch_kwargs = self._datasource.process_batch_parameters(**kwargs)
@@ -74,16 +77,18 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
 
     def get_available_partition_ids(self, generator_asset):
         partition_ids = []
-        asset_definition = self._get_generator_asset_config(generator_asset=generator_asset)
+        asset_definition = self._get_generator_asset_config(
+            generator_asset=generator_asset
+        )
         if isinstance(asset_definition, list):
             for batch_definition in asset_definition:
                 try:
-                    partition_ids.append(batch_definition['partition_id'])
+                    partition_ids.append(batch_definition["partition_id"])
                 except KeyError:
                     pass
         elif isinstance(asset_definition, dict):
             try:
-                partition_ids.append(asset_definition['partition_id'])
+                partition_ids.append(asset_definition["partition_id"])
             except KeyError:
                 pass
         return partition_ids
@@ -93,18 +98,20 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
         partition_id = batch_parameters.pop("partition_id", None)
         batch_kwargs = self._datasource.process_batch_parameters(batch_parameters)
         if partition_id:
-            asset_definition = self._get_generator_asset_config(generator_asset=batch_parameters.get("name"))
+            asset_definition = self._get_generator_asset_config(
+                generator_asset=batch_parameters.get("name")
+            )
             if isinstance(asset_definition, list):
                 for batch_definition in asset_definition:
                     try:
-                        if batch_definition['partition_id'] == partition_id:
+                        if batch_definition["partition_id"] == partition_id:
                             batch_kwargs = deepcopy(batch_definition)
                             batch_kwargs.pop("partition_id")
                     except KeyError:
                         pass
             elif isinstance(asset_definition, dict):
                 try:
-                    if asset_definition['partition_id'] == partition_id:
+                    if asset_definition["partition_id"] == partition_id:
                         batch_kwargs = deepcopy(asset_definition)
                         batch_kwargs.pop("partition_id")
                 except KeyError:
@@ -115,5 +122,7 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
         if batch_kwargs is not None:
             return batch_kwargs
         else:
-            raise BatchKwargsError("Unable to find batch_kwargs for given batch_parameters", batch_parameters)
-
+            raise BatchKwargsError(
+                "Unable to find batch_kwargs for given batch_parameters",
+                batch_parameters,
+            )

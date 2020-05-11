@@ -1,9 +1,10 @@
 # Utility methods for dealing with Dataset objects
 
-from scipy import stats
-import pandas as pd
-import numpy as np
 import warnings
+
+import numpy as np
+import pandas as pd
+from scipy import stats
 
 
 def is_valid_partition_object(partition_object):
@@ -11,8 +12,9 @@ def is_valid_partition_object(partition_object):
     :param partition_object: The partition_object to evaluate
     :return: Boolean
     """
-    return is_valid_continuous_partition_object(partition_object) \
-        or is_valid_categorical_partition_object(partition_object)
+    return is_valid_continuous_partition_object(
+        partition_object
+    ) or is_valid_categorical_partition_object(partition_object)
 
 
 def is_valid_categorical_partition_object(partition_object):
@@ -20,11 +22,16 @@ def is_valid_categorical_partition_object(partition_object):
     :param partition_object: The partition_object to evaluate
     :return: Boolean
     """
-    if partition_object is None or ("weights" not in partition_object) or ("values" not in partition_object):
+    if (
+        partition_object is None
+        or ("weights" not in partition_object)
+        or ("values" not in partition_object)
+    ):
         return False
     # Expect the same number of values as weights; weights should sum to one
-    return len(partition_object['values']) == len(partition_object['weights']) and \
-        np.allclose(np.sum(partition_object['weights']), 1)
+    return len(partition_object["values"]) == len(
+        partition_object["weights"]
+    ) and np.allclose(np.sum(partition_object["weights"]), 1)
 
 
 def is_valid_continuous_partition_object(partition_object):
@@ -33,23 +40,30 @@ def is_valid_continuous_partition_object(partition_object):
     :param partition_object: The partition_object to evaluate
     :return: Boolean
     """
-    if (partition_object is None) or ("weights" not in partition_object) or ("bins" not in partition_object):
+    if (
+        (partition_object is None)
+        or ("weights" not in partition_object)
+        or ("bins" not in partition_object)
+    ):
         return False
 
     if "tail_weights" in partition_object:
         if len(partition_object["tail_weights"]) != 2:
             return False
-        comb_weights=partition_object["tail_weights"]+partition_object["weights"]
+        comb_weights = partition_object["tail_weights"] + partition_object["weights"]
     else:
-        comb_weights=partition_object["weights"]
+        comb_weights = partition_object["weights"]
 
     ## TODO: Consider adding this check to migrate to the tail_weights structure of partition objects
     # if (partition_object['bins'][0] == -np.inf) or (partition_object['bins'][-1] == np.inf):
     #     return False
 
     # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one
-    return (len(partition_object['bins']) == (len(partition_object['weights']) + 1)) and \
-        np.all(np.diff(partition_object['bins']) > 0) and np.allclose(np.sum(comb_weights), 1)
+    return (
+        (len(partition_object["bins"]) == (len(partition_object["weights"]) + 1))
+        and np.all(np.diff(partition_object["bins"]) > 0)
+        and np.allclose(np.sum(comb_weights), 1)
+    )
 
 
 def categorical_partition_data(data):
@@ -78,10 +92,7 @@ def categorical_partition_data(data):
     nonnull_count = (null_indexes == False).sum()
 
     weights = value_counts.values / nonnull_count
-    return {
-        "values": value_counts.index.tolist(),
-        "weights": weights
-    }
+    return {"values": value_counts.index.tolist(), "weights": weights}
 
 
 def kde_partition_data(data, estimate_tails=True):
@@ -102,36 +113,42 @@ def kde_partition_data(data, estimate_tails=True):
         See :ref:`partition_object`.
     """
     kde = stats.kde.gaussian_kde(data)
-    evaluation_bins = np.linspace(start=np.min(data) - (kde.covariance_factor() / 2),
-                                  stop=np.max(data) +
-                                  (kde.covariance_factor() / 2),
-                                  num=np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1).astype(int))
+    evaluation_bins = np.linspace(
+        start=np.min(data) - (kde.covariance_factor() / 2),
+        stop=np.max(data) + (kde.covariance_factor() / 2),
+        num=np.floor(
+            ((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1
+        ).astype(int),
+    )
     cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in evaluation_bins]
     evaluation_weights = np.diff(cdf_vals)
 
     if estimate_tails:
-        bins = np.concatenate(([np.min(data) - (1.5 * kde.covariance_factor())],
-                               evaluation_bins,
-                               [np.max(data) + (1.5 * kde.covariance_factor())]))
+        bins = np.concatenate(
+            (
+                [np.min(data) - (1.5 * kde.covariance_factor())],
+                evaluation_bins,
+                [np.max(data) + (1.5 * kde.covariance_factor())],
+            )
+        )
     else:
         bins = np.concatenate(([-np.inf], evaluation_bins, [np.inf]))
 
-    weights = np.concatenate(
-        ([cdf_vals[0]], evaluation_weights, [1 - cdf_vals[-1]]))
+    weights = np.concatenate(([cdf_vals[0]], evaluation_weights, [1 - cdf_vals[-1]]))
 
-    return {
-        "bins": bins,
-        "weights": weights
-    }
+    return {"bins": bins, "weights": weights}
 
 
-def partition_data(data, bins='auto', n_bins=10):
-    warnings.warn("partition_data is deprecated and will be removed. Use either continuous_partition_data or \
-                    categorical_partition_data instead.", DeprecationWarning)
+def partition_data(data, bins="auto", n_bins=10):
+    warnings.warn(
+        "partition_data is deprecated and will be removed. Use either continuous_partition_data or \
+                    categorical_partition_data instead.",
+        DeprecationWarning,
+    )
     return continuous_partition_data(data, bins, n_bins)
 
 
-def continuous_partition_data(data, bins='auto', n_bins=10, **kwargs):
+def continuous_partition_data(data, bins="auto", n_bins=10, **kwargs):
     """Convenience method for building a partition object on continuous data
 
     Args:
@@ -150,28 +167,31 @@ def continuous_partition_data(data, bins='auto', n_bins=10, **kwargs):
         }
         See :ref:`partition_object`.
     """
-    if bins == 'uniform':
-        bins = np.linspace(start=np.min(data), stop=np.max(data), num=n_bins+1)
-    elif bins == 'ntile':
-        bins = np.percentile(data, np.linspace(start=0, stop=100, num=n_bins+1))
-    elif bins != 'auto':
+    if bins == "uniform":
+        bins = np.linspace(start=np.min(data), stop=np.max(data), num=n_bins + 1)
+    elif bins == "ntile":
+        bins = np.percentile(data, np.linspace(start=0, stop=100, num=n_bins + 1))
+    elif bins != "auto":
         raise ValueError("Invalid parameter for bins argument")
 
     try:
         hist, bin_edges = np.histogram(data, bins, density=False, **kwargs)
     except ValueError as e:
-        raise ValueError("Unable to compute histogram. Did you know you can pass additional kwargs to numpy histogram,"
-                         "such as a range? Numpy error was: " + str(e))
+        raise ValueError(
+            "Unable to compute histogram. Did you know you can pass additional kwargs to numpy histogram,"
+            "such as a range? Numpy error was: " + str(e)
+        )
     except TypeError as e:
-        raise TypeError("Unable to compute histogram. numpy histogram raised error: " + str(e))
+        raise TypeError(
+            "Unable to compute histogram. numpy histogram raised error: " + str(e)
+        )
 
-    return {
-        "bins": bin_edges,
-        "weights": hist / len(data)
-    }
+    return {"bins": bin_edges, "weights": hist / len(data)}
 
 
-def build_continuous_partition_object(dataset, column, bins='auto', n_bins=10, allow_relative_error=False):
+def build_continuous_partition_object(
+    dataset, column, bins="auto", n_bins=10, allow_relative_error=False
+):
     """Convenience method for building a partition object on continuous data from a dataset and column
 
     Args:
@@ -201,12 +221,15 @@ def build_continuous_partition_object(dataset, column, bins='auto', n_bins=10, a
         bins = bins.tolist()
     else:
         bins = list(bins)
-    weights = list(np.array(dataset.get_column_hist(column, tuple(bins))) / dataset.get_column_nonnull_count(column))
+    weights = list(
+        np.array(dataset.get_column_hist(column, tuple(bins)))
+        / dataset.get_column_nonnull_count(column)
+    )
     tail_weights = (1 - sum(weights)) / 2
     partition_object = {
         "bins": bins,
         "weights": weights,
-        "tail_weights": [tail_weights, tail_weights]
+        "tail_weights": [tail_weights, tail_weights],
     }
     return partition_object
 
@@ -233,8 +256,8 @@ def build_categorical_partition_object(dataset, column, sort="value"):
     """
     counts = dataset.get_column_value_counts(column, sort)
     return {
-        'values': list(counts.index),
-        'weights': list(np.array(counts) / dataset.get_column_nonnull_count(column))
+        "values": list(counts.index),
+        "weights": list(np.array(counts) / dataset.get_column_nonnull_count(column)),
     }
 
 
@@ -269,64 +292,67 @@ def infer_distribution_parameters(data, distribution, params=None):
         params = dict()
     elif not isinstance(params, dict):
         raise TypeError(
-            "params must be a dictionary object, see great_expectations documentation")
+            "params must be a dictionary object, see great_expectations documentation"
+        )
 
-    if 'mean' not in params.keys():
-        params['mean'] = data.mean()
+    if "mean" not in params.keys():
+        params["mean"] = data.mean()
 
-    if 'std_dev' not in params.keys():
-        params['std_dev'] = data.std()
+    if "std_dev" not in params.keys():
+        params["std_dev"] = data.std()
 
     if distribution == "beta":
         # scipy cdf(x, a, b, loc=0, scale=1)
-        if 'alpha' not in params.keys():
+        if "alpha" not in params.keys():
             # from https://stats.stackexchange.com/questions/12232/calculating-the-parameters-of-a-beta-distribution-using-the-mean-and-variance
-            params['alpha'] = (params['mean'] ** 2) * (
-                ((1 - params['mean']) / params['std_dev'] ** 2) - (1 / params['mean']))
-        if 'beta' not in params.keys():
-            params['beta'] = params['alpha'] * ((1 / params['mean']) - 1)
+            params["alpha"] = (params["mean"] ** 2) * (
+                ((1 - params["mean"]) / params["std_dev"] ** 2) - (1 / params["mean"])
+            )
+        if "beta" not in params.keys():
+            params["beta"] = params["alpha"] * ((1 / params["mean"]) - 1)
 
-    elif distribution == 'gamma':
+    elif distribution == "gamma":
         # scipy cdf(x, a, loc=0, scale=1)
-        if 'alpha' not in params.keys():
+        if "alpha" not in params.keys():
             # Using https://en.wikipedia.org/wiki/Gamma_distribution
-            params['alpha'] = (params['mean'] / params.get('scale', 1))
+            params["alpha"] = params["mean"] / params.get("scale", 1)
 
     # elif distribution == 'poisson':
     #    if 'lambda' not in params.keys():
     #       params['lambda'] = params['mean']
 
-    elif distribution == 'uniform':
+    elif distribution == "uniform":
         # scipy cdf(x, loc=0, scale=1)
-        if 'min' not in params.keys():
-            if 'loc' in params.keys():
-                params['min'] = params['loc']
+        if "min" not in params.keys():
+            if "loc" in params.keys():
+                params["min"] = params["loc"]
             else:
-                params['min'] = min(data)
-        if 'max' not in params.keys():
-            if 'scale' in params.keys():
-                params['max'] = params['scale']
+                params["min"] = min(data)
+        if "max" not in params.keys():
+            if "scale" in params.keys():
+                params["max"] = params["scale"]
             else:
-                params['max'] = max(data) - params['min']
+                params["max"] = max(data) - params["min"]
 
-    elif distribution == 'chi2':
+    elif distribution == "chi2":
         # scipy cdf(x, df, loc=0, scale=1)
-        if 'df' not in params.keys():
+        if "df" not in params.keys():
             # from https://en.wikipedia.org/wiki/Chi-squared_distribution
-            params['df'] = params['mean']
+            params["df"] = params["mean"]
 
     #  Expon only uses loc and scale, use default
     # elif distribution == 'expon':
-        # scipy cdf(x, loc=0, scale=1)
+    # scipy cdf(x, loc=0, scale=1)
     #    if 'lambda' in params.keys():
-            # Lambda is optional
+    # Lambda is optional
     #        params['scale'] = 1 / params['lambda']
-    elif distribution is not 'norm':
+    elif distribution is not "norm":
         raise AttributeError(
-            "Unsupported distribution type. Please refer to Great Expectations Documentation")
+            "Unsupported distribution type. Please refer to Great Expectations Documentation"
+        )
 
-    params['loc'] = params.get('loc', 0)
-    params['scale'] = params.get('scale', 1)
+    params["loc"] = params.get("loc", 0)
+    params["scale"] = params.get("scale", 1)
 
     return params
 
@@ -349,24 +375,24 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
                If an unsupported distribution is provided.
     """
 
-    params['loc'] = params.get('loc', 0)
-    if 'scale' not in params:
-        params['scale'] = 1
+    params["loc"] = params.get("loc", 0)
+    if "scale" not in params:
+        params["scale"] = 1
 
-    if distribution == 'norm':
-        return params['mean'], params['std_dev']
-    elif distribution == 'beta':
-        return params['alpha'], params['beta'], params['loc'], params['scale']
-    elif distribution == 'gamma':
-        return params['alpha'], params['loc'], params['scale']
+    if distribution == "norm":
+        return params["mean"], params["std_dev"]
+    elif distribution == "beta":
+        return params["alpha"], params["beta"], params["loc"], params["scale"]
+    elif distribution == "gamma":
+        return params["alpha"], params["loc"], params["scale"]
     # elif distribution == 'poisson':
     #    return params['lambda'], params['loc']
-    elif distribution == 'uniform':
-        return params['min'], params['max']
-    elif distribution == 'chi2':
-        return params['df'], params['loc'], params['scale']
-    elif distribution == 'expon':
-        return params['loc'], params['scale']
+    elif distribution == "uniform":
+        return params["min"], params["max"]
+    elif distribution == "chi2":
+        return params["df"], params["loc"], params["scale"]
+    elif distribution == "expon":
+        return params["loc"], params["scale"]
 
 
 def validate_distribution_parameters(distribution, params):
@@ -391,29 +417,44 @@ def validate_distribution_parameters(distribution, params):
 
     """
 
-    norm_msg = "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
+    norm_msg = (
+        "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
+    )
     beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
     gamma_msg = "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
     # poisson_msg = "poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
-    uniform_msg = "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
+    uniform_msg = (
+        "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
+    )
     chi2_msg = "chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
-    expon_msg = "expon distributions require 0 parameters and optionally 'loc', 'scale'."
+    expon_msg = (
+        "expon distributions require 0 parameters and optionally 'loc', 'scale'."
+    )
 
-    if distribution not in ['norm', 'beta', 'gamma', 'poisson', 'uniform', 'chi2', 'expon']:
-        raise AttributeError(
-            "Unsupported  distribution provided: %s" % distribution)
+    if distribution not in [
+        "norm",
+        "beta",
+        "gamma",
+        "poisson",
+        "uniform",
+        "chi2",
+        "expon",
+    ]:
+        raise AttributeError("Unsupported  distribution provided: %s" % distribution)
 
     if isinstance(params, dict):
         # `params` is a dictionary
-        if params.get("std_dev", 1) <= 0 or params.get('scale', 1) <= 0:
+        if params.get("std_dev", 1) <= 0 or params.get("scale", 1) <= 0:
             raise ValueError("std_dev and scale must be positive.")
 
         # alpha and beta are required and positive
-        if distribution == 'beta' and (params.get('alpha', -1) <= 0 or params.get('beta', -1) <= 0):
+        if distribution == "beta" and (
+            params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0
+        ):
             raise ValueError("Invalid parameters: %s" % beta_msg)
 
         # alpha is required and positive
-        elif distribution == 'gamma' and params.get('alpha', -1) <= 0:
+        elif distribution == "gamma" and params.get("alpha", -1) <= 0:
             raise ValueError("Invalid parameters: %s" % gamma_msg)
 
         # lambda is a required and positive
@@ -421,14 +462,14 @@ def validate_distribution_parameters(distribution, params):
         #    raise ValueError("Invalid parameters: %s" %poisson_msg)
 
         # df is necessary and required to be positve
-        elif distribution == 'chi2' and params.get('df', -1) <= 0:
+        elif distribution == "chi2" and params.get("df", -1) <= 0:
             raise ValueError("Invalid parameters: %s:" % chi2_msg)
 
     elif isinstance(params, tuple) or isinstance(params, list):
         scale = None
 
         # `params` is a tuple or a list
-        if distribution == 'beta':
+        if distribution == "beta":
             if len(params) < 2:
                 raise ValueError("Missing required parameters: %s" % beta_msg)
             if params[0] <= 0 or params[1] <= 0:
@@ -438,20 +479,19 @@ def validate_distribution_parameters(distribution, params):
             elif len(params) > 4:
                 raise ValueError("Too many parameters provided: %s" % beta_msg)
 
-        elif distribution == 'norm':
+        elif distribution == "norm":
             if len(params) > 2:
                 raise ValueError("Too many parameters provided: %s" % norm_msg)
             if len(params) == 2:
                 scale = params[1]
 
-        elif distribution == 'gamma':
+        elif distribution == "gamma":
             if len(params) < 1:
                 raise ValueError("Missing required parameters: %s" % gamma_msg)
             if len(params) == 3:
                 scale = params[2]
             if len(params) > 3:
-                raise ValueError(
-                    "Too many parameters provided: %s" % gamma_msg)
+                raise ValueError("Too many parameters provided: %s" % gamma_msg)
             elif params[0] <= 0:
                 raise ValueError("Invalid parameters: %s" % gamma_msg)
 
@@ -463,14 +503,13 @@ def validate_distribution_parameters(distribution, params):
         #    elif params[0] <= 0:
         #        raise ValueError("Invalid parameters: %s" %poisson_msg)
 
-        elif distribution == 'uniform':
+        elif distribution == "uniform":
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:
-                raise ValueError(
-                    "Too many arguments provided: %s" % uniform_msg)
+                raise ValueError("Too many arguments provided: %s" % uniform_msg)
 
-        elif distribution == 'chi2':
+        elif distribution == "chi2":
             if len(params) < 1:
                 raise ValueError("Missing required parameters: %s" % chi2_msg)
             elif len(params) == 3:
@@ -480,7 +519,7 @@ def validate_distribution_parameters(distribution, params):
             if params[0] <= 0:
                 raise ValueError("Invalid parameters: %s" % chi2_msg)
 
-        elif distribution == 'expon':
+        elif distribution == "expon":
 
             if len(params) == 2:
                 scale = params[1]
@@ -492,7 +531,8 @@ def validate_distribution_parameters(distribution, params):
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)")
+            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)"
+        )
 
     return
 
@@ -518,6 +558,6 @@ def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs)
     results = list()
 
     for column in columns:
-        results.append(expectation(column, *args,  **kwargs))
+        results.append(expectation(column, *args, **kwargs))
 
     return results
