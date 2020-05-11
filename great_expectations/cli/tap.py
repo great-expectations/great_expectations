@@ -7,9 +7,7 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message
-from great_expectations.core.usage_statistics.usage_statistics import (
-    send_usage_message,
-)
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import lint_code
 
@@ -53,22 +51,14 @@ def _tap_new(suite, tap_filename, directory, usage_event, datasource=None):
             batch_kwargs, context_directory, suite, tap_filename
         )
         cli_message(
-        f"""\
+            f"""\
 <green>A new tap has been generated!</green>
 To run this tap, run: <green>python {tap_filename}</green>
 You can edit this script or place this code snippet in your pipeline."""
         )
-        send_usage_message(
-            data_context=context,
-            event=usage_event,
-            success=True
-        )
+        send_usage_message(data_context=context, event=usage_event, success=True)
     except Exception as e:
-        send_usage_message(
-            data_context=context,
-            event=usage_event,
-            success=False
-        )
+        send_usage_message(data_context=context, event=usage_event, success=False)
         raise e
 
 
