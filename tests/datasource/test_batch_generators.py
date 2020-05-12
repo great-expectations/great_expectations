@@ -1,54 +1,55 @@
+import os
+
 import pytest
 
-import os
+from great_expectations.datasource.batch_kwargs_generator import (
+    DatabricksTableBatchKwargsGenerator,
+    GlobReaderBatchKwargsGenerator,
+    SubdirReaderBatchKwargsGenerator,
+)
 
 try:
     from unittest import mock
 except ImportError:
     import mock
 
-from great_expectations.datasource.batch_kwargs_generator import SubdirReaderBatchKwargsGenerator, GlobReaderBatchKwargsGenerator, DatabricksTableBatchKwargsGenerator
-
 
 def test_file_kwargs_generator(data_context, filesystem_csv):
     base_dir = filesystem_csv
 
-    datasource = data_context.add_datasource("default",
-                                        module_name="great_expectations.datasource",
-                                        class_name="PandasDatasource",
-                                        batch_kwargs_generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderBatchKwargsGenerator",
-        "base_directory": str(base_dir),
-    }
-}
-)
+    datasource = data_context.add_datasource(
+        "default",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(base_dir),
+            }
+        },
+    )
 
     generator = datasource.get_batch_kwargs_generator("subdir_reader")
     known_data_asset_names = datasource.get_available_data_asset_names()
 
     # Use set to avoid order dependency
-    assert set(known_data_asset_names["subdir_reader"]["names"]) == {('f1', 'file'), ('f2', 'file'), ('f3', 'directory')}
+    assert set(known_data_asset_names["subdir_reader"]["names"]) == {
+        ("f1", "file"),
+        ("f2", "file"),
+        ("f3", "directory"),
+    }
 
     f1_batches = [batch_kwargs["path"] for batch_kwargs in generator.get_iterator("f1")]
     assert len(f1_batches) == 1
-    expected_batches = [
-        {
-            "path": os.path.join(base_dir, "f1.csv")
-        }
-    ]
+    expected_batches = [{"path": os.path.join(base_dir, "f1.csv")}]
     for batch in expected_batches:
         assert batch["path"] in f1_batches
 
     f3_batches = [batch_kwargs["path"] for batch_kwargs in generator.get_iterator("f3")]
     assert len(f3_batches) == 2
     expected_batches = [
-        {
-            "path": os.path.join(base_dir, "f3", "f3_20190101.csv")
-        },
-        {
-            "path": os.path.join(base_dir, "f3", "f3_20190102.csv")
-        }
+        {"path": os.path.join(base_dir, "f3", "f3_20190101.csv")},
+        {"path": os.path.join(base_dir, "f3", "f3_20190102.csv")},
     ]
     for batch in expected_batches:
         assert batch["path"] in f3_batches
@@ -83,14 +84,11 @@ def test_glob_reader_generator(basic_pandas_datasource, tmp_path_factory):
     with open(os.path.join(basedir, "f0.json"), "w") as outfile:
         outfile.write("\n\n\n")
 
-    g2 = GlobReaderBatchKwargsGenerator(base_directory=basedir, datasource=basic_pandas_datasource, asset_globs={
-        "blargs": {
-            "glob": "*.blarg"
-        },
-        "fs": {
-            "glob": "f*"
-        }
-    })
+    g2 = GlobReaderBatchKwargsGenerator(
+        base_directory=basedir,
+        datasource=basic_pandas_datasource,
+        asset_globs={"blargs": {"glob": "*.blarg"}, "fs": {"glob": "f*"}},
+    )
 
     g2_assets = g2.get_available_data_asset_names()
     # Use set in test to avoid order issues
@@ -102,7 +100,7 @@ def test_glob_reader_generator(basic_pandas_datasource, tmp_path_factory):
         os.path.join(basedir, "f3.blarg"),
         os.path.join(basedir, "f4.blarg"),
         os.path.join(basedir, "f5.blarg"),
-        os.path.join(basedir, "f6.blarg")
+        os.path.join(basedir, "f6.blarg"),
     ]
     for kwargs in real_blargs:
         assert kwargs in blargs_kwargs
@@ -152,7 +150,15 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
 
     g1_assets = g1.get_available_data_asset_names()
     # Use set in test to avoid order issues
-    assert set(g1_assets["names"]) == {('f7', 'file'), ('f4', 'directory'), ('f6', 'file'), ('f0', 'file'), ('f2', 'file'), ('f9', 'file'), ('f8', 'file')}
+    assert set(g1_assets["names"]) == {
+        ("f7", "file"),
+        ("f4", "directory"),
+        ("f6", "file"),
+        ("f0", "file"),
+        ("f2", "file"),
+        ("f9", "file"),
+        ("f8", "file"),
+    }
 
 
 def test_databricks_generator(basic_sparkdf_datasource):

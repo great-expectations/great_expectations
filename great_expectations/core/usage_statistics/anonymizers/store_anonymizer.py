@@ -1,13 +1,15 @@
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
+from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymizer import (
+    StoreBackendAnonymizer,
+)
 from great_expectations.data_context.store import (
-    Store,
-    ValidationsStore,
+    EvaluationParameterStore,
     ExpectationsStore,
     HtmlSiteStore,
     MetricStore,
-    EvaluationParameterStore,
+    Store,
+    ValidationsStore,
 )
-from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymizer import StoreBackendAnonymizer
 
 
 class StoreAnonymizer(Anonymizer):
@@ -20,7 +22,7 @@ class StoreAnonymizer(Anonymizer):
             EvaluationParameterStore,
             MetricStore,
             Store,
-            HtmlSiteStore
+            HtmlSiteStore,
         ]
         self._store_backend_anonymizer = StoreBackendAnonymizer(salt=salt)
 
@@ -32,13 +34,13 @@ class StoreAnonymizer(Anonymizer):
         self.anonymize_object_info(
             object_=store_obj,
             anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes
+            ge_classes=self._ge_classes,
         )
 
-        anonymized_info_dict["anonymized_store_backend"] = self._store_backend_anonymizer.anonymize_store_backend_info(
+        anonymized_info_dict[
+            "anonymized_store_backend"
+        ] = self._store_backend_anonymizer.anonymize_store_backend_info(
             store_backend_obj=store_backend_obj
         )
 
         return anonymized_info_dict
-
-

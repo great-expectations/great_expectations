@@ -13,13 +13,10 @@ class CallToActionRenderer(object):
                 "show",
                 "m-0",
                 "rounded-0",
-                "invisible"
+                "invisible",
             ],
-            "attributes": {
-                "id": "ge-cta-footer",
-                "role": "alert"
-            }
-        }
+            "attributes": {"id": "ge-cta-footer", "role": "alert"},
+        },
     }
 
     @classmethod
@@ -43,9 +40,7 @@ class CallToActionRenderer(object):
         cta_object["styling"] = cls._document_defaults.get("styling")
         cta_object["tooltip_icon"] = {
             "template": "$icon",
-            "params": {
-                "icon": ""
-            },
+            "params": {"icon": ""},
             "tooltip": {
                 "content": "To disable this footer, set the show_how_to_buttons flag in your project's data_docs_sites config to false."
             },
@@ -56,7 +51,7 @@ class CallToActionRenderer(object):
                         "classes": ["m-1", "fas", "fa-question-circle"],
                     }
                 }
-            }
+            },
         }
 
         return cta_object

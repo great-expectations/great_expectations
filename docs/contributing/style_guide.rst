@@ -18,7 +18,7 @@ These guidelines should be followed consistently for methods and variables expos
 
 * Methods are usually named using snake_case.
 * Methods that behave as operators (e.g. comparison or equality) are named using camelCase. These methods are rare and should be changed with great caution. Please reach out to James Campbell if you see the need for a change of this kind.
-
+* Lint your contribution. Our CI system will check using ``black`` and ``isort``. We have a git pre-commit configuration in the repo, so you can just run ``pre-commit install`` to automatically run your changes through the linting process before submitting.
 
 .rst files
 ----------
