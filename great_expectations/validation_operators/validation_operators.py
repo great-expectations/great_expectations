@@ -188,28 +188,6 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch_actions_results
 
-        # TODO: Note that the following code is unreachable
-        result_object = {}
-
-        for item in assets_to_validate:
-            batch = self._build_batch_from_item(item)
-            expectation_suite_identifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=batch.expectation_suite_name
-            )
-            validation_result_id = ValidationResultIdentifier(
-                expectation_suite_identifier=expectation_suite_identifier,
-                run_id=run_id,
-                batch_identifier=batch.batch_id
-            )
-            result_object[validation_result_id] = {}
-            batch_validation_result = batch.validate(result_format="SUMMARY")
-            result_object[validation_result_id]["validation_result"] = batch_validation_result
-            batch_actions_results = self._run_actions(batch, batch._expectation_suite, batch_validation_result, run_id)
-            result_object[validation_result_id]["actions_results"] = batch_actions_results
-
-        # NOTE: Eugene: 2019-09-24: Need to define this result object. Discussion required!
-        return result_object
-
 
 class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationOperator):
     """WarningAndFailureExpectationSuitesValidationOperator is a validation operator
