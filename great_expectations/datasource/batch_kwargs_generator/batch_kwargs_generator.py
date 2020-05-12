@@ -76,9 +76,7 @@ class BatchKwargsGenerator(object):
 
     def __init__(self, name, datasource):
         self._name = name
-        self._generator_config = {
-            "class_name": self.__class__.__name__
-        }
+        self._generator_config = {"class_name": self.__class__.__name__}
         self._data_asset_iterators = {}
         if datasource is None:
             raise ValueError("datasource must be provided for a BatchKwargsGenerator")
@@ -116,33 +114,22 @@ class BatchKwargsGenerator(object):
     def get_config(self):
         return self._generator_config
 
-    # TODO: deprecate generator_asset argument
-    def reset_iterator(self, generator_asset=None, data_asset_name=None, **kwargs):
-        assert (generator_asset and not data_asset_name) or (not generator_asset and data_asset_name), \
-            "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            warnings.warn("The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-                          "Please update code accordingly.", DeprecationWarning)
-            data_asset_name = generator_asset
+    def reset_iterator(self, generator_asset, **kwargs):
+        self._data_asset_iterators[generator_asset] = (
+            self._get_iterator(generator_asset, **kwargs),
+            kwargs,
+        )
 
-        self._data_asset_iterators[data_asset_name] = self._get_iterator(
-            data_asset_name=data_asset_name, **kwargs), kwargs
-
-    # TODO: deprecate generator_asset argument
-    def get_iterator(self, generator_asset=None, data_asset_name=None, **kwargs):
-        assert (generator_asset and not data_asset_name) or (not generator_asset and data_asset_name), \
-            "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            warnings.warn("The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-                          "Please update code accordingly.", DeprecationWarning)
-            data_asset_name = generator_asset
-
-        if data_asset_name in self._data_asset_iterators:
-            data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
+    def get_iterator(self, generator_asset, **kwargs):
+        if generator_asset in self._data_asset_iterators:
+            data_asset_iterator, passed_kwargs = self._data_asset_iterators[
+                generator_asset
+            ]
             if passed_kwargs != kwargs:
                 logger.warning(
                     "Asked to yield batch_kwargs using different supplemental kwargs. Please reset iterator to "
-                    "use different supplemental kwargs.")
+                    "use different supplemental kwargs."
+                )
             return data_asset_iterator
         else:
             self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
@@ -166,9 +153,15 @@ class BatchKwargsGenerator(object):
             batch_parameters["partition_id"] = partition_id
         batch_parameters.update(kwargs)
         param_keys = set(batch_parameters.keys())
-        recognized_params = (self.recognized_batch_parameters | self._datasource.recognized_batch_parameters)
+        recognized_params = (
+            self.recognized_batch_parameters
+            | self._datasource.recognized_batch_parameters
+        )
         if not param_keys <= recognized_params:
-            logger.warning("Unrecognized batch_parameter(s): %s" % str(param_keys - recognized_params))
+            logger.warning(
+                "Unrecognized batch_parameter(s): %s"
+                % str(param_keys - recognized_params)
+            )
 
         batch_kwargs = self._build_batch_kwargs(batch_parameters)
         batch_kwargs["data_asset_name"] = data_asset_name
@@ -192,32 +185,46 @@ class BatchKwargsGenerator(object):
             self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
         data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
         if passed_kwargs != kwargs:
-            logger.warning("Asked to yield batch_kwargs using different supplemental kwargs. Resetting iterator to "
-                           "use new supplemental kwargs.")
-            self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
-            data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
+            logger.warning(
+                "Asked to yield batch_kwargs using different supplemental kwargs. Resetting iterator to "
+                "use new supplemental kwargs."
+            )
+            self.reset_iterator(generator_asset, **kwargs)
+            data_asset_iterator, passed_kwargs = self._data_asset_iterators[
+                generator_asset
+            ]
         try:
             batch_kwargs = next(data_asset_iterator)
             batch_kwargs["datasource"] = self._datasource.name
             return batch_kwargs
         except StopIteration:
-            self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
-            data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
+            self.reset_iterator(generator_asset, **kwargs)
+            data_asset_iterator, passed_kwargs = self._data_asset_iterators[
+                generator_asset
+            ]
             if passed_kwargs != kwargs:
                 logger.warning(
                     "Asked to yield batch_kwargs using different batch parameters. Resetting iterator to "
-                    "use different batch parameters.")
-                self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
-                data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
+                    "use different batch parameters."
+                )
+                self.reset_iterator(generator_asset, **kwargs)
+                data_asset_iterator, passed_kwargs = self._data_asset_iterators[
+                    generator_asset
+                ]
             try:
                 batch_kwargs = next(data_asset_iterator)
                 batch_kwargs["datasource"] = self._datasource.name
                 return batch_kwargs
             except StopIteration:
                 # This is a degenerate case in which no kwargs are actually being generated
-                logger.warning("No batch_kwargs found for data_asset_name %s" % data_asset_name)
+                logger.warning(
+                    "No batch_kwargs found for generator_asset %s" % generator_asset
+                )
                 return {}
         except TypeError:
             # If we don't actually have an iterator we can generate, even after resetting, just return empty
-            logger.warning("Unable to generate batch_kwargs for data_asset_name %s" % data_asset_name)
+            logger.warning(
+                "Unable to generate batch_kwargs for generator_asset %s"
+                % generator_asset
+            )
             return {}

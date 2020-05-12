@@ -4,7 +4,7 @@ import uuid
 
 PROJECT_HELP_COMMENT = """
 # Welcome to Great Expectations! Always know what to expect from your data.
-# 
+#
 # Here you can define datasources, batch kwargs generators, integrations and
 # more. This file is intended to be committed to your repo. For help with
 # configuration please:
@@ -19,26 +19,35 @@ config_version: 1
 datasources: {}
 """
 
-CONFIG_VARIABLES_INTRO = """# This config file supports variable substitution which enables: 1) keeping
+CONFIG_VARIABLES_INTRO = """
+# This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes
 # such as staging vs prod.
 #
-# When GE encounters substitution syntax (like `my_key: ${my_value}` or 
-# `my_key: $my_value`) in the config file, it will attempt to replace the value
-# of `my_key` with the value from an environment variable `my_value` or a
-# corresponding key read from the file specified using
-# `config_variables_file_path`. Environment variables take precedence.
+# When GE encounters substitution syntax (like `my_key: ${my_value}` or
+# `my_key: $my_value`) in the great_expectations.yml file, it will attempt
+# to replace the value of `my_key` with the value from an environment
+# variable `my_value` or a corresponding key read from this config file,
+# which is defined through the `config_variables_file_path`.
+# Environment variables take precedence over variables defined here.
 #
-# If the substitution value comes from the config variables file, it can be a
-# simple (non-nested) value or a nested value such as a dictionary. If it comes
-# from an environment variable, it must be a simple value. Read more at:
+# Substitution values defined here can be a simple (non-nested) value,
+# or a nested value such as a dictionary.
+#
+# NOTE: Environment variables are currently *only* supported in
+# great_expectations.yml, but not in this config file!
+#
 # https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets
 
 """
 
-CONFIG_VARIABLES_TEMPLATE = CONFIG_VARIABLES_INTRO + "instance_id: " + str(uuid.uuid4()) + os.linesep
+CONFIG_VARIABLES_TEMPLATE = (
+    CONFIG_VARIABLES_INTRO + "instance_id: " + str(uuid.uuid4()) + os.linesep
+)
 
-PROJECT_OPTIONAL_CONFIG_COMMENT = CONFIG_VARIABLES_INTRO + """
+PROJECT_OPTIONAL_CONFIG_COMMENT = (
+    CONFIG_VARIABLES_INTRO
+    + """
 config_variables_file_path: uncommitted/config_variables.yml
 
 # The plugins_directory will be added to your python path for custom modules
@@ -73,12 +82,12 @@ validation_operators:
       #     renderer:
       #       module_name: great_expectations.render.renderer.slack_renderer
       #       class_name: SlackRenderer
-    
+
 stores:
 # Stores are configurable places to store things like Expectations, Validations
 # Data Docs, and more. These are for advanced users only - most users can simply
 # leave this section alone.
-# 
+#
 # Three stores are required: expectations, validations, and
 # evaluation_parameters, and must exist with a valid store entry. Additional
 # stores can be configured for uses such as data_docs, validation_operators, etc.
@@ -118,6 +127,7 @@ data_docs_sites:
     site_index_builder:
         class_name: DefaultSiteIndexBuilder
 """
+)
 
 ANONYMIZED_USAGE_STATISTICS_ENABLED = """
 anonymous_usage_statistics:
@@ -129,5 +139,13 @@ anonymous_usage_statistics:
   enabled: False
 """
 
-PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED = PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT + ANONYMIZED_USAGE_STATISTICS_ENABLED
-PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED = PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT + ANONYMIZED_USAGE_STATISTICS_DISABLED
+PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED = (
+    PROJECT_HELP_COMMENT
+    + PROJECT_OPTIONAL_CONFIG_COMMENT
+    + ANONYMIZED_USAGE_STATISTICS_ENABLED
+)
+PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED = (
+    PROJECT_HELP_COMMENT
+    + PROJECT_OPTIONAL_CONFIG_COMMENT
+    + ANONYMIZED_USAGE_STATISTICS_DISABLED
+)

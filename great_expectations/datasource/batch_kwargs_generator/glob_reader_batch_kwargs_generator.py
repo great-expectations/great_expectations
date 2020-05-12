@@ -1,11 +1,12 @@
-import os
-import glob
-import re
 import datetime
+import glob
 import logging
-import warnings
+import os
+import re
 
-from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import BatchKwargsGenerator
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
+    BatchKwargsGenerator,
+)
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
@@ -47,14 +48,19 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
     """
     recognized_batch_parameters = {"data_asset_name", "reader_method", "reader_options", "limit"}
 
-    def __init__(self, name="default",
-                 datasource=None,
-                 base_directory="/data",
-                 reader_options=None,
-                 asset_globs=None,
-                 reader_method=None):
+    def __init__(
+        self,
+        name="default",
+        datasource=None,
+        base_directory="/data",
+        reader_options=None,
+        asset_globs=None,
+        reader_method=None,
+    ):
         logger.debug("Constructing GlobReaderBatchKwargsGenerator {!r}".format(name))
-        super(GlobReaderBatchKwargsGenerator, self).__init__(name, datasource=datasource)
+        super(GlobReaderBatchKwargsGenerator, self).__init__(
+            name, datasource=datasource
+        )
         if reader_options is None:
             reader_options = {}
 
@@ -64,7 +70,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                     "glob": "*",
                     "partition_regex": r"^((19|20)\d\d[- /.]?(0[1-9]|1[012])[- /.]?(0[1-9]|[12][0-9]|3[01])_(.*))\.csv",
                     "match_group_id": 1,
-                    "reader_method": 'read_csv'
+                    "reader_method": "read_csv",
                 }
             }
 
@@ -89,10 +95,15 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
     def base_directory(self):
         # If base directory is a relative path, interpret it as relative to the data context's
         # context root directory (parent directory of great_expectation dir)
-        if os.path.isabs(self._base_directory) or self._datasource.get_data_context() is None:
+        if (
+            os.path.isabs(self._base_directory)
+            or self._datasource.get_data_context() is None
+        ):
             return self._base_directory
         else:
-            return os.path.join(self._datasource.get_data_context().root_directory, self._base_directory)
+            return os.path.join(
+                self._datasource.get_data_context().root_directory, self._base_directory
+            )
 
     def get_available_data_asset_names(self):
         known_assets = []
@@ -117,7 +128,8 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         glob_config = self._get_data_asset_config(data_asset_name)
         batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
         partition_ids = [
-            self._partitioner(path, glob_config) for path in batch_paths
+            self._partitioner(path, glob_config)
+            for path in batch_paths
             if self._partitioner(path, glob_config) is not None
         ]
         return partition_ids
@@ -126,26 +138,36 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         try:
             data_asset_name = batch_parameters.pop("data_asset_name")
         except KeyError:
-            raise BatchKwargsError("Unable to build BatchKwargs: no name provided in batch_parameters.",
-                                   batch_kwargs=batch_parameters)
+            raise BatchKwargsError(
+                "Unable to build BatchKwargs: no name provided in batch_parameters.",
+                batch_kwargs=batch_parameters,
+            )
 
         glob_config = self._get_data_asset_config(data_asset_name)
         batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
         partition_id = batch_parameters.pop("partition_id", None)
 
         if partition_id:
-            path = [path for path in batch_paths if self._partitioner(path, glob_config) == partition_id]
+            path = [
+                path
+                for path in batch_paths
+                if self._partitioner(path, glob_config) == partition_id
+            ]
             if len(path) != 1:
-                raise BatchKwargsError("Unable to identify partition %s for asset %s" % (partition_id, data_asset_name),
-                                       {
-                                            data_asset_name: data_asset_name,
-                                            partition_id: partition_id
-                                        })
-            batch_kwargs = self._build_batch_kwargs_from_path(path[0], glob_config, **batch_parameters)
+                raise BatchKwargsError(
+                    "Unable to identify partition %s for asset %s"
+                    % (partition_id, generator_asset),
+                    {generator_asset: generator_asset, partition_id: partition_id},
+                )
+            batch_kwargs = self._build_batch_kwargs_from_path(
+                path[0], glob_config, **batch_parameters
+            )
             return batch_kwargs
 
         else:
-            return self.yield_batch_kwargs(data_asset_name=data_asset_name, **batch_parameters)
+            return self.yield_batch_kwargs(
+                generator_asset=generator_asset, **batch_parameters
+            )
 
     def _get_data_asset_paths(self, data_asset_name):
         """
@@ -167,27 +189,51 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             batch_kwargs = {
                 "data_asset_name": data_asset_name,
             }
-            raise BatchKwargsError("Unknown asset_name %s" % data_asset_name, batch_kwargs)
+            raise BatchKwargsError(
+                "Unknown asset_name %s" % generator_asset, batch_kwargs
+            )
 
-    def _get_iterator(self, data_asset_name, reader_method=None, reader_options=None, limit=None):
-        glob_config = self._get_data_asset_config(data_asset_name)
+    def _get_iterator(
+        self, generator_asset, reader_method=None, reader_options=None, limit=None
+    ):
+        glob_config = self._get_generator_asset_config(generator_asset)
         paths = glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
-        return self._build_batch_kwargs_path_iter(paths, glob_config, reader_method=reader_method,
-                                                  reader_options=reader_options,
-                                                  limit=limit)
+        return self._build_batch_kwargs_path_iter(
+            paths,
+            glob_config,
+            reader_method=reader_method,
+            reader_options=reader_options,
+            limit=limit,
+        )
 
-    def _build_batch_kwargs_path_iter(self, path_list, glob_config, reader_method=None, reader_options=None,
-                                      limit=None):
+    def _build_batch_kwargs_path_iter(
+        self,
+        path_list,
+        glob_config,
+        reader_method=None,
+        reader_options=None,
+        limit=None,
+    ):
         for path in path_list:
-            yield self._build_batch_kwargs_from_path(path, glob_config, reader_method=reader_method,
-                                                     reader_options=reader_options,
-                                                     limit=limit)
+            yield self._build_batch_kwargs_from_path(
+                path,
+                glob_config,
+                reader_method=reader_method,
+                reader_options=reader_options,
+                limit=limit,
+            )
 
-    def _build_batch_kwargs_from_path(self, path, glob_config, reader_method=None, reader_options=None, limit=None):
+    def _build_batch_kwargs_from_path(
+        self, path, glob_config, reader_method=None, reader_options=None, limit=None
+    ):
         batch_kwargs = self._datasource.process_batch_parameters(
-            reader_method=reader_method or glob_config.get("reader_method") or self.reader_method,
-            reader_options=reader_options or glob_config.get("reader_options") or self.reader_options,
-            limit=limit or glob_config.get("limit")
+            reader_method=reader_method
+            or glob_config.get("reader_method")
+            or self.reader_method,
+            reader_options=reader_options
+            or glob_config.get("reader_options")
+            or self.reader_options,
+            limit=limit or glob_config.get("limit"),
         )
         batch_kwargs["path"] = path
         batch_kwargs["datasource"] = self._datasource.name
@@ -201,20 +247,27 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             # So, we'll add a *sortable* id
             if matches is None:
                 logger.warning("No match found for path: %s" % path)
-                return datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ") + "__unmatched"
+                return (
+                    datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+                    + "__unmatched"
+                )
             else:
                 try:
                     return matches.group(match_group_id)
                 except IndexError:
-                    logger.warning("No match group %d in path %s" % (match_group_id, path))
-                    return datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ") + "__no_match_group"
+                    logger.warning(
+                        "No match group %d in path %s" % (match_group_id, path)
+                    )
+                    return (
+                        datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+                        + "__no_match_group"
+                    )
 
         # If there is no partitioner defined, fall back on using the path as a partition_id
         else:
             if path.startswith(self.base_directory):
-                path = path[len(self.base_directory):]
+                path = path[len(self.base_directory) :]
                 # In case os.join had to add a "/"
                 if path.startswith("/"):
                     path = path[1:]
             return path
-

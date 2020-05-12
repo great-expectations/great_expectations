@@ -52,7 +52,7 @@ def suite():
     "--batch-kwargs",
     default=None,
     help="""Batch_kwargs that specify the batch of data to be used a sample when editing the suite. Must be a valid JSON dictionary.
-Make sure to escape quotes. Example: "{\"datasource\": \"my_db\", \"query\": \"select * from my_table\"}"    
+Make sure to escape quotes. Example: "{\"datasource\": \"my_db\", \"query\": \"select * from my_table\"}"
 """,
 )
 @click.option(
@@ -146,7 +146,9 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
             additional_batch_kwargs = None
             try:
-                data_source = toolkit.select_datasource(context, datasource_name=datasource)
+                data_source = toolkit.select_datasource(
+                    context, datasource_name=datasource
+                )
             except ValueError as ve:
                 cli_message("<red>{}</red>".format(ve))
                 send_usage_message(
@@ -170,8 +172,6 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                 ) = get_batch_kwargs(
                     context,
                     datasource_name=data_source.name,
-                    batch_kwargs_generator_name=None,
-                    data_asset_name=None,
                     additional_batch_kwargs=additional_batch_kwargs,
                 )
 
@@ -287,7 +287,15 @@ def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
     )
 
 
-def _suite_new(suite: str, directory: str, empty: bool, jupyter: bool, view: bool, batch_kwargs, usage_event: str) -> None:
+def _suite_new(
+    suite: str,
+    directory: str,
+    empty: bool,
+    jupyter: bool,
+    view: bool,
+    batch_kwargs,
+    usage_event: str,
+) -> None:
     # TODO break this up into demo and new
     context = toolkit.load_data_context_with_error_handling(directory)
 
@@ -299,16 +307,15 @@ def _suite_new(suite: str, directory: str, empty: bool, jupyter: bool, view: boo
         if batch_kwargs is not None:
             batch_kwargs = json.loads(batch_kwargs)
 
-        success, suite_name = create_expectation_suite_impl(
+        success, suite_name = toolkit.create_expectation_suite(
             context,
             datasource_name=datasource_name,
             batch_kwargs_generator_name=generator_name,
-            data_asset_name=data_asset_name,
+            generator_asset=generator_asset,
             batch_kwargs=batch_kwargs,
             expectation_suite_name=suite,
             additional_batch_kwargs={"limit": 1000},
             empty_suite=empty,
-            show_intro_message=False,
             open_docs=view,
         )
         if success:
@@ -368,14 +375,12 @@ def suite_delete(suite, directory):
         toolkit.exit_with_failure_message_and_stats(
             context,
             usage_event,
-            "</red>No expectation suites found in the project.</red>"
+            "</red>No expectation suites found in the project.</red>",
         )
 
     if suite not in suite_names:
         toolkit.exit_with_failure_message_and_stats(
-            context,
-            usage_event,
-            f"No expectation suite named {suite} found."
+            context, usage_event, f"No expectation suite named {suite} found."
         )
 
     context.delete_expectation_suite(suite)

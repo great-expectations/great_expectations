@@ -1,12 +1,13 @@
-import re
-import inspect
 import hashlib
-import os
+import inspect
 import json
-import jsonschema
+import os
+import re
 from functools import wraps
-import numpy as np
 from itertools import compress
+
+import jsonschema
+import numpy as np
 
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
@@ -54,7 +55,15 @@ class MetaFileDataAsset(DataAsset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(self, skip=None, mostly=None, null_lines_regex=r"^\s*$", result_format=None, *args, **kwargs):
+        def inner_wrapper(
+            self,
+            skip=None,
+            mostly=None,
+            null_lines_regex=r"^\s*$",
+            result_format=None,
+            *args,
+            **kwargs
+        ):
             try:
                 f = open(self._path)
             except OSError:
@@ -64,9 +73,9 @@ class MetaFileDataAsset(DataAsset):
                 result_format = self.default_expectation_args["result_format"]
 
             result_format = parse_result_format(result_format)
-            lines = f.readlines() #Read in file lines
+            lines = f.readlines()  # Read in file lines
 
-            #Skip k initial lines designated by the user
+            # Skip k initial lines designated by the user
             if skip is not None and skip <= len(lines):
                 try:
                     assert float(skip).is_integer()
@@ -74,50 +83,70 @@ class MetaFileDataAsset(DataAsset):
                 except (AssertionError, ValueError):
                     raise ValueError("skip must be a positive integer")
 
-                for i in range(1, skip+1):
+                for i in range(1, skip + 1):
                     lines.pop(0)
 
             if lines:
                 if null_lines_regex is not None:
-                    null_lines = re.compile(null_lines_regex) #Ignore lines that are empty or have only white space ("null values" in the line-map context)
+                    null_lines = re.compile(
+                        null_lines_regex
+                    )  # Ignore lines that are empty or have only white space ("null values" in the line-map context)
                     boolean_mapped_null_lines = np.array(
-                        [bool(null_lines.match(line)) for line in lines])
+                        [bool(null_lines.match(line)) for line in lines]
+                    )
                 else:
                     boolean_mapped_null_lines = np.zeros(len(lines), dtype=bool)
                 element_count = int(len(lines))
                 if element_count > sum(boolean_mapped_null_lines):
-                    nonnull_lines = list(compress(lines, np.invert(boolean_mapped_null_lines)))
+                    nonnull_lines = list(
+                        compress(lines, np.invert(boolean_mapped_null_lines))
+                    )
                     nonnull_count = int((boolean_mapped_null_lines == False).sum())
                     boolean_mapped_success_lines = np.array(
-                        func(self, _lines=nonnull_lines, *args, **kwargs))
+                        func(self, _lines=nonnull_lines, *args, **kwargs)
+                    )
                     success_count = np.count_nonzero(boolean_mapped_success_lines)
-                    unexpected_list = list(compress(nonnull_lines, np.invert(boolean_mapped_success_lines)))
-                    nonnull_lines_index = range(0, len(nonnull_lines)+1)
-                    unexpected_index_list = list(compress(nonnull_lines_index,
-                                                          np.invert(boolean_mapped_success_lines)))
+                    unexpected_list = list(
+                        compress(nonnull_lines, np.invert(boolean_mapped_success_lines))
+                    )
+                    nonnull_lines_index = range(0, len(nonnull_lines) + 1)
+                    unexpected_index_list = list(
+                        compress(
+                            nonnull_lines_index, np.invert(boolean_mapped_success_lines)
+                        )
+                    )
                     success, percent_success = self._calc_map_expectation_success(
-                        success_count, nonnull_count, mostly)
+                        success_count, nonnull_count, mostly
+                    )
                     return_obj = self._format_map_output(
-                        result_format, success,
-                        element_count, nonnull_count,
+                        result_format,
+                        success,
+                        element_count,
+                        nonnull_count,
                         len(unexpected_list),
-                        unexpected_list, unexpected_index_list
+                        unexpected_list,
+                        unexpected_index_list,
                     )
                 else:
                     return_obj = self._format_map_output(
-                        result_format=result_format, success=None,
-                        element_count=element_count, nonnull_count=0,
+                        result_format=result_format,
+                        success=None,
+                        element_count=element_count,
+                        nonnull_count=0,
                         unexpected_count=0,
-                        unexpected_list=[], unexpected_index_list=[]
+                        unexpected_list=[],
+                        unexpected_index_list=[],
                     )
             else:
-                return_obj = self._format_map_output(result_format=result_format,
-                                                     success=None,
-                                                     element_count=0,
-                                                     nonnull_count=0,
-                                                     unexpected_count=0,
-                                                     unexpected_list=[],
-                                                     unexpected_index_list=[])
+                return_obj = self._format_map_output(
+                    result_format=result_format,
+                    success=None,
+                    element_count=0,
+                    nonnull_count=0,
+                    unexpected_count=0,
+                    unexpected_list=[],
+                    unexpected_index_list=[],
+                )
             f.close()
             return return_obj
 
@@ -141,23 +170,25 @@ class FileDataAsset(MetaFileDataAsset):
         self._path = file_path
 
     @MetaFileDataAsset.file_lines_map_expectation
-    def expect_file_line_regex_match_count_to_be_between(self,
-                                                         regex,
-                                                         expected_min_count=0,
-                                                         expected_max_count=None,
-                                                         skip=None,
-                                                         mostly=None,
-                                                         null_lines_regex=r"^\s*$",
-                                                         result_format=None,
-                                                         include_config=True,
-                                                         catch_exceptions=None,
-                                                         meta=None,
-                                                         _lines=None):
+    def expect_file_line_regex_match_count_to_be_between(
+        self,
+        regex,
+        expected_min_count=0,
+        expected_max_count=None,
+        skip=None,
+        mostly=None,
+        null_lines_regex=r"^\s*$",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+        _lines=None,
+    ):
         """
         Expect the number of times a regular expression appears on each line of
         a file to be between a maximum and minimum value.
 
-        Args: 
+        Args:
             regex: \
                 A string that can be compiled as valid regular expression to match
 
@@ -217,52 +248,70 @@ class FileDataAsset(MetaFileDataAsset):
                 assert float(expected_min_count).is_integer()
                 assert float(expected_min_count) >= 0
             except (AssertionError, ValueError):
-                raise ValueError("expected_min_count must be a non-negative \
-                                 integer or None")
+                raise ValueError(
+                    "expected_min_count must be a non-negative \
+                                 integer or None"
+                )
 
         if expected_max_count is not None:
             try:
                 assert float(expected_max_count).is_integer()
                 assert float(expected_max_count) >= 0
             except (AssertionError, ValueError):
-                raise ValueError("expected_max_count must be a non-negative \
-                                 integer or None")
+                raise ValueError(
+                    "expected_max_count must be a non-negative \
+                                 integer or None"
+                )
 
         if expected_max_count is not None and expected_min_count is not None:
             try:
                 assert expected_max_count >= expected_min_count
             except (AssertionError, ValueError):
-                raise ValueError("expected_max_count must be greater than or \
-                                 equal to expected_min_count")
+                raise ValueError(
+                    "expected_max_count must be greater than or \
+                                 equal to expected_min_count"
+                )
 
         if expected_max_count is not None and expected_min_count is not None:
-            truth_list = [expected_min_count <= len(comp_regex.findall(line)) <= expected_max_count for line in _lines]
+            truth_list = [
+                expected_min_count
+                <= len(comp_regex.findall(line))
+                <= expected_max_count
+                for line in _lines
+            ]
         elif expected_max_count is not None:
-            truth_list = [len(comp_regex.findall(line)) <= expected_max_count for line in _lines]
+            truth_list = [
+                len(comp_regex.findall(line)) <= expected_max_count for line in _lines
+            ]
         elif expected_min_count is not None:
-            truth_list = [len(comp_regex.findall(line)) >= expected_min_count for line in _lines]
+            truth_list = [
+                len(comp_regex.findall(line)) >= expected_min_count for line in _lines
+            ]
         else:
             truth_list = [True for _ in _lines]
 
         return truth_list
 
     @MetaFileDataAsset.file_lines_map_expectation
-    def expect_file_line_regex_match_count_to_equal(self, regex,
-                                                    expected_count=0,
-                                                    skip=None,
-                                                    mostly=None,
-                                                    nonnull_lines_regex=r"^\s*$",
-                                                    result_format=None,
-                                                    include_config=True,
-                                                    catch_exceptions=None,
-                                                    meta=None,
-                                                    _lines=None):
+    def expect_file_line_regex_match_count_to_equal(
+        self,
+        regex,
+        expected_count=0,
+        skip=None,
+        mostly=None,
+        nonnull_lines_regex=r"^\s*$",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+        _lines=None,
+    ):
 
         """
         Expect the number of times a regular expression appears on each line of
         a file to be between a maximum and minimum value.
 
-        Args: 
+        Args:
             regex: \
                 A string that can be compiled as valid regular expression to match
 
@@ -322,9 +371,15 @@ class FileDataAsset(MetaFileDataAsset):
         return [len(comp_regex.findall(line)) == expected_count for line in _lines]
 
     @DataAsset.expectation(["value"])
-    def expect_file_hash_to_equal(self, value, hash_alg='md5', result_format=None,
-                                  include_config=True, catch_exceptions=None,
-                                  meta=None):
+    def expect_file_hash_to_equal(
+        self,
+        value,
+        hash_alg="md5",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
 
         """
         Expect computed file hash to equal some given value.
@@ -360,10 +415,10 @@ class FileDataAsset(MetaFileDataAsset):
         try:
             hash = hashlib.new(hash_alg)
 
-        # Limit file reads to 64 KB chunks at a time
+            # Limit file reads to 64 KB chunks at a time
             BLOCK_SIZE = 65536
             try:
-                with open(self._path, 'rb') as file:
+                with open(self._path, "rb") as file:
                     file_buffer = file.read(BLOCK_SIZE)
                     while file_buffer:
                         hash.update(file_buffer)
@@ -376,9 +431,15 @@ class FileDataAsset(MetaFileDataAsset):
         return {"success": success}
 
     @DataAsset.expectation(["minsize", "maxsize"])
-    def expect_file_size_to_be_between(self, minsize=0, maxsize=None, result_format=None,
-                                       include_config=True, catch_exceptions=None,
-                                       meta=None):
+    def expect_file_size_to_be_between(
+        self,
+        minsize=0,
+        maxsize=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
 
         """
         Expect file size to be between a user specified maxsize and minsize.
@@ -419,24 +480,24 @@ class FileDataAsset(MetaFileDataAsset):
         # they must be representable as clean integers.
         try:
             if not float(minsize).is_integer():
-                raise ValueError('minsize must be an integer')
+                raise ValueError("minsize must be an integer")
             minsize = int(float(minsize))
 
             if maxsize is not None and not float(maxsize).is_integer():
-                raise ValueError('maxsize must be an integer')
+                raise ValueError("maxsize must be an integer")
             elif maxsize is not None:
                 maxsize = int(float(maxsize))
         except TypeError:
             raise
 
         if minsize < 0:
-            raise ValueError('minsize must be greater than or equal to 0')
+            raise ValueError("minsize must be greater than or equal to 0")
 
         if maxsize is not None and maxsize < 0:
-            raise ValueError('maxsize must be greater than or equal to 0')
+            raise ValueError("maxsize must be greater than or equal to 0")
 
         if maxsize is not None and minsize > maxsize:
-            raise ValueError('maxsize must be greater than or equal to minsize')
+            raise ValueError("maxsize must be greater than or equal to minsize")
 
         if maxsize is None and size >= minsize:
             success = True
@@ -445,16 +506,17 @@ class FileDataAsset(MetaFileDataAsset):
         else:
             success = False
 
-        return {
-            "success": success,
-            "result": {
-                "observed_value": size
-            }
-        }
+        return {"success": success, "result": {"observed_value": size}}
 
     @DataAsset.expectation(["filepath"])
-    def expect_file_to_exist(self, filepath=None, result_format=None, include_config=True,
-                             catch_exceptions=None, meta=None):
+    def expect_file_to_exist(
+        self,
+        filepath=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
 
         """
         Checks to see if a file specified by the user actually exists
@@ -500,10 +562,15 @@ class FileDataAsset(MetaFileDataAsset):
         return {"success": success}
 
     @DataAsset.expectation([])
-    def expect_file_to_have_valid_table_header(self, regex, skip=None,
-                                               result_format=None,
-                                               include_config=True,
-                                               catch_exceptions=None, meta=None):
+    def expect_file_to_have_valid_table_header(
+        self,
+        regex,
+        skip=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """
         Checks to see if a file has a line with unique delimited values,
         such a line may be used as a table header.
@@ -550,12 +617,12 @@ class FileDataAsset(MetaFileDataAsset):
 
         try:
             with open(self._path) as f:
-                lines = f.readlines() #Read in file lines
+                lines = f.readlines()  # Read in file lines
 
         except IOError:
             raise
 
-            #Skip k initial lines designated by the user
+            # Skip k initial lines designated by the user
         if skip is not None and skip <= len(lines):
             try:
                 assert float(skip).is_integer()
@@ -573,9 +640,14 @@ class FileDataAsset(MetaFileDataAsset):
         return {"success": success}
 
     @DataAsset.expectation([])
-    def expect_file_to_be_valid_json(self, schema=None, result_format=None,
-                                     include_config=True, catch_exceptions=None,
-                                     meta=None):
+    def expect_file_to_be_valid_json(
+        self,
+        schema=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
 
         """
         Args:
