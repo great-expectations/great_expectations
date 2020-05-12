@@ -6,6 +6,10 @@ How to Configure a Snowflake Datasource
 
 This guide shows how to connect to a Snowflake Datasource.
 
+-----
+Steps
+-----
+
 To add a Snowflake datasource do this:
 
 #.
@@ -42,9 +46,9 @@ To add a Snowflake datasource do this:
     will appear on your Terminal screen. After this confirmation, you can proceed with exploring the data sets in your
     new Snowflake data source.
 
-################
+----------------
 Additional Notes
-################
+----------------
 
 #.
     Assuming that you intend to use Great Expectations with the data in Snowflake, you may wish to install the required
