@@ -1,8 +1,8 @@
 .. _how_to__use_check_assets:
 
-############################
-Build Check Assets
-############################
+##########################################
+How to use check assets to validate data
+##########################################
 
 While Great Expectations has nearly :ref:`50 built in expectations<expectation_glossary>`, the need for complex data assertions is common.
 
@@ -19,7 +19,7 @@ A check asset is a slice of data that is only created for validation purposes an
 These check assets should be built in your pipeline\'s native transformation language.
 For example, if your pipeline is primarily SQL, create an additional table or view that slices the data so that you can use the built in expectations found here: :ref:`expectation_glossary`.
 
-Using a Check Asset introduces a new node into your data pipeline. You should clearly name the expectations about a check asset in a way that makes it easy to understand how it is used in the pipeline, for example by creating an expectation suite with the name ``event_data.time_rollup_check.warning``.
+Using a check asset introduces a new node into your data pipeline. You should clearly name the expectations about a check asset in a way that makes it easy to understand how it is used in the pipeline, for example by creating an :ref:`Expectation Suite`_ with the name ``event_data.time_rollup_check.warning``.
 
 -----------------------
 Postgres SQL example.
@@ -35,10 +35,10 @@ Let's suppose we have a ``visits`` table and we want to make an assertion about 
     FROM visits
     WHERE visit_date > current_date - interval '30' day;
 
-2. Create a new expectation suite against this new table.
+2. Create a new Expectation Suite for this new table.
 Again, we recommend using an obvious name such as ``visits.last_30_days.warning``.
 
-3. Add an expectation as follows:
+3. Add an Expectation as follows:
 
 .. code-block:: python
 

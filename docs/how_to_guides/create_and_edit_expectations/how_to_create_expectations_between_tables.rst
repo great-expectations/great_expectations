@@ -1,25 +1,24 @@
 .. _tutorial_create_expectations_between_tables:
 
-Create Expectations Between Tables
-===================================
+How to create Expectations between tables
+==========================================
 
-This tutorial covers the workflow of creating and editing expectations that relate to data stored in different tables or datasets.
+This tutorial covers the workflow of creating and editing :ref:`Expectations`_ that relate to data stored in different tables or datasets.
 
 Unfortunately, no Expectations natively support cross-table comparisons today (but we hope to in the future!). Consequently, there are two available paths:
 
-1. Use "Check Assets", where you create a new table that joins the two tables; or
+1. Use "check assets", where you create a new table that joins the two tables; or
 2. Use :ref:`Evaluation Parameters`_ to supply relevant metrics to expectations.
 
-Check Asset Pattern
+Check asset Pattern
 -------------------------
-
 
 See :ref:`how_to__use_check_assets` for more information on the check asset pattern.
 
 Use Evaluation Parameters
 -------------------------
 
-To compare two tables using evaluation parameters, you create expectations for each table, and reference a property from one validation result in the other. To use evaluation parameters, both assets need to be validated during the same run.
+To compare two tables using evaluation parameters, you create Expectations for each table, and reference a property from one :ref:`Validation Result <Validation Results>`_ in the other. To use Evaluation Parameters, both assets need to be validated during the same run.
 
 .. code-block:: python
 
