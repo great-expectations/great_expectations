@@ -10,9 +10,7 @@ import pytest
 import great_expectations as ge
 from great_expectations.core import expectationSuiteSchema
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.profile.basic_dataset_profiler import (
-    BasicDatasetProfiler,
-)
+from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ExpectationSuitePageRenderer,
@@ -30,33 +28,62 @@ from tests.test_utils import expectationSuiteValidationResultSchema
 
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs():
-    with open(file_relative_path(__file__, './fixtures/BasicDatasetProfiler_evrs.json'), 'r') as infile:
-        return expectationSuiteValidationResultSchema.load(json.load(infile, object_pairs_hook=OrderedDict))
+    with open(
+        file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_evrs.json"), "r"
+    ) as infile:
+        return expectationSuiteValidationResultSchema.load(
+            json.load(infile, object_pairs_hook=OrderedDict)
+        )
 
 
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs_with_exception():
-    with open(file_relative_path(__file__, './fixtures/BasicDatasetProfiler_evrs_with_exception.json'), 'r') as infile:
+    with open(
+        file_relative_path(
+            __file__, "./fixtures/BasicDatasetProfiler_evrs_with_exception.json"
+        ),
+        "r",
+    ) as infile:
         return expectationSuiteValidationResultSchema.load(json.load(infile))
 
 
 @pytest.fixture(scope="module")
 def titanic_dataset_profiler_expectations():
-    with open(file_relative_path(__file__, './fixtures/BasicDatasetProfiler_expectations.json'), 'r') as infile:
-        return expectationSuiteSchema.load(json.load(infile, object_pairs_hook=OrderedDict))
+    with open(
+        file_relative_path(
+            __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
+        ),
+        "r",
+    ) as infile:
+        return expectationSuiteSchema.load(
+            json.load(infile, object_pairs_hook=OrderedDict)
+        )
 
 
 @pytest.fixture(scope="module")
 def titanic_dataset_profiler_expectations_with_distribution():
-    with open(file_relative_path(__file__, './fixtures/BasicDatasetProfiler_expectations_with_distribution.json'), 'r') as infile:
-        return expectationSuiteSchema.load(json.load(infile, encoding="utf-8", object_pairs_hook=OrderedDict))
+    with open(
+        file_relative_path(
+            __file__,
+            "./fixtures/BasicDatasetProfiler_expectations_with_distribution.json",
+        ),
+        "r",
+    ) as infile:
+        return expectationSuiteSchema.load(
+            json.load(infile, encoding="utf-8", object_pairs_hook=OrderedDict)
+        )
 
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
 def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):
     rendered = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
-    with open(file_relative_path(__file__, './output/test_render_profiling_results_page_renderer.json'), 'w') as outfile:
+    with open(
+        file_relative_path(
+            __file__, "./output/test_render_profiling_results_page_renderer.json"
+        ),
+        "w",
+    ) as outfile:
         json.dump(rendered.to_json_dict(), outfile, indent=2)
 
     assert len(rendered.sections) > 5
@@ -77,16 +104,34 @@ def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_
             pass
 
     for column in evrs.keys():
-        with open(file_relative_path(__file__, './output/test_render_profiling_results_column_section_renderer__' + column + '.json'), 'w') \
-                as outfile:
-            json.dump(ProfilingResultsColumnSectionRenderer().render(evrs[column]).to_json_dict(), outfile, indent=2)
+        with open(
+            file_relative_path(
+                __file__,
+                "./output/test_render_profiling_results_column_section_renderer__"
+                + column
+                + ".json",
+            ),
+            "w",
+        ) as outfile:
+            json.dump(
+                ProfilingResultsColumnSectionRenderer()
+                .render(evrs[column])
+                .to_json_dict(),
+                outfile,
+                indent=2,
+            )
 
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
 def test_smoke_render_validation_results_page_renderer(titanic_profiler_evrs):
     rendered = ValidationResultsPageRenderer().render(titanic_profiler_evrs)
-    with open(file_relative_path(__file__, './output/test_render_validation_results_page_renderer.json'), 'w') as outfile:
+    with open(
+        file_relative_path(
+            __file__, "./output/test_render_validation_results_page_renderer.json"
+        ),
+        "w",
+    ) as outfile:
         json.dump(rendered.to_json_dict(), outfile, indent=2)
     assert len(rendered.sections) > 5
 
@@ -106,14 +151,29 @@ def test_render_validation_results_column_section_renderer(titanic_profiler_evrs
             pass
 
     for column in evrs.keys():
-        with open(file_relative_path(__file__, './output/test_render_validation_results_column_section_renderer__' + column + '.json'), 'w') \
-                as outfile:
-            json.dump(ValidationResultsColumnSectionRenderer().render(evrs[column]).to_json_dict(), outfile, indent=2)
+        with open(
+            file_relative_path(
+                __file__,
+                "./output/test_render_validation_results_column_section_renderer__"
+                + column
+                + ".json",
+            ),
+            "w",
+        ) as outfile:
+            json.dump(
+                ValidationResultsColumnSectionRenderer()
+                .render(evrs[column])
+                .to_json_dict(),
+                outfile,
+                indent=2,
+            )
 
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
-def test_render_expectation_suite_column_section_renderer(titanic_profiled_expectations_1):
+def test_render_expectation_suite_column_section_renderer(
+    titanic_profiled_expectations_1,
+):
     # Group expectations by column
     exp_groups = {}
     # print(json.dumps(titanic_profiled_expectations_1, indent=2))
@@ -127,66 +187,94 @@ def test_render_expectation_suite_column_section_renderer(titanic_profiled_expec
             pass
 
     for column in exp_groups.keys():
-        with open(file_relative_path(__file__, './output/test_render_expectation_suite_column_section_renderer' + column + '.json'), 'w') \
-                as outfile:
-            json.dump(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]).to_json_dict(), outfile, indent=2)
+        with open(
+            file_relative_path(
+                __file__,
+                "./output/test_render_expectation_suite_column_section_renderer"
+                + column
+                + ".json",
+            ),
+            "w",
+        ) as outfile:
+            json.dump(
+                ExpectationSuiteColumnSectionRenderer()
+                .render(exp_groups[column])
+                .to_json_dict(),
+                outfile,
+                indent=2,
+            )
 
 
 def test_content_block_list_available_expectations():
-    available_expectations = ValidationResultsTableContentBlockRenderer.list_available_expectations()
+    available_expectations = (
+        ValidationResultsTableContentBlockRenderer.list_available_expectations()
+    )
     known_validation_results_implemented_expectations = {
-        'expect_column_distinct_values_to_be_in_set',
-        'expect_column_distinct_values_to_contain_set',
-        'expect_column_distinct_values_to_equal_set',
-        'expect_column_kl_divergence_to_be_less_than',
-        'expect_column_max_to_be_between',
-        'expect_column_mean_to_be_between',
-        'expect_column_median_to_be_between',
-        'expect_column_min_to_be_between',
-        'expect_column_most_common_value_to_be_in_set',
-        'expect_column_pair_values_A_to_be_greater_than_B',
-        'expect_column_pair_values_to_be_equal',
-        'expect_column_proportion_of_unique_values_to_be_between',
-        'expect_column_stdev_to_be_between',
-        'expect_column_sum_to_be_between',
-        'expect_column_to_exist',
-        'expect_column_unique_value_count_to_be_between',
-        'expect_column_value_lengths_to_be_between',
-        'expect_column_value_lengths_to_equal',
-        'expect_column_values_to_be_between',
-        'expect_column_values_to_be_dateutil_parseable',
-        'expect_column_values_to_be_decreasing',
-        'expect_column_values_to_be_in_set',
-        'expect_column_values_to_be_in_type_list',
-        'expect_column_values_to_be_increasing',
-        'expect_column_values_to_be_json_parseable',
-        'expect_column_values_to_be_null',
-        'expect_column_values_to_be_of_type',
-        'expect_column_values_to_be_unique',
-        'expect_column_values_to_match_json_schema',
-        'expect_column_values_to_match_regex',
-        'expect_column_values_to_match_regex_list',
-        'expect_column_values_to_match_strftime_format',
-        'expect_column_values_to_not_be_in_set',
-        'expect_column_values_to_not_be_null',
-        'expect_column_values_to_not_match_regex',
-        'expect_column_values_to_not_match_regex_list',
-        'expect_multicolumn_values_to_be_unique',
-        'expect_table_columns_to_match_ordered_list',
-        'expect_table_row_count_to_be_between',
-        'expect_table_row_count_to_equal'
+        "expect_column_distinct_values_to_be_in_set",
+        "expect_column_distinct_values_to_contain_set",
+        "expect_column_distinct_values_to_equal_set",
+        "expect_column_kl_divergence_to_be_less_than",
+        "expect_column_max_to_be_between",
+        "expect_column_mean_to_be_between",
+        "expect_column_median_to_be_between",
+        "expect_column_min_to_be_between",
+        "expect_column_most_common_value_to_be_in_set",
+        "expect_column_pair_values_A_to_be_greater_than_B",
+        "expect_column_pair_values_to_be_equal",
+        "expect_column_proportion_of_unique_values_to_be_between",
+        "expect_column_stdev_to_be_between",
+        "expect_column_sum_to_be_between",
+        "expect_column_to_exist",
+        "expect_column_unique_value_count_to_be_between",
+        "expect_column_value_lengths_to_be_between",
+        "expect_column_value_lengths_to_equal",
+        "expect_column_values_to_be_between",
+        "expect_column_values_to_be_dateutil_parseable",
+        "expect_column_values_to_be_decreasing",
+        "expect_column_values_to_be_in_set",
+        "expect_column_values_to_be_in_type_list",
+        "expect_column_values_to_be_increasing",
+        "expect_column_values_to_be_json_parseable",
+        "expect_column_values_to_be_null",
+        "expect_column_values_to_be_of_type",
+        "expect_column_values_to_be_unique",
+        "expect_column_values_to_match_json_schema",
+        "expect_column_values_to_match_regex",
+        "expect_column_values_to_match_regex_list",
+        "expect_column_values_to_match_strftime_format",
+        "expect_column_values_to_not_be_in_set",
+        "expect_column_values_to_not_be_null",
+        "expect_column_values_to_not_match_regex",
+        "expect_column_values_to_not_match_regex_list",
+        "expect_multicolumn_values_to_be_unique",
+        "expect_table_columns_to_match_ordered_list",
+        "expect_table_row_count_to_be_between",
+        "expect_table_row_count_to_equal",
     }
-    assert known_validation_results_implemented_expectations <= set(available_expectations)
-    assert len(available_expectations) >= len(known_validation_results_implemented_expectations)
+    assert known_validation_results_implemented_expectations <= set(
+        available_expectations
+    )
+    assert len(available_expectations) >= len(
+        known_validation_results_implemented_expectations
+    )
 
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
-def test_render_profiled_fixture_expectation_suite(titanic_dataset_profiler_expectations):
-    rendered_content = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations)
+def test_render_profiled_fixture_expectation_suite(
+    titanic_dataset_profiler_expectations,
+):
+    rendered_content = ExpectationSuitePageRenderer().render(
+        titanic_dataset_profiler_expectations
+    )
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
-    with open(file_relative_path(__file__, './output/test_render_profiled_fixture_expectation_suite.html'), 'wb') as f:
+    with open(
+        file_relative_path(
+            __file__, "./output/test_render_profiled_fixture_expectation_suite.html"
+        ),
+        "wb",
+    ) as f:
         f.write(rendered_page.encode("utf-8"))
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
@@ -196,12 +284,21 @@ def test_render_profiled_fixture_expectation_suite(titanic_dataset_profiler_expe
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
 def test_render_profiled_fixture_expectation_suite_with_distribution(
-        titanic_dataset_profiler_expectations_with_distribution):
+    titanic_dataset_profiler_expectations_with_distribution,
+):
     # Tests sparkline
-    rendered_content = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations_with_distribution)
+    rendered_content = ExpectationSuitePageRenderer().render(
+        titanic_dataset_profiler_expectations_with_distribution
+    )
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
-    with open(file_relative_path(__file__, './output/titanic_dataset_profiler_expectation_suite_with_distribution.html'), 'wb') as f:
+    with open(
+        file_relative_path(
+            __file__,
+            "./output/titanic_dataset_profiler_expectation_suite_with_distribution.html",
+        ),
+        "wb",
+    ) as f:
         f.write(rendered_page.encode("utf-8"))
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
@@ -214,7 +311,10 @@ def test_render_profiling_results(titanic_profiled_evrs_1):
     rendered_content = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
-    with open(file_relative_path(__file__, './output/test_render_profiling_results.html'), 'wb') as f:
+    with open(
+        file_relative_path(__file__, "./output/test_render_profiling_results.html"),
+        "wb",
+    ) as f:
         f.write(rendered_page.encode("utf-8"))
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
@@ -227,13 +327,19 @@ def test_render_validation_results(titanic_profiled_evrs_1):
     rendered_content = ValidationResultsPageRenderer().render(titanic_profiled_evrs_1)
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
-    with open(file_relative_path(__file__, './output/test_render_validation_results.html'), 'wb') as f:
+    with open(
+        file_relative_path(__file__, "./output/test_render_validation_results.html"),
+        "wb",
+    ) as f:
         f.write(rendered_page.encode("utf-8"))
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
     assert rendered_page[-7:] == "</html>"
     assert "Table-Level Expectations" in rendered_page
-    assert 'Must have more than <span class="badge badge-secondary" >0</span> rows.' in rendered_page
+    assert (
+        'Must have more than <span class="badge badge-secondary" >0</span> rows.'
+        in rendered_page
+    )
     # assert 'This table should have a list of columns in a specific order, but that order is not specified.' \
     #        in rendered_page
 
@@ -241,12 +347,19 @@ def test_render_validation_results(titanic_profiled_evrs_1):
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
 def test_smoke_render_profiling_results_page_renderer_with_exception(
-        titanic_profiler_evrs_with_exception):
-    rendered_content = ProfilingResultsPageRenderer().render(titanic_profiler_evrs_with_exception)
+    titanic_profiler_evrs_with_exception,
+):
+    rendered_content = ProfilingResultsPageRenderer().render(
+        titanic_profiler_evrs_with_exception
+    )
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(
-            file_relative_path(__file__, './output/test_render_profiling_results_column_section_renderer_with_exception.html'), 'wb'
+        file_relative_path(
+            __file__,
+            "./output/test_render_profiling_results_column_section_renderer_with_exception.html",
+        ),
+        "wb",
     ) as outfile:
         outfile.write(rendered_page.encode("utf-8"))
 
@@ -266,7 +379,9 @@ def test_full_oobe_flow():
     rendered_content = ProfilingResultsPageRenderer().render(evrs)
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
-    with open(file_relative_path(__file__, './output/test_full_oobe_flow.html'), 'wb') as f:
+    with open(
+        file_relative_path(__file__, "./output/test_full_oobe_flow.html"), "wb"
+    ) as f:
         f.write(rendered_page.encode("utf-8"))
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
@@ -279,41 +394,34 @@ def test_render_string_template():
         "params": {
             "column": "categorical_fixed",
             "partition_object": {
-                "weights": [
-                    0.54,
-                    0.32,
-                    0.14
-                ],
-                "values": [
-                    "A",
-                    "B",
-                    "C"
-                ]
+                "weights": [0.54, 0.32, 0.14],
+                "values": ["A", "B", "C"],
             },
             "threshold": 0.1,
-            "sparklines_histogram": u"\u2588\u2584\u2581"
+            "sparklines_histogram": u"\u2588\u2584\u2581",
         },
         "styling": {
-            "default": {
-                "classes": [
-                    "badge",
-                    "badge-secondary"
-                ]
-            },
-            "params": {
-                "sparklines_histogram": {
-                    "styles": {
-                        "font-family": "serif"
-                    }
-                }
-            }
-        }
+            "default": {"classes": ["badge", "badge-secondary"]},
+            "params": {"sparklines_histogram": {"styles": {"font-family": "serif"}}},
+        },
     }
 
-    res = DefaultJinjaPageView().render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
-    expected = u"""<span>
+    res = (
+        DefaultJinjaPageView()
+        .render_string_template(template)
+        .replace(" ", "")
+        .replace("\t", "")
+        .replace("\n", "")
+    )
+    expected = (
+        u"""<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >█▄▁</span>
-            </span>""".replace(" ", "").replace("\t", "").replace("\n", "")
+            </span>""".replace(
+            " ", ""
+        )
+        .replace("\t", "")
+        .replace("\n", "")
+    )
     assert res == expected
 
     template = {
@@ -321,47 +429,43 @@ def test_render_string_template():
         "params": {
             "column": "categorical_fixed",
             "partition_object": {
-                "weights": [
-                    0.54,
-                    0.32,
-                    0.14
-                ],
-                "values": [
-                    "A",
-                    "B",
-                    "C"
-                ]
+                "weights": [0.54, 0.32, 0.14],
+                "values": ["A", "B", "C"],
             },
             "threshold": 0.1,
-            "sparklines_histogram": u"▃▆▁█"
+            "sparklines_histogram": u"▃▆▁█",
         },
         "styling": {
-            "default": {
-                "classes": [
-                    "badge",
-                    "badge-secondary"
-                ]
-            },
-            "params": {
-                "sparklines_histogram": {
-                    "styles": {
-                        "font-family": "serif"
-                    }
-                }
-            }
-        }
+            "default": {"classes": ["badge", "badge-secondary"]},
+            "params": {"sparklines_histogram": {"styles": {"font-family": "serif"}}},
+        },
     }
 
-    res = DefaultJinjaPageView().render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
-    expected = u"""<span>
+    res = (
+        DefaultJinjaPageView()
+        .render_string_template(template)
+        .replace(" ", "")
+        .replace("\t", "")
+        .replace("\n", "")
+    )
+    expected = (
+        u"""<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >▃▆▁█</span>
-            </span>""".replace(" ", "").replace("\t", "").replace("\n", "")
+            </span>""".replace(
+            " ", ""
+        )
+        .replace("\t", "")
+        .replace("\n", "")
+    )
 
     assert res == expected
 
 
 def test_render_string_template_bug_1():
-    #Looks like string templates can't contain dollar signs. We need some kind of escaping
+    # Looks like string templates can't contain dollar signs. We need some kind of escaping
     with pytest.raises(ValueError):
-        template = {'template': 'Car Insurance Premiums ($)', 'tooltip': {'content': 'expect_column_to_exist', 'placement': 'top'}}
+        template = {
+            "template": "Car Insurance Premiums ($)",
+            "tooltip": {"content": "expect_column_to_exist", "placement": "top"},
+        }
         DefaultJinjaPageView().render_string_template(template)

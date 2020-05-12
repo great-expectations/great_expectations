@@ -7,8 +7,8 @@ from click.testing import CliRunner
 from great_expectations.cli import cli
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
-
 # TODO When deprecating tap, many of these tests can be simplified to test the toolkit functions
+
 
 def test_tap_help_output(caplog,):
     runner = CliRunner(mix_stderr=False)
@@ -183,6 +183,7 @@ def test_tap_new_on_context_builds_runnable_tap_file(
     status, output = subprocess.getstatusoutput(cmdstring)
     assert status == 0
     assert output == "Validation Succeeded!"
+
 
 def test_tap_new_on_context_builds_runnable_tap_file_that_fails_validation(
     caplog, empty_data_context, filesystem_csv

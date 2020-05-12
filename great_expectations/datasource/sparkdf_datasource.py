@@ -1,15 +1,15 @@
-import logging
 import datetime
+import logging
 import uuid
 
 from great_expectations.datasource.types import BatchMarkers
+from great_expectations.types import ClassConfig
+
 from ..core.batch import Batch
 from ..dataset import SparkDFDataset
 from ..exceptions import BatchKwargsError
-
-from .datasource import Datasource
-from great_expectations.types import ClassConfig
 from ..types.configurations import classConfigSchema
+from .datasource import Datasource
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,9 @@ try:
 except ImportError:
     SparkSession = None
     # TODO: review logging more detail here
-    logger.debug("Unable to load pyspark; install optional spark dependency for support.")
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency for support."
+    )
 
 
 class SparkDFDatasource(Datasource):
@@ -30,10 +32,22 @@ class SparkDFDatasource(Datasource):
         - InMemoryBatchKwargs ("dataset" key)
         - QueryBatchKwargs ("query" key)
     """
-    recognized_batch_parameters = {'reader_method', 'reader_options', 'limit', 'dataset_options'}
+
+    recognized_batch_parameters = {
+        "reader_method",
+        "reader_options",
+        "limit",
+        "dataset_options",
+    }
 
     @classmethod
-    def build_configuration(cls, data_asset_type=None, batch_kwargs_generators=None, spark_config=None, **kwargs):
+    def build_configuration(
+        cls,
+        data_asset_type=None,
+        batch_kwargs_generators=None,
+        spark_config=None,
+        **kwargs
+    ):
         """
         Build a full configuration object for a datasource, potentially including generators with defaults.
 
@@ -51,7 +65,7 @@ class SparkDFDatasource(Datasource):
         if data_asset_type is None:
             data_asset_type = {
                 "class_name": "SparkDFDataset",
-                "module_name": "great_expectations.dataset"
+                "module_name": "great_expectations.dataset",
             }
         else:
             data_asset_type = classConfigSchema.dump(ClassConfig(**data_asset_type))
@@ -60,17 +74,23 @@ class SparkDFDatasource(Datasource):
             spark_config = {}
 
         configuration = kwargs
-        configuration.update({
-            "data_asset_type": data_asset_type,
-            "spark_config": spark_config
-        })
+        configuration.update(
+            {"data_asset_type": data_asset_type, "spark_config": spark_config}
+        )
         if batch_kwargs_generators:
             configuration["batch_kwargs_generators"] = batch_kwargs_generators
 
         return configuration
 
-    def __init__(self, name="default", data_context=None, data_asset_type=None, batch_kwargs_generators=None,
-                 spark_config=None, **kwargs):
+    def __init__(
+        self,
+        name="default",
+        data_context=None,
+        data_asset_type=None,
+        batch_kwargs_generators=None,
+        spark_config=None,
+        **kwargs
+    ):
         """Build a new SparkDFDatasource instance.
 
         Args:
@@ -81,16 +101,20 @@ class SparkDFDatasource(Datasource):
             spark_config: dictionary of key-value pairs to be set on the spark session builder
             **kwargs: Additional
         """
-        configuration_with_defaults = SparkDFDatasource.build_configuration(data_asset_type, batch_kwargs_generators,
-                                                                            spark_config, **kwargs)
+        configuration_with_defaults = SparkDFDatasource.build_configuration(
+            data_asset_type, batch_kwargs_generators, spark_config, **kwargs
+        )
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
-        batch_kwargs_generators = configuration_with_defaults.pop("batch_kwargs_generators", None)
+        batch_kwargs_generators = configuration_with_defaults.pop(
+            "batch_kwargs_generators", None
+        )
         super(SparkDFDatasource, self).__init__(
             name,
             data_context=data_context,
             data_asset_type=data_asset_type,
             batch_kwargs_generators=batch_kwargs_generators,
-            **configuration_with_defaults)
+            **configuration_with_defaults
+        )
 
         try:
             builder = SparkSession.builder
@@ -98,15 +122,18 @@ class SparkDFDatasource(Datasource):
                 builder.config(k, v)
             self.spark = builder.getOrCreate()
         except AttributeError:
-            logger.error("Unable to load spark context; install optional spark dependency for support.")
+            logger.error(
+                "Unable to load spark context; install optional spark dependency for support."
+            )
             self.spark = None
 
         self._build_generators()
 
-    def process_batch_parameters(self, reader_method=None, reader_options=None, limit=None, dataset_options=None):
+    def process_batch_parameters(
+        self, reader_method=None, reader_options=None, limit=None, dataset_options=None
+    ):
         batch_kwargs = super(SparkDFDatasource, self).process_batch_parameters(
-            limit=limit,
-            dataset_options=dataset_options,
+            limit=limit, dataset_options=dataset_options,
         )
 
         # Apply globally-configured reader options first
@@ -130,9 +157,9 @@ class SparkDFDatasource(Datasource):
         reader_options = batch_kwargs.get("reader_options", {})
 
         # We need to build batch_markers to be used with the DataFrame
-        batch_markers = BatchMarkers({
-            "ge_load_time": datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-        })
+        batch_markers = BatchMarkers(
+            {"ge_load_time": datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")}
+        )
 
         if "path" in batch_kwargs or "s3" in batch_kwargs:
             # If both are present, let s3 override
@@ -149,10 +176,12 @@ class SparkDFDatasource(Datasource):
         elif "query" in batch_kwargs:
             df = self.spark.sql(batch_kwargs["query"])
 
-        elif "dataset" in batch_kwargs and isinstance(batch_kwargs["dataset"], (DataFrame, SparkDFDataset)):
+        elif "dataset" in batch_kwargs and isinstance(
+            batch_kwargs["dataset"], (DataFrame, SparkDFDataset)
+        ):
             df = batch_kwargs.get("dataset")
             # We don't want to store the actual dataframe in kwargs; copy the remaining batch_kwargs
-            batch_kwargs = {k: batch_kwargs[k] for k in batch_kwargs if k != 'dataset'}
+            batch_kwargs = {k: batch_kwargs[k] for k in batch_kwargs if k != "dataset"}
             if isinstance(df, SparkDFDataset):
                 # Grab just the spark_df reference, since we want to override everything else
                 df = df.spark_df
@@ -161,10 +190,12 @@ class SparkDFDatasource(Datasource):
             batch_kwargs["ge_batch_id"] = str(uuid.uuid1())
 
         else:
-            raise BatchKwargsError("Unrecognized batch_kwargs for spark_source", batch_kwargs)
+            raise BatchKwargsError(
+                "Unrecognized batch_kwargs for spark_source", batch_kwargs
+            )
 
         if "limit" in batch_kwargs:
-            df = df.limit(batch_kwargs['limit'])
+            df = df.limit(batch_kwargs["limit"])
 
         return Batch(
             datasource_name=self.name,
@@ -172,7 +203,7 @@ class SparkDFDatasource(Datasource):
             data=df,
             batch_parameters=batch_parameters,
             batch_markers=batch_markers,
-            data_context=self._data_context
+            data_context=self._data_context,
         )
 
     @staticmethod
@@ -182,7 +213,9 @@ class SparkDFDatasource(Datasource):
         elif path.endswith(".parquet"):
             return {"reader_method": "parquet"}
 
-        raise BatchKwargsError("Unable to determine reader method from path: %s" % path, {"path": path})
+        raise BatchKwargsError(
+            "Unable to determine reader method from path: %s" % path, {"path": path}
+        )
 
     def _get_reader_fn(self, reader, reader_method=None, path=None):
         """Static helper for providing reader_fn
@@ -197,11 +230,15 @@ class SparkDFDatasource(Datasource):
 
         """
         if reader_method is None and path is None:
-            raise BatchKwargsError("Unable to determine spark reader function without reader_method or path.",
-                                   {"reader_method": reader_method})
+            raise BatchKwargsError(
+                "Unable to determine spark reader function without reader_method or path.",
+                {"reader_method": reader_method},
+            )
 
         if reader_method is None:
-            reader_method = self.guess_reader_method_from_path(path=path)["reader_method"]
+            reader_method = self.guess_reader_method_from_path(path=path)[
+                "reader_method"
+            ]
 
         try:
             if reader_method.lower() == "delta":
@@ -209,5 +246,7 @@ class SparkDFDatasource(Datasource):
 
             return getattr(reader, reader_method)
         except AttributeError:
-            raise BatchKwargsError("Unable to find reader_method %s in spark." % reader_method,
-                                   {"reader_method": reader_method})
+            raise BatchKwargsError(
+                "Unable to find reader_method %s in spark." % reader_method,
+                {"reader_method": reader_method},
+            )
