@@ -1,8 +1,8 @@
 .. _distributional_expectations:
 
-================================================================================
+===========================
 Distributional Expectations
-================================================================================
+===========================
 
 Distributional expectations help identify when new datasets or samples may be different than expected, and can help \
 ensure that assumptions developed during exploratory analysis still hold as new data becomes available. You should use \
@@ -84,7 +84,7 @@ Example discrete partition object:
 
 
 Constructing Partition Objects
---------------------------------------------------------------------------------
+------------------------------
 Three convenience functions are available to easily construct partition objects from existing data:
 
 * :func:`continuous_partition_data <great_expectations.dataset.util.continuous_partition_data>`
@@ -100,7 +100,7 @@ Tests interpret partition objects literally, so care should be taken when a part
 
 
 Distributional Expectations Core Tests
---------------------------------------------------------------------------------
+--------------------------------------
 Distributional expectations rely on three tests for their work.
 
 Kullback-Leibler (KL) divergence is available as an expectation for both categorical and continuous data (continuous data will be discretized according to the provided partition prior to computing divergence). Unlike KS and Chi-Squared tests which can use a p-value, you must provide a threshold for the relative entropy to use KL divergence. Further, KL divergence is not symmetric.
@@ -118,7 +118,7 @@ For categorical data, the expect_column_chisquare_test_p_value_to_be_greater_tha
 
 
 Distributional Expectations Alternatives
---------------------------------------------------------------------------------
-The core partition density object used in current expectations focuses on a particular (partition-based) method of "compressing" the data into a testable form, however it may be desireable to use alternative nonparametric approaches (e.g. Fourier transform/wavelets) to describe expected data.
+----------------------------------------
+The core partition density object used in current expectations focuses on a particular (partition-based) method of "compressing" the data into a testable form, however it may be desirable to use alternative nonparametric approaches (e.g. Fourier transform/wavelets) to describe expected data.
 
 

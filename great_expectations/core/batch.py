@@ -2,7 +2,15 @@ from great_expectations.types import DictDot
 
 
 class Batch(DictDot):
-    def __init__(self, datasource_name, batch_kwargs, data, batch_parameters, batch_markers, data_context):
+    def __init__(
+        self,
+        datasource_name,
+        batch_kwargs,
+        data,
+        batch_parameters,
+        batch_markers,
+        data_context,
+    ):
         self._datasource_name = datasource_name
         self._batch_kwargs = batch_kwargs
         self._data = data

@@ -26,7 +26,7 @@ def test_cli_command_entrance(caplog):
 
   Most commands follow this format: great_expectations <NOUN> <VERB>
 
-  The nouns are: datasource, docs, project, suite
+  The nouns are: datasource, docs, project, suite, validation-operator
 
   Most nouns accept the following verbs: new, list, edit
 
@@ -44,12 +44,15 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  datasource  datasource operations
-  docs        data docs operations
-  init        Initialize a new Great Expectations project.
-  project     project operations
-  suite       expectation suite operations
-  tap         tap operations
+  checkpoint           Checkpoint operations
+  datasource           Datasource operations
+  docs                 Data Docs operations
+  init                 Initialize a new Great Expectations project.
+  project              Project operations
+  store                Store operations
+  suite                Expectation Suite operations
+  tap                  Tap operations
+  validation-operator  Validation Operator operations
 """
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -139,6 +142,57 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
         assert error_message in result.output
         result = runner.invoke(cli, ["suite", "edit", "FAKE"], catch_exceptions=False)
         assert error_message in result.output
+
+        # expectation suite delete
+        result = runner.invoke(
+            cli, ["suite", "delete", "deleteme", "-d", "FAKE"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        # expectation create new
+        # suite new
+        result = runner.invoke(
+            cli, ["suite", "new", "-d", "./"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        result = runner.invoke(
+            cli, ["suite", "delete", "deleteme"], catch_exceptions=False
+        )
+        assert error_message in result.output
+
+        # datasource delete
+        result = runner.invoke(
+            cli, ["datasource", "delete", "new"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        # create new before delete again
+        # datasource new
+        result = runner.invoke(
+            cli, ["datasource", "new", "-d", "./"], catch_exceptions=False
+        )
+
+        # data_docs clean
+        result = runner.invoke(
+            cli, ["docs", "clean", "-d", "FAKE"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        # build docs before deleting again
+        result = runner.invoke(
+            cli, ["docs", "build", "-d", "./", "--no-view"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        result = runner.invoke(cli, ["docs", "clean"], catch_exceptions=False)
+        assert error_message in result.output
+
+        # leave with docs built
+        result = runner.invoke(
+            cli, ["docs", "build", "-d", "./", "--no-view"], catch_exceptions=False
+        )
+        assert error_message in result.output
+        result = runner.invoke(
+            cli, ["docs", "build", "--no-view"], catch_exceptions=False
+        )
+        assert error_message in result.output
+
     except:
         raise
     finally:

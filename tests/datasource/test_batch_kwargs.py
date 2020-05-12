@@ -1,26 +1,20 @@
-import pytest
-
 import os
 
+import pytest
 from freezegun import freeze_time
+
+from great_expectations.datasource.types import *
 
 try:
     from unittest import mock
 except ImportError:
     import mock
 
-from great_expectations.datasource.types import *
-
 
 def test_batch_kwargs_id():
-    test_batch_kwargs = PathBatchKwargs(
-        {
-            "path": "/data/test.csv"
-        }
-    )
+    test_batch_kwargs = PathBatchKwargs({"path": "/data/test.csv"})
     # When there is only a single "important" key used in batch_kwargs, the ID can prominently include it
     assert test_batch_kwargs.to_id() == "path=/data/test.csv"
-
 
     test_batch_kwargs = PathBatchKwargs(
         {
@@ -30,8 +24,8 @@ def test_batch_kwargs_id():
                 "iterator": True,
                 "chunksize": 2e7,
                 "parse_dates": [0, 3],
-                "names": ["start", "type", "quantity", "end"]
-            }
+                "names": ["start", "type", "quantity", "end"],
+            },
         }
     )
     # When there are multiple relevant keys we use the hash of the batch_kwargs dictionary
@@ -49,8 +43,8 @@ def test_batch_kwargs_attributes_and_keys():
                 "iterator": True,
                 "chunksize": 2e7,
                 "parse_dates": [0, 3],
-                "names": ["start", "type", "quantity", "end"]
-            }
+                "names": ["start", "type", "quantity", "end"],
+            },
         }
     )
     assert test_batch_kwargs.path == "/data/test.csv"
@@ -65,6 +59,11 @@ def test_batch_kwargs_attributes_and_keys():
         assert test_batch_kwargs.names == ["start", "type", "quantity", "end"]
 
     # But we can access and set even protected names using dictionary notation
-    assert test_batch_kwargs["reader_options"]["names"] == ["start", "type", "quantity", "end"]
+    assert test_batch_kwargs["reader_options"]["names"] == [
+        "start",
+        "type",
+        "quantity",
+        "end",
+    ]
     test_batch_kwargs["path"] = "/a/new/path.csv"
     assert test_batch_kwargs.path == "/a/new/path.csv"

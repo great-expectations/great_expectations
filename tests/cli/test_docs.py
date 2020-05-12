@@ -1,19 +1,16 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
-import pytest
 from click.testing import CliRunner
-from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 
 def test_docs_help_output(caplog):
@@ -45,9 +42,10 @@ def test_docs_build_view(
     context = DataContext(root_dir)
     obs_urls = context.get_docs_sites_urls()
 
-    assert len(obs_urls) == 1
+    assert len(obs_urls) == 2
     assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]
+        "great_expectations/uncommitted/data_docs/local_site/index.html"
+        in obs_urls[0]["site_url"]
     )
     local_site_dir = os.path.join(root_dir, "uncommitted/data_docs/local_site/")
 
@@ -79,9 +77,10 @@ def test_docs_build_no_view(
     context = DataContext(root_dir)
     obs_urls = context.get_docs_sites_urls()
 
-    assert len(obs_urls) == 1
+    assert len(obs_urls) == 2
     assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]
+        "great_expectations/uncommitted/data_docs/local_site/index.html"
+        in obs_urls[0]["site_url"]
     )
     local_site_dir = os.path.join(root_dir, "uncommitted/data_docs/local_site/")
 

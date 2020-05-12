@@ -1,9 +1,7 @@
-import pytest
-
-import os
 import logging
+import os
 
-from six import PY2
+import pytest
 
 logger = logging.getLogger(__name__)
 
@@ -15,9 +13,6 @@ def read_config_file_from_disk(config_filepath):
 
 
 def test_preserve_comments_in_yml_after_adding_datasource(data_context):
-    if PY2:
-        pytest.skip()
-
     ### THIS TEST FAILING IS A KNOWN ISSUE.
     ### A TICKET IS OPEN
 
@@ -42,14 +37,13 @@ def test_preserve_comments_in_yml_after_adding_datasource(data_context):
         "test_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderBatchKwargsGenerator",
-        "base_directory": "../data",
-    }
-}
-)
-
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": "../data",
+            }
+        },
+    )
 
     # TODO The comments on lines 1,2 & 4 of the fixture exposes the bug.
     expected = """# This is a basic configuration for testing.
@@ -63,7 +57,7 @@ datasources:
     class_name: PandasDatasource
     data_asset_type:
       class_name: PandasDataset
-    generators:
+    batch_kwargs_generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
         class_name: SubdirReaderBatchKwargsGenerator
@@ -76,7 +70,7 @@ datasources:
     class_name: PandasDatasource
     data_asset_type:
       class_name: PandasDataset
-    generators:
+    batch_kwargs_generators:
       default:
         class_name: SubdirReaderBatchKwargsGenerator
         base_directory: ../data
@@ -108,7 +102,7 @@ stores:
 
   validations_store:
     class_name: ValidationsStore
-    
+
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
   default:
