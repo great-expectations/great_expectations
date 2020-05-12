@@ -29,6 +29,8 @@ helps reduce trips to domain experts and avoids leaving insights about data on t
   Not all Expectations are implemented on all execution engines yet. You can see the grid of supported Expectations :ref:`here <#FIXME>`. We welcome :ref:`contributions <contributing>` to fill in the gaps.
 
 
+.. _expectation_suites:
+
 Expectation Suites
 ******************
 
