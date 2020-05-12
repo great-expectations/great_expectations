@@ -8,7 +8,7 @@ People on Slack are distributed and might be in a very different time zone from 
 
 If you post in off hours be patient, Someone will get back to you once the sun comes up.
 
-## Asking for help 
+## Asking for help
 
 - Do your best to try and solve the problem first as your efforts will help us more easily answer the question.
 - Head over to our [Documentation](https://docs.greatexpectations.io/en/latest/)
@@ -57,10 +57,10 @@ Have a good idea for an expectation? Post it here.
 Looking for support for great expectations? Post your questions here.
 
 **\#announcements**<br/>
-Any announcements related to the Great Expectations and the community will be posted here exclusively by admins (have something you think is announcement worthy? DM @Kyle-Eaton). 
+Any announcements related to the Great Expectations and the community will be posted here exclusively by admins (have something you think is announcement worthy? DM @Kyle-Eaton).
 
 **\#general**<br/>
-A place to talk shop about data news, articles, conferences, data horror stories and really just anything in the data world.  
+A place to talk shop about data news, articles, conferences, data horror stories and really just anything in the data world.
 
 **\#documentation**<br/>
 Have questions or suggestions for our documentation? Post here.

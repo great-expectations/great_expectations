@@ -216,6 +216,7 @@ Edit
 
 Editing an Expectation Suite means adding, removing, and modifying the arguments of existing expectations.
 
+.. note:: If you wish to override the default jupyter notebook command then you can set GE_JUPYTER_CMD environement variable. This is specially useful for running great expectations inside dockerized environements. For dockerized GE, use `export GE_JUPYTER_CMD='jupyter notebook --ip 0.0.0.0'`
 
 Similar to writing SQL queries, Expectations are best edited interactively against your data.
 The best interface for this is in a Jupyter notebook where you can get instant feedback as you iterate.
@@ -263,34 +264,34 @@ As long as your data is accessible you can still reap the benefits of automated 
 
 .. note:: This is a fast and convenient way to get the benefits of automated data testing without requiring engineering efforts to build Great Expectations into your pipelines.
 
-A tap is an executable python file that runs validates a batch of data against an expectation suite.
+A checkpoint is an executable python file that runs validates a batch of data against an expectation suite.
 Taps are a convenient way to generate a data validation script that can be run manually or via a scheduler.
 
-Let's make a new tap using the ``tap new`` command.
+Let's make a new checkpoint using the ``checkpoint new`` command.
 
 To do this we\'ll specify the name of the suite and the name of the new python file we want to create.
 For this example, let\'s say we want to validate a batch of data against the ``movieratings.ratings`` expectation suite, and we want to make a new file called ``movieratings.ratings_tap.py``
 
 .. code-block:: bash
 
-    $ great_expectations tap new movieratings.ratings movieratings.ratings_tap.py
+    $ great_expectations checkpoint new movieratings.ratings movieratings.ratings_tap.py
     This is a BETA feature which may change.
 
     Which table would you like to use? (Choose one)
         1. ratings (table)
         Don\'t see the table in the list above? Just type the SQL query
     : 1
-    A new tap has been generated!
-    To run this tap, run: python movieratings.ratings_tap.py
+    A new checkpoint has been generated!
+    To run this checkpoint, run: python movieratings.ratings_tap.py
     You can edit this script or place this code snippet in your pipeline.
 
-If you open the generated tap file you'll see it's only a few lines of code to get validations running!
+If you open the generated checkpoint file you'll see it's only a few lines of code to get validations running!
 It will look like this:
 
 .. code-block:: python
 
     """
-    A basic generated Great Expectations tap that validates a single batch of data.
+    A basic generated Great Expectations checkpoint that validates a single batch of data.
 
     Data that is validated is controlled by BatchKwargs, which can be adjusted in
     this script.
@@ -310,7 +311,7 @@ It will look like this:
     import sys
     import great_expectations as ge
 
-    # tap configuration
+    # checkpoint configuration
     context = ge.DataContext()
     suite = context.get_expectation_suite("movieratings.ratings_tap")
     # You can modify your BatchKwargs to select different data
@@ -320,7 +321,7 @@ It will look like this:
         "datasource": "movieratings",
     }
 
-    # tap validation process
+    # checkpoint validation process
     batch = context.get_batch(batch_kwargs, suite)
     results = context.run_validation_operator("action_list_operator", [batch])
 

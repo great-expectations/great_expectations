@@ -9,7 +9,7 @@ datasources:
     class_name: PandasDatasource
     data_asset_type:
       class_name: PandasDataset
-    generators:
+    batch_kwargs_generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
         class_name: SubdirReaderBatchKwargsGenerator
@@ -30,12 +30,12 @@ validations_store_name: validations_store
 data_docs_sites:
   local_site:
     class_name: SiteBuilder
+    show_how_to_buttons: true
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-      show_cta_footer: true
 
 stores:
   expectations_store:
@@ -72,5 +72,3 @@ validation_operators:
         action:
           class_name: StoreEvaluationParametersAction
           target_store_name: evaluation_parameter_store
-
-

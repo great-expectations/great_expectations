@@ -42,23 +42,24 @@
         </div>
       </div>
     {% endif %}
+    {% if show_how_to_buttons | default(True) %}
+      {% if renderer_type in ["ValidationResultsPageRenderer", "ExpectationSuitePageRenderer"] %}
+        <div class="mb-2">
+          <div class="d-flex justify-content-center">
+            <button type="button" class="btn btn-warning" data-toggle="modal" data-target=".ge-expectation-editing-instructions-modal">
+              <i class="fas fa-edit"></i> How to Edit This Suite
+            </button>
+          </div>
+        </div>
+      {% endif %}
 
-    {% if renderer_type in ["ValidationResultsPageRenderer", "ExpectationSuitePageRenderer"] %}
       <div class="mb-2">
         <div class="d-flex justify-content-center">
-          <button type="button" class="btn btn-warning" data-toggle="modal" data-target=".ge-expectation-editing-instructions-modal">
-            <i class="fas fa-edit"></i> How to Edit This Suite
+          <button type="button" class="btn btn-info" data-toggle="modal" data-target=".ge-walkthrough-modal">
+            Show Walkthrough
           </button>
         </div>
       </div>
     {% endif %}
-
-    <div class="mb-2">
-      <div class="d-flex justify-content-center">
-        <button type="button" class="btn btn-info" data-toggle="modal" data-target=".ge-walkthrough-modal">
-          Show Walkthrough
-        </button>
-      </div>
-    </div>
   </div>
 </div>

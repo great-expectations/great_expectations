@@ -1,6 +1,10 @@
 import pytest
 
-from great_expectations.datasource import PandasDatasource, SqlAlchemyDatasource, SparkDFDatasource
+from great_expectations.datasource import (
+    PandasDatasource,
+    SparkDFDatasource,
+    SqlAlchemyDatasource,
+)
 
 
 @pytest.fixture(scope="module")
@@ -15,9 +19,13 @@ def basic_sqlalchemy_datasource(sqlitedb_engine):
 
 @pytest.fixture
 def postgresql_sqlalchemy_datasource(postgresql_engine):
-    return SqlAlchemyDatasource("postgresql_sqlalchemy_datasource", engine=postgresql_engine)
+    return SqlAlchemyDatasource(
+        "postgresql_sqlalchemy_datasource", engine=postgresql_engine
+    )
 
 
 @pytest.fixture(scope="module")
-def basic_sparkdf_datasource():
+def basic_sparkdf_datasource(test_backends):
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("Spark has not been enabled, so this test must be skipped.")
     return SparkDFDatasource("basic_sparkdf_datasource")

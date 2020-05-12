@@ -1,11 +1,7 @@
-# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 from abc import ABCMeta, abstractmethod
 
-from six import string_types
 
-
-class StoreBackend(object):
-    __metaclass__ = ABCMeta
+class StoreBackend(object, metaclass=ABCMeta):
     """A store backend acts as a key-value store that can accept tuples as keys, to abstract away
     reading and writing to a persistence layer.
 
@@ -15,6 +11,8 @@ class StoreBackend(object):
       - list_keys
       - _has_key
     """
+
+    IGNORED_FILES = [".ipynb_checkpoints"]
 
     def __init__(self, fixed_length_key=False):
         self._fixed_length_key = fixed_length_key
@@ -41,24 +39,25 @@ class StoreBackend(object):
     def get_url_for_key(self, key, protocol=None):
         raise NotImplementedError(
             "Store backend of type {0:s} does not have an implementation of get_url_for_key".format(
-                type(self).__name__))
+                type(self).__name__
+            )
+        )
 
     def _validate_key(self, key):
         if isinstance(key, tuple):
             for key_element in key:
-                if not isinstance(key_element, string_types):
+                if not isinstance(key_element, str):
                     raise TypeError(
                         "Elements within tuples passed as keys to {0} must be instances of {1}, not {2}".format(
-                            self.__class__.__name__,
-                            string_types,
-                            type(key_element),
-                        ))
+                            self.__class__.__name__, str, type(key_element),
+                        )
+                    )
         else:
-            raise TypeError("Keys in {0} must be instances of {1}, not {2}".format(
-                self.__class__.__name__,
-                tuple,
-                type(key),
-            ))
+            raise TypeError(
+                "Keys in {0} must be instances of {1}, not {2}".format(
+                    self.__class__.__name__, tuple, type(key),
+                )
+            )
 
     def _validate_value(self, value):
         pass
@@ -75,8 +74,19 @@ class StoreBackend(object):
     def list_keys(self, prefix=()):
         raise NotImplementedError
 
+    @abstractmethod
+    def remove_key(self, key):
+        raise NotImplementedError
+
     def _has_key(self, key):
         raise NotImplementedError
+
+    def is_ignored_key(self, key):
+        for ignored in self.IGNORED_FILES:
+            if ignored in key:
+                return True
+
+        return False
 
 
 class InMemoryStoreBackend(StoreBackend):
@@ -85,7 +95,7 @@ class InMemoryStoreBackend(StoreBackend):
 
     # noinspection PyUnusedLocal
     def __init__(self, runtime_environment=None, fixed_length_key=False):
-        super(InMemoryStoreBackend, self).__init__(fixed_length_key=fixed_length_key)
+        super().__init__(fixed_length_key=fixed_length_key)
         self._store = {}
 
     def _get(self, key):
@@ -95,7 +105,10 @@ class InMemoryStoreBackend(StoreBackend):
         self._store[key] = value
 
     def list_keys(self, prefix=()):
-        return [key for key in self._store.keys() if key[:len(prefix)] == prefix]
+        return [key for key in self._store.keys() if key[: len(prefix)] == prefix]
 
     def _has_key(self, key):
         return key in self._store
+
+    def remove_key(self, key):
+        del self._store[key]

@@ -39,7 +39,7 @@ configuration information. For example, the following simple configuration suppo
         default:
           class_name: InMemoryGenerator
 
-The following configuration demonstrates a more complicated configuration for reading assets from s3 into pandas. It
+The following configuration demonstrates a more complicated configuration for reading assets from S3 into pandas. It
 will access the amazon public NYC taxi data and provides access to two assets: 'taxi-green' and 'taxi-fhv' which
 represent two public datasets available from the resource.
 
@@ -215,10 +215,9 @@ Variable substitution enables: 1) keeping secrets out of source control & 2)
 environment-based configuration changes such as staging vs prod.
 
 When GE encounters substitution syntax (like ``my_key: ${my_value}`` or
-``my_key: $my_value``) in the config file it will attempt to replace the value
+``my_key: $my_value``) in the great_expectations.yml config file it will attempt to replace the value
 of ``my_key`` with the value from an environment variable ``my_value`` or a
-corresponding key read from the file specified using ``config_variables_file_path``.
-
+corresponding key read from the file specified using ``config_variables_file_path``, which is located in uncommitted/config_variables.yml by default. This is an example of a config_variables.yml file:
 
 
 .. code-block:: yaml
@@ -249,6 +248,8 @@ Environment Variable Substitution
 Environment variables will be substituted into a DataContext config with higher priority than values from the
 config variables file.
 
+**Note**: Substitution of environment variables is currently only supported in the great_expectations.yml, but not in a config variables file. See [this Discuss post](https://discuss.greatexpectations.io/t/environment-variable-substitution-is-not-working-for-me-when-connecting-ge-to-my-database/72) for an example.
+
 ****************************************************
 Default Out of Box Config File
 ****************************************************
@@ -260,7 +261,7 @@ new directory or use this template:
 
     # Welcome to Great Expectations! Always know what to expect from your data.
     #
-    # Here you can define datasources, batch kwarg generators, integrations and
+    # Here you can define datasources, batch kwargs generators, integrations and
     # more. This file is intended to be committed to your repo. For help with
     # configuration please:
     #   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#configuration
@@ -364,3 +365,33 @@ new directory or use this template:
         store_backend:
           class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
+
+.. _Usage Statistics:
+
+#################
+Usage Statistics
+#################
+
+To help us improve the tool, by default we track event data when certain Data Context-enabled commands are run. The
+usage statistics include things like the OS and python version, and which GE features are used. You can see the exact
+schemas for all of our messages `here <https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/core/usage_statistics/schemas.py>`_.
+
+While we hope you'll leave them on, you can easily disable usage statistics for a Data Context by adding the
+following to your data context configuration:
+
+.. code-block:: yaml
+
+    anonymous_usage_statistics:
+      data_context_id: <randomly-generated-uuid>
+      enabled: false
+
+You can also disable usage statistics system-wide by setting the ``GE_USAGE_STATS``` environment variable to
+``FALSE`` or adding the following code block to a file called ``great_expectations.conf`` located in ``/etc/`` or
+``~/.great_expectations``:
+
+.. code-block::
+
+    [anonymous_usage_statistics]
+    enabled=FALSE
+
+As always, please reach out `on Slack <https://greatexpectations.io/slack>`__ if you have any questions or comments.
