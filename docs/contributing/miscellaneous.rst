@@ -41,7 +41,7 @@ GE core team members use this checklist to ship releases.
   * This `private google doc <https://docs.google.com/document/d/16QJPSCawEkwuEjShZeHa01TlQm9nbUwS6GwmFewJ3EY>`_ outlines the procedure. (Note this will be made public eventually)
 
 * Merge all approved PRs into ``develop``.
-* Make a new branch from ``develop`` called something like ``release-prep``.
+* Make a new branch from ``develop`` called something like ``release-prep``. The release-prep moniker helps skip experimental builds.
 * In this branch, update the version number in the ``.travis.yml`` file (look in the deploy section). (This sed snippet is handy if you change the numbers ``sed -i '' 's/0\.9\.6/0\.9\.7/g' .travis.yml``)
 
 * Update the ``changelog.rst``: move all things under ``develop`` under a new heading with the new release number.
