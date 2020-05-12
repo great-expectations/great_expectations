@@ -44,7 +44,8 @@ def test_docs_build_view(
 
     assert len(obs_urls) == 2
     assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]["site_url"]
+        "great_expectations/uncommitted/data_docs/local_site/index.html"
+        in obs_urls[0]["site_url"]
     )
     local_site_dir = os.path.join(root_dir, "uncommitted/data_docs/local_site/")
 
@@ -78,7 +79,8 @@ def test_docs_build_no_view(
 
     assert len(obs_urls) == 2
     assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]["site_url"]
+        "great_expectations/uncommitted/data_docs/local_site/index.html"
+        in obs_urls[0]["site_url"]
     )
     local_site_dir = os.path.join(root_dir, "uncommitted/data_docs/local_site/")
 

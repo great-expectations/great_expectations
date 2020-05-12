@@ -3,7 +3,7 @@
 # The xenial image is required for python 3.7, but openjdk8 cannot be manually
 # specified in that distro. However, pyspark requires JDK8, so, manually install it
 # and set java_home.
-# See: 
+# See:
 # https://travis-ci.community/t/how-to-use-java8-in-a-python-non-java-project-on-xenial/1823
 
 # show current JAVA_HOME and java version

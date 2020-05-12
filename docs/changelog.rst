@@ -6,6 +6,7 @@ Changelog
 
 develop
 -----------------
+* Removed out-of-date Airflow integration examples. This repo provides a comprehensive example of Airflow integration: `#GE Airflow Example <https://github.com/superconductive/ge_tutorials>`_
 
 0.10.9
 -----------------

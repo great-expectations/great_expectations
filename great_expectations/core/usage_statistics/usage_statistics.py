@@ -15,14 +15,27 @@ import requests
 from great_expectations import __version__ as ge_version
 from great_expectations.core import nested_update
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import BatchAnonymizer
-from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import DataDocsSiteAnonymizer
-from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import DatasourceAnonymizer
-from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import ExpectationSuiteAnonymizer
-from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import StoreAnonymizer
-from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import \
-    ValidationOperatorAnonymizer
-from great_expectations.core.usage_statistics.schemas import usage_statistics_record_schema
+from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import (
+    BatchAnonymizer,
+)
+from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import (
+    DataDocsSiteAnonymizer,
+)
+from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
+    DatasourceAnonymizer,
+)
+from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
+    ExpectationSuiteAnonymizer,
+)
+from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
+    StoreAnonymizer,
+)
+from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
+    ValidationOperatorAnonymizer,
+)
+from great_expectations.core.usage_statistics.schemas import (
+    usage_statistics_record_schema,
+)
 
 STOP_SIGNAL = object()
 
@@ -32,7 +45,6 @@ _anonymizers = dict()
 
 
 class UsageStatisticsHandler(object):
-
     def __init__(self, data_context, data_context_id, usage_statistics_url):
         self._url = usage_statistics_url
 
@@ -46,7 +58,9 @@ class UsageStatisticsHandler(object):
         self._worker.start()
         self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
         self._store_anonymizer = StoreAnonymizer(data_context_id)
-        self._validation_operator_anonymizer = ValidationOperatorAnonymizer(data_context_id)
+        self._validation_operator_anonymizer = ValidationOperatorAnonymizer(
+            data_context_id
+        )
         self._data_docs_sites_anonymizer = DataDocsSiteAnonymizer(data_context_id)
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
@@ -74,9 +88,13 @@ class UsageStatisticsHandler(object):
                 return
             try:
                 res = session.post(self._url, json=message, timeout=2)
-                logger.debug("Posted usage stats: message status " + str(res.status_code))
+                logger.debug(
+                    "Posted usage stats: message status " + str(res.status_code)
+                )
                 if res.status_code != 201:
-                    logger.debug("Server rejected message: ", json.dumps(message, indent=2))
+                    logger.debug(
+                        "Server rejected message: ", json.dumps(message, indent=2)
+                    )
             except requests.exceptions.Timeout:
                 logger.debug("Timeout while sending usage stats message.")
             except Exception as e:
@@ -101,8 +119,8 @@ class UsageStatisticsHandler(object):
         """Adds information that may be available only after full data context construction, but is useful to
         calculate only one time (for example, anonymization)."""
         expectation_suites = [
-            self._data_context.get_expectation_suite(expectation_suite_name) for expectation_suite_name in
-            self._data_context.list_expectation_suite_names()
+            self._data_context.get_expectation_suite(expectation_suite_name)
+            for expectation_suite_name in self._data_context.list_expectation_suite_names()
         ]
         return {
             "platform.system": platform.system(),
@@ -121,25 +139,29 @@ class UsageStatisticsHandler(object):
             "anonymized_validation_operators": [
                 self._validation_operator_anonymizer.anonymize_validation_operator_info(
                     validation_operator_name=validation_operator_name,
-                    validation_operator_obj=validation_operator_obj
-                ) for validation_operator_name, validation_operator_obj in self._data_context.validation_operators.items()
+                    validation_operator_obj=validation_operator_obj,
+                )
+                for validation_operator_name, validation_operator_obj in self._data_context.validation_operators.items()
             ],
             "anonymized_data_docs_sites": [
                 self._data_docs_sites_anonymizer.anonymize_data_docs_site_info(
-                    site_name=site_name,
-                    site_config=site_config
-                ) for site_name, site_config in
-                self._data_context._project_config_with_variables_substituted.data_docs_sites.items()
+                    site_name=site_name, site_config=site_config
+                )
+                for site_name, site_config in self._data_context._project_config_with_variables_substituted.data_docs_sites.items()
             ],
             "anonymized_expectation_suites": [
-              self._expectation_suite_anonymizer.anonymize_expectation_suite_info(expectation_suite) for
-              expectation_suite in expectation_suites
-            ]
+                self._expectation_suite_anonymizer.anonymize_expectation_suite_info(
+                    expectation_suite
+                )
+                for expectation_suite in expectation_suites
+            ],
         }
 
     def build_envelope(self, message):
         message["version"] = "1.0.0"
-        message["event_time"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+        message["event_time"] = (
+            datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+        )
         message["data_context_id"] = self._data_context_id
         message["data_context_instance_id"] = self._data_context_instance_id
         message["ge_version"] = self._ge_version
@@ -161,7 +183,9 @@ class UsageStatisticsHandler(object):
             if message["event"] == "data_context.__init__":
                 message["event_payload"] = self.build_init_payload()
             message = self.build_envelope(message)
-            if not self.validate_message(message, schema=usage_statistics_record_schema):
+            if not self.validate_message(
+                message, schema=usage_statistics_record_schema
+            ):
                 return
 
             self._message_queue.put(message)
@@ -180,23 +204,24 @@ def get_usage_statistics_handler(args_array):
             handler = None
     except IndexError:
         # A wrapped method that is not an object; this would be erroneous usage
-        logger.debug("usage_statistics enabled decorator should only be used on data context methods")
+        logger.debug(
+            "usage_statistics enabled decorator should only be used on data context methods"
+        )
         handler = None
     except AttributeError:
         # A wrapped method that is not usage_statistics capable
         handler = None
     except Exception as e:
         # An unknown error -- but we still fail silently
-        logger.debug("Unrecognized error when trying to find usage_statistics_handler: " + str(e))
+        logger.debug(
+            "Unrecognized error when trying to find usage_statistics_handler: " + str(e)
+        )
         handler = None
     return handler
 
 
 def usage_statistics_enabled_method(
-        func=None,
-        event_name=None,
-        args_payload_fn=None,
-        result_payload_fn=None
+    func=None, event_name=None, args_payload_fn=None, result_payload_fn=None
 ):
     """
     A decorator for usage statistics which defaults to the less detailed payload schema.
@@ -232,6 +257,7 @@ def usage_statistics_enabled_method(
 
         return usage_statistics_wrapped_method
     else:
+
         def usage_statistics_wrapped_method_partial(func):
             return usage_statistics_enabled_method(
                 func,
@@ -239,15 +265,16 @@ def usage_statistics_enabled_method(
                 args_payload_fn=args_payload_fn,
                 result_payload_fn=result_payload_fn,
             )
+
         return usage_statistics_wrapped_method_partial
 
 
 def run_validation_operator_usage_statistics(
-        data_context,  # self
-        validation_operator_name,
-        assets_to_validate,
-        run_id=None,
-        **kwargs
+    data_context,  # self
+    validation_operator_name,
+    assets_to_validate,
+    run_id=None,
+    **kwargs
 ):
     try:
         data_context_id = data_context.data_context_id
@@ -259,23 +286,27 @@ def run_validation_operator_usage_statistics(
         _anonymizers[data_context_id] = anonymizer
     payload = {}
     try:
-        payload["anonymized_operator_name"] = anonymizer.anonymize(validation_operator_name)
+        payload["anonymized_operator_name"] = anonymizer.anonymize(
+            validation_operator_name
+        )
     except TypeError:
-        logger.debug("run_validation_operator_usage_statistics: Unable to create validation_operator_name hash")
+        logger.debug(
+            "run_validation_operator_usage_statistics: Unable to create validation_operator_name hash"
+        )
     try:
         batch_anonymizer = data_context._usage_statistics_handler._batch_anonymizer
         payload["anonymized_batches"] = [
             batch_anonymizer.anonymize_batch_info(batch) for batch in assets_to_validate
         ]
     except Exception:
-        logger.debug("run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field")
+        logger.debug(
+            "run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field"
+        )
     return payload
 
 
 def save_expectation_suite_usage_statistics(
-        data_context,  # self
-        expectation_suite,
-        expectation_suite_name=None
+    data_context, expectation_suite, expectation_suite_name=None  # self
 ):
     try:
         data_context_id = data_context.data_context_id
@@ -291,17 +322,17 @@ def save_expectation_suite_usage_statistics(
         expectation_suite_name = expectation_suite.expectation_suite_name
 
     try:
-        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(expectation_suite_name)
+        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
+            expectation_suite_name
+        )
     except Exception:
         logger.debug(
-            "save_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field")
+            "save_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
+        )
     return payload
 
 
-def edit_expectation_suite_usage_statistics(
-        data_context,
-        expectation_suite_name
-):
+def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name):
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:
@@ -313,10 +344,13 @@ def edit_expectation_suite_usage_statistics(
     payload = {}
 
     try:
-        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(expectation_suite_name)
+        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
+            expectation_suite_name
+        )
     except Exception:
         logger.debug(
-            "edit_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field")
+            "edit_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
+        )
     return payload
 
 

@@ -1,45 +1,48 @@
 import datetime
 
-from .renderer import Renderer
 from ...core.id_dict import BatchKwargs
+from .renderer import Renderer
 
 
 class SlackRenderer(Renderer):
     def __init__(self):
         super().__init__()
-    
+
     def render(self, validation_result=None):
         # Defaults
         timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
-        default_text = "No validation occurred. Please ensure you passed a validation_result."
+        default_text = (
+            "No validation occurred. Please ensure you passed a validation_result."
+        )
         status = "Failed :x:"
 
         title_block = {
             "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": default_text,
-            },
+            "text": {"type": "mrkdwn", "text": default_text,},
         }
 
         query = {
             "blocks": [title_block],
             # this abbreviated root level "text" will show up in the notification and not the message
-            "text": default_text
+            "text": default_text,
         }
 
         # TODO improve this nested logic
         if validation_result:
-            expectation_suite_name = validation_result.meta.get("expectation_suite_name",
-                                                                "__no_expectation_suite_name__")
-        
+            expectation_suite_name = validation_result.meta.get(
+                "expectation_suite_name", "__no_expectation_suite_name__"
+            )
+
             n_checks_succeeded = validation_result.statistics["successful_expectations"]
             n_checks = validation_result.statistics["evaluated_expectations"]
             run_id = validation_result.meta.get("run_id", "__no_run_id__")
-            batch_id = BatchKwargs(validation_result.meta.get("batch_kwargs", {})).to_id()
+            batch_id = BatchKwargs(
+                validation_result.meta.get("batch_kwargs", {})
+            ).to_id()
             check_details_text = "*{}* of *{}* expectations were met".format(
-                n_checks_succeeded, n_checks)
-        
+                n_checks_succeeded, n_checks
+            )
+
             if validation_result.success:
                 status = "Success :tada:"
 
@@ -54,7 +57,7 @@ class SlackRenderer(Renderer):
                 run_id,
                 batch_id,
                 timestamp,
-                check_details_text
+                check_details_text,
             )
             query["blocks"][0]["text"]["text"] = summary_text
             # this abbreviated root level "text" will show up in the notification and not the message
@@ -65,16 +68,21 @@ class SlackRenderer(Renderer):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "- *Validation Report*: {}".format(validation_result.meta["result_reference"])},
+                        "text": "- *Validation Report*: {}".format(
+                            validation_result.meta["result_reference"]
+                        ),
+                    },
                 }
                 query["blocks"].append(report_element)
-        
+
             if "dataset_reference" in validation_result.meta:
                 dataset_element = {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "- *Validation data asset*: {}".format(validation_result.meta["dataset_reference"])
+                        "text": "- *Validation data asset*: {}".format(
+                            validation_result.meta["dataset_reference"]
+                        ),
                     },
                 }
                 query["blocks"].append(dataset_element)
@@ -89,7 +97,9 @@ class SlackRenderer(Renderer):
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": "Learn how to review validation results: {}".format(documentation_url),
+                    "text": "Learn how to review validation results: {}".format(
+                        documentation_url
+                    ),
                 }
             ],
         }
