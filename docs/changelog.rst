@@ -6,6 +6,7 @@ Changelog
 
 develop
 -----------------
+* [FEATURE] add support for `expect_multicolumn_values_to_be_unique` to `Spark`.
 
 0.10.11
 -----------------
