@@ -39,7 +39,9 @@ def create_data_context_files(
         os.makedirs(os.path.join(context_path, "uncommitted"), exist_ok=True)
         copy_relative_path(
             "../test_fixtures/config_variables.yml",
-            str(os.path.join(context_path, "uncommitted/config_variables.yml")),
+            str(
+                os.path.join(context_path, "uncommitted/config_variables.yml")
+            ),
         )
         copy_relative_path(
             "../test_fixtures/great_expectations_basic_with_variables.yml",
