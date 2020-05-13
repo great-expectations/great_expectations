@@ -98,7 +98,8 @@ def test_setting_config_variables_is_visible_immediately(
         del os.environ["replace_me_2"]
 
 
-def test_runtime_config_substitutions_are_used_preferentially(tmp_path_factory):
+def test_runtime_config_substitutions_are_used_preferentially(
+        tmp_path_factory):
     value_from_environment = 'from_environment'
     os.environ["replace_me"] = value_from_environment
 
