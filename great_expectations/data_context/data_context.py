@@ -18,14 +18,7 @@ from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
 
 import great_expectations.exceptions as ge_exceptions
-<<<<<<< HEAD
-from great_expectations.core import (
-    ExpectationSuite,
-    get_metric_kwargs_id,
-    RunIdentifier)
-=======
 from great_expectations.core import ExpectationSuite, get_metric_kwargs_id
->>>>>>> develop
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -816,23 +809,12 @@ class BaseDataContext(object):
         args_payload_fn=run_validation_operator_usage_statistics,
     )
     def run_validation_operator(
-<<<<<<< HEAD
-            self,
-            validation_operator_name,
-            assets_to_validate,
-            run_id=None,
-            evaluation_parameters=None,
-            run_name=None,
-            run_time=None,
-            **kwargs
-=======
         self,
         validation_operator_name,
         assets_to_validate,
         run_id=None,
         evaluation_parameters=None,
         **kwargs,
->>>>>>> develop
     ):
         """
         Run a validation operator to validate data assets and to perform the business logic around
@@ -871,28 +853,14 @@ class BaseDataContext(object):
             logger.info("Setting run_name to: {}".format(run_name))
         if evaluation_parameters is None:
             return validation_operator.run(
-<<<<<<< HEAD
-                assets_to_validate=assets_to_validate,
-                run_id=run_id,
-                run_name=run_name,
-                run_time=run_time,
-                **kwargs
-=======
                 assets_to_validate=assets_to_validate, run_id=run_id, **kwargs
->>>>>>> develop
             )
         else:
             return validation_operator.run(
                 assets_to_validate=assets_to_validate,
                 run_id=run_id,
                 evaluation_parameters=evaluation_parameters,
-<<<<<<< HEAD
-                run_name=run_name,
-                run_time=run_time,
-                **kwargs
-=======
                 **kwargs,
->>>>>>> develop
             )
 
     def list_validation_operator_names(self):
@@ -1474,22 +1442,6 @@ class BaseDataContext(object):
                     return True
         return cleaned
 
-<<<<<<< HEAD
-    def profile_datasource(self,
-                           datasource_name,
-                           batch_kwargs_generator_name=None,
-                           data_assets=None,
-                           max_data_assets=20,
-                           profile_all_data_assets=True,
-                           profiler=BasicDatasetProfiler,
-                           profiler_configuration=None,
-                           dry_run=False,
-                           run_id=None,
-                           additional_batch_kwargs=None,
-                           run_name=None,
-                           run_time=None
-                           ):
-=======
     def profile_datasource(
         self,
         datasource_name,
@@ -1503,7 +1455,6 @@ class BaseDataContext(object):
         run_id="profiling",
         additional_batch_kwargs=None,
     ):
->>>>>>> develop
         """Profile the named datasource using the named profiler.
 
         Args:
@@ -1683,11 +1634,6 @@ class BaseDataContext(object):
                             profiler_configuration=profiler_configuration,
                             run_id=run_id,
                             additional_batch_kwargs=additional_batch_kwargs,
-<<<<<<< HEAD
-                            run_name=run_name,
-                            run_time=run_time
-=======
->>>>>>> develop
                         )["results"][0]
                     )
 
@@ -1731,21 +1677,6 @@ class BaseDataContext(object):
         profiling_results["success"] = True
         return profiling_results
 
-<<<<<<< HEAD
-    def profile_data_asset(self,
-                           datasource_name,
-                           batch_kwargs_generator_name=None,
-                           data_asset_name=None,
-                           batch_kwargs=None,
-                           expectation_suite_name=None,
-                           profiler=BasicDatasetProfiler,
-                           profiler_configuration=None,
-                           run_id=None,
-                           additional_batch_kwargs=None,
-                           run_name=None,
-                           run_time=None
-                           ):
-=======
     def profile_data_asset(
         self,
         datasource_name,
@@ -1758,7 +1689,6 @@ class BaseDataContext(object):
         run_id="profiling",
         additional_batch_kwargs=None,
     ):
->>>>>>> develop
         """
         Profile a data asset
 
