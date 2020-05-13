@@ -2094,7 +2094,7 @@ class DataContext(BaseDataContext):
         try:
             with open(checkpoint_path, "r") as f:
                 checkpoint = yaml.load(f.read())
-                return self._validate_checkpoint(checkpoint)
+                return self._validate_checkpoint(checkpoint, checkpoint_name)
         except FileNotFoundError:
             raise ge_exceptions.CheckpointNotFoundError(
                 f"Could not find checkpoint `{checkpoint_name}`."
@@ -2234,21 +2234,23 @@ class DataContext(BaseDataContext):
             logger.debug(e)
 
     @staticmethod
-    def _validate_checkpoint(checkpoint: dict) -> dict:
+    def _validate_checkpoint(checkpoint: dict, checkpoint_name: str) -> dict:
         if checkpoint is None:
             raise ge_exceptions.CheckpointError(
-                "Checkpoint has no contents. Please fix this."
+                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
             )
         if "validation_operator_name" not in checkpoint:
             checkpoint["validation_operator_name"] = "action_list_operator"
 
         if "batches" not in checkpoint:
             raise ge_exceptions.CheckpointError(
-                f"Checkpoint {checkpoint} is missing required key: `batches`"
+                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
             )
         batches = checkpoint["batches"]
         if not isinstance(batches, list):
-            raise ge_exceptions.CheckpointError(f"`batches` must be a list")
+            raise ge_exceptions.CheckpointError(
+                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
+            )
 
         for batch in batches:
             for required in ["expectation_suite_names", "batch_kwargs"]:
