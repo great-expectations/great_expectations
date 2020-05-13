@@ -5,9 +5,8 @@ import os
 import shutil
 from collections import OrderedDict
 
-import pytest
-
 import great_expectations as ge
+import pytest
 from great_expectations.core import expectationSuiteSchema
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler

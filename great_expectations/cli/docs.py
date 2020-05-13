@@ -2,7 +2,6 @@ import os
 import sys
 
 import click
-
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.util import cli_message, cli_message_list

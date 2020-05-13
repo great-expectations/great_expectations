@@ -7,6 +7,12 @@ from string import Template as pTemplate
 from uuid import uuid4
 
 import mistune
+from great_expectations import __version__ as ge_version
+from great_expectations.render.types import (
+    RenderedComponentContent,
+    RenderedContent,
+    RenderedDocumentContent,
+)
 from jinja2 import (
     ChoiceLoader,
     Environment,
@@ -14,13 +20,6 @@ from jinja2 import (
     PackageLoader,
     contextfilter,
     select_autoescape,
-)
-
-from great_expectations import __version__ as ge_version
-from great_expectations.render.types import (
-    RenderedComponentContent,
-    RenderedContent,
-    RenderedDocumentContent,
 )
 
 

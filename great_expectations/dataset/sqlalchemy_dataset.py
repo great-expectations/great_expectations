@@ -1,22 +1,20 @@
 import inspect
 import logging
+import traceback
 import uuid
 import warnings
 from datetime import datetime
 from functools import wraps
 from importlib import import_module
 from typing import List
-import traceback
+
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_asset.util import (
-    DocInherit,
-    parse_result_format
-)
+from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import get_approximate_percentile_disc_sql
+
 from .dataset import Dataset
 from .pandas_dataset import PandasDataset
 
@@ -25,10 +23,7 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy as sa
     from sqlalchemy.engine import reflection
-    from sqlalchemy.sql.expression import (
-        BinaryExpression,
-        literal
-    )
+    from sqlalchemy.sql.expression import BinaryExpression, literal
     from sqlalchemy.sql.operators import custom_op
     from sqlalchemy.sql.elements import WithinGroup
     from sqlalchemy.engine.default import DefaultDialect
@@ -296,7 +291,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         custom_sql=None,
         schema=None,
         *args,
-        **kwargs
+        **kwargs,
     ):
 
         if custom_sql and not table_name:
@@ -589,7 +584,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column_median = column_values[1][0]  # True center value
         return column_median
 
-    def get_column_quantiles(self, column: str, quantiles, allow_relative_error: bool = False):
+    def get_column_quantiles(
+        self, column: str, quantiles, allow_relative_error: bool = False
+    ):
         if self.engine.dialect.name.lower() == "mssql":
             # mssql requires over(), so we add an empty over() clause
             selects: List[WithinGroup] = [
@@ -611,27 +608,30 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ]
 
         try:
-            quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
+            quantiles = self.engine.execute(
+                sa.select(selects).select_from(self._table)
+            ).fetchone()
         except ProgrammingError:
             sql_engine_dialect: DefaultDialect = self.engine.dialect
             if isinstance(
-                    sql_engine_dialect,
-                    (
-                            sqlalchemy_redshift.dialect.RedshiftDialect,
-                            sqlalchemy_psycopg2.PGDialect_psycopg2
-                    )
+                sql_engine_dialect,
+                (
+                    sqlalchemy_redshift.dialect.RedshiftDialect,
+                    sqlalchemy_psycopg2.PGDialect_psycopg2,
+                ),
             ):
                 # Redshift does not have a percentile_disc method, but does support an approximate version.
                 if allow_relative_error:
                     sql_approx: str = get_approximate_percentile_disc_sql(
-                        selects=selects,
-                        sql_engine_dialect=sql_engine_dialect
+                        selects=selects, sql_engine_dialect=sql_engine_dialect
                     )
                     selects = [sa.text(sql_approx)]
                     try:
-                        quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
+                        quantiles = self.engine.execute(
+                            sa.select(selects).select_from(self._table)
+                        ).fetchone()
                     except ProgrammingError as pe:
-                        exception_message: str = 'An SQL syntax Exception occurred.'
+                        exception_message: str = "An SQL syntax Exception occurred."
                         exception_traceback: str = traceback.format_exc()
                         exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
                         logger.error(exception_message)

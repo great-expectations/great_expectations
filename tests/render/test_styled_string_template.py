@@ -1,9 +1,8 @@
 import json
 
-import pytest
-
 import great_expectations as ge
 import great_expectations.render as render
+import pytest
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ExpectationSuitePageRenderer,

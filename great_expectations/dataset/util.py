@@ -1,14 +1,12 @@
 # Utility methods for dealing with Dataset objects
 
+import logging
 import warnings
+from typing import List
 
 import numpy as np
 import pandas as pd
 from scipy import stats
-
-from typing import List
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +15,7 @@ try:
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.sql.elements import WithinGroup
 except ImportError:
-    logger.debug('Unable to load SqlAlchemy or one of its subclasses.')
+    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 
 def is_valid_partition_object(partition_object):
@@ -577,16 +575,14 @@ def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs)
 
 
 def get_approximate_percentile_disc_sql(
-        selects: List[WithinGroup],
-        sql_engine_dialect: DefaultDialect
+    selects: List[WithinGroup], sql_engine_dialect: DefaultDialect
 ):
-    return ', '.join(
+    return ", ".join(
         [
-            'approximate '
+            "approximate "
             + str(
                 stmt.compile(
-                    dialect=sql_engine_dialect,
-                    compile_kwargs={'literal_binds': True},
+                    dialect=sql_engine_dialect, compile_kwargs={"literal_binds": True},
                 )
             )
             for stmt in selects
