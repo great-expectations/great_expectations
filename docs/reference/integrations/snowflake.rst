@@ -60,3 +60,8 @@ Additional Notes
     which means that you will have to rerun ``great_expectations init`` after these packages are installed.  Except for
     having to switch back and forth between ``great_expectations init`` and your Terminal ``shell``, the procedure will
     continue without any problems, because Great Expectations will pick up from where it left off.
+#.
+    When using the Snowflake dialect, `SqlAlchemyDataset` will create a **transient** table instead of a **temporary**
+    table when passing in `query` Batch Kwargs or providing `custom_sql` to its constructor. Consequently, users
+    **must** provide a `snowflake_transient_table` in addition to the `query` parameter. Any existing table with that
+    name will be overwritten.
