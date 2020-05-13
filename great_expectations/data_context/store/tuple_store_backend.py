@@ -537,7 +537,8 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         ):
             for file_ in files:
                 full_path, file_name = os.path.split(os.path.join(root, file_))
-                relative_path = os.path.relpath(full_path, self.full_base_directory,)
+                relative_path = os.path.relpath(full_path, 
+                    self.full_base_directory,)
                 if relative_path == ".":
                     filepath = file_name
                 else:
