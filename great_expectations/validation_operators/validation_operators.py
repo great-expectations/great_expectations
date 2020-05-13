@@ -3,13 +3,17 @@ import logging
 from collections import OrderedDict
 
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import ClassInstantiationError
-
-from ..data_context.types.resource_identifiers import (
+from great_expectations.data_context.types.resource_identifiers import (
+    BatchIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.exceptions import ClassInstantiationError
+from great_expectations.validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
+
 from .util import send_slack_notification
 
 logger = logging.getLogger(__name__)
@@ -126,27 +130,54 @@ class ActionListValidationOperator(ValidationOperator):
         return batch
 
     def run(self, assets_to_validate, run_id, evaluation_parameters=None):
-        result_object = {"success": None, "details": {}}
+        # result_object = {"success": None, "details": {}}
+
+        run_results = {}
+
+        """
+        run_results = {
+            ValidationResultIdentifier: {
+                "validation_result": ExpectationSuiteValidationResult,
+                "actions_results": {}
+            }
+        }
+
+        {
+            batch_id: {
+                batch_kwargs: {},
+                validation_results: {
+                    validation_result_id: {
+                        validation_result: ValidationResult,
+                        batch_actions_results: {
+                            action_name: action_result
+                        }
+                    }
+                }
+            }
+        }
+        """
 
         for item in assets_to_validate:
+            run_result_obj = {}
             batch = self._build_batch_from_item(item)
             expectation_suite_identifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=batch._expectation_suite.expectation_suite_name
             )
-            # validation_result_id = ValidationResultIdentifier(
-            #     batch_identifier=BatchIdentifier(batch.batch_id),
-            #     expectation_suite_identifier=expectation_suite_identifier,
-            #     run_id=run_id,
-            # )
-            result_object["details"][expectation_suite_identifier] = {}
+            validation_result_id = ValidationResultIdentifier(
+                batch_identifier=BatchIdentifier(batch.batch_id),
+                expectation_suite_identifier=expectation_suite_identifier,
+                run_id=run_id,
+            )
+            # result_object["details"][expectation_suite_identifier] = {}
             batch_validation_result = batch.validate(
                 run_id=run_id,
                 result_format="SUMMARY",
                 evaluation_parameters=evaluation_parameters,
             )
-            result_object["details"][expectation_suite_identifier][
-                "validation_result"
-            ] = batch_validation_result
+            # result_object["details"][expectation_suite_identifier][
+            #     "validation_result"
+            # ] = batch_validation_result
+            run_result_obj["validation_result"] = batch_validation_result
             batch_actions_results = self._run_actions(
                 batch,
                 expectation_suite_identifier,
@@ -154,18 +185,25 @@ class ActionListValidationOperator(ValidationOperator):
                 batch_validation_result,
                 run_id,
             )
-            result_object["details"][expectation_suite_identifier][
-                "actions_results"
-            ] = batch_actions_results
+            # result_object["details"][expectation_suite_identifier][
+            #     "actions_results"
+            # ] = batch_actions_results
+            run_result_obj["actions_results"] = batch_actions_results
+            run_results[validation_result_id] = run_result_obj
 
-        result_object["success"] = all(
-            [
-                val["validation_result"].success
-                for val in result_object["details"].values()
-            ]
+        # result_object["success"] = all(
+        #     [
+        #         val["validation_result"].success
+        #         for val in result_object["details"].values()
+        #     ]
+        # )
+
+        # return result_object
+        return ValidationOperatorResult(
+            run_id=run_id,
+            run_results=run_results,
+            evaluation_parameters=evaluation_parameters,
         )
-
-        return result_object
 
     def _run_actions(
         self,
