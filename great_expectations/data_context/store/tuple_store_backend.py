@@ -1,12 +1,14 @@
+import logging
 import os
 import random
 import re
 import shutil
+# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
+import logging
 from abc import ABCMeta
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import StoreBackendError
-
 logger = logging.getLogger(__name__)
 
 
