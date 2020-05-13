@@ -2050,7 +2050,11 @@ class DataContext(BaseDataContext):
                 destination_path = os.path.join(subdir_path, notebook_name)
                 shutil.copyfile(notebook, destination_path)
 
-    def __init__(self, context_root_dir=None, runtime_config_substitutions=None):
+    def __init__(
+            self,
+            context_root_dir=None,
+            runtime_config_substitutions=None
+    ):
 
         # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
