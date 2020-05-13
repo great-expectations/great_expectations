@@ -15,7 +15,7 @@ Features and code within Great Expectations are separated into three levels of m
       </div></section>
 
 
-Being explicit about these levels allows us to enable experimentation, without creating unecessary thrash when features and APIs evolve. It also helps streamline development, by giving contributors a clear, incremental path to create and improve the Great Expectations code base.
+Being explicit about these levels allows us to enable experimentation, without creating unnecessary thrash when features and APIs evolve. It also helps streamline development, by giving contributors a clear, incremental path to create and improve the Great Expectations code base.
 
 For users of Great Expectations, our goal is to enable informed decisions about when to adopt which features.
 
@@ -35,38 +35,38 @@ This grid provides guidelines for how the maintainers of Great Expectations eval
     <tr>
         <td>API stability</td>
         <td style="padding-left:32px;">Unstable*</td>
-        <td style="padding-left:32px;">Stable</td>
+        <td style="padding-left:32px;">Mostly Stable</td>
         <td style="padding-left:32px;">Stable</td>
     </tr>
     <tr>
         <td>Implementation completeness</td>
-        <td style="padding-left:32px;">Partial</td>
-        <td style="padding-left:32px;">Complete**</td>
+        <td style="padding-left:32px;">Minimal</td>
+        <td style="padding-left:32px;">Partial**</td>
         <td style="padding-left:32px;">Complete</td>
     </tr>
     <tr>
         <td>Unit test coverage</td>
+        <td style="padding-left:32px;">Minimal</td>
         <td style="padding-left:32px;">Partial</td>
-        <td style="padding-left:32px;">Complete</td>
         <td style="padding-left:32px;">Complete</td>
     </tr>
     <tr>
-        <td>Infrastructure test coverage</td>
-        <td style="padding-left:32px;">Optional</td>
+        <td>Integration/Infrastructure test coverage</td>
+        <td style="padding-left:32px;">Minimal</td>
         <td style="padding-left:32px;">Partial</td>
-        <td style="padding-left:32px;">Thorough</td>
+        <td style="padding-left:32px;">Complete</td>
     </tr>
     <tr>
         <td>Documentation completeness</td>
-        <td style="padding-left:32px;">Optional</td>
+        <td style="padding-left:32px;">Minimal</td>
         <td style="padding-left:32px;">Partial</td>
-        <td style="padding-left:32px;">Thorough</td>
+        <td style="padding-left:32px;">Complete</td>
     </tr>
     <tr>
-        <td>Bug frequency</td>
-        <td style="padding-left:32px;">Expected</td>
-        <td style="padding-left:32px;">Rare</td>
-        <td style="padding-left:32px;">Very rare</td>
+        <td>Bug risk</td>
+        <td style="padding-left:32px;">High</td>
+        <td style="padding-left:32px;">Moderate</td>
+        <td style="padding-left:32px;">Low</td>
     </tr>
     </table>
     <br/>

@@ -4,73 +4,76 @@
     "section_features": [
       {
         "title": "Where is your data stored?",
-        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "description": "A [Data Connection](https://docs.greatexpectations.io/en/latest/reference/core_concepts/data_connection.html), facilitates access for Great Expectations to data to be validated.",
+        "id": "data_connection",
         "cases": [
           {
-            "id": "datasource_filesystem"
+            "id": "data_connection_filesystem"
           },
           {
-            "id": "datasource_s3"
+            "id": "data_connection_s3"
           },
           {
-            "id": "datasource_gcs"
+            "id": "data_connection_gcs"
           },
           {
-            "id": "datasource_azure"
+            "id": "data_connection_azure"
           },
           {
-            "id": "datasource_postgreql"
+            "id": "data_connection_postgreql"
           },
           {
-            "id": "datasource_bigquery"
+            "id": "data_connection_bigquery"
           },
           {
-            "id": "datasource_redshift"
+            "id": "data_connection_redshift"
           },
           {
-            "id": "datasource_snowflake"
+            "id": "data_connection_snowflake"
           },
           {
-            "id": "datasource_mssql"
+            "id": "data_connection_mssql"
           },
           {
-            "id": "datasource_mysql"
+            "id": "data_connection_mysql"
           },
           {
-            "id": "datasource_mariadb"
+            "id": "data_connection_mariadb"
           }
         ]
       },
       {
-        "title": "What computation engine(s) do you want to use for validation?",
-        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "title": "What validation engine(s) do you want to use?",
+        "description": "A [Validation Engine](https://docs.greatexpectations.io/en/latest/reference/core_concepts/validation_engine.html) provides the compute resources necessary to evaluate expectations on raw data as provided by a data connection.",
+        "id": "validation_engine",
         "cases": [
           {
-            "id": "compute_pandas"
+            "id": "validation_engine_pandas"
           },
           {
-            "id": "compute_pyspark_self_managed"
+            "id": "validation_engine_pyspark_self_managed"
           },
           {
-            "id": "compute_databricks"
+            "id": "cvalidation_engine_databricks"
           },
           {
-            "id": "compute_emr_spark"
+            "id": "validation_engine_emr_spark"
           },
           {
-            "id": "compute_spark_other"
+            "id": "validation_engine_spark_other"
           },
           {
-            "id": "compute_sqlalchemy"
+            "id": "validation_engine_sqlalchemy"
           }
         ]
       },
       {
         "title": "Where do you want to store and share your expectations?",
-        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "description": "An [Expectations Store](https://docs.greatexpectations.io/en/latest/reference/core_concepts/data_context.html#expectations_store) provides a way to store Expectation Suites accessible to a Data Context.",
+        "id": "expectations_store",
         "cases": [
           {
-            "id": "expectations_store_git",
+            "id": "expectations_store_git"
           },
           {
             "id": "expectations_store_filesystem"
@@ -82,16 +85,17 @@
             "id": "expectations_store_gcs"
           },
           {
-            "id": "expectations_store_azure"
+            "id": "expectations_store_azure_blob_storage"
           }
         ]
       },
       {
         "title": "Where do you want to store validation results?",
-        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "description": "A [Validations Store](https://docs.greatexpectations.io/en/latest/reference/core_concepts/data_context.html#validations_store) manages Validation Results to ensure they are accessible via a Data Context for review and rendering into Data Docs.",
+        "id": "validations_store",
         "cases": [
           {
-            "id": "validations_store_git",
+            "id": "validations_store_git"
           },
           {
             "id": "validations_store_filesystem"
@@ -103,16 +107,17 @@
             "id": "validations_store_gcs"
           },
           {
-            "id": "validations_store_azure"
+            "id": "validations_store_azure_blob_storage"
           }
         ]
       },
       {
         "title": "How do you want to host and share your Data Documentation?",
-        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "description": "A [Data Docs Store](https://docs.greatexpectations.io/en/latest/reference/core_concepts/data_context.html#data_docs_store) facilitates publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results",
+        "id": "data_docs_store",
         "cases": [
           {
-            "id": "data_docs_store_git",
+            "id": "data_docs_store_git"
           },
           {
             "id": "data_docs_store_filesystem"
@@ -124,46 +129,48 @@
             "id": "data_docs_store_gcs"
           },
           {
-            "id": "data_docs_store_azure"
+            "id": "data_docs_store_azure_blob_storage"
           }
         ]
       },
       {
         "title": "How do you want to trigger validation?",
-        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "description": "A [Checkpoint](https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoint.html) makes it possible to easily integrate a validation step into your workflow.",
+        "id": "checkpoint",
         "cases": [
           {
-            "id": "trigger_validation_notebook"
+            "id": "checkpoint_notebook"
           },
           {
-            "id": "trigger_validation_command_line"
+            "id": "checkpoint_command_line"
           },
           {
-            "id": "trigger_validation_cron_job"
+            "id": "checkpoint_cron_job"
           },
           {
-            "id": "trigger_validation_airflow_dag"
+            "id": "checkpoint_airflow_dag"
           },
           {
-            "id": "trigger_validation_kedro"
+            "id": "checkpoint_kedro"
           },
           {
-            "id": "trigger_validation_prefect"
+            "id": "checkpoint_prefect"
           },
           {
-            "id": "trigger_validation_within_dbt"
+            "id": "checkpoint_dbt_internal"
           },
           {
-            "id": "trigger_validation_adjacent_to_dbt"
+            "id": "checkpoint_dbt_adjacent"
           },
           {
-            "id": "trigger_validation_other_pipeline_runner"
+            "id": "checkpoint_other"
           }
         ]
       },
       {
         "title": "What operating systems do your development team and data infrastructure use?",
-        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "description": "Operating system related dependencies and testing are reflected in our assessment of the maturity of support indicated here.",
+        "id": "os",
         "cases": [
           {
             "id": "os_linux"
@@ -183,7 +190,8 @@
     "section_features": [
       {
         "title": "How do you want to create and edit Expectations?",
-        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "description": "The maturity of documentation and end-to-end support for workflows is reflected in these assessments.",
+        "id": "workflow_create_edit_expectations",
         "cases": [
           {
             "id": "worfklow_create_edit_expectations_cli_scaffold"
@@ -198,31 +206,33 @@
       },
       {
         "title": "What would you want to do after validating data?",
-        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "description": "The maturity of documentation and end-to-end support for workflows is reflected in these assessments.",
+        "id": "workflow_validation_action",
         "cases": [
           {
-            "id": "worfklow_action_after_validation_review_in_notebook"
+            "id": "workflow_validation_action_review_in_notebook"
           },
           {
-            "id": "worfklow_action_after_validation_adjust_expectations"
+            "id": "workflow_validation_action_adjust_expectations"
           },
           {
-            "id": "worfklow_action_after_validation_fix_data_problems"
+            "id": "workflow_validation_action_fix_data_problems"
           },
           {
-            "id": "worfklow_action_after_validation_send_slack_notification"
+            "id": "workflow_validation_action_send_slack_notification"
           },
           {
-            "id": "worfklow_action_after_validation_save_results_snippets"
+            "id": "workflow_validation_action_save_results_snippets"
           },
           {
-            "id": "worfklow_action_after_validation_quarantine_failed_results"
+            "id": "workflow_validation_action_quarantine_failed_results"
           }
         ]
       },
       {
         "title": "Other",
-        "description": "Non sit sit labore sed eius adipisci. Velit sit labore eius voluptatem etincidunt consectetur ipsum. Sed eius ut aliquam eius amet consectetur. Quiquia adipisci eius quiquia dolorem tempora non est. Quiquia consectetur eius dolor amet. Quiquia adipisci consectetur porro magnam sit labore. Magnam eius etincidunt ipsum ut etincidunt numquam dolorem. Sit sed etincidunt sit porro. Tempora quisquam velit adipisci voluptatem sit. Adipisci tempora porro velit labore numquam porro aliquam.",
+        "description": "The maturity of documentation and end-to-end support for workflows is reflected in these assessments.",
+        "id": "other",
         "cases": [
           {
             "id": "other_configure_expectations_and_val_ops_to_handle_warnings_and_errors"
