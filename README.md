@@ -232,4 +232,4 @@ If you'd like hands-on assistance setting up Great Expectations, establishing a 
 Can I contribute to the library?
 --------------------------------------------------------------------------------
 
-Absolutely. Yes, please. Start [here](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING.md) and please don't be shy with questions.
+Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/en/latest/contributing.html) and please don't be shy with questions.
