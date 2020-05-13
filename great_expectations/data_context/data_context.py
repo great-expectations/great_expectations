@@ -127,8 +127,8 @@ class BaseDataContext(object):
         Args:
             context_root_dir: location to look for the ``great_expectations.yml`` file. If None, searches for the file \
             based on conventions for project subdirectories.
-            runtime_config_substitutions: a dictionary of config variables that override both those set in
-            config_variables.yml and the environment
+            runtime_config_substitutions: a dictionary of config variables that
+            override both those set in config_variables.yml and the environment
 
         Returns:
             None
@@ -595,7 +595,9 @@ class BaseDataContext(object):
             **self.runtime_config_substitutions
         }
 
-        return DataContextConfig(**substitute_all_config_variables(config, substitutions))
+        return DataContextConfig(
+            **substitute_all_config_variables(config, substitutions)
+        )
 
     def save_config_variable(self, config_variable_name, value):
         """Save config variable value
@@ -1898,8 +1900,8 @@ class DataContext(BaseDataContext):
 
         Args:
             project_root_dir: path to the root directory in which to create a new great_expectations directory
-            runtime_config_substitutions: a dictionary of config variables that override both those set in
-            config_variables.yml and the environment
+            runtime_config_substitutions: a dictionary of config variables that
+            override both those set in config_variables.yml and the environment
 
         Returns:
             DataContext
@@ -1943,7 +1945,9 @@ class DataContext(BaseDataContext):
         else:
             cls.write_config_variables_template_to_disk(uncommitted_dir)
 
-        return cls(ge_dir, runtime_config_substitutions=runtime_config_substitutions)
+        return cls(
+            ge_dir, runtime_config_substitutions=runtime_config_substitutions
+        )
 
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir):
