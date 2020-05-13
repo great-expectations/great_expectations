@@ -117,12 +117,14 @@ class BaseDataContext(object):
         return True
 
     @usage_statistics_enabled_method(event_name="data_context.__init__",)
-    def __init__(self, project_config, context_root_dir=None):
+    def __init__(self, project_config, context_root_dir=None, runtime_config_substitutions={}):
         """DataContext constructor
 
         Args:
             context_root_dir: location to look for the ``great_expectations.yml`` file. If None, searches for the file \
             based on conventions for project subdirectories.
+            runtime_config_substitutions: a dictionary of config variables that override both those set in
+            config_variables.yml and the environment
 
         Returns:
             None
@@ -137,6 +139,7 @@ class BaseDataContext(object):
             self._context_root_directory = os.path.abspath(context_root_dir)
         else:
             self._context_root_directory = context_root_dir
+        self.runtime_config_substitutions = runtime_config_substitutions
 
         # Init plugin support
         if self.plugins_directory is not None:
@@ -578,14 +581,17 @@ class BaseDataContext(object):
             return {}
 
     def get_config_with_variables_substituted(self, config=None):
+
         if not config:
             config = self._project_config
 
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, self._load_config_variables_file()
-            )
-        )
+        substitutions = {
+            **dict(self._load_config_variables_file()),
+            **dict(os.environ),
+            **self.runtime_config_substitutions
+        }
+
+        return DataContextConfig(**substitute_all_config_variables(config, substitutions))
 
     def save_config_variable(self, config_variable_name, value):
         """Save config variable value
@@ -1875,7 +1881,7 @@ class DataContext(BaseDataContext):
     """
 
     @classmethod
-    def create(cls, project_root_dir=None, usage_statistics_enabled=True):
+    def create(cls, project_root_dir=None, usage_statistics_enabled=True, runtime_config_substitutions={}):
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
@@ -1884,6 +1890,8 @@ class DataContext(BaseDataContext):
 
         Args:
             project_root_dir: path to the root directory in which to create a new great_expectations directory
+            runtime_config_substitutions: a dictionary of config variables that override both those set in
+            config_variables.yml and the environment
 
         Returns:
             DataContext
@@ -1927,7 +1935,7 @@ class DataContext(BaseDataContext):
         else:
             cls.write_config_variables_template_to_disk(uncommitted_dir)
 
-        return cls(ge_dir)
+        return cls(ge_dir, runtime_config_substitutions=runtime_config_substitutions)
 
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir):
@@ -2030,7 +2038,7 @@ class DataContext(BaseDataContext):
                 destination_path = os.path.join(subdir_path, notebook_name)
                 shutil.copyfile(notebook, destination_path)
 
-    def __init__(self, context_root_dir=None):
+    def __init__(self, context_root_dir=None, runtime_config_substitutions={}):
 
         # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
@@ -2040,7 +2048,11 @@ class DataContext(BaseDataContext):
 
         project_config = self._load_project_config()
         project_config_dict = dataContextConfigSchema.dump(project_config)
-        super(DataContext, self).__init__(project_config, context_root_directory)
+        super(DataContext, self).__init__(
+            project_config,
+            context_root_directory,
+            runtime_config_substitutions
+        )
 
         # save project config if data_context_id auto-generated or global config values applied
         if (
