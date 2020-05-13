@@ -60,7 +60,7 @@ Add the following yaml block to your DataContext validation operators configurat
               target_store_name: metrics_store  # This should match the name of the store configured above
               # Note that the syntax for selecting requested metrics will change in a future release
               requested_metrics:
-                *:  # The asterisk here matches *any* expectation suite name
+                "*":  # The asterisk here matches *any* expectation suite name
                   # use the 'kwargs' key to request metrics that are defined by kwargs,
                   # for example because they are defined only for a particular column
                   # - column:
