@@ -162,7 +162,7 @@ class ActionListValidationOperator(ValidationOperator):
                 expectation_suite_name=batch._expectation_suite.expectation_suite_name
             )
             validation_result_id = ValidationResultIdentifier(
-                batch_identifier=BatchIdentifier(batch.batch_id),
+                batch_identifier=batch.batch_id,
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
             )

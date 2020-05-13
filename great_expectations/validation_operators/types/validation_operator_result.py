@@ -180,6 +180,9 @@ class ValidationOperatorResult(object):
                         if data_asset["batch_kwargs"].get("data_asset_name")
                         == data_asset_name
                     ]
+            self._validation_results_by_data_asset_name = (
+                validation_results_by_data_asset_name
+            )
         return self._validation_results_by_data_asset_name
 
     @property
