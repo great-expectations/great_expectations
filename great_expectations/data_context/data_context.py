@@ -565,7 +565,7 @@ class BaseDataContext(object):
             try:
                 # If the user specifies the config variable path with an environment variable, we want to substitute it
                 defined_path = substitute_config_variable(
-                    config_variables_file_path, {}
+                    config_variables_file_path, dict(os.environ)
                 )
                 if not os.path.isabs(defined_path):
                     # A BaseDataContext will not have a root directory; in that case use the current directory
@@ -2050,7 +2050,7 @@ class DataContext(BaseDataContext):
                 destination_path = os.path.join(subdir_path, notebook_name)
                 shutil.copyfile(notebook, destination_path)
 
-    def __init__(self, context_root_dir=None, runtime_config_substitutions={}):
+    def __init__(self, context_root_dir=None, runtime_config_substitutions=None):
 
         # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
