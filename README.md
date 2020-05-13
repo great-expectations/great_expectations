@@ -53,11 +53,6 @@ Expectations are <!--[declarative, flexible and extensible]()--> declarative, fl
 
 ### Batteries-included data validation
 
-```diff
-! This feature is in beta
-```
-
-
 Expectations are a great start, but it takes more to get to production-ready data validation. Where are Expectations stored? How do they get updated? How do you securely connect to production data systems? How do you notify team members and triage when data validation fails?
 
 Great Expectations supports all of these use cases out of the box. Instead of building these components for yourself over weeks or months, you will be able to add production-ready validation to your pipeline in a day. This “Expectations on rails” framework plays nice with other data engineering tools, respects your existing name spaces, and is designed for extensibility.
@@ -74,7 +69,7 @@ Check out [The Era of DIY Data Validation is Over]() for more details.
 ### Tests are docs and docs are tests
 
 ```diff
-- This feature is experimental
+! This feature is in beta
 ```
 
 
@@ -232,4 +227,4 @@ If you'd like hands-on assistance setting up Great Expectations, establishing a 
 Can I contribute to the library?
 --------------------------------------------------------------------------------
 
-Absolutely. Yes, please. Start [here](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING.md) and please don't be shy with questions.
+Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/en/latest/contributing.html) and please don't be shy with questions.
