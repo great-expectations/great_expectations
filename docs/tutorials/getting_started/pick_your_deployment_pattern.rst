@@ -3,7 +3,9 @@
 Customize your deployment
 =========================
 
-At this point, you have your first, working deployment of Great Expectations. It's pretty basic: most of the storage and execution are handled locally.
+At this point, you have your first, working deployment of Great Expectations. You've also been introduced to the foundational concepts in the library: :ref:`Data Contexts`, :ref:`Datasources`, :ref:`Expectations`, :ref:`Profilers`, :ref:`Auto Docs`, :ref:`Validation`, and :ref:`Checkpoints`.
+
+Congratulations! You're off to a very good start.
 
 The next step is to customize your deployment by upgrading specific components of your deployment. :ref:`Data Contexts` make this modular, so that you can add or swap out one component at a time. Most of these changes are quick, incremental steps---so you can upgrade from a basic demo deployment to a full production deployment at your own pace and be confident that your Data Context will continue to work at every step along the way.
 
@@ -16,50 +18,30 @@ Here's an overview of the components of a typical Great Expectations deployment:
 
 * Great Expectations configs and metadata 
 
-    * Options for storing Great Expectations configuration
-    * Options for storing Expectations
-    * Options for storing ValidationResults
+    * :ref:`Options for storing Great Expectations configuration`
+    * :ref:`Options for storing Expectations`
+    * :ref:`Options for storing Validation Results`
 
 * Integrations to related systems
 
-    * Additional DataSources and Generators
-    * Options for hosting data documentation
-    * Additional ValidationActions
+    * :ref:`Additional Datasources and Generators`
+    * :ref:`Options for hosting Auto Docs`
+    * :ref:`Additional Validation Actions`
 
 * Key workflows
 
-    * Creating and editing Expectations
-    * Triggering validation
-
-Levels of maturity
-------------------
-
-The Great Expectations ecosystem is expanding rapidly, which means that there's always a leading edge of integrations and workflows that aren't yet fully mature. We're committed to (1) shipping early, so that the community can benefit from new tools as soon as possible, and (2) clearly communicating levels of maturity, so that you can make good decisions about which components to use.
-
-.. raw:: html
-
-   <embed>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css">
-   </embed>
-
-   <embed>
-      <p>Components at the <span class="fas fa-circle" style="color:red"></span> experimental or <span class="fas fa-circle" style="color:yellow"></span> beta stage are marked with one of these icons: <span class="fas fa-circle" style="color:yellow"></span> <span class="fas fa-circle" style="color:red"></span>.
-      
-      Please see `Feature maturity grid`_ and `Levels of maturity`_ for more details.
-      </p>
-   </embed>
-
-
-One of the awesome things about open source is that anyone can help improve the ecosystem. If you really want something built, please join the Great Expectations community and help us build it!
+    * :ref:`Creating and editing Expectations`
+    * :ref:`Triggering validation`
 
 
 Options for storing Great Expectations configuration
 ----------------------------------------------------
 
+#FIXME: Add links once how-to guides are set up.
+
 * How to instantiate a DataContext without a yml file
 * How to use environment variables to populate credentials
 * How to populate credentials from a secrets store
-
 
 
 Options for storing Expectations
