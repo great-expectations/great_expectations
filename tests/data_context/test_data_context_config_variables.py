@@ -110,13 +110,17 @@ def test_runtime_config_substitutions_are_used_preferentially(tmp_path_factory):
     asset_config_path = os.path.join(context_path, "expectations")
     create_data_context_files(context_path, asset_config_path, True)
 
-    data_context = ge.data_context.DataContext(context_path, runtime_config_substitutions=runtime_config_substitutions)
+    data_context = ge.data_context.DataContext(
+        context_path,
+        runtime_config_substitutions=runtime_config_substitutions)
     config = data_context.get_config_with_variables_substituted()
 
     try:
-        assert (config.datasources["mydatasource"]["batch_kwargs_generators"]["mygenerator"]["reader_options"][
+        assert (config.datasources["mydatasource"]["batch_kwargs_generators"][
+                    "mygenerator"]["reader_options"][
                     "test_variable_sub1"] == value_from_runtime_override)
-        assert (config.datasources["mydatasource"]["batch_kwargs_generators"]["mygenerator"]["reader_options"][
+        assert (config.datasources["mydatasource"]["batch_kwargs_generators"][
+                    "mygenerator"]["reader_options"][
                     "test_variable_sub2"] == value_from_runtime_override)
     except Exception:
         raise

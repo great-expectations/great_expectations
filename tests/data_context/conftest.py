@@ -30,7 +30,10 @@ def data_context_with_variables_in_config(tmp_path_factory):
     return ge.data_context.DataContext(context_path)
 
 
-def create_data_context_files(context_path, asset_config_path, with_config_variables_file):
+def create_data_context_files(
+        context_path,
+        asset_config_path,
+        with_config_variables_file):
     if with_config_variables_file:
         os.makedirs(context_path, exist_ok=True)
         os.makedirs(os.path.join(context_path, "uncommitted"), exist_ok=True)
@@ -58,7 +61,8 @@ def create_common_data_context_files(context_path, asset_config_path):
     )
     copy_relative_path(
         "../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
-        os.path.join(asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"),
+        os.path.join(asset_config_path,
+                     "mydatasource/mygenerator/my_dag_node/default.json"),
     )
     os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
     copy_relative_path(
@@ -67,7 +71,8 @@ def create_common_data_context_files(context_path, asset_config_path):
     )
     copy_relative_path(
         "../test_fixtures/custom_sqlalchemy_dataset.py",
-        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
+        str(os.path.join(context_path, "plugins",
+                         "custom_sqlalchemy_dataset.py")),
     )
     copy_relative_path(
         "../test_fixtures/custom_sparkdf_dataset.py",
