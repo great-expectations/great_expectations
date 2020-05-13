@@ -50,7 +50,8 @@ def create_data_context_files(
     else:
         os.makedirs(context_path, exist_ok=True)
         copy_relative_path(
-            "../test_fixtures/great_expectations_basic_without_config_variables_filepath.yml",
+            "../test_fixtures/"  
+            "great_expectations_basic_without_config_variables_filepath.yml",
             str(os.path.join(context_path, "great_expectations.yml"))
         )
     create_common_data_context_files(context_path, asset_config_path)
@@ -62,7 +63,8 @@ def create_common_data_context_files(context_path, asset_config_path):
         exist_ok=True,
     )
     copy_relative_path(
-        "../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
+        "../test_fixtures/"
+        "expectation_suites/parameterized_expectation_suite_fixture.json",
         os.path.join(asset_config_path,
                      "mydatasource/mygenerator/my_dag_node/default.json"),
     )
