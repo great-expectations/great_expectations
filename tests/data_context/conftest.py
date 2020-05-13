@@ -50,7 +50,7 @@ def create_data_context_files(
     else:
         os.makedirs(context_path, exist_ok=True)
         copy_relative_path(
-            "../test_fixtures/"  
+            "../test_fixtures/"
             "great_expectations_basic_without_config_variables_filepath.yml",
             str(os.path.join(context_path, "great_expectations.yml"))
         )
