@@ -57,7 +57,7 @@ Add the following yaml block to your DataContext validation operators configurat
           - name: store_metrics
             action:
               class_name: StoreMetricsAction
-              target_store_name: metrics_store  # This should match the name of the store configured above
+              target_store_name: metrics_store  # Keep the space before this hash so it's not read as the name. This should match the name of the store configured above
               # Note that the syntax for selecting requested metrics will change in a future release
               requested_metrics:
                 "*":  # The asterisk here matches *any* expectation suite name
