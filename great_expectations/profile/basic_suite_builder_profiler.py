@@ -220,6 +220,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     [None, None],
                 ],
             },
+            allow_relative_error=True,
             result_format="SUMMARY",
             catch_exceptions=True,
         )
@@ -241,6 +242,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                         for v in quantile_result.result["observed_value"]["values"]
                     ],
                 },
+                allow_relative_error=True,
                 catch_exceptions=True,
             )
             dataset.set_config_value("interactive_evaluation", True)

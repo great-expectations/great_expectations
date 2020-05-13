@@ -6,6 +6,19 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from typing import List
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+try:
+    import sqlalchemy
+    from sqlalchemy.dialects.postgresql.psycopg2 import PGDialect_psycopg2
+    from sqlalchemy.sql.elements import WithinGroup
+except ImportError:
+    logger.debug('Unable to load SqlAlchemy or one of its subclasses.')
+
 
 def is_valid_partition_object(partition_object):
     """Tests whether a given object is a valid continuous or categorical partition object.
@@ -561,3 +574,21 @@ def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs)
         results.append(expectation(column, *args, **kwargs))
 
     return results
+
+
+def get_approximate_percentile_disc_sql(
+        selects: List[WithinGroup],
+        sql_engine_dialect: PGDialect_psycopg2
+):
+    return ', '.join(
+        [
+            'approximate '
+            + str(
+                stmt.compile(
+                    dialect=sql_engine_dialect,
+                    compile_kwargs={'literal_binds': True},
+                )
+            )
+            for stmt in selects
+        ]
+    )
