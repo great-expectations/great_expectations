@@ -65,15 +65,6 @@ Great Expectations added some missing files required to run.
 
 BUILD_DOCS_PROMPT = "Would you like to build & view this project's Data Docs!?"
 
-NEW_TEMPLATE_PROMPT = """
-Would you like to install a new config file template?
-  - We will move your existing `{}` to `{}`"""
-
-NEW_TEMPLATE_INSTALLED = """
-OK. You now have a new config file: `{}`.
-  - Please copy the relevant values from the archived file ({}) into this new template.
-"""
-
 NO_DATASOURCES_FOUND = """<red>Error: No datasources were found.</red> Please add one by:
   - running `<green>great_expectations datasource new</green>` or
   - by editing the {} file
