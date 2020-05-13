@@ -117,7 +117,11 @@ class BaseDataContext(object):
         return True
 
     @usage_statistics_enabled_method(event_name="data_context.__init__",)
-    def __init__(self, project_config, context_root_dir=None, runtime_config_substitutions={}):
+    def __init__(
+            self,
+            project_config,
+            context_root_dir=None,
+            runtime_config_substitutions=None):
         """DataContext constructor
 
         Args:
@@ -139,7 +143,7 @@ class BaseDataContext(object):
             self._context_root_directory = os.path.abspath(context_root_dir)
         else:
             self._context_root_directory = context_root_dir
-        self.runtime_config_substitutions = runtime_config_substitutions
+        self.runtime_config_substitutions = runtime_config_substitutions or {}
 
         # Init plugin support
         if self.plugins_directory is not None:
@@ -1881,7 +1885,11 @@ class DataContext(BaseDataContext):
     """
 
     @classmethod
-    def create(cls, project_root_dir=None, usage_statistics_enabled=True, runtime_config_substitutions={}):
+    def create(
+            cls,
+            project_root_dir=None,
+            usage_statistics_enabled=True,
+            runtime_config_substitutions=None):
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
