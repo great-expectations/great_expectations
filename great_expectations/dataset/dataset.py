@@ -167,7 +167,7 @@ class Dataset(MetaDataset):
         # (e.g. self.spark_df) over the lifetime of the dataset instance
         self.caching = kwargs.pop("caching", True)
 
-        super(Dataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if self.caching:
             for func in self.hashable_getters:
@@ -4333,3 +4333,9 @@ class Dataset(MetaDataset):
             parse(value) if isinstance(value, str) else value for value in value_set
         ]
         return parsed_value_set
+
+    def is_relative_error_supported(self):
+        """
+        Subclasses can override this method if the respective data source (e.g., Redshift) supports "approximate" mode.
+        """
+        return False

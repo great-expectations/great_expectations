@@ -576,7 +576,7 @@ def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs)
 
 def get_approximate_percentile_disc_sql(
     selects: List[WithinGroup], sql_engine_dialect: DefaultDialect
-):
+) -> str:
     return ", ".join(
         [
             "approximate "
@@ -588,3 +588,12 @@ def get_approximate_percentile_disc_sql(
             for stmt in selects
         ]
     )
+
+
+def check_sql_engine_dialect(
+    actual_sql_engine_dialect: DefaultDialect, candidate_sql_engine_dialect
+) -> bool:
+    try:
+        return isinstance(actual_sql_engine_dialect, candidate_sql_engine_dialect)
+    except (AttributeError, TypeError):
+        return False
