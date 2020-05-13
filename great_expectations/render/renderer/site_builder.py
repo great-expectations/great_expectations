@@ -183,7 +183,6 @@ class SiteBuilder(object):
                 "run_id_filter": {"eq": "profiling"},
                 "renderer": {"class_name": "ProfilingResultsPageRenderer"},
             },
->>>>>>> develop
         }
 
         if site_section_builders is None:
@@ -409,7 +408,6 @@ class DefaultSiteSectionBuilder(object):
                             resource_key.batch_identifier
                         )
                     )
->>>>>>> develop
                 else:
 
                     logger.debug(

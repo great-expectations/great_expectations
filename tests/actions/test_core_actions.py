@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-from freezegun import freeze_time
-
-from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
-=======
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
@@ -13,7 +8,6 @@ from great_expectations.validation_operators import (
     SlackNotificationAction,
     StoreValidationResultAction,
 )
->>>>>>> develop
 
 try:
     from unittest import mock
@@ -58,21 +52,6 @@ def test_StoreAction():
     assert len(fake_in_memory_store.list_keys()) == 1
     stored_identifier = fake_in_memory_store.list_keys()[0]
     assert stored_identifier.batch_identifier == "1234"
-<<<<<<< HEAD
-    assert stored_identifier.expectation_suite_identifier.expectation_suite_name == "default_expectations"
-    assert stored_identifier.run_id == expected_run_id
-
-    assert fake_in_memory_store.get(ValidationResultIdentifier(
-        expectation_suite_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="default_expectations"
-        ),
-        run_id=expected_run_id,
-        batch_identifier="1234"
-    )) == ExpectationSuiteValidationResult(
-        success=False,
-        results=[]
-    )
-=======
     assert (
         stored_identifier.expectation_suite_identifier.expectation_suite_name
         == "default_expectations"
@@ -88,7 +67,6 @@ def test_StoreAction():
             batch_identifier="1234",
         )
     ) == ExpectationSuiteValidationResult(success=False, results=[])
->>>>>>> develop
 
 
 def test_SlackNotificationAction(data_context_parameterized_expectation_suite):

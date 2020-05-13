@@ -9,12 +9,8 @@ marshmallow>3.0
 mistune>=0.8.4
 numpy>=1.14.1
 pandas>=0.22.0
-<<<<<<< HEAD
-python-dateutil>=2.7.0
-=======
 pyparsing>=2.4,<3
 python-dateutil>=2.4.2
->>>>>>> develop
 pytz>=2015.6
 requests>=2.20
 ruamel.yaml>=0.15.24

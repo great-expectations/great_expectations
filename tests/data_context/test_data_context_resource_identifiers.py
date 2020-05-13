@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-from freezegun import freeze_time
-=======
 import pytest
->>>>>>> develop
 
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,

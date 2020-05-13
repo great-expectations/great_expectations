@@ -14,9 +14,6 @@ mock>=3.0.5
 moto>=1.3.7
 numpy>=1.14.1
 pandas>=0.22.0
-<<<<<<< HEAD
-python-dateutil>=2.7.0
-=======
 pre-commit>=2.3.0
 psycopg2-binary>=2.7.6
 pyarrow>=0.12.0
@@ -26,7 +23,6 @@ pyspark>=2.3.2
 pytest-cov>=2.8.1
 pytest>=5.3.5
 python-dateutil>=2.4.2
->>>>>>> develop
 pytz>=2015.6
 requests>=2.20
 ruamel.yaml>=0.15.24
