@@ -31,13 +31,17 @@ try:
     )
     from sqlalchemy.sql.operators import custom_op
     from sqlalchemy.sql.elements import WithinGroup
-    from sqlalchemy_redshift.dialect import RedshiftDialect
-    from sqlalchemy.dialects.postgresql.psycopg2 import PGDialect_psycopg2
+    from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.exc import ProgrammingError
 except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
+
+try:
+    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
+except ImportError:
+    sqlalchemy_psycopg2 = None
 
 try:
     import sqlalchemy_redshift.dialect
@@ -607,8 +611,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ]
 
         try:
-            sql_engine_dialect: PGDialect_psycopg2 = self.engine.dialect
-            if isinstance(sql_engine_dialect, RedshiftDialect) or isinstance(sql_engine_dialect, PGDialect_psycopg2):
+            quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
+        except ProgrammingError:
+            sql_engine_dialect: DefaultDialect = self.engine.dialect
+            if isinstance(
+                    sql_engine_dialect,
+                    (
+                            sqlalchemy_redshift.dialect.RedshiftDialect,
+                            sqlalchemy_psycopg2.PGDialect_psycopg2
+                    )
+            ):
                 # Redshift does not have a percentile_disc method, but does support an approximate version.
                 if allow_relative_error:
                     sql_approx: str = get_approximate_percentile_disc_sql(
@@ -616,6 +628,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                         sql_engine_dialect=sql_engine_dialect
                     )
                     selects = [sa.text(sql_approx)]
+                    try:
+                        quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
+                    except ProgrammingError as pe:
+                        exception_message: str = 'An SQL syntax Exception occurred.'
+                        exception_traceback: str = traceback.format_exc()
+                        exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+                        logger.error(exception_message)
+                        raise pe
                 else:
                     raise ValueError(
                         "Redshift does not support computing quantiles without approximation error; "
@@ -623,15 +643,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     )
         except (AttributeError, TypeError):
             pass
-
-        try:
-            quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
-        except ProgrammingError as pe:
-            exception_message: str = 'An SQL syntax Exception occurred.'
-            exception_traceback: str = traceback.format_exc()
-            exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
-            logger.error(exception_message)
-            raise pe
 
         return list(quantiles)
 

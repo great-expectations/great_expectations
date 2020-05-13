@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy
-    from sqlalchemy.dialects.postgresql.psycopg2 import PGDialect_psycopg2
+    from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.sql.elements import WithinGroup
 except ImportError:
     logger.debug('Unable to load SqlAlchemy or one of its subclasses.')
@@ -578,7 +578,7 @@ def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs)
 
 def get_approximate_percentile_disc_sql(
         selects: List[WithinGroup],
-        sql_engine_dialect: PGDialect_psycopg2
+        sql_engine_dialect: DefaultDialect
 ):
     return ', '.join(
         [
