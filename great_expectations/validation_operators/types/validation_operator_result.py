@@ -20,26 +20,54 @@ class ValidationOperatorResult(object):
         self._run_id = run_id
         self._run_results = run_results
         self._evaluation_parameters = evaluation_parameters
-        self._success = all(
-            [
-                run_result["validation_result"].success
-                for run_result in run_results.values()
-            ]
-        )
 
+        self._success = None
         self._validation_results = None
         self._data_assets_validated = None
-        self._data_asset_validated_by_batch_id = None
+        self._data_assets_validated_by_batch_id = None
         self._validation_result_identifiers = None
         self._expectation_suite_names = None
+        self._data_asset_names = None
+        self._actions_results_by_validation_result_identifier = None
+        self._validation_results_by_expectation_suite_name = None
+        self._validation_results_by_data_asset_name = None
+
+    @property
+    def data_asset_names(self) -> List[str]:
+        if self._data_asset_names is None:
+            self._data_asset_names = list(
+                set(
+                    [
+                        data_asset["batch_kwargs"].get("data_asset_name") or "__none__"
+                        for data_asset in self.data_assets_validated
+                    ]
+                )
+            )
+        return self._data_asset_names
+
+    @property
+    def actions_results_by_validation_result_identifier(self) -> dict:
+        if self._actions_results_by_validation_result_identifier is None:
+            self._actions_results_by_validation_result_identifier = {
+                validation_result_identifier: run_result["actions_results"]
+                for (
+                    validation_result_identifier,
+                    run_result,
+                ) in self.run_results.items()
+            }
+        return self._actions_results_by_validation_result_identifier
 
     @property
     def expectation_suite_names(self) -> List[str]:
         if self._expectation_suite_names is None:
-            self._expectation_suite_names = [
-                validation_result_identifier.expectation_suite_identifier.expectation_suite_name
-                for validation_result_identifier in self._run_results.keys()
-            ]
+            self._expectation_suite_names = list(
+                set(
+                    [
+                        validation_result_identifier.expectation_suite_identifier.expectation_suite_name
+                        for validation_result_identifier in self._run_results.keys()
+                    ]
+                )
+            )
         return self._expectation_suite_names
 
     @property
@@ -84,7 +112,7 @@ class ValidationOperatorResult(object):
 
     @property
     def data_assets_validated_by_batch_id(self) -> dict:
-        if self._data_asset_validated_by_batch_id is None:
+        if self._data_assets_validated_by_batch_id is None:
             assets_validated_by_batch_id = {}
 
             for validation_result in self.validation_results:
@@ -106,26 +134,54 @@ class ValidationOperatorResult(object):
                     assets_validated_by_batch_id[batch_id][
                         "expectation_suite_names"
                     ].append(expectation_suite_name)
-            self._data_asset_validated_by_batch_id = assets_validated_by_batch_id
-        return self._data_asset_validated_by_batch_id
-
-    @property
-    def statistics(self) -> dict:
-        raise NotImplementedError
-
-    @property
-    def actions_results(self) -> dict:
-        raise NotImplementedError
+            self._data_assets_validated_by_batch_id = assets_validated_by_batch_id
+        return self._data_assets_validated_by_batch_id
 
     @property
     def success(self) -> bool:
-        raise NotImplementedError
+        if self._success is None:
+            self._success = all(
+                [
+                    run_result["validation_result"].success
+                    for run_result in self.run_results.values()
+                ]
+            )
+        return self._success
 
     @property
-    def details(self):
-        # TODO I'm not sure what type this should return
-        raise NotImplementedError
+    def validation_results_by_expectation_suite_name(self) -> dict:
+        if self._validation_results_by_expectation_suite_name is None:
+            self._validation_results_by_expectation_suite_name = {
+                expectation_suite_name: [
+                    run_result["validation_result"]
+                    for run_result in self.run_results.values()
+                    if run_result["validation_result"].meta["expectation_suite_name"]
+                    == expectation_suite_name
+                ]
+                for expectation_suite_name in self.expectation_suite_names
+            }
+        return self._validation_results_by_expectation_suite_name
 
     @property
-    def validation_result_by_expectation_suite_identifier(self) -> dict:
+    def validation_results_by_data_asset_name(self) -> dict:
+        if self._validation_results_by_data_asset_name is None:
+            validation_results_by_data_asset_name = {}
+            for data_asset_name in self.data_asset_names:
+                if data_asset_name == "__none__":
+                    validation_results_by_data_asset_name[data_asset_name] = [
+                        data_asset["validation_results"]
+                        for data_asset in self.data_assets_validated
+                        if data_asset["batch_kwargs"].get("data_asset_name") is None
+                    ]
+                else:
+                    validation_results_by_data_asset_name[data_asset_name] = [
+                        data_asset["validation_results"]
+                        for data_asset in self.data_assets_validated
+                        if data_asset["batch_kwargs"].get("data_asset_name")
+                        == data_asset_name
+                    ]
+        return self._validation_results_by_data_asset_name
+
+    @property
+    def statistics(self) -> dict:
         raise NotImplementedError
