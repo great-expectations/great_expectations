@@ -145,22 +145,28 @@ Pay special attention to proper formatting of :ref:`result_format`.
                 #Prevent division-by-zero errors
                 if len(not_null) == 0:
                     return {
-                        'success':True,
-                        'unexpected_list':unexpected_values,
-                        'unexpected_index_list':self.index[result],
+                        "success":True,
+                        "result": {
+                            'unexpected_list':unexpected_values,
+                            'unexpected_index_list':self.index[result],
+                        }
                     }
 
                 percent_equaling_1 = float(sum(result))/len(not_null)
                 return {
                     "success" : percent_equaling_1 >= mostly,
-                    "unexpected_list" : unexpected_values[:20],
-                    "unexpected_index_list" : list(self.index[result==False])[:20],
+                    "result": {
+                        "unexpected_list" : unexpected_values[:20],
+                        "unexpected_index_list" : list(self.index[result==False])[:20],
+                        }
                 }
             else:
                 return {
                     "success" : len(unexpected_values) == 0,
-                    "unexpected_list" : unexpected_values[:20],
-                    "unexpected_index_list" : list(self.index[result==False])[:20],
+                    "result": {
+                        "unexpected_list" : unexpected_values[:20],
+                        "unexpected_index_list" : list(self.index[result==False])[:20],
+                    }
                 }
 
 
