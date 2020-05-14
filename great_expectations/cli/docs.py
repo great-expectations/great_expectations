@@ -136,28 +136,32 @@ def build_docs(context, site_name=None, view=True):
                     if site_name == p_sname:
                         b_nfound = True
                 else:
-                     b_nfound = True
+                    b_nfound = True
                 msg += " - <cyan>{}:</cyan> ".format(site_name)
-                msg += "{}\n".format("Site doesn’t exist or is inaccessible at "+ index_page_locator_info + ". If you just built data docs, please check permissions.")
+                msg += "{}\n".format("Site doesn’t exist or is
+                    inaccessible at " + index_page_locator_info + ".
+                    If you just built data docs, please check permissions.")
         else:
-           r = requests.get(index_page_locator_info, stream=True)
-           if r==200:
-               msg += " - <cyan>{}:</cyan> ".format(site_name)
-               msg += "{}\n".format(index_page_locator_info)
-           else:
-              if p_sname is not None:
-                  if site_name == p_sname:
-                      b_nfound = True
-              else:
-                   b_nfound = True
-              msg += " - <cyan>{}:</cyan> ".format(site_name)
-              msg += "{}\n".format("Site doesn’t exist or is inaccessible at "+ index_page_locator_info + ". If you just built data docs, please check permissions.")
+            r = requests.get(index_page_locator_info, stream=True)
+            if r==200:
+                msg += " - <cyan>{}:</cyan> ".format(site_name)
+                msg += "{}\n".format(index_page_locator_info)
+            else:
+                if p_sname is not None:
+                    if site_name == p_sname:
+                        b_nfound = True
+                else:
+                    b_nfound = True
+                msg += " - <cyan>{}:</cyan> ".format(site_name)
+                msg += "{}\n".format("Site doesn’t exist or is 
+                  inaccessible at " + index_page_locator_info + ".
+                  If you just built data docs, please check permissions.")
 
     msg = msg.rstrip("\n")
     cli_message(msg)
 
     if view:
-        if b_nfound == False:
+        if b_nfound is False:
             if p_sname is not None:
                 context.open_data_docs(site_name=p_sname)
             else:
