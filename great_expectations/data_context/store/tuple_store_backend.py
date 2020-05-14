@@ -549,7 +549,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 continue
             elif self.filepath_suffix and not gcs_object_key.endswith(self.filepath_suffix):
                 continue
-            key = os.path.join(self.prefix, gcs_object_key)
+            key = self._convert_filepath_to_key(gcs_object_key)
             if key:
                 key_list.append(key)
         return key_list
