@@ -6,6 +6,7 @@ Changelog
 
 develop
 -----------------
+* Improved help for CLI `checkpoint` command
 
 0.10.10
 -----------------
