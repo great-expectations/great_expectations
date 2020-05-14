@@ -1,44 +1,53 @@
+1. normatively wrong to have to use ge
+2. dataset
+3. query
+
+
+
+
+
+
 [
   {
     "section_title": "Infrastructure",
     "section_features": [
       {
         "title": "Where is your data stored?",
-        "description": "A [Data Connection](https://docs.greatexpectations.io/en/latest/reference/core_concepts/data_connection.html), facilitates access for Great Expectations to data to be validated.",
-        "id": "data_connection",
+        "description": "A [Datasource](https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html), facilitates access for Great Expectations to data to be validated.",
+        "id": "datasource",
         "cases": [
           {
-            "id": "data_connection_filesystem"
+            "id": "datasource_filesystem"
           },
           {
-            "id": "data_connection_s3"
+            "id": "datasource_s3"
           },
           {
-            "id": "data_connection_gcs"
+            "id": "datasource_gcs"
           },
           {
-            "id": "data_connection_azure"
+            "id": "datasource_azure"
           },
           {
-            "id": "data_connection_postgreql"
+            "id": "datasource_postgreql"
           },
           {
-            "id": "data_connection_bigquery"
+            "id": "datasource_bigquery"
           },
           {
-            "id": "data_connection_redshift"
+            "id": "datasource_redshift"
           },
           {
-            "id": "data_connection_snowflake"
+            "id": "datasource_snowflake"
           },
           {
-            "id": "data_connection_mssql"
+            "id": "datasource_mssql"
           },
           {
-            "id": "data_connection_mysql"
+            "id": "datasource_mysql"
           },
           {
-            "id": "data_connection_mariadb"
+            "id": "datasource_mariadb"
           }
         ]
       },
@@ -54,7 +63,7 @@
             "id": "validation_engine_pyspark_self_managed"
           },
           {
-            "id": "cvalidation_engine_databricks"
+            "id": "validation_engine_databricks"
           },
           {
             "id": "validation_engine_emr_spark"
