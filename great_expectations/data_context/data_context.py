@@ -81,6 +81,42 @@ class BaseDataContext(object):
         into DataContext class.
 
     Together, these changes make BaseDataContext class more testable.
+
+s3
+API Stability: medium
+Implementation Completeness: Complete
+Unit Test Coverage: Complete
+Infrastructure Coverage: None
+Documentation Completeness: Minimal/Spotty
+Bug Risk: Low
+
+
+Feature: Filesystem
+API Stability: Medium
+Implementation Completeness: Complete
+Unit Test Coverage: Complete
+Infrastructure Coverage: Partial
+Documentation Completeness: Partial
+Bug Risk: Low (unless you’re on windows)
+
+
+Feature: GCS
+ -> experimental
+API Stability: medium [supported via native ‘gs://' syntax in pandas and spark; medium because we expect configuration to evolve]
+Implementation Completeness: Medium [works via passthrough, not via CLI]
+Unit Test Coverage: Minimal
+Infrastructure Coverage: Minimal
+Documentation Completeness: Minimal
+Bug Risk: Moderate
+
+Feature: azure_blob_storage
+-> to-be-named-level below experimental (“not impossible”) (“i’ve seen worse ideas”) “in roadmap”
+API Stability: N/A [Supported on (data bricks) spark via ‘wasb://' / ‘wasps://' url; requires download locally first for pandas]
+Implementation Completeness: Minimal
+Unit Test Coverage: N/A
+Infrastructure Coverage: N/A
+Documentation Completeness: Minimal
+Bug Risk: Unknown
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
