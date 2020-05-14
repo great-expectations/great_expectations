@@ -117,14 +117,12 @@ def build_docs(context, site_name=None, view=True):
     logger.debug("Starting cli.datasource.build_docs")
 
     cli_message("Building Data Docs...")
-    func_sitename = site_name
     if site_name is not None:
         site_names = [site_name]
     else:
         site_names = None
 
     index_page_locator_infos = context.build_data_docs(site_names=site_names)
-    b_notfound = False
     msg = "The following Data Docs sites were built:\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
         if index_page_locator_info.startswith("file"):
@@ -132,11 +130,6 @@ def build_docs(context, site_name=None, view=True):
                 msg += " - <cyan>{}:</cyan> ".format(site_name)
                 msg += "{}\n".format(index_page_locator_info)
             else:
-                if func_sitename is not None:
-                    if site_name == func_sitename:
-                        b_notfound = True
-                else:
-                    b_notfound = True
                 msg += " - <cyan>{}:</cyan> ".format(site_name)
                 msg += "{}\n".format("Site doesn’t exist or is inaccessible at "
                                      + index_page_locator_info + ". If you"
@@ -148,11 +141,6 @@ def build_docs(context, site_name=None, view=True):
                 msg += " - <cyan>{}:</cyan> ".format(site_name)
                 msg += "{}\n".format(index_page_locator_info)
             else:
-                if func_sitename is not None:
-                    if site_name == func_sitename:
-                        b_notfound = True
-                else:
-                    b_notfound = True
                 msg += " - <cyan>{}:</cyan> ".format(site_name)
                 msg += "{}\n".format("Site doesn’t exist or is inaccessible at "
                                      + index_page_locator_info + ". If you"
@@ -162,8 +150,4 @@ def build_docs(context, site_name=None, view=True):
     msg = msg.rstrip("\n")
     cli_message(msg)
     if view:
-        if b_notfound is False:
-            if func_sitename is not None:
-                context.open_data_docs(site_name=func_sitename)
-            else:
-                context.open_data_docs(site_name=site_name)
+        context.open_data_docs(site_name=site_name, only_if_exists=True)
