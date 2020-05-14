@@ -5,9 +5,10 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
+from great_expectations.types import DictDot
 
 
-class ValidationOperatorResult(object):
+class ValidationOperatorResult(DictDot):
     def __init__(
         self,
         run_id: str,
@@ -15,11 +16,13 @@ class ValidationOperatorResult(object):
             ValidationResultIdentifier,
             Dict[str, Union[ExpectationSuiteValidationResult, dict]],
         ],
+        validation_operator_config,
         evaluation_parameters: dict = None,
     ) -> None:
         self._run_id = run_id
         self._run_results = run_results
         self._evaluation_parameters = evaluation_parameters
+        self._validation_operator_config = validation_operator_config
 
         self._success = None
         self._validation_results = None
@@ -31,6 +34,10 @@ class ValidationOperatorResult(object):
         self._actions_results_by_validation_result_identifier = None
         self._validation_results_by_expectation_suite_name = None
         self._validation_results_by_data_asset_name = None
+
+    @property
+    def validation_operator_config(self) -> dict:
+        return self._validation_operator_config
 
     @property
     def data_asset_names(self) -> List[str]:

@@ -13,9 +13,6 @@ import warnings
 import webbrowser
 from typing import Dict, List, Optional, Union
 
-from marshmallow import ValidationError
-from ruamel.yaml import YAML, YAMLError
-
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite, get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -58,6 +55,8 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import Validator
+from marshmallow import ValidationError
+from ruamel.yaml import YAML, YAMLError
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -362,7 +361,10 @@ class BaseDataContext(object):
         module_name = "great_expectations.validation_operators"
         new_validation_operator = instantiate_class_from_config(
             config=config,
-            runtime_environment={"data_context": self,},
+            runtime_environment={
+                "data_context": self,
+                "name": validation_operator_name,
+            },
             config_defaults={"module_name": module_name},
         )
         if not new_validation_operator:

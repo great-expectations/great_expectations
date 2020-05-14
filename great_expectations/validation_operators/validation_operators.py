@@ -31,6 +31,13 @@ class ValidationOperator(object):
     of validation operator classes that will be the descendants of this base class.
     """
 
+    def __init__(self) -> None:
+        self._validation_operator_config = None
+
+    @property
+    def validation_operator_config(self):
+        raise NotImplementedError
+
     def run(self, assets_to_validate, run_id, evaluation_parameters=None):
         raise NotImplementedError
 
@@ -71,8 +78,10 @@ class ActionListValidationOperator(ValidationOperator):
                     class_name: SlackRenderer
     """
 
-    def __init__(self, data_context, action_list):
+    def __init__(self, data_context, action_list, name):
+        super().__init__()
         self.data_context = data_context
+        self.name = name
 
         self.action_list = action_list
         self.actions = OrderedDict()
@@ -100,6 +109,17 @@ class ActionListValidationOperator(ValidationOperator):
                     class_name=config["class_name"],
                 )
             self.actions[action_config["name"]] = new_action
+
+    @property
+    def validation_operator_config(self) -> dict:
+        if self._validation_operator_config is None:
+            self._validation_operator_config = {
+                "class_name": "ActionListValidationOperator",
+                "module_name": "great_expectations.validation_operators",
+                "name": self.name,
+                "kwargs": {"action_list": self.action_list},
+            }
+        return self._validation_operator_config
 
     def _build_batch_from_item(self, item):
         """Internal helper method to take an asset to validate, which can be either:
@@ -185,6 +205,7 @@ class ActionListValidationOperator(ValidationOperator):
         return ValidationOperatorResult(
             run_id=run_id,
             run_results=run_results,
+            validation_operator_config=self.validation_operator_config,
             evaluation_parameters=evaluation_parameters,
         )
 
@@ -316,6 +337,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         self,
         data_context,
         action_list,
+        name,
         base_expectation_suite_name=None,
         expectation_suite_name_suffixes=None,
         stop_on_first_error=False,
@@ -323,7 +345,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         notify_on="all",
     ):
         super(WarningAndFailureExpectationSuitesValidationOperator, self).__init__(
-            data_context, action_list,
+            data_context, action_list, name
         )
 
         if expectation_suite_name_suffixes is None:
@@ -339,6 +361,24 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         self.slack_webhook = slack_webhook
         self.notify_on = notify_on
+
+    @property
+    def validation_operator_config(self) -> dict:
+        if self._validation_operator_config is None:
+            self._validation_operator_config = {
+                "class_name": "ActionListValidationOperator",
+                "module_name": "great_expectations.validation_operators",
+                "name": self.name,
+                "kwargs": {
+                    "action_list": self.action_list,
+                    "base_expectation_suite_name": self.base_expectation_suite_name,
+                    "expectation_suite_name_suffixes": self.expectation_suite_name_suffixes,
+                    "stop_on_first_error": self.stop_on_first_error,
+                    "slack_webhook": self.slack_webhook,
+                    "notify_on": self.notify_on,
+                },
+            }
+        return self._validation_operator_config
 
     def _build_slack_query(self, run_return_obj):
         timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
