@@ -1,6 +1,6 @@
-.. attention:: This doc is a template. Please do not attempt to follow these instructions.
+.. _how_to_guides__miscellaneous__how_to_template:
 
-.. _how_to_guides__miscellaneous__how_to_template
+.. attention:: This doc is a template. Please do not attempt to follow these instructions.
 
 TEMPLATE: How to {do something}
 ===============================

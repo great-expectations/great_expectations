@@ -1,4 +1,4 @@
-.. _how_to_guides__miscellaneous__how_to_write_a_how_to_guide
+.. _how_to_guides__miscellaneous__how_to_write_a_how_to_guide:
 
 How to write a how to guide
 ===========================
