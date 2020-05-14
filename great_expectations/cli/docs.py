@@ -56,7 +56,7 @@ def docs_list(directory):
             docs_site_dict["site_name"],
             docs_site_dict.get("site_url")
             or f"site configured but does not exist. Run the following command to build site: great_expectations "
-               f'docs build --site-name {docs_site_dict["site_name"]}',
+            f'docs build --site-name {docs_site_dict["site_name"]}',
         )
         for docs_site_dict in docs_sites_url_dicts
     ]
@@ -131,10 +131,13 @@ def build_docs(context, site_name=None, view=True):
                 msg += "{}\n".format(index_page_locator_info)
             else:
                 msg += " - <cyan>{}:</cyan> ".format(site_name)
-                msg += "{}\n".format("Site doesn’t exist or is inaccessible at "
-                                     + index_page_locator_info + ". If you"
-                                     + " just built data docs,"
-                                     + " please check permissions.")
+                msg += "{}\n".format(
+                    "Site doesn’t exist or is inaccessible at "
+                    + index_page_locator_info
+                    + ". If you"
+                    + " just built data docs,"
+                    + " please check permissions."
+                )
         else:
             r = requests.get(index_page_locator_info, stream=True)
             if r == 200:
@@ -142,10 +145,13 @@ def build_docs(context, site_name=None, view=True):
                 msg += "{}\n".format(index_page_locator_info)
             else:
                 msg += " - <cyan>{}:</cyan> ".format(site_name)
-                msg += "{}\n".format("Site doesn’t exist or is inaccessible at "
-                                     + index_page_locator_info + ". If you"
-                                     + " just built data docs,"
-                                     + " please check permissions.")
+                msg += "{}\n".format(
+                    "Site doesn’t exist or is inaccessible at "
+                    + index_page_locator_info
+                    + ". If you"
+                    + " just built data docs,"
+                    + " please check permissions."
+                )
 
     msg = msg.rstrip("\n")
     cli_message(msg)
