@@ -516,8 +516,8 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs_response_object = bucket.get_blob(gcs_object_key)
         return gcs_response_object.download_as_string().decode("utf-8")
 
-    def _set(self, key, value, content_encoding=
-        'utf-8', content_type='application/json'):
+    def _set(self, key, value, content_encoding='utf-8',
+             content_type='application/json'):
         gcs_object_key = os.path.join(
             self.prefix,
             self._convert_key_to_filepath(key)
@@ -547,6 +547,10 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 gcs_object_name,
                 self.prefix,
             )
+            if self.filepath_prefix and not gcs_object_key.startswith(self.filepath_prefix):
+                continue
+            elif self.filepath_suffix and not gcs_object_key.endswith(self.filepath_suffix):
+                continue
             key = os.path.join(
                 self.prefix,
                 gcs_object_key)
