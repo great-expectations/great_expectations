@@ -524,6 +524,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
+
         if isinstance(value, str):
             blob.upload_from_string(
                 value.encode(content_encoding), content_type=content_type
@@ -553,7 +554,6 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             key = self._convert_filepath_to_key(gcs_object_key)
             if key:
                 key_list.append(key)
-
         return key_list
 
     def get_url_for_key(self, key, protocol=None):
