@@ -254,13 +254,9 @@ class DefaultJinjaView(object):
 
         # if there are any groupings of two or more $, we need to double the groupings to account
         # for template string substitution escaping
-        two_or_more_dollar_signs = list(
-            set(re.findall(r"\${2,}", template.get("template") or ""))
+        template["template"] = re.sub(
+            r"\${2,}", lambda m: m.group(0) * 2, template.get("template", "")
         )
-        for match in two_or_more_dollar_signs:
-            template["template"] = template.get("template", "").replace(
-                match, match * 2
-            )
 
         tag = template.get("tag", "span")
         template["template"] = template.get("template", "").replace("\n", "<br>")
