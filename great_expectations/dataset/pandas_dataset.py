@@ -9,8 +9,6 @@ import jsonschema
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-from scipy import stats
-
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -19,6 +17,7 @@ from great_expectations.dataset.util import (
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
 )
+from scipy import stats
 
 from .dataset import Dataset
 
