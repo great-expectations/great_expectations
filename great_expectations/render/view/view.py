@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import re
 from collections import OrderedDict
 from string import Template as pTemplate
 from uuid import uuid4
@@ -251,6 +252,12 @@ class DefaultJinjaView(object):
         if not isinstance(template, (dict, OrderedDict)):
             return template
 
+        # if there are any groupings of two or more $, we need to double the groupings to account
+        # for template string substitution escaping
+        template["template"] = re.sub(
+            r"\${2,}", lambda m: m.group(0) * 2, template.get("template", "")
+        )
+
         tag = template.get("tag", "span")
         template["template"] = template.get("template", "").replace("\n", "<br>")
 
@@ -306,7 +313,7 @@ class DefaultJinjaView(object):
 
                     params[parameter] = pTemplate(
                         base_param_template_string
-                    ).substitute(
+                    ).safe_substitute(
                         {
                             "styling": self.render_styling(default_parameter_styling),
                             "content": params[parameter],
@@ -325,7 +332,9 @@ class DefaultJinjaView(object):
                     param_template_string = "<{param_tag} $styling>$content</{param_tag}>".format(
                         param_tag=param_tag
                     )
-                    params[parameter] = pTemplate(param_template_string).substitute(
+                    params[parameter] = pTemplate(
+                        param_template_string
+                    ).safe_substitute(
                         {
                             "styling": self.render_styling(parameter_styling),
                             "content": params[parameter],
@@ -333,23 +342,23 @@ class DefaultJinjaView(object):
                     )
 
             string = pTemplate(
-                pTemplate(base_template_string).substitute(
+                pTemplate(base_template_string).safe_substitute(
                     {
                         "template": template["template"],
                         "styling": self.render_styling(template.get("styling", {})),
                     }
                 )
-            ).substitute(params)
+            ).safe_substitute(params)
             return string
 
         return pTemplate(
-            pTemplate(base_template_string).substitute(
+            pTemplate(base_template_string).safe_substitute(
                 {
                     "template": template.get("template", ""),
                     "styling": self.render_styling(template.get("styling", {})),
                 }
             )
-        ).substitute(template.get("params", {}))
+        ).safe_substitute(template.get("params", {}))
 
     def _validate_document(self, document):
         raise NotImplementedError
