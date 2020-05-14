@@ -1,12 +1,3 @@
-1. normatively wrong to have to use ge
-2. dataset
-3. query
-
-
-
-
-
-
 [
   {
     "section_title": "Infrastructure",
@@ -48,6 +39,34 @@
           },
           {
             "id": "datasource_mariadb"
+          },
+          {
+            "id": "datasource_hdfs"
+          }
+        ]
+      },
+      {
+        "title": "What batch kwargs generators do you want to use?",
+        "description": "A Batch Kwargs Generator provides an interface for interacting with a datasource to introspect it and slice data into logical batches.",
+        "id": "batch_kwargs_generator",
+        "cases": [
+          {
+            "id": "batch_kwargs_generator_manual"
+          },
+          {
+            "id": "batch_kwargs_s3"
+          },
+          {
+            "id": "batch_kwargs_glob_reader"
+          },
+          {
+            "id": "batch_kwargs_generator_table"
+          },
+          {
+            "id": "batch_kwargs_generator_query"
+          },
+          {
+            "id": "batch_kwargs_generator_subdir_reader"
           }
         ]
       },
