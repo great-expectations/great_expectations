@@ -3,10 +3,15 @@ import pandas as pd
 
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
+    RenderedBulletListContent,
     RenderedDocumentContent,
+    RenderedGraphContent,
+    RenderedHeaderContent,
     RenderedSectionContent,
-    RenderedHeaderContent, RenderedBulletListContent, RenderedTableContent, RenderedStringTemplateContent,
-    RenderedGraphContent, ValueListContent)
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+    ValueListContent,
+)
 
 
 class CustomPageRenderer(Renderer):
