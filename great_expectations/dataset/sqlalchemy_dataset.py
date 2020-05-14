@@ -415,7 +415,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def sql_engine_dialect(self) -> DefaultDialect:
         return self.engine.dialect
 
-    def is_relative_error_supported(self):
+    def attempt_allowing_relative_error(self):
         detected_redshift = check_sql_engine_dialect(
             actual_sql_engine_dialect=self.sql_engine_dialect,
             candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
@@ -632,7 +632,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         except ProgrammingError:
             # ProgrammingError: (psycopg2.errors.SyntaxError) Aggregate function "percentile_disc" is not supported;
             # use approximate percentile_disc or percentile_cont instead.
-            if self.is_relative_error_supported():
+            if self.attempt_allowing_relative_error():
                 # Redshift does not have a percentile_disc method, but does support an approximate version.
                 if allow_relative_error:
                     sql_approx: str = get_approximate_percentile_disc_sql(
@@ -651,11 +651,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                         raise pe
                 else:
                     raise ValueError(
-                        "Redshift does not support computing quantiles without approximation error; "
-                        "set allow_relative_error to True to allow approximate quantiles."
+                        f'The SQL engine dialect "{str(self.sql_engine_dialect)}" does not support computing quantiles '
+                        "without approximation error; set allow_relative_error to True to allow approximate quantiles."
                     )
             else:
-                raise ValueError("Unable to detect SQL engine dialect.")
+                raise ValueError(
+                    f'The SQL engine dialect "{str(self.sql_engine_dialect)}" does not support computing quantiles with '
+                    "approximation error; set allow_relative_error to False to disable approximate quantiles."
+                )
 
         return list(quantiles)
 

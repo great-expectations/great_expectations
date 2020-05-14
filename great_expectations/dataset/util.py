@@ -591,7 +591,8 @@ def get_approximate_percentile_disc_sql(
 
 
 def check_sql_engine_dialect(
-    actual_sql_engine_dialect: DefaultDialect, candidate_sql_engine_dialect
+    actual_sql_engine_dialect: DefaultDialect,
+    candidate_sql_engine_dialect: DefaultDialect,
 ) -> bool:
     try:
         return isinstance(actual_sql_engine_dialect, candidate_sql_engine_dialect)

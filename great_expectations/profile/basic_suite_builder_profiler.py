@@ -207,7 +207,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 f"Skipping expect_column_median_to_be_between because observed value is nan: {observed_median}"
             )
 
-        allow_relative_error = dataset.is_relative_error_supported()
+        allow_relative_error = dataset.attempt_allowing_relative_error()
 
         quantile_result = dataset.expect_column_quantile_values_to_be_between(
             column,

@@ -3,7 +3,7 @@ from datetime import datetime
 from functools import lru_cache, wraps
 from itertools import zip_longest
 from numbers import Number
-from typing import List
+from typing import Any, List, Union
 
 import numpy as np
 import pandas as pd
@@ -241,7 +241,9 @@ class Dataset(MetaDataset):
         """Returns: any"""
         raise NotImplementedError
 
-    def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
+    def get_column_quantiles(
+        self, column, quantiles, allow_relative_error=False
+    ) -> List[Any]:
         """Get the values in column closest to the requested quantiles
         Args:
             column (string): name of column
@@ -4334,8 +4336,9 @@ class Dataset(MetaDataset):
         ]
         return parsed_value_set
 
-    def is_relative_error_supported(self):
+    def attempt_allowing_relative_error(self) -> Union[bool, float]:
         """
         Subclasses can override this method if the respective data source (e.g., Redshift) supports "approximate" mode.
+        In certain cases (e.g., for SparkDFDataset), a fraction between 0 and 1 (i.e., not only a boolean) is allowed.
         """
         return False
