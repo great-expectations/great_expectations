@@ -145,8 +145,7 @@ class SiteBuilder(object):
             site_index_builder.get("module_name")
             or "great_expectations.render.renderer.site_builder"
         )
-        class_name = site_index_builder.get("class_name") or \
-                     "DefaultSiteIndexBuilder"
+        class_name = site_index_builder.get("class_name") or "DefaultSiteIndexBuilder"
         self.site_index_builder = instantiate_class_from_config(
             config=site_index_builder,
             runtime_environment={
@@ -200,8 +199,7 @@ class SiteBuilder(object):
                 default_site_section_builders_config, site_section_builders
             )
         self.site_section_builders = {}
-        for site_section_name, site_section_config in \
-                site_section_builders.items():
+        for site_section_name, site_section_config in site_section_builders.items():
             if not site_section_config or site_section_config in [
                 "0",
                 "None",
@@ -227,8 +225,7 @@ class SiteBuilder(object):
                     "data_context_id": self.data_context_id,
                     "show_how_to_buttons": self.show_how_to_buttons,
                 },
-                config_defaults={"name": site_section_name,
-                                 "module_name": module_name},
+                config_defaults={"name": site_section_name, "module_name": module_name},
             )
             if not self.site_section_builders[site_section_name]:
                 raise exceptions.ClassInstantiationError(
@@ -257,10 +254,8 @@ class SiteBuilder(object):
         # copy static assets
         self.target_store.copy_static_assets()
 
-        for site_section, site_section_builder in \
-                self.site_section_builders.items():
-            site_section_builder.build(resource_identifiers=
-                                       resource_identifiers)
+        for site_section, site_section_builder in self.site_section_builders.items():
+            site_section_builder.build(resource_identifiers=resource_identifiers)
 
         index_page_resource_identifier_tuple = self.site_index_builder.build()
         return (
@@ -281,8 +276,7 @@ class SiteBuilder(object):
         """
 
         return self.target_store.get_url_for_resource(
-            resource_identifier=resource_identifier,
-            only_if_exists=only_if_exists
+            resource_identifier=resource_identifier, only_if_exists=only_if_exists
         )
 
 
@@ -339,8 +333,7 @@ class DefaultSiteSectionBuilder(object):
         module_name = view.get("module_name") or module_name
         self.view_class = instantiate_class_from_config(
             config=view,
-            runtime_environment={"custom_styles_directory":
-                                     custom_styles_directory},
+            runtime_environment={"custom_styles_directory": custom_styles_directory},
             config_defaults={"module_name": module_name},
         )
         if not self.view_class:
@@ -364,8 +357,7 @@ class DefaultSiteSectionBuilder(object):
             # a page for every keys in its source store.
             # if the caller did pass resource_identifiers, the section builder
             # will build pages only for the specified resources
-            if resource_identifiers and resource_key not in \
-                    resource_identifiers:
+            if resource_identifiers and resource_key not in resource_identifiers:
                 continue
 
             if self.run_id_filter:
@@ -391,8 +383,7 @@ class DefaultSiteSectionBuilder(object):
             elif isinstance(resource_key, ValidationResultIdentifier):
                 run_id = resource_key.run_id
                 expectation_suite_name = (
-                    resource_key.expectation_suite_identifier.
-                        expectation_suite_name
+                    resource_key.expectation_suite_identifier.expectation_suite_name
                 )
                 if run_id == "profiling":
                     logger.debug(
@@ -419,21 +410,22 @@ class DefaultSiteSectionBuilder(object):
                     show_how_to_buttons=self.show_how_to_buttons,
                 )
             except Exception as e:
-                exception_message = f'''\
+                exception_message = f"""\
 An unexpected Exception occurred during data docs rendering.  Because of this \
 error, certain parts of data docs will not be rendered properly and/or may \
 not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
-                '''
+                """
                 exception_traceback = traceback.format_exc()
-                exception_message += f'{type(e).__name__}: "{str(e)}".  ' \
-                                     f'Traceback: "{exception_traceback}".'
+                exception_message += (
+                    f'{type(e).__name__}: "{str(e)}".  '
+                    f'Traceback: "{exception_traceback}".'
+                )
                 logger.error(exception_message, e, exc_info=True)
 
             self.target_store.set(
                 SiteSectionIdentifier(
-                    site_section_name=self.name,
-                    resource_identifier=resource_key,
+                    site_section_name=self.name, resource_identifier=resource_key,
                 ),
                 viewable_content,
             )
@@ -507,8 +499,7 @@ class DefaultSiteIndexBuilder(object):
         module_name = view.get("module_name") or module_name
         self.view_class = instantiate_class_from_config(
             config=view,
-            runtime_environment={"custom_styles_directory":
-                                     custom_styles_directory},
+            runtime_environment={"custom_styles_directory": custom_styles_directory},
             config_defaults={"module_name": module_name},
         )
         if not self.view_class:
@@ -544,8 +535,7 @@ class DefaultSiteIndexBuilder(object):
             filepath = os.path.join(*path_components)
             filepath += ".html"
         else:
-            filepath = os.path.join("expectations", *expectation_suite_name.
-                                    split("."))
+            filepath = os.path.join("expectations", *expectation_suite_name.split("."))
             filepath += ".html"
 
         index_links_dict[section_name + "_links"].append(
@@ -593,7 +583,7 @@ class DefaultSiteIndexBuilder(object):
 
         return {
             "header": "To continue exploring Great Expectations check out one "
-                      "of these tutorials...",
+            "of these tutorials...",
             "buttons": self._get_call_to_action_buttons(usage_statistics),
         }
 
@@ -694,8 +684,7 @@ class DefaultSiteIndexBuilder(object):
         for expectation_suite_key in expectation_suite_keys:
             self.add_resource_info_to_index_links_dict(
                 index_links_dict=index_links_dict,
-                expectation_suite_name=expectation_suite_key.
-                    expectation_suite_name,
+                expectation_suite_name=expectation_suite_key.expectation_suite_name,
                 section_name="expectations",
             )
 
@@ -703,8 +692,7 @@ class DefaultSiteIndexBuilder(object):
             try:
                 validation = self.data_context.get_validation_result(
                     batch_identifier=profiling_result_key.batch_identifier,
-                    expectation_suite_name=profiling_result_key.
-                        expectation_suite_identifier.expectation_suite_name,
+                    expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
                     run_id=profiling_result_key.run_id,
                 )
 
@@ -712,8 +700,7 @@ class DefaultSiteIndexBuilder(object):
 
                 self.add_resource_info_to_index_links_dict(
                     index_links_dict=index_links_dict,
-                    expectation_suite_name=profiling_result_key.
-                        expectation_suite_identifier.expectation_suite_name,
+                    expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
                     section_name="profiling",
                     batch_identifier=profiling_result_key.batch_identifier,
                     run_id=profiling_result_key.run_id,
@@ -729,8 +716,7 @@ class DefaultSiteIndexBuilder(object):
             try:
                 validation = self.data_context.get_validation_result(
                     batch_identifier=validation_result_key.batch_identifier,
-                    expectation_suite_name=validation_result_key.
-                        expectation_suite_identifier.expectation_suite_name,
+                    expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
                     run_id=validation_result_key.run_id,
                 )
 
@@ -738,8 +724,7 @@ class DefaultSiteIndexBuilder(object):
 
                 self.add_resource_info_to_index_links_dict(
                     index_links_dict=index_links_dict,
-                    expectation_suite_name=validation_result_key.
-                        expectation_suite_identifier.expectation_suite_name,
+                    expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
                     section_name="validations",
                     batch_identifier=validation_result_key.batch_identifier,
                     run_id=validation_result_key.run_id,
@@ -759,12 +744,12 @@ class DefaultSiteIndexBuilder(object):
                 show_how_to_buttons=self.show_how_to_buttons,
             )
         except Exception as e:
-            exception_message = f'''\
+            exception_message = f"""\
 An unexpected Exception occurred during data docs rendering.  Because of this \
 error, certain parts of data docs will not be rendered properly and/or may \
 not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
-            '''
+            """
             exception_traceback = traceback.format_exc()
             exception_message += (
                 f'{type(e).__name__}: "{str(e)}".  Traceback: '
@@ -772,8 +757,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
             logger.error(exception_message, e, exc_info=True)
 
-        return (self.target_store.write_index_page(
-            viewable_content), index_links_dict)
+        return (self.target_store.write_index_page(viewable_content), index_links_dict)
 
 
 class CallToActionButton(object):
