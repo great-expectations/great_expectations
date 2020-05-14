@@ -138,9 +138,9 @@ def build_docs(context, site_name=None, view=True):
                 else:
                     b_nfound = True
                 msg += " - <cyan>{}:</cyan> ".format(site_name)
-                msg += "{}\n".format("Site doesn’t exist or is
-                    inaccessible at " + index_page_locator_info + ".
-                    If you just built data docs, please check permissions.")
+                msg += "{}\n".format("Site doesn’t exist or is inaccessible at "
+                    + index_page_locator_info + ". If you just built data docs," 
+                    + " please check permissions.")
         else:
             r = requests.get(index_page_locator_info, stream=True)
             if r==200:
@@ -153,9 +153,9 @@ def build_docs(context, site_name=None, view=True):
                 else:
                     b_nfound = True
                 msg += " - <cyan>{}:</cyan> ".format(site_name)
-                msg += "{}\n".format("Site doesn’t exist or is 
-                  inaccessible at " + index_page_locator_info + ".
-                  If you just built data docs, please check permissions.")
+                msg += "{}\n".format("Site doesn’t exist or is inaccessible at "
+                    + index_page_locator_info + ". If you just built data docs," 
+                    + " please check permissions.")
 
     msg = msg.rstrip("\n")
     cli_message(msg)
