@@ -3,7 +3,10 @@ import pandas as pd
 
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
+    RenderedBulletListContent,
     RenderedDocumentContent,
+    RenderedGraphContent,
+    RenderedHeaderContent,
     RenderedSectionContent,
     RenderedHeaderContent,
     RenderedBulletListContent,
@@ -187,6 +190,75 @@ class CustomPageRenderer(Renderer):
         if ge_dict is None:
             ge_dict = {}
 
+<<<<<<< HEAD
+        return RenderedDocumentContent(**{
+            "renderer_type": "CustomValidationResultsPageRenderer",
+            "data_asset_name": "my_data_asset_name",
+            "full_data_asset_identifier": "my_datasource/my_generator/my_generator_asset",
+            "page_title": "My Page Title",
+            "sections": [
+                RenderedSectionContent(**{
+                    "section_name": "Header Content Block",
+                    "content_blocks": [
+                        cls._get_header_content_block(header="Header Content Block", subheader="subheader")]
+                }),
+                RenderedSectionContent(**{
+                    "section_name": "Bullet List Content Block",
+                    "content_blocks": [
+                        cls._get_header_content_block(header="Bullet List Content Block"),
+                        cls._get_bullet_list_content_block(header="My Important List",
+                                                           subheader="Unremarkable Subheader")
+                    ]
+                }),
+                RenderedSectionContent(**{
+                    "section_name": "Table Content Block",
+                    "content_blocks": [
+                        cls._get_header_content_block(header="Table Content Block"),
+                        cls._get_table_content_block(header="My Big Data Table"),
+                    ]
+                }),
+                RenderedSectionContent(**{
+                    "section_name": "Value List Content Block",
+                    "content_blocks": [
+                        cls._get_header_content_block(header="Value List Content Block"),
+                        cls._get_value_list_content_block(header="My Name Value List"),
+                    ]
+                }),
+                RenderedSectionContent(**{
+                    "section_name": "Graph Content Block",
+                    "content_blocks": [
+                        cls._get_header_content_block(header="Graph Content Block"),
+                        cls._get_graph_content_block(header="My Big Data Graph"),
+                    ]
+                }),
+                RenderedSectionContent(**{
+                    "section_name": "String Template Content Block With Icon",
+                    "content_blocks": [
+                        cls._get_header_content_block(header="String Template Content Block With Icon"),
+                        cls._get_string_template_content_block()
+                    ]
+                }),
+                RenderedSectionContent(**{
+                    "section_name": "String Template Content Block With Tooltip",
+                    "content_blocks": [
+                        cls._get_header_content_block(header="String Template Content Block With Tooltip"),
+                        cls._get_tooltip_string_template_content_block()
+                    ]
+                }),
+                RenderedSectionContent(**{
+                    "section_name": "Multiple Content Block Section",
+                    "content_blocks": [
+                        cls._get_header_content_block(header="Multiple Content Block Section"),
+                        cls._get_graph_content_block(header="My col-4 Graph", col=4),
+                        cls._get_graph_content_block(header="My col-4 Graph", col=4),
+                        cls._get_graph_content_block(header="My col-4 Graph", col=4),
+                        cls._get_table_content_block(header="My col-6 Table", col=6),
+                        cls._get_bullet_list_content_block(header="My col-6 List", subheader="subheader", col=6)
+                    ]
+                }),
+            ]
+        })
+=======
         return RenderedDocumentContent(
             **{
                 "renderer_type": "CustomValidationResultsPageRenderer",
@@ -307,3 +379,4 @@ class CustomPageRenderer(Renderer):
                 ],
             }
         )
+>>>>>>> develop

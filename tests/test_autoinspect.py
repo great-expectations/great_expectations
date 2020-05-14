@@ -2,9 +2,8 @@
 Tests for autoinspection framework.
 """
 
-import pytest
-
 import great_expectations as ge
+import pytest
 from great_expectations.core import ExpectationConfiguration
 
 from .test_utils import get_dataset

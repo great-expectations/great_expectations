@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations import DataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidConfigError
