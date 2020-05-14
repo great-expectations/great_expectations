@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import re
 from collections import OrderedDict
 from string import Template as pTemplate
 from uuid import uuid4
@@ -250,6 +251,16 @@ class DefaultJinjaView(object):
         # NOTE: We should add some kind of type-checking to template
         if not isinstance(template, (dict, OrderedDict)):
             return template
+
+        # if there are any groupings of two or more $, we need to double the groupings to account
+        # for template string substitution escaping
+        two_or_more_dollar_signs = list(
+            set(re.findall(r"\${2,}", template.get("template") or ""))
+        )
+        for match in two_or_more_dollar_signs:
+            template["template"] = template.get("template", "").replace(
+                match, match * 2
+            )
 
         tag = template.get("tag", "span")
         template["template"] = template.get("template", "").replace("\n", "<br>")
