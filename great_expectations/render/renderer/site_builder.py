@@ -19,18 +19,23 @@ logger = logging.getLogger(__name__)
 
 
 class SiteBuilder(object):
-    """SiteBuilder builds data documentation for the project defined by a DataContext.
+    """SiteBuilder builds data documentation for the project defined by a
+    DataContext.
 
-    A data documentation site consists of HTML pages for expectation suites, profiling and validation results, and
+    A data documentation site consists of HTML pages for expectation suites,
+    profiling and validation results, and
     an index.html page that links to all the pages.
 
-    The exact behavior of SiteBuilder is controlled by configuration in the DataContext's great_expectations.yml file.
+    The exact behavior of SiteBuilder is controlled by configuration in the
+    DataContext's great_expectations.yml file.
 
     Users can specify:
 
         * which datasources to document (by default, all)
-        * whether to include expectations, validations and profiling results sections (by default, all)
-        * where the expectations and validations should be read from (filesystem or S3)
+        * whether to include expectations, validations and profiling results
+        sections (by default, all)
+        * where the expectations and validations should be read from
+        (filesystem or S3)
         * where the HTML files should be written (filesystem or S3)
         * which renderer and view class should be used to render each section
 
@@ -44,7 +49,8 @@ class SiteBuilder(object):
                 prefix: /data_docs/
 
 
-    A more verbose configuration can also control individual sections and override renderers, views, and stores::
+    A more verbose configuration can also control individual sections and
+    override renderers, views, and stores::
 
         local_site:
             class_name: SiteBuilder
@@ -125,7 +131,8 @@ class SiteBuilder(object):
                 plugins_directory, "custom_data_docs", "styles"
             )
 
-        # The site builder is essentially a frontend store. We'll open up three types of backends using the base
+        # The site builder is essentially a frontend store. We'll open up
+        # three types of backends using the base
         # type of the configuration defined in the store_backend section
 
         self.target_store = HtmlSiteStore(
@@ -138,7 +145,8 @@ class SiteBuilder(object):
             site_index_builder.get("module_name")
             or "great_expectations.render.renderer.site_builder"
         )
-        class_name = site_index_builder.get("class_name") or "DefaultSiteIndexBuilder"
+        class_name = site_index_builder.get("class_name") or \
+                     "DefaultSiteIndexBuilder"
         self.site_index_builder = instantiate_class_from_config(
             config=site_index_builder,
             runtime_environment={
@@ -192,7 +200,8 @@ class SiteBuilder(object):
                 default_site_section_builders_config, site_section_builders
             )
         self.site_section_builders = {}
-        for site_section_name, site_section_config in site_section_builders.items():
+        for site_section_name, site_section_config in \
+                site_section_builders.items():
             if not site_section_config or site_section_config in [
                 "0",
                 "None",
@@ -218,7 +227,8 @@ class SiteBuilder(object):
                     "data_context_id": self.data_context_id,
                     "show_how_to_buttons": self.show_how_to_buttons,
                 },
-                config_defaults={"name": site_section_name, "module_name": module_name},
+                config_defaults={"name": site_section_name,
+                                 "module_name": module_name},
             )
             if not self.site_section_builders[site_section_name]:
                 raise exceptions.ClassInstantiationError(
@@ -233,11 +243,13 @@ class SiteBuilder(object):
     def build(self, resource_identifiers=None):
         """
 
-        :param resource_identifiers: a list of resource identifiers (ExpectationSuiteIdentifier,
-                            ValidationResultIdentifier). If specified, rebuild HTML
-                            (or other views the data docs site renders) only for
-                            the resources in this list. This supports incremental build
-                            of data docs sites (e.g., when a new validation result is created)
+        :param resource_identifiers: a list of resource identifiers
+        (ExpectationSuiteIdentifier,
+                            ValidationResultIdentifier). If specified,
+                            rebuild HTML(or other views the data docs
+                            site renders) only forthe resources in this list.
+                            This supports incremental build of data docs sites
+                            (e.g., when a new validation result is created)
                             and avoids full rebuild.
         :return:
         """
@@ -245,8 +257,10 @@ class SiteBuilder(object):
         # copy static assets
         self.target_store.copy_static_assets()
 
-        for site_section, site_section_builder in self.site_section_builders.items():
-            site_section_builder.build(resource_identifiers=resource_identifiers)
+        for site_section, site_section_builder in \
+                self.site_section_builders.items():
+            site_section_builder.build(resource_identifiers=
+                                       resource_identifiers)
 
         index_page_resource_identifier_tuple = self.site_index_builder.build()
         return self.get_resource_url(
@@ -257,14 +271,16 @@ class SiteBuilder(object):
         Return the URL of the HTML document that renders a resource
         (e.g., an expectation suite or a validation result).
 
-        :param resource_identifier: ExpectationSuiteIdentifier, ValidationResultIdentifier
-                or any other type's identifier. The argument is optional - when
-                not supplied, the method returns the URL of the index page.
+        :param resource_identifier: ExpectationSuiteIdentifier,
+        ValidationResultIdentifier or any other type's identifier. The
+        argument is optional - whennot supplied, the method returns the URL of
+        the index page.
         :return: URL (string)
         """
 
         return self.target_store.get_url_for_resource(
-            resource_identifier=resource_identifier, only_if_exists=only_if_exists
+            resource_identifier=resource_identifier,
+            only_if_exists=only_if_exists
         )
 
 
@@ -294,7 +310,8 @@ class DefaultSiteSectionBuilder(object):
 
         if renderer is None:
             raise exceptions.InvalidConfigError(
-                "SiteSectionBuilder requires a renderer configuration with a class_name key."
+                "SiteSectionBuilder requires a renderer configuration "
+                "with a class_name key."
             )
         module_name = (
             renderer.get("module_name") or "great_expectations.render.renderer"
@@ -320,7 +337,8 @@ class DefaultSiteSectionBuilder(object):
         module_name = view.get("module_name") or module_name
         self.view_class = instantiate_class_from_config(
             config=view,
-            runtime_environment={"custom_styles_directory": custom_styles_directory},
+            runtime_environment={"custom_styles_directory":
+                                     custom_styles_directory},
             config_defaults={"module_name": module_name},
         )
         if not self.view_class:
@@ -339,11 +357,13 @@ class DefaultSiteSectionBuilder(object):
 
         for resource_key in source_store_keys:
 
-            # if no resource_identifiers are passed, the section builder will build
+            # if no resource_identifiers are passed, the section
+            # builder will build
             # a page for every keys in its source store.
             # if the caller did pass resource_identifiers, the section builder
             # will build pages only for the specified resources
-            if resource_identifiers and resource_key not in resource_identifiers:
+            if resource_identifiers and resource_key not in \
+                    resource_identifiers:
                 continue
 
             if self.run_id_filter:
@@ -354,7 +374,8 @@ class DefaultSiteSectionBuilder(object):
                 resource = self.source_store.get(resource_key)
             except FileNotFoundError:
                 logger.warning(
-                    f"File {resource_key.to_fixed_length_tuple()} could not be found. Skipping."
+                    f"File {resource_key.to_fixed_length_tuple()} "
+                    f"could not be found. Skipping."
                 )
                 continue
 
@@ -368,7 +389,8 @@ class DefaultSiteSectionBuilder(object):
             elif isinstance(resource_key, ValidationResultIdentifier):
                 run_id = resource_key.run_id
                 expectation_suite_name = (
-                    resource_key.expectation_suite_identifier.expectation_suite_name
+                    resource_key.expectation_suite_identifier.
+                        expectation_suite_name
                 )
                 if run_id == "profiling":
                     logger.debug(
@@ -379,7 +401,8 @@ class DefaultSiteSectionBuilder(object):
                 else:
 
                     logger.debug(
-                        "        Rendering validation: run id: {}, suite {} for batch {}".format(
+                        "        Rendering validation: run id: {}, suite {} "
+                        "for batch {}".format(
                             run_id,
                             expectation_suite_name,
                             resource_key.batch_identifier,
@@ -394,18 +417,21 @@ class DefaultSiteSectionBuilder(object):
                     show_how_to_buttons=self.show_how_to_buttons,
                 )
             except Exception as e:
-                exception_message = f"""\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
+                exception_message = f'''\
+An unexpected Exception occurred during data docs rendering.  Because of this \
+error, certain parts of data docs will not be rendered properly and/or may \
+not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
-                """
+                '''
                 exception_traceback = traceback.format_exc()
-                exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                exception_message += f'{type(e).__name__}: "{str(e)}".  ' \
+                                     f'Traceback: "{exception_traceback}".'
                 logger.error(exception_message, e, exc_info=True)
 
             self.target_store.set(
                 SiteSectionIdentifier(
-                    site_section_name=self.name, resource_identifier=resource_key,
+                    site_section_name=self.name,
+                    resource_identifier=resource_key,
                 ),
                 viewable_content,
             )
@@ -415,7 +441,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
             run_id = resource_key.run_id
         else:
             raise TypeError(
-                "run_id_filter filtering is only implemented for ValidationResultResources."
+                "run_id_filter filtering is only implemented for "
+                "ValidationResultResources."
             )
 
         if self.run_id_filter.get("eq"):
@@ -478,7 +505,8 @@ class DefaultSiteIndexBuilder(object):
         module_name = view.get("module_name") or module_name
         self.view_class = instantiate_class_from_config(
             config=view,
-            runtime_environment={"custom_styles_directory": custom_styles_directory},
+            runtime_environment={"custom_styles_directory":
+                                     custom_styles_directory},
             config_defaults={"module_name": module_name},
         )
         if not self.view_class:
@@ -509,11 +537,13 @@ class DefaultSiteIndexBuilder(object):
                 + [run_id]
                 + [batch_identifier]
             )
-            # filepath = os.path.join("validations", batch_identifier, *expectation_suite_name.split("."), run_id)
+            # filepath = os.path.join("validations", batch_identifier,
+            # *expectation_suite_name.split("."), run_id)
             filepath = os.path.join(*path_components)
             filepath += ".html"
         else:
-            filepath = os.path.join("expectations", *expectation_suite_name.split("."))
+            filepath = os.path.join("expectations", *expectation_suite_name.
+                                    split("."))
             filepath += ".html"
 
         index_links_dict[section_name + "_links"].append(
@@ -535,27 +565,33 @@ class DefaultSiteIndexBuilder(object):
         #
         # if datasource_classes_by_name:
         #     last_datasource_class_by_name = datasource_classes_by_name[-1]
-        #     last_datasource_class_name = last_datasource_class_by_name["class_name"]
+        #     last_datasource_class_name = last_datasource_class_by_name["
+        #     class_name"]
         #     last_datasource_name = last_datasource_class_by_name["name"]
-        #     last_datasource = self.data_context.get_datasource(last_datasource_name)
+        #     last_datasource = self.data_context.get_datasource
+        #     (last_datasource_name)
         #
         #     if last_datasource_class_name == "SqlAlchemyDatasource":
         #         try:
-        #                # NOTE: JPC - 20200327 - I do not believe datasource will *ever* have a drivername property
+        #                # NOTE: JPC - 20200327 - I do not believe datasource
+        #                will *ever* have a drivername property
         #                (it's in credentials). Suspect this isn't working.
         #             db_driver = last_datasource.drivername
         #         except AttributeError:
         #             pass
         #
-        #     datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
-        #     usage_statistics = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
+        #     datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[
+        #     last_datasource_class_name].value
+        #     usage_statistics = "?utm_source={}&utm_medium={}
+        #     &utm_campaign={}".format(
         #         "ge-init-datadocs-v2",
         #         datasource_type,
         #         db_driver,
         #     )
 
         return {
-            "header": "To continue exploring Great Expectations check out one of these tutorials...",
+            "header": "To continue exploring Great Expectations check out one "
+                      "of these tutorials...",
             "buttons": self._get_call_to_action_buttons(usage_statistics),
         }
 
@@ -569,24 +605,29 @@ class DefaultSiteIndexBuilder(object):
         create_expectations = CallToActionButton(
             "How To Create Expectations",
             # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html",
+            "https://docs.greatexpectations.io/en/latest/"
+            "tutorials/create_expectations.html",
         )
         see_glossary = CallToActionButton(
             "See more kinds of Expectations",
-            "http://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html",
+            "http://docs.greatexpectations.io/en/latest/reference/"
+            "expectation_glossary.html",
         )
         validation_playground = CallToActionButton(
             "How To Validate data",
             # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/tutorials/validate_data.html",
+            "https://docs.greatexpectations.io/en/latest/tutorials/"
+            "validate_data.html",
         )
         customize_data_docs = CallToActionButton(
             "How To Customize Data Docs",
-            "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs",
+            "https://docs.greatexpectations.io/en/latest/reference/"
+            "data_docs_reference.html#customizing-data-docs",
         )
         s3_team_site = CallToActionButton(
             "How To Set up a team site on AWS S3",
-            "https://docs.greatexpectations.io/en/latest/tutorials/publishing_data_docs_to_s3.html",
+            "https://docs.greatexpectations.io/en/latest/tutorials/"
+            "publishing_data_docs_to_s3.html",
         )
         # TODO gallery does not yet exist
         # gallery = CallToActionButton(
@@ -651,7 +692,8 @@ class DefaultSiteIndexBuilder(object):
         for expectation_suite_key in expectation_suite_keys:
             self.add_resource_info_to_index_links_dict(
                 index_links_dict=index_links_dict,
-                expectation_suite_name=expectation_suite_key.expectation_suite_name,
+                expectation_suite_name=expectation_suite_key.
+                    expectation_suite_name,
                 section_name="expectations",
             )
 
@@ -659,7 +701,8 @@ class DefaultSiteIndexBuilder(object):
             try:
                 validation = self.data_context.get_validation_result(
                     batch_identifier=profiling_result_key.batch_identifier,
-                    expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
+                    expectation_suite_name=profiling_result_key.
+                        expectation_suite_identifier.expectation_suite_name,
                     run_id=profiling_result_key.run_id,
                 )
 
@@ -667,7 +710,8 @@ class DefaultSiteIndexBuilder(object):
 
                 self.add_resource_info_to_index_links_dict(
                     index_links_dict=index_links_dict,
-                    expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
+                    expectation_suite_name=profiling_result_key.
+                        expectation_suite_identifier.expectation_suite_name,
                     section_name="profiling",
                     batch_identifier=profiling_result_key.batch_identifier,
                     run_id=profiling_result_key.run_id,
@@ -683,7 +727,8 @@ class DefaultSiteIndexBuilder(object):
             try:
                 validation = self.data_context.get_validation_result(
                     batch_identifier=validation_result_key.batch_identifier,
-                    expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
+                    expectation_suite_name=validation_result_key.
+                        expectation_suite_identifier.expectation_suite_name,
                     run_id=validation_result_key.run_id,
                 )
 
@@ -691,7 +736,8 @@ class DefaultSiteIndexBuilder(object):
 
                 self.add_resource_info_to_index_links_dict(
                     index_links_dict=index_links_dict,
-                    expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
+                    expectation_suite_name=validation_result_key.
+                        expectation_suite_identifier.expectation_suite_name,
                     section_name="validations",
                     batch_identifier=validation_result_key.batch_identifier,
                     run_id=validation_result_key.run_id,
@@ -711,18 +757,21 @@ class DefaultSiteIndexBuilder(object):
                 show_how_to_buttons=self.show_how_to_buttons,
             )
         except Exception as e:
-            exception_message = f"""\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
+            exception_message = f'''\
+An unexpected Exception occurred during data docs rendering.  Because of this \
+error, certain parts of data docs will not be rendered properly and/or may \
+not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
-            """
+            '''
             exception_traceback = traceback.format_exc()
             exception_message += (
-                f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                f'{type(e).__name__}: "{str(e)}".  Traceback: '
+                f'"{exception_traceback}".'
             )
             logger.error(exception_message, e, exc_info=True)
 
-        return (self.target_store.write_index_page(viewable_content), index_links_dict)
+        return (self.target_store.write_index_page(
+            viewable_content), index_links_dict)
 
 
 class CallToActionButton(object):
