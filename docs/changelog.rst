@@ -6,6 +6,8 @@ Changelog
 
 develop
 -----------------
+[ENHANCEMENT] Enable Redshift Quantile Profiling.
+
 
 0.10.10
 -----------------

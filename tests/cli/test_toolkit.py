@@ -5,7 +5,6 @@ import json
 import os
 
 import mock
-
 from great_expectations.cli import toolkit
 
 
