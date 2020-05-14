@@ -5,9 +5,8 @@ import os
 import shutil
 from collections import OrderedDict
 
-import pytest
-
 import great_expectations as ge
+import pytest
 from great_expectations.core import expectationSuiteSchema
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
@@ -459,13 +458,3 @@ def test_render_string_template():
     )
 
     assert res == expected
-
-
-def test_render_string_template_bug_1():
-    # Looks like string templates can't contain dollar signs. We need some kind of escaping
-    with pytest.raises(ValueError):
-        template = {
-            "template": "Car Insurance Premiums ($)",
-            "tooltip": {"content": "expect_column_to_exist", "placement": "top"},
-        }
-        DefaultJinjaPageView().render_string_template(template)
