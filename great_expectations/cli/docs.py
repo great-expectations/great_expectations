@@ -1,9 +1,8 @@
 import os
 import sys
 
-import requests
 import click
-
+import requests
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.util import cli_message, cli_message_list
@@ -162,7 +161,6 @@ def build_docs(context, site_name=None, view=True):
 
     msg = msg.rstrip("\n")
     cli_message(msg)
-
     if view:
         if b_nfound is False:
             if p_sname is not None:

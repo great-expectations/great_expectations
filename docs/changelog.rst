@@ -6,12 +6,16 @@ Changelog
 
 develop
 -----------------
+
+0.10.10
+-----------------
 * Removed out-of-date Airflow integration examples. This repo provides a comprehensive example of Airflow integration: `#GE Airflow Example <https://github.com/superconductive/ge_tutorials>`_
 * Bugfix suite scaffold notebook now has correct suite name in first markdown cell.
 * Bugfix: fixed an example in the custom expectations documentation article - "result" key was missing in the returned dictionary
 * Data Docs Bugfix: template string substitution is now done using .safe_substitute(), to handle cases where string templates
   or substitution params have extraneous $ signs. Also added logic to handle templates where intended output has groupings of 2 or more $ signs
 * Docs fix: fix in yml for example action_list_operator for metrics
+* GE is now auto-linted using Black
 
 0.10.9
 -----------------

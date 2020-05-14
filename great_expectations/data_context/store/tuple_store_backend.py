@@ -505,12 +505,10 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         self.project = project
 
     def _get(self, key):
-        gcs_object_key = os.path.join(
-            self.prefix,
-            self._convert_key_to_filepath(key)
-        )
+        gcs_object_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
 
         from google.cloud import storage
+
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         gcs_response_object = bucket.get_blob(gcs_object_key)
@@ -524,13 +522,15 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         )
 
         from google.cloud import storage
+
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
 
         if isinstance(value, str):
-            blob.upload_from_string(value.encode(
-                content_encoding), content_type=content_type)
+            blob.upload_from_string(
+                value.encode(content_encoding), content_type=content_type
+            )
         else:
             blob.upload_from_string(value, content_type=content_type)
         return gcs_object_key
@@ -539,21 +539,17 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         key_list = []
 
         from google.cloud import storage
-        gcs = storage.Client(self.project)
 
+        gcs = storage.Client(self.project)
+      
         for blob in gcs.list_blobs(self.bucket, prefix=self.prefix):
             gcs_object_name = blob.name
-            gcs_object_key = os.path.relpath(
-                gcs_object_name,
-                self.prefix,
-            )
+            gcs_object_key = os.path.relpath(gcs_object_name, self.prefix,)
             if self.filepath_prefix and not gcs_object_key.startswith(self.filepath_prefix):
                 continue
             elif self.filepath_suffix and not gcs_object_key.endswith(self.filepath_suffix):
                 continue
-            key = os.path.join(
-                self.prefix,
-                gcs_object_key)
+            key = os.path.join(self.prefix, gcs_object_key)
             if key:
                 key_list.append(key)
         return key_list

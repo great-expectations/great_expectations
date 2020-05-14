@@ -263,8 +263,10 @@ class SiteBuilder(object):
                                        resource_identifiers)
 
         index_page_resource_identifier_tuple = self.site_index_builder.build()
-        return self.get_resource_url(
-            only_if_exists=False), index_page_resource_identifier_tuple[1]
+        return (
+            self.get_resource_url(only_if_exists=False),
+            index_page_resource_identifier_tuple[1],
+        )
 
     def get_resource_url(self, resource_identifier=None, only_if_exists=True):
         """
