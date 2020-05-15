@@ -54,6 +54,11 @@ except ImportError:
     help="By default, usage statistics are enabled unless you specify the --no-usage-stats flag.",
     default=True,
 )
+@click.option(
+    "--demo",
+    help="When specified, the init flow runs in a demo mode and uses a built-in dataset",
+    default=False,
+)
 def init(target_directory, view, usage_stats):
     """
     Initialize a new Great Expectations project.
