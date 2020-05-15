@@ -152,29 +152,6 @@ class ActionListValidationOperator(ValidationOperator):
     def run(self, assets_to_validate, run_id, evaluation_parameters=None):
         run_results = {}
 
-        """
-        run_results = {
-            ValidationResultIdentifier: {
-                "validation_result": ExpectationSuiteValidationResult,
-                "actions_results": {}
-            }
-        }
-
-        {
-            batch_id: {
-                batch_kwargs: {},
-                validation_results: {
-                    validation_result_id: {
-                        validation_result: ValidationResult,
-                        batch_actions_results: {
-                            action_name: action_result
-                        }
-                    }
-                }
-            }
-        }
-        """
-
         for item in assets_to_validate:
             run_result_obj = {}
             batch = self._build_batch_from_item(item)
