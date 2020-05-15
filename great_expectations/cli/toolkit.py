@@ -338,3 +338,9 @@ def load_data_context_with_error_handling(directory: str) -> DataContext:
     except ge_exceptions.PluginClassNotFoundError as err:
         cli_message(err.cli_colored_message)
         sys.exit(1)
+
+
+def install_library(library_name: str):
+    """Install a library"""
+    raise NotImplementedError()
+
