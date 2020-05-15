@@ -56,6 +56,7 @@ class ValidationOperatorResult(DictDot):
         self._validation_results_by_expectation_suite_name = None
         self._validation_results_by_data_asset_name = None
         self._batch_identifiers = None
+        self._statistics = None
 
     @property
     def batch_identifiers(self) -> List[str]:
@@ -229,4 +230,29 @@ class ValidationOperatorResult(DictDot):
 
     @property
     def statistics(self) -> dict:
-        raise NotImplementedError
+        if self._statistics is None:
+            data_asset_count = len(self.data_assets_validated)
+            validation_result_count = len(self.validation_results)
+            successful_validation_count = len(
+                [
+                    validation_result
+                    for validation_result in self.validation_results
+                    if validation_result.success
+                ]
+            )
+            unsuccessful_validation_count = (
+                validation_result_count - successful_validation_count
+            )
+            successful_validation_percent = (
+                successful_validation_count / validation_result_count
+            ) * 100
+
+            self._statistics = {
+                "data_asset_count": data_asset_count,
+                "validation_result_count": validation_result_count,
+                "successful_validation_count": successful_validation_count,
+                "unsuccessful_validation_count": unsuccessful_validation_count,
+                "successful_validation_percent": successful_validation_percent,
+            }
+
+        return self._statistics
