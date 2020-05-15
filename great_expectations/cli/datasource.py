@@ -385,35 +385,33 @@ def _is_library_loadable(library_name: str) -> bool:
         return False
 
 
-def load_library(pip_library_name, python_import_name, skip_load_check=False, install_instructions_string=None):
+def load_library(pip_library_name, python_import_name):
     """
-    Dynamically load a module from strings or raise a helpful error.
+    Dynamically load a module from strings, attempt a pip install or raise a
+    helpful error.
 
-    :param pip_library_name: name of the library to load
-    :param install_instructions_string: optional - used when the install instructions
-            are different from 'pip install library_name'
     :return: True if the library was loaded successfully, False otherwise
 
     Args:
-        pip_library_name:
+        pip_library_name: name of the library to load
     """
-    logger.debug(f"running load_library for {pip_library_name}")
+    logger.critical(f"running load_library for {pip_library_name}")
 
-    # TODO remove skip load check haaaaacks
-    if not skip_load_check:
-        if _is_library_loadable(python_import_name):
-            return True
+    # TODO[Alex] remove skip load check haaaaacks in favor of a proper load test
+    #  of the snowflake-sqlalchemy so we can still verify that it is loadable.
+    loadable_first = _is_library_loadable(python_import_name)
+    if loadable_first:
+        logger.critical(f"loadable first: {loadable_first}")
+        return True
 
     # TODO clean up logic easier to understand
-    # TODO attempt install
     status_code = execute_shell_command(f"pip install {pip_library_name}")
-    logger.debug(f"status: {status_code}")
+    logger.critical(f"status: {status_code}")
 
-    # TODO try to load again
-    if not skip_load_check:
-        loadable = _is_library_loadable(python_import_name)
-    else:
-        loadable = True
+    # try to load again
+    loadable = _is_library_loadable(python_import_name)
+    logger.critical(f"loadable second: {loadable}")
+
     if not (status_code == 0 and loadable):
         cli_message(
                 f"""<red>ERROR: Great Expectations relies on the library `{pip_library_name}` to connect to your data.</red>
@@ -479,28 +477,17 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                 return None
             credentials = _collect_redshift_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.SNOWFLAKE:
-            snowflake_installed = load_library(
-                "snowflake-sqlalchemy",
-                "snowflake",
-                install_instructions_string="pip install snowflake-sqlalchemy"
-            )
-
-            connector_installed = load_library(
-                "snowflake-connector-python",
-                "snowflake-connector-python",
-                skip_load_check=True,
-                install_instructions_string="pip install snowflake-connector-python"
-            )
-            if not snowflake_installed and connector_installed:
+            if not load_library(
+                    pip_library_name="snowflake-sqlalchemy",
+                    python_import_name="snowflake.sqlalchemy.snowdialect"
+            ):
                 return None
 
             credentials = _collect_snowflake_credentials(
                 default_credentials=credentials
             )
         elif selected_database == SupportedDatabases.BIGQUERY:
-            if not load_library(
-                "pybigquery", "pybigquery", install_instructions_string="pip install pybigquery"
-            ):
+            if not load_library("pybigquery", "pybigquery"):
                 return None
             credentials = _collect_bigquery_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.OTHER:
@@ -771,7 +758,7 @@ def _collect_redshift_credentials(default_credentials=None):
 def _add_spark_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
-    if not load_library("pyspark"):
+    if not load_library("pyspark", ):
         return None
 
     if passthrough_generator_only:
