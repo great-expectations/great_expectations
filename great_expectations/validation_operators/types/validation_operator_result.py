@@ -14,17 +14,18 @@ class ValidationOperatorResult(DictDot):
         run_id: str,
         run_results: Dict[
             ValidationResultIdentifier,
-            Dict[str, Union[ExpectationSuiteValidationResult, dict]],
+            Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
         ],
         validation_operator_config,
         evaluation_parameters: dict = None,
+        success: bool = None,
     ) -> None:
         self._run_id = run_id
         self._run_results = run_results
         self._evaluation_parameters = evaluation_parameters
         self._validation_operator_config = validation_operator_config
+        self._success = success
 
-        self._success = None
         self._validation_results = None
         self._data_assets_validated = None
         self._data_assets_validated_by_batch_id = None
@@ -34,6 +35,20 @@ class ValidationOperatorResult(DictDot):
         self._actions_results_by_validation_result_identifier = None
         self._validation_results_by_expectation_suite_name = None
         self._validation_results_by_data_asset_name = None
+        self._batch_identifiers = None
+
+    @property
+    def batch_identifiers(self) -> List[str]:
+        if self._batch_identifiers is None:
+            self._batch_identifiers = list(
+                set(
+                    [
+                        validation_result_identifier.batch_identifier
+                        for validation_result_identifier in self.validation_result_identifiers
+                    ]
+                )
+            )
+        return self.batch_identifiers
 
     @property
     def validation_operator_config(self) -> dict:
