@@ -69,7 +69,7 @@ class ValidationOperatorResult(DictDot):
                     ]
                 )
             )
-        return self.batch_identifiers
+        return self._batch_identifiers
 
     @property
     def validation_operator_config(self) -> dict:
