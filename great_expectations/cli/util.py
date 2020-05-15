@@ -1,7 +1,5 @@
 import re
 
-from great_expectations.cli.python_subprocess import execute_shell_command
-
 try:
     from termcolor import colored
 except ImportError:

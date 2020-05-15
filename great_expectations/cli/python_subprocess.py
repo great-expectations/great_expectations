@@ -1,8 +1,6 @@
 import sys
-
-from subprocess import CalledProcessError, STDOUT, check_output
-
 import traceback
+from subprocess import STDOUT, CalledProcessError, check_output
 
 from great_expectations.core import logger
 
