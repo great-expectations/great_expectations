@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,

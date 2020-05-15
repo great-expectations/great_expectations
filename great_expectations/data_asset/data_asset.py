@@ -10,8 +10,6 @@ from collections import Counter, defaultdict, namedtuple
 from collections.abc import Hashable
 from functools import wraps
 
-from marshmallow import ValidationError
-
 from great_expectations import __version__ as ge_version
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -29,6 +27,7 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
+from marshmallow import ValidationError
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)

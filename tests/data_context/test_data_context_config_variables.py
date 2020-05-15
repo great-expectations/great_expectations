@@ -1,7 +1,6 @@
 import os
 
 import pytest
-
 from great_expectations.data_context.util import substitute_config_variable
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
 

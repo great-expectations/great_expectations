@@ -4,11 +4,10 @@ import locale
 import os
 import shutil
 
+import great_expectations as ge
 import numpy as np
 import pandas as pd
 import pytest
-
-import great_expectations as ge
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
