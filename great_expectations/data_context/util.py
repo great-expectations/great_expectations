@@ -144,7 +144,14 @@ def substitute_config_variable(template_str, config_variables_dict):
         return template_str
 
     if match:
-        config_variable_value = config_variables_dict.get(match.group(1))
+        config_variable_value = os.getenv(match.group(1))
+        if not config_variable_value:
+            config_variable_value = config_variables_dict.get(match.group(1)) or ''
+            # If an env variable is referenced in the config_variables.yml, substitute that in
+            inner_match = re.search(r"\$\{(.*?)\}", config_variable_value) or re.search(
+            r"\$([_a-z][_a-z0-9]*)", config_variable_value)
+            if inner_match:
+                config_variable_value = os.getenv(inner_match.group(1))
 
         if config_variable_value is not None:
             if match.start() == 0 and match.end() == len(template_str):

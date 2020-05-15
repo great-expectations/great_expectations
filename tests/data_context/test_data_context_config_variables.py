@@ -220,3 +220,15 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
         == config_variables_dict["arg2"]
     )
     assert exc.value.missing_config_variable == "arg1"
+
+
+def test_substitute_env_var_in_config_variable_file(monkeypatch):
+    monkeypatch.setenv("FOO", "val_of_arg_0")
+    config_variables_dict = {"arg0": "${FOO}", "arg2": {"v1": 2}}
+    assert (
+            substitute_config_variable("abc${arg0}", config_variables_dict)
+            == "abcval_of_arg_0"
+    )
+    monkeypatch.delenv("FOO")
+    with pytest.raises(MissingConfigVariableError):
+        substitute_config_variable("abc${arg0}", config_variables_dict)
