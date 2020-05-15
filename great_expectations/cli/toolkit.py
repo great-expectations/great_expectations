@@ -21,6 +21,20 @@ from great_expectations.datasource import Datasource
 from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
+demo_cli_message = """
+<cyan>==== You are running init in demo mode! ===</cyan>
+
+We picked a sample dataset for you called "Titanic.csv". Here are the first few lines:
+
+|   a | Name                          | PClass |   Age | Sex    | Survived | SexCode |
+| --- | ----------------------------- | ------ | ----- | ------ | -------- | ------- |
+|   1 | Allen, Miss Elisabeth Walton  | 1st    | 29.00 | female |     True |    True |
+|   2 | Allison, Miss Helen Loraine   | 1st    |  2.00 | female |    False |    True |
+|  17 | Baxter, Mr Quigg Edmond       | 1st    | 24.00 | male   |    False |   False |
+|  18 | Beattie, Mr Thomson           | 1st    | 36.00 | male   |    False |   False |
+|  19 | Beckwith, Mr Richard Leonard  | 1st    | 37.00 | male   |     True |   False |
+...
+"""
 
 def create_expectation_suite(
     context,
@@ -34,6 +48,7 @@ def create_expectation_suite(
     show_intro_message=False,
     open_docs=False,
     profiler_configuration="demo",
+    demo=False
 ):
     """
     Create a new expectation suite.
@@ -72,9 +87,13 @@ def create_expectation_suite(
             batch_kwargs_generator_name=batch_kwargs_generator_name,
             generator_asset=generator_asset,
             additional_batch_kwargs=additional_batch_kwargs,
+            demo=demo
         )
         # In this case, we have "consumed" the additional_batch_kwargs
         additional_batch_kwargs = {}
+
+    if demo:
+        expectation_suite_name = generator_asset + '.demo.warning'
 
     if expectation_suite_name is None:
         default_expectation_suite_name = _get_default_expectation_suite_name(
@@ -93,6 +112,9 @@ def create_expectation_suite(
     if empty_suite:
         create_empty_suite(context, expectation_suite_name, batch_kwargs)
         return True, expectation_suite_name
+
+    if demo:
+        cli_message(demo_cli_message)
 
     profiling_results = _profile_to_create_a_suite(
         additional_batch_kwargs,

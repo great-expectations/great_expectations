@@ -55,11 +55,11 @@ except ImportError:
     default=True,
 )
 @click.option(
-    "--demo",
+    "--demo/--no-demo",
     help="When specified, the init flow runs in a demo mode and uses a built-in dataset",
     default=False,
 )
-def init(target_directory, view, usage_stats):
+def init(target_directory, view, usage_stats, demo):
     """
     Initialize a new Great Expectations project.
 
@@ -72,6 +72,7 @@ def init(target_directory, view, usage_stats):
     target_directory = os.path.abspath(target_directory)
     ge_dir = _get_full_path_to_ge_dir(target_directory)
     cli_message(GREETING)
+    # TODO_HACK: indicate that we're in demo mode
 
     if DataContext.does_config_exist_on_disk(ge_dir):
         try:
@@ -122,7 +123,7 @@ def init(target_directory, view, usage_stats):
             datasources = context.list_datasources()
             if len(datasources) == 0:
                 datasource_name, data_source_type = add_datasource_impl(
-                    context, choose_one_data_asset=True
+                    context, demo, choose_one_data_asset=True
                 )
                 if not datasource_name:  # no datasource was created
                     sys.exit(1)
@@ -136,6 +137,7 @@ def init(target_directory, view, usage_stats):
                     datasource_name=datasource_name,
                     additional_batch_kwargs={"limit": 1000},
                     open_docs=view,
+                    demo=demo
                 )
                 if success:
                     cli_message(

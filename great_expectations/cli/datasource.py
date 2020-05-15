@@ -274,7 +274,7 @@ def datasource_profile(
         raise e
 
 
-def add_datasource(context, choose_one_data_asset=False):
+def add_datasource(context, demo=False, choose_one_data_asset=False):
     """
     Interactive flow for adding a datasource to an existing context.
 
@@ -296,7 +296,14 @@ What are you processing your files with?
     1. Pandas
     2. PySpark
 """
+    if demo:
+        data_source_type = DatasourceTypes.PANDAS
+        datasource_name = _add_pandas_datasource(
+            context, demo=demo, passthrough_generator_only=choose_one_data_asset
+        )
+        return datasource_name, data_source_type
 
+    # TODO_HACK: show the prompt but pre-populate with choices if demo mode is activated
     data_source_location_selection = click.prompt(
         msg_prompt_where_is_your_data, type=click.Choice(["1", "2"]), show_choices=False
     )
@@ -334,40 +341,45 @@ What are you processing your files with?
 
 
 def _add_pandas_datasource(
-    context, passthrough_generator_only=True, prompt_for_datasource_name=True
+    context, demo=False, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
-    if passthrough_generator_only:
-        datasource_name = "files_datasource"
+    if demo:
+        datasource_name = 'demo_datasource'
         configuration = PandasDatasource.build_configuration()
 
     else:
-        path = click.prompt(
-            msg_prompt_filesys_enter_base_path,
-            type=click.Path(exists=True, file_okay=False),
-        )
+        if passthrough_generator_only:
+            datasource_name = "files_datasource"
+            configuration = PandasDatasource.build_configuration()
 
-        if path.startswith("./"):
-            path = path[2:]
-
-        if path.endswith("/"):
-            basenamepath = path[:-1]
         else:
-            basenamepath = path
-
-        datasource_name = os.path.basename(basenamepath) + "__dir"
-        if prompt_for_datasource_name:
-            datasource_name = click.prompt(
-                msg_prompt_datasource_name, default=datasource_name
+            path = click.prompt(
+                msg_prompt_filesys_enter_base_path,
+                type=click.Path(exists=True, file_okay=False),
             )
 
-        configuration = PandasDatasource.build_configuration(
-            batch_kwargs_generators={
-                "subdir_reader": {
-                    "class_name": "SubdirReaderBatchKwargsGenerator",
-                    "base_directory": os.path.join("..", path),
+            if path.startswith("./"):
+                path = path[2:]
+
+            if path.endswith("/"):
+                basenamepath = path[:-1]
+            else:
+                basenamepath = path
+
+            datasource_name = os.path.basename(basenamepath) + "__dir"
+            if prompt_for_datasource_name:
+                datasource_name = click.prompt(
+                    msg_prompt_datasource_name, default=datasource_name
+                )
+
+            configuration = PandasDatasource.build_configuration(
+                batch_kwargs_generators={
+                    "subdir_reader": {
+                        "class_name": "SubdirReaderBatchKwargsGenerator",
+                        "base_directory": os.path.join("..", path),
+                    }
                 }
-            }
-        )
+            )
 
     context.add_datasource(
         name=datasource_name, class_name="PandasDatasource", **configuration
@@ -839,6 +851,7 @@ def get_batch_kwargs(
     batch_kwargs_generator_name=None,
     generator_asset=None,
     additional_batch_kwargs=None,
+    demo=False
 ):
     """
     This method manages the interaction with user necessary to obtain batch_kwargs for a batch of a data asset.
@@ -907,6 +920,7 @@ def get_batch_kwargs(
             context,
             datasource_name,
             batch_kwargs_generator_name=batch_kwargs_generator_name,
+            demo=demo
         )
 
     elif isinstance(context.get_datasource(datasource_name), SqlAlchemyDatasource):
@@ -928,6 +942,7 @@ def _get_batch_kwargs_from_generator_or_from_file_path(
     datasource_name,
     batch_kwargs_generator_name=None,
     additional_batch_kwargs=None,
+    demo=False
 ):
     if additional_batch_kwargs is None:
         additional_batch_kwargs = {}
@@ -965,6 +980,16 @@ We could not determine the format of the file. What is it?
     generator_asset = None
 
     datasource = context.get_datasource(datasource_name)
+
+    if demo:
+        demo_file = os.path.join(os.path.dirname(__file__), '../../examples/data/Titanic.csv')
+        batch_kwargs = {"path": demo_file,
+                        "datasource": datasource_name,
+                        "reader_method": "read_csv",
+                        }
+        generator_asset = 'Titanic'
+        return generator_asset, batch_kwargs
+
     if batch_kwargs_generator_name is not None:
         generator = datasource.get_batch_kwargs_generator(batch_kwargs_generator_name)
 
