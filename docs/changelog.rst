@@ -9,6 +9,10 @@ develop
 [ENHANCEMENT] Enable Redshift Quantile Profiling.
 
 
+0.10.11
+-----------------
+*Bugfix: build_data_docs list_keys for GCS returns keys and when empty a more user friendly message
+
 0.10.10
 -----------------
 * Removed out-of-date Airflow integration examples. This repo provides a comprehensive example of Airflow integration: `#GE Airflow Example <https://github.com/superconductive/ge_tutorials>`_
