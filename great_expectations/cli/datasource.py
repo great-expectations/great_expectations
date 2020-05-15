@@ -15,6 +15,7 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.mark import Mark as mark
+from great_expectations.cli.python_subprocess import execute_shell_command
 from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
@@ -376,35 +377,62 @@ def _add_pandas_datasource(
     return datasource_name
 
 
-def load_library(library_name, install_instructions_string=None):
-    """
-    Dynamically load a module from strings or raise a helpful error.
+def _is_library_loadable(library_name: str) -> bool:
 
-    :param library_name: name of the library to load
-    :param install_instructions_string: optional - used when the install instructions
-            are different from 'pip install library_name'
-    :return: True if the library was loaded successfully, False otherwise
-    """
     try:
         _ = importlib.import_module(library_name)
         return True
     except ModuleNotFoundError:
+        return False
+
+
+def load_library(pip_library_name, python_import_name, skip_load_check=False, install_instructions_string=None):
+    """
+    Dynamically load a module from strings or raise a helpful error.
+
+    :param pip_library_name: name of the library to load
+    :param install_instructions_string: optional - used when the install instructions
+            are different from 'pip install library_name'
+    :return: True if the library was loaded successfully, False otherwise
+
+    Args:
+        pip_library_name:
+    """
+    print(f"\n\nrunning load_library for {pip_library_name}")
+    if not skip_load_check:
+        if _is_library_loadable(python_import_name):
+            return True
+
+    # TODO clean up logic easier to understand
+    # TODO attempt install
+    status_code = execute_shell_command(f"pip install {pip_library_name}")
+    print(f"status: {status_code}")
+
+    # TODO try to load again
+    if not skip_load_check:
+        loadable = _is_library_loadable(python_import_name)
+        print(f"loadable: {loadable}")
+    else:
+        loadable = True
+    if not (status_code == 0 and loadable):
         if install_instructions_string:
             cli_message(
                 """<red>ERROR: Great Expectations relies on the library `{}` to connect to your data.</red>
             - Please `{}` before trying again.""".format(
-                    library_name, install_instructions_string
+                    pip_library_name, install_instructions_string
                 )
             )
         else:
             cli_message(
                 """<red>ERROR: Great Expectations relies on the library `{}` to connect to your data.</red>
       - Please `pip install {}` before trying again.""".format(
-                    library_name, library_name
+                    pip_library_name, pip_library_name
                 )
             )
 
         return False
+
+    return True
 
 
 def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
@@ -412,7 +440,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
         "\n<green>Great Expectations connected to your database!</green>"
     )
 
-    if not load_library("sqlalchemy"):
+    if not load_library("sqlalchemy", "sqlalchemy"):
         return None
 
     db_choices = [str(x) for x in list(range(1, 1 + len(SupportedDatabases)))]
@@ -450,29 +478,39 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
         cli_message(msg_db_config.format(datasource_name))
 
         if selected_database == SupportedDatabases.MYSQL:
-            if not load_library("pymysql"):
+            if not load_library("pymysql", "pymysql"):
                 return None
             credentials = _collect_mysql_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.POSTGRES:
-            if not load_library("psycopg2"):
+            if not load_library("psycopg2", "psycopg2"):
                 return None
             credentials = _collect_postgres_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.REDSHIFT:
-            if not load_library("psycopg2"):
+            if not load_library("psycopg2", "psycopg2"):
                 return None
             credentials = _collect_redshift_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.SNOWFLAKE:
-            if not load_library(
+            snowflake_installed = load_library(
+                "snowflake-sqlalchemy",
                 "snowflake",
-                install_instructions_string="pip install snowflake-sqlalchemy",
-            ):
+                install_instructions_string="pip install snowflake-sqlalchemy"
+            )
+
+            connector_installed = load_library(
+                "snowflake-connector-python",
+                "snowflake-connector-python",
+                skip_load_check=True,
+                install_instructions_string="pip install snowflake-connector-python"
+            )
+            if not snowflake_installed and connector_installed:
                 return None
+
             credentials = _collect_snowflake_credentials(
                 default_credentials=credentials
             )
         elif selected_database == SupportedDatabases.BIGQUERY:
             if not load_library(
-                "pybigquery", install_instructions_string="pip install pybigquery"
+                "pybigquery", "pybigquery", install_instructions_string="pip install pybigquery"
             ):
                 return None
             credentials = _collect_bigquery_credentials(default_credentials=credentials)
