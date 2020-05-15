@@ -41,7 +41,7 @@ extensions = [
     'sphinxcontrib.contentui',
     'sphinx_gitstamp',
     'sphinx.ext.autosectionlabel',
-    'sphinxcontrib.discourse'
+    'sphinxcontrib.discourse',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
