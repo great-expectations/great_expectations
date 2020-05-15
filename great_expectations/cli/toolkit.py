@@ -340,7 +340,3 @@ def load_data_context_with_error_handling(directory: str) -> DataContext:
         sys.exit(1)
 
 
-def install_library(library_name: str):
-    """Install a library"""
-    raise NotImplementedError()
-

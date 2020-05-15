@@ -106,3 +106,8 @@ def is_sane_slack_webhook(url):
         return False
 
     return url.strip().startswith("https://hooks.slack.com/")
+
+
+def install_library(library_name: str):
+    """Install a library"""
+    raise NotImplementedError()
