@@ -1,7 +1,6 @@
 import datetime
 
 import pytest
-
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuiteValidationResult,

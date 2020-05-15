@@ -4,7 +4,6 @@ import logging
 import os
 
 import black
-
 from great_expectations.core import expectationSuiteSchema
 
 logger = logging.getLogger(__name__)

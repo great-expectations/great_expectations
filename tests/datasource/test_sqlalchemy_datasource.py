@@ -3,14 +3,13 @@ from unittest import mock
 
 import pandas as pd
 import pytest
-from ruamel.yaml import YAML
-
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.validator.validator import Validator
+from ruamel.yaml import YAML
 
 yaml = YAML()
 
