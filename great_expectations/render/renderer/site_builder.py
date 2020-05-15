@@ -19,18 +19,23 @@ logger = logging.getLogger(__name__)
 
 
 class SiteBuilder(object):
-    """SiteBuilder builds data documentation for the project defined by a DataContext.
+    """SiteBuilder builds data documentation for the project defined by a
+    DataContext.
 
-    A data documentation site consists of HTML pages for expectation suites, profiling and validation results, and
+    A data documentation site consists of HTML pages for expectation suites,
+    profiling and validation results, and
     an index.html page that links to all the pages.
 
-    The exact behavior of SiteBuilder is controlled by configuration in the DataContext's great_expectations.yml file.
+    The exact behavior of SiteBuilder is controlled by configuration in the
+    DataContext's great_expectations.yml file.
 
     Users can specify:
 
         * which datasources to document (by default, all)
-        * whether to include expectations, validations and profiling results sections (by default, all)
-        * where the expectations and validations should be read from (filesystem or S3)
+        * whether to include expectations, validations and profiling results
+        sections (by default, all)
+        * where the expectations and validations should be read from
+        (filesystem or S3)
         * where the HTML files should be written (filesystem or S3)
         * which renderer and view class should be used to render each section
 
@@ -44,7 +49,8 @@ class SiteBuilder(object):
                 prefix: /data_docs/
 
 
-    A more verbose configuration can also control individual sections and override renderers, views, and stores::
+    A more verbose configuration can also control individual sections and
+    override renderers, views, and stores::
 
         local_site:
             class_name: SiteBuilder
@@ -125,7 +131,8 @@ class SiteBuilder(object):
                 plugins_directory, "custom_data_docs", "styles"
             )
 
-        # The site builder is essentially a frontend store. We'll open up three types of backends using the base
+        # The site builder is essentially a frontend store. We'll open up
+        # three types of backends using the base
         # type of the configuration defined in the store_backend section
 
         self.target_store = HtmlSiteStore(
@@ -233,11 +240,13 @@ class SiteBuilder(object):
     def build(self, resource_identifiers=None):
         """
 
-        :param resource_identifiers: a list of resource identifiers (ExpectationSuiteIdentifier,
-                            ValidationResultIdentifier). If specified, rebuild HTML
-                            (or other views the data docs site renders) only for
-                            the resources in this list. This supports incremental build
-                            of data docs sites (e.g., when a new validation result is created)
+        :param resource_identifiers: a list of resource identifiers
+        (ExpectationSuiteIdentifier,
+                            ValidationResultIdentifier). If specified,
+                            rebuild HTML(or other views the data docs
+                            site renders) only forthe resources in this list.
+                            This supports incremental build of data docs sites
+                            (e.g., when a new validation result is created)
                             and avoids full rebuild.
         :return:
         """
@@ -249,16 +258,20 @@ class SiteBuilder(object):
             site_section_builder.build(resource_identifiers=resource_identifiers)
 
         index_page_resource_identifier_tuple = self.site_index_builder.build()
-        return self.get_resource_url(), index_page_resource_identifier_tuple[1]
+        return (
+            self.get_resource_url(only_if_exists=False),
+            index_page_resource_identifier_tuple[1],
+        )
 
     def get_resource_url(self, resource_identifier=None, only_if_exists=True):
         """
         Return the URL of the HTML document that renders a resource
         (e.g., an expectation suite or a validation result).
 
-        :param resource_identifier: ExpectationSuiteIdentifier, ValidationResultIdentifier
-                or any other type's identifier. The argument is optional - when
-                not supplied, the method returns the URL of the index page.
+        :param resource_identifier: ExpectationSuiteIdentifier,
+        ValidationResultIdentifier or any other type's identifier. The
+        argument is optional - whennot supplied, the method returns the URL of
+        the index page.
         :return: URL (string)
         """
 
@@ -293,7 +306,8 @@ class DefaultSiteSectionBuilder(object):
 
         if renderer is None:
             raise exceptions.InvalidConfigError(
-                "SiteSectionBuilder requires a renderer configuration with a class_name key."
+                "SiteSectionBuilder requires a renderer configuration "
+                "with a class_name key."
             )
         module_name = (
             renderer.get("module_name") or "great_expectations.render.renderer"
@@ -338,7 +352,8 @@ class DefaultSiteSectionBuilder(object):
 
         for resource_key in source_store_keys:
 
-            # if no resource_identifiers are passed, the section builder will build
+            # if no resource_identifiers are passed, the section
+            # builder will build
             # a page for every keys in its source store.
             # if the caller did pass resource_identifiers, the section builder
             # will build pages only for the specified resources
@@ -353,7 +368,8 @@ class DefaultSiteSectionBuilder(object):
                 resource = self.source_store.get(resource_key)
             except FileNotFoundError:
                 logger.warning(
-                    f"File {resource_key.to_fixed_length_tuple()} could not be found. Skipping."
+                    f"File {resource_key.to_fixed_length_tuple()} "
+                    f"could not be found. Skipping."
                 )
                 continue
 
@@ -378,7 +394,8 @@ class DefaultSiteSectionBuilder(object):
                 else:
 
                     logger.debug(
-                        "        Rendering validation: run id: {}, suite {} for batch {}".format(
+                        "        Rendering validation: run id: {}, suite {} "
+                        "for batch {}".format(
                             run_id,
                             expectation_suite_name,
                             resource_key.batch_identifier,
@@ -394,12 +411,16 @@ class DefaultSiteSectionBuilder(object):
                 )
             except Exception as e:
                 exception_message = f"""\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
+An unexpected Exception occurred during data docs rendering.  Because of this \
+error, certain parts of data docs will not be rendered properly and/or may \
+not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
                 """
                 exception_traceback = traceback.format_exc()
-                exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                exception_message += (
+                    f'{type(e).__name__}: "{str(e)}".  '
+                    f'Traceback: "{exception_traceback}".'
+                )
                 logger.error(exception_message, e, exc_info=True)
 
             self.target_store.set(
@@ -414,7 +435,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
             run_id = resource_key.run_id
         else:
             raise TypeError(
-                "run_id_filter filtering is only implemented for ValidationResultResources."
+                "run_id_filter filtering is only implemented for "
+                "ValidationResultResources."
             )
 
         if self.run_id_filter.get("eq"):
@@ -508,7 +530,8 @@ class DefaultSiteIndexBuilder(object):
                 + [run_id]
                 + [batch_identifier]
             )
-            # filepath = os.path.join("validations", batch_identifier, *expectation_suite_name.split("."), run_id)
+            # filepath = os.path.join("validations", batch_identifier,
+            # *expectation_suite_name.split("."), run_id)
             filepath = os.path.join(*path_components)
             filepath += ".html"
         else:
@@ -534,27 +557,33 @@ class DefaultSiteIndexBuilder(object):
         #
         # if datasource_classes_by_name:
         #     last_datasource_class_by_name = datasource_classes_by_name[-1]
-        #     last_datasource_class_name = last_datasource_class_by_name["class_name"]
+        #     last_datasource_class_name = last_datasource_class_by_name["
+        #     class_name"]
         #     last_datasource_name = last_datasource_class_by_name["name"]
-        #     last_datasource = self.data_context.get_datasource(last_datasource_name)
+        #     last_datasource = self.data_context.get_datasource
+        #     (last_datasource_name)
         #
         #     if last_datasource_class_name == "SqlAlchemyDatasource":
         #         try:
-        #                # NOTE: JPC - 20200327 - I do not believe datasource will *ever* have a drivername property
+        #                # NOTE: JPC - 20200327 - I do not believe datasource
+        #                will *ever* have a drivername property
         #                (it's in credentials). Suspect this isn't working.
         #             db_driver = last_datasource.drivername
         #         except AttributeError:
         #             pass
         #
-        #     datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
-        #     usage_statistics = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
+        #     datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[
+        #     last_datasource_class_name].value
+        #     usage_statistics = "?utm_source={}&utm_medium={}
+        #     &utm_campaign={}".format(
         #         "ge-init-datadocs-v2",
         #         datasource_type,
         #         db_driver,
         #     )
 
         return {
-            "header": "To continue exploring Great Expectations check out one of these tutorials...",
+            "header": "To continue exploring Great Expectations check out one "
+            "of these tutorials...",
             "buttons": self._get_call_to_action_buttons(usage_statistics),
         }
 
@@ -568,24 +597,29 @@ class DefaultSiteIndexBuilder(object):
         create_expectations = CallToActionButton(
             "How To Create Expectations",
             # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html",
+            "https://docs.greatexpectations.io/en/latest/"
+            "tutorials/create_expectations.html",
         )
         see_glossary = CallToActionButton(
             "See more kinds of Expectations",
-            "http://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html",
+            "http://docs.greatexpectations.io/en/latest/reference/"
+            "expectation_glossary.html",
         )
         validation_playground = CallToActionButton(
             "How To Validate data",
             # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/tutorials/validate_data.html",
+            "https://docs.greatexpectations.io/en/latest/tutorials/"
+            "validate_data.html",
         )
         customize_data_docs = CallToActionButton(
             "How To Customize Data Docs",
-            "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs",
+            "https://docs.greatexpectations.io/en/latest/reference/"
+            "data_docs_reference.html#customizing-data-docs",
         )
         s3_team_site = CallToActionButton(
             "How To Set up a team site on AWS S3",
-            "https://docs.greatexpectations.io/en/latest/tutorials/publishing_data_docs_to_s3.html",
+            "https://docs.greatexpectations.io/en/latest/tutorials/"
+            "publishing_data_docs_to_s3.html",
         )
         # TODO gallery does not yet exist
         # gallery = CallToActionButton(
@@ -711,13 +745,15 @@ class DefaultSiteIndexBuilder(object):
             )
         except Exception as e:
             exception_message = f"""\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
+An unexpected Exception occurred during data docs rendering.  Because of this \
+error, certain parts of data docs will not be rendered properly and/or may \
+not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
             """
             exception_traceback = traceback.format_exc()
             exception_message += (
-                f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                f'{type(e).__name__}: "{str(e)}".  Traceback: '
+                f'"{exception_traceback}".'
             )
             logger.error(exception_message, e, exc_info=True)
 

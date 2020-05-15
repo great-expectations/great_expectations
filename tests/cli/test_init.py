@@ -4,7 +4,6 @@ from unittest import mock
 
 import pytest
 from click.testing import CliRunner
-
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE

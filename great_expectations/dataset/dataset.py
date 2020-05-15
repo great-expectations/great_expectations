@@ -3,13 +3,11 @@ from datetime import datetime
 from functools import lru_cache, wraps
 from itertools import zip_longest
 from numbers import Number
-from typing import List
+from typing import Any, List, Union
 
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-from scipy import stats
-
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
@@ -18,6 +16,7 @@ from great_expectations.dataset.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
 )
+from scipy import stats
 
 
 class MetaDataset(DataAsset):
@@ -168,7 +167,7 @@ class Dataset(MetaDataset):
         # (e.g. self.spark_df) over the lifetime of the dataset instance
         self.caching = kwargs.pop("caching", True)
 
-        super(Dataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if self.caching:
             for func in self.hashable_getters:
@@ -242,7 +241,9 @@ class Dataset(MetaDataset):
         """Returns: any"""
         raise NotImplementedError
 
-    def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
+    def get_column_quantiles(
+        self, column, quantiles, allow_relative_error=False
+    ) -> List[Any]:
         """Get the values in column closest to the requested quantiles
         Args:
             column (string): name of column
@@ -4334,3 +4335,10 @@ class Dataset(MetaDataset):
             parse(value) if isinstance(value, str) else value for value in value_set
         ]
         return parsed_value_set
+
+    def attempt_allowing_relative_error(self) -> Union[bool, float]:
+        """
+        Subclasses can override this method if the respective data source (e.g., Redshift) supports "approximate" mode.
+        In certain cases (e.g., for SparkDFDataset), a fraction between 0 and 1 (i.e., not only a boolean) is allowed.
+        """
+        return False

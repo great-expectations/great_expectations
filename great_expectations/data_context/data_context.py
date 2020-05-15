@@ -488,8 +488,9 @@ class BaseDataContext(object):
         urls_to_open = [site["site_url"] for site in data_docs_urls]
 
         for url in urls_to_open:
-            logger.debug(f"Opening Data Docs found here: {url}")
-            webbrowser.open(url)
+            if url is not None:
+                logger.debug(f"Opening Data Docs found here: {url}")
+                webbrowser.open(url)
 
     @property
     def root_directory(self):

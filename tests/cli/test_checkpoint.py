@@ -5,10 +5,9 @@ import subprocess
 import mock
 import pytest
 from click.testing import CliRunner
-from ruamel.yaml import YAML
-
 from great_expectations import DataContext
 from great_expectations.cli import cli
+from ruamel.yaml import YAML
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 

@@ -2,7 +2,6 @@ import json
 from collections import OrderedDict
 
 import pytest
-
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuiteValidationResult,
