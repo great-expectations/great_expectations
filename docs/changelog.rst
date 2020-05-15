@@ -7,7 +7,6 @@ Changelog
 develop
 -----------------
 
-
 0.10.11
 -----------------
 * Bugfix: build_data_docs list_keys for GCS returns keys and when empty a more user friendly message
