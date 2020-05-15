@@ -9,6 +9,26 @@ from great_expectations.types import DictDot
 
 
 class ValidationOperatorResult(DictDot):
+    """
+    The run_results property forms the backbone of this type and defines the basic contract for what a validation
+    operator's run method returns. It is a dictionary where the top-level keys are the ValidationResultIdentifiers of
+    the validation results generated in the run. Each value is a dictionary having at minimum, validation_result and
+    actions_results keys; this dictionary can contain other keys that are relevant for a specific validation operator
+    implementation. For example, the dictionary from a WarningAndFailureExpectationSuitesValidationOperator
+    would have an extra key named "expectation_suite_severity_level" to indicate if the suite is at either a
+    "warning" or "failure" level.
+
+    e.g.
+    {
+        ValidationResultIdentifier: {
+            "validation_result": ExpectationSuiteValidationResult,
+            "actions_results": {}
+        }
+    }
+
+    Most other properties of this class are derived from the run_results property using lazy evaluation.
+    """
+
     def __init__(
         self,
         run_id: str,

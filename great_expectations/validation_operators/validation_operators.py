@@ -26,8 +26,8 @@ class ValidationOperator(object):
     """
     The base class of all validation operators.
 
-    It defines the signature of the public run method - this is the only
-    contract re operators' API. Everything else is up to the implementors
+    It defines the signature of the public run method. This method and the validation_operator_config property are the
+    only contract re operators' API. Everything else is up to the implementors
     of validation operator classes that will be the descendants of this base class.
     """
 
@@ -36,6 +36,35 @@ class ValidationOperator(object):
 
     @property
     def validation_operator_config(self):
+        """
+        This method builds the config dict of a particular validation operator. The "kwargs" key is what really
+        distinguishes different validation operators.
+
+        e.g.:
+        {
+            "class_name": "ActionListValidationOperator",
+            "module_name": "great_expectations.validation_operators",
+            "name": self.name,
+            "kwargs": {
+                "action_list": self.action_list
+            },
+        }
+
+        {
+            "class_name": "WarningAndFailureExpectationSuitesValidationOperator",
+            "module_name": "great_expectations.validation_operators",
+            "name": self.name,
+            "kwargs": {
+                "action_list": self.action_list,
+                "base_expectation_suite_name": self.base_expectation_suite_name,
+                "expectation_suite_name_suffixes": self.expectation_suite_name_suffixes,
+                "stop_on_first_error": self.stop_on_first_error,
+                "slack_webhook": self.slack_webhook,
+                "notify_on": self.notify_on,
+            },
+        }
+        """
+
         raise NotImplementedError
 
     def run(self, assets_to_validate, run_id, evaluation_parameters=None):
@@ -343,7 +372,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
     def validation_operator_config(self) -> dict:
         if self._validation_operator_config is None:
             self._validation_operator_config = {
-                "class_name": "ActionListValidationOperator",
+                "class_name": "WarningAndFailureExpectationSuitesValidationOperator",
                 "module_name": "great_expectations.validation_operators",
                 "name": self.name,
                 "kwargs": {
