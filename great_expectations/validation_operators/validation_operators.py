@@ -380,23 +380,28 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             }
         return self._validation_operator_config
 
-    def _build_slack_query(self, run_return_obj):
+    def _build_slack_query(self, validation_operator_result: ValidationOperatorResult):
         timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
-        success = run_return_obj.get("success")
+        success = validation_operator_result.success
         status_text = "Success :tada:" if success else "Failed :x:"
-        run_id = run_return_obj.get("run_id")
-        batch_identifiers = run_return_obj.get("batch_identifiers")
-        failed_data_assets = []
+        run_id = validation_operator_result.run_id
+        batch_identifiers = validation_operator_result.batch_identifiers
+        failed_data_assets_msg_strings = []
 
-        if run_return_obj.get("failure"):
-            failed_data_assets = [
+        run_results = validation_operator_result.run_results
+        failure_level_run_results = {
+            validation_result_identifier: run_result
+            for validation_result_identifier, run_result in run_results.items()
+            if run_result["expectation_suite_severity_level"] == "failure"
+        }
+
+        if failure_level_run_results:
+            failed_data_assets_msg_strings = [
                 validation_result_identifier.expectation_suite_identifier.expectation_suite_name
                 + "-"
                 + validation_result_identifier.batch_identifier
-                for validation_result_identifier, value in run_return_obj.get(
-                    "failure"
-                ).items()
-                if not value["validation_result"].success
+                for validation_result_identifier, run_result in failure_level_run_results.items()
+                if not run_result["validation_result"].success
             ]
 
         title_block = {
@@ -430,7 +435,9 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Failed Batches:* {}".format(failed_data_assets),
+                    "text": "*Failed Batches:* {}".format(
+                        failed_data_assets_msg_strings
+                    ),
                 },
             }
             query["blocks"].append(failed_data_assets_element)
@@ -478,13 +485,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 )
             base_expectation_suite_name = self.base_expectation_suite_name
 
-        return_obj = {
-            "batch_identifiers": [],
-            "success": None,
-            "failure": {},
-            "warning": {},
-            "run_id": run_id,
-        }
+        run_results = {}
 
         for item in assets_to_validate:
             batch = self._build_batch_from_item(item)
@@ -494,8 +495,6 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
             assert not batch_id is None
             assert not run_id is None
-
-            return_obj["batch_identifiers"].append(batch_id)
 
             failure_expectation_suite_identifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=base_expectation_suite_name
@@ -526,15 +525,13 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 )
 
             if failure_expectation_suite:
-                return_obj["failure"][failure_validation_result_id] = {}
+                failure_run_result_obj = {"expectation_suite_severity_level": "failure"}
                 failure_validation_result = batch.validate(
                     failure_expectation_suite,
                     result_format="SUMMARY",
                     evaluation_parameters=evaluation_parameters,
                 )
-                return_obj["failure"][failure_validation_result_id][
-                    "validation_result"
-                ] = failure_validation_result
+                failure_run_result_obj["validation_result"] = failure_validation_result
                 failure_actions_results = self._run_actions(
                     batch,
                     failure_expectation_suite_identifier,
@@ -542,9 +539,8 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                     failure_validation_result,
                     run_id,
                 )
-                return_obj["failure"][failure_validation_result_id][
-                    "actions_results"
-                ] = failure_actions_results
+                failure_run_result_obj["actions_results"] = failure_actions_results
+                run_results[failure_validation_result_id] = failure_run_result_obj
 
                 if not failure_validation_result.success and self.stop_on_first_error:
                     break
@@ -573,15 +569,13 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 )
 
             if warning_expectation_suite:
-                return_obj["warning"][warning_validation_result_id] = {}
+                warning_run_result_obj = {"expectation_suite_severity_level": "warning"}
                 warning_validation_result = batch.validate(
                     warning_expectation_suite,
                     result_format="SUMMARY",
                     evaluation_parameters=evaluation_parameters,
                 )
-                return_obj["warning"][warning_validation_result_id][
-                    "validation_result"
-                ] = warning_validation_result
+                warning_run_result_obj["validation_result"] = warning_validation_result
                 warning_actions_results = self._run_actions(
                     batch,
                     warning_expectation_suite_identifier,
@@ -589,26 +583,35 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                     warning_validation_result,
                     run_id,
                 )
-                return_obj["warning"][warning_validation_result_id][
-                    "actions_results"
-                ] = warning_actions_results
+                warning_run_result_obj["actions_results"] = warning_actions_results
+                run_results[warning_validation_result_id] = warning_run_result_obj
 
-        return_obj["success"] = all(
-            [val["validation_result"].success for val in return_obj["failure"].values()]
+        validation_operator_result = ValidationOperatorResult(
+            run_id=run_id,
+            run_results=run_results,
+            validation_operator_config=self.validation_operator_config,
+            evaluation_parameters=evaluation_parameters,
+            success=all(
+                [
+                    run_result_obj["validation_result"].success
+                    for run_result_obj in run_results.values()
+                ]
+            ),
         )
 
-        # NOTE: Eugene: 2019-09-24: Update the data doc sites?
         if self.slack_webhook:
             if (
                 self.notify_on == "all"
                 or self.notify_on == "success"
-                and return_obj.success
+                and validation_operator_result.success
                 or self.notify_on == "failure"
-                and not return_obj.success
+                and not validation_operator_result.success
             ):
-                slack_query = self._build_slack_query(run_return_obj=return_obj)
+                slack_query = self._build_slack_query(
+                    validation_operator_result=validation_operator_result
+                )
                 send_slack_notification(
                     query=slack_query, slack_webhook=self.slack_webhook
                 )
 
-        return return_obj
+        return validation_operator_result
