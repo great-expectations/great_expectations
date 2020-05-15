@@ -7,8 +7,11 @@ Changelog
 develop
 -----------------
 * Updated the installation/configuration documentation for Snowflake users
-* [ENHANCEMENT] Enable Redshift Quantile Profiling.
 
+0.10.11
+-----------------
+* Bugfix: build_data_docs list_keys for GCS returns keys and when empty a more user friendly message
+* ENHANCEMENT: Enable Redshift Quantile Profiling
 
 0.10.10
 -----------------
