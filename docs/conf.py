@@ -109,8 +109,8 @@ html_theme_options = {
 }
 
 html_static_path = [
-    '_static', 
-    '_static/style.css', 
+    '_static',
+    '_static/style.css',
     '_static/hk-grotesk-pro/HKGroteskPro-Bold.woff2',
     '_static/hk-grotesk-pro/HKGroteskPro-Regular.woff2',
     '_static/hk-grotesk-pro/HKGroteskPro-SemiBold.woff2',
