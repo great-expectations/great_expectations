@@ -378,7 +378,6 @@ def _add_pandas_datasource(
 
 
 def _is_library_loadable(library_name: str) -> bool:
-
     try:
         _ = importlib.import_module(library_name)
         return True
@@ -398,7 +397,9 @@ def load_library(pip_library_name, python_import_name, skip_load_check=False, in
     Args:
         pip_library_name:
     """
-    print(f"\n\nrunning load_library for {pip_library_name}")
+    logger.debug(f"running load_library for {pip_library_name}")
+
+    # TODO remove skip load check haaaaacks
     if not skip_load_check:
         if _is_library_loadable(python_import_name):
             return True
@@ -406,30 +407,18 @@ def load_library(pip_library_name, python_import_name, skip_load_check=False, in
     # TODO clean up logic easier to understand
     # TODO attempt install
     status_code = execute_shell_command(f"pip install {pip_library_name}")
-    print(f"status: {status_code}")
+    logger.debug(f"status: {status_code}")
 
     # TODO try to load again
     if not skip_load_check:
         loadable = _is_library_loadable(python_import_name)
-        print(f"loadable: {loadable}")
     else:
         loadable = True
     if not (status_code == 0 and loadable):
-        if install_instructions_string:
-            cli_message(
-                """<red>ERROR: Great Expectations relies on the library `{}` to connect to your data.</red>
-            - Please `{}` before trying again.""".format(
-                    pip_library_name, install_instructions_string
-                )
+        cli_message(
+                f"""<red>ERROR: Great Expectations relies on the library `{pip_library_name}` to connect to your data.</red>
+  - Please `pip install {pip_library_name}` before trying again."""
             )
-        else:
-            cli_message(
-                """<red>ERROR: Great Expectations relies on the library `{}` to connect to your data.</red>
-      - Please `pip install {}` before trying again.""".format(
-                    pip_library_name, pip_library_name
-                )
-            )
-
         return False
 
     return True
