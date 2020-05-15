@@ -601,6 +601,7 @@ class DataAsset(object):
         discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False,
+        suppress_logging=False,
     ):
         """Returns _expectation_config as a JSON object, and perform some cleaning along the way.
 
@@ -613,6 +614,10 @@ class DataAsset(object):
                 In returned expectation objects, suppress the `include_config` parameter. Defaults to `True`.
             discard_catch_exceptions_kwargs (boolean): \
                 In returned expectation objects, suppress the `catch_exceptions` parameter.  Defaults to `True`.
+            suppress_warnings (boolean): \
+                If true, do not include warnings in logging information about the operation.
+            suppress_logging (boolean): \
+                If true, do not create a log entry (useful when using get_expectation_suite programmatically)
 
         Returns:
             An expectation suite.
@@ -690,7 +695,8 @@ class DataAsset(object):
             settings_message += " settings filtered."
 
         expectation_suite.expectations = expectations
-        logger.info(message + settings_message)
+        if not suppress_logging:
+            logger.info(message + settings_message)
         return expectation_suite
 
     def save_expectation_suite(
