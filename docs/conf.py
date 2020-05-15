@@ -39,6 +39,7 @@ extensions = [
     # 'sphinx.ext.mathjax'
     'sphinx.ext.napoleon',
     'sphinxcontrib.contentui',
+    'sphinxcontrib.discourse',
     'sphinx_gitstamp',
     'sphinx.ext.autosectionlabel'
 ]
