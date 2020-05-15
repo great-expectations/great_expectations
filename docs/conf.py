@@ -40,15 +40,11 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinxcontrib.contentui',
     'sphinx_gitstamp',
-    'sphinx.ext.autosectionlabel',
-    'sphinxcontrib.discourse',
+    'sphinx.ext.autosectionlabel'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
-
-#discourse url connect
-discourse_url = 'https://discuss.greatexpectations.io/'
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
