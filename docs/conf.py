@@ -39,10 +39,14 @@ extensions = [
     # 'sphinx.ext.mathjax'
     'sphinx.ext.napoleon',
     'sphinxcontrib.contentui',
-    'sphinxcontrib-discourse',
+    'sphinxcontrib.discourse',
     'sphinx_gitstamp',
     'sphinx.ext.autosectionlabel'
 ]
+
+
+##Discourse URL connect
+discourse_url = 'https://discuss.greatexpectations.io/'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
