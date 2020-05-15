@@ -385,7 +385,7 @@ def _is_library_loadable(library_name: str) -> bool:
         return False
 
 
-def load_library(pip_library_name, python_import_name):
+def load_library(pip_library_name: str, python_import_name: str) -> bool:
     """
     Dynamically load a module from strings, attempt a pip install or raise a
     helpful error.
@@ -394,25 +394,25 @@ def load_library(pip_library_name, python_import_name):
 
     Args:
         pip_library_name: name of the library to load
+        python_import_name (str): a module to import to verify installation
     """
+    # TODO[Taylor+Alex] integration tests
+    # TODO[Alex] other databases
+    # TODO[Alex] change loggers to more appropriate level
     logger.critical(f"running load_library for {pip_library_name}")
 
-    # TODO[Alex] remove skip load check haaaaacks in favor of a proper load test
-    #  of the snowflake-sqlalchemy so we can still verify that it is loadable.
-    loadable_first = _is_library_loadable(python_import_name)
-    if loadable_first:
-        logger.critical(f"loadable first: {loadable_first}")
+    loadable_first_attempt: bool = _is_library_loadable(python_import_name)
+    if loadable_first_attempt:
+        logger.critical(f"loadable first: {loadable_first_attempt}")
         return True
 
-    # TODO clean up logic easier to understand
-    status_code = execute_shell_command(f"pip install {pip_library_name}")
+    status_code: int = execute_shell_command(f"pip install {pip_library_name}")
     logger.critical(f"status: {status_code}")
 
-    # try to load again
-    loadable = _is_library_loadable(python_import_name)
-    logger.critical(f"loadable second: {loadable}")
+    loadable_second_attempt: bool = _is_library_loadable(python_import_name)
+    logger.critical(f"loadable second: {loadable_second_attempt}")
 
-    if not (status_code == 0 and loadable):
+    if not (status_code == 0 and loadable_second_attempt):
         cli_message(
                 f"""<red>ERROR: Great Expectations relies on the library `{pip_library_name}` to connect to your data.</red>
   - Please `pip install {pip_library_name}` before trying again."""

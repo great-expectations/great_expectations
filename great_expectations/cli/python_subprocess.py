@@ -9,6 +9,7 @@ from great_expectations.core import logger
 
 def execute_shell_command(command: str, *, cwd: str = None, env: dict = None) -> int:
     # TODO[Alex] progress bar https://click.palletsprojects.com/en/7.x/utils/#showing-progress-bars
+    # TODO[Alex] change loggers to more appropriate level
     logger.critical(f"\n\nrunning execute_shell_command for {command}")
     status_code: int = 0
     try:
