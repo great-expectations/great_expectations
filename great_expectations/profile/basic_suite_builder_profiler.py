@@ -479,8 +479,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             dataset = _remove_column_expectations(dataset, excluded_expectations)
         if included_expectations:
             for expectation in dataset.get_expectation_suite(
-                    discard_failed_expectations=False,
-                    suppress_logging=True,
+                discard_failed_expectations=False, suppress_logging=True,
             ).expectations:
                 if expectation.expectation_type not in included_expectations:
                     try:
