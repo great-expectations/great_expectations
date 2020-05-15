@@ -93,4 +93,4 @@ This grid provides guidelines for how the maintainers of Great Expectations eval
 ** In the special case of Expectations, some gaps in implementation are allowed in beta (e.g. works in pandas and Spark, but not yet in SQLAlchemy; validation and rendering work, but not profiling yet)
 
 .. discourse::
-    :topic_identifier: t/slack-invite-on-greatexpectations-io-not-working/38
+    :topic_identifier: 38
