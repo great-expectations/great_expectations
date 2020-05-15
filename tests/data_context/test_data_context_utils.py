@@ -1,6 +1,5 @@
-import pytest
-
 import great_expectations.exceptions as gee
+import pytest
 from great_expectations.data_context.util import load_class
 
 

@@ -694,6 +694,7 @@
               ]
             ]
           },
+          "allow_relative_error": false,
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_quantile_values_to_be_between"

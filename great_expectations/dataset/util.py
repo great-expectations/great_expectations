@@ -1,10 +1,21 @@
 # Utility methods for dealing with Dataset objects
 
+import logging
 import warnings
+from typing import List
 
 import numpy as np
 import pandas as pd
 from scipy import stats
+
+logger = logging.getLogger(__name__)
+
+try:
+    import sqlalchemy
+    from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.sql.elements import WithinGroup
+except ImportError:
+    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 
 def is_valid_partition_object(partition_object):
@@ -561,3 +572,29 @@ def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs)
         results.append(expectation(column, *args, **kwargs))
 
     return results
+
+
+def get_approximate_percentile_disc_sql(
+    selects: List[WithinGroup], sql_engine_dialect: DefaultDialect
+) -> str:
+    return ", ".join(
+        [
+            "approximate "
+            + str(
+                stmt.compile(
+                    dialect=sql_engine_dialect, compile_kwargs={"literal_binds": True},
+                )
+            )
+            for stmt in selects
+        ]
+    )
+
+
+def check_sql_engine_dialect(
+    actual_sql_engine_dialect: DefaultDialect,
+    candidate_sql_engine_dialect: DefaultDialect,
+) -> bool:
+    try:
+        return isinstance(actual_sql_engine_dialect, candidate_sql_engine_dialect)
+    except (AttributeError, TypeError):
+        return False

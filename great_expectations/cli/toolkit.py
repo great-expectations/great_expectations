@@ -5,7 +5,6 @@ import sys
 from typing import Union
 
 import click
-
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.datasource import get_batch_kwargs
