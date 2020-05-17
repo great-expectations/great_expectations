@@ -356,8 +356,15 @@ class MetaSparkDFDataset(Dataset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(self, column_list, mostly=None, ignore_row_if="all_values_are_missing",
-                          result_format=None, *args, **kwargs):
+        def inner_wrapper(
+            self,
+            column_list,
+            mostly=None,
+            ignore_row_if="all_values_are_missing",
+            result_format=None,
+            *args,
+            **kwargs
+        ):
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
@@ -366,10 +373,10 @@ class MetaSparkDFDataset(Dataset):
             # this is a little dangerous: expectations that specify "COMPLETE" result format and have a very
             # large number of unexpected results could hang for a long time. we should either call this out in docs
             # or put a limit on it
-            if result_format['result_format'] == 'COMPLETE':
+            if result_format["result_format"] == "COMPLETE":
                 unexpected_count_limit = None
             else:
-                unexpected_count_limit = result_format['partial_unexpected_count']
+                unexpected_count_limit = result_format["partial_unexpected_count"]
 
             temp_df = self.spark_df.select(*column_list)  # pyspark.sql.DataFrame
 
@@ -378,31 +385,36 @@ class MetaSparkDFDataset(Dataset):
             element_count = self.get_row_count()
 
             if ignore_row_if == "all_values_are_missing":
-                boolean_mapped_skip_values = temp_df.select([
-                    *column_list,
-                    reduce(lambda a, b: a & b, [col(c).isNull() for c in column_list]).alias("__null_val")
-                ])
+                boolean_mapped_skip_values = temp_df.select(
+                    [
+                        *column_list,
+                        reduce(
+                            lambda a, b: a & b, [col(c).isNull() for c in column_list]
+                        ).alias("__null_val"),
+                    ]
+                )
             elif ignore_row_if == "any_value_is_missing":
-                boolean_mapped_skip_values = temp_df.select([
-                    *column_list,
-                    reduce(lambda a, b: a | b, [col(c).isNull() for c in column_list]).alias("__null_val")
-                ])
+                boolean_mapped_skip_values = temp_df.select(
+                    [
+                        *column_list,
+                        reduce(
+                            lambda a, b: a | b, [col(c).isNull() for c in column_list]
+                        ).alias("__null_val"),
+                    ]
+                )
             elif ignore_row_if == "never":
-                boolean_mapped_skip_values = temp_df.select([
-                    *column_list,
-                    lit(False).alias("__null_val")
-                ])
+                boolean_mapped_skip_values = temp_df.select(
+                    [*column_list, lit(False).alias("__null_val")]
+                )
             else:
-                raise ValueError(
-                    "Unknown value of ignore_row_if: %s", (ignore_row_if,))
+                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
 
             nonnull_df = boolean_mapped_skip_values.filter("__null_val = False")
             nonnull_count = nonnull_df.count()
 
             cols_df = nonnull_df.select(*column_list)
 
-            success_df = func(
-                self, cols_df, *args, **kwargs)
+            success_df = func(self, cols_df, *args, **kwargs)
             success_count = success_df.filter("__success = True").count()
 
             unexpected_count = nonnull_count - success_count
@@ -411,13 +423,12 @@ class MetaSparkDFDataset(Dataset):
             else:
                 # here's an example of a place where we could do optimizations if we knew result format: see
                 # comment block below
-                unexpected_df = success_df.filter('__success = False')
+                unexpected_df = success_df.filter("__success = False")
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
                     OrderedDict((c, row[c]) for c in column_list)
-                    for row
-                    in unexpected_df.collect()
+                    for row in unexpected_df.collect()
                 ]
 
                 if "output_strftime_format" in kwargs:
@@ -429,11 +440,17 @@ class MetaSparkDFDataset(Dataset):
                         else:
                             if all(isinstance(v, string_types) for k, v in val):
                                 val = OrderedDict((k, parse(v)) for k, v in val)
-                            parsed_maybe_limited_unexpected_list.append(OrderedDict((k, datetime.strftime(v, output_strftime_format)) for k, v in val))
+                            parsed_maybe_limited_unexpected_list.append(
+                                OrderedDict(
+                                    (k, datetime.strftime(v, output_strftime_format))
+                                    for k, v in val
+                                )
+                            )
                     maybe_limited_unexpected_list = parsed_maybe_limited_unexpected_list
 
             success, percent_success = self._calc_map_expectation_success(
-                success_count, nonnull_count, mostly)
+                success_count, nonnull_count, mostly
+            )
 
             # Currently the abstraction of "result_format" that _format_column_map_output provides
             # limits some possible optimizations within the column-map decorator. It seems that either
@@ -1110,15 +1127,19 @@ class SparkDFDataset(MetaSparkDFDataset):
         self,
         column_list,  # pyspark.sql.DataFrame
         ignore_row_if="all_values_are_missing",
-        result_format=None, include_config=True, catch_exceptions=None,
-        meta=None
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
     ):
         column_names = column_list.schema.names[:]
         conditions = []
-        for i in range(0, len(column_names)-1):
+        for i in range(0, len(column_names) - 1):
             # Negate the `eqNullSafe` result and append to the conditions.
-            conditions.append(~(
-                col(column_names[i]).eqNullSafe(col(column_names[i+1]))
-            ))
+            conditions.append(
+                ~(col(column_names[i]).eqNullSafe(col(column_names[i + 1])))
+            )
 
-        return column_list.withColumn('__success', reduce(lambda a, b: a & b, conditions))
+        return column_list.withColumn(
+            "__success", reduce(lambda a, b: a & b, conditions)
+        )
