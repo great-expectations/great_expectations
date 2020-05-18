@@ -6,7 +6,7 @@ import warnings
 from datetime import datetime
 from functools import wraps
 from importlib import import_module
-from typing import List
+from typing import Any, List
 
 import numpy as np
 import pandas as pd
@@ -35,6 +35,8 @@ except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
+    DefaultDialect = Any
+    WithinGroup = Any
 
 try:
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2

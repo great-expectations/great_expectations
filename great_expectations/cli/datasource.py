@@ -386,14 +386,16 @@ def _is_library_loadable(library_name: str) -> bool:
 
 def load_library(pip_library_name: str, python_import_name: str) -> bool:
     """
-    Dynamically load a module from strings, attempt a pip install or raise a
-    helpful error.
+    Dynamically load a module from strings, attempt a pip install or raise a helpful error.
 
     :return: True if the library was loaded successfully, False otherwise
 
     Args:
         pip_library_name: name of the library to load
         python_import_name (str): a module to import to verify installation
+
+    While developed independently, this function is very similar to the one, offered in this StackOverflow article:
+    https://stackoverflow.com/questions/30993411/environment-variables-using-subprocess-check-output-python
     """
     # TODO[Taylor+Alex] integration tests
     # TODO[Alex] other databases
@@ -413,9 +415,9 @@ def load_library(pip_library_name: str, python_import_name: str) -> bool:
 
     if not (status_code == 0 and loadable_second_attempt):
         cli_message(
-                f"""<red>ERROR: Great Expectations relies on the library `{pip_library_name}` to connect to your data.</red>
+            f"""<red>ERROR: Great Expectations relies on the library `{pip_library_name}` to connect to your data.</red>
   - Please `pip install {pip_library_name}` before trying again."""
-            )
+        )
         return False
 
     return True
@@ -477,8 +479,8 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             credentials = _collect_redshift_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.SNOWFLAKE:
             if not load_library(
-                    pip_library_name="snowflake-sqlalchemy",
-                    python_import_name="snowflake.sqlalchemy.snowdialect"
+                pip_library_name="snowflake-sqlalchemy",
+                python_import_name="snowflake.sqlalchemy.snowdialect",
             ):
                 return None
 
@@ -757,7 +759,7 @@ def _collect_redshift_credentials(default_credentials=None):
 def _add_spark_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
-    if not load_library("pyspark", ):
+    if not load_library("pyspark",):
         return None
 
     if passthrough_generator_only:

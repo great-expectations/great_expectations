@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import List
+from typing import Any, List
 
 import numpy as np
 import pandas as pd
@@ -16,6 +16,8 @@ try:
     from sqlalchemy.sql.elements import WithinGroup
 except ImportError:
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
+    DefaultDialect = Any
+    WithinGroup = Any
 
 
 def is_valid_partition_object(partition_object):
