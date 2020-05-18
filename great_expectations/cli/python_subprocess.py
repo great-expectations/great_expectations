@@ -1,3 +1,4 @@
+import os
 import sys
 import traceback
 from subprocess import STDOUT, CalledProcessError, check_output
@@ -5,10 +6,21 @@ from subprocess import STDOUT, CalledProcessError, check_output
 from great_expectations.core import logger
 
 
-def execute_shell_command(command: str, *, cwd: str = None, env: dict = None) -> int:
-    # TODO[Alex] progress bar https://click.palletsprojects.com/en/7.x/utils/#showing-progress-bars
-    # TODO[Alex] change loggers to more appropriate level
-    logger.critical(f"\n\nrunning execute_shell_command for {command}")
+def execute_shell_command(command: str) -> int:
+    """
+    Execute a shell (bash in the present case) command from inside Python program.
+
+    While developed independently, this function is very similar to the one, offered in this StackOverflow article:
+    https://stackoverflow.com/questions/30993411/environment-variables-using-subprocess-check-output-python
+
+    :param command: bash command -- as if typed in a shell/Terminal window
+    :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error
+    """
+    cwd: str = os.getcwd()
+
+    path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
+    env: dict = dict(os.environ, PATH=path_env_var)
+
     status_code: int = 0
     try:
         sh_out: str = check_output(
@@ -20,7 +32,7 @@ def execute_shell_command(command: str, *, cwd: str = None, env: dict = None) ->
             universal_newlines=True,
         )
         sh_out = sh_out.strip()
-        logger.critical(sh_out)
+        logger.info(sh_out)
     except CalledProcessError as cpe:
         status_code = cpe.returncode
         sys.stderr.write(cpe.output)
@@ -30,6 +42,6 @@ def execute_shell_command(command: str, *, cwd: str = None, env: dict = None) ->
         exception_message += (
             f'{type(cpe).__name__}: "{str(cpe)}".  Traceback: "{exception_traceback}".'
         )
-        logger.warning(exception_message)
+        logger.error(exception_message)
 
     return status_code

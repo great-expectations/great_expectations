@@ -393,9 +393,6 @@ def load_library(pip_library_name: str, python_import_name: str) -> bool:
     Args:
         pip_library_name: name of the library to load
         python_import_name (str): a module to import to verify installation
-
-    While developed independently, this function is very similar to the one, offered in this StackOverflow article:
-    https://stackoverflow.com/questions/30993411/environment-variables-using-subprocess-check-output-python
     """
     # TODO[Taylor+Alex] integration tests
     # TODO[Alex] other databases
