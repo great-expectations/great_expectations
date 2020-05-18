@@ -6,6 +6,8 @@ Changelog
 
 develop
 -----------------
+* Enhancement: A dictionary of variables can be passed to the DataContext constructor to allow override config variables
+  at runtime.
 
 0.10.11
 -----------------
