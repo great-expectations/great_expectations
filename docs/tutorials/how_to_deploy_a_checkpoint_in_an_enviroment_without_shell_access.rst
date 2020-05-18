@@ -6,16 +6,18 @@ How to deploy a checkpoint in an environment without shell access
 In this howto guide you'll learn how to deploy a **TODO link** `checkpoint`
 in an environment without shell access such as `databricks <https://databricks.com>`_.
 
+This guide assumes that you have an existing checkpoint.
+To make a new checkpoint use ``great_expectations checkpoint new``.
+
+Checkpoints can be run simply with a shell using the command ``great_expectations checkpoint run``.
+
+However there are many pipeline environments that do not have shell access.
+
+1. Generate a python script that can run your checkpoint.
 
 ``great_expectations checkpoint script <CHECKPOINT>``
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Create an executable script for deploying a checkpoint via python.
-
-This is provided as a convenience for teams whose pipeline deployments may not have shell access or may wish to have more flexibility when running a checkpoint.
-
-To generate a script, you must first have an existing checkpoint.
-To make a new checkpoint use ``great_expectations checkpoint new``.
+This command creates an executable scipt for deploying a checkpoint via python.
 
 .. code-block:: bash
 
@@ -85,18 +87,11 @@ The generated script looks like this:
     print("Validation Succeeded!")
     sys.exit(0)
 
-This script can be run by invoking it with:
+#########
+TODO
+#########
 
-.. code-block:: bash
-
-    $ python great_expectations/uncommitted/run_cost_model_protection.py
-    Validation Suceeded!
-
-Just like the built in command ``great_expectations checkpoint run``, this posix-compatible script exits with a status of ``0`` if validation is successful and a status of ``1`` if validation failed.
-
-A failure will look like:
-
-.. code-block:: bash
-
-    $ python great_expectations/uncommitted/run_cost_model_protection.py
-    Validation Failed!
+- maybe remove exit codes
+- plop this in a function
+- wrap main() in exit codes
+- 
