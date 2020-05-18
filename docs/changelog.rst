@@ -6,6 +6,8 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] BasicSuiteBuilderProfiler could include extra expectations when only some expectations were selected (#1422)
+
 
 0.10.11
 -----------------
