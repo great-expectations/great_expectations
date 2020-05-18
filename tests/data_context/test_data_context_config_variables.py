@@ -1,8 +1,10 @@
 import os
 
 import pytest
+import great_expectations as ge
 from great_expectations.data_context.util import substitute_config_variable
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
+from tests.data_context.conftest import create_data_context_files
 
 
 def test_config_variables_on_context_without_config_variables_filepath_configured(
@@ -94,6 +96,42 @@ def test_setting_config_variables_is_visible_immediately(
         raise
     finally:
         del os.environ["replace_me_2"]
+
+
+def test_runtime_environment_are_used_preferentially(tmp_path_factory):
+    value_from_environment = "from_environment"
+    os.environ["replace_me"] = value_from_environment
+
+    value_from_runtime_override = "runtime_var"
+    runtime_environment = {"replace_me": value_from_runtime_override}
+
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    create_data_context_files(context_path, asset_config_path, True)
+
+    data_context = ge.data_context.DataContext(
+        context_path, runtime_environment=runtime_environment
+    )
+    config = data_context.get_config_with_variables_substituted()
+
+    try:
+        assert (
+            config.datasources["mydatasource"]["batch_kwargs_generators"][
+                "mygenerator"
+            ]["reader_options"]["test_variable_sub1"]
+            == value_from_runtime_override
+        )
+        assert (
+            config.datasources["mydatasource"]["batch_kwargs_generators"][
+                "mygenerator"
+            ]["reader_options"]["test_variable_sub2"]
+            == value_from_runtime_override
+        )
+    except Exception:
+        raise
+    finally:
+        del os.environ["replace_me"]
 
 
 def test_substitute_config_variable():
