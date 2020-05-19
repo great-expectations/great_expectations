@@ -1,11 +1,5 @@
 .. _BigQuery:
 
-.. warning::
-  This documentation is untested, and may contain outdated instructions.
-
-  Please report bugs or issues in the public `Discussion forum <google.com>`_.
-
-
 ######################################
 How to configure a BigQuery Datasource
 ######################################

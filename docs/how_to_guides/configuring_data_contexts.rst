@@ -4,7 +4,7 @@ Configuring Data Contexts
 ===================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    /how_to_guides/configuring_data_contexts/how_to_create_a_new_data_context_with_the_cli
    /how_to_guides/configuring_data_contexts/how_to_use_environment_variables_to_populate_credentials
