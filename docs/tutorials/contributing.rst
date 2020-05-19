@@ -61,7 +61,7 @@ Our goal is to make your experience as great as possible. Please follow these st
 
 .. container:: custom-indented-paragraph
 
-   Issues in GitHub are a great place to start. Check out the `help wanted <https://github.com/great-expectations/great_expectations/labels/help%20wanted>`__ and `good first issue <https://github.com/great-expectations/great_expectations/labels/good%20first%20issue>`__ labels. Comment to let everyone know you’re working on it. 
+   Issues in GitHub are a great place to start. Check out the `help wanted <https://github.com/great-expectations/great_expectations/labels/help%20wanted>`__ and `good first issue <https://github.com/great-expectations/great_expectations/labels/good%20first%20issue>`__ labels. Comment to let everyone know you’re working on it.
 
    If there’s no issue for what you want to work on, please create one. Add a comment to let everyone know that you're working on it. We prefer small, incremental commits, because it makes the thought process behind changes easier to review.
 
@@ -82,7 +82,7 @@ Our goal is to make your experience as great as possible. Please follow these st
 .. container:: custom-indented-paragraph
 
    When your changes are ready, run through our :ref:`contributing_contribution_checklist` for pull requests.
-   
+
    Note that if it’s your first contribution, there is a standard :ref:`Contributor license agreement (CLA)` to sign.
 
 ..
