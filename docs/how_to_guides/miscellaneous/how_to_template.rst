@@ -16,7 +16,7 @@ Steps
 .. code-block:: yaml
 
     site_section_builders:
-      expectations: # Looks, comments work, too!
+      expectations: # Look, comments work, too!
         class_name: DefaultSiteSectionBuilder
         source_store_name: expectations_store
         renderer:
