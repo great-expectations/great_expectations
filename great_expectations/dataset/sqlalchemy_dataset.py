@@ -106,7 +106,7 @@ class SqlAlchemyBatchReference(object):
 
 class MetaSqlAlchemyDataset(Dataset):
     def __init__(self, *args, **kwargs):
-        super(MetaSqlAlchemyDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @classmethod
     def column_map_expectation(cls, func):

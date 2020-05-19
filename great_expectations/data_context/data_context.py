@@ -2123,7 +2123,7 @@ class DataContext(BaseDataContext):
     def add_datasource(self, name, **kwargs):
         logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
 
-        new_datasource = super(DataContext, self).add_datasource(name, **kwargs)
+        new_datasource = super().add_datasource(name, **kwargs)
         self._save_project_config()
 
         return new_datasource

@@ -87,7 +87,7 @@ class SqlAlchemyDatasource(Datasource):
         batch_kwargs_generators = configuration_with_defaults.pop(
             "batch_kwargs_generators", None
         )
-        super(SqlAlchemyDatasource, self).__init__(
+        super().__init__(
             name,
             data_context=data_context,
             data_asset_type=data_asset_type,
