@@ -438,7 +438,7 @@ class MetaSparkDFDataset(Dataset):
                         if val is None or not all(v for k, v in val):
                             parsed_maybe_limited_unexpected_list.append(val)
                         else:
-                            if all(isinstance(v, string_types) for k, v in val):
+                            if all(isinstance(v, str) for k, v in val):
                                 val = OrderedDict((k, parse(v)) for k, v in val)
                             parsed_maybe_limited_unexpected_list.append(
                                 OrderedDict(
