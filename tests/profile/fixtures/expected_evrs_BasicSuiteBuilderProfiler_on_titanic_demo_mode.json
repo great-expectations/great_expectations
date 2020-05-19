@@ -288,6 +288,7 @@
               ]
             ]
           },
+          "allow_relative_error": false,
           "result_format": "SUMMARY"
         },
         "meta": {},
@@ -893,6 +894,7 @@
               ]
             ]
           },
+          "allow_relative_error": false,
           "result_format": "SUMMARY"
         },
         "meta": {},

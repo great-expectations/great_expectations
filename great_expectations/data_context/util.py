@@ -144,9 +144,7 @@ def substitute_config_variable(template_str, config_variables_dict):
         return template_str
 
     if match:
-        config_variable_value = os.getenv(match.group(1))
-        if not config_variable_value:
-            config_variable_value = config_variables_dict.get(match.group(1))
+        config_variable_value = config_variables_dict.get(match.group(1))
 
         if config_variable_value:
             if match.start() == 0 and match.end() == len(template_str):
