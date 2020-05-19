@@ -12,7 +12,7 @@ Steps
 2. Write a title and purpose paragraph.
 3. Fill in the Steps section, making sure to include bash, yml, and code snippets as appropriate.
 4. Starting from a clean install of Great Expectations, follow your own steps from start to finish, to make sure there aren’t any gaps.
-5. If needed, add content to Additional Notes and/or Additional Resources. These sections cover errata that would be distracting to include in Steps. It’s fine for them to be empty.
+5. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
 6. Scan your article to make sure it follows the :ref:`Style guide`. If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
 7. Submit your PR!
 
@@ -22,7 +22,7 @@ Additional Notes
 Purpose of a how-to guide
 #########################
 
-The purpose of a how-to guide is to *replicate*, NOT to *teach or explain*.
+The purpose of a how-to guide is to *replicate*, NOT to *teach or explain*. Teaching and explaining Great Expectations concepts are covered in the :ref:`reference__core_concepts`_ reference section.
 
 	* Assume that the user has already successfully run ``great_expectations init`` and has a working deployment of Great Expectations.
 	* Assume that the user is already familiar with core concepts in Great Expectations: Expectations, Data Contexts, Validation, Datasources, etc. etc. You don’t need to spend any time explaining these things.
