@@ -18,6 +18,7 @@ from pyparsing import (
     delimitedList,
     Combine)
 
+from great_expectations.core import ge_urn
 from great_expectations.exceptions import EvaluationParameterError
 
 logger = logging.getLogger(__name__)
@@ -91,7 +92,7 @@ class EvaluationParameterParser:
             # or use provided pyparsing_common.number, but convert back to str:
             # fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
             fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
-            ge_urn = Combine(Literal("urn:great_expectations:") + Word(alphas, alphanums + "_$:?=%."))
+            ge_urn = Combine(Literal("urn:great_expectations:") + Word(alphas, alphanums + "_$:?=%.&"))
             variable = Word(alphas, alphanums + "_$")
             ident = ge_urn | variable
 
@@ -155,7 +156,8 @@ class EvaluationParameterParser:
                 return float(op)
 
 
-def build_evaluation_parameters(expectation_args, evaluation_parameters=None, interactive_evaluation=True):
+def build_evaluation_parameters(expectation_args, evaluation_parameters=None, interactive_evaluation=True,
+                                data_context=None):
     """Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,
     AND mutate expectation_args by removing any parameter values passed in as temporary values during
     exploratory work.
@@ -180,7 +182,9 @@ def build_evaluation_parameters(expectation_args, evaluation_parameters=None, in
 
             elif evaluation_parameters is not None:
                 # parse_evaluation_parameter will raise EvaluationParameterError if we cannot find a suitable value
-                evaluation_args[key] = parse_evaluation_parameter(value['$PARAMETER'], evaluation_parameters)
+                evaluation_args[key] = parse_evaluation_parameter(value['$PARAMETER'],
+                                                                  evaluation_parameters=evaluation_parameters,
+                                                                  data_context=data_context)
 
             else:
                 # If we haven't been able to continue already, we failed to find a parameter
@@ -192,13 +196,14 @@ def build_evaluation_parameters(expectation_args, evaluation_parameters=None, in
 expr = EvaluationParameterParser()
 
 
-def parse_evaluation_parameter(parameter_expression, evaluation_parameters=None):
+def parse_evaluation_parameter(parameter_expression, evaluation_parameters=None, data_context=None):
     """Use the provided evaluation_parameters dict to parse a given parameter expression.
 
     Args:
         parameter_expression (str): A string, potentially containing basic arithmetic operations and functions,
             and variables to be substituted
         evaluation_parameters (dict): A dictionary of name-value pairs consisting of values to substitute
+        data_context (DataContext): A data context to use to obtain metrics, if necessary
 
     The parser will allow arithmetic operations +, -, /, *, as well as basic functions, including trunc() and round() to
     obtain integer values when needed for certain expectations (e.g. expect_column_value_length_to_be_between).
@@ -220,7 +225,19 @@ def parse_evaluation_parameter(parameter_expression, evaluation_parameters=None)
     if len(L) == 1 and L[0] not in evaluation_parameters:
         # In this special case there were no operations to find, so only one value, but we don't have something to
         # substitute for that value
-        raise EvaluationParameterError("No value found for $PARAMETER " + str(L[0]))
+        try:
+            res = ge_urn.parseString(L[0])
+            if res["urn_type"] == "stores":
+                store = data_context.stores.get(res["store_name"])
+                return store.get_query_result(res["metric_name"], res.get("metric_kwargs", {}))
+            else:
+                logger.error("Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store.")
+                raise EvaluationParameterError("No value found for $PARAMETER " + str(L[0]))
+        except ParseException:
+            raise EvaluationParameterError("No value found for $PARAMETER " + str(L[0]))
+        except AttributeError:
+            logger.warning("Unable to get store for store-type valuation parameter.")
+            raise EvaluationParameterError("No value found for $PARAMETER " + str(L[0]))
 
     elif len(L) == 1:
         # In this case, we *do* have a substitution for a single type. We treat this specially because in this

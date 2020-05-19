@@ -28,7 +28,7 @@ class CustomPageRenderer(Renderer):
                 }
             }
         })
-    
+
     @classmethod
     def _get_bullet_list_content_block(cls, header="", subheader="", col=12):
         return RenderedBulletListContent(**{
@@ -48,7 +48,7 @@ class CustomPageRenderer(Renderer):
                 },
             },
         })
-    
+
     @classmethod
     def _get_table_content_block(cls, header="", subheader="", col=12):
         return RenderedTableContent(**{
@@ -74,7 +74,7 @@ class CustomPageRenderer(Renderer):
                 }
             },
         })
-    
+
     @classmethod
     def _get_graph_content_block(cls, header="", subheader="", col=12):
         df = pd.DataFrame({
@@ -86,7 +86,7 @@ class CustomPageRenderer(Renderer):
             x="value:O"
         ).properties(height=200, width=200, autosize="fit")
         chart = bars.to_json()
-        
+
         return RenderedGraphContent(**{
             "content_block_type": "graph",
             "header": header,
@@ -99,7 +99,7 @@ class CustomPageRenderer(Renderer):
                 },
             },
         })
-    
+
     @classmethod
     def _get_tooltip_string_template_content_block(cls):
         return RenderedStringTemplateContent(**{
@@ -118,7 +118,7 @@ class CustomPageRenderer(Renderer):
                 },
             },
         })
-    
+
     @classmethod
     def _get_string_template_content_block(cls):
         return RenderedStringTemplateContent(**{
@@ -156,7 +156,7 @@ class CustomPageRenderer(Renderer):
                 },
             },
         })
-    
+
     @classmethod
     def _get_value_list_content_block(cls, header="", subheader="", col=12):
         return ValueListContent(**{
@@ -187,7 +187,7 @@ class CustomPageRenderer(Renderer):
                 "classes": ["col-{}".format(col)]
             },
         })
-    
+
     @classmethod
     def render(cls, ge_dict=None):
         if ge_dict is None:
@@ -196,7 +196,7 @@ class CustomPageRenderer(Renderer):
         return RenderedDocumentContent(**{
             "renderer_type": "CustomValidationResultsPageRenderer",
             "data_asset_name": "my_data_asset_name",
-            "full_data_asset_identifier": "my_datasource/my_generator/my_generator_asset",
+            "full_data_asset_identifier": "my_datasource/my_generator/my_data_asset_name",
             "page_title": "My Page Title",
             "sections": [
                 RenderedSectionContent(**{

@@ -1,7 +1,11 @@
 import logging
 import time
+import warnings
 from enum import Enum
 
+from dateutil.parser import parse, ParserError
+
+from great_expectations.core import RunIdentifier
 from great_expectations.exceptions import GreatExpectationsError
 
 from ..data_asset import DataAsset
@@ -76,7 +80,25 @@ class DatasetProfiler(DataAssetProfiler):
         return expectation_suite
 
     @classmethod
-    def profile(cls, data_asset, run_id=None, profiler_configuration=None):
+    def profile(cls, data_asset, run_id=None, profiler_configuration=None, run_name=None, run_time=None):
+        assert not (run_id and run_name) and not (run_id and run_time), \
+            "Please provide either a run_id or run_name and/or run_time."
+        if isinstance(run_id, str) and not run_name:
+            warnings.warn("String run_ids will be deprecated in the future. Please provide a run_id of type "
+                          "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
+                          "and run_time (both optional). Instead of providing a run_id, you may also provide"
+                          "run_name and run_time separately.", DeprecationWarning)
+            try:
+                run_time = parse(run_id)
+            except ParserError:
+                pass
+            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
+        elif isinstance(run_id, dict):
+            run_id = RunIdentifier(**run_id)
+        elif not isinstance(run_id, RunIdentifier):
+            run_name = run_name or "profiling"
+            run_id = RunIdentifier(run_name=run_name, run_time=run_time)
+
         if not cls.validate(data_asset):
             raise GreatExpectationsError("Invalid data_asset for profiler; aborting")
 

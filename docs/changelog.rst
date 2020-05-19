@@ -7,6 +7,21 @@ Changelog
 develop
 -----------------
 
+0.11.0b0
+-----------------
+* (BREAKING) ``run_id`` is now typed using the new ``RunIdentifier`` class, which consists of a ``run_time`` and
+  ``run_name``. Existing projects that have Expectation Suite Validation Results must be migrated.
+  See :ref:`Upgrading to 0.11.x-beta` for instructions.
+* (BREAKING) ``ValidationMetric`` and ``ValidationMetricIdentifier`` objects now have a ``data_asset_name`` attribute.
+  Existing projects with evaluation parameter stores that have database backends must be migrated.
+  See :ref:`Upgrading to 0.11.x-beta` for instructions.
+* Data Docs: redesigned index page with paginated/sortable/searchable/filterable tables
+* Data Docs: searchable tables on Expectation Suite Validation Result pages
+* ``data_asset_name`` is now added to batch_kwargs by batch_kwargs_generators (if available) and surfaced in Data Docs
+* Renamed all ``generator_asset`` parameters to ``data_asset_name``
+* Updated the dateutil dependency
+* Added QueryStore
+
 0.10.9
 -----------------
 
@@ -27,7 +42,6 @@ develop
 * changed the prompt for the name of the temp table in BigQuery in the CLI to hint that a fully qualified name (project.dataset.table) should be provided
 * Bugfix for: expect_column_quantile_values_to_be_between expectation throws an "unexpected keyword WITHIN" on BigQuery (#1391)
 
-
 0.10.8
 -----------------
 * added support for overriding the default jupyter command via a GE_JUPYTER_COMMAND environment variable (#1347) @nehiljain
@@ -35,7 +49,7 @@ develop
 
 0.10.7
 -----------------
-*crud delete suite bug fix
+* crud delete suite bug fix
 
 0.10.6
 -----------------

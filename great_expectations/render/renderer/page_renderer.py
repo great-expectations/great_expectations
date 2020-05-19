@@ -3,6 +3,9 @@ import os
 
 from collections import OrderedDict
 
+from dateutil.parser import parse, ParserError
+
+from great_expectations.core import RunIdentifier
 from ...core.id_dict import BatchKwargs
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render.util import num_to_str
@@ -46,6 +49,18 @@ class ValidationResultsPageRenderer(Renderer):
 
     def render(self, validation_results):
         run_id = validation_results.meta['run_id']
+        if isinstance(run_id, str):
+            try:
+                run_time = parse(run_id).isoformat()
+            except ParserError:
+                run_time = "__none__"
+            run_name = run_id
+        elif isinstance(run_id, dict):
+            run_name = run_id.get("run_name") or "__none__"
+            run_time = run_id.get("run_time") or "__none__"
+        elif isinstance(run_id, RunIdentifier):
+            run_name = run_id.run_name or "__none__"
+            run_time = run_id.run_time.isoformat()
         batch_id = BatchKwargs(validation_results.meta['batch_kwargs']).to_id()
         expectation_suite_name = validation_results.meta['expectation_suite_name']
         batch_kwargs = validation_results.meta.get("batch_kwargs")
@@ -136,7 +151,7 @@ class ValidationResultsPageRenderer(Renderer):
 
         return RenderedDocumentContent(**{
             "renderer_type": "ValidationResultsPageRenderer",
-            "page_title": expectation_suite_name + " / " + run_id + " / " + batch_id,
+            "page_title": expectation_suite_name + " / " + run_name + " / " + run_time + " / " + batch_id,
             "batch_kwargs": batch_kwargs,
             "expectation_suite_name": expectation_suite_name,
             "sections": sections,
@@ -147,7 +162,7 @@ class ValidationResultsPageRenderer(Renderer):
     def _render_validation_header(cls, validation_results):
         success = validation_results.success
         expectation_suite_name = validation_results.meta['expectation_suite_name']
-        expectation_suite_path_components = ['..' for _ in range(len(expectation_suite_name.split('.')) + 2)] \
+        expectation_suite_path_components = ['..' for _ in range(len(expectation_suite_name.split('.')) + 3)] \
             + ["expectations"] + expectation_suite_name.split(".")
         expectation_suite_path = os.path.join(*expectation_suite_path_components) + ".html"
         if success:
@@ -206,6 +221,18 @@ class ValidationResultsPageRenderer(Renderer):
     @classmethod
     def _render_validation_info(cls, validation_results):
         run_id = validation_results.meta['run_id']
+        if isinstance(run_id, str):
+            try:
+                run_time = parse(run_id).isoformat()
+            except ParserError:
+                run_time = "__none__"
+            run_name = run_id
+        elif isinstance(run_id, dict):
+            run_name = run_id.get("run_name") or "__none__"
+            run_time = run_id.get("run_time") or "__none__"
+        elif isinstance(run_id, RunIdentifier):
+            run_name = run_id.run_name or "__none__"
+            run_time = run_id.run_time.isoformat()
         ge_version = validation_results.meta["great_expectations.__version__"]
 
         return RenderedTableContent(**{
@@ -222,13 +249,18 @@ class ValidationResultsPageRenderer(Renderer):
             }),
             "table": [
                 ["Great Expectations Version", ge_version],
-                ["Run ID", run_id]
+                ["Run Name", run_name],
+                ["Run Time", run_time]
             ],
             "styling": {
                 "classes": ["col-12", "table-responsive", "mt-1"],
                 "body": {
-                    "classes": ["table", "table-sm"]
-                }
+                    "classes": ["table", "table-sm"],
+                    "styles": {
+                        "margin-bottom": "0.5rem !important",
+                        "margin-top": "0.5rem !important"
+                    }
+                },
             },
         })
 
@@ -329,20 +361,23 @@ class ValidationResultsPageRenderer(Renderer):
             return RenderedTableContent(**{
                 "content_block_type": "table",
                 "header": RenderedStringTemplateContent(**{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": header,
-                    "tag": "h6",
-                    "styling": {
-                        "classes": ["m-0"]
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": header,
+                        "tag": "h6",
+                        "styling": {
+                            "classes": ["m-0"]
+                        }
                     }
-                }
-            }),
+                }),
                 "table": table_rows,
                 "styling": {
-                    "classes": ["col-6", "table-responsive", "mt-1"],
                     "body": {
-                        "classes": ["table", "table-sm"]
+                        "classes": ["table", "table-sm"],
+                        "styles": {
+                            "margin-bottom": "0.5rem !important",
+                            "margin-top": "0.5rem !important"
+                        }
                     }
                 },
             })
@@ -381,7 +416,11 @@ class ValidationResultsPageRenderer(Renderer):
             "styling": {
                 "classes": ["col-6", "table-responsive", "mt-1", "p-1"],
                 "body": {
-                    "classes": ["table", "table-sm"]
+                    "classes": ["table", "table-sm"],
+                    "styles": {
+                        "margin-bottom": "0.5rem !important",
+                        "margin-top": "0.5rem !important"
+                    }
                 }
             },
         })
@@ -509,7 +548,11 @@ class ExpectationSuitePageRenderer(Renderer):
             "styling": {
                 "classes": ["col-12", "table-responsive", "mt-1"],
                 "body": {
-                    "classes": ["table", "table-sm"]
+                    "classes": ["table", "table-sm"],
+                    "styles": {
+                        "margin-bottom": "0.5rem !important",
+                        "margin-top": "0.5rem !important"
+                    }
                 }
             },
         })
@@ -652,6 +695,19 @@ class ProfilingResultsPageRenderer(Renderer):
 
     def render(self, validation_results):
         run_id = validation_results.meta['run_id']
+        if isinstance(run_id, str):
+            try:
+                run_time = parse(run_id).isoformat()
+            except ParserError:
+                run_time = "__none__"
+            run_name = run_id
+        elif isinstance(run_id, dict):
+            run_name = run_id.get("run_name") or "__none__"
+            run_time = run_id.get("run_time") or "__none__"
+        elif isinstance(run_id, RunIdentifier):
+            run_name = run_id.run_name or "__none__"
+            run_time = run_id.run_time.isoformat()
+
         expectation_suite_name = validation_results.meta['expectation_suite_name']
         batch_kwargs = validation_results.meta.get("batch_kwargs")
 
@@ -670,7 +726,7 @@ class ProfilingResultsPageRenderer(Renderer):
 
         return RenderedDocumentContent(**{
             "renderer_type": "ProfilingResultsPageRenderer",
-            "page_title": run_id + "-" + expectation_suite_name + "-ProfilingResults",
+            "page_title": run_time + "-" + run_name + "-" + expectation_suite_name + "-ProfilingResults",
             "expectation_suite_name": expectation_suite_name,
             "utm_medium": "profiling-results-page",
             "batch_kwargs": batch_kwargs,

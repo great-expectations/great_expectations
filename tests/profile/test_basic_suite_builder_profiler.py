@@ -3,6 +3,7 @@ import os
 from collections import OrderedDict
 
 import pytest
+from freezegun import freeze_time
 from numpy import Infinity
 
 import great_expectations as ge
@@ -346,6 +347,7 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
         "expectation_suite_name",
         "great_expectations.__version__",
         "run_id",
+        "validation_time"
     }
 
     assert expectation_suite.meta["notes"] == {
@@ -439,6 +441,7 @@ def test_context_profiler(filesystem_csv_data_context):
     assert set(expectation_types) == expected_expectation_types
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     """
     A snapshot regression test for BasicSuiteBuilderProfiler.
@@ -490,8 +493,9 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
     del evrs.meta["run_id"]
     del evrs.meta["batch_kwargs"]["ge_batch_id"]
+    del evrs.meta["validation_time"]
 
-    assert expected_evrs == evrs
+    assert evrs == expected_evrs
 
 
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
@@ -1266,6 +1270,7 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_not_real_expectations_in_excl
         )
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuration():
     """
     A snapshot regression test for BasicSuiteBuilderProfiler.
@@ -1311,5 +1316,6 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuratio
     del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
     del evrs.meta["run_id"]
     del evrs.meta["batch_kwargs"]["ge_batch_id"]
+    del evrs.meta["validation_time"]
 
-    assert expected_evrs == evrs
+    assert evrs == expected_evrs

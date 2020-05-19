@@ -2,6 +2,7 @@ branches:
   only:
   - master
   - develop
+  - v0.11.x
   - "/^\\d.*/"
 language: python
 cache: pip
@@ -16,9 +17,9 @@ env:
 stages:
   - name: test
   - name: deploy
-    if: branch = master AND type != pull_request
+    if: (branch = master AND type != pull_request) OR (branch = v0.11.x AND type != pull_request)
   - name: experimental
-    if: branch != master AND head_branch != release-prep
+    if: branch != master AND branch != v0.11.x AND head_branch != release-prep
 jobs:
   allow_failures:
     - if: os = windows OR os = osx
@@ -97,12 +98,13 @@ jobs:
   - stage: deploy
     python: 3.6
     script:
-      - git tag --annotate 0.10.9 -m "0.10.9" || echo "tag exists, skipping"
+      - git tag --annotate 0.11.0b0 -m "0.11.0b0" || echo "tag exists, skipping"
     deploy:
       provider: pypi
       edge: true
       on:
-        branch: master
+        all_branches: true
+        condition: $TRAVIS_BRANCH =~ ^(master|v0.11.x)$
       distributions: sdist bdist_wheel
       skip_existing: true
       username: __token__

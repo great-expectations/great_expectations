@@ -5,9 +5,13 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.util import cli_message
-from great_expectations.core.usage_statistics.usage_statistics import (
-    send_usage_message,
-)
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.cli.upgrade_helpers import UpgradeHelperV11
+from great_expectations import __version__ as ge_version
+
+GE_UPGRADE_HELPERS = {
+    "0.11": UpgradeHelperV11
+}
 
 
 @click.group()
@@ -39,6 +43,26 @@ def project_check_config(directory):
         sys.exit(1)
 
     cli_message("<green>Your config file appears valid!</green>")
+
+
+# @project.command(name="upgrade")
+# @click.option(
+#     "--directory",
+#     "-d",
+#     default="./great_expectations",
+#     help="The project's great_expectations directory.",
+# )
+# def project_upgrade(directory):
+#     """Upgrade a project after installing the next Great Expectations major version."""
+#     cli_message("Migrating your project...\n")
+#     try:
+#         upgrade_helper = GE_UPGRADE_HELPERS.get(ge_version[:4])
+#         context = DataContext(context_root_dir=directory)
+#         upgrade_helper(context).upgrade_project()
+#     except Exception as e:
+#         cli_message("BLARGH!!!!!!!:\n")
+#         cli_message("<red>{}</red>".format(e.message))
+#         sys.exit(1)
 
 
 def do_config_check(target_directory):

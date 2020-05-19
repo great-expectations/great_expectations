@@ -6,18 +6,6 @@
   {% set static_fonts_dir = "./static/fonts/" -%}
 {% endif %}
 
-@font-face {
-  font-family: HKGroteskPro;
-  src: url("{{ static_fonts_dir +  'HKGrotesk/HKGrotesk-Regular.otf'}}");
-  font-weight: normal;
-}
-
-@font-face {
-  font-family: HKGrotesk-Light;
-  src: url("{{ static_fonts_dir +  'HKGrotesk/HKGrotesk-Light.otf'}}");
-  font-weight: 300;
-}
-
 body {
   position: relative;
 }
