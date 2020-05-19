@@ -14,7 +14,10 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.mark import Mark as mark
-from great_expectations.cli.python_subprocess import execute_shell_command
+from great_expectations.cli.python_subprocess import (
+    execute_shell_command,
+    execute_shell_command_with_progress_polling,
+)
 from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
@@ -395,22 +398,13 @@ def load_library(pip_library_name: str, python_import_name: str) -> bool:
         python_import_name (str): a module to import to verify installation
     """
     # TODO[Taylor+Alex] integration tests
-    # TODO[Alex] other databases
-    # TODO[Alex] change loggers to more appropriate level
-    logger.critical(f"running load_library for {pip_library_name}")
-
-    loadable_first_attempt: bool = _is_library_loadable(python_import_name)
-    if loadable_first_attempt:
-        logger.critical(f"loadable first: {loadable_first_attempt}")
+    if _is_library_loadable(python_import_name):
         return True
 
-    status_code: int = execute_shell_command(f"pip install {pip_library_name}")
-    logger.critical(f"status: {status_code}")
-
-    loadable_second_attempt: bool = _is_library_loadable(python_import_name)
-    logger.critical(f"loadable second: {loadable_second_attempt}")
-
-    if not (status_code == 0 and loadable_second_attempt):
+    status_code: int = execute_shell_command_with_progress_polling(
+        f"pip install {pip_library_name}"
+    )
+    if not (status_code == 0 and _is_library_loadable(python_import_name)):
         cli_message(
             f"""<red>ERROR: Great Expectations relies on the library `{pip_library_name}` to connect to your data.</red>
   - Please `pip install {pip_library_name}` before trying again."""
