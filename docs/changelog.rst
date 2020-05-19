@@ -6,6 +6,7 @@ Changelog
 
 develop
 -----------------
+* [DOCS] Improved help for CLI `checkpoint` command
 * [BUGFIX] BasicSuiteBuilderProfiler could include extra expectations when only some expectations were selected (#1422)
 * [FEATURE] add support for `expect_multicolumn_values_to_be_unique` to `Spark`. Thanks @WilliamWsyHK!
 * [ENHANCEMENT] Allow a dictionary of variables can be passed to the DataContext constructor to allow override 
@@ -16,6 +17,7 @@ develop
 -----------------
 * Bugfix: build_data_docs list_keys for GCS returns keys and when empty a more user friendly message
 * ENHANCEMENT: Enable Redshift Quantile Profiling
+
 
 0.10.10
 -----------------
