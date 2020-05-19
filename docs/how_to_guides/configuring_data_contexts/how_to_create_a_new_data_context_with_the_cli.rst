@@ -1,9 +1,11 @@
 .. _how_to_guides__configuring_data_contexts__how_to_create_a_new_data_context_with_the_cli:
 
-.. warning:: This doc is a stub.
-
 How to create a new Data Context with the CLI
 =============================================
+
+.. admonition:: Admonition from Mr. Dickens
+
+    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
 
 This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
 
