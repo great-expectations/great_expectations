@@ -20,7 +20,7 @@ code
 ----
 
 * **Methods are almost always named using snake_case.**
-* **Methods that behave as operators (e.g. comparison or equality) are named using camelCase**. These methods are rare and should be changed with great caution. Please reach out to James Campbell if you see the need for a change of this kind.
+* **Methods that behave as operators (e.g. comparison or equality) are named using camelCase**. These methods are rare and should be changed with great caution. Please reach out to us if you see the need for a change of this kind.
 * **Experimental methods should log an experimental warning when called**: "Warning: some_method is experimental. Methods, APIs, and core behavior may change in the future."
 * **Experimental classes should log an experimental warning when initialized**: "Warning: great_expectations.some_module.SomeClass is experimental. Methods, APIs, and core behavior may change in the future."
 * **Docstrings are highly recommended**. We use the Sphinx's `Napoleon extension <http://www.sphinx-doc.org/en/master/ext/napoleon.html>`__ to build documentation from Google-style docstrings.
