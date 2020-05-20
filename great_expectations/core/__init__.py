@@ -335,6 +335,7 @@ class RunIdentifier(DataContextKey):
     def from_fixed_length_tuple(cls, tuple_):
         return cls(tuple_[0], tuple_[1])
 
+
 class RunIdentifierSchema(Schema):
     run_name = fields.Str()
     run_time = fields.DateTime(format="iso")
