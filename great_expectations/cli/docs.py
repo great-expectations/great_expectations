@@ -135,7 +135,7 @@ def build_docs(context, site_name=None, view=True):
         site_names = None
     index_page_locator_infos = context.build_data_docs(site_names=site_names, dry_run=True)
 
-    msg = "The following Data Docs sites will be built:\n"
+    msg = "\nThe following Data Docs sites will be built:\n\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
         if os.path.isfile(index_page_locator_info):
             msg += " - <cyan>{}:</cyan> ".format(site_name)
@@ -149,7 +149,7 @@ def build_docs(context, site_name=None, view=True):
     cli_message(msg)
     toolkit.confirm_proceed_or_exit()
 
-    cli_message("Building Data Docs...")
+    cli_message("\nBuilding Data Docs...\n")
     index_page_locator_infos = context.build_data_docs(site_names=site_names)
 
     cli_message("Done building Data Docs")

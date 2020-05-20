@@ -312,11 +312,6 @@ def _suite_new(suite: str, directory: str, empty: bool, jupyter: bool, view: boo
             open_docs=view,
         )
         if success:
-            cli_message(
-                "A new Expectation Suite '{}' was added to your project".format(
-                    suite_name
-                )
-            )
             if empty:
                 if jupyter:
                     cli_message(

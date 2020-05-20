@@ -14,7 +14,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext, rtd_url_ge_version
 from great_expectations.cli import toolkit
 from great_expectations.cli.docs import build_docs
-from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
+from great_expectations.cli.cli_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core import ExpectationSuite
@@ -1230,7 +1230,7 @@ Enter the path (relative or absolute) of the root directory where the data files
 """
 
 msg_prompt_datasource_name = """
-Give your new data source a short name.
+Give your new Datasource a short name.
 """
 
 msg_db_config = """

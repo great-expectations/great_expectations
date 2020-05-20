@@ -10,7 +10,7 @@ GREETING = """<cyan>\
              ~ Always know what to expect from your data ~             
 </cyan>"""
 
-LETS_BEGIN_PROMPT = """In a few minutes you will see Great Expectations in action on your data!
+LETS_BEGIN_PROMPT = """Let's configure a new Data Context.
 
 First, Great Expectations will create a new directory:
 
@@ -75,3 +75,7 @@ NO_DATASOURCES_FOUND = """<red>Error: No datasources were found.</red> Please ad
 """.format(DataContext.GE_YML)
 
 SETUP_SUCCESS = "\n<cyan>Congratulations! Great Expectations is now set up.</cyan>"
+
+SECTION_SEPARATOR = "\n================================================================================\n"
+
+DONE = "Done"

@@ -9,7 +9,7 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.datasource import \
     add_datasource as add_datasource_impl
 from great_expectations.cli.docs import build_docs
-from great_expectations.cli.init_messages import (
+from great_expectations.cli.cli_messages import (
     BUILD_DOCS_PROMPT,
     GREETING,
     LETS_BEGIN_PROMPT,
@@ -22,6 +22,7 @@ from great_expectations.cli.init_messages import (
     SLACK_SETUP_INTRO,
     SLACK_SETUP_PROMPT,
     SLACK_WEBHOOK_PROMPT,
+    SECTION_SEPARATOR
 )
 from great_expectations.cli.util import cli_message, is_sane_slack_webhook
 from great_expectations.exceptions import (
@@ -115,7 +116,8 @@ def init(target_directory, view, usage_stats):
         else:
             datasources = context.list_datasources()
             if len(datasources) == 0:
-                if not click.confirm("\nWould you like to configure a Datasource?", default=True):
+                cli_message(SECTION_SEPARATOR)
+                if not click.confirm("Would you like to configure a Datasource?", default=True):
                     cli_message("Okay, bye!")
                     sys.exit(1)
                 datasource_name, data_source_type = add_datasource_impl(context, choose_one_data_asset=False)
@@ -126,19 +128,17 @@ def init(target_directory, view, usage_stats):
             if len(datasources) == 1:
                 datasource_name = datasources[0]["name"]
 
-                if not click.confirm("\nWould you like to profile new Expectations for a single data asset within your new Datasource?", default=True):
+                cli_message(SECTION_SEPARATOR)
+                if not click.confirm("Would you like to profile new Expectations for a single data asset within your new Datasource?", default=True):
                     cli_message("Okay, bye!")
                     sys.exit(1)
 
                 success, suite_name, profiling_results = toolkit.create_expectation_suite(context, datasource_name=datasource_name,
                                                                     additional_batch_kwargs={"limit": 1000},
                                                                     flag_build_docs=False, open_docs=False)
-                if success:
-                    cli_message(
-                        "A new Expectation Suite '{}' was added to your project".format(suite_name)
-                    )
 
-                if not click.confirm("\nWould you like to build Data Docs?", default=True):
+                cli_message(SECTION_SEPARATOR)
+                if not click.confirm("Would you like to build Data Docs?", default=True):
                     cli_message("Okay, bye!")
                     sys.exit(1)
 
@@ -149,6 +149,7 @@ def init(target_directory, view, usage_stats):
                     sys.exit(1)
                 toolkit.attempt_to_open_validation_results_in_data_docs(context, profiling_results)
 
+                cli_message(SECTION_SEPARATOR)
                 cli_message(SETUP_SUCCESS)
                 sys.exit(0)
     except (

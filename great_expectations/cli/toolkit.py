@@ -161,6 +161,8 @@ Great Expectations will store these expectations in a new Expectation Suite '{0:
     )
     if not profiling_results["success"]:
         _raise_profiling_errors(profiling_results)
+
+    cli_message("\nDone generating example Expectation Suite")
     return profiling_results
 
 
