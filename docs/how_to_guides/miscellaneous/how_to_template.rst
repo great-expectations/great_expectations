@@ -37,12 +37,12 @@ Here's a pinch of connecting text.
     batch.expect_table_row_count_to_be_between(min_value=2000, max_value=5000)
 
 
-Additional Notes
+Additional notes
 ----------------
 
 How-to guides are not about teaching or explanation. They are about providing clear, bite-sized replication steps. If you **must** include a longer explanation, it should go in this section.
 
-Additional Resources
+Additional resources
 --------------------
 
 - `Links in RST <https://docutils.sourceforge.io/docs/user/rst/quickref.html#hyperlink-targets>`_ are a pain.

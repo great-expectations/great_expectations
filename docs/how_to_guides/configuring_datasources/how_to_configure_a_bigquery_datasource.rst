@@ -21,8 +21,8 @@ To add a BigQuery datasource do this:
 6. Should you need to modify your connection string you can manually edit the
    ``great_expectations/uncommitted/config_variables.yml`` file.
 
-Custom Queries with SQL datasource
-==================================
+Custom queries with a SQL Datasource
+------------------------------------
 
 While other backends use temporary tables to generate batches of data from
 custom queries, BigQuery does not support ephemeral temporary tables. As a
@@ -50,8 +50,8 @@ If a default BigQuery dataset is not defined in the connection string
 is supplied, then custom queries will fail.
 
 
-Additional Notes
-=================
+Additional notes
+----------------
 
 Follow the `Google Cloud library guide <https://googleapis.dev/python/google-api-core/latest/auth.html>`_
 for authentication.
