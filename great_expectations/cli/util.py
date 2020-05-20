@@ -1,4 +1,13 @@
+import importlib
 import re
+import sys
+from types import ModuleType
+from typing import Union
+
+from great_expectations.cli.python_subprocess import (
+    execute_shell_command_with_progress_polling,
+)
+from great_expectations.util import get_module_object, import_library_module
 
 try:
     from termcolor import colored
@@ -106,3 +115,60 @@ def is_sane_slack_webhook(url):
         return False
 
     return url.strip().startswith("https://hooks.slack.com/")
+
+
+def is_library_loadable(library_name: str) -> bool:
+    module_obj: Union[ModuleType, None] = import_library_module(
+        module_name=library_name
+    )
+    return module_obj is not None
+
+
+def library_install_load_check(
+    python_import_name: str, pip_library_name: str
+) -> Union[int, None]:
+    """
+    Dynamically load a module from strings, attempt a pip install or raise a helpful error.
+
+    :return: True if the library was loaded successfully, False otherwise
+
+    Args:
+        pip_library_name: name of the library to load
+        python_import_name (str): a module to import to verify installation
+    """
+    # TODO[Taylor+Alex] integration tests
+    if is_library_loadable(library_name=python_import_name):
+        return None
+
+    status_code: int = execute_shell_command_with_progress_polling(
+        f"pip install {pip_library_name}"
+    )
+    library_loadable: bool = is_library_loadable(library_name=python_import_name)
+
+    if status_code == 0 and library_loadable:
+        return 0
+
+    cli_message(
+        f"""<red>ERROR: Great Expectations relies on the library `{pip_library_name}` to connect to your data.</red>
+- Please `pip install {pip_library_name}` before trying again."""
+    )
+    if status_code == 0 or status_code is None:
+        return 1
+
+    return status_code
+
+
+def reload_modules_containing_pattern(pattern: str = None) -> None:
+    for module_name in get_ge_module_names():
+        module_obj = get_module_object(module_name=module_name, pattern=pattern)
+        if module_obj is not None:
+            _ = importlib.reload(module_obj)
+
+
+def get_ge_module_names() -> list:
+    module_name: str
+    return [
+        module_name
+        for module_name in sys.modules.keys()
+        if module_name.split(".")[0] == "great_expectations"
+    ]

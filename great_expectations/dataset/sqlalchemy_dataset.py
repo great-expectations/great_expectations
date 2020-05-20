@@ -39,6 +39,7 @@ except ImportError:
     WithinGroup = Any
 
 try:
+    import psycopg2
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
 except ImportError:
     sqlalchemy_psycopg2 = None

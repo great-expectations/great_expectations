@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class ExpectationSuiteIdentifier(DataContextKey):
     def __init__(self, expectation_suite_name: str):
-        super(ExpectationSuiteIdentifier, self).__init__()
+        super().__init__()
         if not isinstance(expectation_suite_name, str):
             raise InvalidDataContextKeyError(
                 f"expectation_suite_name must be a string, not {type(expectation_suite_name).__name__}"
@@ -50,7 +50,7 @@ class ExpectationSuiteIdentifierSchema(Schema):
 
 class BatchIdentifier(DataContextKey):
     def __init__(self, batch_identifier):
-        super(BatchIdentifier, self).__init__()
+        super().__init__()
         # batch_kwargs
         # if isinstance(batch_identifier, (BatchKwargs, dict)):
         #     self._batch_identifier = batch_identifier.batch_fingerprint
@@ -91,7 +91,7 @@ class ValidationResultIdentifier(DataContextKey):
                 identifying information for the fully qualified expectation suite used to validate
             run_id (str): The run_id for which validation occurred
         """
-        super(ValidationResultIdentifier, self).__init__()
+        super().__init__()
         self._expectation_suite_identifier = expectation_suite_identifier
         self._run_id = run_id
         self._batch_identifier = batch_identifier

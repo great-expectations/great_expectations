@@ -1,7 +1,11 @@
 import importlib
+import inspect
 import json
 import logging
 import os
+import re
+from types import ModuleType
+from typing import Union
 
 import black
 from great_expectations.core import expectationSuiteSchema
@@ -9,19 +13,56 @@ from great_expectations.core import expectationSuiteSchema
 logger = logging.getLogger(__name__)
 
 
-def verify_dynamic_loading_support(module_name, package_name=None):
+def verify_dynamic_loading_support(module_name: str, package_name: str = None) -> None:
+    """
+    :param module_name: a possibly-relative name of a module
+    :param package_name: the name of a package, to which the given module belongs
+    """
     try:
-        module_spec = importlib.util.find_spec(module_name, package=package_name)
+        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(
+            module_name, package=package_name
+        )
     except ModuleNotFoundError:
         module_spec = None
     if not module_spec:
         if not package_name:
             package_name = ""
-        message = f"""No module named "{package_name + module_name}" could be found in the repository. Please \
+        message: str = f"""No module named "{package_name + module_name}" could be found in the repository. Please \
 make sure that the file, corresponding to this package and module, exists and that dynamic loading of code modules, \
 templates, and assets is supported in your execution environment.  This error is unrecoverable.
         """
         raise FileNotFoundError(message)
+
+
+def import_library_module(module_name: str) -> Union[ModuleType, None]:
+    module_obj: Union[ModuleType, None]
+    try:
+        module_obj = importlib.import_module(module_name)
+    except ModuleNotFoundError:
+        module_obj = None
+
+    return module_obj
+
+
+def get_module_object(module_name: str, pattern: str = None) -> Union[ModuleType, None]:
+    """
+    :param module_name: a fully-qualified name of a module (e.g., "great_expectations.dataset.sqlalchemy_dataset")
+    :param pattern: an optional non-compiled regular expression string to be required to match in the source code
+    :return: raw source code of the module (if can be retrieved)
+    """
+    module_obj: Union[ModuleType, None] = import_library_module(module_name=module_name)
+    if module_obj is None:
+        return None
+    try:
+        module_source_code: str = inspect.getsource(module_obj)
+        if pattern is None:
+            return module_obj
+        regex_pattern: re.Pattern = re.compile(pattern)
+        if regex_pattern.match(module_source_code):
+            return module_obj
+        return None
+    except OSError as e:
+        return None
 
 
 def load_class(class_name, module_name):

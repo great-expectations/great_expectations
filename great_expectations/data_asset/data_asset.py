@@ -69,7 +69,7 @@ class DataAsset(object):
                 "Autoinspect_func is no longer supported; use a profiler instead (migration is easy!).",
                 category=DeprecationWarning,
             )
-        super(DataAsset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._config = {"interactive_evaluation": interactive_evaluation}
         self._initialize_expectations(
             expectation_suite=expectation_suite,

@@ -1,11 +1,11 @@
 import enum
-import importlib
 import json
 import logging
 import os
 import platform
 import sys
 import uuid
+from typing import Union
 
 import click
 import great_expectations.exceptions as ge_exceptions
@@ -14,11 +14,12 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.mark import Mark as mark
-from great_expectations.cli.python_subprocess import (
-    execute_shell_command,
-    execute_shell_command_with_progress_polling,
+from great_expectations.cli.util import (
+    cli_message,
+    cli_message_dict,
+    library_install_load_check,
+    reload_modules_containing_pattern,
 )
-from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.datasource import (
@@ -379,47 +380,21 @@ def _add_pandas_datasource(
     return datasource_name
 
 
-def _is_library_loadable(library_name: str) -> bool:
-    try:
-        _ = importlib.import_module(library_name)
-        return True
-    except ModuleNotFoundError:
-        return False
-
-
-def load_library(pip_library_name: str, python_import_name: str) -> bool:
-    """
-    Dynamically load a module from strings, attempt a pip install or raise a helpful error.
-
-    :return: True if the library was loaded successfully, False otherwise
-
-    Args:
-        pip_library_name: name of the library to load
-        python_import_name (str): a module to import to verify installation
-    """
-    # TODO[Taylor+Alex] integration tests
-    if _is_library_loadable(python_import_name):
-        return True
-
-    status_code: int = execute_shell_command_with_progress_polling(
-        f"pip install {pip_library_name}"
-    )
-    if not (status_code == 0 and _is_library_loadable(python_import_name)):
-        cli_message(
-            f"""<red>ERROR: Great Expectations relies on the library `{pip_library_name}` to connect to your data.</red>
-  - Please `pip install {pip_library_name}` before trying again."""
-        )
-        return False
-
-    return True
-
-
 def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
     msg_success_database = (
         "\n<green>Great Expectations connected to your database!</green>"
     )
 
-    if not load_library("sqlalchemy", "sqlalchemy"):
+    library_status_code: Union[int, None]
+
+    library_status_code = library_install_load_check(
+        python_import_name="sqlalchemy", pip_library_name="sqlalchemy"
+    )
+    if library_status_code == 0:
+        reload_modules_containing_pattern(
+            pattern=r"([^#]*import\s+sqlalchemy.*)|([^#]*from\s+.*sqlalchemy(\..*|_dataset|_datasource)?\s+import.*)"
+        )
+    elif library_status_code is not None:
         return None
 
     db_choices = [str(x) for x in list(range(1, 1 + len(SupportedDatabases)))]
@@ -457,30 +432,82 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
         cli_message(msg_db_config.format(datasource_name))
 
         if selected_database == SupportedDatabases.MYSQL:
-            if not load_library("pymysql", "pymysql"):
+            library_status_code = library_install_load_check(
+                python_import_name="pymysql", pip_library_name="pymysql"
+            )
+            if library_status_code == 0:
+                reload_modules_containing_pattern(pattern=r"[^#]*import\s+pymysql.*]")
+            elif library_status_code is not None:
                 return None
+
             credentials = _collect_mysql_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.POSTGRES:
-            if not load_library("psycopg2", "psycopg2"):
+            library_status_code = library_install_load_check(
+                python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
+                pip_library_name="psycopg2-binary",
+            )
+            if library_status_code == 0:
+                reload_modules_containing_pattern(
+                    pattern=r"[^#]*import\s+sqlalchemy\.dialects\.postgresql\.psycopg2.*"
+                )
+            elif library_status_code is not None:
                 return None
+
             credentials = _collect_postgres_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.REDSHIFT:
-            if not load_library("psycopg2", "psycopg2"):
+            library_status_code = library_install_load_check(
+                python_import_name="psycopg2", pip_library_name="psycopg2-binary"
+            )
+            if library_status_code == 0:
+                reload_modules_containing_pattern(pattern=r"[^#]*import\s+psycopg2.*")
+            elif library_status_code is not None:
                 return None
+
+            library_status_code = library_install_load_check(
+                python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
+                pip_library_name="psycopg2-binary",
+            )
+            if library_status_code == 0:
+                reload_modules_containing_pattern(
+                    pattern=r"[^#]*import\s+sqlalchemy\.dialects\.postgresql\.psycopg2.*"
+                )
+            elif library_status_code is not None:
+                return None
+
+            library_status_code = library_install_load_check(
+                python_import_name="sqlalchemy_redshift.dialect",
+                pip_library_name="sqlalchemy-redshift",
+            )
+            if library_status_code == 0:
+                reload_modules_containing_pattern(
+                    pattern=r"[^#]*import\s+sqlalchemy_redshift\.dialect.*"
+                )
+
             credentials = _collect_redshift_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.SNOWFLAKE:
-            if not load_library(
-                pip_library_name="snowflake-sqlalchemy",
+            library_status_code = library_install_load_check(
                 python_import_name="snowflake.sqlalchemy.snowdialect",
-            ):
+                pip_library_name="snowflake-sqlalchemy",
+            )
+            if library_status_code == 0:
+                reload_modules_containing_pattern(
+                    pattern=r"[^#]*import\s+snowflake\.sqlalchemy\.snowdialect.*"
+                )
+            elif library_status_code is not None:
                 return None
 
             credentials = _collect_snowflake_credentials(
                 default_credentials=credentials
             )
         elif selected_database == SupportedDatabases.BIGQUERY:
-            if not load_library("pybigquery", "pybigquery"):
+            library_status_code = library_install_load_check(
+                python_import_name="pybigquery", pip_library_name="pybigquery"
+            )
+            if library_status_code == 0:
+                reload_modules_containing_pattern(pattern=r"[^#]*import\s+pybigquery.*")
+            elif library_status_code is not None:
                 return None
+
             credentials = _collect_bigquery_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.OTHER:
             sqlalchemy_url = click.prompt(
@@ -750,7 +777,14 @@ def _collect_redshift_credentials(default_credentials=None):
 def _add_spark_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
-    if not load_library("pyspark",):
+    library_status_code: Union[int, None] = library_install_load_check(
+        python_import_name="pyspark", pip_library_name="pyspark"
+    )
+    if library_status_code == 0:
+        reload_modules_containing_pattern(
+            pattern=r"([^#]*import\s+pyspark.*)|([^#]*from\s+.*pyspark(\..*)?\s+import.*)"
+        )
+    elif library_status_code is not None:
         return None
 
     if passthrough_generator_only:
