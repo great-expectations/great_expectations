@@ -342,6 +342,7 @@ class BaseDataContext(object):
             config=config,
             runtime_environment={
                 "data_context": self,
+                "name": validation_operator_name,
             },
             config_defaults={
                 "module_name": module_name
