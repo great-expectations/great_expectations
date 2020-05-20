@@ -50,6 +50,7 @@ class UpgradeHelperV11:
             TupleS3StoreBackend: self._update_tuple_s3_store_backend_run_id,
             TupleGCSStoreBackend: self._update_tuple_gcs_store_backend_run_id
         }
+        self._generate_upgrade_checklist()
 
     def _generate_upgrade_checklist(self):
         for (store_name, store) in self.data_context.stores.items():
