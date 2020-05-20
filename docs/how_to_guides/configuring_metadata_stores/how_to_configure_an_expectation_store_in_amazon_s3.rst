@@ -1,7 +1,7 @@
-.. _how_to_guides__validation__how_to_implement_a_custom_validation_operator:
+.. _how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_amazon_s3:
 
-How to implement a custom Validation Operator
-=============================================
+How to configure an Expectation store in Amazon S3
+==================================================
 
 .. admonition:: Admonition from Mr. Dickens
 

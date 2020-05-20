@@ -55,15 +55,12 @@ This is an example of invoking an instance of a Validation Operator from Python:
 
     results = context.run_validation_operator(
         assets_to_validate=[batch0, batch1, ...],
-        run_id=RunIdentifier(**{
-          "run_name": "some_string_that_uniquely_identifies_this_run",
-          "run_time": "2020-04-29T10:46:03.197008"  # optional run timestamp, defaults to current UTC datetime
-        }),  # you may also pass in a dictionary with run_name and run_time keys
+        run_id="some_string_that_uniquely_identifies_this_run",
         validation_operator_name="perform_action_list_operator",
     )
 
 * `assets_to_validate` - an iterable that specifies the data assets that the operator will validate. The members of the list can be either batches or triples that will allow the operator to fetch the batch: (data_asset_name, expectation_suite_name, batch_kwargs) using this method: :py:meth:`~great_expectations.data_context.BaseDataContext.get_batch`
-* run_id - pipeline run id of type RunIdentifier, consisting of a run_time and run_name string that is meaningful to you and will help you refer to the result of this operation later
+* run_id - pipeline run id, a timestamp or any other string that is meaningful to you and will help you refer to the result of this operation later
 * validation_operator_name you can instances of a class that implements a Validation Operator
 
 The `run` method returns an object that looks like this:
@@ -73,7 +70,7 @@ The `run` method returns an object that looks like this:
     {
         'success: True/False, (True if all validations are successful)
         'details': {
-            great_expectations.data_context.types.ExpectationSuiteIdentifier:
+            great_expectations.data_context.types.ExpectationSuiteIdentifier: 
                 {
                 'validation_result': :ref:validation_result
                 'actions_results':

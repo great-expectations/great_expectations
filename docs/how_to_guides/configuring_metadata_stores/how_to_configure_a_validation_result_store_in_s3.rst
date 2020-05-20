@@ -1,7 +1,7 @@
-.. _how_to_guides__validation__how_to_implement_a_custom_validation_operator:
+.. _how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_s3:
 
-How to implement a custom Validation Operator
-=============================================
+How to configure a Validation Result store in S3
+================================================
 
 .. admonition:: Admonition from Mr. Dickens
 

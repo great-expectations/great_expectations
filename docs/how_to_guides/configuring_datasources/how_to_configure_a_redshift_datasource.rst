@@ -1,8 +1,7 @@
-.. _redshift:
+.. _how_to_guides__configuring_datasources__how_to_configure_a_redshift_datasource::
 
-######################################
 How to configure a Redshift Datasource
-######################################
+======================================
 
 To add a Redshift datasource do this:
 
@@ -25,8 +24,8 @@ To add a Redshift datasource do this:
 6. Should you need to modify your connection string you can manually edit the
    ``great_expectations/uncommitted/config_variables.yml`` file.
 
-Additional Notes
-=================
+Additional notes
+----------------
 
 Depending on your Redshift cluster configuration, you may or may not need the
 ``sslmode`` parameter at the end of the connection url. You can delete everything

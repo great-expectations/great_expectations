@@ -1,7 +1,7 @@
-.. _how_to_guides__validation__how_to_implement_a_custom_validation_operator:
+.. _how_to_guides__creating_batches__how_to_load_a_spark_dataframe_as_a_batch:
 
-How to implement a custom Validation Operator
-=============================================
+How to load a Spark dataframe as a batch
+========================================
 
 .. admonition:: Admonition from Mr. Dickens
 

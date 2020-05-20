@@ -4,7 +4,7 @@ Configuring Datasources
 ===================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :glob:
 
    /how_to_guides/configuring_datasources/*

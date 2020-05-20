@@ -1,7 +1,7 @@
-.. _how_to_guides__validation__how_to_implement_a_custom_validation_operator:
+.. _how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_gcs:
 
-How to implement a custom Validation Operator
-=============================================
+How to host and share Data Docs on GCS
+======================================
 
 .. admonition:: Admonition from Mr. Dickens
 

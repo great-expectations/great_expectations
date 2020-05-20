@@ -1,7 +1,7 @@
-.. _how_to_guides__validation__how_to_implement_a_custom_validation_operator:
+.. _how_to_guides__configuring_datasources__how_to_configure_a_self_managed_spark_datasource:
 
-How to implement a custom Validation Operator
-=============================================
+How to configure a self managed Spark Datasource
+================================================
 
 .. admonition:: Admonition from Mr. Dickens
 
