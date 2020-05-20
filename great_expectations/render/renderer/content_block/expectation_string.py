@@ -1762,8 +1762,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             table_rows.append(
                 [
                     quantile_string if quantile_string else "{:3.2f}".format(quantile),
-                    str(value_ranges[idx][0]) if value_ranges[idx][0] else "Any",
-                    str(value_ranges[idx][1]) if value_ranges[idx][1] else "Any",
+                    str(value_ranges[idx][0]) if value_ranges[idx][0] is not None else "Any",
+                    str(value_ranges[idx][1]) if value_ranges[idx][1] is not None else "Any",
                 ]
             )
 
