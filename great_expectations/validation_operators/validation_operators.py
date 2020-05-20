@@ -1,7 +1,11 @@
 import datetime
 import logging
+import warnings
 from collections import OrderedDict
 
+from dateutil.parser import ParserError, parse
+
+from great_expectations.core import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.resource_identifiers import (
     BatchIdentifier,
@@ -67,7 +71,7 @@ class ValidationOperator(object):
 
         raise NotImplementedError
 
-    def run(self, assets_to_validate, run_id, evaluation_parameters=None):
+    def run(self, assets_to_validate, run_id=None, evaluation_parameters=None, run_name=None, run_time=None):
         raise NotImplementedError
 
 
@@ -178,7 +182,24 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch
 
-    def run(self, assets_to_validate, run_id, evaluation_parameters=None):
+    def run(self, assets_to_validate, run_id=None, evaluation_parameters=None, run_name=None, run_time=None):
+        assert not (run_id and run_name) and not (run_id and run_time), \
+            "Please provide either a run_id or run_name and/or run_time."
+        if isinstance(run_id, str) and not run_name:
+            warnings.warn("String run_ids will be deprecated in the future. Please provide a run_id of type "
+                          "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
+                          "and run_time (both optional). Instead of providing a run_id, you may also provide"
+                          "run_name and run_time separately.", DeprecationWarning)
+            try:
+                run_time = parse(run_id)
+            except ParserError:
+                pass
+            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
+        elif isinstance(run_id, dict):
+            run_id = RunIdentifier(**run_id)
+        elif not isinstance(run_id, RunIdentifier):
+            run_id = RunIdentifier(run_name=run_name, run_time=run_time)
+
         run_results = {}
 
         for item in assets_to_validate:
@@ -387,11 +408,12 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         return self._validation_operator_config
 
     def _build_slack_query(self, validation_operator_result: ValidationOperatorResult):
-        timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
         success = validation_operator_result.success
         status_text = "Success :tada:" if success else "Failed :x:"
         run_id = validation_operator_result.run_id
-        batch_identifiers = validation_operator_result.batch_identifiers
+        run_name = run_id.run_name
+        run_time = run_id.run_time.strftime("%x %X")
+        batch_identifiers = validation_operator_result.list_batch_identifiers()
         failed_data_assets_msg_strings = []
 
         run_results = validation_operator_result.run_results
@@ -448,17 +470,26 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             }
             query["blocks"].append(failed_data_assets_element)
 
-        run_id_element = {
+        run_name_element = {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*Run ID:* {}".format(run_id),},
+            "text":
+                {
+                    "type": "mrkdwn",
+                    "text": "*Run Name:* {}".format(run_name),
+                }
         }
-        query["blocks"].append(run_id_element)
+        query["blocks"].append(run_name_element)
 
-        timestamp_element = {
+        run_time_element = {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*Timestamp:* {}".format(timestamp),},
+            "text":
+                {
+                    "type": "mrkdwn",
+                    "text": "*Run Time:* {}".format(run_time),
+                }
         }
-        query["blocks"].append(timestamp_element)
+        query["blocks"].append(run_time_element)
+
         query["blocks"].append(divider_block)
 
         documentation_url = "https://docs.greatexpectations.io/en/latest/reference/validation_operators/warning_and_failure_expectation_suites_validation_operator.html"
@@ -480,10 +511,29 @@ class WarningAndFailureExpectationSuitesValidationOperator(
     def run(
         self,
         assets_to_validate,
-        run_id,
+        run_id=None,
         base_expectation_suite_name=None,
         evaluation_parameters=None,
+        run_name=None,
+        run_time=None
     ):
+        assert not (run_id and run_name) and not (run_id and run_time), \
+            "Please provide either a run_id or run_name and/or run_time."
+        if isinstance(run_id, str) and not run_name:
+            warnings.warn("String run_ids will be deprecated in the future. Please provide a run_id of type "
+                          "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
+                          "and run_time (both optional). Instead of providing a run_id, you may also provide"
+                          "run_name and run_time separately.", DeprecationWarning)
+            try:
+                run_time = parse(run_id)
+            except ParserError:
+                pass
+            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
+        elif isinstance(run_id, dict):
+            run_id = RunIdentifier(**run_id)
+        elif not isinstance(run_id, RunIdentifier):
+            run_id = RunIdentifier(run_name=run_name, run_time=run_time)
+
         if base_expectation_suite_name is None:
             if self.base_expectation_suite_name is None:
                 raise ValueError(
