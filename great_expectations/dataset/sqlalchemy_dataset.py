@@ -6,7 +6,7 @@ import warnings
 from datetime import datetime
 from functools import wraps
 from importlib import import_module
-from typing import List
+from typing import List, Any
 
 import numpy as np
 import pandas as pd
@@ -412,7 +412,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         super().__init__(*args, **kwargs)
 
     @property
-    def sql_engine_dialect(self) -> DefaultDialect:
+    def sql_engine_dialect(self) -> Any:
         return self.engine.dialect
 
     def attempt_allowing_relative_error(self):
@@ -607,7 +607,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     ):
         if self.sql_engine_dialect.name.lower() == "mssql":
             # mssql requires over(), so we add an empty over() clause
-            selects: List[WithinGroup] = [
+            selects = [
                 sa.func.percentile_disc(quantile)
                 .within_group(sa.column(column).asc())
                 .over()
@@ -615,12 +615,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ]
         elif self.sql_engine_dialect.name.lower() == "bigquery":
             # BigQuery does not support "WITHIN", so we need a special case for it
-            selects: List[WithinGroup] = [
+            selects: List = [
                 sa.func.percentile_disc(sa.column(column), quantile).over()
                 for quantile in quantiles
             ]
         else:
-            selects: List[WithinGroup] = [
+            selects: List = [
                 sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
                 for quantile in quantiles
             ]

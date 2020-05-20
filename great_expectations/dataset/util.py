@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import List
+from typing import List, Any
 
 import numpy as np
 import pandas as pd
@@ -575,7 +575,7 @@ def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs)
 
 
 def get_approximate_percentile_disc_sql(
-    selects: List[WithinGroup], sql_engine_dialect: DefaultDialect
+    selects: List, sql_engine_dialect: Any
 ) -> str:
     return ", ".join(
         [
@@ -591,8 +591,8 @@ def get_approximate_percentile_disc_sql(
 
 
 def check_sql_engine_dialect(
-    actual_sql_engine_dialect: DefaultDialect,
-    candidate_sql_engine_dialect: DefaultDialect,
+    actual_sql_engine_dialect: Any,
+    candidate_sql_engine_dialect: Any,
 ) -> bool:
     try:
         return isinstance(actual_sql_engine_dialect, candidate_sql_engine_dialect)
