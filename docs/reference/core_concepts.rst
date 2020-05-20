@@ -6,6 +6,8 @@ Core concepts
 #############
 
 
+.. _reference__core_concepts__expectations:
+
 *************
 Expectations
 *************
@@ -33,6 +35,9 @@ Suites should have names corresponding to the kind of data they define, like “
    /reference/core_concepts/expectations/glossary_of_expectations.rst
    /reference/core_concepts/expectations/implemented_expectations.rst
 
+
+.. _reference__core_concepts__data_contexts:
+
 *************
 Data Contexts
 *************
@@ -54,6 +59,9 @@ of data, such as ensuring that the number of rows in a downstream dataset equals
 
    /reference/core_concepts/data_context.rst
    /reference/core_concepts/evaluation_parameters.rst
+
+
+.. _reference__core_concepts__datasources:
 
 ***********
 Datasources
@@ -87,6 +95,9 @@ can also identify data assets and partitions by inspecting a storage environment
    /reference/core_concepts/datasource.rst
    /reference/core_concepts/datasource_reference.rst
    /reference/core_concepts/batch_kwargs_generator.rst
+
+
+.. _reference__core_concepts__validation:
 
 **********
 Validation
@@ -122,6 +133,9 @@ demonstrate the full potential of Great Expectations. They take configurable Act
    /reference/core_concepts/validation_result.rst
    /reference/core_concepts/metric_reference.rst
    /reference/core_concepts/metrics.rst
+
+
+.. _reference__core_concepts__data_docs:
 
 **************************
 Data Docs
