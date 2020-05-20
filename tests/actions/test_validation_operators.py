@@ -61,6 +61,7 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
     vo = WarningAndFailureExpectationSuitesValidationOperator(
         data_context=data_context,
         action_list=[],
+        name="test",
         slack_webhook="https://hooks.slack.com/services/test/slack/webhook"
     )
 
@@ -112,8 +113,9 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Batch Id List:* ['ge_batch_id=82a8de83-e063-11e9-8226-acde48001122', 'ge_batch_id=82a8de"
-                            "83-e063-11e9-8133-acde48001122', 'ge_batch_id=82a8de83-e063-11e9-a53d-acde48001122']"
+                    "text": "*Batch Id List:* ['ge_batch_id=82a8de83-e063-11e9-8133-acde48001122', "
+                              "'ge_batch_id=82a8de83-e063-11e9-8226-acde48001122', "
+                              "'ge_batch_id=82a8de83-e063-11e9-a53d-acde48001122']"
                 }
             },
             {
