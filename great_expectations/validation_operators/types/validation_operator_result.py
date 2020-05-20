@@ -244,8 +244,9 @@ class ValidationOperatorResult(DictDot):
                 validation_result_count - successful_validation_count
             )
             successful_validation_percent = (
-                successful_validation_count / validation_result_count
-            ) * 100
+                validation_result_count
+                and (successful_validation_count / validation_result_count) * 100
+            )
 
             self._statistics = {
                 "data_asset_count": data_asset_count,
