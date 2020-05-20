@@ -33,7 +33,7 @@ def test_cli_command_entrance(caplog):
 
   - great_expectations init : create a new great_expectations project
 
-  - great_expectations datasource profile : profile a  datasource
+  - great_expectations datasource profile : profile a datasource
 
   - great_expectations docs build : compile documentation from expectations
 

@@ -197,9 +197,16 @@ See the :ref:`validation_operators` for more information regarding configuring a
 Managing Environment and Secrets
 *****************************************
 
-In a DataContext configuration, values that should come from the runtime environment or secrets can be injected via
-a separate config file or using environment variables. Use the ``${var}`` syntax in a config file to specify a variable
-to be substituted.
+Values can be injected in a DataContext configuration file by using the
+``${var}`` syntax to specify a variable to be substituted.
+
+The injected value can come from three sources:
+
+1. A config variables file
+2. Environment variables
+3. A dictionary passed to the DataContext constructor.
+
+Each source above will override variables set in a previous source.
 
 Config Variables File
 ========================
@@ -249,6 +256,21 @@ Environment variables will be substituted into a DataContext config with higher 
 config variables file.
 
 **Note**: Substitution of environment variables is currently only supported in the great_expectations.yml, but not in a config variables file. See [this Discuss post](https://discuss.greatexpectations.io/t/environment-variable-substitution-is-not-working-for-me-when-connecting-ge-to-my-database/72) for an example.
+
+
+Passing Values To DataContext
+===============================
+
+A dictionary of values can be passed to a DataContext when it is instantiated.
+These values will override both values from the config variables file and
+from environment variables.
+
+.. code-block:: python
+
+  data_context = DataContext.create(runtime_environment={
+      'name_to_replace': 'replacement_value'
+    })
+
 
 ****************************************************
 Default Out of Box Config File
