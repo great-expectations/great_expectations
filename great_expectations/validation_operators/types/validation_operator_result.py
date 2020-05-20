@@ -1,12 +1,16 @@
+from copy import deepcopy
 from typing import Dict, List, Union
 
-from great_expectations.core import ExpectationSuiteValidationResult
+from great_expectations.core import (
+    ExpectationSuiteValidationResult,
+    convert_to_json_serializable,
+)
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.types import DictDot
-from marshmallow import Schema
+from marshmallow import Schema, fields, post_load, pre_dump
 
 
 class ValidationOperatorResult(DictDot):
@@ -266,3 +270,30 @@ class ValidationOperatorResult(DictDot):
                 for validation_result_identifier, run_result in self.run_results.items()
             }
         return self._validation_statistics
+
+    def to_json_dict(self):
+        return validationOperatorResultSchema.dump(self)
+
+
+class ValidationOperatorResultSchema(Schema):
+    run_id = fields.Str()
+    run_results = fields.Dict()
+    evaluation_parameters = fields.Dict(allow_none=True)
+    validation_operator_config = fields.Dict()
+    success = fields.Bool()
+
+    # noinspection PyUnusedLocal
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        data = deepcopy(data)
+        data._run_results = convert_to_json_serializable(data.run_results)
+        data._run_id = convert_to_json_serializable(data.run_id)
+        return data
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_expectation_suite_validation_result(self, data, **kwargs):
+        return ValidationOperatorResult(**data)
+
+
+validationOperatorResultSchema = ValidationOperatorResultSchema()
