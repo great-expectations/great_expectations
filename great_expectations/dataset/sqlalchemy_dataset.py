@@ -13,7 +13,6 @@ from dateutil.parser import parse
 
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
-
 from .dataset import Dataset
 from .pandas_dataset import PandasDataset
 
@@ -278,6 +277,25 @@ Documentation Completeness: Medium [doesn’t have “specific” how-to, but we
 Bug Risk: Low
 Expectation Completeness: Moderate+ (all sqlalchemy works)
 
+Bigquery
+	• API Stability: Unstable
+		○ Table generator inability to work with triple-dotted
+		○ Temp table usability
+		○ Init flow calls setup "other"
+	• Implementation Completeness
+	• Unit test: Partial
+		○ No test coverage for temp table creation, e.g.
+	• Infrastructure: Minimal (optional)
+	• Documentation: Partial
+		○ How-to does not cover all cases
+	• Bug frequency: Expected
+		○ We *know* of several bugs, including inability to list tables
+		○ Sqlalchemy URL incomplete
+Bug Frequency -> Bug Risk == H/M/L (footnote?)
+Thorough -> Complete
+Bug Frequency: "Expected" == "Expected and/or Known"
+Infrastructure test "Optional" == "minimal"
+
 Feature: redshift
 ->
 API Stability: Moderate [unresolved driver recommendation; potential metadata/introspection method special handling for performance]
@@ -299,7 +317,6 @@ Documentation Completeness:
 Bug Risk:
 Expectation Completeness:
 
-
 Feature: mssql
 -> Experimental
 API Stability: High
@@ -309,6 +326,37 @@ Infrastructure Coverage: Minimal [None]
 Documentation Completeness: Minimal
 Bug Risk: High
 Expectation Completeness: Low [some required queries do not generate properly, such as related to nullity]
+
+Feature: mysql
+-> experimental
+API Stability: Low [no consideration for temp tables]
+Implementation Completeness: Low [no consideration for temp tables]
+Unit Test Coverage: Minimal [None]
+Infrastructure Coverage: Minimal [None]
+Documentation Completeness:  Minimal [None]
+Bug Risk: [Unknown]
+Expectation Completeness: [Unknown]
+
+Feature: mariadb
+-> experimental
+API Stability: Low [no consideration for temp tables]
+Implementation Completeness: Low [no consideration for temp tables]
+Unit Test Coverage: Minimal [None]
+Infrastructure Coverage: Minimal [None]
+Documentation Completeness:  Minimal [None]
+Bug Risk: [Unknown]
+Expectation Completeness: [Unknown]
+
+
+Feature: validation_engine_sqlalchemy
+API Stability: High
+Implementation Completeness: Moderate [temp table handling / permissions not universal]
+Unit Test Coverage: High
+Infrastructure Coverage: N/A
+Documentation Completeness:  Minimal [None]
+Bug Risk: Low
+
+
 
     """
 

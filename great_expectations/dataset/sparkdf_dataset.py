@@ -11,7 +11,6 @@ from dateutil.parser import parse
 
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
-
 from .dataset import Dataset
 from .pandas_dataset import PandasDataset
 
@@ -350,6 +349,52 @@ class MetaSparkDFDataset(Dataset):
 class SparkDFDataset(MetaSparkDFDataset):
     """
     This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
+
+    Feature Maturity:
+    -> production
+    id: validation_engine_pyspark_self_managed
+    API Stability: stable
+    Implementation Completeness: moderate
+    Unit Test Coverage: complete
+    Integration/Infrastructure Coverage: N/A -> see relevant datasource evaluation
+    Documentation Completeness: complete
+    Bug Risk: low/moderate
+    Expectation Completeness: moderate
+
+    Feature Maturity:
+    -> beta
+    id: validation_engine_databricks
+    API Stability: stable
+    Implementation Completeness: low [dbfs-specific handling]
+    Unit Test Coverage: N/A -> implementation not different
+    Integration/Infrastructure Coverage: We've tested a bit, know others have used it
+    Documentation Completeness: moderate [need docs on managing project configuration via dbfs/etc]
+    Bug Risk: low/moderate
+    Expectation Completeness: moderate
+
+    Feature Maturity:
+    -> experimental
+    id: validation_engine_emr_spark
+    API Stability: stable
+    Implementation Completeness: Low [need to provide guidance on "known good" paths, and we know there are many "knobs" to tune that we have not explored/tested]
+    Unit Test Coverage: N/A -> implementation not different
+    Integration/Infrastructure Coverage: Unknown / rumor
+    Documentation Completeness: low [must install specific/latest version but do not have docs to that effect or of known useful paths]
+    Bug Risk: low/moderate
+    Expectation Completeness: moderate
+
+    Feature Maturity:
+    -> experimental
+    id: validation_engine_spark_other
+    API Stability: stable
+    Implementation Completeness: "other" means we haven't even tested possibility (e.g. known glue deployment)
+    Unit Test Coverage: N/A -> implementation not different
+    Integration/Infrastructure Coverage: Unknown / rumor
+    Documentation Completeness: low [must install specific/latest version but do not have docs to that effect or of known useful paths]
+    Bug Risk: low/moderate
+    Expectation Completeness: moderate
+
+
     """
 
     @classmethod

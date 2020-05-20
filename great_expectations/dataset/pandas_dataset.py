@@ -19,7 +19,6 @@ from great_expectations.dataset.util import (
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
 )
-
 from .dataset import Dataset
 
 logger = logging.getLogger(__name__)
@@ -324,6 +323,21 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
            property on the original data frame.
         2. Concatenations, joins, and merges of PandaDataSets contain NO expectations (since no autoinspection
            is performed by default).
+
+
+    Feature Maturity:
+    -> production
+    id: validation_engine_pandas
+    API Stability: stable
+    Implementation Completeness: complete
+    Unit Test Coverage: complete
+    Integration/Infrastructure Coverage: N/A -> see relevant datasource evaluation
+    Documentation Completeness: complete
+    Bug Risk: low
+    Expectation Completeness: complete
+
+
+
     """
 
     # this is necessary to subclass pandas in a proper way.
