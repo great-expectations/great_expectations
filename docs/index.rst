@@ -1,8 +1,5 @@
 .. great_expectations documentation master file
 
-.. image:: ../generic_dickens_protagonist.png
-   :align: right
-
 ##############################
 Welcome to Great Expectations!
 ##############################
@@ -16,16 +13,13 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
    :maxdepth: 2
 
    intro
-   getting_started
-   expectation_glossary
-   command_line
    tutorials
+   how_to_guides
    features
    reference
-   contributing
    community
+   contributing
    module_docs
-   changelog
 
 *****
 Index
