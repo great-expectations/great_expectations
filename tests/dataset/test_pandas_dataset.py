@@ -755,15 +755,14 @@ def test_expect_values_quantiles_to_be_between():
     used to be interpreted as None (and thus +-inf) and we'd get false negatives.
     """
     T = [
-        ([1, 2, 3, 4, 5], [.5], [[0, 0]], False),
-        ([0, 0, 0, 0, 0], [.5], [[0, 0]], True),
+        ([1, 2, 3, 4, 5], [0.5], [[0, 0]], False),
+        ([0, 0, 0, 0, 0], [0.5], [[0, 0]], True),
     ]
 
     for data, quantiles, value_ranges, success in T:
         df = ge.dataset.PandasDataset({"A": data})
 
-        validation = df.expect_column_quantile_values_to_be_between("A", {
-            "quantiles": quantiles,
-            "value_ranges": value_ranges,
-        })
+        validation = df.expect_column_quantile_values_to_be_between(
+            "A", {"quantiles": quantiles, "value_ranges": value_ranges,}
+        )
         assert validation.success is success

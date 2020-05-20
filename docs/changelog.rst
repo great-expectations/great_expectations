@@ -6,11 +6,14 @@ Changelog
 
 develop
 -----------------
+
+0.10.12
+-----------------
 * [DOCS] Improved help for CLI `checkpoint` command
 * [BUGFIX] BasicSuiteBuilderProfiler could include extra expectations when only some expectations were selected (#1422)
-* [FEATURE] add support for `expect_multicolumn_values_to_be_unique` and `expect_column_pair_values_A_to_be_greater_than_B` 
+* [FEATURE] add support for `expect_multicolumn_values_to_be_unique` and `expect_column_pair_values_A_to_be_greater_than_B`
   to `Spark`. Thanks @WilliamWsyHK!
-* [ENHANCEMENT] Allow a dictionary of variables can be passed to the DataContext constructor to allow override 
+* [ENHANCEMENT] Allow a dictionary of variables can be passed to the DataContext constructor to allow override
   config variables at runtime. Thanks @balexander!
 * [FEATURE] add support for `expect_column_pair_values_A_to_be_greater_than_B` to `Spark`.
 * [BUGFIX] Remove SQLAlchemy typehints to avoid requiring library (thanks @mzjp2)!
