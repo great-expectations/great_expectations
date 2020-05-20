@@ -11,7 +11,7 @@ develop
 * [FEATURE] add support for `expect_multicolumn_values_to_be_unique` to `Spark`. Thanks @WilliamWsyHK!
 * [ENHANCEMENT] Allow a dictionary of variables can be passed to the DataContext constructor to allow override 
   config variables at runtime. Thanks @balexander!
-
+* [BUGFIX] Remove SQLAlchemy typehints to avoid requiring library (thanks @mzjp2)!
 
 0.10.11
 -----------------
