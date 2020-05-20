@@ -6,6 +6,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.types import DictDot
+from marshmallow import Schema
 
 
 class ValidationOperatorResult(DictDot):
@@ -54,6 +55,8 @@ class ValidationOperatorResult(DictDot):
         self._validation_results_by_data_asset_name = None
         self._batch_identifiers = None
         self._statistics = None
+        self._validation_statistics = None
+        self._validation_results_by_validation_result_identifier = None
 
     @property
     def validation_operator_config(self) -> dict:
@@ -138,10 +141,20 @@ class ValidationOperatorResult(DictDot):
                     for run_result in self.run_results.values()
                 ]
             return self._validation_results
+        elif group_by == "validation_result_identifier":
+            return self._list_validation_results_by_validation_result_identifier()
         elif group_by == "expectation_suite_name":
             return self._list_validation_results_by_expectation_suite_name()
         elif group_by == "data_asset_name":
             return self._list_validation_results_by_data_asset_name()
+
+    def _list_validation_results_by_validation_result_identifier(self) -> dict:
+        if self._validation_results_by_validation_result_identifier is None:
+            self._validation_results_by_validation_result_identifier = {
+                validation_result_identifier: run_result["validation_result"]
+                for validation_result_identifier, run_result in self.run_results.items()
+            }
+        return self._validation_results_by_validation_result_identifier
 
     def _list_validation_results_by_expectation_suite_name(self) -> dict:
         if self._validation_results_by_expectation_suite_name is None:
@@ -240,6 +253,15 @@ class ValidationOperatorResult(DictDot):
                 "successful_validation_count": successful_validation_count,
                 "unsuccessful_validation_count": unsuccessful_validation_count,
                 "successful_validation_percent": successful_validation_percent,
+                "validation_statistics": self._list_validation_statistics(),
             }
 
         return self._statistics
+
+    def _list_validation_statistics(self) -> Dict[ValidationResultIdentifier, dict]:
+        if self._validation_statistics is None:
+            self._validation_statistics = {
+                validation_result_identifier: run_result["validation_result"].statistics
+                for validation_result_identifier, run_result in self.run_results.items()
+            }
+        return self._validation_statistics
