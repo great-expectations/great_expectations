@@ -413,7 +413,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         run_id = validation_operator_result.run_id
         run_name = run_id.run_name
         run_time = run_id.run_time.strftime("%x %X")
-        batch_identifiers = validation_operator_result.list_batch_identifiers()
+        batch_identifiers = sorted(validation_operator_result.list_batch_identifiers())
         failed_data_assets_msg_strings = []
 
         run_results = validation_operator_result.run_results
