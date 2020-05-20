@@ -11,6 +11,7 @@ develop
 * [FEATURE] add support for `expect_multicolumn_values_to_be_unique` to `Spark`. Thanks @WilliamWsyHK!
 * [ENHANCEMENT] Allow a dictionary of variables can be passed to the DataContext constructor to allow override 
   config variables at runtime. Thanks @balexander!
+* [FEATURE] add support for `expect_column_pair_values_A_to_be_greater_than_B` to `Spark`.
 
 
 0.10.11
