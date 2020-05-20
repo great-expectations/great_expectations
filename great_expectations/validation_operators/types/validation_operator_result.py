@@ -4,7 +4,7 @@ from typing import Dict, List, Union
 from great_expectations.core import (
     ExpectationSuiteValidationResult,
     convert_to_json_serializable,
-)
+    RunIdentifierSchema, RunIdentifier)
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
@@ -34,7 +34,7 @@ class ValidationOperatorResult(DictDot):
 
     def __init__(
         self,
-        run_id: str,
+        run_id: RunIdentifier,
         run_results: Dict[
             ValidationResultIdentifier,
             Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
@@ -76,7 +76,7 @@ class ValidationOperatorResult(DictDot):
         return self._run_results
 
     @property
-    def run_id(self) -> str:
+    def run_id(self) -> RunIdentifier:
         return self._run_id
 
     @property
@@ -276,7 +276,7 @@ class ValidationOperatorResult(DictDot):
 
 
 class ValidationOperatorResultSchema(Schema):
-    run_id = fields.Str()
+    run_id = fields.Nested(RunIdentifierSchema)
     run_results = fields.Dict()
     evaluation_parameters = fields.Dict(allow_none=True)
     validation_operator_config = fields.Dict()
