@@ -135,16 +135,16 @@ def init(target_directory, view, usage_stats):
                                                                     flag_build_docs=False, open_docs=False)
                 if success:
                     cli_message(
-                        "A new Expectation suite '{}' was added to your project".format(suite_name)
+                        "A new Expectation Suite '{}' was added to your project".format(suite_name)
                     )
 
-                if not click.confirm("\nWould you like to build Auto Docs?", default=True):
+                if not click.confirm("\nWould you like to build Data Docs?", default=True):
                     cli_message("Okay, bye!")
                     sys.exit(1)
 
                 build_docs(context, view=False)
 
-                if not click.confirm("\nWould you like to view your new Expectations in Auto Docs?", default=True):
+                if not click.confirm("\nWould you like to view your new Expectations in Data Docs? This will open a new browser window.", default=True):
                     cli_message("Okay, bye!")
                     sys.exit(1)
                 toolkit.attempt_to_open_validation_results_in_data_docs(context, profiling_results)

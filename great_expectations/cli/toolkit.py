@@ -4,6 +4,8 @@ import subprocess
 import sys
 import warnings
 from typing import Union
+from ruamel.yaml import YAML
+from ruamel.yaml.compat import StringIO
 
 import click
 
@@ -27,7 +29,26 @@ from great_expectations.exceptions import (
     CheckpointNotFoundError,
 )
 from great_expectations.profile import BasicSuiteBuilderProfiler
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 
+class MyYAML(YAML):
+    # copied from https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
+    def dump(self, data, stream=None, **kw):
+        inefficient = False
+        if stream is None:
+            inefficient = True
+            stream = StringIO()
+        YAML.dump(self, data, stream, **kw)
+        if inefficient:
+            return stream.getvalue()
+
+yaml = MyYAML()   # or typ='safe'/'unsafe' etc
+
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 def create_expectation_suite(context, datasource_name=None, batch_kwargs_generator_name=None, generator_asset=None,
                              batch_kwargs=None, expectation_suite_name=None, additional_batch_kwargs=None,
@@ -83,7 +104,7 @@ def create_expectation_suite(context, datasource_name=None, batch_kwargs_generat
         default_expectation_suite_name = _get_default_expectation_suite_name(batch_kwargs, data_asset_name)
         while True:
             expectation_suite_name = click.prompt(
-                "\nName the new expectation suite",
+                "\nName the new Expectation Suite",
                 default=default_expectation_suite_name,
             )
             if expectation_suite_name in context.list_expectation_suite_names():
@@ -109,16 +130,21 @@ def create_expectation_suite(context, datasource_name=None, batch_kwargs_generat
 
 def _profile_to_create_a_suite(additional_batch_kwargs, batch_kwargs, batch_kwargs_generator_name, context,
                                datasource_name, expectation_suite_name, data_asset_name, profiler_configuration):
-    click.prompt(
-        """
+
+
+    cli_message("""
 Great Expectations will choose a couple of columns and generate expectations about them
-to demonstrate some examples of assertions you can make about your data. 
+to demonstrate some examples of assertions you can make about your data.
     
-Press Enter to continue
-""",
-        default=True,
-        show_default=False,
-    )
+Great Expectations will store these expectations in a new Expectation Suite '{0:s}' here:
+
+  {1:s}
+""".format(expectation_suite_name,
+               context.stores[context.expectations_store_name].store_backend.get_url_for_key(ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name).to_tuple()))
+                )
+
+    confirm_proceed_or_exit()
+
     # TODO this may not apply
     cli_message("\nGenerating example Expectation Suite...")
     run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
@@ -161,6 +187,7 @@ def attempt_to_open_validation_results_in_data_docs(context, profiling_results):
         validation_result_identifier = ValidationResultIdentifier.from_object(
             validation_result
         )
+
         context.open_data_docs(resource_identifier=validation_result_identifier)
     except (KeyError, IndexError):
         context.open_data_docs()
@@ -324,3 +351,9 @@ def load_data_context_with_error_handling(directory: str) -> DataContext:
     except ge_exceptions.PluginClassNotFoundError as err:
         cli_message(err.cli_colored_message)
         sys.exit(1)
+
+
+def confirm_proceed_or_exit():
+    if not click.confirm("OK to proceed?", default=True):
+        cli_message("Okay, bye!")
+        exit(0)

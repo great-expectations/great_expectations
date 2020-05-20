@@ -1210,7 +1210,7 @@ class BaseDataContext(object):
         return return_obj
 
     @usage_statistics_enabled_method(event_name="data_context.build_data_docs")
-    def build_data_docs(self, site_names=None, resource_identifiers=None):
+    def build_data_docs(self, site_names=None, resource_identifiers=None, dry_run=False):
         """
         Build Data Docs for your project.
 
@@ -1227,6 +1227,11 @@ class BaseDataContext(object):
                             the resources in this list. This supports incremental build
                             of data docs sites (e.g., when a new validation result is created)
                             and avoids full rebuild.
+        :param dry_run: a flag, if True, the method returna the structure containing the
+                            URLs of the sites that *would* be built, but it does not build
+                            these sites. The motivation for adding this flag was to allow
+                            the CLI to display the the URLs before building and to let users
+                            confirm.
 
         Returns:
             A dictionary with the names of the updated data documentation sites as keys and the the location info
@@ -1263,9 +1268,12 @@ class BaseDataContext(object):
                             package_name=None,
                             class_name=complete_site_config['class_name']
                         )
-                    index_page_resource_identifier_tuple = site_builder.build(resource_identifiers)
-                    if index_page_resource_identifier_tuple:
-                        index_page_locator_infos[site_name] = index_page_resource_identifier_tuple[0]
+                    if dry_run:
+                        index_page_locator_infos[site_name] = site_builder.get_resource_url(only_if_exists=False)
+                    else:
+                        index_page_resource_identifier_tuple = site_builder.build(resource_identifiers)
+                        if index_page_resource_identifier_tuple:
+                            index_page_locator_infos[site_name] = index_page_resource_identifier_tuple[0]
 
         else:
             logger.debug("No data_docs_config found. No site(s) built.")

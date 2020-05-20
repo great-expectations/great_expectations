@@ -5,6 +5,7 @@ import logging
 import os
 import platform
 import sys
+import textwrap
 import uuid
 
 import click
@@ -349,6 +350,15 @@ def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_
                 }
             }
         )
+
+    cli_message("""
+Great Expectations will now add a new Datasource '{0:s}' to your deployment, by adding this entry to your great_expectations.yml:
+
+{1:s}
+""".format(datasource_name, textwrap.indent(toolkit.yaml.dump({datasource_name: configuration}), "  "))
+    )
+
+    toolkit.confirm_proceed_or_exit()
 
     context.add_datasource(name=datasource_name, class_name='PandasDatasource', **configuration)
     return datasource_name
