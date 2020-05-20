@@ -1,7 +1,7 @@
-.. _how_to_guides__validation__how_to_implement_a_custom_validation_operator:
+.. _how_to_guides__validation__how_to_add_validations_data_or_suites_to_a_checkpoint:
 
-How to implement a custom Validation Operator
-=============================================
+How to add validations, data, or suites to a Checkpoint
+=======================================================
 
 .. admonition:: Admonition from Mr. Dickens
 

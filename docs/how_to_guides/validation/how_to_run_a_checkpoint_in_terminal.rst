@@ -1,7 +1,7 @@
-.. _how_to_guides__validation__how_to_implement_a_custom_validation_operator:
+.. _how_to_guides__validation__how_to_run_a_checkpoint_in_terminal:
 
-How to implement a custom Validation Operator
-=============================================
+How to run a checkpoint in terminal
+===================================
 
 .. admonition:: Admonition from Mr. Dickens
 
