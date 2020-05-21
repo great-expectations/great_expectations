@@ -3,7 +3,7 @@
 Customize your deployment
 =========================
 
-At this point, you have your first, working deployment of Great Expectations. You've also been introduced to the foundational concepts in the library: :ref:`Data Contexts`, :ref:`Datasources`, :ref:`Expectations`, :ref:`Profilers`, :ref:`Auto Docs`, :ref:`Validation`, and :ref:`Checkpoints`.
+At this point, you have your first, working deployment of Great Expectations. You've also been introduced to the foundational concepts in the library: :ref:`Data Contexts`, :ref:`Datasources`, :ref:`Expectations`, :ref:`Profilers`, :ref:`Data Docs`, :ref:`Validation`, and :ref:`Checkpoints`.
 
 Congratulations! You're off to a very good start.
 
@@ -25,7 +25,7 @@ Here's an overview of the components of a typical Great Expectations deployment:
 * Integrations to related systems
 
     * :ref:`Additional Datasources and Generators`
-    * :ref:`Options for hosting Auto Docs`
+    * :ref:`Options for hosting Data Docs`
     * :ref:`Additional Validation Actions`
 
 * Key workflows
@@ -81,10 +81,10 @@ Great Expectations plugs into a wide variety of Datasources, and the list is con
 * How to configure a AAAAA Datasource
 
 
-Options for hosting Auto Docs
+Options for hosting Data Docs
 -----------------------------
 
-By default, Auto Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure blob store), configured to share a static website.
+By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure blob store), configured to share a static website.
 
 * How to store Validation Results to S3
 * How to store Validation Results to GCS
@@ -96,7 +96,7 @@ Additional Validation Actions
 -----------------------------
 
 * How to store Validation Results as a Validation Action
-* How to re-render Auto docs as a Validation Action
+* How to re-render Data docs as a Validation Action
 * How to trigger slack notifications as a Validation Action
 
 

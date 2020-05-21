@@ -46,7 +46,7 @@ With rare exceptions, How-to guides follow this structure:
 
 **Purpose paragraph**: A single, short paragraph to state the purpose of the guide, and motivate it if necessary.
 
-    "This guide will help you publish an Auto Docs site directly to S3. Publishing a site this way makes reviewing and acting on Validation Results easy in a team, and provides a central location to review Expectations."
+    "This guide will help you publish an Data Docs site directly to S3. Publishing a site this way makes reviewing and acting on Validation Results easy in a team, and provides a central location to review Expectations."
 
 Sometimes motivation can be a simple statement of purpose:
     
