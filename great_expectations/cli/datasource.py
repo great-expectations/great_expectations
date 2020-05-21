@@ -454,11 +454,17 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                 return None
             credentials = _collect_mysql_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.POSTGRES:
-            if not load_library("psycopg2"):
+            if not load_library(
+                "psycopg2",
+                "pip install psycopg2 (or if on macOS pip install psycopg2-binary)",
+            ):
                 return None
             credentials = _collect_postgres_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.REDSHIFT:
-            if not load_library("psycopg2"):
+            if not load_library(
+                "psycopg2",
+                "pip install psycopg2 (or if on macOS pip install psycopg2-binary)",
+            ):
                 return None
             credentials = _collect_redshift_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.SNOWFLAKE:
