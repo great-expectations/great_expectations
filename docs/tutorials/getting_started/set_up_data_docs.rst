@@ -43,6 +43,8 @@ Finally, your static site includes a set of pages for future data validations. T
 
 <<<SCREENSHOT GOES HERE>>>
 
+For now, your static site is built and stored locally. In the last step of the tutorial, we'll explain options for configuring, hosting and sharing it.
+
 
 The Data Docs build chain
 -------------------------
