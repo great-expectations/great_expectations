@@ -204,22 +204,23 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="Y\n2\n6\ntitanic\n{}\n1\nwarning\n\n".format(
-            engine_url_with_added_whitespace, catch_exceptions=False
+        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(
+            engine_url_with_added_whitespace
         ),
+        catch_exceptions=False
     )
     stdout = result.output
-    assert len(stdout) < 3000, "CLI output is unreasonably long."
+    assert len(stdout) < 6000, "CLI output is unreasonably long."
 
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "Which database backend are you using" in stdout
-    assert "Give your new data source a short name" in stdout
+    assert "Give your new Datasource a short name" in stdout
     assert "What is the url/connection string for the sqlalchemy connection" in stdout
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
     assert "Which table would you like to use?" in stdout
-    assert "Name the new expectation suite [main.titanic.warning]" in stdout
+    assert "Name the new Expectation Suite [main.titanic.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
         in stdout
@@ -227,7 +228,6 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
-    assert "A new Expectation suite 'warning' was added to your project" in stdout
     assert "Great Expectations is now set up" in stdout
 
     context = DataContext(ge_dir)
@@ -288,8 +288,8 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
         result = runner.invoke(
             cli,
             ["init", "-d", project_dir],
-            input="2\n6\nsqlite\nsqlite:///{}\n1\nmy_suite\n\n".format(
-                titanic_sqlite_db_file
+            input="\n\n2\n6\nsqlite\n{}\n\n\n1\nmy_suite\n\n\n\n".format(
+                url
             ),
             catch_exceptions=False,
         )
@@ -314,7 +314,6 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert "What is the url/connection string for the sqlalchemy connection?" in stdout
     assert "Which table would you like to use?" in stdout
     assert "Great Expectations connected to your database" in stdout
-    assert "A new Expectation suite 'my_suite' was added to your project" in stdout
     assert "This looks like an existing project that" not in stdout
 
     config = _load_config_file(os.path.join(ge_dir, DataContext.GE_YML))
@@ -376,7 +375,9 @@ def initialized_sqlite_project(
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url),
+        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(
+            engine.url
+        ),
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -486,7 +487,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", project_dir], input="Y\n", catch_exceptions=False,
+            cli, ["init", "-d", project_dir], input="\n\n", catch_exceptions=False,
         )
     stdout = result.stdout
 
@@ -536,7 +537,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
         result = runner.invoke(
             cli,
             ["init", "-d", project_dir],
-            input="1\nsink_me\n\n\n".format(
+            input="\n1\nsink_me\n\n\n\n".format(
                 os.path.join(project_dir, "data/Titanic.csv")
             ),
             catch_exceptions=False,
@@ -555,9 +556,8 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert "Always know what to expect from your data" in stdout
     assert "Which table would you like to use?" in stdout
     assert "Generating example Expectation Suite..." in stdout
-    assert "The following Data Docs sites were built" in stdout
+    assert "The following Data Docs sites will be built" in stdout
     assert "Great Expectations is now set up" in stdout
-    assert "A new Expectation suite 'sink_me' was added to your project" in stdout
 
     assert "Error: invalid input" not in stdout
     assert "This looks like an existing project that" not in stdout
