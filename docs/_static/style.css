@@ -47,6 +47,13 @@ a {
     url(hk-grotesk-pro/HKGroteskPro-Bold.woff) format("woff");
 }
 
+@media print {
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+}
+
 .wy-nav-content {
   width: auto !important;
   max-width: max-content !important;
