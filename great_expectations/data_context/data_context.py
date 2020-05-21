@@ -163,9 +163,7 @@ class BaseDataContext(object):
         for (
             validation_operator_name,
             validation_operator_config,
-        ) in (
-            self._project_config_with_variables_substituted.validation_operators.items()
-        ):
+        ) in self._project_config.validation_operators.items():
             self.add_validation_operator(
                 validation_operator_name, validation_operator_config,
             )
