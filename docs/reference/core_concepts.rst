@@ -86,6 +86,9 @@ validation. The batch could be a specific database table, the most recent log fi
 **Batch Parameters** provide instructions for how to retrieve stored Batch Kwargs or build new Batch Kwargs that reflect
 partitions, deliveries, or slices of logical data assets.
 
+
+.. _reference__core_concepts__batch_kwargs_generators:
+
 A **Batch Kwargs Generator** translates Batch Parameters to datasource-specific Batch Kwargs. A Batch Kwargs Generator 
 can also identify data assets and partitions by inspecting a storage environment.
 
@@ -109,6 +112,10 @@ DataAssets and Validations, answer the questions:
 
 - How do I describe my Expectations to Great Expectations?
 - Does my data meet my Expectations?
+
+.. _reference__core_concepts__validation__execution_engines:
+
+An **Execution Engine** is the layer that handles the actual computation for validation. Currently, Great Expectations supports three Execution Engines: pandas, sqlalchemy, and pyspark. We plan to extend the library to support others in the future.
 
 A **DataAsset** is a Great Expectations object that can create and validate Expectations against specific data. 
 DataAssets are connected to data. They can evaluate Expectations wherever you access your data, using Pandas, Spark, or SqlAlchemy.
