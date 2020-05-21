@@ -4,10 +4,9 @@ import re
 import unittest
 from datetime import datetime
 
+import great_expectations as ge
 import pandas as pd
 import pytest
-
-import great_expectations as ge
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,

@@ -1,8 +1,5 @@
 import boto3
 import pytest
-from marshmallow import ValidationError
-from moto import mock_s3
-
 from great_expectations.data_context.store import HtmlSiteStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -12,6 +9,8 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.exceptions import MissingTopLevelConfigKeyError
 from great_expectations.util import gen_directory_tree_str
+from marshmallow import ValidationError
+from moto import mock_s3
 
 
 def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):

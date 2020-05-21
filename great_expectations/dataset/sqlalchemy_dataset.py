@@ -1,18 +1,22 @@
 import inspect
 import logging
+import traceback
 import uuid
 import warnings
 from datetime import datetime
 from functools import wraps
 from importlib import import_module
-from typing import List
+from typing import List, Any
 
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.util import (
+    check_sql_engine_dialect,
+    get_approximate_percentile_disc_sql,
+)
 
 from .dataset import Dataset
 from .pandas_dataset import PandasDataset
@@ -24,10 +28,18 @@ try:
     from sqlalchemy.engine import reflection
     from sqlalchemy.sql.expression import BinaryExpression, literal
     from sqlalchemy.sql.operators import custom_op
+    from sqlalchemy.sql.elements import WithinGroup
+    from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.exc import ProgrammingError
 except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
+
+try:
+    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
+except ImportError:
+    sqlalchemy_psycopg2 = None
 
 try:
     import sqlalchemy_redshift.dialect
@@ -282,7 +294,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         custom_sql=None,
         schema=None,
         *args,
-        **kwargs
+        **kwargs,
     ):
 
         if custom_sql and not table_name:
@@ -397,7 +409,22 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.columns = self.column_reflection_fallback()
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
-        super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+
+    @property
+    def sql_engine_dialect(self) -> Any:
+        return self.engine.dialect
+
+    def attempt_allowing_relative_error(self):
+        detected_redshift = check_sql_engine_dialect(
+            actual_sql_engine_dialect=self.sql_engine_dialect,
+            candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
+        )
+        detected_psycopg2 = check_sql_engine_dialect(
+            actual_sql_engine_dialect=self.sql_engine_dialect,
+            candidate_sql_engine_dialect=sqlalchemy_psycopg2.PGDialect_psycopg2,
+        )
+        return detected_redshift or detected_psycopg2
 
     def head(self, n=5):
         """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
@@ -575,9 +602,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column_median = column_values[1][0]  # True center value
         return column_median
 
-    def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
-        selects = None
-        if self.engine.dialect.name.lower() == "mssql":
+    def get_column_quantiles(
+        self, column: str, quantiles, allow_relative_error: bool = False
+    ):
+        if self.sql_engine_dialect.name.lower() == "mssql":
             # mssql requires over(), so we add an empty over() clause
             selects = [
                 sa.func.percentile_disc(quantile)
@@ -585,56 +613,57 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 .over()
                 for quantile in quantiles
             ]
-        elif self.engine.dialect.name.lower() == "bigquery":
+        elif self.sql_engine_dialect.name.lower() == "bigquery":
             # BigQuery does not support "WITHIN", so we need a special case for it
-            selects = [
+            selects: List = [
                 sa.func.percentile_disc(sa.column(column), quantile).over()
                 for quantile in quantiles
             ]
         else:
-            try:
-                if isinstance(
-                    self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect
-                ):
-                    # Redshift does not have a percentile_disc method, but does support an approximate version
-                    if allow_relative_error is True:
-                        selects = [
-                            sa.text(
-                                ", ".join(
-                                    [
-                                        "approximate "
-                                        + str(
-                                            stmt.compile(
-                                                dialect=self.engine.dialect,
-                                                compile_kwargs={"literal_binds": True},
-                                            )
-                                        )
-                                        for stmt in selects
-                                    ]
-                                )
-                            )
-                        ]
-                    else:
-                        raise ValueError(
-                            "Redshift does not support computing quantiles without approximation error; "
-                            "set allow_relative_error to True to allow approximate quantiles."
-                        )
-            except (AttributeError, TypeError):
-                pass
-
-        if not selects:
-            selects = [
+            selects: List = [
                 sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
                 for quantile in quantiles
             ]
 
-        quantiles = self.engine.execute(
-            sa.select(selects).select_from(self._table)
-        ).fetchone()
+        try:
+            quantiles = self.engine.execute(
+                sa.select(selects).select_from(self._table)
+            ).fetchone()
+        except ProgrammingError:
+            # ProgrammingError: (psycopg2.errors.SyntaxError) Aggregate function "percentile_disc" is not supported;
+            # use approximate percentile_disc or percentile_cont instead.
+            if self.attempt_allowing_relative_error():
+                # Redshift does not have a percentile_disc method, but does support an approximate version.
+                if allow_relative_error:
+                    sql_approx: str = get_approximate_percentile_disc_sql(
+                        selects=selects, sql_engine_dialect=self.sql_engine_dialect
+                    )
+                    selects = [sa.text(sql_approx)]
+                    try:
+                        quantiles = self.engine.execute(
+                            sa.select(selects).select_from(self._table)
+                        ).fetchone()
+                    except ProgrammingError as pe:
+                        exception_message: str = "An SQL syntax Exception occurred."
+                        exception_traceback: str = traceback.format_exc()
+                        exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+                        logger.error(exception_message)
+                        raise pe
+                else:
+                    raise ValueError(
+                        f'The SQL engine dialect "{str(self.sql_engine_dialect)}" does not support computing quantiles '
+                        "without approximation error; set allow_relative_error to True to allow approximate quantiles."
+                    )
+            else:
+                raise ValueError(
+                    f'The SQL engine dialect "{str(self.sql_engine_dialect)}" does not support computing quantiles with '
+                    "approximation error; set allow_relative_error to False to disable approximate quantiles."
+                )
+
         return list(quantiles)
 
     def get_column_stdev(self, column):
-        if self.engine.dialect.name.lower() != "mssql":
+        if self.sql_engine_dialect.name.lower() != "mssql":
             res = self.engine.execute(
                 sa.select([sa.func.stddev_samp(sa.column(column))])
                 .select_from(self._table)
@@ -790,22 +819,22 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # similar, for example.
         ###
 
-        if self.engine.dialect.name.lower() == "bigquery":
+        if self.sql_engine_dialect.name.lower() == "bigquery":
             stmt = "CREATE OR REPLACE TABLE `{table_name}` AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif self.engine.dialect.name.lower() == "snowflake":
+        elif self.sql_engine_dialect.name.lower() == "snowflake":
             logger.info("Creating transient table %s" % table_name)
             if schema_name is not None:
                 table_name = schema_name + "." + table_name
             stmt = "CREATE OR REPLACE TRANSIENT TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif self.engine.dialect.name == "mysql":
+        elif self.sql_engine_dialect.name == "mysql":
             stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif self.engine.dialect.name == "mssql":
+        elif self.sql_engine_dialect.name == "mssql":
             # Insert "into #{table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
             # Note: transforming custom_sql to uppercase/lowercase has uninteded consequences (i.e., changing column names), so this is not an option!
@@ -825,7 +854,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
-        if self.engine.dialect.name.lower() != "mssql":
+        if self.sql_engine_dialect.name.lower() != "mssql":
             sql = sa.select([sa.text("*")]).select_from(self._table).limit(1)
             col_names = self.engine.execute(sql).keys()
             col_dict = [{"name": col_name} for col_name in col_names]
@@ -891,7 +920,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         try:
             # Redshift does not (yet) export types to top level; only recognize base SA types
             if isinstance(
-                self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+                self.sql_engine_dialect, sqlalchemy_redshift.dialect.RedshiftDialect
             ):
                 return self.dialect.sa
         except (TypeError, AttributeError):
@@ -901,7 +930,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         try:
             if (
                 isinstance(
-                    self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect
+                    self.sql_engine_dialect,
+                    pybigquery.sqlalchemy_bigquery.BigQueryDialect,
                 )
                 and bigquery_types_tuple is not None
             ):
@@ -1192,7 +1222,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def _get_dialect_regex_expression(self, column, regex, positive=True):
         try:
             # postgres
-            if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+            if isinstance(self.sql_engine_dialect, sa.dialects.postgresql.dialect):
                 if positive:
                     return BinaryExpression(
                         sa.column(column), literal(regex), custom_op("~")
@@ -1207,7 +1237,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         try:
             # redshift
             if isinstance(
-                self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+                self.sql_engine_dialect, sqlalchemy_redshift.dialect.RedshiftDialect
             ):
                 if positive:
                     return BinaryExpression(
@@ -1224,7 +1254,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             pass
         try:
             # Mysql
-            if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
+            if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
                 if positive:
                     return BinaryExpression(
                         sa.column(column), literal(regex), custom_op("REGEXP")
@@ -1239,7 +1269,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         try:
             # Snowflake
             if isinstance(
-                self.engine.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect
+                self.sql_engine_dialect,
+                snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
             ):
                 if positive:
                     return BinaryExpression(
@@ -1258,7 +1289,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         try:
             # Bigquery
             if isinstance(
-                self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect
+                self.sql_engine_dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect
             ):
                 if positive:
                     return sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex))
@@ -1286,7 +1317,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         regex_expression = self._get_dialect_regex_expression(column, regex)
         if regex_expression is None:
             logger.warning(
-                "Regex is not supported for dialect %s" % str(self.engine.dialect)
+                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
             )
             raise NotImplementedError
 
@@ -1308,7 +1339,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         )
         if regex_expression is None:
             logger.warning(
-                "Regex is not supported for dialect %s" % str(self.engine.dialect)
+                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
             )
             raise NotImplementedError
 
@@ -1336,7 +1367,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         regex_expression = self._get_dialect_regex_expression(column, regex_list[0])
         if regex_expression is None:
             logger.warning(
-                "Regex is not supported for dialect %s" % str(self.engine.dialect)
+                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
             )
             raise NotImplementedError
 
@@ -1375,7 +1406,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         )
         if regex_expression is None:
             logger.warning(
-                "Regex is not supported for dialect %s" % str(self.engine.dialect)
+                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
             )
             raise NotImplementedError
 

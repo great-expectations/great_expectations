@@ -1,10 +1,9 @@
 import datetime
 import json
 
+import great_expectations as ge
 import pandas as pd
 import pytest
-
-import great_expectations as ge
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
 from great_expectations.profile import ColumnsExistProfiler
 from tests.test_utils import expectationValidationResultSchema
@@ -748,3 +747,22 @@ def test_expect_values_to_be_of_type_list():
 
     validation = df.expect_column_values_to_be_of_type("A", "list")
     assert not validation.success
+
+
+def test_expect_values_quantiles_to_be_between():
+    """
+    Test that quantile bounds set to zero actually get interpreted as such. Zero
+    used to be interpreted as None (and thus +-inf) and we'd get false negatives.
+    """
+    T = [
+        ([1, 2, 3, 4, 5], [0.5], [[0, 0]], False),
+        ([0, 0, 0, 0, 0], [0.5], [[0, 0]], True),
+    ]
+
+    for data, quantiles, value_ranges, success in T:
+        df = ge.dataset.PandasDataset({"A": data})
+
+        validation = df.expect_column_quantile_values_to_be_between(
+            "A", {"quantiles": quantiles, "value_ranges": value_ranges,}
+        )
+        assert validation.success is success
