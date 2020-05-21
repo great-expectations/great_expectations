@@ -1,43 +1,69 @@
 .. _getting_started__validate_data:
 
-Validating Data using Great Expectations
+Validate some data
 =========================================================
 
-So far, your team members used Great Expectations to capture and document their expectations about your data.
+Validation is the core operation of Great Expectations: “Validate X data against Y Expectations.”
 
-It is time for your team to benefit from Great Expectations' automated testing that systematically surfaces errors, discrepancies and surprises lurking in your data, allowing you and your team to be more proactive when data changes.
+In normal usage, the best way to validate data is with a :ref:`Checkpoint`. Let’s set up our first Checkpoint by continuing with the CLI:
 
-We typically see two main deployment patterns that we will explore in depth below.
+.. code-block:: bash
 
-1. Great Expectations is **deployed adjacent to your existing data pipeline**.
-2. Great Expectations is **embedded into your existing data pipeline**.
+    Would you like to configure a Checkpoint for data validation? [Y/n]
+
+    Heads up! This feature is Experimental. It may change. Please give us your feedback!
+
+    Select a datasource
+        1. files_datasource
+        2. repeated-phrases-gop__dir
+    : 1
+
+    Enter the path (relative or absolute) of a data file
+    : data/religion-survey/religion-survey-results.csv
+
+    A checkpoint named `my_checkpoint` was added to your project:
+
+    validation_operator_name: action_list_operator
+    batches:
+      - batch_kwargs:
+          path: /Users/me/pipeline/source_files/npi.csv
+          datasource: files_datasource
+          reader_method: read_csv
+        expectation_suite_names: # one or more suites may validate against a single batch
+          - npi.warning
 
 
+Let’s pause there before continuing.
 
-Responding to Validation Results
-----------------------------------------
+What just happened?
+-------------------
 
-A :ref:`Validation Operator<validation_operators_and_actions>` is deployed at a particular point in your data pipeline.
+Checkpoints bring :ref:`Batches` of data together with corresponding :ref:`Expectation Suites`. The actual computation is carried out by a :ref:`ValidationOperator`. After executing validation, the ValidationOperator can kick off additional workflows through :ref:`ValidationActions`.
 
-A new batch of data arrives and the operator validates it against an expectation suite (see the previous step).
+We just configured a Checkpoint so that it’s able to load ``npi.csv`` as a Batch, pair it with the ``npi.warning`` Expectation Suite, and execute them both using a pre-configured Validation Operator called ``action_list_operator``.
 
-The :ref:`actions<actions>` of the operator store the validation result, add an HTML view of the result to the Data Docs website, and fire a configurable notification (by default, Slack).
+We’ll look more closely at the Validation Operator in a moment.
 
-If the data meets all the expectations in the suite, no action is required. This is the beauty of automated testing. No team members have to be interrupted.
+First, let’s test it out.
 
-In case the data violates some expectations, team members must get involved.
+Test out your Checkpoint in a notebook
+--------------------------------------
 
-In the world of software testing, if a program does not pass a test, it usually means that the program is wrong and must be fixed.
+Checkpoints can be run like applications from the command line or cron. They can also be run from within data orchestration tools like airflow, prefect, kedro, etc.
 
-In pipeline and data testing, if data does not meet expectations, the response to a failing test is triaged into 3 categories:
+The simplest way to test out a Checkpoint is in a disposable notebook. This is often a handy tool for testing and debugging new configuration.
 
-1. **The data is fine, and the validation result revealed a characteristic that the team was not aware of.**
-  The team's data scientists or domain experts update the expectations to reflect this new discovery.
-  They use the process described above in the Review and Edit sections to update the expectations while testing them against the data batch that failed validation.
-2. **The data is "broken"**, and **can be recovered.**
-  For example, the users table could have dates in an incorrect format.
-  Data engineers update the pipeline code to deal with this brokenness and fix it on the fly.
-3. **The data is "broken beyond repair".**
-  The owners of the pipeline go upstream to the team (or external partner) who produced the data and address it with them.
-  For example, columns in the users table could be missing entirely.
-  The validation results in Data Docs makes it easy to communicate exactly what is broken, since it shows the expectation that was not met and observed examples of non-conforming data.
+.. code-block:: bash
+
+    Would you like to test this checkpoint by running it from a disposable notebook? [Y/n]
+
+
+Click yes, and the CLI will start up a notebook that looks like this.
+
+<<< Screen shot >>>
+
+Aside from imports, this should be a one-liner.
+
+.. code-block:: python
+
+    data_context.run_checkpoint(run_id)
