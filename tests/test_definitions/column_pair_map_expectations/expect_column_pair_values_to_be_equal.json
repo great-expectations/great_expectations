@@ -36,9 +36,12 @@
       },
       "out" : {
         "unexpected_list": [
-          [10, "abc"]
-        ], 
-        "success": false      
+          [
+            10,
+            "abc"
+          ]
+        ],
+        "success": false
       }
     }, {
       "title" : "Positive example with mostly",
@@ -50,8 +53,11 @@
       },
       "out" : {
         "unexpected_list": [
-          [10, "abc"]
-        ], 
+          [
+            10,
+            "abc"
+          ]
+        ],
         "success": true
       }
     }, {
@@ -63,7 +69,7 @@
         "ignore_row_if": "either_value_is_missing"
       },
       "out" : {
-        "unexpected_list": [], 
+        "unexpected_list": [],
         "success": true
       }
     }, {
@@ -76,8 +82,23 @@
       },
       "out" : {
         "unexpected_list": [
-          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
-        ], 
+          [
+            6.0,
+            null
+          ],
+          [
+            7.0,
+            null
+          ],
+          [
+            8.0,
+            null
+          ],
+          [
+            9.0,
+            null
+          ]
+        ],
         "success": false
       }
     }, {
@@ -89,8 +110,23 @@
       },
       "out" : {
         "unexpected_list": [
-          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
-        ], 
+          [
+            6.0,
+            null
+          ],
+          [
+            7.0,
+            null
+          ],
+          [
+            8.0,
+            null
+          ],
+          [
+            9.0,
+            null
+          ]
+        ],
         "success": false
       }
     }, {
@@ -102,8 +138,23 @@
       },
       "out" : {
         "unexpected_list": [
-          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
-        ], 
+          [
+            6.0,
+            null
+          ],
+          [
+            7.0,
+            null
+          ],
+          [
+            8.0,
+            null
+          ],
+          [
+            9.0,
+            null
+          ]
+        ],
         "success": false
       }
     }, {
@@ -116,8 +167,23 @@
       },
       "out" : {
         "unexpected_list": [
-          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
-        ], 
+          [
+            6.0,
+            null
+          ],
+          [
+            7.0,
+            null
+          ],
+          [
+            8.0,
+            null
+          ],
+          [
+            9.0,
+            null
+          ]
+        ],
         "success": true
       }
     }, {
@@ -129,7 +195,7 @@
         "ignore_row_if": "either_value_is_missing"
       },
       "out" : {
-        "unexpected_list": [], 
+        "unexpected_list": [],
         "success": true
       }
     }]

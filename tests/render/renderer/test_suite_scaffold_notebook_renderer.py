@@ -69,13 +69,13 @@ use a jupyter keyboard shortcut to toggle each line: **Linux/Windows**:
 
 The suites generated here are **not meant to be production suites** - they are **scaffolds to build upon**.
 
-**To get to a production grade suite, will definitely want to [edit this 
-suite](http://docs.greatexpectations.io/en/latest/command_line.html#great-expectations-suite-edit) 
+**To get to a production grade suite, will definitely want to [edit this
+suite](http://docs.greatexpectations.io/en/latest/command_line.html#great-expectations-suite-edit)
 after scaffolding gets you close to what you want.**
 
 This is highly configurable depending on your goals. You can include or exclude
-columns, and include or exclude expectation types (when applicable). [The 
-Expectation Glossary](http://docs.greatexpectations.io/en/latest/expectation_glossary.html) 
+columns, and include or exclude expectation types (when applicable). [The
+Expectation Glossary](http://docs.greatexpectations.io/en/latest/expectation_glossary.html)
 contains a list of possible expectations.""",
                 "metadata": {},
             },

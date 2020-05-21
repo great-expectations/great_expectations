@@ -3,11 +3,10 @@
 
 import logging
 import sys
-
 from datetime import datetime
 
 import tzlocal
-from IPython.core.display import display, HTML
+from IPython.core.display import HTML, display
 
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
@@ -25,10 +24,14 @@ def set_data_source(context, data_source_type=None):
     data_source_name = None
 
     if not data_source_type:
-        configured_datasources = [datasource for datasource in context.list_datasources()]
+        configured_datasources = [
+            datasource for datasource in context.list_datasources()
+        ]
 
         if len(configured_datasources) == 0:
-            display(HTML("""
+            display(
+                HTML(
+                    """
 <p>
 No data sources found in the great_expectations.yml of your project.
 </p>
@@ -36,9 +39,13 @@ No data sources found in the great_expectations.yml of your project.
 <p>
 If you did not create the data source during init, here is how to add it now: <a href="https://great-expectations.readthedocs.io/en/latest/how_to_add_data_source.html">How To Add a Data Source</a>
 </p>
-"""))
+"""
+                )
+            )
         elif len(configured_datasources) > 1:
-            display(HTML("""
+            display(
+                HTML(
+                    """
 <p>
 Found more than one data source in the great_expectations.yml of your project:
 <b>{1:s}</b>
@@ -46,16 +53,37 @@ Found more than one data source in the great_expectations.yml of your project:
 <p>
 Uncomment the next cell and set data_source_name to one of these names.
 </p>
-""".format(data_source_type, ','.join([datasource['name'] for datasource in configured_datasources]))))
+""".format(
+                        data_source_type,
+                        ",".join(
+                            [
+                                datasource["name"]
+                                for datasource in configured_datasources
+                            ]
+                        ),
+                    )
+                )
+            )
         else:
-            data_source_name = configured_datasources[0]['name']
-            display(HTML("Will be using this data source from your project's great_expectations.yml: <b>{0:s}</b>".format(data_source_name)))
+            data_source_name = configured_datasources[0]["name"]
+            display(
+                HTML(
+                    "Will be using this data source from your project's great_expectations.yml: <b>{0:s}</b>".format(
+                        data_source_name
+                    )
+                )
+            )
 
     else:
-        configured_datasources = [datasource['name'] for datasource in context.list_datasources() if
-                                         datasource['type'] == data_source_type]
+        configured_datasources = [
+            datasource["name"]
+            for datasource in context.list_datasources()
+            if datasource["type"] == data_source_type
+        ]
         if len(configured_datasources) == 0:
-            display(HTML("""
+            display(
+                HTML(
+                    """
 <p>
 No {0:s} data sources found in the great_expectations.yml of your project.
 </p>
@@ -63,9 +91,15 @@ No {0:s} data sources found in the great_expectations.yml of your project.
 <p>
 If you did not create the data source during init, here is how to add it now: <a href="https://great-expectations.readthedocs.io/en/latest/how_to_add_data_source.html">How To Add a Data Source</a>
 </p>
-""".format(data_source_type)))
+""".format(
+                        data_source_type
+                    )
+                )
+            )
         elif len(configured_datasources) > 1:
-            display(HTML("""
+            display(
+                HTML(
+                    """
 <p>
 Found more than one {0:s} data source in the great_expectations.yml of your project:
 <b>{1:s}</b>
@@ -73,10 +107,20 @@ Found more than one {0:s} data source in the great_expectations.yml of your proj
 <p>
 Uncomment the next cell and set data_source_name to one of these names.
 </p>
-""".format(data_source_type, ','.join(configured_datasources))))
+""".format(
+                        data_source_type, ",".join(configured_datasources)
+                    )
+                )
+            )
         else:
             data_source_name = configured_datasources[0]
-            display(HTML("Will be using this {0:s} data source from your project's great_expectations.yml: <b>{1:s}</b>".format(data_source_type, data_source_name)))
+            display(
+                HTML(
+                    "Will be using this {0:s} data source from your project's great_expectations.yml: <b>{1:s}</b>".format(
+                        data_source_type, data_source_name
+                    )
+                )
+            )
 
     return data_source_name
 
@@ -111,10 +155,15 @@ def setup_notebook_logging(logger=None, log_level=logging.INFO):
     chandler = logging.StreamHandler(stream=sys.stdout)
     chandler.setLevel(logging.DEBUG)
     # chandler.setFormatter(Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
-    chandler.setFormatter(Formatter("%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
+    chandler.setFormatter(
+        Formatter("%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z")
+    )
     logger.addHandler(chandler)
     logger.setLevel(log_level)
-    logger.info("Great Expectations logging enabled at %s level by JupyterUX module." % (log_level,) )
+    logger.info(
+        "Great Expectations logging enabled at %s level by JupyterUX module."
+        % (log_level,)
+    )
     #
     # # Filter warnings
     # import warnings
@@ -144,14 +193,18 @@ def show_available_data_asset_names(context, data_source_name=None):
     datasources = context.list_datasources()
     html = ""
     for datasource in datasources:
-        if data_source_name and datasource['name'] != data_source_name:
+        if data_source_name and datasource["name"] != data_source_name:
             continue
-        html += "<h2 style='margin: 0'>Datasource: {0:s} ({1:s})</h2>".format(datasource['name'], datasource['class_name'])
-        ds = context.get_datasource(datasource['name'])
+        html += "<h2 style='margin: 0'>Datasource: {0:s} ({1:s})</h2>".format(
+            datasource["name"], datasource["class_name"]
+        )
+        ds = context.get_datasource(datasource["name"])
         generators = ds.list_batch_kwargs_generators()
         for generator_info in generators:
-            html += "batch_kwargs_generator: {0:s} ({1:s})".format(generator_info['name'], generator_info['class_name'])
-            generator = ds.get_batch_kwargs_generator(generator_info['name'])
+            html += "batch_kwargs_generator: {0:s} ({1:s})".format(
+                generator_info["name"], generator_info["class_name"]
+            )
+            generator = ds.get_batch_kwargs_generator(generator_info["name"])
 
             # TODO hacks to deal w/ inconsistent return types. Remove urgently
             mystery_object = generator.get_available_data_asset_names()
@@ -167,25 +220,35 @@ def show_available_data_asset_names(context, data_source_name=None):
                 html += styles
                 html += "<ul class='data-assets'>"
                 for data_asset_name in data_asset_names:
-                    html += '<li>{0:s}</li>'.format(data_asset_name)
-                    data_asset_expectation_suite_keys = [es_key for es_key in expectation_suite_keys if \
-                                                         es_key.data_asset_name.datasource == datasource['name'] and \
-                                                         es_key.data_asset_name.generator == generator_info['name'] and \
-                                                         es_key.data_asset_name.generator_asset == data_asset_name]
+                    html += "<li>{0:s}</li>".format(data_asset_name)
+                    data_asset_expectation_suite_keys = [
+                        es_key
+                        for es_key in expectation_suite_keys
+                        if es_key.data_asset_name.datasource == datasource["name"]
+                        and es_key.data_asset_name.generator == generator_info["name"]
+                        and es_key.data_asset_name.generator_asset == data_asset_name
+                    ]
                     if len(data_asset_expectation_suite_keys) > 0:
                         html += "<ul>"
                         for es_key in data_asset_expectation_suite_keys:
-                            html += "<li><span class='expectation-suite'>Expectation Suite</span>: {0:s}</li>".format(es_key.expectation_suite_name)
+                            html += "<li><span class='expectation-suite'>Expectation Suite</span>: {0:s}</li>".format(
+                                es_key.expectation_suite_name
+                            )
                         html += "</ul>"
                 html += "</ul>"
             else:
-                display(HTML("""<p>No data assets found in this data source.</p>
+                display(
+                    HTML(
+                        """<p>No data assets found in this data source.</p>
 <p>Read about how batch kwargs generators derive data assets from data sources:
 <a href="https://great-expectations.readthedocs.io/en/latest/how_to_add_data_source.html">Data assets</a>
-</p>"""))
+</p>"""
+                    )
+                )
         display(HTML(html))
 
-    #TODO: add expectation suite names (existing)
+    # TODO: add expectation suite names (existing)
+
 
 bootstrap_link_element = """<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">"""
 cooltip_style_element = """<style type="text/css">
@@ -196,7 +259,7 @@ cooltip_style_element = """<style type="text/css">
 }
 
 .cooltip .top {
-    min-width:200px; 
+    min-width:200px;
     top:-6px;
     left:50%;
     transform:translate(-50%, -100%);
@@ -240,13 +303,12 @@ cooltip_style_element = """<style type="text/css">
 </style>
 """
 
+
 def _render_for_jupyter(
-    view,
-    include_styling,
-    return_without_displaying,
+    view, include_styling, return_without_displaying,
 ):
     if include_styling:
-        html_to_display = bootstrap_link_element+cooltip_style_element+view
+        html_to_display = bootstrap_link_element + cooltip_style_element + view
     else:
         html_to_display = view
 
@@ -257,10 +319,7 @@ def _render_for_jupyter(
 
 
 def display_column_expectations_as_section(
-    expectation_suite,
-    column,
-    include_styling=True,
-    return_without_displaying=False,
+    expectation_suite, column, include_styling=True, return_without_displaying=False,
 ):
     """This is a utility function to render all of the Expectations in an ExpectationSuite with the same column name as an HTML block.
 
@@ -272,26 +331,27 @@ def display_column_expectations_as_section(
     display_column_expectations_as_section(exp, "Type")
     """
 
-    #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
-    column_expectation_list = [ e for e in expectation_suite.expectations if "column" in e.kwargs and e.kwargs["column"] == column ]
+    # TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
+    column_expectation_list = [
+        e
+        for e in expectation_suite.expectations
+        if "column" in e.kwargs and e.kwargs["column"] == column
+    ]
 
-    #TODO: Handle the case where zero evrs match the column name
+    # TODO: Handle the case where zero evrs match the column name
 
-    document = ExpectationSuiteColumnSectionRenderer().render(column_expectation_list).to_json_dict()
+    document = (
+        ExpectationSuiteColumnSectionRenderer()
+        .render(column_expectation_list)
+        .to_json_dict()
+    )
     view = DefaultJinjaSectionView().render({"section": document, "section_loop": 1})
 
-    return _render_for_jupyter(
-        view,
-        include_styling,
-        return_without_displaying,
-    )
+    return _render_for_jupyter(view, include_styling, return_without_displaying,)
 
 
 def display_profiled_column_evrs_as_section(
-    evrs,
-    column,
-    include_styling=True,
-    return_without_displaying=False,
+    evrs, column, include_styling=True, return_without_displaying=False,
 ):
     """This is a utility function to render all of the EVRs in an ExpectationSuite with the same column name as an HTML block.
 
@@ -304,30 +364,28 @@ def display_profiled_column_evrs_as_section(
     WARNING: This method is experimental.
     """
 
-    #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
-    column_evr_list = [ e for e in evrs.results if "column" in e.expectation_config.kwargs and e.expectation_config.kwargs["column"] == column ]
+    # TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
+    column_evr_list = [
+        e
+        for e in evrs.results
+        if "column" in e.expectation_config.kwargs
+        and e.expectation_config.kwargs["column"] == column
+    ]
 
-    #TODO: Handle the case where zero evrs match the column name
+    # TODO: Handle the case where zero evrs match the column name
 
-    document = ProfilingResultsColumnSectionRenderer().render(column_evr_list).to_json_dict()
+    document = (
+        ProfilingResultsColumnSectionRenderer().render(column_evr_list).to_json_dict()
+    )
     view = DefaultJinjaSectionView().render(
-        {
-            "section": document,
-            "section_loop": {"index": 1},
-        }
+        {"section": document, "section_loop": {"index": 1},}
     )
 
-    return _render_for_jupyter(
-        view,
-        include_styling,
-        return_without_displaying,
-    )
+    return _render_for_jupyter(view, include_styling, return_without_displaying,)
+
 
 def display_column_evrs_as_section(
-    evrs,
-    column,
-    include_styling=True,
-    return_without_displaying=False,
+    evrs, column, include_styling=True, return_without_displaying=False,
 ):
     """
     Display validation results for a single column as a section.
@@ -335,24 +393,24 @@ def display_column_evrs_as_section(
     WARNING: This method is experimental.
     """
 
-    #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
-    column_evr_list = [ e for e in evrs.results if "column" in e.expectation_config.kwargs and e.expectation_config.kwargs["column"] == column ]
+    # TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
+    column_evr_list = [
+        e
+        for e in evrs.results
+        if "column" in e.expectation_config.kwargs
+        and e.expectation_config.kwargs["column"] == column
+    ]
 
-    #TODO: Handle the case where zero evrs match the column name
+    # TODO: Handle the case where zero evrs match the column name
 
-    document = ValidationResultsColumnSectionRenderer().render(column_evr_list).to_json_dict()
+    document = (
+        ValidationResultsColumnSectionRenderer().render(column_evr_list).to_json_dict()
+    )
     view = DefaultJinjaSectionView().render(
-        {
-            "section": document,
-            "section_loop": {"index": 1},
-        }
+        {"section": document, "section_loop": {"index": 1},}
     )
 
-    return _render_for_jupyter(
-        view,
-        include_styling,
-        return_without_displaying,
-    )
+    return _render_for_jupyter(view, include_styling, return_without_displaying,)
 
 
 # When importing the jupyter_ux module, we set up a preferred logging configuration

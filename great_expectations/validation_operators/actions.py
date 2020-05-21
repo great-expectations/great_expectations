@@ -2,13 +2,11 @@ import logging
 import warnings
 
 from great_expectations.data_context.util import instantiate_class_from_config
-from .util import send_slack_notification
+
 from ..data_context.store.metric_store import MetricStore
 from ..data_context.types.resource_identifiers import ValidationResultIdentifier
-from ..exceptions import (
-    DataContextError,
-    ClassInstantiationError,
-)
+from ..exceptions import ClassInstantiationError, DataContextError
+from .util import send_slack_notification
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +22,13 @@ class ValidationAction(object):
     def __init__(self, data_context):
         self.data_context = data_context
 
-    def run(self, validation_result_suite, validation_result_suite_identifier, data_asset, **kwargs):
+    def run(
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset,
+        **kwargs
+    ):
         """
 
         :param validation_result_suite:
@@ -33,18 +37,28 @@ class ValidationAction(object):
         :param: kwargs - any additional arguments the child might use
         :return:
         """
-        return self._run(validation_result_suite, validation_result_suite_identifier, data_asset, **kwargs)
+        return self._run(
+            validation_result_suite,
+            validation_result_suite_identifier,
+            data_asset,
+            **kwargs
+        )
 
-    def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
+    def _run(
+        self, validation_result_suite, validation_result_suite_identifier, data_asset
+    ):
         return NotImplementedError
 
 
 class NoOpAction(ValidationAction):
-
-    def __init__(self, data_context,):
+    def __init__(
+        self, data_context,
+    ):
         super(NoOpAction, self).__init__(data_context)
 
-    def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
+    def _run(
+        self, validation_result_suite, validation_result_suite_identifier, data_asset
+    ):
         print("Happily doing nothing")
 
 
@@ -62,12 +76,9 @@ class SlackNotificationAction(ValidationAction):
         "notify_on": "all"
     }
     """
+
     def __init__(
-            self,
-            data_context,
-            renderer,
-            slack_webhook,
-            notify_on="all",
+        self, data_context, renderer, slack_webhook, notify_on="all",
     ):
         """Construct a SlackNotificationAction
 
@@ -83,37 +94,48 @@ class SlackNotificationAction(ValidationAction):
         """
         super(SlackNotificationAction, self).__init__(data_context)
         self.renderer = instantiate_class_from_config(
-            config=renderer,
-            runtime_environment={},
-            config_defaults={},
+            config=renderer, runtime_environment={}, config_defaults={},
         )
-        module_name = renderer['module_name']
+        module_name = renderer["module_name"]
         if not self.renderer:
             raise ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
-                class_name=renderer['class_name']
+                class_name=renderer["class_name"],
             )
         self.slack_webhook = slack_webhook
         assert slack_webhook, "No Slack webhook found in action config."
         self.notify_on = notify_on
 
-    def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset=None):
+    def _run(
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset=None,
+    ):
         logger.debug("SlackNotificationAction.run")
 
         if validation_result_suite is None:
             return
 
-        if not isinstance(validation_result_suite_identifier, ValidationResultIdentifier):
-            raise TypeError("validation_result_suite_id must be of type ValidationResultIdentifier, not {0}".format(
-                type(validation_result_suite_identifier)
-            ))
+        if not isinstance(
+            validation_result_suite_identifier, ValidationResultIdentifier
+        ):
+            raise TypeError(
+                "validation_result_suite_id must be of type ValidationResultIdentifier, not {0}".format(
+                    type(validation_result_suite_identifier)
+                )
+            )
 
         validation_success = validation_result_suite.success
 
-        if self.notify_on == "all" or \
-                self.notify_on == "success" and validation_success or \
-                self.notify_on == "failure" and not validation_success:
+        if (
+            self.notify_on == "all"
+            or self.notify_on == "success"
+            and validation_success
+            or self.notify_on == "failure"
+            and not validation_success
+        ):
             query = self.renderer.render(validation_result_suite)
             return send_slack_notification(query, slack_webhook=self.slack_webhook)
         else:
@@ -125,10 +147,9 @@ class StoreValidationResultAction(ValidationAction):
     StoreValidationResultAction stores a validation result in the ValidationsStore.
     """
 
-    def __init__(self,
-                 data_context,
-                 target_store_name=None,
-                 ):
+    def __init__(
+        self, data_context, target_store_name=None,
+    ):
         """
 
         :param data_context: data context
@@ -142,18 +163,26 @@ class StoreValidationResultAction(ValidationAction):
         else:
             self.target_store = data_context.stores[target_store_name]
 
-    def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
+    def _run(
+        self, validation_result_suite, validation_result_suite_identifier, data_asset
+    ):
         logger.debug("StoreValidationResultAction.run")
 
         if validation_result_suite is None:
             return
 
-        if not isinstance(validation_result_suite_identifier, ValidationResultIdentifier):
-            raise TypeError("validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
-                type(validation_result_suite_identifier)
-            ))
+        if not isinstance(
+            validation_result_suite_identifier, ValidationResultIdentifier
+        ):
+            raise TypeError(
+                "validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                    type(validation_result_suite_identifier)
+                )
+            )
 
-        self.target_store.set(validation_result_suite_identifier, validation_result_suite)
+        self.target_store.set(
+            validation_result_suite_identifier, validation_result_suite
+        )
 
 
 class StoreEvaluationParametersAction(ValidationAction):
@@ -181,22 +210,30 @@ class StoreEvaluationParametersAction(ValidationAction):
         else:
             self.target_store = data_context.stores[target_store_name]
 
-    def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
+    def _run(
+        self, validation_result_suite, validation_result_suite_identifier, data_asset
+    ):
         logger.debug("StoreEvaluationParametersAction.run")
 
         if validation_result_suite is None:
             return
 
-        if not isinstance(validation_result_suite_identifier, ValidationResultIdentifier):
-            raise TypeError("validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
-                type(validation_result_suite_identifier)
-            ))
+        if not isinstance(
+            validation_result_suite_identifier, ValidationResultIdentifier
+        ):
+            raise TypeError(
+                "validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                    type(validation_result_suite_identifier)
+                )
+            )
 
         self.data_context.store_evaluation_parameters(validation_result_suite)
 
 
 class StoreMetricsAction(ValidationAction):
-    def __init__(self, data_context, requested_metrics, target_store_name="metrics_store"):
+    def __init__(
+        self, data_context, requested_metrics, target_store_name="metrics_store"
+    ):
         """
 
         Args:
@@ -217,26 +254,35 @@ class StoreMetricsAction(ValidationAction):
         try:
             store = data_context.stores[target_store_name]
         except KeyError:
-            raise DataContextError("Unable to find store {} in your DataContext configuration.".format(
-                target_store_name))
+            raise DataContextError(
+                "Unable to find store {} in your DataContext configuration.".format(
+                    target_store_name
+                )
+            )
         if not isinstance(store, MetricStore):
-            raise DataContextError("StoreMetricsAction must have a valid MetricsStore for its target store.")
+            raise DataContextError(
+                "StoreMetricsAction must have a valid MetricsStore for its target store."
+            )
 
-    def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
+    def _run(
+        self, validation_result_suite, validation_result_suite_identifier, data_asset
+    ):
         logger.debug("StoreMetricsAction.run")
 
         if validation_result_suite is None:
             return
 
-        if not isinstance(validation_result_suite_identifier, ValidationResultIdentifier):
-            raise TypeError("validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
-                type(validation_result_suite_identifier)
-            ))
+        if not isinstance(
+            validation_result_suite_identifier, ValidationResultIdentifier
+        ):
+            raise TypeError(
+                "validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                    type(validation_result_suite_identifier)
+                )
+            )
 
         self.data_context.store_validation_result_metrics(
-            self._requested_metrics,
-            validation_result_suite,
-            self._target_store_name
+            self._requested_metrics, validation_result_suite, self._target_store_name
         )
 
 
@@ -254,25 +300,36 @@ class UpdateDataDocsAction(ValidationAction):
         """
         super(UpdateDataDocsAction, self).__init__(data_context)
         if target_site_names:
-            warnings.warn("target_site_names is deprecated. Please use site_names instead.", DeprecationWarning)
+            warnings.warn(
+                "target_site_names is deprecated. Please use site_names instead.",
+                DeprecationWarning,
+            )
             if site_names:
-                raise DataContextError("Invalid configuration: legacy key target_site_names and site_names key are "
-                                       "both present in UpdateDataDocsAction configuration")
+                raise DataContextError(
+                    "Invalid configuration: legacy key target_site_names and site_names key are "
+                    "both present in UpdateDataDocsAction configuration"
+                )
             site_names = target_site_names
         self._site_names = site_names
 
-    def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
+    def _run(
+        self, validation_result_suite, validation_result_suite_identifier, data_asset
+    ):
         logger.debug("UpdateDataDocsAction.run")
 
         if validation_result_suite is None:
             return
 
-        if not isinstance(validation_result_suite_identifier, ValidationResultIdentifier):
-            raise TypeError("validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
-                type(validation_result_suite_identifier)
-            ))
+        if not isinstance(
+            validation_result_suite_identifier, ValidationResultIdentifier
+        ):
+            raise TypeError(
+                "validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                    type(validation_result_suite_identifier)
+                )
+            )
 
         self.data_context.build_data_docs(
             site_names=self._site_names,
-            resource_identifiers=[validation_result_suite_identifier]
+            resource_identifiers=[validation_result_suite_identifier],
         )

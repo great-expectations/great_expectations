@@ -1,22 +1,16 @@
-import pytest
-
 from copy import copy, deepcopy
 
-from great_expectations.core import ExpectationSuite, ExpectationConfiguration
+import pytest
+
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 
 
 @pytest.fixture
 def exp1():
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "a",
-            "value_set": [1, 2, 3],
-            "result_format": "BASIC"
-        },
-        meta={
-            "notes": "This is an expectation."
-        }
+        kwargs={"column": "a", "value_set": [1, 2, 3], "result_format": "BASIC"},
+        meta={"notes": "This is an expectation."},
     )
 
 
@@ -24,14 +18,8 @@ def exp1():
 def exp2():
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "b",
-            "value_set": [-1, -2, -3],
-            "result_format": "BASIC"
-        },
-        meta={
-            "notes": "This is an expectation."
-        }
+        kwargs={"column": "b", "value_set": [-1, -2, -3], "result_format": "BASIC"},
+        meta={"notes": "This is an expectation."},
     )
 
 
@@ -39,14 +27,8 @@ def exp2():
 def exp3():
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "b",
-            "value_set": [-1, -2, -3],
-            "result_format": "BASIC"
-        },
-        meta={
-            "notes": "This is an expectation."
-        }
+        kwargs={"column": "b", "value_set": [-1, -2, -3], "result_format": "BASIC"},
+        meta={"notes": "This is an expectation."},
     )
 
 
@@ -54,14 +36,8 @@ def exp3():
 def exp4():
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "b",
-            "value_set": [1, 2, 3],
-            "result_format": "BASIC"
-        },
-        meta={
-            "notes": "This is an expectation."
-        }
+        kwargs={"column": "b", "value_set": [1, 2, 3], "result_format": "BASIC"},
+        meta={"notes": "This is an expectation."},
     )
 
 
@@ -73,7 +49,7 @@ def column_pair_expectation():
             "column_A": "1",
             "column_B": "b",
             "value_set": [(1, 1), (2, 2)],
-            "result_format": "BASIC"
+            "result_format": "BASIC",
         },
     )
 
@@ -116,10 +92,28 @@ def suite_with_table_and_column_expectations(
 ):
     suite = ExpectationSuite(
         expectation_suite_name="warning",
-        expectations=[exp1, exp2, exp3, exp4, column_pair_expectation, table_exp1, table_exp2, table_exp3],
+        expectations=[
+            exp1,
+            exp2,
+            exp3,
+            exp4,
+            column_pair_expectation,
+            table_exp1,
+            table_exp2,
+            table_exp3,
+        ],
         meta={"notes": "This is an expectation suite."},
     )
-    assert suite.expectations == [exp1, exp2, exp3, exp4, column_pair_expectation, table_exp1, table_exp2, table_exp3]
+    assert suite.expectations == [
+        exp1,
+        exp2,
+        exp3,
+        exp4,
+        column_pair_expectation,
+        table_exp1,
+        table_exp2,
+        table_exp3,
+    ]
     return suite
 
 
@@ -128,9 +122,7 @@ def baseline_suite(exp1, exp2):
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp2],
-        meta={
-            "notes": "This is an expectation suite."
-        }
+        meta={"notes": "This is an expectation suite."},
     )
 
 
@@ -139,9 +131,7 @@ def identical_suite(exp1, exp3):
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp3],
-        meta={
-            "notes": "This is an expectation suite."
-        }
+        meta={"notes": "This is an expectation suite."},
     )
 
 
@@ -152,7 +142,7 @@ def equivalent_suite(exp1, exp3):
         expectations=[exp1, exp3],
         meta={
             "notes": "This is another expectation suite, with a different name and meta"
-        }
+        },
     )
 
 
@@ -161,9 +151,7 @@ def different_suite(exp1, exp4):
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp4],
-        meta={
-            "notes": "This is an expectation suite."
-        }
+        meta={"notes": "This is an expectation suite."},
     )
 
 
@@ -171,98 +159,119 @@ def test_expectation_suite_equality(baseline_suite, identical_suite, equivalent_
     """Equality should depend on all defined properties of a configuration object, but not on whether the *instances*
     are the same."""
     assert baseline_suite is baseline_suite  # no difference
-    assert baseline_suite is not identical_suite  # different instances, but same content
+    assert (
+        baseline_suite is not identical_suite
+    )  # different instances, but same content
     assert baseline_suite == identical_suite  # different instances, but same content
     assert not (baseline_suite != identical_suite)  # ne works properly
     assert not (baseline_suite == equivalent_suite)  # different meta
     assert baseline_suite != equivalent_suite  # ne works properly
 
 
-def test_expectation_suite_equivalence(baseline_suite, identical_suite, equivalent_suite, different_suite):
+def test_expectation_suite_equivalence(
+    baseline_suite, identical_suite, equivalent_suite, different_suite
+):
     """Equivalence should depend only on properties that affect the result of the expectation."""
     assert baseline_suite.isEquivalentTo(baseline_suite)  # no difference
     assert baseline_suite.isEquivalentTo(identical_suite)
     assert baseline_suite.isEquivalentTo(equivalent_suite)  # different meta
-    assert not baseline_suite.isEquivalentTo(different_suite)  # different value_set in one expectation
+    assert not baseline_suite.isEquivalentTo(
+        different_suite
+    )  # different value_set in one expectation
 
 
 def test_expectation_suite_dictionary_equivalence(baseline_suite):
-    assert baseline_suite.isEquivalentTo({
-        "expectation_suite_name": "warning",
-        "expectations": [{
-            "expectation_type": "expect_column_values_to_be_in_set",
-            "kwargs": {
-                "column": "a",
-                "value_set": [1, 2, 3],
-                "result_format": "BASIC"
-            },
-            "meta": {
-                "notes": "This is an expectation."
-            }},
+    assert (
+        baseline_suite.isEquivalentTo(
             {
-            "expectation_type": "expect_column_values_to_be_in_set",
-            "kwargs": {
-                "column": "b",
-                "value_set": [-1, -2, -3],
-                "result_format": "BASIC"
-            },
-            "meta": {
-                "notes": "This is an expectation."
-            }}],
-        "meta": {
-            "notes": "This is an expectation suite."
-        }
-    }) is True
+                "expectation_suite_name": "warning",
+                "expectations": [
+                    {
+                        "expectation_type": "expect_column_values_to_be_in_set",
+                        "kwargs": {
+                            "column": "a",
+                            "value_set": [1, 2, 3],
+                            "result_format": "BASIC",
+                        },
+                        "meta": {"notes": "This is an expectation."},
+                    },
+                    {
+                        "expectation_type": "expect_column_values_to_be_in_set",
+                        "kwargs": {
+                            "column": "b",
+                            "value_set": [-1, -2, -3],
+                            "result_format": "BASIC",
+                        },
+                        "meta": {"notes": "This is an expectation."},
+                    },
+                ],
+                "meta": {"notes": "This is an expectation suite."},
+            }
+        )
+        is True
+    )
 
-    assert baseline_suite.isEquivalentTo({
-        "expectation_suite_name": "warning",
-        "expectations": [{
-            "expectation_type": "expect_column_values_to_be_in_set",
-            "kwargs": {
-                "column": "a",
-                "value_set": [-1, 2, 3],  # One value changed here
-                "result_format": "BASIC"
-            },
-            "meta": {
-                "notes": "This is an expectation."
-            }},
+    assert (
+        baseline_suite.isEquivalentTo(
             {
-            "expectation_type": "expect_column_values_to_be_in_set",
-            "kwargs": {
-                "column": "b",
-                "value_set": [-1, -2, -3],
-                "result_format": "BASIC"
-            },
-            "meta": {
-                "notes": "This is an expectation."
-            }}],
-        "meta": {
-            "notes": "This is an expectation suite."
-        }
-    }) is False
+                "expectation_suite_name": "warning",
+                "expectations": [
+                    {
+                        "expectation_type": "expect_column_values_to_be_in_set",
+                        "kwargs": {
+                            "column": "a",
+                            "value_set": [-1, 2, 3],  # One value changed here
+                            "result_format": "BASIC",
+                        },
+                        "meta": {"notes": "This is an expectation."},
+                    },
+                    {
+                        "expectation_type": "expect_column_values_to_be_in_set",
+                        "kwargs": {
+                            "column": "b",
+                            "value_set": [-1, -2, -3],
+                            "result_format": "BASIC",
+                        },
+                        "meta": {"notes": "This is an expectation."},
+                    },
+                ],
+                "meta": {"notes": "This is an expectation suite."},
+            }
+        )
+        is False
+    )
 
 
 def test_expectation_suite_copy(baseline_suite):
     suite_copy = copy(baseline_suite)
     assert suite_copy == baseline_suite
     suite_copy.data_asset_type = "blarg!"
-    assert baseline_suite.data_asset_type != "blarg"  # copy on primitive properties shouldn't propagate
+    assert (
+        baseline_suite.data_asset_type != "blarg"
+    )  # copy on primitive properties shouldn't propagate
     suite_copy.expectations[0].meta["notes"] = "a different note"
-    assert baseline_suite.expectations[0].meta["notes"] == "a different note"  # copy on deep attributes does propagate
+    assert (
+        baseline_suite.expectations[0].meta["notes"] == "a different note"
+    )  # copy on deep attributes does propagate
 
 
 def test_expectation_suite_deepcopy(baseline_suite):
     suite_deepcopy = deepcopy(baseline_suite)
     assert suite_deepcopy == baseline_suite
     suite_deepcopy.data_asset_type = "blarg!"
-    assert baseline_suite.data_asset_type != "blarg"  # copy on primitive properties shouldn't propagate
+    assert (
+        baseline_suite.data_asset_type != "blarg"
+    )  # copy on primitive properties shouldn't propagate
     suite_deepcopy.expectations[0].meta["notes"] = "a different note"
     # deepcopy on deep attributes does not propagate
     assert baseline_suite.expectations[0].meta["notes"] == "This is an expectation."
 
 
 def test_add_citation(baseline_suite):
-    assert "citations" not in baseline_suite.meta or len(baseline_suite.meta["citations"]) == 0
+    assert (
+        "citations" not in baseline_suite.meta
+        or len(baseline_suite.meta["citations"]) == 0
+    )
     baseline_suite.add_citation("hello!")
     assert baseline_suite.meta["citations"][0].get("comment") == "hello!"
 

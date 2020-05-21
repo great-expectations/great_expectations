@@ -13,6 +13,7 @@ class StoreBackend(object, metaclass=ABCMeta):
       - list_keys
       - _has_key
     """
+
     IGNORED_FILES = [".ipynb_checkpoints"]
 
     def __init__(self, fixed_length_key=False):
@@ -45,7 +46,9 @@ class StoreBackend(object, metaclass=ABCMeta):
     def get_url_for_key(self, key, protocol=None):
         raise StoreError(
             "Store backend of type {0:s} does not have an implementation of get_url_for_key".format(
-                type(self).__name__))
+                type(self).__name__
+            )
+        )
 
     def _validate_key(self, key):
         if isinstance(key, tuple):
@@ -53,16 +56,15 @@ class StoreBackend(object, metaclass=ABCMeta):
                 if not isinstance(key_element, str):
                     raise TypeError(
                         "Elements within tuples passed as keys to {0} must be instances of {1}, not {2}".format(
-                            self.__class__.__name__,
-                            str,
-                            type(key_element),
-                        ))
+                            self.__class__.__name__, str, type(key_element),
+                        )
+                    )
         else:
-            raise TypeError("Keys in {0} must be instances of {1}, not {2}".format(
-                self.__class__.__name__,
-                tuple,
-                type(key),
-            ))
+            raise TypeError(
+                "Keys in {0} must be instances of {1}, not {2}".format(
+                    self.__class__.__name__, tuple, type(key),
+                )
+            )
 
     def _validate_value(self, value):
         pass
@@ -118,7 +120,7 @@ class InMemoryStoreBackend(StoreBackend):
         self._store.pop(source_key)
 
     def list_keys(self, prefix=()):
-        return [key for key in self._store.keys() if key[:len(prefix)] == prefix]
+        return [key for key in self._store.keys() if key[: len(prefix)] == prefix]
 
     def _has_key(self, key):
         return key in self._store

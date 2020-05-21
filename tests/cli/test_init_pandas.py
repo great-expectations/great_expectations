@@ -24,8 +24,12 @@ except ImportError:
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_cli_init_on_new_project(mock_emit, mock_webbrowser, caplog, tmp_path_factory, monkeypatch):
-    monkeypatch.delenv("GE_USAGE_STATS", raising=False)  # Undo the project-wide test default
+def test_cli_init_on_new_project(
+    mock_emit, mock_webbrowser, caplog, tmp_path_factory, monkeypatch
+):
+    monkeypatch.delenv(
+        "GE_USAGE_STATS", raising=False
+    )  # Undo the project-wide test default
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     os.makedirs(os.path.join(project_dir, "data"))
     data_path = os.path.join(project_dir, "data", "Titanic.csv")
@@ -157,10 +161,9 @@ def test_cli_init_on_new_project(mock_emit, mock_webbrowser, caplog, tmp_path_fa
     )
 
     assert mock_emit.call_count == 7
-    assert mock_emit.call_args_list[1] ==\
-        mock.call(
-            {"event_payload": {}, "event": "cli.init.create", "success": True}
-        )
+    assert mock_emit.call_args_list[1] == mock.call(
+        {"event_payload": {}, "event": "cli.init.create", "success": True}
+    )
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -225,8 +228,10 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
         {
             "name": "files_datasource",
             "class_name": "PandasDatasource",
-            'data_asset_type': {'class_name': 'PandasDataset',
-                                'module_name': 'great_expectations.dataset'},
+            "data_asset_type": {
+                "class_name": "PandasDataset",
+                "module_name": "great_expectations.dataset",
+            },
             "module_name": "great_expectations.datasource",
         }
     ]

@@ -104,8 +104,8 @@ Let's now rebuild your Data Docs, which helps you communicate about your data wi
 batch.save_expectation_suite(discard_failed_expectations=False)
 
 \"""
-Let's create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation 
-arguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline 
+Let's create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation
+arguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline
 runner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object. If no
 instantiation arguments are given, run_name will be None and run_time will default to the current UTC datetime.
 \"""
@@ -246,7 +246,9 @@ Add expectations by calling specific expectation methods on the `batch` object. 
 You can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**."""
         )
 
-    def get_batch_kwargs(self, suite: ExpectationSuite, batch_kwargs: Union[dict, BatchKwargs]):
+    def get_batch_kwargs(
+        self, suite: ExpectationSuite, batch_kwargs: Union[dict, BatchKwargs]
+    ):
         if isinstance(batch_kwargs, dict):
             return self._fix_path_in_batch_kwargs(batch_kwargs)
 

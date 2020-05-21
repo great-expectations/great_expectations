@@ -8,18 +8,17 @@ from great_expectations.core import ge_urn
 
 def test_ge_validations_urn():
     # We should be able to parse validations urns
-    urn = "urn:great_expectations:validations:my_suite:expect_something.observed_value:query=s%20tring&query=" \
-          "string3&query2=string2"
+    urn = (
+        "urn:great_expectations:validations:my_suite:expect_something.observed_value:query=s%20tring&query="
+        "string3&query2=string2"
+    )
     res = ge_urn.parseString(urn)
 
     assert res["urn_type"] == "validations"
     assert res["expectation_suite_name"] == "my_suite"
     assert res["metric_name"] == "expect_something.observed_value"
     kwargs_dict = parse_qs(res["metric_kwargs"])
-    assert kwargs_dict == {
-        "query": ["s tring", "string3"],
-        "query2": ["string2"]
-    }
+    assert kwargs_dict == {"query": ["s tring", "string3"], "query2": ["string2"]}
 
     # no kwargs is ok
     urn = "urn:great_expectations:validations:my_suite:expect_something.observed_value"
@@ -40,9 +39,7 @@ def test_ge_metrics_urn():
     assert res["expectation_suite_name"] == "my_suite"
     assert res["metric_name"] == "expect_something.observed_value"
     kwargs_dict = parse_qs(res["metric_kwargs"])
-    assert kwargs_dict == {
-        "column": ["mycol"]
-    }
+    assert kwargs_dict == {"column": ["mycol"]}
 
     # No kwargs is ok
     urn = "urn:great_expectations:metrics:20200403T1234.324Z:my_suite:expect_something.observed_value"
@@ -90,5 +87,7 @@ def test_invalid_urn():
 
     # Cannot have too many parts
     with pytest.raises(ParseException) as e:
-        ge_urn.parseString("urn:great_expectations:validations:foo:bar:baz:bin:barg:boo")
+        ge_urn.parseString(
+            "urn:great_expectations:validations:foo:bar:baz:bin:barg:boo"
+        )
     assert "urn:great_expectations:validations:foo:bar:baz:bin:barg:boo" in e.value.line

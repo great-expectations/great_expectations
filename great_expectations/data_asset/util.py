@@ -1,16 +1,19 @@
 # Utility methods for dealing with DataAsset objects
 
+import datetime
 import decimal
 import sys
-import datetime
-
-import pandas as pd
-import numpy as np
-
 from functools import wraps
 
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite, ExpectationValidationResult, \
-    ExpectationSuiteValidationResult
+import numpy as np
+import pandas as pd
+
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+)
 
 
 def parse_result_format(result_format):
@@ -18,13 +21,10 @@ def parse_result_format(result_format):
     internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
     there is no need to specify a custom partial_unexpected_count."""
     if isinstance(result_format, str):
-        result_format = {
-            'result_format': result_format,
-            'partial_unexpected_count': 20
-        }
+        result_format = {"result_format": result_format, "partial_unexpected_count": 20}
     else:
-        if 'partial_unexpected_count' not in result_format:
-            result_format['partial_unexpected_count'] = 20
+        if "partial_unexpected_count" not in result_format:
+            result_format["partial_unexpected_count"] = 20
 
     return result_format
 
@@ -61,22 +61,21 @@ Usage::
 
 
 class DocInherit(object):
-
     def __init__(self, mthd):
         self.mthd = mthd
         self.name = mthd.__name__
         self.mthd_doc = mthd.__doc__
 
     def __get__(self, obj, cls):
-        doc = self.mthd_doc if self.mthd_doc is not None else ''
+        doc = self.mthd_doc if self.mthd_doc is not None else ""
 
         for parent in cls.mro():
             if self.name not in parent.__dict__:
                 continue
             if parent.__dict__[self.name].__doc__ is not None:
-                doc = doc + '\n' + parent.__dict__[self.name].__doc__
+                doc = doc + "\n" + parent.__dict__[self.name].__doc__
 
-        @wraps(self.mthd, assigned=('__name__', '__module__'))
+        @wraps(self.mthd, assigned=("__name__", "__module__"))
         def f(*args, **kwargs):
             return self.mthd(obj, *args, **kwargs)
 
@@ -99,10 +98,16 @@ def recursively_convert_to_json_serializable(test_obj):
 
     """
     # If it's one of our types, we pass
-    if isinstance(test_obj, (ExpectationConfiguration, ExpectationSuite, ExpectationValidationResult,
-                             ExpectationSuiteValidationResult)):
+    if isinstance(
+        test_obj,
+        (
+            ExpectationConfiguration,
+            ExpectationSuite,
+            ExpectationValidationResult,
+            ExpectationSuiteValidationResult,
+        ),
+    ):
         return test_obj
-
 
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
     # print(type(test_obj), test_obj)
@@ -123,8 +128,7 @@ def recursively_convert_to_json_serializable(test_obj):
         new_dict = {}
         for key in test_obj:
             # A pandas index can be numeric, and a dict key can be numeric, but a json key must be a string
-            new_dict[str(key)] = recursively_convert_to_json_serializable(
-                test_obj[key])
+            new_dict[str(key)] = recursively_convert_to_json_serializable(test_obj[key])
 
         return new_dict
 
@@ -136,7 +140,7 @@ def recursively_convert_to_json_serializable(test_obj):
         return new_list
 
     elif isinstance(test_obj, (np.ndarray, pd.Index)):
-        #test_obj[key] = test_obj[key].tolist()
+        # test_obj[key] = test_obj[key].tolist()
         # If we have an array or index, convert it first to a list--causing coercion to float--and then round
         # to the number of digits for which the string representation will equal the float representation
         return [recursively_convert_to_json_serializable(x) for x in test_obj.tolist()]
@@ -155,7 +159,9 @@ def recursively_convert_to_json_serializable(test_obj):
     elif np.issubdtype(type(test_obj), np.bool_):
         return bool(test_obj)
 
-    elif np.issubdtype(type(test_obj), np.integer) or np.issubdtype(type(test_obj), np.uint):
+    elif np.issubdtype(type(test_obj), np.integer) or np.issubdtype(
+        type(test_obj), np.uint
+    ):
         return int(test_obj)
 
     elif np.issubdtype(type(test_obj), np.floating):
@@ -167,24 +173,31 @@ def recursively_convert_to_json_serializable(test_obj):
         # keys must be strings. So, we use a very ugly serialization strategy
         index_name = test_obj.index.name or "index"
         value_name = test_obj.name or "value"
-        return [{
-            index_name: recursively_convert_to_json_serializable(idx),
-            value_name: recursively_convert_to_json_serializable(val)
-        } for idx, val in test_obj.iteritems()]
+        return [
+            {
+                index_name: recursively_convert_to_json_serializable(idx),
+                value_name: recursively_convert_to_json_serializable(val),
+            }
+            for idx, val in test_obj.iteritems()
+        ]
 
     elif isinstance(test_obj, pd.DataFrame):
-        return recursively_convert_to_json_serializable(test_obj.to_dict(orient='records'))
+        return recursively_convert_to_json_serializable(
+            test_obj.to_dict(orient="records")
+        )
 
     # elif np.issubdtype(type(test_obj), np.complexfloating):
-        # Note: Use np.complexfloating to avoid Future Warning from numpy
-        # Complex numbers consist of two floating point numbers
-        # return complex(
-        #     float(round(test_obj.real, sys.float_info.dig)),
-        #     float(round(test_obj.imag, sys.float_info.dig)))
+    # Note: Use np.complexfloating to avoid Future Warning from numpy
+    # Complex numbers consist of two floating point numbers
+    # return complex(
+    #     float(round(test_obj.real, sys.float_info.dig)),
+    #     float(round(test_obj.imag, sys.float_info.dig)))
 
     elif isinstance(test_obj, decimal.Decimal):
         return float(test_obj)
 
     else:
-        raise TypeError('%s is of type %s which cannot be serialized.' % (
-            str(test_obj), type(test_obj).__name__))
+        raise TypeError(
+            "%s is of type %s which cannot be serialized."
+            % (str(test_obj), type(test_obj).__name__)
+        )

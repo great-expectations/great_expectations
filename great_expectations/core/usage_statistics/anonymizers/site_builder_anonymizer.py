@@ -1,6 +1,9 @@
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.render.renderer.site_builder import SiteBuilder, DefaultSiteSectionBuilder, \
-    DefaultSiteIndexBuilder
+from great_expectations.render.renderer.site_builder import (
+    DefaultSiteIndexBuilder,
+    DefaultSiteSectionBuilder,
+    SiteBuilder,
+)
 
 
 class SiteBuilderAnonymizer(Anonymizer):
@@ -20,12 +23,9 @@ class SiteBuilderAnonymizer(Anonymizer):
 
         anonymized_info_dict = dict()
         self.anonymize_object_info(
-            object_config={
-                "class_name": class_name,
-                "module_name": module_name
-            },
+            object_config={"class_name": class_name, "module_name": module_name},
             anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes
+            ge_classes=self._ge_classes,
         )
 
         return anonymized_info_dict

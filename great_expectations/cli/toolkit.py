@@ -14,33 +14,41 @@ from great_expectations.cli.docs import build_docs
 from great_expectations.cli.util import cli_message
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.usage_statistics.usage_statistics import (
-    send_usage_message,
-)
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.datasource import Datasource
-from great_expectations.exceptions import (
-    CheckpointError,
-    CheckpointNotFoundError,
-)
+from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
 
-def create_expectation_suite(context, datasource_name=None, batch_kwargs_generator_name=None, generator_asset=None,
-                             batch_kwargs=None, expectation_suite_name=None, additional_batch_kwargs=None,
-                             empty_suite=False, show_intro_message=False, open_docs=False,
-                             profiler_configuration="demo", data_asset_name=None):
+def create_expectation_suite(
+    context,
+    datasource_name=None,
+    batch_kwargs_generator_name=None,
+    generator_asset=None,
+    batch_kwargs=None,
+    expectation_suite_name=None,
+    additional_batch_kwargs=None,
+    empty_suite=False,
+    show_intro_message=False,
+    open_docs=False,
+    profiler_configuration="demo",
+    data_asset_name=None,
+):
     """
     Create a new expectation suite.
 
     :return: a tuple: (success, suite name)
     """
     if generator_asset:
-        warnings.warn("The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-                      "Please update code accordingly.", DeprecationWarning)
+        warnings.warn(
+            "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
+            "Please update code accordingly.",
+            DeprecationWarning,
+        )
         data_asset_name = generator_asset
 
     if show_intro_message and not empty_suite:
@@ -80,7 +88,9 @@ def create_expectation_suite(context, datasource_name=None, batch_kwargs_generat
         additional_batch_kwargs = {}
 
     if expectation_suite_name is None:
-        default_expectation_suite_name = _get_default_expectation_suite_name(batch_kwargs, data_asset_name)
+        default_expectation_suite_name = _get_default_expectation_suite_name(
+            batch_kwargs, data_asset_name
+        )
         while True:
             expectation_suite_name = click.prompt(
                 "\nName the new expectation suite",
@@ -95,9 +105,16 @@ def create_expectation_suite(context, datasource_name=None, batch_kwargs_generat
         create_empty_suite(context, expectation_suite_name, batch_kwargs)
         return True, expectation_suite_name
 
-    profiling_results = _profile_to_create_a_suite(additional_batch_kwargs, batch_kwargs, batch_kwargs_generator_name,
-                                                   context, datasource_name, expectation_suite_name, data_asset_name,
-                                                   profiler_configuration)
+    profiling_results = _profile_to_create_a_suite(
+        additional_batch_kwargs,
+        batch_kwargs,
+        batch_kwargs_generator_name,
+        context,
+        datasource_name,
+        expectation_suite_name,
+        data_asset_name,
+        profiler_configuration,
+    )
 
     build_docs(context, view=False)
     if open_docs:
@@ -106,13 +123,21 @@ def create_expectation_suite(context, datasource_name=None, batch_kwargs_generat
     return True, expectation_suite_name
 
 
-def _profile_to_create_a_suite(additional_batch_kwargs, batch_kwargs, batch_kwargs_generator_name, context,
-                               datasource_name, expectation_suite_name, data_asset_name, profiler_configuration):
+def _profile_to_create_a_suite(
+    additional_batch_kwargs,
+    batch_kwargs,
+    batch_kwargs_generator_name,
+    context,
+    datasource_name,
+    expectation_suite_name,
+    data_asset_name,
+    profiler_configuration,
+):
     click.prompt(
         """
 Great Expectations will choose a couple of columns and generate expectations about them
-to demonstrate some examples of assertions you can make about your data. 
-    
+to demonstrate some examples of assertions you can make about your data.
+
 Press Enter to continue
 """,
         default=True,
@@ -143,7 +168,7 @@ def _raise_profiling_errors(profiling_results):
         == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
     ):
         raise ge_exceptions.DataContextError(
-            """Some of the data assets you specified were not found: {0:s}    
+            """Some of the data assets you specified were not found: {0:s}
             """.format(
                 ",".join(profiling_results["error"]["not_found_data_assets"])
             )
@@ -200,10 +225,10 @@ def create_empty_suite(
 
 
 def launch_jupyter_notebook(notebook_path: str) -> None:
-    jupyter_command_override = os.getenv('GE_JUPYTER_CMD', None)
+    jupyter_command_override = os.getenv("GE_JUPYTER_CMD", None)
     if jupyter_command_override:
         subprocess.call(f"{jupyter_command_override} {notebook_path}", shell=True)
-    else:        
+    else:
         subprocess.call(["jupyter", "notebook", notebook_path])
 
 
