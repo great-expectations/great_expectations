@@ -125,7 +125,7 @@ def create_expectation_suite(context, datasource_name=None, batch_kwargs_generat
         if open_docs:
             attempt_to_open_validation_results_in_data_docs(context, profiling_results)
 
-    return True, expectation_suite_name
+    return True, expectation_suite_name, profiling_results
 
 
 def _profile_to_create_a_suite(additional_batch_kwargs, batch_kwargs, batch_kwargs_generator_name, context,
