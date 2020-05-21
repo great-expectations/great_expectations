@@ -1,7 +1,9 @@
-from .content_block import ContentBlockRenderer
-
 from great_expectations.render.types import (
-    RenderedBulletListContent, RenderedStringTemplateContent)
+    RenderedBulletListContent,
+    RenderedStringTemplateContent,
+)
+
+from .content_block import ContentBlockRenderer
 
 
 class ExceptionListContentBlockRenderer(ContentBlockRenderer):
@@ -14,9 +16,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
 
     _default_content_block_styling = {
         "classes": ["col-12"],
-        "styles": {
-            "margin-top": "20px"
-        },
+        "styles": {"margin-top": "20px"},
         "header": {
             "classes": ["collapsed"],
             "attributes": {
@@ -26,28 +26,20 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
                 "aria-expanded": "true",
                 "aria-controls": "collapseExample",
             },
-            "styles": {
-                "cursor": "pointer",
-            }
+            "styles": {"cursor": "pointer",},
         },
-        "body": {
-            "classes": ["list-group", "collapse"],
-        }
+        "body": {"classes": ["list-group", "collapse"],},
     }
 
     _default_element_styling = {
-        "classes": ["list-group-item"],  # "d-flex", "justify-content-between", "align-items-center"],
+        "classes": [
+            "list-group-item"
+        ],  # "d-flex", "justify-content-between", "align-items-center"],
         "params": {
-            "column": {
-                "classes": ["badge", "badge-primary"]
-            },
-            "expectation_type": {
-                "classes": ["text-monospace"]
-            },
-            "exception_message": {
-                "classes": ["text-monospace"]
-            }
-        }
+            "column": {"classes": ["badge", "badge-primary"]},
+            "expectation_type": {"classes": ["text-monospace"]},
+            "exception_message": {"classes": ["text-monospace"]},
+        },
     }
 
     @classmethod
@@ -62,15 +54,21 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
                 column = evr.expectation_config.kwargs["column"]
             except KeyError:
                 column = None
-            return [RenderedStringTemplateContent(**{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": template_str,
-                    "params": {
-                        "column": column,
-                        "expectation_type": evr.expectation_config.expectation_type,
-                        "exception_message": evr.exception_info["exception_message"]
-                    },
-                    "styling": styling,
-                }
-            })]
+            return [
+                RenderedStringTemplateContent(
+                    **{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": template_str,
+                            "params": {
+                                "column": column,
+                                "expectation_type": evr.expectation_config.expectation_type,
+                                "exception_message": evr.exception_info[
+                                    "exception_message"
+                                ],
+                            },
+                            "styling": styling,
+                        },
+                    }
+                )
+            ]

@@ -2,12 +2,12 @@
 from great_expectations import DataContext
 
 GREETING = """<cyan>\
-  ___              _     ___                  _        _   _             
+  ___              _     ___                  _        _   _
  / __|_ _ ___ __ _| |_  | __|_ ___ __  ___ __| |_ __ _| |_(_)___ _ _  ___
 | (_ | '_/ -_) _` |  _| | _|\ \ / '_ \/ -_) _|  _/ _` |  _| / _ \ ' \(_-<
  \___|_| \___\__,_|\__| |___/_\_\ .__/\___\__|\__\__,_|\__|_\___/_||_/__/
-                                |_|                                      
-             ~ Always know what to expect from your data ~             
+                                |_|
+             ~ Always know what to expect from your data ~
 </cyan>"""
 
 LETS_BEGIN_PROMPT = """Let's configure a new Data Context.
@@ -29,7 +29,9 @@ OK to proceed?"""
 
 PROJECT_IS_COMPLETE = "This looks like an existing project that <green>appears complete!</green> You are <green>ready to roll.</green>\n"
 
-RUN_INIT_AGAIN = "OK. You must run <green>great_expectations init</green> to fix the missing files!"
+RUN_INIT_AGAIN = (
+    "OK. You must run <green>great_expectations init</green> to fix the missing files!"
+)
 
 COMPLETE_ONBOARDING_PROMPT = """To run locally, we need some files that are not in source control.
   - Anything existing will not be modified.
@@ -60,19 +62,12 @@ Great Expectations added some missing files required to run.
 
 BUILD_DOCS_PROMPT = "Would you like to build & view this project's Data Docs!?"
 
-NEW_TEMPLATE_PROMPT = """
-Would you like to install a new config file template?
-  - We will move your existing `{}` to `{}`"""
-
-NEW_TEMPLATE_INSTALLED = """
-OK. You now have a new config file: `{}`.
-  - Please copy the relevant values from the archived file ({}) into this new template.
-"""
-
 NO_DATASOURCES_FOUND = """<red>Error: No datasources were found.</red> Please add one by:
   - running `<green>great_expectations datasource new</green>` or
   - by editing the {} file
-""".format(DataContext.GE_YML)
+""".format(
+    DataContext.GE_YML
+)
 
 SETUP_SUCCESS = "\n<cyan>Congratulations! Great Expectations is now set up.</cyan>"
 

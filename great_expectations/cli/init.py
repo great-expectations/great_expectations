@@ -6,8 +6,7 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
-from great_expectations.cli.datasource import \
-    add_datasource as add_datasource_impl
+from great_expectations.cli.datasource import add_datasource as add_datasource_impl
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.cli_messages import (
     BUILD_DOCS_PROMPT,
@@ -25,13 +24,10 @@ from great_expectations.cli.cli_messages import (
     SECTION_SEPARATOR
 )
 from great_expectations.cli.util import cli_message, is_sane_slack_webhook
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.exceptions import (
     DataContextError,
     DatasourceInitializationError,
-)
-
-from great_expectations.core.usage_statistics.usage_statistics import (
-    send_usage_message,
 )
 
 try:
@@ -58,7 +54,7 @@ except ImportError:
 @click.option(
     "--usage-stats/--no-usage-stats",
     help="By default, usage statistics are enabled unless you specify the --no-usage-stats flag.",
-    default=True
+    default=True,
 )
 def init(target_directory, view, usage_stats):
     """
@@ -84,7 +80,9 @@ def init(target_directory, view, usage_stats):
             sys.exit(1)
 
         try:
-            context = DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
+            context = DataContext.create(
+                target_directory, usage_statistics_enabled=usage_stats
+            )
             cli_message(ONBOARDING_COMPLETE)
             # TODO if this is correct, ensure this is covered by a test
             # cli_message(SETUP_SUCCESS)
@@ -100,8 +98,12 @@ def init(target_directory, view, usage_stats):
             exit(0)
 
         try:
-            context = DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
-            send_usage_message(data_context=context, event="cli.init.create", success=True)
+            context = DataContext.create(
+                target_directory, usage_statistics_enabled=usage_stats
+            )
+            send_usage_message(
+                data_context=context, event="cli.init.create", success=True
+            )
         except DataContextError as e:
             # TODO ensure this is covered by a test
             cli_message("<red>{}</red>".format(e))
@@ -156,7 +158,7 @@ def init(target_directory, view, usage_stats):
         DataContextError,
         ge_exceptions.ProfilerError,
         IOError,
-        SQLAlchemyError
+        SQLAlchemyError,
     ) as e:
         cli_message("<red>{}</red>".format(e))
         sys.exit(1)

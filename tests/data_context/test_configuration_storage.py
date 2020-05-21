@@ -1,7 +1,7 @@
-import pytest
-
-import os
 import logging
+import os
+
+import pytest
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +12,9 @@ def read_config_file_from_disk(config_filepath):
         return config_file
 
 
-def test_preserve_comments_in_yml_after_adding_datasource(data_context_parameterized_expectation_suite):
+def test_preserve_comments_in_yml_after_adding_datasource(
+    data_context_parameterized_expectation_suite,
+):
     ### THIS TEST FAILING IS A KNOWN ISSUE.
     ### A TICKET IS OPEN
 
@@ -26,7 +28,8 @@ def test_preserve_comments_in_yml_after_adding_datasource(data_context_parameter
     #####
 
     config_filepath = os.path.join(
-        data_context_parameterized_expectation_suite.root_directory, "great_expectations.yml"
+        data_context_parameterized_expectation_suite.root_directory,
+        "great_expectations.yml",
     )
     initial_config = read_config_file_from_disk(config_filepath)
     print("++++++++++++++++ initial config +++++++++++++++++++++++")
@@ -38,13 +41,12 @@ def test_preserve_comments_in_yml_after_adding_datasource(data_context_parameter
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
         batch_kwargs_generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderBatchKwargsGenerator",
-        "base_directory": "../data",
-    }
-}
-)
-
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": "../data",
+            }
+        },
+    )
 
     # TODO The comments on lines 1,2 & 4 of the fixture exposes the bug.
     expected = """# This is a basic configuration for testing.
@@ -103,7 +105,7 @@ stores:
 
   validations_store:
     class_name: ValidationsStore
-    
+
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
   default:

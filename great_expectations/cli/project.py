@@ -4,14 +4,11 @@ import click
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.cli.upgrade_helpers import UpgradeHelperV11
 from great_expectations.cli.util import cli_message
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
-from great_expectations.cli.upgrade_helpers import UpgradeHelperV11
-from great_expectations import __version__ as ge_version
 
-GE_UPGRADE_HELPERS = {
-    "0.11": UpgradeHelperV11
-}
+GE_UPGRADE_HELPERS = {"0.11": UpgradeHelperV11}
 
 
 @click.group()
@@ -33,9 +30,7 @@ def project_check_config(directory):
     is_config_ok, error_message, context = do_config_check(directory)
     if context:
         send_usage_message(
-            data_context=context,
-            event="cli.project.check_config",
-            success=True
+            data_context=context, event="cli.project.check_config", success=True
         )
     if not is_config_ok:
         cli_message("Unfortunately, your config appears to be invalid:\n")

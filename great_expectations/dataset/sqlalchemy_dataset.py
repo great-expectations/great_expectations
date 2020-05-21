@@ -1,22 +1,26 @@
-from typing import List
-
-import uuid
-from functools import wraps
 import inspect
 import logging
+import traceback
+import uuid
 import warnings
 from datetime import datetime
+from functools import wraps
 from importlib import import_module
+from typing import Any, List
 
-import pandas as pd
 import numpy as np
-
+import pandas as pd
 from dateutil.parser import parse
+
+from great_expectations.data_asset import DataAsset
+from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.util import (
+    check_sql_engine_dialect,
+    get_approximate_percentile_disc_sql,
+)
 
 from .dataset import Dataset
 from .pandas_dataset import PandasDataset
-from great_expectations.data_asset import DataAsset
-from great_expectations.data_asset.util import DocInherit, parse_result_format
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +29,18 @@ try:
     from sqlalchemy.engine import reflection
     from sqlalchemy.sql.expression import BinaryExpression, literal
     from sqlalchemy.sql.operators import custom_op
+    from sqlalchemy.sql.elements import WithinGroup
+    from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.exc import ProgrammingError
 except ImportError:
-    logger.debug("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+
+try:
+    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
+except ImportError:
+    sqlalchemy_psycopg2 = None
 
 try:
     import sqlalchemy_redshift.dialect
@@ -40,14 +54,20 @@ except ImportError:
 
 try:
     import pybigquery.sqlalchemy_bigquery
+
     try:
         getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
         bigquery_types_tuple = None
     except AttributeError:
         # In older versions of the pybigquery driver, types were not exported, so we use a hack
-        logger.warning("Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later.")
+        logger.warning(
+            "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
+        )
         from collections import namedtuple
-        BigQueryTypes = namedtuple('BigQueryTypes', sorted(pybigquery.sqlalchemy_bigquery._type_map))
+
+        BigQueryTypes = namedtuple(
+            "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
+        )
         bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
 except ImportError:
     bigquery_types_tuple = None
@@ -55,7 +75,6 @@ except ImportError:
 
 
 class SqlAlchemyBatchReference(object):
-
     def __init__(self, engine, table_name=None, schema=None, query=None):
         self._engine = engine
         if table_name is None and query is None:
@@ -72,18 +91,12 @@ class SqlAlchemyBatchReference(object):
             kwargs = {
                 "engine": self._engine,
                 "table_name": self._table_name,
-                "custom_sql": self._query
+                "custom_sql": self._query,
             }
         elif self._table_name:
-            kwargs = {
-                "engine": self._engine,
-                "table_name": self._table_name
-            }
+            kwargs = {"engine": self._engine, "table_name": self._table_name}
         else:
-            kwargs = {
-                "engine": self._engine,
-                "custom_sql": self._query
-            }
+            kwargs = {"engine": self._engine, "custom_sql": self._query}
         if self._schema:
             kwargs["schema"] = self._schema
 
@@ -91,7 +104,6 @@ class SqlAlchemyBatchReference(object):
 
 
 class MetaSqlAlchemyDataset(Dataset):
-
     def __init__(self, *args, **kwargs):
         super(MetaSqlAlchemyDataset, self).__init__(*args, **kwargs)
 
@@ -107,35 +119,49 @@ class MetaSqlAlchemyDataset(Dataset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(self, column, mostly=None, result_format=None, *args, **kwargs):
+        def inner_wrapper(
+            self, column, mostly=None, result_format=None, *args, **kwargs
+        ):
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
             result_format = parse_result_format(result_format)
 
-            if result_format['result_format'] == 'COMPLETE':
-                warnings.warn("Setting result format to COMPLETE for a SqlAlchemyDataset can be dangerous because it will not limit the number of returned results.")
+            if result_format["result_format"] == "COMPLETE":
+                warnings.warn(
+                    "Setting result format to COMPLETE for a SqlAlchemyDataset can be dangerous because it will not limit the number of returned results."
+                )
                 unexpected_count_limit = None
             else:
-                unexpected_count_limit = result_format['partial_unexpected_count']
+                unexpected_count_limit = result_format["partial_unexpected_count"]
 
             expected_condition = func(self, column, *args, **kwargs)
 
             # Added to prepare for when an ignore_values argument is added to the expectation
             ignore_values = [None]
-            if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
+            if func.__name__ in [
+                "expect_column_values_to_not_be_null",
+                "expect_column_values_to_be_null",
+            ]:
                 ignore_values = []
                 # Counting the number of unexpected values can be expensive when there is a large
                 # number of np.nan values.
                 # This only happens on expect_column_values_to_not_be_null expectations.
                 # Since there is no reason to look for most common unexpected values in this case,
                 # we will instruct the result formatting method to skip this step.
-                result_format['partial_unexpected_count'] = 0
+                result_format["partial_unexpected_count"] = 0
 
             ignore_values_conditions = []
-            if len(ignore_values) > 0 and None not in ignore_values or len(ignore_values) > 1 and None in ignore_values:
+            if (
+                len(ignore_values) > 0
+                and None not in ignore_values
+                or len(ignore_values) > 1
+                and None in ignore_values
+            ):
                 ignore_values_conditions += [
-                    sa.column(column).in_([val for val in ignore_values if val is not None])
+                    sa.column(column).in_(
+                        [val for val in ignore_values if val is not None]
+                    )
                 ]
             if None in ignore_values:
                 ignore_values_conditions += [sa.column(column).is_(None)]
@@ -147,45 +173,58 @@ class MetaSqlAlchemyDataset(Dataset):
             else:
                 ignore_values_condition = sa.literal(False)
 
-            count_query = sa.select([
-                sa.func.count().label('element_count'),
-                sa.func.sum(
-                    sa.case([(ignore_values_condition, 1)], else_=0)
-                ).label('null_count'),
-                sa.func.sum(
-                    sa.case([
-                        (
-                            sa.and_(
-                                sa.not_(expected_condition),
-                                sa.not_(ignore_values_condition)
-                            ),
-                            1
+            count_query = sa.select(
+                [
+                    sa.func.count().label("element_count"),
+                    sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
+                        "null_count"
+                    ),
+                    sa.func.sum(
+                        sa.case(
+                            [
+                                (
+                                    sa.and_(
+                                        sa.not_(expected_condition),
+                                        sa.not_(ignore_values_condition),
+                                    ),
+                                    1,
+                                )
+                            ],
+                            else_=0,
                         )
-                    ], else_=0)
-                ).label('unexpected_count')
-            ]).select_from(self._table)
+                    ).label("unexpected_count"),
+                ]
+            ).select_from(self._table)
 
             count_results = dict(self.engine.execute(count_query).fetchone())
 
             # Handle case of empty table gracefully:
-            if "element_count" not in count_results or count_results["element_count"] is None:
+            if (
+                "element_count" not in count_results
+                or count_results["element_count"] is None
+            ):
                 count_results["element_count"] = 0
             if "null_count" not in count_results or count_results["null_count"] is None:
                 count_results["null_count"] = 0
-            if "unexpected_count" not in count_results or count_results["unexpected_count"] is None:
+            if (
+                "unexpected_count" not in count_results
+                or count_results["unexpected_count"] is None
+            ):
                 count_results["unexpected_count"] = 0
 
             # Retrieve unexpected values
             unexpected_query_results = self.engine.execute(
-                sa.select([sa.column(column)]).select_from(self._table).where(
-                    sa.and_(sa.not_(expected_condition),
-                            sa.not_(ignore_values_condition)
-                            )
-                ).limit(unexpected_count_limit)
+                sa.select([sa.column(column)])
+                .select_from(self._table)
+                .where(
+                    sa.and_(
+                        sa.not_(expected_condition), sa.not_(ignore_values_condition)
+                    )
+                )
+                .limit(unexpected_count_limit)
             )
 
-            nonnull_count = count_results['element_count'] - \
-                count_results['null_count']
+            nonnull_count = count_results["element_count"] - count_results["null_count"]
 
             if "output_strftime_format" in kwargs:
                 output_strftime_format = kwargs["output_strftime_format"]
@@ -195,32 +234,40 @@ class MetaSqlAlchemyDataset(Dataset):
                         col = parse(x[column])
                     else:
                         col = x[column]
-                    maybe_limited_unexpected_list.append(datetime.strftime(col, output_strftime_format))
+                    maybe_limited_unexpected_list.append(
+                        datetime.strftime(col, output_strftime_format)
+                    )
             else:
-                maybe_limited_unexpected_list = [x[column] for x in unexpected_query_results.fetchall()]
+                maybe_limited_unexpected_list = [
+                    x[column] for x in unexpected_query_results.fetchall()
+                ]
 
-            success_count = nonnull_count - count_results['unexpected_count']
+            success_count = nonnull_count - count_results["unexpected_count"]
             success, percent_success = self._calc_map_expectation_success(
-                success_count, nonnull_count, mostly)
+                success_count, nonnull_count, mostly
+            )
 
             return_obj = self._format_map_output(
                 result_format,
                 success,
-                count_results['element_count'],
+                count_results["element_count"],
                 nonnull_count,
-                count_results['unexpected_count'],
+                count_results["unexpected_count"],
                 maybe_limited_unexpected_list,
                 None,
             )
 
-            if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
+            if func.__name__ in [
+                "expect_column_values_to_not_be_null",
+                "expect_column_values_to_be_null",
+            ]:
                 # These results are unnecessary for the above expectations
-                del return_obj['result']['unexpected_percent_nonmissing']
-                del return_obj['result']['missing_count']
-                del return_obj['result']['missing_percent']
+                del return_obj["result"]["unexpected_percent_nonmissing"]
+                del return_obj["result"]["missing_count"]
+                del return_obj["result"]["missing_percent"]
                 try:
-                    del return_obj['result']['partial_unexpected_counts']
-                    del return_obj['result']['partial_unexpected_list']
+                    del return_obj["result"]["partial_unexpected_counts"]
+                    del return_obj["result"]["partial_unexpected_list"]
                 except KeyError:
                     pass
 
@@ -233,7 +280,6 @@ class MetaSqlAlchemyDataset(Dataset):
 
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
-
     @classmethod
     def from_dataset(cls, dataset=None):
         if isinstance(dataset, SqlAlchemyDataset):
@@ -241,12 +287,20 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         else:
             raise ValueError("from_dataset requires a SqlAlchemy dataset")
 
-    def __init__(self, table_name=None, engine=None, connection_string=None,
-                 custom_sql=None, schema=None, *args, **kwargs):
+    def __init__(
+        self,
+        table_name=None,
+        engine=None,
+        connection_string=None,
+        custom_sql=None,
+        schema=None,
+        *args,
+        **kwargs,
+    ):
 
         if custom_sql and not table_name:
-            #NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
-            #was used for a temp table and raising an error
+            # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
+            # was used for a temp table and raising an error
             schema = None
             table_name = "ge_tmp_" + str(uuid.uuid4())[:8]
             # mssql expects all temporary table names to have a prefix '#'
@@ -278,9 +332,18 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
         # Get the dialect **for purposes of identifying types**
-        if self.engine.dialect.name.lower() in ["postgresql", "mysql", "sqlite", "oracle", "mssql", "oracle"]:
+        if self.engine.dialect.name.lower() in [
+            "postgresql",
+            "mysql",
+            "sqlite",
+            "oracle",
+            "mssql",
+            "oracle",
+        ]:
             # These are the officially included and supported dialects by sqlalchemy
-            self.dialect = import_module("sqlalchemy.dialects." + self.engine.dialect.name)
+            self.dialect = import_module(
+                "sqlalchemy.dialects." + self.engine.dialect.name
+            )
 
             if engine and engine.dialect.name.lower() in ["sqlite", "mssql"]:
                 # sqlite/mssql temp tables only persist within a connection so override the engine
@@ -304,21 +367,35 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             pass
 
         if custom_sql is not None and self.engine.dialect.name.lower() == "bigquery":
-            if generated_table_name is not None and self.engine.dialect.dataset_id is None:
-                raise ValueError("No BigQuery dataset specified. Use bigquery_temp_table batch_kwarg or a specify a "
-                                 "default dataset in engine url")
+            if (
+                generated_table_name is not None
+                and self.engine.dialect.dataset_id is None
+            ):
+                raise ValueError(
+                    "No BigQuery dataset specified. Use bigquery_temp_table batch_kwarg or a specify a "
+                    "default dataset in engine url"
+                )
 
-        if (custom_sql is not None and self.engine.dialect.name.lower() == "snowflake" and
-                generated_table_name is not None):
-            raise ValueError("No snowflake_transient_table specified. Snowflake with a query batch_kwarg will create "
-                             "a transient table, so you must provide a user-selected name.")
+        if (
+            custom_sql is not None
+            and self.engine.dialect.name.lower() == "snowflake"
+            and generated_table_name is not None
+        ):
+            raise ValueError(
+                "No snowflake_transient_table specified. Snowflake with a query batch_kwarg will create "
+                "a transient table, so you must provide a user-selected name."
+            )
 
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql, schema_name=schema)
 
-            if generated_table_name is not None and self.engine.dialect.name.lower() == "bigquery":
-                logger.warning("Created permanent table {table_name}".format(
-                    table_name=table_name))
+            if (
+                generated_table_name is not None
+                and self.engine.dialect.name.lower() == "bigquery"
+            ):
+                logger.warning(
+                    "Created permanent table {table_name}".format(table_name=table_name)
+                )
 
         try:
             insp = reflection.Inspector.from_engine(self.engine)
@@ -333,18 +410,43 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.columns = self.column_reflection_fallback()
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
-        super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+
+    @property
+    def sql_engine_dialect(self) -> Any:
+        return self.engine.dialect
+
+    def attempt_allowing_relative_error(self):
+        try:
+            detected_redshift = check_sql_engine_dialect(
+                actual_sql_engine_dialect=self.sql_engine_dialect,
+                candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
+            )
+        except AttributeError:
+            # sqlalchemy_redshift could be None if it was not available to import
+            detected_redshift = False
+        try:
+            detected_psycopg2 = check_sql_engine_dialect(
+                actual_sql_engine_dialect=self.sql_engine_dialect,
+                candidate_sql_engine_dialect=sqlalchemy_psycopg2.PGDialect_psycopg2,
+            )
+        except AttributeError:
+            # sqlalchemy_psycopg2 could be None if it was not available to import
+            detected_psycopg2 = False
+        return detected_redshift or detected_psycopg2
 
     def head(self, n=5):
         """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
 
         try:
-            df = next(pd.read_sql_table(
-                table_name=self._table.name,
-                schema=self._table.schema,
-                con=self.engine,
-                chunksize=n
-            ))
+            df = next(
+                pd.read_sql_table(
+                    table_name=self._table.name,
+                    schema=self._table.schema,
+                    con=self.engine,
+                    chunksize=n,
+                )
+            )
         except (ValueError, NotImplementedError):
             # it looks like MetaData that is used by pd.read_sql_table
             # cannot work on a temp table.
@@ -360,7 +462,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
             # Limit is unknown in mssql! Use top instead!
             if self.engine.dialect.name.lower() == "mssql":
-                head_sql_str = "select top({n}) * from {table}".format(n=n, table=self._table.name)
+                head_sql_str = "select top({n}) * from {table}".format(
+                    n=n, table=self._table.name
+                )
 
             df = pd.read_sql(head_sql_str, con=self.engine)
 
@@ -370,71 +474,83 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
                 discard_catch_exceptions_kwargs=False,
-                discard_include_config_kwargs=False
-            )
+                discard_include_config_kwargs=False,
+            ),
         )
 
     def get_row_count(self):
-        count_query = sa.select([sa.func.count()]).select_from(
-            self._table)
+        count_query = sa.select([sa.func.count()]).select_from(self._table)
         return int(self.engine.execute(count_query).scalar())
 
     def get_column_count(self):
         return len(self.columns)
 
     def get_table_columns(self) -> List[str]:
-        return [col['name'] for col in self.columns]
+        return [col["name"] for col in self.columns]
 
     def get_column_nonnull_count(self, column):
         ignore_values = [None]
-        count_query = sa.select([
-            sa.func.count().label('element_count'),
-            sa.func.sum(
-                sa.case([(sa.or_(
-                    sa.column(column).in_(ignore_values),
-                    # Below is necessary b/c sa.in_() uses `==` but None != None
-                    # But we only consider this if None is actually in the list of ignore values
-                    sa.column(column).is_(None) if None in ignore_values else False), 1)], else_=0)
-            ).label('null_count'),
-        ]).select_from(self._table)
+        count_query = sa.select(
+            [
+                sa.func.count().label("element_count"),
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (
+                                sa.or_(
+                                    sa.column(column).in_(ignore_values),
+                                    # Below is necessary b/c sa.in_() uses `==` but None != None
+                                    # But we only consider this if None is actually in the list of ignore values
+                                    sa.column(column).is_(None)
+                                    if None in ignore_values
+                                    else False,
+                                ),
+                                1,
+                            )
+                        ],
+                        else_=0,
+                    )
+                ).label("null_count"),
+            ]
+        ).select_from(self._table)
         count_results = dict(self.engine.execute(count_query).fetchone())
-        element_count = int(count_results.get('element_count') or 0)
-        null_count = int(count_results.get('null_count') or 0)
+        element_count = int(count_results.get("element_count") or 0)
+        null_count = int(count_results.get("null_count") or 0)
         return element_count - null_count
 
     def get_column_sum(self, column):
         return self.engine.execute(
-            sa.select([sa.func.sum(sa.column(column))]).select_from(
-                self._table)
+            sa.select([sa.func.sum(sa.column(column))]).select_from(self._table)
         ).scalar()
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
         if parse_strings_as_datetimes:
             raise NotImplementedError
         return self.engine.execute(
-            sa.select([sa.func.max(sa.column(column))]).select_from(
-                self._table)
+            sa.select([sa.func.max(sa.column(column))]).select_from(self._table)
         ).scalar()
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
         if parse_strings_as_datetimes:
             raise NotImplementedError
         return self.engine.execute(
-            sa.select([sa.func.min(sa.column(column))]).select_from(
-                self._table)
+            sa.select([sa.func.min(sa.column(column))]).select_from(self._table)
         ).scalar()
 
     def get_column_value_counts(self, column, sort="value", collate=None):
         if sort not in ["value", "count", "none"]:
-            raise ValueError(
-                "sort must be either 'value', 'count', or 'none'"
-            )
+            raise ValueError("sort must be either 'value', 'count', or 'none'")
 
-        query = sa.select([
-                sa.column(column).label("value"),
-                sa.func.count(sa.column(column)).label("count"),
-            ]).where(sa.column(column) != None) \
-              .group_by(sa.column(column))
+        query = (
+            sa.select(
+                [
+                    sa.column(column).label("value"),
+                    sa.func.count(sa.column(column)).label("count"),
+                ]
+            )
+            .where(sa.column(column) != None)
+            .group_by(sa.column(column))
+        )
         if sort == "value":
             # NOTE: depending on the way the underlying database collates columns,
             # ordering can vary. postgresql collate "C" matches default sort
@@ -449,32 +565,32 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         results = self.engine.execute(query.select_from(self._table)).fetchall()
         series = pd.Series(
             [row[1] for row in results],
-            index=pd.Index(
-                data=[row[0] for row in results],
-                name="value"
-            ),
-            name="count"
+            index=pd.Index(data=[row[0] for row in results], name="value"),
+            name="count",
         )
         return series
 
     def get_column_mean(self, column):
         return self.engine.execute(
-            sa.select([sa.func.avg(sa.column(column))]).select_from(
-                self._table)
+            sa.select([sa.func.avg(sa.column(column))]).select_from(self._table)
         ).scalar()
 
     def get_column_unique_count(self, column):
         return self.engine.execute(
             sa.select([sa.func.count(sa.func.distinct(sa.column(column)))]).select_from(
-                self._table)
+                self._table
+            )
         ).scalar()
 
     def get_column_median(self, column):
         nonnull_count = self.get_column_nonnull_count(column)
         element_values = self.engine.execute(
-            sa.select([sa.column(column)]).order_by(sa.column(column)).where(
-                sa.column(column) != None
-            ).offset(max(nonnull_count // 2 - 1, 0)).limit(2).select_from(self._table)
+            sa.select([sa.column(column)])
+            .order_by(sa.column(column))
+            .where(sa.column(column) != None)
+            .offset(max(nonnull_count // 2 - 1, 0))
+            .limit(2)
+            .select_from(self._table)
         )
 
         column_values = list(element_values.fetchall())
@@ -483,56 +599,92 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column_median = None
         elif nonnull_count % 2 == 0:
             # An even number of column values: take the average of the two center values
-            column_median = float(
-                column_values[0][0] +  # left center value
-                column_values[1][0]    # right center value
-            ) / 2.0  # Average center values
+            column_median = (
+                float(
+                    column_values[0][0]
+                    + column_values[1][0]  # left center value  # right center value
+                )
+                / 2.0
+            )  # Average center values
         else:
             # An odd number of column values, we can just take the center value
             column_median = column_values[1][0]  # True center value
         return column_median
 
-    def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
-        selects = None
-        if self.engine.dialect.name.lower() == "mssql":
+    def get_column_quantiles(
+        self, column: str, quantiles, allow_relative_error: bool = False
+    ):
+        if self.sql_engine_dialect.name.lower() == "mssql":
             # mssql requires over(), so we add an empty over() clause
-            selects = [sa.func.percentile_disc(quantile).within_group(
-                sa.column(column).asc()).over() for quantile in quantiles]
-        elif self.engine.dialect.name.lower() == "bigquery":
+            selects = [
+                sa.func.percentile_disc(quantile)
+                .within_group(sa.column(column).asc())
+                .over()
+                for quantile in quantiles
+            ]
+        elif self.sql_engine_dialect.name.lower() == "bigquery":
             # BigQuery does not support "WITHIN", so we need a special case for it
-            selects = [sa.func.percentile_disc(sa.column(column), quantile).over() for quantile in quantiles]
+            selects: List = [
+                sa.func.percentile_disc(sa.column(column), quantile).over()
+                for quantile in quantiles
+            ]
         else:
-            try:
-                if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
-                    # Redshift does not have a percentile_disc method, but does support an approximate version
-                    if allow_relative_error is True:
-                        selects = [sa.text(
-                            ", ".join(["approximate " + str(stmt.compile(dialect=self.engine.dialect, compile_kwargs={
-                                'literal_binds': True})) for stmt in selects])
-                        )]
-                    else:
-                        raise ValueError("Redshift does not support computing quantiles without approximation error; "
-                                         "set allow_relative_error to True to allow approximate quantiles.")
-            except (AttributeError, TypeError):
-                pass
+            selects: List = [
+                sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
+                for quantile in quantiles
+            ]
 
-        if not selects:
-            selects = [sa.func.percentile_disc(quantile).within_group(
-                sa.column(column).asc()) for quantile in quantiles]
+        try:
+            quantiles = self.engine.execute(
+                sa.select(selects).select_from(self._table)
+            ).fetchone()
+        except ProgrammingError:
+            # ProgrammingError: (psycopg2.errors.SyntaxError) Aggregate function "percentile_disc" is not supported;
+            # use approximate percentile_disc or percentile_cont instead.
+            if self.attempt_allowing_relative_error():
+                # Redshift does not have a percentile_disc method, but does support an approximate version.
+                if allow_relative_error:
+                    sql_approx: str = get_approximate_percentile_disc_sql(
+                        selects=selects, sql_engine_dialect=self.sql_engine_dialect
+                    )
+                    selects = [sa.text(sql_approx)]
+                    try:
+                        quantiles = self.engine.execute(
+                            sa.select(selects).select_from(self._table)
+                        ).fetchone()
+                    except ProgrammingError as pe:
+                        exception_message: str = "An SQL syntax Exception occurred."
+                        exception_traceback: str = traceback.format_exc()
+                        exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+                        logger.error(exception_message)
+                        raise pe
+                else:
+                    raise ValueError(
+                        f'The SQL engine dialect "{str(self.sql_engine_dialect)}" does not support computing quantiles '
+                        "without approximation error; set allow_relative_error to True to allow approximate quantiles."
+                    )
+            else:
+                raise ValueError(
+                    f'The SQL engine dialect "{str(self.sql_engine_dialect)}" does not support computing quantiles with '
+                    "approximation error; set allow_relative_error to False to disable approximate quantiles."
+                )
 
-        quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
         return list(quantiles)
 
     def get_column_stdev(self, column):
-        if self.engine.dialect.name.lower() != "mssql":
-            res = self.engine.execute(sa.select([
-                    sa.func.stddev_samp(sa.column(column))
-                ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
+        if self.sql_engine_dialect.name.lower() != "mssql":
+            res = self.engine.execute(
+                sa.select([sa.func.stddev_samp(sa.column(column))])
+                .select_from(self._table)
+                .where(sa.column(column) != None)
+            ).fetchone()
         else:
             # stdev_samp is not a recognized built-in function name but stdevp does exist for mssql!
-            res = self.engine.execute(sa.select([
-                    sa.func.stdevp(sa.column(column))
-                ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
+            res = self.engine.execute(
+                sa.select([sa.func.stdevp(sa.column(column))])
+                .select_from(self._table)
+                .where(sa.column(column) != None)
+            ).fetchone()
         return float(res[0])
 
     def get_column_hist(self, column, bins):
@@ -550,25 +702,25 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if (bins[0] == -np.inf) or (bins[0] == -float("inf")):
             case_conditions.append(
                 sa.func.sum(
-                    sa.case(
-                        [
-                            (sa.column(column) < bins[idx+1], 1)
-                        ], else_=0
-                    )
+                    sa.case([(sa.column(column) < bins[idx + 1], 1)], else_=0)
                 ).label("bin_" + str(idx))
             )
             idx += 1
 
-        for idx in range(idx, len(bins)-2):
+        for idx in range(idx, len(bins) - 2):
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
                         [
-                            (sa.and_(
-                                bins[idx] <= sa.column(column),
-                                sa.column(column) < bins[idx+1]
-                            ), 1)
-                        ], else_=0
+                            (
+                                sa.and_(
+                                    bins[idx] <= sa.column(column),
+                                    sa.column(column) < bins[idx + 1],
+                                ),
+                                1,
+                            )
+                        ],
+                        else_=0,
                     )
                 ).label("bin_" + str(idx))
             )
@@ -576,43 +728,43 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if (bins[-1] == np.inf) or (bins[-1] == float("inf")):
             case_conditions.append(
                 sa.func.sum(
-                    sa.case(
-                        [
-                            (bins[-2] <= sa.column(column), 1)
-                        ], else_=0
-                    )
-                ).label("bin_" + str(len(bins)-1))
+                    sa.case([(bins[-2] <= sa.column(column), 1)], else_=0)
+                ).label("bin_" + str(len(bins) - 1))
             )
         else:
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
                         [
-                            (sa.and_(
-                                bins[-2] <= sa.column(column),
-                                sa.column(column) <= bins[-1]
-                            ), 1)
-                        ], else_=0
+                            (
+                                sa.and_(
+                                    bins[-2] <= sa.column(column),
+                                    sa.column(column) <= bins[-1],
+                                ),
+                                1,
+                            )
+                        ],
+                        else_=0,
                     )
-                ).label("bin_" + str(len(bins)-1))
+                ).label("bin_" + str(len(bins) - 1))
             )
 
-        query = sa.select(
-            case_conditions
-        )\
-        .where(
-            sa.column(column) != None,
-        )\
-        .select_from(self._table)
+        query = (
+            sa.select(case_conditions)
+            .where(sa.column(column) != None,)
+            .select_from(self._table)
+        )
 
         hist = list(self.engine.execute(query).fetchone())
         return hist
 
-    def get_column_count_in_range(self, column, min_val=None, max_val=None, strict_min=False, strict_max=True):
+    def get_column_count_in_range(
+        self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
+    ):
         if min_val is None and max_val is None:
-            raise ValueError('Must specify either min or max value')
+            raise ValueError("Must specify either min or max value")
         if min_val is not None and max_val is not None and min_val > max_val:
-            raise ValueError('Min value must be <= to max value')
+            raise ValueError("Min value must be <= to max value")
 
         min_condition = None
         max_condition = None
@@ -634,16 +786,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         else:
             condition = max_condition
 
-        query = query = sa.select([
-                    sa.func.count((sa.column(column)))
-                ]) \
-                .where(
-                    sa.and_(
-                        sa.column(column) != None,
-                        condition
-                    )
-                ) \
-                .select_from(self._table)
+        query = query = (
+            sa.select([sa.func.count((sa.column(column)))])
+            .where(sa.and_(sa.column(column) != None, condition))
+            .select_from(self._table)
+        )
 
         return self.engine.execute(query).scalar()
 
@@ -681,45 +828,58 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # similar, for example.
         ###
 
-        if self.engine.dialect.name.lower() == "bigquery":
+        if self.sql_engine_dialect.name.lower() == "bigquery":
             stmt = "CREATE OR REPLACE TABLE `{table_name}` AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql)
-        elif self.engine.dialect.name.lower() == "snowflake":
+                table_name=table_name, custom_sql=custom_sql
+            )
+        elif self.sql_engine_dialect.name.lower() == "snowflake":
             logger.info("Creating transient table %s" % table_name)
             if schema_name is not None:
                 table_name = schema_name + "." + table_name
             stmt = "CREATE OR REPLACE TRANSIENT TABLE {table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql)
-        elif self.engine.dialect.name == "mysql":
+                table_name=table_name, custom_sql=custom_sql
+            )
+        elif self.sql_engine_dialect.name == "mysql":
             stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql)
-        elif self.engine.dialect.name == "mssql":
+                table_name=table_name, custom_sql=custom_sql
+            )
+        elif self.sql_engine_dialect.name == "mssql":
             # Insert "into #{table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
             # Note: transforming custom_sql to uppercase/lowercase has uninteded consequences (i.e., changing column names), so this is not an option!
-            if 'from' in custom_sql:
-                strsep = 'from'
+            if "from" in custom_sql:
+                strsep = "from"
             else:
-                strsep = 'FROM'
+                strsep = "FROM"
             custom_sqlmod = custom_sql.split(strsep, maxsplit=1)
-            stmt = (custom_sqlmod[0] + "into {table_name} from" + custom_sqlmod[1]).format(table_name=table_name)
+            stmt = (
+                custom_sqlmod[0] + "into {table_name} from" + custom_sqlmod[1]
+            ).format(table_name=table_name)
         else:
-            stmt = "CREATE TEMPORARY TABLE \"{table_name}\" AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql)
+            stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
+                table_name=table_name, custom_sql=custom_sql
+            )
         self.engine.execute(stmt)
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
-        if self.engine.dialect.name.lower() != "mssql":
+        if self.sql_engine_dialect.name.lower() != "mssql":
             sql = sa.select([sa.text("*")]).select_from(self._table).limit(1)
             col_names = self.engine.execute(sql).keys()
-            col_dict = [{'name': col_name} for col_name in col_names]
+            col_dict = [{"name": col_name} for col_name in col_names]
         else:
             type_module = self._get_dialect_type_module()
             # Get column names and types from the database
             # StackOverflow to the rescue: https://stackoverflow.com/a/38634368
-            col_info = self.engine.execute("SELECT cols.NAME,ty.NAME FROM tempdb.sys.columns cols JOIN sys.types ty ON cols.user_type_id = ty.user_type_id WHERE object_id = OBJECT_ID('tempdb..{}')".format(self._table)).fetchall()
-            col_dict = [{'name': col_name, 'type': getattr(type_module,col_type.upper())()} for col_name,col_type in col_info]
+            col_info = self.engine.execute(
+                "SELECT cols.NAME,ty.NAME FROM tempdb.sys.columns cols JOIN sys.types ty ON cols.user_type_id = ty.user_type_id WHERE object_id = OBJECT_ID('tempdb..{}')".format(
+                    self._table
+                )
+            ).fetchall()
+            col_dict = [
+                {"name": col_name, "type": getattr(type_module, col_type.upper())()}
+                for col_name, col_type in col_info
+            ]
         return col_dict
 
     ###
@@ -734,39 +894,56 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
-    def expect_column_values_to_be_null(self,
-                                        column,
-                                        mostly=None,
-                                        result_format=None, include_config=True, catch_exceptions=None, meta=None
-                                        ):
+    def expect_column_values_to_be_null(
+        self,
+        column,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
 
         return sa.column(column) == None
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
-    def expect_column_values_to_not_be_null(self,
-                                            column,
-                                            mostly=None,
-                                            result_format=None, include_config=True, catch_exceptions=None, meta=None
-                                            ):
+    def expect_column_values_to_not_be_null(
+        self,
+        column,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
 
         return sa.column(column) != None
 
     def _get_dialect_type_module(self):
         if self.dialect is None:
-            logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+            logger.warning(
+                "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
+            )
             return sa
         try:
             # Redshift does not (yet) export types to top level; only recognize base SA types
-            if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+            if isinstance(
+                self.sql_engine_dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+            ):
                 return self.dialect.sa
         except (TypeError, AttributeError):
             pass
 
         # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
         try:
-            if (isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect) and
-                    bigquery_types_tuple is not None):
+            if (
+                isinstance(
+                    self.sql_engine_dialect,
+                    pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+                )
+                and bigquery_types_tuple is not None
+            ):
                 return bigquery_types_tuple
         except (TypeError, AttributeError):
             pass
@@ -774,16 +951,21 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return self.dialect
 
     @DocInherit
-    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    @DataAsset.expectation(["column", "type_", "mostly"])
     def expect_column_values_to_be_of_type(
         self,
         column,
         type_,
         mostly=None,
-        result_format=None, include_config=True, catch_exceptions=None, meta=None
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
     ):
         if mostly is not None:
-            raise ValueError("SqlAlchemyDataset does not support column map semantics for column types")
+            raise ValueError(
+                "SqlAlchemyDataset does not support column map semantics for column types"
+            )
 
         try:
             col_data = [col for col in self.columns if col["name"] == column][0]
@@ -810,27 +992,27 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 type_module = self._get_dialect_type_module()
                 success = issubclass(col_type, getattr(type_module, type_))
 
-            return {
-                    "success": success,
-                    "result": {
-                        "observed_value": col_type.__name__
-                    }
-                }
+            return {"success": success, "result": {"observed_value": col_type.__name__}}
 
         except AttributeError:
             raise ValueError("Type not recognized by current driver: %s" % type_)
 
     @DocInherit
-    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    @DataAsset.expectation(["column", "type_", "mostly"])
     def expect_column_values_to_be_in_type_list(
         self,
         column,
         type_list,
         mostly=None,
-        result_format=None, include_config=True, catch_exceptions=None, meta=None
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
     ):
         if mostly is not None:
-            raise ValueError("SqlAlchemyDataset does not support column map semantics for column types")
+            raise ValueError(
+                "SqlAlchemyDataset does not support column map semantics for column types"
+            )
 
         try:
             col_data = [col for col in self.columns if col["name"] == column][0]
@@ -861,26 +1043,27 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 except AttributeError:
                     logger.debug("Unrecognized type: %s" % type_)
             if len(types) == 0:
-                logger.warning("No recognized sqlalchemy types in type_list for current dialect.")
+                logger.warning(
+                    "No recognized sqlalchemy types in type_list for current dialect."
+                )
             types = tuple(types)
             success = issubclass(col_type, types)
 
-        return {
-                "success": success,
-                "result": {
-                    "observed_value": col_type.__name__
-                }
-        }
+        return {"success": success, "result": {"observed_value": col_type.__name__}}
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
-    def expect_column_values_to_be_in_set(self,
-                                          column,
-                                          value_set,
-                                          mostly=None,
-                                          parse_strings_as_datetimes=None,
-                                          result_format=None, include_config=True, catch_exceptions=None, meta=None
-                                          ):
+    def expect_column_values_to_be_in_set(
+        self,
+        column,
+        value_set,
+        mostly=None,
+        parse_strings_as_datetimes=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         if value_set is None:
             # vacuously true
             return True
@@ -893,13 +1076,17 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
-    def expect_column_values_to_not_be_in_set(self,
-                                              column,
-                                              value_set,
-                                              mostly=None,
-                                              parse_strings_as_datetimes=None,
-                                              result_format=None, include_config=True, catch_exceptions=None, meta=None
-                                              ):
+    def expect_column_values_to_not_be_in_set(
+        self,
+        column,
+        value_set,
+        mostly=None,
+        parse_strings_as_datetimes=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
         else:
@@ -908,18 +1095,22 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
-    def expect_column_values_to_be_between(self,
-                                           column,
-                                           min_value=None,
-                                           max_value=None,
-                                           strict_min=False,
-                                           strict_max=False,
-                                           allow_cross_type_comparisons=None,
-                                           parse_strings_as_datetimes=None,
-                                           output_strftime_format=None,
-                                           mostly=None,
-                                           result_format=None, include_config=True, catch_exceptions=None, meta=None
-                                           ):
+    def expect_column_values_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        strict_min=False,
+        strict_max=False,
+        allow_cross_type_comparisons=None,
+        parse_strings_as_datetimes=None,
+        output_strftime_format=None,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         if parse_strings_as_datetimes:
             if min_value:
                 min_value = parse(min_value)
@@ -948,44 +1139,48 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         else:
             if strict_min and strict_max:
                 return sa.and_(
-                    min_value < sa.column(column),
-                    sa.column(column) < max_value
+                    min_value < sa.column(column), sa.column(column) < max_value
                 )
             elif strict_min:
                 return sa.and_(
-                    min_value < sa.column(column),
-                    sa.column(column) <= max_value
+                    min_value < sa.column(column), sa.column(column) <= max_value
                 )
             elif strict_max:
                 return sa.and_(
-                    min_value <= sa.column(column),
-                    sa.column(column) < max_value
+                    min_value <= sa.column(column), sa.column(column) < max_value
                 )
             else:
                 return sa.and_(
-                    min_value <= sa.column(column),
-                    sa.column(column) <= max_value
+                    min_value <= sa.column(column), sa.column(column) <= max_value
                 )
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
-    def expect_column_value_lengths_to_equal(self,
-                                             column,
-                                             value,
-                                             mostly=None,
-                                             result_format=None, include_config=True, catch_exceptions=None, meta=None
-                                             ):
+    def expect_column_value_lengths_to_equal(
+        self,
+        column,
+        value,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         return sa.func.length(sa.column(column)) == value
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
-    def expect_column_value_lengths_to_be_between(self,
-                                                  column,
-                                                  min_value=None,
-                                                  max_value=None,
-                                                  mostly=None,
-                                                  result_format=None, include_config=True, catch_exceptions=None, meta=None
-                                                  ):
+    def expect_column_value_lengths_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -1002,8 +1197,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             raise ValueError("min_value and max_value must be integers")
 
         if min_value is not None and max_value is not None:
-            return sa.and_(sa.func.length(sa.column(column)) >= min_value,
-                           sa.func.length(sa.column(column)) <= max_value)
+            return sa.and_(
+                sa.func.length(sa.column(column)) >= min_value,
+                sa.func.length(sa.column(column)) <= max_value,
+            )
 
         elif min_value is None and max_value is not None:
             return sa.func.length(sa.column(column)) <= max_value
@@ -1012,104 +1209,163 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             return sa.func.length(sa.column(column)) >= min_value
 
     @MetaSqlAlchemyDataset.column_map_expectation
-    def expect_column_values_to_be_unique(self, column, mostly=None,
-                                          result_format=None, include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_be_unique(
+        self,
+        column,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         # Duplicates are found by filtering a group by query
-        dup_query = sa.select([sa.column(column)]).\
-            select_from(self._table).\
-            group_by(sa.column(column)).\
-            having(sa.func.count(sa.column(column)) > 1)
+        dup_query = (
+            sa.select([sa.column(column)])
+            .select_from(self._table)
+            .group_by(sa.column(column))
+            .having(sa.func.count(sa.column(column)) > 1)
+        )
 
         return sa.column(column).notin_(dup_query)
 
     def _get_dialect_regex_expression(self, column, regex, positive=True):
         try:
             # postgres
-            if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+            if isinstance(self.sql_engine_dialect, sa.dialects.postgresql.dialect):
                 if positive:
-                    return BinaryExpression(sa.column(column), literal(regex), custom_op("~"))
+                    return BinaryExpression(
+                        sa.column(column), literal(regex), custom_op("~")
+                    )
                 else:
-                    return BinaryExpression(sa.column(column), literal(regex), custom_op("!~"))
+                    return BinaryExpression(
+                        sa.column(column), literal(regex), custom_op("!~")
+                    )
         except AttributeError:
             pass
 
         try:
             # redshift
-            if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+            if isinstance(
+                self.sql_engine_dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+            ):
                 if positive:
-                    return BinaryExpression(sa.column(column), literal(regex), custom_op("~"))
+                    return BinaryExpression(
+                        sa.column(column), literal(regex), custom_op("~")
+                    )
                 else:
-                    return BinaryExpression(sa.column(column), literal(regex), custom_op("!~"))
-        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+                    return BinaryExpression(
+                        sa.column(column), literal(regex), custom_op("!~")
+                    )
+        except (
+            AttributeError,
+            TypeError,
+        ):  # TypeError can occur if the driver was not installed and so is None
             pass
         try:
             # Mysql
-            if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
+            if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
                 if positive:
-                    return BinaryExpression(sa.column(column), literal(regex), custom_op("REGEXP"))
+                    return BinaryExpression(
+                        sa.column(column), literal(regex), custom_op("REGEXP")
+                    )
                 else:
-                    return BinaryExpression(sa.column(column), literal(regex), custom_op("NOT REGEXP"))
+                    return BinaryExpression(
+                        sa.column(column), literal(regex), custom_op("NOT REGEXP")
+                    )
         except AttributeError:
             pass
 
         try:
             # Snowflake
-            if isinstance(self.engine.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect):
+            if isinstance(
+                self.sql_engine_dialect,
+                snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
+            ):
                 if positive:
-                    return BinaryExpression(sa.column(column), literal(regex), custom_op("RLIKE"))
+                    return BinaryExpression(
+                        sa.column(column), literal(regex), custom_op("RLIKE")
+                    )
                 else:
-                    return BinaryExpression(sa.column(column), literal(regex), custom_op("NOT RLIKE"))
-        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+                    return BinaryExpression(
+                        sa.column(column), literal(regex), custom_op("NOT RLIKE")
+                    )
+        except (
+            AttributeError,
+            TypeError,
+        ):  # TypeError can occur if the driver was not installed and so is None
             pass
 
         try:
             # Bigquery
-            if isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+            if isinstance(
+                self.sql_engine_dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect
+            ):
                 if positive:
                     return sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex))
                 else:
-                    return sa.not_(sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex)))
-        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+                    return sa.not_(
+                        sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex))
+                    )
+        except (
+            AttributeError,
+            TypeError,
+        ):  # TypeError can occur if the driver was not installed and so is None
             pass
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_match_regex(
-            self,
-            column,
-            regex,
-            mostly=None,
-            result_format=None, include_config=True, catch_exceptions=None, meta=None
+        self,
+        column,
+        regex,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
     ):
         regex_expression = self._get_dialect_regex_expression(column, regex)
         if regex_expression is None:
-            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            logger.warning(
+                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
+            )
             raise NotImplementedError
 
         return regex_expression
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_not_match_regex(
-            self,
-            column,
-            regex,
-            mostly=None,
-            result_format=None, include_config=True, catch_exceptions=None, meta=None
+        self,
+        column,
+        regex,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
     ):
-        regex_expression = self._get_dialect_regex_expression(column, regex, positive=False)
+        regex_expression = self._get_dialect_regex_expression(
+            column, regex, positive=False
+        )
         if regex_expression is None:
-            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            logger.warning(
+                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
+            )
             raise NotImplementedError
 
         return regex_expression
 
     @MetaSqlAlchemyDataset.column_map_expectation
-    def expect_column_values_to_match_regex_list(self,
-                                                 column,
-                                                 regex_list,
-                                                 match_on="any",
-                                                 mostly=None,
-                                                 result_format=None, include_config=True, catch_exceptions=None, meta=None
-                                                 ):
+    def expect_column_values_to_match_regex_list(
+        self,
+        column,
+        regex_list,
+        match_on="any",
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
 
         if match_on not in ["any", "all"]:
             raise ValueError("match_on must be any or all")
@@ -1119,33 +1375,53 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         regex_expression = self._get_dialect_regex_expression(column, regex_list[0])
         if regex_expression is None:
-            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            logger.warning(
+                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
+            )
             raise NotImplementedError
 
         if match_on == "any":
-            condition = \
-                sa.or_(
-                    *[self._get_dialect_regex_expression(column, regex) for regex in regex_list]
-                )
+            condition = sa.or_(
+                *[
+                    self._get_dialect_regex_expression(column, regex)
+                    for regex in regex_list
+                ]
+            )
         else:
-            condition = \
-                sa.and_(
-                    *[self._get_dialect_regex_expression(column, regex) for regex in regex_list]
-                )
+            condition = sa.and_(
+                *[
+                    self._get_dialect_regex_expression(column, regex)
+                    for regex in regex_list
+                ]
+            )
         return condition
 
     @MetaSqlAlchemyDataset.column_map_expectation
-    def expect_column_values_to_not_match_regex_list(self, column, regex_list,
-                                                     mostly=None,
-                                                     result_format=None, include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_not_match_regex_list(
+        self,
+        column,
+        regex_list,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         if len(regex_list) == 0:
             raise ValueError("At least one regex must be supplied in the regex_list.")
 
-        regex_expression = self._get_dialect_regex_expression(column, regex_list[0], positive=False)
+        regex_expression = self._get_dialect_regex_expression(
+            column, regex_list[0], positive=False
+        )
         if regex_expression is None:
-            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            logger.warning(
+                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
+            )
             raise NotImplementedError
 
         return sa.and_(
-            *[self._get_dialect_regex_expression(column, regex, positive=False) for regex in regex_list]
+            *[
+                self._get_dialect_regex_expression(column, regex, positive=False)
+                for regex in regex_list
+            ]
         )

@@ -35,4 +35,3 @@ stores:
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
     class_name: EvaluationParameterStore
-

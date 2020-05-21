@@ -53,11 +53,6 @@ Expectations are <!--[declarative, flexible and extensible]()--> declarative, fl
 
 ### Batteries-included data validation
 
-```diff 
-! This feature is in beta
-```
-
-
 Expectations are a great start, but it takes more to get to production-ready data validation. Where are Expectations stored? How do they get updated? How do you securely connect to production data systems? How do you notify team members and triage when data validation fails?
 
 Great Expectations supports all of these use cases out of the box. Instead of building these components for yourself over weeks or months, you will be able to add production-ready validation to your pipeline in a day. This “Expectations on rails” framework plays nice with other data engineering tools, respects your existing name spaces, and is designed for extensibility.
@@ -73,12 +68,12 @@ Check out [The Era of DIY Data Validation is Over]() for more details.
 
 ### Tests are docs and docs are tests
 
-```diff 
-- This feature is experimental
+```diff
+! This feature is in beta
 ```
 
 
-Many data teams struggle to maintain up-to-date data documentation. Great Expectations solves this problem by rendering Expectations directly into clean, human-readable documentation. 
+Many data teams struggle to maintain up-to-date data documentation. Great Expectations solves this problem by rendering Expectations directly into clean, human-readable documentation.
 
 Since docs are rendered from tests, and tests are run against new data as it arrives, your documentation is guaranteed to never go stale. Additional renderers allow Great Expectations to generate other type of "documentation", including <!--[slack notifications](), [data dictionaries](), [customized notebooks]()--> slack notifications, data dictionaries, customized notebooks, etc.
 
@@ -94,7 +89,7 @@ Check out [Down with Documentation Rot!]() for more details.
 
 ### Automated data profiling
 
-```diff 
+```diff
 - This feature is experimental
 ```
 
@@ -209,10 +204,10 @@ What does Great Expectations _not_ do?
 We aim to integrate seamlessly with DAG execution tools like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/), [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster), [Kedro](https://github.com/quantumblacklabs/kedro), etc. We DON'T execute your pipelines for you.
 
 **Great Expectations is _not_ a data versioning tool.**
-	
+
 Great Expectations does not store data itself. Instead, it deals in metadata about data: Expectations, validation results, etc. If you want to bring your data itself under version control, check out tools like: [DVC](https://dvc.org/) and [Quilt](https://github.com/quiltdata/quilt).
 
-**Great Expectations currently works best in a python/bash environment.** 
+**Great Expectations currently works best in a python/bash environment.**
 
 Following the philosophy of "take the compute to the data," Great Expectations currently supports native execution of Expectations in three environments: pandas, SQL (through the SQLAlchemy core), and Spark. That said, all orchestration in Great Expectations is python-based. You can invoke it from the command line without using a python programming environment, but if you're working in another ecosystem, other tools might be a better choice. If you're running in a pure R environment, you might consider [assertR](https://github.com/ropensci/assertr) as an alternative. Within the Tensorflow ecosystem, [TFDV](https://www.tensorflow.org/tfx/guide/tfdv) fulfills a similar function as Great Expectations.
 
@@ -232,4 +227,4 @@ If you'd like hands-on assistance setting up Great Expectations, establishing a 
 Can I contribute to the library?
 --------------------------------------------------------------------------------
 
-Absolutely. Yes, please. Start [here](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING.md) and please don't be shy with questions.
+Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/en/latest/contributing.html) and please don't be shy with questions.
