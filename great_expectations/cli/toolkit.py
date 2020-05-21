@@ -125,7 +125,7 @@ def create_expectation_suite(context, datasource_name=None, batch_kwargs_generat
         if open_docs:
             attempt_to_open_validation_results_in_data_docs(context, profiling_results)
 
-    return True, expectation_suite_name, profiling_results
+    return True, expectation_suite_name
 
 
 def _profile_to_create_a_suite(additional_batch_kwargs, batch_kwargs, batch_kwargs_generator_name, context,
@@ -224,6 +224,14 @@ def tell_user_suite_exists(suite_name: str) -> None:
 def create_empty_suite(
     context: DataContext, expectation_suite_name: str, batch_kwargs
 ) -> None:
+    cli_message("""
+Great Expectations will create a new Expectation Suite '{0:s}' and store it here:
+
+  {1:s}
+""".format(expectation_suite_name,
+               context.stores[context.expectations_store_name].store_backend.get_url_for_key(
+                   ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name).to_tuple()))
+                )
     suite = context.create_expectation_suite(expectation_suite_name)
     suite.add_citation(comment="New suite added via CLI", batch_kwargs=batch_kwargs)
     context.save_expectation_suite(suite, expectation_suite_name)
