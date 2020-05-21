@@ -153,13 +153,13 @@ def test_cli_datasorce_new_connection_string(
     result = runner.invoke(
         cli,
         ["datasource", "new", "-d", project_root_dir],
-        input="2\n6\nmynewsource\n{}\n".format(str(empty_sqlite_db.url)),
+        input="2\n6\nmynewsource\n{}\n\n".format(str(empty_sqlite_db.url)),
         catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert "What data would you like Great Expectations to connect to?" in stdout
-    assert "Give your new data source a short name." in stdout
+    assert "Give your new Datasource a short name." in stdout
     assert (
         "Next, we will configure database credentials and store them in the `mynewsource` section"
         in stdout
@@ -381,7 +381,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert result.exit_code == 0
     stdout = result.stdout
     assert "Profiling 'wow_a_datasource'" in stdout
-    assert "The following Data Docs sites were built:\n" in stdout
+    assert "The following Data Docs sites will be built:\n" in stdout
     assert "local_site:" in stdout
 
     context = DataContext(project_root_dir)
@@ -449,7 +449,7 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     stdout = result.stdout
     assert result.exit_code == 0
     assert "Profiling '{}'".format(datasource_name) in stdout
-    assert "The following Data Docs sites were built:\n" in stdout
+    assert "The following Data Docs sites will be built:\n" in stdout
     assert "local_site:" in stdout
 
     context = DataContext(project_root_dir)
@@ -517,7 +517,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     stdout = result.stdout
     assert result.exit_code == 0
     assert "Profiling '{}'".format(datasource_name) in stdout
-    assert "The following Data Docs sites were built:\n" in stdout
+    assert "The following Data Docs sites will be built:\n" in stdout
     assert "local_site:" in stdout
 
     context = DataContext(project_root_dir)

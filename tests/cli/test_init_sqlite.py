@@ -53,22 +53,23 @@ def test_cli_init_on_new_project(
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="Y\n2\n6\ntitanic\n{}\n1\nwarning\n\n".format(
-            engine.url, catch_exceptions=False
+        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(
+            engine.url
         ),
+        catch_exceptions = False
     )
     stdout = result.output
-    assert len(stdout) < 3000, "CLI output is unreasonably long."
+    assert len(stdout) < 6000, "CLI output is unreasonably long."
 
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "Which database backend are you using" in stdout
-    assert "Give your new data source a short name" in stdout
+    assert "Give your new Datasource a short name" in stdout
     assert "What is the url/connection string for the sqlalchemy connection" in stdout
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
     assert "Which table would you like to use?" in stdout
-    assert "Name the new expectation suite [main.titanic.warning]" in stdout
+    assert "Name the new Expectation Suite [main.titanic.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
         in stdout
@@ -76,22 +77,12 @@ def test_cli_init_on_new_project(
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
-    assert "A new Expectation suite 'warning' was added to your project" in stdout
     assert "Great Expectations is now set up" in stdout
 
     context = DataContext(ge_dir)
     assert len(context.list_datasources()) == 1
-    assert context.list_datasources() == [
-        {
-            "class_name": "SqlAlchemyDatasource",
-            "name": "titanic",
-            "module_name": "great_expectations.datasource",
-            'credentials': {
-                'url': str(engine.url)},
-            'data_asset_type': {'class_name': 'SqlAlchemyDataset',
-                                'module_name': 'great_expectations.dataset'},
-        }
-    ]
+    assert context.list_datasources()[0]["class_name"] == "SqlAlchemyDatasource"
+    assert context.list_datasources()[0]["name"] == "titanic"
 
     first_suite = context.list_expectation_suites()[0]
     suite = context.get_expectation_suite(first_suite.expectation_suite_name)

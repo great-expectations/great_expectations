@@ -29,14 +29,16 @@ def test_docs_build_view(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["docs", "build", "-d", root_dir], catch_exceptions=False
+        cli, ["docs", "build", "-d", root_dir],
+        input="\n",
+        catch_exceptions=False
     )
     stdout = result.stdout
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
     assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
+    assert "The following Data Docs sites will be built:" in stdout
     assert "great_expectations/uncommitted/data_docs/local_site/index.html" in stdout
 
     context = DataContext(root_dir)
@@ -63,14 +65,16 @@ def test_docs_build_no_view(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["docs", "build", "--no-view", "-d", root_dir], catch_exceptions=False
+        cli, ["docs", "build", "--no-view", "-d", root_dir],
+        input="\n",
+        catch_exceptions=False
     )
     stdout = result.stdout
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 0
     assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
+    assert "The following Data Docs sites will be built:" in stdout
     assert "great_expectations/uncommitted/data_docs/local_site/index.html" in stdout
 
     context = DataContext(root_dir)
