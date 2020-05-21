@@ -168,7 +168,7 @@ class Dataset(MetaDataset):
         # (e.g. self.spark_df) over the lifetime of the dataset instance
         self.caching = kwargs.pop("caching", True)
 
-        super(Dataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if self.caching:
             for func in self.hashable_getters:
@@ -242,7 +242,9 @@ class Dataset(MetaDataset):
         """Returns: any"""
         raise NotImplementedError
 
-    def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
+    def get_column_quantiles(
+        self, column, quantiles, allow_relative_error=False
+    ) -> List[Any]:
         """Get the values in column closest to the requested quantiles
         Args:
             column (string): name of column
@@ -2708,7 +2710,10 @@ class Dataset(MetaDataset):
         )
         # We explicitly allow "None" to be interpreted as +/- infinity
         comparison_quantile_ranges = [
-            [lower_bound or -np.inf, upper_bound or np.inf]
+            [
+                -np.inf if lower_bound is None else lower_bound,
+                np.inf if upper_bound is None else upper_bound,
+            ]
             for (lower_bound, upper_bound) in quantile_value_ranges
         ]
         success_details = [
@@ -4334,3 +4339,10 @@ class Dataset(MetaDataset):
             parse(value) if isinstance(value, str) else value for value in value_set
         ]
         return parsed_value_set
+
+    def attempt_allowing_relative_error(self) -> Union[bool, float]:
+        """
+        Subclasses can override this method if the respective data source (e.g., Redshift) supports "approximate" mode.
+        In certain cases (e.g., for SparkDFDataset), a fraction between 0 and 1 (i.e., not only a boolean) is allowed.
+        """
+        return False

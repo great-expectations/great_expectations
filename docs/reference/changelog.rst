@@ -4,10 +4,7 @@
 Changelog
 #########
 
-develop
------------------
-
-0.11.0b0
+0.11-develop
 -----------------
 * (BREAKING) ``run_id`` is now typed using the new ``RunIdentifier`` class, which consists of a ``run_time`` and
   ``run_name``. Existing projects that have Expectation Suite Validation Results must be migrated.
@@ -21,6 +18,37 @@ develop
 * Renamed all ``generator_asset`` parameters to ``data_asset_name``
 * Updated the dateutil dependency
 * Added QueryStore
+
+develop
+-----------------
+
+0.10.12
+-----------------
+* [DOCS] Improved help for CLI `checkpoint` command
+* [BUGFIX] BasicSuiteBuilderProfiler could include extra expectations when only some expectations were selected (#1422)
+* [FEATURE] add support for `expect_multicolumn_values_to_be_unique` and `expect_column_pair_values_A_to_be_greater_than_B`
+  to `Spark`. Thanks @WilliamWsyHK!
+* [ENHANCEMENT] Allow a dictionary of variables can be passed to the DataContext constructor to allow override
+  config variables at runtime. Thanks @balexander!
+* [FEATURE] add support for `expect_column_pair_values_A_to_be_greater_than_B` to `Spark`.
+* [BUGFIX] Remove SQLAlchemy typehints to avoid requiring library (thanks @mzjp2)!
+* [BUGFIX] Fix issue where quantile boundaries could not be set to zero. Thanks @kokes!
+
+0.10.11
+-----------------
+* Bugfix: build_data_docs list_keys for GCS returns keys and when empty a more user friendly message
+* ENHANCEMENT: Enable Redshift Quantile Profiling
+
+
+0.10.10
+-----------------
+* Removed out-of-date Airflow integration examples. This repo provides a comprehensive example of Airflow integration: `#GE Airflow Example <https://github.com/superconductive/ge_tutorials>`_
+* Bugfix suite scaffold notebook now has correct suite name in first markdown cell.
+* Bugfix: fixed an example in the custom expectations documentation article - "result" key was missing in the returned dictionary
+* Data Docs Bugfix: template string substitution is now done using .safe_substitute(), to handle cases where string templates
+  or substitution params have extraneous $ signs. Also added logic to handle templates where intended output has groupings of 2 or more $ signs
+* Docs fix: fix in yml for example action_list_operator for metrics
+* GE is now auto-linted using Black
 
 0.10.9
 -----------------

@@ -14,8 +14,12 @@ logger = logging.getLogger(__name__)
 
 
 class ExpectationSuiteIdentifier(DataContextKey):
-    def __init__(self, expectation_suite_name):
+    def __init__(self, expectation_suite_name: str):
         super(ExpectationSuiteIdentifier, self).__init__()
+        if not isinstance(expectation_suite_name, str):
+            raise InvalidDataContextKeyError(
+                f"expectation_suite_name must be a string, not {type(expectation_suite_name).__name__}"
+            )
         self._expectation_suite_name = expectation_suite_name
 
     @property
@@ -35,6 +39,9 @@ class ExpectationSuiteIdentifier(DataContextKey):
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
         return cls(expectation_suite_name=tuple_[0])
+
+    def __repr__(self):
+        return self.__class__.__name__ + "::" + self._expectation_suite_name
 
 
 class ExpectationSuiteIdentifierSchema(Schema):

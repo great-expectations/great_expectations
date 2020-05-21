@@ -5,6 +5,7 @@ import logging
 from itertools import chain
 
 import ipywidgets as widgets
+from IPython.display import display
 
 logger = logging.getLogger(__name__)
 

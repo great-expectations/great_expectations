@@ -19,13 +19,30 @@ try:
 except ImportError:
     SQLAlchemyError = RuntimeError
 
+
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    SQLAlchemyError = RuntimeError
+
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 
 
-@click.group()
+@click.group(short_help="Checkpoint operations")
 def checkpoint():
-    """Checkpoint operations"""
+    """
+    Checkpoint operations
+
+    A checkpoint is a bundle of one or more batches of data with one or more
+    Expectation Suites.
+
+    A checkpoint can be as simple as one batch of data paired with one
+    Expectation Suite.
+
+    A checkpoint can be as complex as many batches of data across different
+    datasources paired with one or more Expectation Suites each.
+    """
     pass
 
 

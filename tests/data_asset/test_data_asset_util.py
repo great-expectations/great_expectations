@@ -8,7 +8,6 @@ from functools import wraps
 import numpy as np
 import pytest
 
-import great_expectations as ge
 from great_expectations.core import expectationSuiteSchema
 
 

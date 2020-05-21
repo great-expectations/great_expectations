@@ -2,8 +2,6 @@ import datetime
 import json
 import logging
 import warnings
-
-# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 from collections import namedtuple
 from copy import deepcopy
 

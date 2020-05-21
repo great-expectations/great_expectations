@@ -1,6 +1,8 @@
 import os
 import shutil
 
+import pytest
+
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.batch_kwargs_generator import (

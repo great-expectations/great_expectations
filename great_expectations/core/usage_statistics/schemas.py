@@ -372,7 +372,7 @@ usage_statistics_record_schema = {
                         "cli.datasource.new",
                         "data_context.open_data_docs",
                         "data_context.build_data_docs",
-                        "cli.init.ctx_new",
+                        "cli.init.create",
                     ],
                 },
                 "event_payload": {"$ref": "#/definitions/empty_payload"},

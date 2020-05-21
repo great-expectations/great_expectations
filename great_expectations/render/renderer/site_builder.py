@@ -19,18 +19,23 @@ logger = logging.getLogger(__name__)
 
 
 class SiteBuilder(object):
-    """SiteBuilder builds data documentation for the project defined by a DataContext.
+    """SiteBuilder builds data documentation for the project defined by a
+    DataContext.
 
-    A data documentation site consists of HTML pages for expectation suites, profiling and validation results, and
+    A data documentation site consists of HTML pages for expectation suites,
+    profiling and validation results, and
     an index.html page that links to all the pages.
 
-    The exact behavior of SiteBuilder is controlled by configuration in the DataContext's great_expectations.yml file.
+    The exact behavior of SiteBuilder is controlled by configuration in the
+    DataContext's great_expectations.yml file.
 
     Users can specify:
 
         * which datasources to document (by default, all)
-        * whether to include expectations, validations and profiling results sections (by default, all)
-        * where the expectations and validations should be read from (filesystem or S3)
+        * whether to include expectations, validations and profiling results
+        sections (by default, all)
+        * where the expectations and validations should be read from
+        (filesystem or S3)
         * where the HTML files should be written (filesystem or S3)
         * which renderer and view class should be used to render each section
 
@@ -44,7 +49,8 @@ class SiteBuilder(object):
                 prefix: /data_docs/
 
 
-    A more verbose configuration can also control individual sections and override renderers, views, and stores::
+    A more verbose configuration can also control individual sections and
+    override renderers, views, and stores::
 
         local_site:
             class_name: SiteBuilder
@@ -128,7 +134,8 @@ class SiteBuilder(object):
         if site_index_builder is None:
             site_index_builder = {"class_name": "DefaultSiteIndexBuilder"}
 
-        # The site builder is essentially a frontend store. We'll open up three types of backends using the base
+        # The site builder is essentially a frontend store. We'll open up
+        # three types of backends using the base
         # type of the configuration defined in the store_backend section
 
         self.target_store = HtmlSiteStore(
@@ -238,11 +245,13 @@ class SiteBuilder(object):
     def build(self, resource_identifiers=None):
         """
 
-        :param resource_identifiers: a list of resource identifiers (ExpectationSuiteIdentifier,
-                            ValidationResultIdentifier). If specified, rebuild HTML
-                            (or other views the data docs site renders) only for
-                            the resources in this list. This supports incremental build
-                            of data docs sites (e.g., when a new validation result is created)
+        :param resource_identifiers: a list of resource identifiers
+        (ExpectationSuiteIdentifier,
+                            ValidationResultIdentifier). If specified,
+                            rebuild HTML(or other views the data docs
+                            site renders) only forthe resources in this list.
+                            This supports incremental build of data docs sites
+                            (e.g., when a new validation result is created)
                             and avoids full rebuild.
         :return:
         """
@@ -254,16 +263,20 @@ class SiteBuilder(object):
             site_section_builder.build(resource_identifiers=resource_identifiers)
 
         index_page_resource_identifier_tuple = self.site_index_builder.build()
-        return self.get_resource_url(), index_page_resource_identifier_tuple[1]
+        return (
+            self.get_resource_url(only_if_exists=False),
+            index_page_resource_identifier_tuple[1],
+        )
 
     def get_resource_url(self, resource_identifier=None, only_if_exists=True):
         """
         Return the URL of the HTML document that renders a resource
         (e.g., an expectation suite or a validation result).
 
-        :param resource_identifier: ExpectationSuiteIdentifier, ValidationResultIdentifier
-                or any other type's identifier. The argument is optional - when
-                not supplied, the method returns the URL of the index page.
+        :param resource_identifier: ExpectationSuiteIdentifier,
+        ValidationResultIdentifier or any other type's identifier. The
+        argument is optional - whennot supplied, the method returns the URL of
+        the index page.
         :return: URL (string)
         """
 
@@ -298,7 +311,8 @@ class DefaultSiteSectionBuilder(object):
 
         if renderer is None:
             raise exceptions.InvalidConfigError(
-                "SiteSectionBuilder requires a renderer configuration with a class_name key."
+                "SiteSectionBuilder requires a renderer configuration "
+                "with a class_name key."
             )
         module_name = (
             renderer.get("module_name") or "great_expectations.render.renderer"
@@ -343,7 +357,8 @@ class DefaultSiteSectionBuilder(object):
 
         for resource_key in source_store_keys:
 
-            # if no resource_identifiers are passed, the section builder will build
+            # if no resource_identifiers are passed, the section
+            # builder will build
             # a page for every keys in its source store.
             # if the caller did pass resource_identifiers, the section builder
             # will build pages only for the specified resources
@@ -407,7 +422,10 @@ not be rendered properly and/or may not appear altogether.  Please use the trace
 diagnose and repair the underlying issue.  Detailed information follows:
                 """
                 exception_traceback = traceback.format_exc()
-                exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                exception_message += (
+                    f'{type(e).__name__}: "{str(e)}".  '
+                    f'Traceback: "{exception_traceback}".'
+                )
                 logger.error(exception_message, e, exc_info=True)
 
             self.target_store.set(
@@ -561,20 +579,25 @@ class DefaultSiteIndexBuilder(object):
         #
         # if datasource_classes_by_name:
         #     last_datasource_class_by_name = datasource_classes_by_name[-1]
-        #     last_datasource_class_name = last_datasource_class_by_name["class_name"]
+        #     last_datasource_class_name = last_datasource_class_by_name["
+        #     class_name"]
         #     last_datasource_name = last_datasource_class_by_name["name"]
-        #     last_datasource = self.data_context.get_datasource(last_datasource_name)
+        #     last_datasource = self.data_context.get_datasource
+        #     (last_datasource_name)
         #
         #     if last_datasource_class_name == "SqlAlchemyDatasource":
         #         try:
-        #                # NOTE: JPC - 20200327 - I do not believe datasource will *ever* have a drivername property
+        #                # NOTE: JPC - 20200327 - I do not believe datasource
+        #                will *ever* have a drivername property
         #                (it's in credentials). Suspect this isn't working.
         #             db_driver = last_datasource.drivername
         #         except AttributeError:
         #             pass
         #
-        #     datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
-        #     usage_statistics = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
+        #     datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[
+        #     last_datasource_class_name].value
+        #     usage_statistics = "?utm_source={}&utm_medium={}
+        #     &utm_campaign={}".format(
         #         "ge-init-datadocs-v2",
         #         datasource_type,
         #         db_driver,

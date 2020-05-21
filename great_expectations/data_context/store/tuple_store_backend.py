@@ -609,7 +609,6 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             key = self._convert_filepath_to_key(gcs_object_key)
             if key:
                 key_list.append(key)
-
         return key_list
 
     def get_url_for_key(self, key, protocol=None):

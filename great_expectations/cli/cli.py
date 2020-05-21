@@ -2,7 +2,6 @@
 import logging
 
 import click
-
 from great_expectations import __version__ as ge_version
 from great_expectations.cli.checkpoint import checkpoint
 from great_expectations.cli.cli_logging import _set_up_logger
@@ -41,7 +40,7 @@ In particular, the CLI supports the following special commands:
 
 - great_expectations init : create a new great_expectations project
 
-- great_expectations datasource profile : profile a  datasource
+- great_expectations datasource profile : profile a datasource
 
 - great_expectations docs build : compile documentation from expectations
 """

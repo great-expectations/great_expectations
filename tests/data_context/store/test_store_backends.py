@@ -3,8 +3,6 @@ import os
 import boto3
 import pytest
 from botocore.exceptions import ClientError
-from mock import patch
-from moto import mock_s3
 
 from great_expectations.data_context.store import (
     InMemoryStoreBackend,

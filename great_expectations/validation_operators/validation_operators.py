@@ -18,9 +18,6 @@ from .util import send_slack_notification
 logger = logging.getLogger(__name__)
 
 
-# NOTE: Abe 2019/08/24 : This is first implementation of all these classes. Consider them UNSTABLE for now.
-
-
 class ValidationOperator(object):
     """
     The base class of all validation operators.

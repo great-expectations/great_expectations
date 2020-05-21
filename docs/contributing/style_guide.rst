@@ -24,6 +24,7 @@ code
 * **Experimental methods should log an experimental warning when called**: "Warning: some_method is experimental. Methods, APIs, and core behavior may change in the future."
 * **Experimental classes should log an experimental warning when initialized**: "Warning: great_expectations.some_module.SomeClass is experimental. Methods, APIs, and core behavior may change in the future."
 * **Docstrings are highly recommended**. We use the Sphinx's `Napoleon extension <http://www.sphinx-doc.org/en/master/ext/napoleon.html>`__ to build documentation from Google-style docstrings.
+* **Lint your code**. Our CI system will check using ``black`` and ``isort``. We have a git pre-commit configuration in the repo, so you can just run ``pre-commit install`` to automatically run your changes through the linting process before submitting.
 
 **Expectations**
 

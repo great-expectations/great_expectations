@@ -1,6 +1,11 @@
+# Set up version information immediately
+from ._version import get_versions  # isort:skip
+
+__version__ = get_versions()["version"]  # isort:skip
+del get_versions  # isort:skip
+
 from great_expectations.data_context import DataContext
 
-from ._version import get_versions
 from .util import (
     from_pandas,
     read_csv,
@@ -12,6 +17,4 @@ from .util import (
     validate,
 )
 
-__version__ = get_versions()["version"]
 rtd_url_ge_version = __version__.replace(".", "_")
-del get_versions

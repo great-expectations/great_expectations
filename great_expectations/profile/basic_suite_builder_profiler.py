@@ -2,7 +2,6 @@ import datetime
 
 import numpy as np
 from dateutil.parser import parse
-
 from great_expectations.dataset.util import build_categorical_partition_object
 from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.base import ProfilerCardinality, ProfilerDataType
@@ -208,6 +207,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 f"Skipping expect_column_median_to_be_between because observed value is nan: {observed_median}"
             )
 
+        allow_relative_error = dataset.attempt_allowing_relative_error()
+
         quantile_result = dataset.expect_column_quantile_values_to_be_between(
             column,
             quantile_ranges={
@@ -220,6 +221,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     [None, None],
                 ],
             },
+            allow_relative_error=allow_relative_error,
             result_format="SUMMARY",
             catch_exceptions=True,
         )
@@ -241,6 +243,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                         for v in quantile_result.result["observed_value"]["values"]
                     ],
                 },
+                allow_relative_error=allow_relative_error,
                 catch_exceptions=True,
             )
             dataset.set_config_value("interactive_evaluation", True)
@@ -475,7 +478,9 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             dataset = _remove_table_expectations(dataset, excluded_expectations)
             dataset = _remove_column_expectations(dataset, excluded_expectations)
         if included_expectations:
-            for expectation in dataset.get_expectation_suite().expectations:
+            for expectation in dataset.get_expectation_suite(
+                discard_failed_expectations=False
+            ).expectations:
                 if expectation.expectation_type not in included_expectations:
                     try:
                         dataset.remove_expectation(
