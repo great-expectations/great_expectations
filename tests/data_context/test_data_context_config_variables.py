@@ -5,6 +5,7 @@ import pytest
 import great_expectations as ge
 from great_expectations.data_context.util import substitute_config_variable
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
+from tests.data_context.conftest import create_data_context_files
 
 
 def test_config_variables_on_context_without_config_variables_filepath_configured(
@@ -153,8 +154,8 @@ def test_substitute_config_variable():
         )  # does NOT equal "abc${arg1}"
     assert (
         """Unable to find a match for config substitution variable: `arg1`.
-    Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
-    See https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets"""
+Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
+See https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets"""
         in exc.value.message
     )
     assert (

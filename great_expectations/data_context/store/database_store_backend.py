@@ -17,7 +17,8 @@ try:
         text,
     )
     from sqlalchemy.engine.url import URL
-    from sqlalchemy.exc import SQLAlchemyError
+    from sqlalchemy.engine.reflection import Inspector
+    from sqlalchemy.exc import SQLAlchemyError, NoSuchTableError
 except ImportError:
     sqlalchemy = None
     create_engine = None
@@ -39,6 +40,10 @@ class DatabaseStoreBackend(StoreBackend):
                 "DatabaseStoreBackend requires use of a fixed-length-key"
             )
 
+        drivername = credentials.pop("drivername")
+        options = URL(drivername, **credentials)
+        self.engine = create_engine(options)
+
         meta = MetaData()
         self.key_columns = key_columns
         # Dynamically construct a SQLAlchemy table with the name and column names we'll use
@@ -49,19 +54,25 @@ class DatabaseStoreBackend(StoreBackend):
                     "'value' cannot be used as a key_element name"
                 )
             cols.append(Column(column, String, primary_key=True))
-
         cols.append(Column("value", String))
-        self._table = Table(table_name, meta, *cols)
-
-        drivername = credentials.pop("drivername")
-        options = URL(drivername, **credentials)
-        self.engine = create_engine(options)
         try:
-            meta.create_all(self.engine)
-        except SQLAlchemyError as e:
-            raise ge_exceptions.StoreBackendError(
-                f"Unable to connect to table {table_name} because of an error. It is possible your table needs to be migrated to a new schema.  SqlAlchemyError: {str(e)}"
-            )
+            table = Table(table_name, meta, autoload=True, autoload_with=self.engine)
+            # We do a "light" check: if the columns' names match, we will proceed, otherwise, create the table
+            if set([str(col.name).lower() for col in table.columns]) != set(
+                key_columns
+            ):
+                raise ge_exceptions.StoreBackendError(
+                    f"Unable to use table {table_name}: it exists, but does not have the expected schema."
+                )
+        except NoSuchTableError:
+            table = Table(table_name, meta, *cols)
+            try:
+                meta.create_all(self.engine)
+            except SQLAlchemyError as e:
+                raise ge_exceptions.StoreBackendError(
+                    f"Unable to connect to table {table_name} because of an error. It is possible your table needs to be migrated to a new schema.  SqlAlchemyError: {str(e)}"
+                )
+        self._table = table
 
     def _get(self, key):
         sel = (

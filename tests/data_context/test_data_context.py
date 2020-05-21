@@ -460,8 +460,12 @@ project_path/
                         Titanic/
                             BasicDatasetProfiler/
                                 profiling/
-                                    {}.json
-""".format(titanic_profiled_batch_id)
+                                    2019-09-26T13:42:41+00:00/
+                                        {}.json
+""".format(
+            titanic_profiled_batch_id
+        )
+    )
 
     context.profile_datasource("random")
     context.build_data_docs()
