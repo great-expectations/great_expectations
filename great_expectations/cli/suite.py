@@ -299,7 +299,7 @@ def _suite_new(suite: str, directory: str, empty: bool, jupyter: bool, view: boo
         if batch_kwargs is not None:
             batch_kwargs = json.loads(batch_kwargs)
 
-        success, suite_name = toolkit.create_expectation_suite(
+        success, suite_name, profiling_results = toolkit.create_expectation_suite(
             context,
             datasource_name=datasource_name,
             batch_kwargs_generator_name=generator_name,

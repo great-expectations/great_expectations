@@ -114,7 +114,7 @@ def create_expectation_suite(context, datasource_name=None, batch_kwargs_generat
 
     if empty_suite:
         create_empty_suite(context, expectation_suite_name, batch_kwargs)
-        return True, expectation_suite_name
+        return True, expectation_suite_name, None
 
     profiling_results = _profile_to_create_a_suite(additional_batch_kwargs, batch_kwargs, batch_kwargs_generator_name,
                                                    context, datasource_name, expectation_suite_name, data_asset_name,
