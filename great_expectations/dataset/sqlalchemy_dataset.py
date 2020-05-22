@@ -32,24 +32,24 @@ try:
     from sqlalchemy.sql.elements import WithinGroup
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.exc import ProgrammingError
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
 
 try:
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     sqlalchemy_psycopg2 = None
 
 try:
     import sqlalchemy_redshift.dialect
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     sqlalchemy_redshift = None
 
 try:
     import snowflake.sqlalchemy.snowdialect
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     snowflake = None
 
 try:
@@ -69,7 +69,7 @@ try:
             "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
         )
         bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     bigquery_types_tuple = None
     pybigquery = None
 
@@ -417,14 +417,19 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return self.engine.dialect
 
     def attempt_allowing_relative_error(self):
-        detected_redshift = check_sql_engine_dialect(
-            actual_sql_engine_dialect=self.sql_engine_dialect,
-            candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
-        )
-        detected_psycopg2 = check_sql_engine_dialect(
-            actual_sql_engine_dialect=self.sql_engine_dialect,
-            candidate_sql_engine_dialect=sqlalchemy_psycopg2.PGDialect_psycopg2,
-        )
+        detected_redshift = False
+        detected_psycopg2 = False
+
+        if sqlalchemy_redshift is not None:
+            detected_redshift = check_sql_engine_dialect(
+                actual_sql_engine_dialect=self.sql_engine_dialect,
+                candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
+            )
+        if sqlalchemy_psycopg2 is not None:
+            detected_psycopg2 = check_sql_engine_dialect(
+                actual_sql_engine_dialect=self.sql_engine_dialect,
+                candidate_sql_engine_dialect=sqlalchemy_psycopg2.PGDialect_psycopg2,
+            )
         return detected_redshift or detected_psycopg2
 
     def head(self, n=5):

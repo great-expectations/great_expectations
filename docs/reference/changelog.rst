@@ -19,6 +19,7 @@ Changelog
 * Updated the dateutil dependency
 * Added QueryStore
 * corrected Scaffold maturity language in notebook to Experimental
+* fixed bug in SQLAlchemyDataset when sqlalchemy_redshift is not installed
 
 develop
 -----------------
