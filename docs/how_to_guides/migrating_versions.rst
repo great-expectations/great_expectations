@@ -40,9 +40,12 @@ in your source control system already, right? ;-)
 Upgrading to 0.11.x
 *************************
 
-The 0.11.0-beta release has several breaking changes related to ``run_id`` and ``ValidationMetric`` objects.
+The 0.11.0 release has several breaking changes related to ``run_id`` and ``ValidationMetric`` objects.
 Existing projects that have Expectation Suite Validation Results or configured evaluation parameter stores with
 DatabaseStoreBackend backends must be migrated.
+
+In addition, ``ValidationOperator.run`` now returns an instance of new type, ``ValidationOperatorResult`` (instead of a
+dictionary). If your code uses output from Validation Operators, it must be updated.
 
 run_id and ValidationMetric Changes
 ===================================
@@ -107,6 +110,9 @@ the new ``RunIdentifier`` type (or a dictionary with ``run_name`` and ``run_time
 ``run_id`` parameter will continue to accept strings. In this case, the provided ``run_id`` string will be converted to
 a ``RunIdentifier`` object, acting as the ``run_name``. If the ``run_id`` string can also be parsed as a datetime, it
 will also be used for the ``run_time`` attribute, otherwise, the current UTC time is used.
+
+If your code uses output from Validation Operators, it must be updated to handle the new ValidationOperatorResult
+type.
 
 1. Expectation Suite Validation Result JSONs
 --------------------------------------------
