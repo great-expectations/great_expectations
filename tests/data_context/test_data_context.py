@@ -461,7 +461,10 @@ project_path/
                             BasicDatasetProfiler/
                                 profiling/
                                     {}.json
-""".format(titanic_profiled_batch_id)
+""".format(
+            titanic_profiled_batch_id
+        )
+    )
 
     context.profile_datasource("random")
     context.build_data_docs()
