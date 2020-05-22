@@ -16,14 +16,14 @@ def test_suite_help_output(caplog):
     result = runner.invoke(cli, ["suite"], catch_exceptions=False)
     assert result.exit_code == 0
     assert (
-            """Commands:
+        """Commands:
   delete    Delete an expectation suite from the expectation store.
   demo      Create a new demo Expectation Suite.
   edit      Generate a Jupyter notebook for editing an existing Expectation...
   list      Lists available Expectation Suites.
   new       Create a new Expectation Suite.
   scaffold  Scaffold a new Expectation Suite."""
-            in result.stdout
+        in result.stdout
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -31,7 +31,7 @@ def test_suite_help_output(caplog):
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_on_context_with_no_datasources(
-        mock_webbrowser, mock_subprocess, caplog, empty_data_context
+    mock_webbrowser, mock_subprocess, caplog, empty_data_context
 ):
     """
     We call the "suite demo" command on a data context that has no datasources
@@ -63,7 +63,10 @@ def test_suite_demo_on_context_with_no_datasources(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_enter_existing_suite_name_as_arg(
-    mock_webbrowser, mock_subprocess, caplog, data_context_parameterized_expectation_suite
+    mock_webbrowser,
+    mock_subprocess,
+    caplog,
+    data_context_parameterized_expectation_suite,
 ):
     """
     We call the "suite demo" command with the name of an existing expectation
@@ -117,7 +120,11 @@ def test_suite_demo_enter_existing_suite_name_as_arg(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
-    mock_webbrowser, mock_subprocess, caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
+    mock_webbrowser,
+    mock_subprocess,
+    caplog,
+    data_context_parameterized_expectation_suite,
+    filesystem_csv_2,
 ):
     """
     We call the "suite demo" command without the suite name argument
@@ -159,15 +166,18 @@ def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
         in stdout
     )
     assert "Enter the path" in stdout
-    assert "Name the new expectation suite [f1.warning]" in stdout
+    assert "Name the new Expectation Suite [f1.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
     )
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
-    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+    assert "The following Data Docs sites will be built" in stdout
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here"
+        in stdout
+    )
     assert "open a notebook for you now" not in stdout
 
     expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
@@ -187,7 +197,11 @@ def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_creates_empty_suite(
-    mock_webbroser, mock_subprocess, caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
+    mock_webbroser,
+    mock_subprocess,
+    caplog,
+    data_context_parameterized_expectation_suite,
+    filesystem_csv_2,
 ):
     """
     Running "suite new" should:
@@ -219,7 +233,10 @@ def test_suite_new_creates_empty_suite(
     )
     assert "Generating example Expectation Suite..." not in stdout
     assert "The following Data Docs sites were built" not in stdout
-    assert "A new Expectation suite 'foo' was added to your project" in stdout
+    assert (
+        "Great Expectations will create a new Expectation Suite 'foo' and store it here"
+        in stdout
+    )
     assert (
         "Because you requested an empty suite, we'll open a notebook for you now to edit it!"
         in stdout
@@ -263,7 +280,11 @@ def test_suite_new_creates_empty_suite(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_empty_with_no_jupyter(
-    mock_webbroser, mock_subprocess, caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
+    mock_webbroser,
+    mock_subprocess,
+    caplog,
+    data_context_parameterized_expectation_suite,
+    filesystem_csv_2,
 ):
     """
     Running "suite new --no-jupyter" should:
@@ -271,7 +292,11 @@ def test_suite_new_empty_with_no_jupyter(
     - NOT open jupyter
     - NOT open data docs
     """
-    os.mkdir(os.path.join(data_context_parameterized_expectation_suite.root_directory, "uncommitted"))
+    os.mkdir(
+        os.path.join(
+            data_context_parameterized_expectation_suite.root_directory, "uncommitted"
+        )
+    )
     root_dir = data_context_parameterized_expectation_suite.root_directory
     runner = CliRunner(mix_stderr=False)
     csv = os.path.join(filesystem_csv_2, "f1.csv")
@@ -293,7 +318,10 @@ def test_suite_new_empty_with_no_jupyter(
     )
     assert "Generating example Expectation Suite..." not in stdout
     assert "The following Data Docs sites were built" not in stdout
-    assert "A new Expectation suite 'foo' was added to your project" in stdout
+    assert (
+        "Great Expectations will create a new Expectation Suite 'foo' and store it here"
+        in stdout
+    )
     assert "open a notebook for you now" not in stdout
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo.json")
@@ -368,15 +396,18 @@ def test_suite_demo_one_datasource_without_generator_without_suite_name_argument
 
     assert result.exit_code == 0
     assert "Enter the path" in stdout
-    assert "Name the new expectation suite [f1.warning]" in stdout
+    assert "Name the new Expectation Suite [f1.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
     )
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here:"
+        in stdout
+    )
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
-    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+    assert "The following Data Docs sites will be built" in stdout
 
     obs_urls = context.get_docs_sites_urls()
 
@@ -444,16 +475,20 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     2. titanic (directory)"""
         in stdout
     )
-    
-    assert "Name the new expectation suite [random.warning]" in stdout
+
+    assert "Name the new Expectation Suite [random.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
     )
+
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here:"
+        in stdout
+    )
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
-    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+    assert "The following Data Docs sites will be built" in stdout
 
     obs_urls = context.get_docs_sites_urls()
 
@@ -515,12 +550,15 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     )
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
-    assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
+    assert "The following Data Docs sites will be built" in stdout
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'foo_suite' here:"
+        in stdout
+    )
 
     obs_urls = context.get_docs_sites_urls()
 
-    assert len(obs_urls) == 2 
+    assert len(obs_urls) == 2
     assert (
         "great_expectations/uncommitted/data_docs/local_site/index.html"
         in obs_urls[0]["site_url"]
@@ -865,7 +903,10 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert mock_subprocess.call_count == 0
     mock_subprocess.reset_mock()
     mock_webbrowser.reset_mock()
-    assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'foo_suite' here:"
+        in stdout
+    )
 
     batch_kwargs = {
         "datasource": "random",
@@ -1059,7 +1100,10 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     mock_subprocess.reset_mock()
     mock_webbrowser.reset_mock()
     assert result.exit_code == 0
-    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here:"
+        in stdout
+    )
 
     # remove the citations from the suite
     context = DataContext(project_root_dir)
@@ -1148,7 +1192,9 @@ def test_suite_list_with_multiple_suites(caplog, empty_data_context):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_suite_delete_with_zero_suites(mock_emit, caplog, empty_data_context_stats_enabled):
+def test_suite_delete_with_zero_suites(
+    mock_emit, caplog, empty_data_context_stats_enabled
+):
     project_dir = empty_data_context_stats_enabled.root_directory
     runner = CliRunner(mix_stderr=False)
 
@@ -1161,13 +1207,9 @@ def test_suite_delete_with_zero_suites(mock_emit, caplog, empty_data_context_sta
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__",
-             "success": True}
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
-        mock.call(
-            {"event": "cli.suite.delete", "event_payload": {},
-             "success": False}
-        ),
+        mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": False}),
     ]
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -1176,7 +1218,9 @@ def test_suite_delete_with_zero_suites(mock_emit, caplog, empty_data_context_sta
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_suite_delete_with_non_existent_suite(mock_emit, caplog, empty_data_context_stats_enabled):
+def test_suite_delete_with_non_existent_suite(
+    mock_emit, caplog, empty_data_context_stats_enabled
+):
     context = empty_data_context_stats_enabled
     project_dir = context.root_directory
     suite = context.create_expectation_suite("foo")
@@ -1193,13 +1237,9 @@ def test_suite_delete_with_non_existent_suite(mock_emit, caplog, empty_data_cont
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__",
-             "success": True}
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
-        mock.call(
-            {"event": "cli.suite.delete", "event_payload": {},
-             "success": False}
-        ),
+        mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": False}),
     ]
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -1207,7 +1247,9 @@ def test_suite_delete_with_non_existent_suite(mock_emit, caplog, empty_data_cont
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_suite_delete_with_one_suite(mock_emit, caplog, empty_data_context_stats_enabled):
+def test_suite_delete_with_one_suite(
+    mock_emit, caplog, empty_data_context_stats_enabled
+):
     project_dir = empty_data_context_stats_enabled.root_directory
     context = DataContext(project_dir)
     suite = context.create_expectation_suite("a.warning")
@@ -1231,13 +1273,9 @@ def test_suite_delete_with_one_suite(mock_emit, caplog, empty_data_context_stats
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__",
-             "success": True}
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
-        mock.call(
-            {"event": "cli.suite.delete", "event_payload": {},
-             "success": True}
-        ),
+        mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": True}),
     ]
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -1248,7 +1286,7 @@ def test_suite_delete_with_one_suite(mock_emit, caplog, empty_data_context_stats
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_scaffold_on_context_with_no_datasource_raises_error(
-        mock_subprocess, mock_emit, caplog, empty_data_context_stats_enabled
+    mock_subprocess, mock_emit, caplog, empty_data_context_stats_enabled
 ):
     """
     We call the "suite scaffold" command on a context with no datasource
@@ -1290,7 +1328,7 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_suite_scaffold_on_existing_suite_raises_error(
-        mock_emit, caplog, empty_data_context_stats_enabled
+    mock_emit, caplog, empty_data_context_stats_enabled
 ):
     """
     We call the "suite scaffold" command with an existing suite
@@ -1337,7 +1375,7 @@ def test_suite_scaffold_on_existing_suite_raises_error(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_scaffold_creates_notebook_and_opens_jupyter(
-        mock_subprocess, mock_emit, caplog, titanic_data_context_stats_enabled
+    mock_subprocess, mock_emit, caplog, titanic_data_context_stats_enabled
 ):
     """
     We call the "suite scaffold" command
@@ -1388,7 +1426,7 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
-        mock_subprocess, mock_emit, caplog, titanic_data_context_stats_enabled
+    mock_subprocess, mock_emit, caplog, titanic_data_context_stats_enabled
 ):
     """
     We call the "suite scaffold --no-jupyter"

@@ -1,6 +1,7 @@
-from marshmallow import ValidationError
-import json
 import importlib
+import json
+
+from marshmallow import ValidationError
 
 
 class GreatExpectationsError(Exception):
@@ -131,7 +132,7 @@ class InvalidCacheValueError(GreatExpectationsError):
 Invalid result values were found when trying to instantiate an ExpectationValidationResult.
 - Invalid result values are likely caused by inconsistent cache values.
 - Great Expectations enables caching by default.
-- Please ensure that caching behavior is consistent between the underlying Dataset (e.g. Spark) and Great Expectations. 
+- Please ensure that caching behavior is consistent between the underlying Dataset (e.g. Spark) and Great Expectations.
 Result: {}
 """
         self.message = template.format(json.dumps(result_dict, indent=2))
@@ -140,6 +141,7 @@ Result: {}
 
 class ConfigNotFoundError(DataContextError):
     """The great_expectations dir could not be found."""
+
     def __init__(self):
         self.message = """Error: No great_expectations directory was found here!
     - Please check that you are in the correct directory or have specified the correct directory.
@@ -150,6 +152,7 @@ class ConfigNotFoundError(DataContextError):
 
 class PluginModuleNotFoundError(GreatExpectationsError):
     """A module import failed."""
+
     def __init__(self, module_name):
         template = """\
 No module named `{}` could be found in your plugins directory.
@@ -161,14 +164,14 @@ No module named `{}` could be found in your plugins directory.
         colored_template = "<red>" + template + "</red>"
         module_snippet = "</red><yellow>" + module_name + "</yellow><red>"
         self.cli_colored_message = colored_template.format(
-            module_snippet,
-            module_snippet
+            module_snippet, module_snippet
         )
         super().__init__(self.message)
 
 
 class PluginClassNotFoundError(DataContextError, AttributeError):
     """A module import failed."""
+
     def __init__(self, module_name, class_name):
         class_name_changes = {
             "FixedLengthTupleFilesystemStoreBackend": "TupleFilesystemStoreBackend",
@@ -182,17 +185,14 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "TableGenerator": "TableBatchKwargsGenerator",
             "S3Generator": "S3GlobReaderBatchKwargsGenerator",
             "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
-            "StoreAction": "StoreValidationResultAction"
+            "StoreAction": "StoreValidationResultAction",
         }
 
         if class_name_changes.get(class_name):
             template = """The module: `{}` does not contain the class: `{}`.
             The class name `{}` has changed to `{}`."""
             self.message = template.format(
-                module_name,
-                class_name,
-                class_name,
-                class_name_changes.get(class_name)
+                module_name, class_name, class_name, class_name_changes.get(class_name)
             )
         else:
             template = """The module: `{}` does not contain the class: `{}`.
@@ -203,18 +203,15 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
         module_snippet = "</red><yellow>" + module_name + "</yellow><red>"
         class_snippet = "</red><yellow>" + class_name + "</yellow><red>"
         if class_name_changes.get(class_name):
-            new_class_snippet = "</red><yellow>" + class_name_changes.get(class_name) + "</yellow><red>"
+            new_class_snippet = (
+                "</red><yellow>" + class_name_changes.get(class_name) + "</yellow><red>"
+            )
             self.cli_colored_message = colored_template.format(
-                module_snippet,
-                class_snippet,
-                class_snippet,
-                new_class_snippet
+                module_snippet, class_snippet, class_snippet, new_class_snippet
             )
         else:
             self.cli_colored_message = colored_template.format(
-                module_snippet,
-                class_snippet,
-                class_snippet,
+                module_snippet, class_snippet, class_snippet,
             )
         super().__init__(self.message)
 
@@ -224,23 +221,25 @@ class ClassInstantiationError(GreatExpectationsError):
         module_spec = importlib.util.find_spec(module_name, package=package_name)
         if not module_spec:
             if not package_name:
-                package_name = ''
-            self.message = f'''No module named "{package_name + module_name}" could be found in the repository.  \
+                package_name = ""
+            self.message = f"""No module named "{package_name + module_name}" could be found in the repository.  \
 Please make sure that the file, corresponding to this package and module, exists and that dynamic loading of code \
 modules, templates, and assets is supported in your execution environment.  This error is unrecoverable.
-            '''
+            """
         else:
-            self.message = f'''The module "{module_name}" exists; however, the system is unable to create an instance \
+            self.message = f"""The module "{module_name}" exists; however, the system is unable to create an instance \
 of the class "{class_name}", searched for inside this module.  Please make sure that the class named "{class_name}" is \
 properly defined inside its intended module and declared correctly by the calling entity.  This error is unrecoverable.
-            '''
+            """
         super().__init__(self.message)
 
 
 class ExpectationSuiteNotFoundError(GreatExpectationsError):
     def __init__(self, data_asset_name):
         self.data_asset_name = data_asset_name
-        self.message = "No expectation suite found for data_asset_name %s" % data_asset_name
+        self.message = (
+            "No expectation suite found for data_asset_name %s" % data_asset_name
+        )
         super().__init__(self.message)
 
 
@@ -253,7 +252,10 @@ class BatchKwargsError(DataContextError):
 
 class DatasourceInitializationError(GreatExpectationsError):
     def __init__(self, datasource_name, message):
-        self.message = "Cannot initialize datasource %s, error: %s" % (datasource_name, message)
+        self.message = "Cannot initialize datasource %s, error: %s" % (
+            datasource_name,
+            message,
+        )
         super().__init__(self.message)
 
 

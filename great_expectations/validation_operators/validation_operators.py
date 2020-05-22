@@ -1,10 +1,8 @@
-import datetime
 import logging
 import warnings
 from collections import OrderedDict
 
 from dateutil.parser import ParserError, parse
-
 from great_expectations.core import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.resource_identifiers import (
@@ -23,7 +21,7 @@ from .util import send_slack_notification
 logger = logging.getLogger(__name__)
 
 
-# NOTE: Abe 2019/08/24 : This is first implementation of all these classes. Consider them UNSTABLE for now.
+logger = logging.getLogger(__name__)
 
 
 class ValidationOperator(object):
@@ -71,7 +69,14 @@ class ValidationOperator(object):
 
         raise NotImplementedError
 
-    def run(self, assets_to_validate, run_id=None, evaluation_parameters=None, run_name=None, run_time=None):
+    def run(
+        self,
+        assets_to_validate,
+        run_id=None,
+        evaluation_parameters=None,
+        run_name=None,
+        run_time=None,
+    ):
         raise NotImplementedError
 
 
@@ -182,14 +187,25 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch
 
-    def run(self, assets_to_validate, run_id=None, evaluation_parameters=None, run_name=None, run_time=None):
-        assert not (run_id and run_name) and not (run_id and run_time), \
-            "Please provide either a run_id or run_name and/or run_time."
+    def run(
+        self,
+        assets_to_validate,
+        run_id=None,
+        evaluation_parameters=None,
+        run_name=None,
+        run_time=None,
+    ):
+        assert not (run_id and run_name) and not (
+            run_id and run_time
+        ), "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
-            warnings.warn("String run_ids will be deprecated in the future. Please provide a run_id of type "
-                          "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                          "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                          "run_name and run_time separately.", DeprecationWarning)
+            warnings.warn(
+                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
+                "and run_time (both optional). Instead of providing a run_id, you may also provide"
+                "run_name and run_time separately.",
+                DeprecationWarning,
+            )
             try:
                 run_time = parse(run_id)
             except ParserError:
@@ -472,21 +488,13 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         run_name_element = {
             "type": "section",
-            "text":
-                {
-                    "type": "mrkdwn",
-                    "text": "*Run Name:* {}".format(run_name),
-                }
+            "text": {"type": "mrkdwn", "text": "*Run Name:* {}".format(run_name),},
         }
         query["blocks"].append(run_name_element)
 
         run_time_element = {
             "type": "section",
-            "text":
-                {
-                    "type": "mrkdwn",
-                    "text": "*Run Time:* {}".format(run_time),
-                }
+            "text": {"type": "mrkdwn", "text": "*Run Time:* {}".format(run_time),},
         }
         query["blocks"].append(run_time_element)
 
@@ -515,15 +523,19 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         base_expectation_suite_name=None,
         evaluation_parameters=None,
         run_name=None,
-        run_time=None
+        run_time=None,
     ):
-        assert not (run_id and run_name) and not (run_id and run_time), \
-            "Please provide either a run_id or run_name and/or run_time."
+        assert not (run_id and run_name) and not (
+            run_id and run_time
+        ), "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
-            warnings.warn("String run_ids will be deprecated in the future. Please provide a run_id of type "
-                          "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                          "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                          "run_name and run_time separately.", DeprecationWarning)
+            warnings.warn(
+                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
+                "and run_time (both optional). Instead of providing a run_id, you may also provide"
+                "run_name and run_time separately.",
+                DeprecationWarning,
+            )
             try:
                 run_time = parse(run_id)
             except ParserError:

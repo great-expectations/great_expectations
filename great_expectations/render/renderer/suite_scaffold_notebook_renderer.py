@@ -1,5 +1,4 @@
 import nbformat
-
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.dataset import Dataset
@@ -22,7 +21,7 @@ class SuiteScaffoldNotebookRenderer(SuiteEditNotebookRenderer):
             """# Scaffold a new Expectation Suite (BETA)
 This process helps you avoid writing lots of boilerplate when authoring suites by allowing you to select columns you care about and letting a profiler write some candidate expectations for you to adjust.
 
-**Expectation Suite Name**: `bar`
+**Expectation Suite Name**: `{}`
 
 We'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)""".format(
                 self.suite_name
@@ -65,7 +64,7 @@ included_columns = [
         self.add_markdown_cell(
             """## Save & review the scaffolded Expectation Suite
 
-Let's save the scaffolded expectation suite as a JSON file in the 
+Let's save the scaffolded expectation suite as a JSON file in the
 `great_expectations/expectations` directory of your project and rebuild the Data
  Docs site to make reviewing the scaffolded suite easy."""
         )
@@ -83,8 +82,8 @@ context.open_data_docs(validation_result_identifier)"""
         )
         self.add_markdown_cell(
             f"""## Next steps
-After you are happy with this scaffolded Expectation Suite in Data Docs you 
-should edit this suite to make finer grained adjustments to the expectations. 
+After you are happy with this scaffolded Expectation Suite in Data Docs you
+should edit this suite to make finer grained adjustments to the expectations.
 This is be done by running `great_expectations suite edit {self.suite_name}`."""
         )
 
@@ -114,13 +113,13 @@ use a jupyter keyboard shortcut to toggle each line: **Linux/Windows**:
 
 The suites generated here are **not meant to be production suites** - they are **scaffolds to build upon**.
 
-**To get to a production grade suite, will definitely want to [edit this 
-suite](http://docs.greatexpectations.io/en/latest/command_line.html#great-expectations-suite-edit) 
+**To get to a production grade suite, will definitely want to [edit this
+suite](http://docs.greatexpectations.io/en/latest/command_line.html#great-expectations-suite-edit)
 after scaffolding gets you close to what you want.**
 
 This is highly configurable depending on your goals. You can include or exclude
-columns, and include or exclude expectation types (when applicable). [The 
-Expectation Glossary](http://docs.greatexpectations.io/en/latest/expectation_glossary.html) 
+columns, and include or exclude expectation types (when applicable). [The
+Expectation Glossary](http://docs.greatexpectations.io/en/latest/expectation_glossary.html)
 contains a list of possible expectations."""
         )
         self._add_scaffold_cell()

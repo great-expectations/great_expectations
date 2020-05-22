@@ -7,6 +7,7 @@ class DataContextKey(object, metaclass=ABCMeta):
     A DataContextKey is designed to support clear naming with multiple representations including a hashable
     version making it suitable for use as the key in a dictionary.
     """
+
     @abstractmethod
     def to_tuple(self):
         pass
@@ -45,7 +46,7 @@ class StringKey(DataContextKey):
         self._key = key
 
     def to_tuple(self):
-        return self._key,
+        return (self._key,)
 
     def to_fixed_length_tuple(self):
         return self.to_tuple()
