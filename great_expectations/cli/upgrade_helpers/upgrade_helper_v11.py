@@ -365,7 +365,7 @@ class UpgradeHelperV11:
 
             self.validation_run_times[run_name] = source_blob_created_time
 
-    def _generate_upgrade_prompt(self):
+    def _get_skipped_store_and_site_names(self):
         validations_stores_with_database_backends = [
             store_dict.get("store_name")
             for store_dict in self.upgrade_log["skipped_validations_stores"][
@@ -403,6 +403,49 @@ class UpgradeHelperV11:
                 "unsupported"
             ]
         ]
+        return (
+            stores_with_database_backends,
+            stores_with_unsupported_backends,
+            doc_sites_with_unsupported_backends,
+        )
+
+    def get_upgrade_prompt(self):
+        (
+            skip_with_database_backends,
+            skip_with_unsupported_backends,
+            skip_doc_sites_with_unsupported_backends,
+        ) = self._get_skipped_store_and_site_names()
+        validations_store_name_checklist = [
+            store_name
+            for store_name in self.upgrade_checklist[
+                "validations_store_backends"
+            ].keys()
+        ]
+        site_name_checklist = [
+            site_name
+            for site_name in self.upgrade_checklist[
+                "docs_validations_store_backends"
+            ].keys()
+        ]
+
+        upgrade_text = f"""\
+**WARNING!**: This automated upgrade helper is currently experimental. Before proceeding, please make sure you have
+appropriate backups of your project.
+
+The following Stores and/or Data Docs sites will be upgraded:
+    - Validation Stores: {", ".join(validations_store_name_checklist) if validations_store_name_checklist else "None"}
+    - Data Docs Sites: {", ".join(site_name_checklist) if site_name_checklist else "None"}
+
+The following Stores and/or Data Docs sites must be upgraded manually, due to having a database backend, or backend
+type that is unsupported or unrecognized. Please consult the 0.11.x migration guide for more information:
+https://docs.greatexpectations.io/how_to_guides/migrating_versions.html
+    - Stores with database backends: {", ".join(skip_with_database_backends) if skip_with_database_backends else "None"}
+    - Stores with unsupported/unrecognized backends: {", ".join(skip_with_unsupported_backends) if skip_with_unsupported_backends else "None"}
+    - Data Docs sites with unsupported/unrecognized backends: {", ".join(skip_doc_sites_with_unsupported_backends) if skip_doc_sites_with_unsupported_backends else "None"}
+
+Would you like to proceed?
+"""
+        return upgrade_text
 
     def upgrade_project(self):
         try:
