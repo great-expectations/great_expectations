@@ -1,7 +1,8 @@
 import warnings
 
-import great_expectations as ge
 import pytest
+
+import great_expectations as ge
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationKwargs,

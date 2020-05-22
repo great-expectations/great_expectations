@@ -3,7 +3,7 @@
 Customize your deployment
 =========================
 
-At this point, you have your first, working deployment of Great Expectations. You've also been introduced to the foundational concepts in the library: :ref:`Data Contexts`, :ref:`Datasources`, :ref:`Expectations`, :ref:`Profilers`, :ref:`Auto Docs`, :ref:`Validation`, and :ref:`Checkpoints`.
+At this point, you have your first, working deployment of Great Expectations. You've also been introduced to the foundational concepts in the library: :ref:`Data Contexts`, :ref:`Datasources`, :ref:`Expectations`, :ref:`Profilers`, :ref:`Data Docs`, :ref:`Validation`, and :ref:`Checkpoints`.
 
 Congratulations! You're off to a very good start.
 
@@ -25,8 +25,8 @@ Here's an overview of the components of a typical Great Expectations deployment:
 * Integrations to related systems
 
     * :ref:`Additional Datasources and Generators`
-    * :ref:`Options for hosting Auto Docs`
-    * :ref:`Additional Validation Actions`
+    * :ref:`Options for hosting Data Docs`
+    * :ref:`Additional Validation Operators and Actions`
 
 * Key workflows
 
@@ -37,11 +37,13 @@ Here's an overview of the components of a typical Great Expectations deployment:
 Options for storing Great Expectations configuration
 ----------------------------------------------------
 
-#FIXME: Add links once how-to guides are set up.
+The simplest way to manage your Great Expectations configuration is usually by committing ``great_expectations/great_expectations.yml`` to git. However, it's not usually a good idea to commit credentials to source control. In some situations, you might need to deploy without access to source control (or maybe even a file system).
 
-* How to instantiate a DataContext without a yml file
-* How to use environment variables to populate credentials
-* How to populate credentials from a secrets store
+Here's how to handle each of those cases:
+
+* :ref:`How to use environment variables to populate credentials`
+* :ref:`How to populate credentials from a secrets store`
+* :ref:`How to instantiate a Data Context without a yml file`
 
 
 Options for storing Expectations
@@ -51,65 +53,89 @@ Many teams find it convenient to store Expectations in git. Essentially, this ap
 
 Alternatively, you can treat Expectations like configs, and store them in a blob store. Finally, you can store them in a database.
 
-* How to store Expectations to S3
-* How to store Expectations to GCS
-* How to store Expectations to Azure blob store
-* How to store Expectations to postgresql
-
+* :ref:`How to configure an Expectation store in Amazon S3`
+* :ref:`How to configure an Expectation store in GCS`
+* :ref:`How to configure an Expectation store in Azure blob storage`
+* :ref:`How to configure an Expectation store to postgresql`
 
 
 Options for storing Validation Results
 --------------------------------------
 By default, Validation Results are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. The most common pattern is to use a cloud-based blob store such as S3, GCS, or Azure blob store. You can also store Validation Results in a database.
 
-* How to store Validation Results to S3
-* How to store Validation Results to GCS
-* How to store Validation Results to Azure blob store
-* How to store Validation Results to postgresql
+* :ref:`How to configure a Validation Result store on a filesystem`
+* :ref:`How to configure a Validation Result store in S3`
+* :ref:`How to configure a Validation Result store in GCS`
+* :ref:`How to configure a Validation Result store in Azure blob storage`
+* :ref:`How to configure a Validation Result store to postgresql`
+
 
 Additional DataSources and Generators
 -------------------------------------
 
-Great Expectations plugs into a wide variety of Datasources, and the list is constantly getting longer. If you have an idea for a Datasource not listed here, please speak up at [Some location].
+Great Expectations plugs into a wide variety of Datasources, and the list is constantly getting longer. If you have an idea for a Datasource not listed here, please speak up in `the public discussion forum <discuss.greatexpectations.io>`__.
 
-#FIXME: Finalize this list after tidying up our How-to Guides
+* :ref:`How to configure a Pandas/filesystem Datasource`
+* :ref:`How to configure a Pandas/S3 Datasource`
+* :ref:`How to configure a Redshift Datasource`
+* :ref:`How to configure a Snowflake Datasource`
+* :ref:`How to configure a BigQuery Datasource`
+* :ref:`How to configure a Databricks Azure Datasource`
+* :ref:`How to configure an EMR Spark Datasource`
+* :ref:`How to configure a Databricks AWS Datasource`
+* :ref:`How to configure a self managed Spark Datasource`
 
-* How to configure a AAAAA Datasource
-* How to configure a AAAAA Datasource
-* How to configure a AAAAA Datasource
-* How to configure a AAAAA Datasource
-* How to configure a AAAAA Datasource
 
-
-Options for hosting Auto Docs
+Options for hosting Data Docs
 -----------------------------
 
-By default, Auto Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure blob store), configured to share a static website.
+By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure blob store), configured to share a static website.
 
-* How to store Validation Results to S3
-* How to store Validation Results to GCS
-* How to store Validation Results to Azure blob store
-* How to store Validation Results to postgresql
-
-
-Additional Validation Actions
------------------------------
-
-* How to store Validation Results as a Validation Action
-* How to re-render Auto docs as a Validation Action
-* How to trigger slack notifications as a Validation Action
+* :ref:`How to host and share Data Docs on a filesystem`
+* :ref:`How to host and share Data Docs on S3`
+* :ref:`How to host and share Data Docs on Azure Blob Storage`
+* :ref:`How to host and share Data Docs on GCS`
 
 
+Additional Validation Operators and Actions
+-------------------------------------------
+
+Most teams will want to configure various :ref:`Validation Actions` as part of their deployment.
+
+* :ref:`How to re-render Data Docs as a Validation Action`
+* :ref:`How to store Validation Results as a Validation Action`
+* :ref:`How to trigger slack notifications as a Validation Action`
+* :ref:`How to implement a custom Validation Action`
+
+Modifying :ref:`Validation Operators` themselves is more advanced work. You can learn how here.
+
+* :ref:`How to configure a Validation Operator`
+* :ref:`How to configure a WarningAndFailureExpectationSuitesValidationOperator`
+* :ref:`How to configure an ActionListValidationOperator`
+* :ref:`How to implement a custom Validation Operator`
 
 Creating and editing Expectations
 ---------------------------------
 
+#FIXME: Need words here.
+
+#FIXME: Need list here, after we wrangle the how-to guides for creating and editing Expectations.
 
 Triggering validation
 ---------------------
 
-As we saw in the previous step of the tutorial, the basic Great Expectations deployment allows you to trigger validation from a notebook. This is great for getting started, but not usually the approach you
+There are two primary paths to validate data 
 
-There are two primary paths 
+* :ref:`How to create a new Checkpoint`
+* :ref:`How to add validations, data, or suites to a Checkpoint`
+* :ref:`How to run a Checkpoint in Airflow`
+* :ref:`How to run a Checkpoint in python`
+* :ref:`How to run a Checkpoint in terminal`
+* :ref:`How to validate data without a Checkpoint`
 
-* How to validate data using an Airflow BashOperator
+Conclusion
+----------
+
+#FIXME: Need words here.
+
+#FIXME: Need words from Dickens here.

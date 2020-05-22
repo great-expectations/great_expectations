@@ -1,7 +1,7 @@
-.. _how_to_guides__validation__how_to_run_a_checkpoint_in_terminal:
+.. _how_to_guides__validation__how_to_validate_data_without_a_checkpoint:
 
-How to run a Checkpoint in terminal
-===================================
+How to validate data without a Checkpoint
+=========================================
 
 .. admonition:: Admonition from Mr. Dickens
 

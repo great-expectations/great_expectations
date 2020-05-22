@@ -35,6 +35,197 @@ You will most likely be prompted to install a new template. Rest assured that
 your original yaml file will be archived automatically for you. Even so, it's
 in your source control system already, right? ;-)
 
+.. _Upgrading to 0.11.x:
+*************************
+Upgrading to 0.11.x
+*************************
+
+The 0.11.0 release has several breaking changes related to ``run_id`` and ``ValidationMetric`` objects.
+Existing projects that have Expectation Suite Validation Results or configured evaluation parameter stores with
+DatabaseStoreBackend backends must be migrated.
+
+In addition, ``ValidationOperator.run`` now returns an instance of new type, ``ValidationOperatorResult`` (instead of a
+dictionary). If your code uses output from Validation Operators, it must be updated.
+
+run_id and ValidationMetric Changes
+===================================
+
+``run_id`` is now typed using the new ``RunIdentifier`` class, with optional ``run_name`` and ``run_time`` instantiation
+arguments. The ``run_name`` can be any string (this could come from your pipeline runner, e.g. Airflow run id). The ``run_time``
+can be either a dateutil parsable string or a datetime object. If no instantiation arguments are provided, ``run_name`` will be
+``None`` (and appear as "__none__" in stores) and ``run_time`` will default to the current UTC datetime. This change
+affects all Great Expectations classes that have a ``run_id`` attribute as well as any functions or methods that accept
+a ``run_id`` argument.
+
+``data_asset_name`` (if available) is now added to ``batch_kwargs`` by ``batch_kwargs_generators``.
+Because of this newly exposed key in ``batch_kwargs``, ``ValidationMetric`` and associated ``ValidationMetricIdentifier``
+objects now have a ``data_asset_name`` attribute.
+
+The affected classes that are relevant to existing projects are ``ValidationResultIdentifier`` and
+``ValidationMetricIdentifier``, as well as any configured stores that rely on these classes for keys, namely
+stores of type ``ValidationsStore`` (and subclasses) or ``EvaluationParameterStore`` (and other subclasses of
+``MetricStore``). In addition, because Expectation Suite Validation Result json objects have a ``run_id`` key,
+existing validation result json files must be updated with a new typed ``run_id``.
+
+Migrating Your 0.10.x Project
+==============================
+
+Before performing any of the following migration steps, please make sure you have appropriate backups of your project.
+In the future, there will be a CLI tool to help automate all or most of this process (affected
+stores with database backends will still have to be migrated manually). The CLI tool will make use of a new class called
+UpgradeHelperV11. In the meantime, you may use the following code snippet in a Jupyter notebook or Python script to
+help automate the process::
+
+  import great_expectations as ge
+  from great_expectations.cli.upgrade_helpers import UpgradeHelperV11
+
+  context_root_dir = "/Users/user/projects/great_expectations" # enter the path to your GE project here
+  context = ge.data_context.DataContext(
+      context_root_dir=context_root_dir
+  )
+
+  # instantiate the upgrade helper
+  upgrade_helper = UpgradeHelperV11(data_context=context)
+  # upgrade_helper = UpgradeHelperV11(context_root_dir=context_root_dir)  # another way
+
+  # generate a prompt summarizing what the upgrade helper will do and what steps, if any, need to be performed manually
+  # you should review this summary before proceeding with the automated process
+  upgrade_prompt = upgrade_helper.get_upgrade_prompt()
+  print(upgrade_prompt)
+
+  # if you were satisfied with the above summary, trigger the automated process
+  # when complete, the upgrade helper outputs a log of what was done, what was skipped, and exception messages of
+  # any exceptions that occurred
+  upgrade_logs = upgrade_helper.upgrade_project()
+
+For reference, the UpgradeHelperV11 class is located at ``great_expectations.cli.upgrade_helpers.upgrade_helper_v11``.
+
+.. note:: The migration steps are written in the order they should be completed.
+
+0. Code That Uses Great Expectations
+-------------------------------------
+
+If you are using any Great Expectations methods that accept a ``run_id`` argument, you should update your code to pass in
+the new ``RunIdentifier`` type (or a dictionary with ``run_name`` and ``run_time`` keys). For now, methods with a
+``run_id`` parameter will continue to accept strings. In this case, the provided ``run_id`` string will be converted to
+a ``RunIdentifier`` object, acting as the ``run_name``. If the ``run_id`` string can also be parsed as a datetime, it
+will also be used for the ``run_time`` attribute, otherwise, the current UTC time is used.
+
+If your code uses output from Validation Operators, it must be updated to handle the new ValidationOperatorResult
+type.
+
+1. Expectation Suite Validation Result JSONs
+--------------------------------------------
+
+Each existing Expectation Suite Validation Result JSON in your project should be updated with a typed ``run_id``. The ``run_id``
+key is found under the top-level ``meta`` key. You can use the current ``run_id`` string as the new ``run_name``
+(or select a different one). If the current ``run_id`` is already a datetime string, you can also use it for the ``run_time``
+as well, otherwise, we suggest using the last modified datetime of the validation result.
+
+.. note:: Subsequent migration steps will make use of this new ``run_time`` when generating new paths/keys for validation
+  result jsons and their Data Docs html pages. Please ensure the ``run_time`` in these paths/keys match the ``run_time``
+  in the corresponding validation result. Similarly, if you decide to use a different value for ``run_name`` instead of
+  reusing an existing ``run_id`` string, make sure this is reflected in the new paths/keys.
+
+For example, an existing validation result json with ``run_id="my_run"`` should be updated to look like the following::
+
+  {
+  "meta": {
+    "great_expectations.__version__": "0.10.8",
+    "expectation_suite_name": "diabetic_data.warning",
+    "run_id": {
+      "run_name": "my_run",
+      "run_time": "20200507T065044.404158Z"
+    },
+    ...
+  },
+  ...
+  }
+
+2. Stores and their Backends
+------------------------------
+
+Stores rely on special identifier classes to serve as keys when getting or setting values. When the signature of an
+identifier class changes, any existing stores that rely on that identifier must be updated. Specifically, the structure
+of that store's backend must be modified to conform to the new identifier signature.
+
+For example, in a v0.10.x project, you might have an Expectation Suite Validation Result with the following
+``ValidationResultIdentifier``::
+
+  v10_identifier = ValidationResultIdentifier(
+    expectation_suite_identifier=ExpectationSuiteIdentifier(expectation_suite_name="my_suite_name"),
+    run_id="my_string_run_id",
+    batch_identifier="some_batch_identifier"
+  )
+
+A configured ``ValidationsStore`` with a ``TupleFilesystemStoreBackend`` (and default config) would use this identifier
+to generate the following filepath for writing the validation result to a file (and retrieving it at a later time)::
+
+  v10_filepath = "great_expectations/uncommitted/validations/my_suite_name/my_string_run_id/some_batch_identifier.json"
+
+In a v0.11.x project, the ``ValidationResultIdentifier`` and corresponding filepath would look like the following::
+
+  v11_identifier = ValidationResultIdentifier(
+    expectation_suite_identifier=ExpectationSuiteIdentifier(expectation_suite_name="my_suite_name"),
+    run_id=RunIdentifier(run_name="my_string_run_name", run_time="2020-05-08T20:51:18.077262"),
+    batch_identifier="some_batch_identifier"
+  )
+  v11_filepath = "great_expectations/uncommitted/validations/my_suite_name/my_string_run_name/2020-05-08T20:51:18.077262/some_batch_identifier.json"
+
+When migrating to v0.11.x, you would have to move all existing validation results to new filepaths. For a particular
+validation result, you might move the file like this::
+
+  os.makedirs(v11_filepath, exist_ok=True)  # create missing directories from v11 filepath
+  shutil.move(v10_filepath, v11_filepath)  # move validation result json file
+
+The following sections detail the changes you must make to existing store backends.
+
+**2a. Validations Store Backends**
+
+For validations stores with backends of type ``TupleFilesystemStoreBackend``, ``TupleS3StoreBackend``, or ``TupleGCSStoreBackend``,
+rename paths (or object keys) of all existing Expectation Suite Validation Result json files:
+
+Before::
+
+  great_expectations/uncommitted/validations/my_suite_name/my_run_id/some_batch_identifier.json
+
+After::
+
+  great_expectations/uncommitted/validations/my_suite_name/my_run_id/my_run_time/batch_identifier.json
+
+For validations stores with backends of type ``DatabaseStoreBackend``, perform the following database migration:
+
+* add string column with name ``run_name``; copy values from ``run_id`` column
+* add string column with name ``run_time``; fill with appropriate dateutil parsable values
+* delete ``run_id`` column
+
+**2b. Evaluation Parameter Store Backends**
+
+If you have any configured evaluation parameter stores that use a ``DatabaseStoreBackend`` backend, you must perform the
+following migration for each database backend:
+
+* add string column with name ``data_asset_name``; fill with appropriate values or use "__none__"
+* add string column with name ``run_name``; copy values from ``run_id`` column
+* add string column with name ``run_time``; fill with appropriate dateutil parsable values
+* delete ``run_id`` column
+
+**2c. Data Docs Validations Store Backends**
+
+.. note:: If you are okay with rebuilding your Data Docs sites, you can skip the migration steps in this section. Instead,
+  you should should run the following CLI command, but **only after** you have completed the above migration steps:
+  ``great_expectations docs clean --all && great_expectations docs build``.
+
+For Data Docs sites with store backends of type ``TupleFilesystemStoreBackend``, ``TupleS3StoreBackend``, or ``TupleGCSStoreBackend``, rename
+paths (or object keys) of all existing Expectation Suite Validation Result html files:
+
+Before::
+
+  great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/my_run_id/some_batch_identifier.html
+
+After::
+
+  great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/my_run_id/my_run_time/batch_identifier.html
+
 .. _Upgrading to 0.10.x:
 ************************
 How to upgrade to 0.10.x

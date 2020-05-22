@@ -10,6 +10,13 @@ a {
   font-family: HKGroteskPro, serif !important;
 }
 
+h1,
+h2,
+h3 {
+  padding-top: 80px;
+  margin-top: -80px;
+}
+
 body {
   background-color: #efefef;
   color: #2b354f;
@@ -45,6 +52,13 @@ a {
   font-weight: 800;
   src: url(hk-grotesk-pro/HKGroteskPro-Bold.woff2) format("woff2"),
     url(hk-grotesk-pro/HKGroteskPro-Bold.woff) format("woff");
+}
+
+@media print {
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
 }
 
 .wy-nav-content {

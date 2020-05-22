@@ -1,6 +1,7 @@
 import os
 
 from click.testing import CliRunner
+
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from tests.cli.test_cli import yaml
@@ -99,7 +100,7 @@ def test_cli_datasorce_new(caplog, empty_data_context, filesystem_csv_2):
 
     assert "What data would you like Great Expectations to connect to?" in stdout
     assert "What are you processing your files with?" in stdout
-    assert "Give your new data source a short name." in stdout
+    assert "Give your new Datasource a short name." in stdout
     assert "A new datasource 'mynewsource' was added to your project." in stdout
 
     assert result.exit_code == 0
@@ -393,13 +394,14 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
             project_root_dir,
             "--no-view",
         ],
+        input="\n",
         catch_exceptions=False,
     )
 
     assert result.exit_code == 0
     stdout = result.stdout
     assert "Profiling 'my_datasource'" in stdout
-    assert "The following Data Docs sites were built:\n" in stdout
+    assert "The following Data Docs sites will be built:\n" in stdout
     assert "local_site:" in stdout
 
     context = DataContext(project_root_dir)

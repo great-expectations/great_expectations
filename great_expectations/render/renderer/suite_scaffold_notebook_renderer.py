@@ -18,7 +18,7 @@ class SuiteScaffoldNotebookRenderer(SuiteEditNotebookRenderer):
 
     def add_header(self):
         self.add_markdown_cell(
-            """# Scaffold a new Expectation Suite (BETA)
+            """# Scaffold a new Expectation Suite (Experimental)
 This process helps you avoid writing lots of boilerplate when authoring suites by allowing you to select columns you care about and letting a profiler write some candidate expectations for you to adjust.
 
 **Expectation Suite Name**: `{}`
@@ -76,12 +76,7 @@ context.save_expectation_suite(suite, expectation_suite_name)
 run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
 
 results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
+validation_result_identifier = results.list_validation_result_identifiers()[0]
 context.build_data_docs()
 context.open_data_docs(validation_result_identifier)"""
         )

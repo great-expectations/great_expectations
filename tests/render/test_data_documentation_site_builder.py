@@ -4,7 +4,6 @@ import shutil
 
 import pytest
 from freezegun import freeze_time
-
 from great_expectations import DataContext
 from great_expectations.core import RunIdentifier
 from great_expectations.data_context.store import ExpectationsStore, ValidationsStore
@@ -275,13 +274,7 @@ def test_configuration_driven_site_builder(
         validation_operator_name="validate_and_store",
     )
 
-    validation_result_id = ValidationResultIdentifier(
-        expectation_suite_identifier=[key for key in operator_result["details"].keys()][
-            0
-        ],
-        run_id=run_id,
-        batch_identifier=batch.batch_id,
-    )
+    validation_result_id = operator_result.list_validation_result_identifiers()[0]
     res = site_builder.build(resource_identifiers=[validation_result_id])
 
     index_links_dict = res[1]

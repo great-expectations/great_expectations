@@ -133,7 +133,7 @@ def test_validation_operator_run_noninteractive_golden_path(
                     "datasource": "mydatasource",
                     "reader_method": "read_csv",
                 },
-                "expectation_suite_names": ["my_dag_node.default"],
+                "expectation_suite_names": ["default"],
             }
         ],
     }

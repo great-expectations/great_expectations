@@ -3,7 +3,7 @@ from datetime import datetime
 from functools import lru_cache, wraps
 from itertools import zip_longest
 from numbers import Number
-from typing import List, Any, Union
+from typing import Any, List, Union
 
 import numpy as np
 import pandas as pd

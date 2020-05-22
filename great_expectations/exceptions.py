@@ -68,7 +68,7 @@ class InvalidDataContextKeyError(DataContextError):
     pass
 
 
-class UnsupportedConfigVersionError(GreatExpectationsError):
+class UnsupportedConfigVersionError(DataContextError):
     pass
 
 

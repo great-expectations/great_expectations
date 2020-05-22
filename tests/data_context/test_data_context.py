@@ -2,10 +2,10 @@ import json
 import os
 import shutil
 
-import pytest
-from freezegun import freeze_time
 from ruamel.yaml import YAML
 
+import pytest
+from freezegun import freeze_time
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -460,8 +460,12 @@ project_path/
                         Titanic/
                             BasicDatasetProfiler/
                                 profiling/
-                                    {}.json
-""".format(titanic_profiled_batch_id)
+                                    2019-09-26T13:42:41+00:00/
+                                        {}.json
+""".format(
+            titanic_profiled_batch_id
+        )
+    )
 
     context.profile_datasource("random")
     context.build_data_docs()
@@ -589,7 +593,7 @@ def basic_data_context_config():
     return DataContextConfig(
         **{
             "commented_map": {},
-            "config_version": 1,
+            "config_version": 2,
             "plugins_directory": "plugins/",
             "evaluation_parameter_store_name": "evaluation_parameter_store",
             "validations_store_name": "does_not_have_to_be_real",

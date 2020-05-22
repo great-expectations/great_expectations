@@ -31,20 +31,22 @@ class MetricStore(Store):
 
             if issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
-                store_backend["table_name"] = store_backend.get(
-                    "table_name", "ge_metrics"
-                )
-                store_backend["key_columns"] = store_backend.get(
-                    "key_columns",
-                    [
-                        "run_name",
-                        "run_time",
-                        "data_asset_name",
-                        "expectation_suite_identifier",
-                        "metric_name",
-                        "metric_kwargs_id",
-                    ],
-                )
+                if "table_name" not in store_backend:
+                    store_backend["table_name"] = store_backend.get(
+                        "table_name", "ge_metrics"
+                    )
+                if "key_columns" not in store_backend:
+                    store_backend["key_columns"] = store_backend.get(
+                        "key_columns",
+                        [
+                            "run_name",
+                            "run_time",
+                            "data_asset_name",
+                            "expectation_suite_identifier",
+                            "metric_name",
+                            "metric_kwargs_id",
+                        ],
+                    )
 
         super().__init__(store_backend=store_backend)
 
