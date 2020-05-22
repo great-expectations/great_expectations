@@ -50,7 +50,6 @@ Commands:
   project              Project operations
   store                Store operations
   suite                Expectation Suite operations
-  tap                  Tap operations
   validation-operator  Validation Operator operations
 """
     )
