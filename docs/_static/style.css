@@ -10,6 +10,13 @@ a {
   font-family: HKGroteskPro, serif !important;
 }
 
+h1,
+h2,
+h3 {
+  padding-top: 80px;
+  margin-top: -80px;
+}
+
 body {
   background-color: #efefef;
   color: #2b354f;
