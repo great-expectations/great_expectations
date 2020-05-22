@@ -4,7 +4,7 @@ How to load a BigQuery table or a query result as a batch
 =========================================================
 
 This guide will help you load a BigQuery table or a query result as a batch. This is important when you want to validate
-a table or the result of a query against an Expectation Suite.
+a table or the result of a query against an Expectation Suite. When you use a BigQuery Datasource, the validation is done in BigQuery itself. Your data is not downloaded.
 
 
 Steps
