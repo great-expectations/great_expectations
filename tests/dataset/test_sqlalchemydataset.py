@@ -301,9 +301,11 @@ def test_result_format_warning(sa, unexpected_count_df):
 
 @pytest.mark.skipif(
     is_library_installed("sqlalchemy_redshift"),
-    reason="sqlalchemy_redshift must not be installed"
+    reason="sqlalchemy_redshift must not be installed",
 )
-def test_dataset_attempt_allowing_relative_error_when_redshift_library_not_installed(sa):
+def test_dataset_attempt_allowing_relative_error_when_redshift_library_not_installed(
+    sa,
+):
     engine = sa.create_engine("sqlite://")
     dataset = SqlAlchemyDataset(engine=engine, custom_sql="select 1")
 
