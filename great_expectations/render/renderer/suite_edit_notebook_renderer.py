@@ -116,12 +116,7 @@ run_id = {
 }
 
 results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
+validation_result_identifier = results.list_validation_result_identifiers()[0]
 context.build_data_docs()
 context.open_data_docs(validation_result_identifier)"""
         )
