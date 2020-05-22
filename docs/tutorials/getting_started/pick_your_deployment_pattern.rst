@@ -37,7 +37,9 @@ Here's an overview of the components of a typical Great Expectations deployment:
 Options for storing Great Expectations configuration
 ----------------------------------------------------
 
-#FIXME: Need words here.
+The simplest way to manage your Great Expectations configuration is usually by committing ``great_expectations/great_expectations.yml`` to git. However, it's not usually a good idea to commit credentials to source control. In some situations, you might need to deploy without access to source control (or maybe even a file system).
+
+Here's how to handle each of those cases:
 
 * :ref:`How to use environment variables to populate credentials`
 * :ref:`How to populate credentials from a secrets store`
@@ -71,7 +73,7 @@ By default, Validation Results are stored locally, in an uncommitted directory. 
 Additional DataSources and Generators
 -------------------------------------
 
-Great Expectations plugs into a wide variety of Datasources, and the list is constantly getting longer. If you have an idea for a Datasource not listed here, please speak up in :ref:`the public discussion forum <https://discuss.greatexpectations.io>`__.
+Great Expectations plugs into a wide variety of Datasources, and the list is constantly getting longer. If you have an idea for a Datasource not listed here, please speak up in `the public discussion forum <discuss.greatexpectations.io>`__.
 
 * :ref:`How to configure a Pandas/filesystem Datasource`
 * :ref:`How to configure a Pandas/S3 Datasource`
@@ -98,13 +100,14 @@ By default, Data Docs are stored locally, in an uncommitted directory. This is g
 Additional Validation Operators and Actions
 -------------------------------------------
 
-#FIXME: Need words here.
+Most teams will want to configure various :ref:`Validation Actions` as part of their deployment.
 
 * :ref:`How to re-render Data Docs as a Validation Action`
 * :ref:`How to store Validation Results as a Validation Action`
 * :ref:`How to trigger slack notifications as a Validation Action`
+* :ref:`How to implement a custom Validation Action`
 
-#FIXME: Need words here.
+Modifying :ref:`Validation Operators` themselves is more advanced work. You can learn how here.
 
 * :ref:`How to configure a Validation Operator`
 * :ref:`How to configure a WarningAndFailureExpectationSuitesValidationOperator`
@@ -121,17 +124,14 @@ Creating and editing Expectations
 Triggering validation
 ---------------------
 
-#FIXME: Need better words here.
-
-As we saw in the previous step of the tutorial, the basic Great Expectations deployment allows you to trigger validation from a notebook. This is great for getting started, but not usually the approach you
-
-There are two primary paths 
+There are two primary paths to validate data 
 
 * :ref:`How to create a new Checkpoint`
 * :ref:`How to add validations, data, or suites to a Checkpoint`
-* :ref:`How to run a checkpoint in Airflow`
-* :ref:`How to run a checkpoint in python`
-* :ref:`How to run a checkpoint in terminal`
+* :ref:`How to run a Checkpoint in Airflow`
+* :ref:`How to run a Checkpoint in python`
+* :ref:`How to run a Checkpoint in terminal`
+* :ref:`How to validate data without a Checkpoint`
 
 Conclusion
 ----------

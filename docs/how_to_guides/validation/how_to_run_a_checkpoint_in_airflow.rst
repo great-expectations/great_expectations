@@ -1,6 +1,6 @@
 .. _how_to_guides__validation__how_to_run_a_checkpoint_in_airflow:
 
-How to run a checkpoint in Airflow
+How to run a Checkpoint in Airflow
 ==================================
 
 .. admonition:: Admonition from Mr. Dickens
