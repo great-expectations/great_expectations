@@ -4,6 +4,11 @@
 Getting started
 ###############
 
+.. warning::
+
+   We're really excited about our new documentation, but this Getting Started Guide is brand new and still incomplete. Please refer to the older getting started materials at https://docs.greatexpectations.io/en/0.10.12/getting_started/cli_init.html as needed to help you get going!
+
+
 Welcome to Great Expectations! This tutorial will help you set up your first deployment of Great Expectactions. We'll also introduce important concepts, with links to detailed material you can dig into later.
 
 Please follow these steps to get started:

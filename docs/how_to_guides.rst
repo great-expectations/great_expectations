@@ -5,6 +5,10 @@
 How-to guides
 #############
 
+.. warning::
+
+   We are working on improving our How-to Guides, but many of them are just stubs. Please check the "spare parts" sections or feel free to review older versions of documentation while we migrate content.
+
 .. toctree::
    :maxdepth: 2
 
