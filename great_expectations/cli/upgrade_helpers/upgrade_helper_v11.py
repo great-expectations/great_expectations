@@ -366,16 +366,42 @@ class UpgradeHelperV11:
             self.validation_run_times[run_name] = source_blob_created_time
 
     def _generate_upgrade_prompt(self):
+        validations_stores_with_database_backends = [
+            store_dict.get("store_name")
+            for store_dict in self.upgrade_log["skipped_validations_stores"][
+                "database_store_backends"
+            ]
+        ]
+        metrics_stores_with_database_backends = [
+            store_dict.get("store_name")
+            for store_dict in self.upgrade_log["skipped_metrics_stores"][
+                "database_store_backends"
+            ]
+        ]
+
+        unsupported_validations_stores = [
+            store_dict.get("store_name")
+            for store_dict in self.upgrade_log["skipped_validations_stores"][
+                "unsupported"
+            ]
+        ]
+        unsupported_metrics_stores = [
+            store_dict.get("store_name")
+            for store_dict in self.upgrade_log["skipped_metrics_stores"]["unsupported"]
+        ]
+
         stores_with_database_backends = (
-            self.upgrade_log["skipped_validations_stores"]["database_store_backends"]
-            + self.upgrade_log["skipped_metrics_stores"]["database_store_backends"]
+            validations_stores_with_database_backends
+            + metrics_stores_with_database_backends
         )
-        unsupported_stores = (
-            self.upgrade_log["skipped_validations_stores"]["unsupported"]
-            + self.upgrade_log["skipped_metrics_stores"]["unsupported"]
+        stores_with_unsupported_backends = (
+            unsupported_validations_stores + unsupported_metrics_stores
         )
-        unsupported_doc_sites = self.upgrade_log["skipped_docs_validations_stores"][
-            "unsupported"
+        doc_sites_with_unsupported_backends = [
+            doc_site_dict.get("site_name")
+            for doc_site_dict in self.upgrade_log["skipped_docs_validations_stores"][
+                "unsupported"
+            ]
         ]
 
     def upgrade_project(self):
