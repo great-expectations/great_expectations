@@ -165,13 +165,13 @@ class BaseDataContext(object):
         self._init_stores(self._project_config_with_variables_substituted.stores)
 
         # Init validation operators
+        # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
+        # the way that datasources, validation operators, site builders and other plugins are built.
         self.validation_operators = {}
         for (
             validation_operator_name,
             validation_operator_config,
-        ) in (
-            self._project_config_with_variables_substituted.validation_operators.items()
-        ):
+        ) in self._project_config.validation_operators.items():
             self.add_validation_operator(
                 validation_operator_name, validation_operator_config,
             )
@@ -370,7 +370,10 @@ class BaseDataContext(object):
         module_name = "great_expectations.validation_operators"
         new_validation_operator = instantiate_class_from_config(
             config=config,
-            runtime_environment={"data_context": self,},
+            runtime_environment={
+                "data_context": self,
+                "name": validation_operator_name,
+            },
             config_defaults={"module_name": module_name},
         )
         if not new_validation_operator:
@@ -1367,7 +1370,9 @@ class BaseDataContext(object):
         return return_obj
 
     @usage_statistics_enabled_method(event_name="data_context.build_data_docs")
-    def build_data_docs(self, site_names=None, resource_identifiers=None):
+    def build_data_docs(
+        self, site_names=None, resource_identifiers=None, dry_run=False
+    ):
         """
         Build Data Docs for your project.
 
@@ -1384,6 +1389,11 @@ class BaseDataContext(object):
                             the resources in this list. This supports incremental build
                             of data docs sites (e.g., when a new validation result is created)
                             and avoids full rebuild.
+        :param dry_run: a flag, if True, the method returna the structure containing the
+                            URLs of the sites that *would* be built, but it does not build
+                            these sites. The motivation for adding this flag was to allow
+                            the CLI to display the the URLs before building and to let users
+                            confirm.
 
         Returns:
             A dictionary with the names of the updated data documentation sites as keys and the the location info
@@ -1418,13 +1428,18 @@ class BaseDataContext(object):
                             package_name=None,
                             class_name=complete_site_config["class_name"],
                         )
-                    index_page_resource_identifier_tuple = site_builder.build(
-                        resource_identifiers
-                    )
-                    if index_page_resource_identifier_tuple:
+                    if dry_run:
                         index_page_locator_infos[
                             site_name
-                        ] = index_page_resource_identifier_tuple[0]
+                        ] = site_builder.get_resource_url(only_if_exists=False)
+                    else:
+                        index_page_resource_identifier_tuple = site_builder.build(
+                            resource_identifiers
+                        )
+                        if index_page_resource_identifier_tuple:
+                            index_page_locator_infos[
+                                site_name
+                            ] = index_page_resource_identifier_tuple[0]
 
         else:
             logger.debug("No data_docs_config found. No site(s) built.")
@@ -2157,7 +2172,7 @@ class DataContext(BaseDataContext):
         try:
             with open(checkpoint_path, "r") as f:
                 checkpoint = yaml.load(f.read())
-                return self._validate_checkpoint(checkpoint)
+                return self._validate_checkpoint(checkpoint, checkpoint_name)
         except FileNotFoundError:
             raise ge_exceptions.CheckpointNotFoundError(
                 f"Could not find checkpoint `{checkpoint_name}`."
@@ -2297,21 +2312,23 @@ class DataContext(BaseDataContext):
             logger.debug(e)
 
     @staticmethod
-    def _validate_checkpoint(checkpoint: dict) -> dict:
+    def _validate_checkpoint(checkpoint: dict, checkpoint_name: str) -> dict:
         if checkpoint is None:
             raise ge_exceptions.CheckpointError(
-                "Checkpoint has no contents. Please fix this."
+                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
             )
         if "validation_operator_name" not in checkpoint:
             checkpoint["validation_operator_name"] = "action_list_operator"
 
         if "batches" not in checkpoint:
             raise ge_exceptions.CheckpointError(
-                f"Checkpoint {checkpoint} is missing required key: `batches`"
+                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
             )
         batches = checkpoint["batches"]
         if not isinstance(batches, list):
-            raise ge_exceptions.CheckpointError(f"`batches` must be a list")
+            raise ge_exceptions.CheckpointError(
+                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
+            )
 
         for batch in batches:
             for required in ["expectation_suite_names", "batch_kwargs"]:

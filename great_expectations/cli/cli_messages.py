@@ -10,23 +10,20 @@ GREETING = """<cyan>\
              ~ Always know what to expect from your data ~
 </cyan>"""
 
-LETS_BEGIN_PROMPT = """In a few minutes you will see Great Expectations in action on your data!
+LETS_BEGIN_PROMPT = """Let's configure a new Data Context.
 
 First, Great Expectations will create a new directory:
 
     great_expectations
-    |-- expectations
     |-- great_expectations.yml
-    |-- checkpoints
+    |-- expectations
     |-- notebooks
-    |   |-- pandas
-    |   |-- spark
-    |   |-- sql
     |-- plugins
-    |   |-- ...
+    |-- .gitignore
     |-- uncommitted
         |-- config_variables.yml
-        |-- ...
+        |-- documentation
+        |-- validations
 
 OK to proceed?"""
 
@@ -60,7 +57,7 @@ OK. <green>Slack is set up.</green> To modify this in the future please see the 
 ONBOARDING_COMPLETE = """
 Great Expectations added some missing files required to run.
   - You may see new files in `<yellow>great_expectations/uncommitted</yellow>`.
-  - You may need to add secrets to <yellow>great_expectations/uncommitted/config_variables.yml</yellow> to finish onboarding.
+  - You may need to add secrets to `<yellow>great_expectations/uncommitted/config_variables.yml</yellow>` to finish onboarding.
 """
 
 BUILD_DOCS_PROMPT = "Would you like to build & view this project's Data Docs!?"
@@ -72,4 +69,8 @@ NO_DATASOURCES_FOUND = """<red>Error: No datasources were found.</red> Please ad
     DataContext.GE_YML
 )
 
-SETUP_SUCCESS = "\n<cyan>Great Expectations is now set up.</cyan>"
+SETUP_SUCCESS = "\n<cyan>Congratulations! Great Expectations is now set up.</cyan>"
+
+SECTION_SEPARATOR = "\n================================================================================\n"
+
+DONE = "Done"

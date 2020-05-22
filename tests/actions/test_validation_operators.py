@@ -1,9 +1,8 @@
 # TODO: ADD TESTS ONCE GET_BATCH IS INTEGRATED!
 
+import great_expectations as ge
 import pandas as pd
 from freezegun import freeze_time
-
-import great_expectations as ge
 from great_expectations.data_context import BaseDataContext
 from great_expectations.validation_operators.validation_operators import (
     WarningAndFailureExpectationSuitesValidationOperator,
@@ -82,6 +81,7 @@ def test_errors_warnings_validation_operator_run_slack_query(
     vo = WarningAndFailureExpectationSuitesValidationOperator(
         data_context=data_context,
         action_list=[],
+        name="test",
         slack_webhook="https://hooks.slack.com/services/test/slack/webhook",
     )
 
@@ -125,8 +125,9 @@ def test_errors_warnings_validation_operator_run_slack_query(
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Batch Id List:* ['ge_batch_id=82a8de83-e063-11e9-8226-acde48001122', 'ge_batch_id=82a8de"
-                    "83-e063-11e9-8133-acde48001122', 'ge_batch_id=82a8de83-e063-11e9-a53d-acde48001122']",
+                    "text": "*Batch Id List:* ['ge_batch_id=82a8de83-e063-11e9-8133-acde48001122', "
+                    "'ge_batch_id=82a8de83-e063-11e9-8226-acde48001122', "
+                    "'ge_batch_id=82a8de83-e063-11e9-a53d-acde48001122']",
                 },
             },
             {

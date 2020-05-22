@@ -46,7 +46,7 @@ Our goal is to make your experience as great as possible. Please follow these st
 
 .. container:: custom-indented-paragraph
 
-   Follow :ref:`those instructions <contributing_setting_up_your_dev_environment>` to set up your dev environment.
+   Follow :ref:`these instructions <contributing_setting_up_your_dev_environment>` to set up your dev environment.
    
    Alternatively, for small changes that don't need to be tested locally (e.g. documentation changes), you can :ref:`make changes directly through Github <contributing_make_changes_through_github>`.
 

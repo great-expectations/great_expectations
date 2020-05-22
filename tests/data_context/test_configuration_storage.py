@@ -51,7 +51,7 @@ def test_preserve_comments_in_yml_after_adding_datasource(
     # TODO The comments on lines 1,2 & 4 of the fixture exposes the bug.
     expected = """# This is a basic configuration for testing.
 # It has comments that should be preserved.
-config_version: 1
+config_version: 2
 # Here's a comment between the config version and the datassources
 datasources:
   # For example, this one.
