@@ -6,6 +6,7 @@ Changelog
 
 develop
 -----------------
+* Updated the installation/configuration documentation for Snowflake users
 * [ENHANCEMENT] Improved error messages for misconfigured checkpoints.
 * [BUGFIX] Fixed bug that could cause some substituted variables in DataContext config to be saved to `great_expectations.yml`
 * [FEATURE] Add support for expect_volumn_values_to_match_json_schema exception for Spark backend
@@ -38,7 +39,6 @@ develop
 * Docs fix: fix in yml for example action_list_operator for metrics
 * GE is now auto-linted using Black
 
-0.10.9
 -----------------
 
 * DataContext.get_docs_sites_urls now raises error if non-existent site_name is specified

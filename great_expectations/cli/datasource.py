@@ -461,6 +461,11 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                 return None
             credentials = _collect_redshift_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.SNOWFLAKE:
+            cli_message(
+                "<yellow>Please consider going through "
+                "https://docs.greatexpectations.io/en/latest/reference/integrations/snowflake.html for helpful "
+                "information regarding connecting Great Expectations to Snowflake.</yellow>\n"
+            )
             if not load_library(
                 "snowflake",
                 install_instructions_string="pip install snowflake-sqlalchemy",
