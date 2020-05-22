@@ -8,14 +8,14 @@ Expectations are the workhorse abstraction in Great Expectations. Like assertion
 Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests,
 Great Expectations applies Expectations to data instead of code.
 
-Great Expectations' built-in library include more than 50 common Expectations, such as:
+Great Expectations' built-in library includes more than 50 common Expectations, such as:
 
-* expect_column_values_to_not_be_null
-* expect_column_values_to_match_regex
-* expect_column_values_to_be_unique
-* expect_column_values_to_match_strftime_format
-* expect_table_row_count_to_be_between
-* expect_column_median_to_be_between
+* ``expect_column_values_to_not_be_null``
+* ``expect_column_values_to_match_regex``
+* ``expect_column_values_to_be_unique``
+* ``expect_column_values_to_match_strftime_format``
+* ``expect_table_row_count_to_be_between``
+* ``expect_column_median_to_be_between``
 
 For a full list of available Expectations, please check out the :ref:`expectation_glossary`. Please note that not all Expectations are implemented on all :ref:`Execution engines` yet. You can see the grid of supported Expectations :ref:`here <#FIXME>`. We welcome :ref:`contributions <contributing>` to fill in the gaps.
 
