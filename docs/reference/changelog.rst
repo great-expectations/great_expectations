@@ -22,8 +22,8 @@ Changelog
 * Updated the dateutil dependency
 * Added experimental QueryStore
 * Removed deprecated cli tap command
-* Addition of 0.11 upgrade helper
-
+* Added of 0.11 upgrade helper
+* Corrected Scaffold maturity language in notebook to Experimental
 
 develop
 -----------------
