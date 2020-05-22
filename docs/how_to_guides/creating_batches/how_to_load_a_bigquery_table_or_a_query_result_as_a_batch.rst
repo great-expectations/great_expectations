@@ -20,7 +20,7 @@ Steps
 
 If the SQLAlchemy URL that you used to configure the Datasource has only the project name, but no dataset name, use the full name of the table in batch_kwargs:
 
-.. code-block:: json
+.. code-block:: python
 
     batch_kwargs = {
         "table": "dataset-name.my-table",
@@ -28,7 +28,7 @@ If the SQLAlchemy URL that you used to configure the Datasource has only the pro
 
 If the URL had both project name and dataset name, you may specify the short name of the table:
 
-.. code-block:: json
+.. code-block:: python
 
     batch_kwargs = {
         "table": "my-table",
@@ -67,14 +67,9 @@ It is safest to specify the fully qualified name for this "temporary" table.
 
 Otherwise, default behavior depends on how the pybigquery engine is configured:
 
-If a default BigQuery dataset is defined in the connection string
-(for example, ``bigquery://project-name/dataset-name``), and no ``bigquery_temp_table``
-Batch Kwarg is supplied, then GE will create a permanent table with a random
-UUID in that location (e.g. ``project-name.dataset-name.ge_tmp_1a1b6511_03e6_4e18_a1b2_d85f9e9045c3``).
+* If a default BigQuery dataset is defined in the connection string (for example, ``bigquery://project-name/dataset-name``), and no ``bigquery_temp_table`` value is supplied, then GE will create a permanent table with a random UUID in that location (e.g. ``project-name.dataset-name.ge_tmp_1a1b6511``).
 
-If a default BigQuery dataset is not defined in the connection string
-(for example, ``bigquery://project-name``) and no ``bigquery_temp_table`` value
-is supplied, then custom queries will fail.
+* If a default BigQuery dataset is not defined in the connection string (for example, ``bigquery://project-name``) and no ``bigquery_temp_table`` value is supplied, then custom queries will fail.
 
 Additional resources
 --------------------
