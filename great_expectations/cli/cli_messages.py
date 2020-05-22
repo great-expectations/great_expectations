@@ -15,15 +15,15 @@ LETS_BEGIN_PROMPT = """Let's configure a new Data Context.
 First, Great Expectations will create a new directory:
 
     great_expectations
-    ├── great_expectations.yml
-    ├── expectations
-    ├── notebooks
-    ├── plugins
-    ├── .gitignore
-    └── uncommitted
-        ├── config_variables.yml
-        ├── documentation
-        └── validations
+    |-- great_expectations.yml
+    |-- expectations
+    |-- notebooks
+    |-- plugins
+    |-- .gitignore
+    |-- uncommitted
+        |-- config_variables.yml
+        |-- documentation
+        |-- validations
 
 OK to proceed?"""
 
