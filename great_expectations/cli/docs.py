@@ -155,7 +155,6 @@ def build_docs(context, site_name=None, view=True):
                     + " please check permissions."
                 )
 
-    # msg = msg.rstrip("\n")
 
     cli_message(msg)
     toolkit.confirm_proceed_or_exit()
