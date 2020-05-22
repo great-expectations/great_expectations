@@ -6,6 +6,8 @@ Core concepts
 #############
 
 
+.. _reference__core_concepts__expectations:
+
 *************
 Expectations
 *************
@@ -30,6 +32,8 @@ Suites should have names corresponding to the kind of data they define, like “
    /reference/core_concepts/expectations/result_format.rst
    /reference/core_concepts/expectations/glossary_of_expectations.rst
    /reference/core_concepts/expectations/implemented_expectations.rst
+
+.. _reference__core_concepts__validation:
 
 **********
 Validation
@@ -65,6 +69,7 @@ A **Checkpoint** is a configuration for a Validation Operator that specifies whi
    /reference/core_concepts/metric_reference.rst
    /reference/core_concepts/metrics.rst
 
+.. _reference__core_concepts__data_contexts:
 
 *************
 Data Context
@@ -89,6 +94,9 @@ A **Metric** Store makes facilitates saving any metric or statistic generated du
 
    /reference/core_concepts/data_context.rst
    /reference/core_concepts/evaluation_parameters.rst
+
+
+.. _reference__core_concepts__datasources:
 
 ************
 Datasources
@@ -120,6 +128,10 @@ A **Batch Kwargs Generator** produces datasource-specific Batch Kwargs. The most
 
 **Batch Markers** provide additional metadata a batch to help ensure reproducitiblity, such as the timestamp at which it was created.
 
+.. _reference__core_concepts__batch_kwargs_generators:
+
+A **Batch Kwargs Generator** translates Batch Parameters to datasource-specific Batch Kwargs. A Batch Kwargs Generator 
+can also identify data assets and partitions by inspecting a storage environment.
 
 .. toctree::
    :maxdepth: 2
@@ -128,6 +140,8 @@ A **Batch Kwargs Generator** produces datasource-specific Batch Kwargs. The most
    /reference/core_concepts/datasource_reference.rst
    /reference/core_concepts/batch_kwargs_generator.rst
 
+
+.. _reference__core_concepts__data_docs:
 
 **************************
 Data Docs

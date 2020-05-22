@@ -1,12 +1,11 @@
 import os
 
 import nbformat
-from nbconvert.preprocessors import ExecutePreprocessor
-
 from great_expectations import DataContext
 from great_expectations.render.renderer.suite_scaffold_notebook_renderer import (
     SuiteScaffoldNotebookRenderer,
 )
+from nbconvert.preprocessors import ExecutePreprocessor
 
 
 def test_render_snapshot_test(titanic_data_context):
@@ -95,7 +94,7 @@ contains a list of possible expectations.""",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\n# Let\'s make a simple sortable timestamp. Note this could come from your pipeline runner.\nrun_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nexpectation_suite_identifier = list(results["details"].keys())[0]\nvalidation_result_identifier = ValidationResultIdentifier(\n    expectation_suite_identifier=expectation_suite_identifier,\n    batch_identifier=batch.batch_kwargs.to_id(),\n    run_id=run_id\n)\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\n# Let\'s make a simple sortable timestamp. Note this could come from your pipeline runner.\nrun_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
             {
