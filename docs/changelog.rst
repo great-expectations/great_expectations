@@ -6,6 +6,7 @@ Changelog
 
 develop
 -----------------
+* [ENHANCEMENT] Improved error messages for misconfigured checkpoints.
 
 0.10.12
 -----------------
