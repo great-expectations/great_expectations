@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import Any, List
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -16,8 +16,8 @@ try:
     from sqlalchemy.sql.elements import WithinGroup
 except ImportError:
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
-    DefaultDialect = Any
-    WithinGroup = Any
+    DefaultDialect = None
+    WithinGroup = None
 
 
 def is_valid_partition_object(partition_object):
@@ -597,6 +597,7 @@ def check_sql_engine_dialect(
     candidate_sql_engine_dialect: DefaultDialect,
 ) -> bool:
     try:
+        # noinspection PyTypeChecker
         return isinstance(actual_sql_engine_dialect, candidate_sql_engine_dialect)
     except (AttributeError, TypeError):
         return False

@@ -9,6 +9,10 @@ from typing import Union
 
 import black
 from great_expectations.core import expectationSuiteSchema
+from great_expectations.exceptions import (
+    PluginClassNotFoundError,
+    PluginModuleNotFoundError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -67,13 +71,14 @@ def get_module_object(module_name: str, pattern: str = None) -> Union[ModuleType
 
 def load_class(class_name, module_name):
     verify_dynamic_loading_support(module_name=module_name)
-    loaded_module = importlib.import_module(module_name)
+    module_obj: Union[ModuleType, None] = import_library_module(module_name=module_name)
+    if module_obj is None:
+        raise PluginModuleNotFoundError(module_name)
     try:
-        klass_ = getattr(loaded_module, class_name)
+        klass_ = getattr(module_obj, class_name)
     except AttributeError:
-        raise AttributeError(
-            "Module : {} has no class named : {}".format(module_name, class_name,)
-        )
+        raise PluginClassNotFoundError(module_name=module_name, class_name=class_name)
+
     return klass_
 
 
