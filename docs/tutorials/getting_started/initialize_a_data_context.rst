@@ -43,7 +43,7 @@ To install from a git fork, use the following command (replace ``great-expectati
 
 If you intend to develop within the Great Expectations (e.g. to contribute back to the project), check out :ref:`contributing_setting_up_your_dev_environment` in the contributor documentation.
 
-Downloading Example Data ** to fix?
+Downloading Example Data
 -----------------------------------------------
 For this tutorial, we will use a sample dataset released by the `Centers of Medicare and Medicaid <https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/DataDissemination>`_.
 It includes the National Provider Identifier (NPI) information for unique health care providers in the United States that you can download from an S3 bucket.
