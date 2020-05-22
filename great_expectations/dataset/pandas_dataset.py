@@ -9,6 +9,8 @@ import jsonschema
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+from scipy import stats
+
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -17,7 +19,6 @@ from great_expectations.dataset.util import (
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
 )
-from scipy import stats
 
 from .dataset import Dataset
 
@@ -469,6 +470,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             else:
                 result = result[result <= max_val]
         return len(result)
+
+    def get_crosstab(
+        self,
+        column_A,
+        column_B
+    ):
+        return self.crosstab(index=column_A, columns=[column_B])
 
     ### Expectation methods ###
 
@@ -1636,6 +1644,22 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             results.append((a, b) in value_pairs_set)
 
         return pd.Series(results, temp_df.index)
+
+    @DocInherit
+    @MetaPandasDataset.column_pair_map_expectation
+    def expect_column_pair_values_to_be_independent(
+        self,
+        column_A,
+        column_B,
+        p_value=0.05,
+        method="default",
+        ignore_missings=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None
+    ):
+        return stats.chi2_contingency(self.get_crosstab(column_A, column_B)).p_value
 
     @DocInherit
     @MetaPandasDataset.multicolumn_map_expectation
