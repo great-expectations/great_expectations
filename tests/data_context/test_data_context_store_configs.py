@@ -1,9 +1,9 @@
 import os
 
-import pytest
 from ruamel.yaml import YAML
 
 import great_expectations as ge
+import pytest
 
 yaml = YAML()
 yaml.default_flow_style = False
@@ -19,7 +19,7 @@ def totally_empty_data_context(tmp_path_factory):
     os.mkdir(os.path.join(project_root_dir, "great_expectations"))
 
     config = {
-        "config_version": 1,
+        "config_version": 2,
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name": "not_a_real_store_name",
         "validations_store_name": "another_fake_store",

@@ -1,6 +1,6 @@
 .. _how_to_guides__validation__how_to_run_a_checkpoint_in_python:
 
-How to run a checkpoint in python
+How to run a Checkpoint in python
 =================================
 
 .. admonition:: Admonition from Mr. Dickens

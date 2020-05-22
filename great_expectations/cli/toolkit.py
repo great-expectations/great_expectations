@@ -6,6 +6,8 @@ import warnings
 from typing import Union
 
 import click
+from ruamel.yaml import YAML
+from ruamel.yaml.compat import StringIO
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
@@ -17,11 +19,30 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.datasource import Datasource
 from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
 from great_expectations.profile import BasicSuiteBuilderProfiler
+
+
+class MyYAML(YAML):
+    # copied from https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
+    def dump(self, data, stream=None, **kw):
+        inefficient = False
+        if stream is None:
+            inefficient = True
+            stream = StringIO()
+        YAML.dump(self, data, stream, **kw)
+        if inefficient:
+            return stream.getvalue()
+
+
+yaml = MyYAML()  # or typ='safe'/'unsafe' etc
+
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 
 def create_expectation_suite(
@@ -34,6 +55,7 @@ def create_expectation_suite(
     additional_batch_kwargs=None,
     empty_suite=False,
     show_intro_message=False,
+    flag_build_docs=True,
     open_docs=False,
     profiler_configuration="demo",
     data_asset_name=None,
@@ -41,7 +63,9 @@ def create_expectation_suite(
     """
     Create a new expectation suite.
 
-    :return: a tuple: (success, suite name)
+    WARNING: the flow and name of this method and its interaction with _profile_to_create_a_suite
+    require a serious revisiting.
+    :return: a tuple: (success, suite name, profiling_results)
     """
     if generator_asset:
         warnings.warn(
@@ -93,7 +117,7 @@ def create_expectation_suite(
         )
         while True:
             expectation_suite_name = click.prompt(
-                "\nName the new expectation suite",
+                "\nName the new Expectation Suite",
                 default=default_expectation_suite_name,
             )
             if expectation_suite_name in context.list_expectation_suite_names():
@@ -103,7 +127,7 @@ def create_expectation_suite(
 
     if empty_suite:
         create_empty_suite(context, expectation_suite_name, batch_kwargs)
-        return True, expectation_suite_name
+        return True, expectation_suite_name, None
 
     profiling_results = _profile_to_create_a_suite(
         additional_batch_kwargs,
@@ -116,11 +140,12 @@ def create_expectation_suite(
         profiler_configuration,
     )
 
-    build_docs(context, view=False)
-    if open_docs:
-        _attempt_to_open_validation_results_in_data_docs(context, profiling_results)
+    if flag_build_docs:
+        build_docs(context, view=False)
+        if open_docs:
+            attempt_to_open_validation_results_in_data_docs(context, profiling_results)
 
-    return True, expectation_suite_name
+    return True, expectation_suite_name, profiling_results
 
 
 def _profile_to_create_a_suite(
@@ -133,16 +158,29 @@ def _profile_to_create_a_suite(
     data_asset_name,
     profiler_configuration,
 ):
-    click.prompt(
+
+    cli_message(
         """
 Great Expectations will choose a couple of columns and generate expectations about them
 to demonstrate some examples of assertions you can make about your data.
 
-Press Enter to continue
-""",
-        default=True,
-        show_default=False,
+Great Expectations will store these expectations in a new Expectation Suite '{0:s}' here:
+
+  {1:s}
+""".format(
+            expectation_suite_name,
+            context.stores[
+                context.expectations_store_name
+            ].store_backend.get_url_for_key(
+                ExpectationSuiteIdentifier(
+                    expectation_suite_name=expectation_suite_name
+                ).to_tuple()
+            ),
+        )
     )
+
+    confirm_proceed_or_exit()
+
     # TODO this may not apply
     cli_message("\nGenerating example Expectation Suite...")
     run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
@@ -159,6 +197,8 @@ Press Enter to continue
     )
     if not profiling_results["success"]:
         _raise_profiling_errors(profiling_results)
+
+    cli_message("\nDone generating example Expectation Suite")
     return profiling_results
 
 
@@ -178,13 +218,14 @@ def _raise_profiling_errors(profiling_results):
     )
 
 
-def _attempt_to_open_validation_results_in_data_docs(context, profiling_results):
+def attempt_to_open_validation_results_in_data_docs(context, profiling_results):
     try:
         # TODO this is really brittle and not covered in tests
         validation_result = profiling_results["results"][0][1]
         validation_result_identifier = ValidationResultIdentifier.from_object(
             validation_result
         )
+
         context.open_data_docs(resource_identifier=validation_result_identifier)
     except (KeyError, IndexError):
         context.open_data_docs()
@@ -219,6 +260,22 @@ def tell_user_suite_exists(suite_name: str) -> None:
 def create_empty_suite(
     context: DataContext, expectation_suite_name: str, batch_kwargs
 ) -> None:
+    cli_message(
+        """
+Great Expectations will create a new Expectation Suite '{0:s}' and store it here:
+
+  {1:s}
+""".format(
+            expectation_suite_name,
+            context.stores[
+                context.expectations_store_name
+            ].store_backend.get_url_for_key(
+                ExpectationSuiteIdentifier(
+                    expectation_suite_name=expectation_suite_name
+                ).to_tuple()
+            ),
+        )
+    )
     suite = context.create_expectation_suite(expectation_suite_name)
     suite.add_citation(comment="New suite added via CLI", batch_kwargs=batch_kwargs)
     context.save_expectation_suite(suite, expectation_suite_name)
@@ -339,7 +396,11 @@ def load_data_context_with_error_handling(directory: str) -> DataContext:
     try:
         context = DataContext(directory)
         return context
-    except (ge_exceptions.ConfigNotFoundError, ge_exceptions.InvalidConfigError) as err:
+    except (
+        ge_exceptions.ConfigNotFoundError,
+        ge_exceptions.InvalidConfigError,
+        ge_exceptions.UnsupportedConfigVersionError,
+    ) as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)
     except ge_exceptions.PluginModuleNotFoundError as err:
@@ -348,3 +409,21 @@ def load_data_context_with_error_handling(directory: str) -> DataContext:
     except ge_exceptions.PluginClassNotFoundError as err:
         cli_message(err.cli_colored_message)
         sys.exit(1)
+
+
+def confirm_proceed_or_exit(
+    continuation_message="Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
+):
+    """
+    Every CLI command that starts a potentially lengthy (>1 sec) computation
+    or modifies some resources (e.g., edits the config file, adds objects
+    to the stores) must follow this pattern:
+    1. Explain which resources will be created/modified/deleted
+    2. Use this method to ask for user's confirmation
+
+    The goal of this standardization is for the users to expect consistency -
+    if you saw one command, you know what to expect from all others.
+    """
+    if not click.confirm("Would you like to proceed?", default=True):
+        cli_message(continuation_message)
+        exit(0)

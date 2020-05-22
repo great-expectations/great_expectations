@@ -6,23 +6,27 @@ Changelog
 
 0.11-develop
 -----------------
-* (BREAKING) ``run_id`` is now typed using the new ``RunIdentifier`` class, which consists of a ``run_time`` and
+* [BREAKING] ``run_id`` is now typed using the new ``RunIdentifier`` class, which consists of a ``run_time`` and
   ``run_name``. Existing projects that have Expectation Suite Validation Results must be migrated.
-  See :ref:`Upgrading to 0.11.x-beta` for instructions.
-* (BREAKING) ``ValidationMetric`` and ``ValidationMetricIdentifier`` objects now have a ``data_asset_name`` attribute.
+  See :ref:`Upgrading to 0.11` for instructions.
+* [BREAKING] ``ValidationMetric`` and ``ValidationMetricIdentifier`` objects now have a ``data_asset_name`` attribute.
   Existing projects with evaluation parameter stores that have database backends must be migrated.
-  See :ref:`Upgrading to 0.11.x-beta` for instructions.
-* Data Docs: redesigned index page with paginated/sortable/searchable/filterable tables
-* Data Docs: searchable tables on Expectation Suite Validation Result pages
+  See :ref:`Upgrading to 0.11` for instructions.
+* [BREAKING] ``ValidationOperator.run`` now returns an instance of new type, ``ValidationOperatorResult`` (instead of a
+  dictionary). If your code uses output from Validation Operators, it must be updated.
+* Major update to the styling and organization of documentation! Watch for more content and reorganization as we continue to improve the documentation experience with Great Expectations.
+* [FEATURE] Data Docs: redesigned index page with paginated/sortable/searchable/filterable tables
+* [FEATURE] Data Docs: searchable tables on Expectation Suite Validation Result pages
 * ``data_asset_name`` is now added to batch_kwargs by batch_kwargs_generators (if available) and surfaced in Data Docs
 * Renamed all ``generator_asset`` parameters to ``data_asset_name``
 * Updated the dateutil dependency
-* Added QueryStore
-* removed deprecated cli tap command
-* corrected Scaffold maturity language in notebook to Experimental
+* Corrected Scaffold maturity language in notebook to Experimental
 
 develop
 -----------------
+* Updated the installation/configuration documentation for Snowflake users
+* [ENHANCEMENT] Improved error messages for misconfigured checkpoints.
+* [BUGFIX] Fixed bug that could cause some substituted variables in DataContext config to be saved to `great_expectations.yml`
 
 0.10.12
 -----------------
@@ -52,7 +56,6 @@ develop
 * Docs fix: fix in yml for example action_list_operator for metrics
 * GE is now auto-linted using Black
 
-0.10.9
 -----------------
 
 * DataContext.get_docs_sites_urls now raises error if non-existent site_name is specified
