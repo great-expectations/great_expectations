@@ -293,7 +293,7 @@ class DataContextConfigSchema(Schema):
             )
         elif data["config_version"] < MINIMUM_SUPPORTED_CONFIG_VERSION:
             raise ge_exceptions.UnsupportedConfigVersionError(
-                "You appear to have an invalid config version ({}).\n    The version number must be at least {}."
+                "You appear to have an invalid config version ({}).\n    The version number must be at least {}. "
                 "Please see the migration guide at https://docs.greatexpectations.io/how_to_guides/migrating_versions.html".format(
                     data["config_version"], MINIMUM_SUPPORTED_CONFIG_VERSION
                 ),
