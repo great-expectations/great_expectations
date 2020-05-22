@@ -28,7 +28,7 @@ def test_render_snapshot_test(titanic_data_context):
         "cells": [
             {
                 "cell_type": "markdown",
-                "source": """# Scaffold a new Expectation Suite (BETA)
+                "source": """# Scaffold a new Expectation Suite (Experimental)
 This process helps you avoid writing lots of boilerplate when authoring suites by allowing you to select columns you care about and letting a profiler write some candidate expectations for you to adjust.
 
 **Expectation Suite Name**: `my_suite`

@@ -18,6 +18,7 @@ Changelog
 * Renamed all ``generator_asset`` parameters to ``data_asset_name``
 * Updated the dateutil dependency
 * Added QueryStore
+* corrected Scaffold maturity language in notebook to Experimental
 
 develop
 -----------------
