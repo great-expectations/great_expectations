@@ -4285,6 +4285,54 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
+    
+    def expect_column_pair_values_to_be_independent(
+        self,
+        column_A,
+        column_B,
+        method="default",
+        ignore_missings=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None
+    ):
+        """
+        Expect the values in column_A to be independent of those in column_B.
+
+        Args:
+            column_A (str): The first column name
+            column_B (str): The second column name
+            method (str): Method to check for independence. One of ...
+        
+        Keyword Args:
+            ignore_missings (bool): \
+                If True, ignore columns where either column has missing. If False, treat missing values as
+                another category (only for methods ...).
+        
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+        raise NotADirectoryError
+
     ###
     #
     # Multicolumn pairs
