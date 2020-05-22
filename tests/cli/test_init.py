@@ -4,7 +4,6 @@ from unittest import mock
 
 import pytest
 from click.testing import CliRunner
-
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
@@ -41,7 +40,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
         cli,
         ["init", "-d", root_dir],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
-        catch_exceptions=False
+        catch_exceptions=False,
     )
     stdout = result.output
     assert result.exit_code == 0
@@ -114,7 +113,9 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     result = runner.invoke(
         cli,
         ["init", "-d", root_dir],
-        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path, catch_exceptions=False),
+        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(
+            data_folder_path, data_path, catch_exceptions=False
+        ),
     )
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1

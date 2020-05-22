@@ -1,8 +1,7 @@
 import os
 
-import pytest
-
 import great_expectations.exceptions as ge_exceptions
+import pytest
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import PandasDatasource
 from great_expectations.profile.base import DatasetProfiler

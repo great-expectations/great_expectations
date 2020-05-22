@@ -5,12 +5,11 @@ import shutil
 import pytest
 from click.testing import CliRunner
 from freezegun import freeze_time
-from sqlalchemy import create_engine
-
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
+from sqlalchemy import create_engine
 from tests.cli.test_cli import yaml
 from tests.cli.test_datasource_sqlite import _add_datasource_and_credentials_to_context
 from tests.cli.test_init_pandas import _delete_and_recreate_dir
@@ -53,10 +52,8 @@ def test_cli_init_on_new_project(
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(
-            engine.url
-        ),
-        catch_exceptions = False
+        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(engine.url),
+        catch_exceptions=False,
     )
     stdout = result.output
     assert len(stdout) < 6000, "CLI output is unreasonably long."
@@ -207,7 +204,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
         input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(
             engine_url_with_added_whitespace
         ),
-        catch_exceptions=False
+        catch_exceptions=False,
     )
     stdout = result.output
     assert len(stdout) < 6000, "CLI output is unreasonably long."
@@ -291,9 +288,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
         result = runner.invoke(
             cli,
             ["init", "-d", project_dir],
-            input="\n\n2\n6\nsqlite\n{}\n\n\n1\nmy_suite\n\n\n\n".format(
-                url
-            ),
+            input="\n\n2\n6\nsqlite\n{}\n\n\n1\nmy_suite\n\n\n\n".format(url),
             catch_exceptions=False,
         )
     stdout = result.stdout
@@ -379,9 +374,7 @@ def initialized_sqlite_project(
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(
-            engine.url
-        ),
+        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(engine.url),
         catch_exceptions=False,
     )
     assert result.exit_code == 0

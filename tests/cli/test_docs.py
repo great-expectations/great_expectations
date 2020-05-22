@@ -2,7 +2,6 @@
 import os
 
 from click.testing import CliRunner
-
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
@@ -29,9 +28,7 @@ def test_docs_build_view(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["docs", "build", "-d", root_dir],
-        input="\n",
-        catch_exceptions=False
+        cli, ["docs", "build", "-d", root_dir], input="\n", catch_exceptions=False
     )
     stdout = result.stdout
 
@@ -66,9 +63,10 @@ def test_docs_build_no_view(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["docs", "build", "--no-view", "-d", root_dir],
+        cli,
+        ["docs", "build", "--no-view", "-d", root_dir],
         input="\n",
-        catch_exceptions=False
+        catch_exceptions=False,
     )
     stdout = result.stdout
 

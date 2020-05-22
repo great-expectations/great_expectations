@@ -5,7 +5,6 @@ import shutil
 import pytest
 from click.testing import CliRunner
 from freezegun import freeze_time
-
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path
@@ -42,7 +41,7 @@ def test_cli_init_on_new_project(
         cli,
         ["init", "-d", project_dir],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
-        catch_exceptions=False
+        catch_exceptions=False,
     )
     stdout = result.output
     assert mock_webbrowser.call_count == 1
@@ -66,9 +65,7 @@ def test_cli_init_on_new_project(
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
-    assert (
-        "Done generating example Expectation Suite" in stdout
-    )
+    assert "Done generating example Expectation Suite" in stdout
     assert "Great Expectations is now set up" in stdout
 
     assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
@@ -164,10 +161,9 @@ def test_cli_init_on_new_project(
 
     # data_context.build_docs is twice (once in dry run mode) and two events are fired
     assert mock_emit.call_count == 8
-    assert mock_emit.call_args_list[1] ==\
-        mock.call(
-            {"event_payload": {}, "event": "cli.init.create", "success": True}
-        )
+    assert mock_emit.call_args_list[1] == mock.call(
+        {"event_payload": {}, "event": "cli.init.create", "success": True}
+    )
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -199,7 +195,9 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
         result = runner.invoke(
             cli,
             ["init", "-d", project_dir],
-            input="\n1\n1\n{}\n\n\n\n2\n{}\nmy_suite\n\n\n\n\n".format(data_folder_path, csv_path),
+            input="\n1\n1\n{}\n\n\n\n2\n{}\nmy_suite\n\n\n\n\n".format(
+                data_folder_path, csv_path
+            ),
             catch_exceptions=False,
         )
     assert mock_webbrowser.call_count == 1
@@ -276,7 +274,7 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
         cli,
         ["init", "-d", project_dir],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
-        catch_exceptions=False
+        catch_exceptions=False,
     )
     assert mock_webbrowser.call_count == 1
     assert (
@@ -453,7 +451,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
         cli,
         ["init", "-d", project_dir],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\nn\n".format(data_folder_path, data_path),
-        catch_exceptions=False
+        catch_exceptions=False,
     )
     stdout = result.output
 
@@ -509,8 +507,10 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n{}\n\n\n\n".format(data_folder_path, data_path, data_path_2),
-        catch_exceptions=False
+        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n{}\n\n\n\n".format(
+            data_folder_path, data_path, data_path_2
+        ),
+        catch_exceptions=False,
     )
     stdout = result.output
     assert mock_webbrowser.call_count == 1

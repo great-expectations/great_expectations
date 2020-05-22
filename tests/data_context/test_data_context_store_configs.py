@@ -1,9 +1,8 @@
 import os
 
+import great_expectations as ge
 import pytest
 from ruamel.yaml import YAML
-
-import great_expectations as ge
 
 yaml = YAML()
 yaml.default_flow_style = False

@@ -1,8 +1,7 @@
 import os
 
-import pytest
-
 import great_expectations as ge
+import pytest
 from great_expectations.data_context.util import substitute_config_variable
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
 from tests.data_context.conftest import create_data_context_files

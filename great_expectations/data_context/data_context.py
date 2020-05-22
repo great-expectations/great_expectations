@@ -13,11 +13,8 @@ import warnings
 import webbrowser
 from typing import Dict, List, Optional, Union
 
-from dateutil.parser import ParserError, parse
-from marshmallow import ValidationError
-from ruamel.yaml import YAML, YAMLError
-
 import great_expectations.exceptions as ge_exceptions
+from dateutil.parser import ParserError, parse
 from great_expectations.core import (
     ExpectationSuite,
     RunIdentifier,
@@ -63,6 +60,8 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import Validator
+from marshmallow import ValidationError
+from ruamel.yaml import YAML, YAMLError
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -1367,7 +1366,9 @@ class BaseDataContext(object):
         return return_obj
 
     @usage_statistics_enabled_method(event_name="data_context.build_data_docs")
-    def build_data_docs(self, site_names=None, resource_identifiers=None, dry_run=False):
+    def build_data_docs(
+        self, site_names=None, resource_identifiers=None, dry_run=False
+    ):
         """
         Build Data Docs for your project.
 
@@ -1424,11 +1425,17 @@ class BaseDataContext(object):
                             class_name=complete_site_config["class_name"],
                         )
                     if dry_run:
-                        index_page_locator_infos[site_name] = site_builder.get_resource_url(only_if_exists=False)
+                        index_page_locator_infos[
+                            site_name
+                        ] = site_builder.get_resource_url(only_if_exists=False)
                     else:
-                        index_page_resource_identifier_tuple = site_builder.build(resource_identifiers)
+                        index_page_resource_identifier_tuple = site_builder.build(
+                            resource_identifiers
+                        )
                         if index_page_resource_identifier_tuple:
-                            index_page_locator_infos[site_name] = index_page_resource_identifier_tuple[0]
+                            index_page_locator_infos[
+                                site_name
+                            ] = index_page_resource_identifier_tuple[0]
 
         else:
             logger.debug("No data_docs_config found. No site(s) built.")

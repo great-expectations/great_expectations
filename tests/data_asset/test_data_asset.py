@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations import __version__ as ge_version
 from great_expectations.core import (
     ExpectationConfiguration,

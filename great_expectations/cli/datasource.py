@@ -9,12 +9,11 @@ import textwrap
 import uuid
 
 import click
-
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext, rtd_url_ge_version
 from great_expectations.cli import toolkit
-from great_expectations.cli.docs import build_docs
 from great_expectations.cli.cli_messages import NO_DATASOURCES_FOUND
+from great_expectations.cli.docs import build_docs
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core import ExpectationSuite
@@ -371,16 +370,22 @@ def _add_pandas_datasource(
             }
         )
 
-    cli_message("""
+    cli_message(
+        """
 Great Expectations will now add a new Datasource '{0:s}' to your deployment, by adding this entry to your great_expectations.yml:
 
 {1:s}
-""".format(datasource_name, textwrap.indent(toolkit.yaml.dump({datasource_name: configuration}), "  "))
+""".format(
+            datasource_name,
+            textwrap.indent(toolkit.yaml.dump({datasource_name: configuration}), "  "),
+        )
     )
 
     toolkit.confirm_proceed_or_exit()
 
-    context.add_datasource(name=datasource_name, class_name='PandasDatasource', **configuration)
+    context.add_datasource(
+        name=datasource_name, class_name="PandasDatasource", **configuration
+    )
     return datasource_name
 
 
@@ -500,18 +505,30 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
   - Please check your environment and the configuration you provided.
   - Database Error: {0:s}"""
         try:
-            cli_message("<cyan>Attempting to connect to your database. This may take a moment...</cyan>")
-            configuration = SqlAlchemyDatasource.build_configuration(credentials="${" + datasource_name + "}")
-            cli_message("""
+            cli_message(
+                "<cyan>Attempting to connect to your database. This may take a moment...</cyan>"
+            )
+            configuration = SqlAlchemyDatasource.build_configuration(
+                credentials="${" + datasource_name + "}"
+            )
+            cli_message(
+                """
 Great Expectations will now add a new Datasource '{0:s}' to your deployment, by adding this entry to your great_expectations.yml:
 
 {1:s}
 The credentials will be saved in uncommitted/config_variables.yml under the key '{0:s}'
-""".format(datasource_name, textwrap.indent(toolkit.yaml.dump({datasource_name: configuration}), "  "))
-                        )
+""".format(
+                    datasource_name,
+                    textwrap.indent(
+                        toolkit.yaml.dump({datasource_name: configuration}), "  "
+                    ),
+                )
+            )
 
             toolkit.confirm_proceed_or_exit()
-            context.add_datasource(name=datasource_name, class_name='SqlAlchemyDatasource', **configuration)
+            context.add_datasource(
+                name=datasource_name, class_name="SqlAlchemyDatasource", **configuration
+            )
             cli_message(msg_success_database)
             break
         except ModuleNotFoundError as de:
@@ -797,14 +814,21 @@ def _add_spark_datasource(
             }
         )
 
-    cli_message("""
+    cli_message(
+        """
 Great Expectations will now add a new Datasource '{0:s}' to your deployment, by adding this entry to your great_expectations.yml:
 
 {1:s}
-""".format(datasource_name, textwrap.indent(toolkit.yaml.dump({datasource_name: configuration}), "  ")))
+""".format(
+            datasource_name,
+            textwrap.indent(toolkit.yaml.dump({datasource_name: configuration}), "  "),
+        )
+    )
     toolkit.confirm_proceed_or_exit()
 
-    context.add_datasource(name=datasource_name, class_name='SparkDFDatasource', **configuration)
+    context.add_datasource(
+        name=datasource_name, class_name="SparkDFDatasource", **configuration
+    )
     return datasource_name
 
 

@@ -2,9 +2,8 @@
 import os
 import platform
 
-import pytest
-
 import great_expectations as ge
+import pytest
 from great_expectations.data_context.util import file_relative_path
 
 

@@ -3,7 +3,6 @@ import sys
 
 import click
 import requests
-
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.util import cli_message, cli_message_list
@@ -123,7 +122,9 @@ def build_docs(context, site_name=None, view=True):
         site_names = [site_name]
     else:
         site_names = None
-    index_page_locator_infos = context.build_data_docs(site_names=site_names, dry_run=True)
+    index_page_locator_infos = context.build_data_docs(
+        site_names=site_names, dry_run=True
+    )
 
     msg = "\nThe following Data Docs sites will be built:\n\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
@@ -154,7 +155,6 @@ def build_docs(context, site_name=None, view=True):
                     + " just built data docs,"
                     + " please check permissions."
                 )
-
 
     cli_message(msg)
     toolkit.confirm_proceed_or_exit()

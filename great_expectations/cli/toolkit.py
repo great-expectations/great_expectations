@@ -4,11 +4,8 @@ import subprocess
 import sys
 import warnings
 from typing import Union
-from ruamel.yaml import YAML
-from ruamel.yaml.compat import StringIO
 
 import click
-
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.datasource import get_batch_kwargs
@@ -19,15 +16,15 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.datasource import Datasource
 from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
 from great_expectations.profile import BasicSuiteBuilderProfiler
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
-)
+from ruamel.yaml import YAML
+from ruamel.yaml.compat import StringIO
+
 
 class MyYAML(YAML):
     # copied from https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
@@ -40,15 +37,28 @@ class MyYAML(YAML):
         if inefficient:
             return stream.getvalue()
 
-yaml = MyYAML()   # or typ='safe'/'unsafe' etc
+
+yaml = MyYAML()  # or typ='safe'/'unsafe' etc
 
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
-def create_expectation_suite(context, datasource_name=None, batch_kwargs_generator_name=None, generator_asset=None,
-                             batch_kwargs=None, expectation_suite_name=None, additional_batch_kwargs=None,
-                             empty_suite=False, show_intro_message=False, flag_build_docs=True, open_docs=False,
-                             profiler_configuration="demo", data_asset_name=None):
+
+def create_expectation_suite(
+    context,
+    datasource_name=None,
+    batch_kwargs_generator_name=None,
+    generator_asset=None,
+    batch_kwargs=None,
+    expectation_suite_name=None,
+    additional_batch_kwargs=None,
+    empty_suite=False,
+    show_intro_message=False,
+    flag_build_docs=True,
+    open_docs=False,
+    profiler_configuration="demo",
+    data_asset_name=None,
+):
     """
     Create a new expectation suite.
 
@@ -135,20 +145,36 @@ def create_expectation_suite(context, datasource_name=None, batch_kwargs_generat
     return True, expectation_suite_name, profiling_results
 
 
-def _profile_to_create_a_suite(additional_batch_kwargs, batch_kwargs, batch_kwargs_generator_name, context,
-                               datasource_name, expectation_suite_name, data_asset_name, profiler_configuration):
+def _profile_to_create_a_suite(
+    additional_batch_kwargs,
+    batch_kwargs,
+    batch_kwargs_generator_name,
+    context,
+    datasource_name,
+    expectation_suite_name,
+    data_asset_name,
+    profiler_configuration,
+):
 
-
-    cli_message("""
+    cli_message(
+        """
 Great Expectations will choose a couple of columns and generate expectations about them
 to demonstrate some examples of assertions you can make about your data.
-    
+
 Great Expectations will store these expectations in a new Expectation Suite '{0:s}' here:
 
   {1:s}
-""".format(expectation_suite_name,
-               context.stores[context.expectations_store_name].store_backend.get_url_for_key(ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name).to_tuple()))
-                )
+""".format(
+            expectation_suite_name,
+            context.stores[
+                context.expectations_store_name
+            ].store_backend.get_url_for_key(
+                ExpectationSuiteIdentifier(
+                    expectation_suite_name=expectation_suite_name
+                ).to_tuple()
+            ),
+        )
+    )
 
     confirm_proceed_or_exit()
 
@@ -231,14 +257,22 @@ def tell_user_suite_exists(suite_name: str) -> None:
 def create_empty_suite(
     context: DataContext, expectation_suite_name: str, batch_kwargs
 ) -> None:
-    cli_message("""
+    cli_message(
+        """
 Great Expectations will create a new Expectation Suite '{0:s}' and store it here:
 
   {1:s}
-""".format(expectation_suite_name,
-               context.stores[context.expectations_store_name].store_backend.get_url_for_key(
-                   ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name).to_tuple()))
-                )
+""".format(
+            expectation_suite_name,
+            context.stores[
+                context.expectations_store_name
+            ].store_backend.get_url_for_key(
+                ExpectationSuiteIdentifier(
+                    expectation_suite_name=expectation_suite_name
+                ).to_tuple()
+            ),
+        )
+    )
     suite = context.create_expectation_suite(expectation_suite_name)
     suite.add_citation(comment="New suite added via CLI", batch_kwargs=batch_kwargs)
     context.save_expectation_suite(suite, expectation_suite_name)

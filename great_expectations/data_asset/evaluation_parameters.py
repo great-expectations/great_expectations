@@ -4,6 +4,8 @@ import math
 import operator
 import traceback
 
+from great_expectations.core import ge_urn
+from great_expectations.exceptions import EvaluationParameterError
 from pyparsing import (
     CaselessKeyword,
     Combine,
@@ -18,9 +20,6 @@ from pyparsing import (
     alphas,
     delimitedList,
 )
-
-from great_expectations.core import ge_urn
-from great_expectations.exceptions import EvaluationParameterError
 
 logger = logging.getLogger(__name__)
 _epsilon = 1e-12
