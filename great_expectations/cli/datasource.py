@@ -374,7 +374,9 @@ def _add_pandas_datasource(
         configuration["class_name"] = "PandasDatasource"
         errors = DatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
-            raise ge_exceptions.GreatExpectationsError("Invalid Datasource configuration: {0:s}".format(errors))
+            raise ge_exceptions.GreatExpectationsError(
+                "Invalid Datasource configuration: {0:s}".format(errors)
+            )
 
     cli_message(
         """
@@ -389,9 +391,7 @@ Great Expectations will now add a new Datasource '{0:s}' to your deployment, by 
 
     toolkit.confirm_proceed_or_exit()
 
-    context.add_datasource(
-        name=datasource_name, **configuration
-    )
+    context.add_datasource(name=datasource_name, **configuration)
     return datasource_name
 
 
@@ -521,7 +521,9 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             configuration["class_name"] = "SqlAlchemyDatasource"
             errors = DatasourceConfigSchema().validate(configuration)
             if len(errors) != 0:
-                raise ge_exceptions.GreatExpectationsError("Invalid Datasource configuration: {0:s}".format(errors))
+                raise ge_exceptions.GreatExpectationsError(
+                    "Invalid Datasource configuration: {0:s}".format(errors)
+                )
 
             cli_message(
                 """
@@ -538,9 +540,7 @@ The credentials will be saved in uncommitted/config_variables.yml under the key 
             )
 
             toolkit.confirm_proceed_or_exit()
-            context.add_datasource(
-                name=datasource_name, **configuration
-            )
+            context.add_datasource(name=datasource_name, **configuration)
             cli_message(msg_success_database)
             break
         except ModuleNotFoundError as de:
@@ -828,7 +828,9 @@ def _add_spark_datasource(
         configuration["class_name"] = "SparkDFDatasource"
         errors = DatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
-            raise ge_exceptions.GreatExpectationsError("Invalid Datasource configuration: {0:s}".format(errors))
+            raise ge_exceptions.GreatExpectationsError(
+                "Invalid Datasource configuration: {0:s}".format(errors)
+            )
 
     cli_message(
         """
@@ -842,9 +844,7 @@ Great Expectations will now add a new Datasource '{0:s}' to your deployment, by 
     )
     toolkit.confirm_proceed_or_exit()
 
-    context.add_datasource(
-        name=datasource_name, **configuration
-    )
+    context.add_datasource(name=datasource_name, **configuration)
     return datasource_name
 
 

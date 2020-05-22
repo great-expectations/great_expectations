@@ -406,7 +406,9 @@ def load_data_context_with_error_handling(directory: str) -> DataContext:
         sys.exit(1)
 
 
-def confirm_proceed_or_exit(continuation_message="Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !"):
+def confirm_proceed_or_exit(
+    continuation_message="Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
+):
     """
     Every CLI command that starts a potentially lengthy (>1 sec) computation
     or modifies some resources (e.g., edits the config file, adds objects
