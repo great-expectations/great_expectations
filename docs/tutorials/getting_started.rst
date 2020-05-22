@@ -1,16 +1,5 @@
 .. _getting_started:
 
-
-
-
-# TODO
- - instructions for getting data (replace "get the example dickens project" with "set up a test project")
- - Verify that text is identical to what happens with the same data
-
-
-
-
-
 ###############
 Getting started
 ###############

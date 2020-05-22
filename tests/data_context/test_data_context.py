@@ -2,10 +2,10 @@ import json
 import os
 import shutil
 
-from ruamel.yaml import YAML
-
 import pytest
 from freezegun import freeze_time
+from ruamel.yaml import YAML
+
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
