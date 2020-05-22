@@ -10,6 +10,7 @@ import boto3
 import botocore
 import pytest
 import requests
+
 from great_expectations.data_context.util import file_relative_path
 
 USAGE_STATISTICS_QA_URL = (

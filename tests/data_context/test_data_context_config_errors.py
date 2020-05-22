@@ -1,7 +1,8 @@
 import os
 
-import great_expectations.exceptions as ge_exceptions
 import pytest
+
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import file_relative_path
 

@@ -3,6 +3,8 @@ import datetime
 import boto3
 import pytest
 from freezegun import freeze_time
+from moto import mock_s3
+
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
@@ -10,7 +12,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.util import gen_directory_tree_str
-from moto import mock_s3
 
 
 @freeze_time("09/26/2019 13:42:41")

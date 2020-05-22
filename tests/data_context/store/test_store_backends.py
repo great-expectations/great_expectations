@@ -3,6 +3,8 @@ import os
 import boto3
 import pytest
 from botocore.exceptions import ClientError
+from moto import mock_s3
+
 from great_expectations.data_context.store import (
     InMemoryStoreBackend,
     TupleFilesystemStoreBackend,
@@ -11,7 +13,6 @@ from great_expectations.data_context.store import (
 )
 from great_expectations.exceptions import StoreBackendError, StoreError
 from great_expectations.util import gen_directory_tree_str
-from moto import mock_s3
 
 
 def test_StoreBackendValidation():

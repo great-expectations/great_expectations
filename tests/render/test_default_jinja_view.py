@@ -1,9 +1,10 @@
 import json
 from collections import OrderedDict
 
+import pytest
+
 import great_expectations as ge
 import great_expectations.render as render
-import pytest
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer import ProfilingResultsPageRenderer

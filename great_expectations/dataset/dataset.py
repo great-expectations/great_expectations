@@ -8,6 +8,8 @@ from typing import Any, List, Union
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+from scipy import stats
+
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
@@ -16,7 +18,6 @@ from great_expectations.dataset.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
 )
-from scipy import stats
 
 
 class MetaDataset(DataAsset):

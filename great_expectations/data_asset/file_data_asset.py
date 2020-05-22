@@ -8,6 +8,7 @@ from itertools import compress
 
 import jsonschema
 import numpy as np
+
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 

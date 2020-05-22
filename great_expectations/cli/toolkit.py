@@ -6,6 +6,9 @@ import warnings
 from typing import Union
 
 import click
+from ruamel.yaml import YAML
+from ruamel.yaml.compat import StringIO
+
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.datasource import get_batch_kwargs
@@ -22,8 +25,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.datasource import Datasource
 from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
 from great_expectations.profile import BasicSuiteBuilderProfiler
-from ruamel.yaml import YAML
-from ruamel.yaml.compat import StringIO
 
 
 class MyYAML(YAML):

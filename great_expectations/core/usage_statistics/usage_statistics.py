@@ -11,6 +11,7 @@ from queue import Queue
 
 import jsonschema
 import requests
+
 from great_expectations import __version__ as ge_version
 from great_expectations.core import nested_update
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer

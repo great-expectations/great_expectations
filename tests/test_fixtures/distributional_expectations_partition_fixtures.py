@@ -2,10 +2,11 @@ import copy
 import json
 import sys
 
-import great_expectations as ge
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
+
+import great_expectations as ge
 
 
 """
