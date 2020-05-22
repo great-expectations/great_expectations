@@ -62,7 +62,9 @@ def create_expectation_suite(
     """
     Create a new expectation suite.
 
-    :return: a tuple: (success, suite name)
+    WARNING: the flow and name of this method and its interaction with _profile_to_create_a_suite
+    require a serious revisiting.
+    :return: a tuple: (success, suite name, profiling_results)
     """
     if generator_asset:
         warnings.warn(
@@ -404,7 +406,7 @@ def load_data_context_with_error_handling(directory: str) -> DataContext:
         sys.exit(1)
 
 
-def confirm_proceed_or_exit():
+def confirm_proceed_or_exit(continuation_message="Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !"):
     """
     Every CLI command that starts a potentially lengthy (>1 sec) computation
     or modifies some resources (e.g., edits the config file, adds objects
@@ -415,6 +417,6 @@ def confirm_proceed_or_exit():
     The goal of this standardization is for the users to expect consistency -
     if you saw one command, you know what to expect from all others.
     """
-    if not click.confirm("OK to proceed?", default=True):
-        cli_message("Okay, bye!")
+    if not click.confirm("Would you like to proceed?", default=True):
+        cli_message(continuation_message)
         exit(0)

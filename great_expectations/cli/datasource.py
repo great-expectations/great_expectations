@@ -18,6 +18,7 @@ from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.data_context.types.base import DatasourceConfigSchema
 from great_expectations.datasource import (
     PandasDatasource,
     SparkDFDatasource,
@@ -370,6 +371,11 @@ def _add_pandas_datasource(
             }
         )
 
+        configuration["class_name"] = "PandasDatasource"
+        errors = DatasourceConfigSchema().validate(configuration)
+        if len(errors) != 0:
+            raise ge_exceptions.GreatExpectationsError("Invalid Datasource configuration: {0:s}".format(errors))
+
     cli_message(
         """
 Great Expectations will now add a new Datasource '{0:s}' to your deployment, by adding this entry to your great_expectations.yml:
@@ -384,7 +390,7 @@ Great Expectations will now add a new Datasource '{0:s}' to your deployment, by 
     toolkit.confirm_proceed_or_exit()
 
     context.add_datasource(
-        name=datasource_name, class_name="PandasDatasource", **configuration
+        name=datasource_name, **configuration
     )
     return datasource_name
 
@@ -511,6 +517,12 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             configuration = SqlAlchemyDatasource.build_configuration(
                 credentials="${" + datasource_name + "}"
             )
+
+            configuration["class_name"] = "SqlAlchemyDatasource"
+            errors = DatasourceConfigSchema().validate(configuration)
+            if len(errors) != 0:
+                raise ge_exceptions.GreatExpectationsError("Invalid Datasource configuration: {0:s}".format(errors))
+
             cli_message(
                 """
 Great Expectations will now add a new Datasource '{0:s}' to your deployment, by adding this entry to your great_expectations.yml:
@@ -527,7 +539,7 @@ The credentials will be saved in uncommitted/config_variables.yml under the key 
 
             toolkit.confirm_proceed_or_exit()
             context.add_datasource(
-                name=datasource_name, class_name="SqlAlchemyDatasource", **configuration
+                name=datasource_name, **configuration
             )
             cli_message(msg_success_database)
             break
@@ -813,6 +825,10 @@ def _add_spark_datasource(
                 }
             }
         )
+        configuration["class_name"] = "SparkDFDatasource"
+        errors = DatasourceConfigSchema().validate(configuration)
+        if len(errors) != 0:
+            raise ge_exceptions.GreatExpectationsError("Invalid Datasource configuration: {0:s}".format(errors))
 
     cli_message(
         """
@@ -827,7 +843,7 @@ Great Expectations will now add a new Datasource '{0:s}' to your deployment, by 
     toolkit.confirm_proceed_or_exit()
 
     context.add_datasource(
-        name=datasource_name, class_name="SparkDFDatasource", **configuration
+        name=datasource_name, **configuration
     )
     return datasource_name
 
