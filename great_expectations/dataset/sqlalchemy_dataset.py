@@ -11,7 +11,6 @@ from typing import Any, List
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (

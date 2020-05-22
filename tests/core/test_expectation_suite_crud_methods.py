@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 
 from .test_expectation_suite import baseline_suite, exp1, exp2, exp3, exp4

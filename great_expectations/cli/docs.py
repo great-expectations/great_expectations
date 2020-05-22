@@ -3,7 +3,6 @@ import sys
 
 import click
 import requests
-
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.util import cli_message, cli_message_list
@@ -119,14 +118,15 @@ def build_docs(context, site_name=None, view=True):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 
-    cli_message("Building Data Docs...")
     if site_name is not None:
         site_names = [site_name]
     else:
         site_names = None
+    index_page_locator_infos = context.build_data_docs(
+        site_names=site_names, dry_run=True
+    )
 
-    index_page_locator_infos = context.build_data_docs(site_names=site_names)
-    msg = "The following Data Docs sites were built:\n"
+    msg = "\nThe following Data Docs sites will be built:\n\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
         if index_page_locator_info.startswith("file"):
             if os.path.isfile(index_page_locator_info[6:]):
@@ -156,7 +156,13 @@ def build_docs(context, site_name=None, view=True):
                     + " please check permissions."
                 )
 
-    msg = msg.rstrip("\n")
     cli_message(msg)
+    toolkit.confirm_proceed_or_exit()
+
+    cli_message("\nBuilding Data Docs...\n")
+    index_page_locator_infos = context.build_data_docs(site_names=site_names)
+
+    cli_message("Done building Data Docs")
+
     if view:
         context.open_data_docs(site_name=site_name, only_if_exists=True)

@@ -4,7 +4,6 @@ import os
 
 import mock
 from click.testing import CliRunner
-
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.core import ExpectationSuite
@@ -166,15 +165,18 @@ def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
         in stdout
     )
     assert "Enter the path" in stdout
-    assert "Name the new expectation suite [f1.warning]" in stdout
+    assert "Name the new Expectation Suite [f1.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
     )
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
-    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+    assert "The following Data Docs sites will be built" in stdout
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here"
+        in stdout
+    )
     assert "open a notebook for you now" not in stdout
 
     expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
@@ -230,7 +232,10 @@ def test_suite_new_creates_empty_suite(
     )
     assert "Generating example Expectation Suite..." not in stdout
     assert "The following Data Docs sites were built" not in stdout
-    assert "A new Expectation suite 'foo' was added to your project" in stdout
+    assert (
+        "Great Expectations will create a new Expectation Suite 'foo' and store it here"
+        in stdout
+    )
     assert (
         "Because you requested an empty suite, we'll open a notebook for you now to edit it!"
         in stdout
@@ -312,7 +317,10 @@ def test_suite_new_empty_with_no_jupyter(
     )
     assert "Generating example Expectation Suite..." not in stdout
     assert "The following Data Docs sites were built" not in stdout
-    assert "A new Expectation suite 'foo' was added to your project" in stdout
+    assert (
+        "Great Expectations will create a new Expectation Suite 'foo' and store it here"
+        in stdout
+    )
     assert "open a notebook for you now" not in stdout
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo.json")
@@ -387,15 +395,18 @@ def test_suite_demo_one_datasource_without_generator_without_suite_name_argument
 
     assert result.exit_code == 0
     assert "Enter the path" in stdout
-    assert "Name the new expectation suite [f1.warning]" in stdout
+    assert "Name the new Expectation Suite [f1.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
     )
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here:"
+        in stdout
+    )
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
-    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+    assert "The following Data Docs sites will be built" in stdout
 
     obs_urls = context.get_docs_sites_urls()
 
@@ -464,15 +475,19 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
         in stdout
     )
 
-    assert "Name the new expectation suite [random.warning]" in stdout
+    assert "Name the new Expectation Suite [random.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
     )
+
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here:"
+        in stdout
+    )
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
-    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+    assert "The following Data Docs sites will be built" in stdout
 
     obs_urls = context.get_docs_sites_urls()
 
@@ -534,8 +549,11 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     )
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
-    assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
+    assert "The following Data Docs sites will be built" in stdout
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'foo_suite' here:"
+        in stdout
+    )
 
     obs_urls = context.get_docs_sites_urls()
 
@@ -884,7 +902,10 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert mock_subprocess.call_count == 0
     mock_subprocess.reset_mock()
     mock_webbrowser.reset_mock()
-    assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'foo_suite' here:"
+        in stdout
+    )
 
     batch_kwargs = {
         "datasource": "random",
@@ -1078,7 +1099,10 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     mock_subprocess.reset_mock()
     mock_webbrowser.reset_mock()
     assert result.exit_code == 0
-    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here:"
+        in stdout
+    )
 
     # remove the citations from the suite
     context = DataContext(project_root_dir)

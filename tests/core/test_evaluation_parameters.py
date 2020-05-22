@@ -1,7 +1,6 @@
 from timeit import timeit
 
 import pytest
-
 from great_expectations.data_asset.evaluation_parameters import (
     parse_evaluation_parameter,
 )

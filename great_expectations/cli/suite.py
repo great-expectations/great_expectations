@@ -3,7 +3,6 @@ import os
 import sys
 
 import click
-
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.datasource import get_batch_kwargs
@@ -305,7 +304,7 @@ def _suite_new(
         if batch_kwargs is not None:
             batch_kwargs = json.loads(batch_kwargs)
 
-        success, suite_name = toolkit.create_expectation_suite(
+        success, suite_name, profiling_results = toolkit.create_expectation_suite(
             context,
             datasource_name=datasource_name,
             batch_kwargs_generator_name=generator_name,
@@ -318,11 +317,6 @@ def _suite_new(
             open_docs=view,
         )
         if success:
-            cli_message(
-                "A new Expectation suite '{}' was added to your project".format(
-                    suite_name
-                )
-            )
             if empty:
                 if jupyter:
                     cli_message(
