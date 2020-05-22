@@ -19,7 +19,7 @@ class SuiteScaffoldNotebookRenderer(SuiteEditNotebookRenderer):
 
     def add_header(self):
         self.add_markdown_cell(
-            """# Scaffold a new Expectation Suite (BETA)
+            """# Scaffold a new Expectation Suite (Experimental)
 This process helps you avoid writing lots of boilerplate when authoring suites by allowing you to select columns you care about and letting a profiler write some candidate expectations for you to adjust.
 
 **Expectation Suite Name**: `{}`
