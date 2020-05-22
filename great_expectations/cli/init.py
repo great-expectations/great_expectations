@@ -138,7 +138,7 @@ def init(target_directory, view, usage_stats):
                     "Would you like to profile new Expectations for a single data asset within your new Datasource?",
                     default=True,
                 ):
-                    cli_message("Okay, bye!")
+                    cli_message("Okay, exiting now. To learn more about Profilers, run great_expectations profile --help or visit docs.greatexpectations.io!")
                     sys.exit(1)
 
                 (
@@ -157,7 +157,7 @@ def init(target_directory, view, usage_stats):
                 if not click.confirm(
                     "Would you like to build Data Docs?", default=True
                 ):
-                    cli_message("Okay, bye!")
+                    cli_message("Okay, exiting now. To learn more about Data Docs, run great_expectations docs --help or visit docs.greatexpectations.io!")
                     sys.exit(1)
 
                 build_docs(context, view=False)
@@ -166,7 +166,7 @@ def init(target_directory, view, usage_stats):
                     "\nWould you like to view your new Expectations in Data Docs? This will open a new browser window.",
                     default=True,
                 ):
-                    cli_message("Okay, bye!")
+                    cli_message("Okay, exiting now. You can view the site that has been created in a browser, or visit docs.greatexpectations.io for more information!")
                     sys.exit(1)
                 toolkit.attempt_to_open_validation_results_in_data_docs(
                     context, profiling_results
