@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 
 yaml = YAML()
 
-CURRENT_CONFIG_VERSION = 1
-MINIMUM_SUPPORTED_CONFIG_VERSION = 1
+CURRENT_CONFIG_VERSION = 2
+MINIMUM_SUPPORTED_CONFIG_VERSION = 2
 DEFAULT_USAGE_STATISTICS_URL = (
     "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 )
@@ -293,10 +293,9 @@ class DataContextConfigSchema(Schema):
             )
         elif data["config_version"] < MINIMUM_SUPPORTED_CONFIG_VERSION:
             raise ge_exceptions.UnsupportedConfigVersionError(
-                "You appear to have an invalid config version ({}).\n    The version number must be between {} and {}.".format(
-                    data["config_version"],
-                    MINIMUM_SUPPORTED_CONFIG_VERSION,
-                    CURRENT_CONFIG_VERSION,
+                "You appear to have an invalid config version ({}).\n    The version number must be at least {}. "
+                "Please see the migration guide at https://docs.greatexpectations.io/how_to_guides/migrating_versions.html".format(
+                    data["config_version"], MINIMUM_SUPPORTED_CONFIG_VERSION
                 ),
             )
         elif data["config_version"] > CURRENT_CONFIG_VERSION:

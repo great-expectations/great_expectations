@@ -396,7 +396,11 @@ def load_data_context_with_error_handling(directory: str) -> DataContext:
     try:
         context = DataContext(directory)
         return context
-    except (ge_exceptions.ConfigNotFoundError, ge_exceptions.InvalidConfigError) as err:
+    except (
+        ge_exceptions.ConfigNotFoundError,
+        ge_exceptions.InvalidConfigError,
+        ge_exceptions.UnsupportedConfigVersionError,
+    ) as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)
     except ge_exceptions.PluginModuleNotFoundError as err:

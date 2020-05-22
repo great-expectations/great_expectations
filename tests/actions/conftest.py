@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
 
@@ -7,7 +6,7 @@ from great_expectations.data_context.types.base import DataContextConfig
 @pytest.fixture(scope="module")
 def basic_data_context_config_for_validation_operator():
     return DataContextConfig(
-        config_version=1,
+        config_version=2,
         plugins_directory=None,
         evaluation_parameter_store_name="evaluation_parameter_store",
         expectations_store_name="expectations_store",
