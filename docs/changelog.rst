@@ -7,11 +7,26 @@ Changelog
 develop
 -----------------
 * Updated the installation/configuration documentation for Snowflake users
+* [ENHANCEMENT] Improved error messages for misconfigured checkpoints.
+* [BUGFIX] Fixed bug that could cause some substituted variables in DataContext config to be saved to `great_expectations.yml`
+
+0.10.12
+-----------------
+* [DOCS] Improved help for CLI `checkpoint` command
+* [BUGFIX] BasicSuiteBuilderProfiler could include extra expectations when only some expectations were selected (#1422)
+* [FEATURE] add support for `expect_multicolumn_values_to_be_unique` and `expect_column_pair_values_A_to_be_greater_than_B`
+  to `Spark`. Thanks @WilliamWsyHK!
+* [ENHANCEMENT] Allow a dictionary of variables can be passed to the DataContext constructor to allow override
+  config variables at runtime. Thanks @balexander!
+* [FEATURE] add support for `expect_column_pair_values_A_to_be_greater_than_B` to `Spark`.
+* [BUGFIX] Remove SQLAlchemy typehints to avoid requiring library (thanks @mzjp2)!
+* [BUGFIX] Fix issue where quantile boundaries could not be set to zero. Thanks @kokes!
 
 0.10.11
 -----------------
 * Bugfix: build_data_docs list_keys for GCS returns keys and when empty a more user friendly message
 * ENHANCEMENT: Enable Redshift Quantile Profiling
+
 
 0.10.10
 -----------------

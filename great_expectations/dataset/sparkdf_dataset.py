@@ -2,8 +2,9 @@ import copy
 import inspect
 import logging
 from datetime import datetime
-from functools import wraps
+from functools import reduce, wraps
 from typing import List
+from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
@@ -337,6 +338,142 @@ class MetaSparkDFDataset(Dataset):
             #         pass
 
             cols_df.unpersist()
+
+            return return_obj
+
+        inner_wrapper.__name__ = func.__name__
+        inner_wrapper.__doc__ = func.__doc__
+
+        return inner_wrapper
+
+    @classmethod
+    def multicolumn_map_expectation(cls, func):
+        """
+        The multicolumn_map_expectation decorator handles boilerplate issues surrounding the common pattern of
+        evaluating truthiness of some condition on a per row basis across a set of columns.
+        """
+        argspec = inspect.getfullargspec(func)[0][1:]
+
+        @cls.expectation(argspec)
+        @wraps(func)
+        def inner_wrapper(
+            self,
+            column_list,
+            mostly=None,
+            ignore_row_if="all_values_are_missing",
+            result_format=None,
+            *args,
+            **kwargs
+        ):
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
+
+            result_format = parse_result_format(result_format)
+
+            # this is a little dangerous: expectations that specify "COMPLETE" result format and have a very
+            # large number of unexpected results could hang for a long time. we should either call this out in docs
+            # or put a limit on it
+            if result_format["result_format"] == "COMPLETE":
+                unexpected_count_limit = None
+            else:
+                unexpected_count_limit = result_format["partial_unexpected_count"]
+
+            temp_df = self.spark_df.select(*column_list)  # pyspark.sql.DataFrame
+
+            # a couple of tests indicate that caching here helps performance
+            temp_df.cache()
+            element_count = self.get_row_count()
+
+            if ignore_row_if == "all_values_are_missing":
+                boolean_mapped_skip_values = temp_df.select(
+                    [
+                        *column_list,
+                        reduce(
+                            lambda a, b: a & b, [col(c).isNull() for c in column_list]
+                        ).alias("__null_val"),
+                    ]
+                )
+            elif ignore_row_if == "any_value_is_missing":
+                boolean_mapped_skip_values = temp_df.select(
+                    [
+                        *column_list,
+                        reduce(
+                            lambda a, b: a | b, [col(c).isNull() for c in column_list]
+                        ).alias("__null_val"),
+                    ]
+                )
+            elif ignore_row_if == "never":
+                boolean_mapped_skip_values = temp_df.select(
+                    [*column_list, lit(False).alias("__null_val")]
+                )
+            else:
+                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
+
+            nonnull_df = boolean_mapped_skip_values.filter("__null_val = False")
+            nonnull_count = nonnull_df.count()
+
+            cols_df = nonnull_df.select(*column_list)
+
+            success_df = func(self, cols_df, *args, **kwargs)
+            success_count = success_df.filter("__success = True").count()
+
+            unexpected_count = nonnull_count - success_count
+            if unexpected_count == 0:
+                maybe_limited_unexpected_list = []
+            else:
+                # here's an example of a place where we could do optimizations if we knew result format: see
+                # comment block below
+                unexpected_df = success_df.filter("__success = False")
+                if unexpected_count_limit:
+                    unexpected_df = unexpected_df.limit(unexpected_count_limit)
+                maybe_limited_unexpected_list = [
+                    OrderedDict((c, row[c]) for c in column_list)
+                    for row in unexpected_df.collect()
+                ]
+
+                if "output_strftime_format" in kwargs:
+                    output_strftime_format = kwargs["output_strftime_format"]
+                    parsed_maybe_limited_unexpected_list = []
+                    for val in maybe_limited_unexpected_list:
+                        if val is None or not all(v for k, v in val):
+                            parsed_maybe_limited_unexpected_list.append(val)
+                        else:
+                            if all(isinstance(v, str) for k, v in val):
+                                val = OrderedDict((k, parse(v)) for k, v in val)
+                            parsed_maybe_limited_unexpected_list.append(
+                                OrderedDict(
+                                    (k, datetime.strftime(v, output_strftime_format))
+                                    for k, v in val
+                                )
+                            )
+                    maybe_limited_unexpected_list = parsed_maybe_limited_unexpected_list
+
+            success, percent_success = self._calc_map_expectation_success(
+                success_count, nonnull_count, mostly
+            )
+
+            # Currently the abstraction of "result_format" that _format_column_map_output provides
+            # limits some possible optimizations within the column-map decorator. It seems that either
+            # this logic should be completely rolled into the processing done in the column_map decorator, or that the decorator
+            # should do a minimal amount of computation agnostic of result_format, and then delegate the rest to this method.
+            # In the first approach, it could make sense to put all of this decorator logic in Dataset, and then implement
+            # properties that require dataset-type-dependent implementations (as is done with SparkDFDataset.row_count currently).
+            # Then a new dataset type could just implement these properties/hooks and Dataset could deal with caching these and
+            # with the optimizations based on result_format. A side benefit would be implementing an interface for the user
+            # to get basic info about a dataset in a standardized way, e.g. my_dataset.row_count, my_dataset.columns (only for
+            # tablular datasets maybe). However, unclear if this is worth it or if it would conflict with optimizations being done
+            # in other dataset implementations.
+            return_obj = self._format_map_output(
+                result_format,
+                success,
+                element_count,
+                nonnull_count,
+                unexpected_count,
+                maybe_limited_unexpected_list,
+                unexpected_index_list=None,
+            )
+
+            temp_df.unpersist()
 
             return return_obj
 
@@ -982,4 +1119,80 @@ class SparkDFDataset(MetaSparkDFDataset):
         return join_df.withColumn(
             "__success",
             when(col(column_A_name) == col(column_B_name), True).otherwise(False),
+        )
+
+    @DocInherit
+    @MetaSparkDFDataset.column_pair_map_expectation
+    def expect_column_pair_values_A_to_be_greater_than_B(
+        self,
+        column_A,
+        column_B,
+        or_equal=None,
+        parse_strings_as_datetimes=None,
+        allow_cross_type_comparisons=None,
+        ignore_row_if="both_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # FIXME
+        if allow_cross_type_comparisons:
+            raise NotImplementedError
+
+        column_A_name = column_A.schema.names[1]
+        column_B_name = column_B.schema.names[1]
+
+        if parse_strings_as_datetimes:
+            _udf = udf(parse, sparktypes.TimestampType())
+            # Create new columns for comparison without replacing original values.
+            (timestamp_column_A, timestamp_column_B) = (
+                "__ts_{0}".format(column_A_name),
+                "__ts_{0}".format(column_B_name),
+            )
+            temp_column_A = column_A.withColumn(timestamp_column_A, _udf(column_A_name))
+            temp_column_B = column_B.withColumn(timestamp_column_B, _udf(column_B_name))
+            # Use the new columns to compare instead of original columns.
+            (column_A_name, column_B_name) = (timestamp_column_A, timestamp_column_B)
+
+        else:
+            temp_column_A = column_A
+            temp_column_B = column_B
+
+        join_df = temp_column_A.join(
+            temp_column_B, temp_column_A["__row"] == temp_column_B["__row"], how="inner"
+        )
+
+        if or_equal:
+            return join_df.withColumn(
+                "__success",
+                when(col(column_A_name) >= col(column_B_name), True).otherwise(False),
+            )
+        else:
+            return join_df.withColumn(
+                "__success",
+                when(col(column_A_name) > col(column_B_name), True).otherwise(False),
+            )
+
+    @DocInherit
+    @MetaSparkDFDataset.multicolumn_map_expectation
+    def expect_multicolumn_values_to_be_unique(
+        self,
+        column_list,  # pyspark.sql.DataFrame
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        column_names = column_list.schema.names[:]
+        conditions = []
+        for i in range(0, len(column_names) - 1):
+            # Negate the `eqNullSafe` result and append to the conditions.
+            conditions.append(
+                ~(col(column_names[i]).eqNullSafe(col(column_names[i + 1])))
+            )
+
+        return column_list.withColumn(
+            "__success", reduce(lambda a, b: a & b, conditions)
         )

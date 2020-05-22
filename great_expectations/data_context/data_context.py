@@ -13,6 +13,9 @@ import warnings
 import webbrowser
 from typing import Dict, List, Optional, Union
 
+from marshmallow import ValidationError
+from ruamel.yaml import YAML, YAMLError
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite, get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -55,8 +58,6 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import Validator
-from marshmallow import ValidationError
-from ruamel.yaml import YAML, YAMLError
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -117,12 +118,14 @@ class BaseDataContext(object):
         return True
 
     @usage_statistics_enabled_method(event_name="data_context.__init__",)
-    def __init__(self, project_config, context_root_dir=None):
+    def __init__(self, project_config, context_root_dir=None, runtime_environment=None):
         """DataContext constructor
 
         Args:
             context_root_dir: location to look for the ``great_expectations.yml`` file. If None, searches for the file \
             based on conventions for project subdirectories.
+            runtime_environment: a dictionary of config variables that
+            override both those set in config_variables.yml and the environment
 
         Returns:
             None
@@ -137,6 +140,7 @@ class BaseDataContext(object):
             self._context_root_directory = os.path.abspath(context_root_dir)
         else:
             self._context_root_directory = context_root_dir
+        self.runtime_environment = runtime_environment or {}
 
         # Init plugin support
         if self.plugins_directory is not None:
@@ -156,13 +160,13 @@ class BaseDataContext(object):
         self._init_stores(self._project_config_with_variables_substituted.stores)
 
         # Init validation operators
+        # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
+        # the way that datasources, validation operators, site builders and other plugins are built.
         self.validation_operators = {}
         for (
             validation_operator_name,
             validation_operator_config,
-        ) in (
-            self._project_config_with_variables_substituted.validation_operators.items()
-        ):
+        ) in self._project_config.validation_operators.items():
             self.add_validation_operator(
                 validation_operator_name, validation_operator_config,
             )
@@ -558,7 +562,7 @@ class BaseDataContext(object):
             try:
                 # If the user specifies the config variable path with an environment variable, we want to substitute it
                 defined_path = substitute_config_variable(
-                    config_variables_file_path, {}
+                    config_variables_file_path, dict(os.environ)
                 )
                 if not os.path.isabs(defined_path):
                     # A BaseDataContext will not have a root directory; in that case use the current directory
@@ -578,13 +582,18 @@ class BaseDataContext(object):
             return {}
 
     def get_config_with_variables_substituted(self, config=None):
+
         if not config:
             config = self._project_config
 
+        substitutions = {
+            **dict(self._load_config_variables_file()),
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+
         return DataContextConfig(
-            **substitute_all_config_variables(
-                config, self._load_config_variables_file()
-            )
+            **substitute_all_config_variables(config, substitutions)
         )
 
     def save_config_variable(self, config_variable_name, value):
@@ -1875,7 +1884,12 @@ class DataContext(BaseDataContext):
     """
 
     @classmethod
-    def create(cls, project_root_dir=None, usage_statistics_enabled=True):
+    def create(
+        cls,
+        project_root_dir=None,
+        usage_statistics_enabled=True,
+        runtime_environment=None,
+    ):
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
@@ -1884,6 +1898,8 @@ class DataContext(BaseDataContext):
 
         Args:
             project_root_dir: path to the root directory in which to create a new great_expectations directory
+            runtime_environment: a dictionary of config variables that
+            override both those set in config_variables.yml and the environment
 
         Returns:
             DataContext
@@ -1927,7 +1943,7 @@ class DataContext(BaseDataContext):
         else:
             cls.write_config_variables_template_to_disk(uncommitted_dir)
 
-        return cls(ge_dir)
+        return cls(ge_dir, runtime_environment=runtime_environment)
 
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir):
@@ -2030,7 +2046,7 @@ class DataContext(BaseDataContext):
                 destination_path = os.path.join(subdir_path, notebook_name)
                 shutil.copyfile(notebook, destination_path)
 
-    def __init__(self, context_root_dir=None):
+    def __init__(self, context_root_dir=None, runtime_environment=None):
 
         # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
@@ -2040,7 +2056,9 @@ class DataContext(BaseDataContext):
 
         project_config = self._load_project_config()
         project_config_dict = dataContextConfigSchema.dump(project_config)
-        super(DataContext, self).__init__(project_config, context_root_directory)
+        super(DataContext, self).__init__(
+            project_config, context_root_directory, runtime_environment
+        )
 
         # save project config if data_context_id auto-generated or global config values applied
         if (
@@ -2094,7 +2112,7 @@ class DataContext(BaseDataContext):
         try:
             with open(checkpoint_path, "r") as f:
                 checkpoint = yaml.load(f.read())
-                return self._validate_checkpoint(checkpoint)
+                return self._validate_checkpoint(checkpoint, checkpoint_name)
         except FileNotFoundError:
             raise ge_exceptions.CheckpointNotFoundError(
                 f"Could not find checkpoint `{checkpoint_name}`."
@@ -2234,21 +2252,23 @@ class DataContext(BaseDataContext):
             logger.debug(e)
 
     @staticmethod
-    def _validate_checkpoint(checkpoint: dict) -> dict:
+    def _validate_checkpoint(checkpoint: dict, checkpoint_name: str) -> dict:
         if checkpoint is None:
             raise ge_exceptions.CheckpointError(
-                "Checkpoint has no contents. Please fix this."
+                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
             )
         if "validation_operator_name" not in checkpoint:
             checkpoint["validation_operator_name"] = "action_list_operator"
 
         if "batches" not in checkpoint:
             raise ge_exceptions.CheckpointError(
-                f"Checkpoint {checkpoint} is missing required key: `batches`"
+                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
             )
         batches = checkpoint["batches"]
         if not isinstance(batches, list):
-            raise ge_exceptions.CheckpointError(f"`batches` must be a list")
+            raise ge_exceptions.CheckpointError(
+                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
+            )
 
         for batch in batches:
             for required in ["expectation_suite_names", "batch_kwargs"]:

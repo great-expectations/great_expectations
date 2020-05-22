@@ -2709,7 +2709,10 @@ class Dataset(MetaDataset):
         )
         # We explicitly allow "None" to be interpreted as +/- infinity
         comparison_quantile_ranges = [
-            [lower_bound or -np.inf, upper_bound or np.inf]
+            [
+                -np.inf if lower_bound is None else lower_bound,
+                np.inf if upper_bound is None else upper_bound,
+            ]
             for (lower_bound, upper_bound) in quantile_value_ranges
         ]
         success_details = [

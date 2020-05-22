@@ -1757,13 +1757,13 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
 
-        for idx, quantile in enumerate(quantiles):
-            quantile_string = quantile_strings.get(quantile)
+        for quantile, value_range in zip(quantiles, value_ranges):
+            quantile_string = quantile_strings.get(quantile, "{:3.2f}".format(quantile))
             table_rows.append(
                 [
-                    quantile_string if quantile_string else "{:3.2f}".format(quantile),
-                    str(value_ranges[idx][0]) if value_ranges[idx][0] else "Any",
-                    str(value_ranges[idx][1]) if value_ranges[idx][1] else "Any",
+                    quantile_string,
+                    str(value_range[0]) if value_range[0] is not None else "Any",
+                    str(value_range[1]) if value_range[1] is not None else "Any",
                 ]
             )
 
