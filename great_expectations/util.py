@@ -61,21 +61,20 @@ def get_module_object(module_name: str, pattern: str = None) -> Union[ModuleType
         if regex_pattern.match(module_source_code):
             return module_obj
         return None
-    except OSError as e:
+    except (OSError, TypeError):
         return None
 
 
 def load_class(class_name, module_name):
     verify_dynamic_loading_support(module_name=module_name)
-    # Get the class object itself from strings.
     loaded_module = importlib.import_module(module_name)
     try:
-        class_ = getattr(loaded_module, class_name)
+        klass_ = getattr(loaded_module, class_name)
     except AttributeError:
         raise AttributeError(
             "Module : {} has no class named : {}".format(module_name, class_name,)
         )
-    return class_
+    return klass_
 
 
 def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, profiler=None):
