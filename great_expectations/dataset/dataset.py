@@ -4331,7 +4331,14 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
-        raise NotImplementedError
+        observed_p_value = stats.chi2_contingency(self.get_crosstab(column_A, column_B))[1]
+        return_obj = {
+                "success": observed_p_value >= p_value,
+                "result": {
+                    "observed_value": observed_p_value,
+                },
+            }
+        return return_obj
 
     ###
     #

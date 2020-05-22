@@ -476,7 +476,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         column_A,
         column_B
     ):
-        return self.crosstab(index=column_A, columns=[column_B])
+        print(column_A)
+        print(column_B)
+        return pd.crosstab(self[column_A], columns=self[column_B])
 
     ### Expectation methods ###
 
@@ -1644,22 +1646,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             results.append((a, b) in value_pairs_set)
 
         return pd.Series(results, temp_df.index)
-
-    @DocInherit
-    @MetaPandasDataset.column_pair_map_expectation
-    def expect_column_pair_values_to_be_independent(
-        self,
-        column_A,
-        column_B,
-        p_value=0.05,
-        method="default",
-        ignore_missings=None,
-        result_format=None,
-        include_config=True,
-        catch_exceptions=None,
-        meta=None
-    ):
-        return stats.chi2_contingency(self.get_crosstab(column_A, column_B)).p_value
 
     @DocInherit
     @MetaPandasDataset.multicolumn_map_expectation
