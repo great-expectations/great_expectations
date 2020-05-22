@@ -389,7 +389,7 @@ Great Expectations will now add a new Datasource '{0:s}' to your deployment, by 
         )
     )
 
-    toolkit.confirm_proceed_or_exit()
+    toolkit.confirm_proceed_or_exit("Okay, exiting now. To learn more about adding datasources, run great_expectations datasource --help or visit https://docs.greatexpectations.io/")
 
     context.add_datasource(name=datasource_name, **configuration)
     return datasource_name
