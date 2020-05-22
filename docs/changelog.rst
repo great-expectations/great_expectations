@@ -7,6 +7,7 @@ Changelog
 develop
 -----------------
 * [ENHANCEMENT] Improved error messages for misconfigured checkpoints.
+* [BUGFIX] Fixed bug that could cause some substituted variables in DataContext config to be saved to `great_expectations.yml`
 
 0.10.12
 -----------------
