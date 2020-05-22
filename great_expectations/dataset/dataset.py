@@ -4285,11 +4285,11 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    
     def expect_column_pair_values_to_be_independent(
         self,
         column_A,
         column_B,
+        p_value=0.05,
         method="default",
         ignore_missings=None,
         result_format=None,
@@ -4331,7 +4331,7 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
-        raise NotADirectoryError
+        raise NotImplementedError
 
     ###
     #
