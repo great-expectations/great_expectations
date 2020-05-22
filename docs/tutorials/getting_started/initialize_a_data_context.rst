@@ -11,7 +11,7 @@ Install Great Expectations
 
 If you haven't already, install Great Expectations.
 
-We recommend deploying within a virtual environment. If you're not familiar with virtual environments, pip, notebooks,
+We recommend deploying within a virtual environment. If you're not familiar with virtual environments, pip, jupyter notebooks,
 or git, you may want to check out the :ref:`supporting_resources` section before continuing.
 
 .. raw:: html
@@ -24,54 +24,45 @@ or git, you may want to check out the :ref:`supporting_resources` section before
 
     $ pip install great_expectations
 
-To install from a git branch:
+To install from a git branch, use the following command (replace ``develop`` below with the name of the branch you want to use):
 
 .. code-block:: bash
 
-    #FIXME:
     $ git clone https://github.com/great-expectations/great_expectations.git
-    $ pip install great_expectations/
+    $ cd great_expectations/
+    $ git checkout develop
+    $ pip install -e .
 
-To install from a git fork:
+To install from a git fork, use the following command (replace ``great-expectations`` below with the name of the fork, which is usually your github username):
 
 .. code-block:: bash
 
+    $ pip install -e .
     $ git clone https://github.com/great-expectations/great_expectations.git
     $ pip install great_expectations/
 
 If you intend to develop within the Great Expectations (e.g. to contribute back to the project), check out :ref:`contributing_setting_up_your_dev_environment` in the contributor documentation.
 
-Get the ``example-dickens-data-project``
+Downloading Example Data
 -----------------------------------------------
+For this tutorial, we will use a sample dataset released by the `Centers of Medicare and Medicaid <https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/DataDissemination>`_.
+It includes the National Provider Identifier (NPI) information for unique health care providers in the United States that you can download from an S3 bucket.
 
-For this tutorial, we will use a simple example project based on the works of Charles Dickens. If this is your very first time with Great Expectations, we encourage you to use this example, so that there's no discrepancy between what you see in the tutorial and in your own environment. Later, you can follow similar steps with data and code of your own.
+Before you download the data, we recommend you create a test directory where your data is eventually going to be stored. In our case we will use the name ``ge_example_project``
 
-To download this project:
+.. code-block:: bash
+   $ mkdir ge_example_project
+   $ cd ge_example_project
+   $ mkdir data
+   $ cd data
+
+To download this project use the following ``wget`` command, which should download it to your current directory. Make sure you download the file and unzip it in a directory that you can access. You will need it in initializing the great_expectations data context.
 
 .. code-block:: bash
 
-    git clone https://github.com/superconductive/example-dickens-data-project
-    cd ge_example_project
+    $ wget https://superconductive-public.s3.amazonaws.com/data/npi/weekly/npidata_pfile_20200511-20200517.csv.gz
+    $ gunzip npidata_pfile_20200511-20200517.csv.gz
 
-The project is laid out as follows:
-
-.. code-block:: bash
-
-    .
-    ├── README.md
-    ├── data
-    │   └── notable_works_by_charles_dickens.csv
-    ├── notebooks
-    │   └── explore_and_predict_stuff_about_dickens_novels.ipynb
-    └── pipeline
-        ├── explore_and_predict_stuff_about_dickens_novels.py
-        └── title_length_prediction_pipeline.py
-
-
-Quick orientation to this project: 
-# FIXME: What are the main components of this project?
-
-# FIXME: What does the data itself look like?
 
 Run ``great_expectations init``
 -----------------------------------------------
@@ -89,33 +80,43 @@ You should see this:
 
 .. code-block::
 
-      ___              _     ___                  _        _   _             
+      ___              _     ___                  _        _   _
      / __|_ _ ___ __ _| |_  | __|_ ___ __  ___ __| |_ __ _| |_(_)___ _ _  ___
     | (_ | '_/ -_) _` |  _| | _|\ \ / '_ \/ -_) _|  _/ _` |  _| / _ \ ' \(_-<
      \___|_| \___\__,_|\__| |___/_\_\ .__/\___\__|\__\__,_|\__|_\___/_||_/__/
-                                    |_|                                      
-                 ~ Always know what to expect from your data ~             
-    
-    Let's configure a new Data Context.
-    
+                                    |_|
+                 ~ Always know what to expect from your data ~
+
+    In a few minutes you will see Great Expectations in action on your data!
+
     First, Great Expectations will create a new directory:
 
+    #FIXME: Adjust this here, and in init_messages.py
+
+In a few minutes you will see Great Expectations in action on your data!
+
+First, Great Expectations will create a new directory:
+
         great_expectations
-        ├── great_expectations.yml
-        ├── expectations
-        ├── notebooks
-        ├── plugins
-        ├── .gitignore
-        └── uncommitted
-            ├── config_variables.yml
-            ├── documentation
-            └── validations
-    
-    OK to proceed? [Y/n]: 
+        |-- expectations
+        |-- great_expectations.yml
+        |-- checkpoints
+        |-- notebooks
+        |   |-- pandas
+        |   |-- spark
+        |   |-- sql
+        |-- plugins
+        |   |-- ...
+        |-- uncommitted
+            |-- config_variables.yml
+            |-- ...
+
+    OK to proceed? [Y/n]:
 
 Let's pause there for a moment.
-    
-Once you finish going through ``init``, your ``great_expectations/`` directory will contain all of the important components of a Great Expectations deployment, in miniature:
+
+Once you finish going through ``init``, your ``great_expectations/`` directory will contains all of the important components of a Great Expectations deployment, in miniature:
+
 
 * ``great_expectations.yml`` will contain the main configuration your deployment.
 * The ``expectations/`` directory will store all your :ref:`Expectations` as JSON files. If you want to store them somewhere else, you can change that later.
