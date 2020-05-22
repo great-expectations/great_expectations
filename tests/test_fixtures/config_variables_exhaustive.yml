@@ -1,0 +1,45 @@
+a: great_expectations.datasource
+b: PandasDatasource
+c: PandasDataset
+d: SubdirReaderBatchKwargsGenerator
+e: ../data
+f: python
+g: SqlAlchemyDatasource
+h: SqlAlchemyDataset
+i: great_expectations.dataset
+j: great_expectations.datasource
+k:
+  drivername: postgres
+  host: localhost
+  port: '5432'
+  username: postgres
+  password: ''
+  database: postgres
+l: plugins/
+m: evaluation_parameter_store
+n: expectations_store
+o: validations_store
+p: SiteBuilder
+q: true
+r: TupleFilesystemStoreBackend
+s: uncommitted/data_docs/local_site/
+t: DefaultSiteIndexBuilder
+u: ExpectationsStore
+v: TupleFilesystemStoreBackend
+w: expectations/
+x: great_expectations.data_context.store
+y: EvaluationParameterStore
+z: ValidationsStore
+aa: ActionListValidationOperator
+bb: store_validation_result
+cc: StoreValidationResultAction
+dd: validations_store
+ee: notify_slack
+ff: SlackNotificationAction
+gg: www.fake-slack-webhook.net
+hh: all
+ii: great_expectations.render.renderer.slack_renderer
+jj: SlackRenderer
+kk: store_evaluation_params
+ll: StoreEvaluationParametersAction
+mm: evaluation_parameter_store
