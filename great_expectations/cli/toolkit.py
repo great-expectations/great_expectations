@@ -371,6 +371,16 @@ def load_data_context_with_error_handling(directory: str) -> DataContext:
 
 
 def confirm_proceed_or_exit():
+    """
+    Every CLI command that starts a potentially lengthy (>1 sec) computation
+    or modifies some resources (e.g., edits the config file, adds objects
+    to the stores) must follow this pattern:
+    1. Explain which resources will be created/modified/deleted
+    2. Use this method to ask for user's confirmation
+
+    The goal of this standardization is for the users to expect consistency -
+    if you saw one command, you know what to expect from all others.
+    """
     if not click.confirm("OK to proceed?", default=True):
         cli_message("Okay, bye!")
         exit(0)
