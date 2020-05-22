@@ -5,7 +5,6 @@ from copy import deepcopy
 
 import mock
 import pytest
-
 from great_expectations.core.usage_statistics.usage_statistics import (
     run_validation_operator_usage_statistics,
 )
@@ -22,7 +21,7 @@ def in_memory_data_context_config_usage_stats_enabled():
     return DataContextConfig(
         **{
             "commented_map": {},
-            "config_version": 1,
+            "config_version": 2,
             "plugins_directory": None,
             "evaluation_parameter_store_name": "evaluation_parameter_store",
             "validations_store_name": "validations_store",

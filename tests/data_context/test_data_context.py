@@ -2,10 +2,10 @@ import json
 import os
 import shutil
 
-import pytest
-from freezegun import freeze_time
 from ruamel.yaml import YAML
 
+import pytest
+from freezegun import freeze_time
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -593,7 +593,7 @@ def basic_data_context_config():
     return DataContextConfig(
         **{
             "commented_map": {},
-            "config_version": 1,
+            "config_version": 2,
             "plugins_directory": "plugins/",
             "evaluation_parameter_store_name": "evaluation_parameter_store",
             "validations_store_name": "does_not_have_to_be_real",
