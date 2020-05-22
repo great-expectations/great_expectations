@@ -142,10 +142,26 @@ def test_action_list_operator(validation_operators_data_context):
     # results = data_context.run_validation_operator(my_ge_df)
 
     validation_result_store_keys = data_context.stores["validation_result_store"].list_keys()
-    print(validation_result_store_keys)
     assert len(validation_result_store_keys) == 2
-    assert operator_result["success"]
-    assert len(operator_result['details'].keys()) == 2
+    assert operator_result.success
+
+    assert len(operator_result.list_validation_results(group_by=None)) == 2
+
+    assert len(operator_result.list_validation_results(group_by='validation_result_identifier')) == 2
+
+    assert len(operator_result.list_validation_results(group_by=None)) == 2
+
+    assert len(operator_result.list_validation_results(group_by='validation_result_identifier')) == 2
+    assert len(operator_result.list_validation_results(group_by='expectation_suite_name')) == 2
+
+    assert len(operator_result.list_validation_results(group_by='expectation_suite_name')['f1.failure']) == 1
+    assert operator_result.list_validation_results(group_by='expectation_suite_name')['f1.failure'][0]['statistics']['success_percent'] == 1.0e2
+
+    assert len(operator_result.list_validation_results(group_by='data_asset_name')) == 1
+    assert len(operator_result.list_validation_results(group_by='data_asset_name')['f1']) == 1
+    assert len(operator_result.list_validation_results(group_by='data_asset_name')['f1'][0]) == 2
+    assert any(e['meta']['expectation_suite_name'] == 'f1.failure' for e in operator_result.list_validation_results(group_by='data_asset_name')['f1'][0])
+    assert any(e['meta']['expectation_suite_name'] == 'f1.warning' for e in operator_result.list_validation_results(group_by='data_asset_name')['f1'][0])
 
     first_validation_result = data_context.stores["validation_result_store"].get(validation_result_store_keys[0])
     assert data_context.stores["validation_result_store"].get(validation_result_store_keys[0]).success is True
