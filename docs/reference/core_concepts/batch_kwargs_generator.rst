@@ -4,7 +4,7 @@
 Batch Kwargs Generators
 #######################
 
-:ref:`batch_kwargs` are specific instructions for a :ref:`Datasource` about what data should be prepared as a “batch” for validation. The batch could be a specific database table, the most recent log file delivered to S3, or even a subset of one of those objects such as the first 10,000 rows.
+:ref:`batch_kwargs` are specific instructions for a :ref:`datasource` about what data should be prepared as a “batch” for validation. The batch could be a specific database table, the most recent log file delivered to S3, or even a subset of one of those objects such as the first 10,000 rows.
 
 A BatchKwargsGenerator builds those instructions for Datasources by inspecting storage backends or data, or by
 maintaining configuration such as commonly-used paths or filepath conventions. That allows BatchKwargsGenerators to add

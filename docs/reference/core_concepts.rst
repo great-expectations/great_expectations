@@ -41,8 +41,7 @@ Great Expectations makes it possible to validate your data against an Expectatio
 
    The DataAsset class will be refactored and renamed in an upcoming release of Great Expectations to make it easier to create custom expectations and ensure Expectation Implementations are consistent across different validation engines.
 
-A **DataAsset** is a Great Expectations object that can create and validate Expectations against specific data.
-DataAssets are connected to data. A DataAsset can evaluate Expectations wherever you access your data, using different **ValidationEngines** such as Pandas, Spark, or SqlAlchemy.
+A **DataAsset** is a Great Expectations object that can create and validate Expectations against specific data. DataAssets are connected to data. A DataAsset can evaluate Expectations wherever you access your data, using different **ValidationEngines** such as Pandas, Spark, or SqlAlchemy.
 
 An **Expectation Validation Result** captures the output of checking an expectation against data. It describes whether
 the data met the expectation, and additional metrics from the data such as the percentage of unique values or observed mean.
