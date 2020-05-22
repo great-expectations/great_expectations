@@ -6,6 +6,8 @@ Core concepts
 #############
 
 
+.. _reference__core_concepts__expectations:
+
 *************
 Expectations
 *************
@@ -33,6 +35,9 @@ Suites should have names corresponding to the kind of data they define, like “
    /reference/core_concepts/expectations/glossary_of_expectations.rst
    /reference/core_concepts/expectations/implemented_expectations.rst
 
+
+.. _reference__core_concepts__data_contexts:
+
 *************
 Data Contexts
 *************
@@ -54,6 +59,9 @@ of data, such as ensuring that the number of rows in a downstream dataset equals
 
    /reference/core_concepts/data_context.rst
    /reference/core_concepts/evaluation_parameters.rst
+
+
+.. _reference__core_concepts__datasources:
 
 ***********
 Datasources
@@ -78,6 +86,9 @@ validation. The batch could be a specific database table, the most recent log fi
 **Batch Parameters** provide instructions for how to retrieve stored Batch Kwargs or build new Batch Kwargs that reflect
 partitions, deliveries, or slices of logical data assets.
 
+
+.. _reference__core_concepts__batch_kwargs_generators:
+
 A **Batch Kwargs Generator** translates Batch Parameters to datasource-specific Batch Kwargs. A Batch Kwargs Generator 
 can also identify data assets and partitions by inspecting a storage environment.
 
@@ -87,6 +98,9 @@ can also identify data assets and partitions by inspecting a storage environment
    /reference/core_concepts/datasource.rst
    /reference/core_concepts/datasource_reference.rst
    /reference/core_concepts/batch_kwargs_generator.rst
+
+
+.. _reference__core_concepts__validation:
 
 **********
 Validation
@@ -98,6 +112,10 @@ DataAssets and Validations, answer the questions:
 
 - How do I describe my Expectations to Great Expectations?
 - Does my data meet my Expectations?
+
+.. _reference__core_concepts__validation__execution_engines:
+
+An **Execution Engine** is the layer that handles the actual computation for validation. Currently, Great Expectations supports three Execution Engines: pandas, sqlalchemy, and pyspark. We plan to extend the library to support others in the future.
 
 A **DataAsset** is a Great Expectations object that can create and validate Expectations against specific data. 
 DataAssets are connected to data. They can evaluate Expectations wherever you access your data, using Pandas, Spark, or SqlAlchemy.
@@ -122,6 +140,9 @@ demonstrate the full potential of Great Expectations. They take configurable Act
    /reference/core_concepts/validation_result.rst
    /reference/core_concepts/metric_reference.rst
    /reference/core_concepts/metrics.rst
+
+
+.. _reference__core_concepts__data_docs:
 
 **************************
 Data Docs
