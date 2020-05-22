@@ -4,53 +4,34 @@
 Distributional Expectations
 ===========================
 
-Distributional expectations help identify when new datasets or samples may be different than expected, and can help \
-ensure that assumptions developed during exploratory analysis still hold as new data becomes available. You should use \
-distributional expectations in the same way as other expectations: to help accelerate identification of risks as \
-diverse as changes in a system being modeled or disruptions to a complex upstream data feed.
+Distributional expectations help identify when new datasets or samples may be different than expected, and can help ensure that assumptions developed during exploratory analysis still hold as new data becomes available. You should use distributional expectations in the same way as other expectations: to help accelerate identification of risks as diverse as changes in a system being modeled or disruptions to a complex upstream data feed.
 
-Great Expectations' Philosophy of Distributional Expectations
---------------------------------------------------------------------------------
-
-Great Expectations attempts to provide a simple, expressive framework for describing distributional expectations. \
-The framework generally adopts a nonparametric approach, although it is possible to build expectations from \
-parameterized distributions.
-
-The design is motivated by the following assumptions:
-
-* Encoding expectations into a simple object that allows for portable data pipeline testing is the top priority. \
-  In many circumstances the loss of precision associated with "compressing" data into an expectation may be beneficial \
-  because of its intentional simplicity as well as because it adds a very light layer of obfuscation over the data \
-  which may align with privacy preservation goals.
-* While it should be possible to easily extend the framework with more rigorous statistical tests, great expectations \
-  should provide simple, reasonable defaults. Care should be taken in cases where robust statistical guarantees are \
-  expected.
-* Building and interpreting expectations should be intuitive: a more precise partition object implies a more precise \
-  expectation.
-
+Great Expectations provides a direct, expressive framework for describing distributional expectations. Most distributional expectations apply nonparametric tests, although it is possible to build expectations from parameterized distributions.
 
 .. _partition_object:
 
 Partition Objects
 --------------------------------------------------------------------------------
 
-The core constructs of a great expectations distributional expectation are the partition and associated weights.
+The core constructs of a great expectations distributional expectation are the partition (histogram bins) and associated weights.
 
 For continuous data:
 
 * A partition is defined by an ordered list of points that define intervals on the real number line. Note that partition intervals do not need to be uniform.
 * Each bin in a partition is partially open: a data element x is in bin i if lower_bound_i <= x < upper_bound_i.
 * However, following the behavior of numpy.histogram, a data element x is in the largest bin k if x == upper_bound_k.
-* A bin may include -Infinity and Infinity as endpoints, however, those endpoints are not supported by the Kolmogorov-Smirnov test.
+* A partition object can also include ``tail_weights`` which extend from -Infinity to the lowest bound, and from the highest bound to +Infinity.
 
-* Partition weights define the probability of the associated interval. Note that this effectively applies a "piecewise uniform" distribution to the data for the purpose of statistical tests. The weights must define a valid probability distribution, ie they must be non-negative numbers that sum to 1.
+* Partition weights define the probability of the associated interval. Note that this applies a "piecewise uniform" distribution to the data for the purpose of statistical tests. The weights must define a valid probability distribution, i.e. they must be non-negative numbers that sum to 1.
 
 Example continuous partition object:
 
 .. code-block:: python
+
     partition = {
         "bins": [0, 1, 2, 10],
-        "weights": [0.3, 0.3, 0.4]
+        "weights": [0.2, 0.3, 0.3],
+        "tail_weights": [0.1, 0.1]
     }
 
 >>> json.dumps(partition, indent=2)
@@ -65,6 +46,10 @@ Example continuous partition object:
     0.3,
     0.3,
     0.4
+  ],
+  "tail_weights": [
+    0.1,
+    0.1
   ]
 }
 
@@ -85,13 +70,12 @@ Example discrete partition object:
 
 Constructing Partition Objects
 ------------------------------
-Three convenience functions are available to easily construct partition objects from existing data:
+Convenience functions are available to easily construct partition objects from existing data:
 
-* :func:`continuous_partition_data <great_expectations.dataset.util.continuous_partition_data>`
-* :func:`categorical_partition_data <great_expectations.dataset.util.categorical_partition_data>`
-* :func:`kde_partition_data <great_expectations.dataset.util.kde_partition_data>`
+* :func:`build_continuous_partition_object <great_expectations.dataset.util.build_continuous_partition_object>`
+* :func:`build_categorical_partition_object <great_expectations.dataset.util.build_categorical_partition_object>`
 
-Convenience functions are also provided to validate that an object is a valid partition density object:
+Convenience functions are also provided to validate that an object is valid:
 
 * :func:`is_valid_continuous_partition_object <great_expectations.dataset.util.is_valid_continuous_partition_object>`
 * :func:`is_valid_categorical_partition_object <great_expectations.dataset.util.is_valid_categorical_partition_object>`
@@ -99,9 +83,8 @@ Convenience functions are also provided to validate that an object is a valid pa
 Tests interpret partition objects literally, so care should be taken when a partition includes a segment with zero weight. The convenience methods consequently allow you to include small amounts of residual weight on the "tails" of a dataset used to construct a partition.
 
 
-Distributional Expectations Core Tests
+Available Distributional Expectations
 --------------------------------------
-Distributional expectations rely on three tests for their work.
 
 Kullback-Leibler (KL) divergence is available as an expectation for both categorical and continuous data (continuous data will be discretized according to the provided partition prior to computing divergence). Unlike KS and Chi-Squared tests which can use a p-value, you must provide a threshold for the relative entropy to use KL divergence. Further, KL divergence is not symmetric.
 
@@ -114,11 +97,3 @@ For continuous data, the expect_column_bootstrapped_ks_test_p_value_to_be_greate
 For categorical data, the expect_column_chisquare_test_p_value_to_be_greater_than expectation uses the Chi-Squared test. The Chi-Squared test works with expected and observed counts, but that is handled internally in this function -- both the input and output to this function are valid partition objects (ie with weights that are probabilities and sum to 1).
 
 * :func:`expect_column_chisquare_test_p_value_to_be_greater_than <great_expectations.dataset.dataset.Dataset.expect_column_chisquare_test_p_value_to_be_greater_than>`
-
-
-
-Distributional Expectations Alternatives
-----------------------------------------
-The core partition density object used in current expectations focuses on a particular (partition-based) method of "compressing" the data into a testable form, however it may be desirable to use alternative nonparametric approaches (e.g. Fourier transform/wavelets) to describe expected data.
-
-
