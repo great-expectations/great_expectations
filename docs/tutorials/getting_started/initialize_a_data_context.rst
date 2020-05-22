@@ -97,6 +97,8 @@ In a few minutes you will see Great Expectations in action on your data!
 
 First, Great Expectations will create a new directory:
 
+.. code-block::
+
         great_expectations
         |-- expectations
         |-- great_expectations.yml
