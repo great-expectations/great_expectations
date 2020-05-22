@@ -20,6 +20,9 @@ Changelog
 * ``data_asset_name`` is now added to batch_kwargs by batch_kwargs_generators (if available) and surfaced in Data Docs
 * Renamed all ``generator_asset`` parameters to ``data_asset_name``
 * Updated the dateutil dependency
+* Added experimental QueryStore
+* Removed deprecated cli tap command
+* Added of 0.11 upgrade helper
 * Corrected Scaffold maturity language in notebook to Experimental
 
 develop
