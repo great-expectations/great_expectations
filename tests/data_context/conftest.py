@@ -13,7 +13,12 @@ def data_context_without_config_variables_filepath_configured(tmp_path_factory):
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
 
-    create_data_context_files(context_path, asset_config_path, False)
+    create_data_context_files(
+        context_path,
+        asset_config_path,
+        ge_config_fixture_filename="great_expectations_basic_without_config_variables_filepath.yml",
+        config_variables_fixture_filename=None,
+    )
 
     return ge.data_context.DataContext(context_path)
 
@@ -25,30 +30,54 @@ def data_context_with_variables_in_config(tmp_path_factory):
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
 
-    create_data_context_files(context_path, asset_config_path, True)
+    create_data_context_files(
+        context_path,
+        asset_config_path,
+        ge_config_fixture_filename="great_expectations_basic_with_variables.yml",
+        config_variables_fixture_filename="config_variables.yml",
+    )
+
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture()
+def data_context_with_variables_in_config_exhaustive(tmp_path_factory):
+    # This data_context is *manually* created to have the config we want, vs created with DataContext.create
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+
+    create_data_context_files(
+        context_path,
+        asset_config_path,
+        ge_config_fixture_filename="great_expectations_basic_with_exhaustive_variables.yml",
+        config_variables_fixture_filename="config_variables_exhaustive.yml",
+    )
 
     return ge.data_context.DataContext(context_path)
 
 
 def create_data_context_files(
-    context_path, asset_config_path, with_config_variables_file
+    context_path,
+    asset_config_path,
+    ge_config_fixture_filename,
+    config_variables_fixture_filename=None,
 ):
-    if with_config_variables_file:
+    if config_variables_fixture_filename:
         os.makedirs(context_path, exist_ok=True)
         os.makedirs(os.path.join(context_path, "uncommitted"), exist_ok=True)
         copy_relative_path(
-            "../test_fixtures/config_variables.yml",
+            f"../test_fixtures/{config_variables_fixture_filename}",
             str(os.path.join(context_path, "uncommitted/config_variables.yml")),
         )
         copy_relative_path(
-            "../test_fixtures/great_expectations_basic_with_variables.yml",
+            f"../test_fixtures/{ge_config_fixture_filename}",
             str(os.path.join(context_path, "great_expectations.yml")),
         )
     else:
         os.makedirs(context_path, exist_ok=True)
         copy_relative_path(
-            "../test_fixtures/"
-            "great_expectations_basic_without_config_variables_filepath.yml",
+            f"../test_fixtures/{ge_config_fixture_filename}",
             str(os.path.join(context_path, "great_expectations.yml")),
         )
     create_common_data_context_files(context_path, asset_config_path)
