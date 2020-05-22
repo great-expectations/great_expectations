@@ -247,10 +247,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         validation_operator_name="validate_and_store",
     )
 
-    validation_result_id = ValidationResultIdentifier(
-        expectation_suite_identifier=[key for key in operator_result["details"].keys()][0],
-        run_id=run_id,
-        batch_identifier=batch.batch_id)
+    validation_result_id = operator_result.list_validation_result_identifiers()[0]
     res = site_builder.build(resource_identifiers=[validation_result_id])
 
     index_links_dict = res[1]
