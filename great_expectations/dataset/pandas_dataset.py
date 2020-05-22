@@ -476,8 +476,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         column_A,
         column_B
     ):
-        print(column_A)
-        print(column_B)
         return pd.crosstab(self[column_A], columns=self[column_B])
 
     ### Expectation methods ###
