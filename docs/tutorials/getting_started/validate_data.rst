@@ -89,7 +89,12 @@ You can see that the ``action_list`` for your validation Operator contains three
 2. ``store_evaluation_params`` : store :ref:`Evaluation Parameters`.
 3. ``update_data_docs`` : update your :ref:`Data Docs`.
 
-A fourth action, ``send_slack_notification_on_validation_result``, will trigger a notification in slack.
+A fourth action, ``send_slack_notification_on_validation_result``, will trigger a notification in Slack. It's currently commented out. See :ref:`How to trigger Slack notifications as a Validation Action` to configure it.
+
+For more examples of post-validation actions, please see the :ref:`How-to section for Validation <how_to_guides__validation>`.
+
+How to run Checkpoints
+----------------------
 
 Checkpoints can be run like applications from the command line or cron:
 
@@ -97,7 +102,7 @@ Checkpoints can be run like applications from the command line or cron:
 
     great_expectations checkpoint run my_checkpoint
 
-You can also generate Checkpoint scripts that you can edit and run using python, or within data orchestration tools like airflow, prefect, kedro, dagster, flyte, etc.
+You can also generate Checkpoint scripts that you can edit and run using python, or within data orchestration tools like airflow.
 
 .. code-block:: bash
 
