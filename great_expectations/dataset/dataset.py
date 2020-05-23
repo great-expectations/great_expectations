@@ -81,7 +81,7 @@ class MetaDataset(DataAsset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(self, column, result_format=None, *args, **kwargs):
+        def inner_wrapper(self, result_format=None, *args, **kwargs):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -89,10 +89,20 @@ class MetaDataset(DataAsset):
             result_format = parse_result_format(result_format)
 
             element_count = self.get_row_count()
-            nonnull_count = self.get_column_nonnull_count(column)
+
+            if kwargs.get("column"):
+                nonnull_count = self.get_column_nonnull_count(kwargs.get("column"))
+            elif kwargs.get("column_A") and kwargs.get("column_B"):
+                nonnull_count = (self[kwargs.get("column_A")].notnull() & self[kwargs.get("column_B")].notnull()).sum()
+            else:
+                raise ValueError(
+                    "The column_aggregate_expectation wrapper requires either column or "
+                    "both column_A and column_B as input."
+                )
+
             null_count = element_count - nonnull_count
 
-            evaluation_result = func(self, column, *args, **kwargs)
+            evaluation_result = func(self, *args, **kwargs)
 
             if "success" not in evaluation_result:
                 raise ValueError(
@@ -134,7 +144,6 @@ class MetaDataset(DataAsset):
             )
 
         return inner_wrapper
-
 
 # noinspection PyIncorrectDocstring
 class Dataset(MetaDataset):
@@ -4285,11 +4294,12 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
+    @MetaDataset.column_aggregate_expectation
     def expect_column_pair_values_to_be_independent(
         self,
         column_A,
         column_B,
-        p_value=0.05,
+        max_V=0.05,
         method="default",
         ignore_missings=None,
         result_format=None,
@@ -4304,12 +4314,12 @@ class Dataset(MetaDataset):
             column_A (str): The first column name
             column_B (str): The second column name
             method (str): Method to check for independence. One of ...
-        
+
         Keyword Args:
             ignore_missings (bool): \
                 If True, ignore columns where either column has missing. If False, treat missing values as
                 another category (only for methods ...).
-        
+
         Other Parameters:
             result_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
@@ -4331,12 +4341,20 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
-        observed_p_value = stats.chi2_contingency(self.get_crosstab(column_A, column_B))[1]
+        crosstab = self.get_crosstab(column_A, column_B)
+        chi2_result = stats.chi2_contingency(crosstab)
+        # See e.g. https://en.wikipedia.org/wiki/Cram%C3%A9r%27s_V
+        cramers_V = np.sqrt(chi2_result[0] / self.get_row_count() / min(crosstab.shape))
         return_obj = {
-                "success": observed_p_value >= p_value,
+                "success": cramers_V <= max_V,
                 "result": {
-                    "observed_value": observed_p_value,
+                    "observed_value": cramers_V,
+                    "unexpected_list": crosstab,
+                    "details": {
+                        "crosstab": crosstab
+                    }
                 },
+
             }
         return return_obj
 
