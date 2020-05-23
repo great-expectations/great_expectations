@@ -5,7 +5,7 @@ import os
 import platform
 import sys
 import uuid
-from typing import Union
+from typing import Dict
 
 import click
 import great_expectations.exceptions as ge_exceptions
@@ -17,16 +17,11 @@ from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import (
     cli_message,
     cli_message_dict,
-    library_install_load_check,
-    reload_modules_containing_pattern,
+    verify_library_dependent_modules,
 )
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
-from great_expectations.datasource import (
-    PandasDatasource,
-    SparkDFDatasource,
-    SqlAlchemyDatasource,
-)
+from great_expectations.datasource import PandasDatasource, SparkDFDatasource
 from great_expectations.datasource.batch_kwargs_generator import (
     ManualBatchKwargsGenerator,
 )
@@ -37,6 +32,7 @@ from great_expectations.exceptions import (
     BatchKwargsError,
     DatasourceInitializationError,
 )
+from great_expectations.util import load_class
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -49,13 +45,9 @@ class DatasourceTypes(enum.Enum):
     # TODO DBT = "dbt"
 
 
-DATASOURCE_TYPE_BY_DATASOURCE_CLASS = {
-    "PandasDatasource": DatasourceTypes.PANDAS,
-    "SparkDFDatasource": DatasourceTypes.SPARK,
-    "SqlAlchemyDatasource": DatasourceTypes.SQL,
-}
-
 MANUAL_GENERATOR_CLASSES = ManualBatchKwargsGenerator
+
+SqlAlchemyDatasource = None
 
 
 class SupportedDatabases(enum.Enum):
@@ -381,20 +373,13 @@ def _add_pandas_datasource(
 
 
 def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
+    global SqlAlchemyDatasource
+
     msg_success_database = (
         "\n<green>Great Expectations connected to your database!</green>"
     )
 
-    library_status_code: Union[int, None]
-
-    library_status_code = library_install_load_check(
-        python_import_name="sqlalchemy", pip_library_name="sqlalchemy"
-    )
-    if library_status_code == 0:
-        reload_modules_containing_pattern(
-            pattern=r"([^#]*import\s+sqlalchemy.*)|([^#]*from\s+.*sqlalchemy(\..*|_dataset|_datasource)?\s+import.*)"
-        )
-    elif library_status_code is not None:
+    if not _verify_sqlalchemy_dependent_modules():
         return None
 
     db_choices = [str(x) for x in list(range(1, 1 + len(SupportedDatabases)))]
@@ -432,80 +417,39 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
         cli_message(msg_db_config.format(datasource_name))
 
         if selected_database == SupportedDatabases.MYSQL:
-            library_status_code = library_install_load_check(
-                python_import_name="pymysql", pip_library_name="pymysql"
-            )
-            if library_status_code == 0:
-                reload_modules_containing_pattern(pattern=r"[^#]*import\s+pymysql.*]")
-            elif library_status_code is not None:
+            if not _verify_mysql_dependent_modules():
                 return None
 
             credentials = _collect_mysql_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.POSTGRES:
-            library_status_code = library_install_load_check(
-                python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
-                pip_library_name="psycopg2-binary",
-            )
-            if library_status_code == 0:
-                reload_modules_containing_pattern(
-                    pattern=r"[^#]*import\s+sqlalchemy\.dialects\.postgresql\.psycopg2.*"
-                )
-            elif library_status_code is not None:
+            if not _verify_postgresql_dependent_modules():
                 return None
 
             credentials = _collect_postgres_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.REDSHIFT:
-            library_status_code = library_install_load_check(
-                python_import_name="psycopg2", pip_library_name="psycopg2-binary"
-            )
-            if library_status_code == 0:
-                reload_modules_containing_pattern(pattern=r"[^#]*import\s+psycopg2.*")
-            elif library_status_code is not None:
+            if not _verify_redshift_dependent_modules():
                 return None
 
-            library_status_code = library_install_load_check(
-                python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
-                pip_library_name="psycopg2-binary",
-            )
-            if library_status_code == 0:
-                reload_modules_containing_pattern(
-                    pattern=r"[^#]*import\s+sqlalchemy\.dialects\.postgresql\.psycopg2.*"
-                )
-            elif library_status_code is not None:
+            if not _verify_sqlalchemy_dependent_modules(
+                force_reload_if_package_loaded=True
+            ):
                 return None
-
-            library_status_code = library_install_load_check(
-                python_import_name="sqlalchemy_redshift.dialect",
-                pip_library_name="sqlalchemy-redshift",
-            )
-            if library_status_code == 0:
-                reload_modules_containing_pattern(
-                    pattern=r"[^#]*import\s+sqlalchemy_redshift\.dialect.*"
-                )
 
             credentials = _collect_redshift_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.SNOWFLAKE:
-            library_status_code = library_install_load_check(
-                python_import_name="snowflake.sqlalchemy.snowdialect",
-                pip_library_name="snowflake-sqlalchemy",
-            )
-            if library_status_code == 0:
-                reload_modules_containing_pattern(
-                    pattern=r"[^#]*import\s+snowflake\.sqlalchemy\.snowdialect.*"
-                )
-            elif library_status_code is not None:
+            if not _verify_snowflake_dependent_modules():
+                return None
+
+            if not _verify_sqlalchemy_dependent_modules(
+                force_reload_if_package_loaded=True
+            ):
                 return None
 
             credentials = _collect_snowflake_credentials(
                 default_credentials=credentials
             )
         elif selected_database == SupportedDatabases.BIGQUERY:
-            library_status_code = library_install_load_check(
-                python_import_name="pybigquery", pip_library_name="pybigquery"
-            )
-            if library_status_code == 0:
-                reload_modules_containing_pattern(pattern=r"[^#]*import\s+pybigquery.*")
-            elif library_status_code is not None:
+            if not _verify_bigquery_dependent_modules():
                 return None
 
             credentials = _collect_bigquery_credentials(default_credentials=credentials)
@@ -528,6 +472,13 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             cli_message(
                 "<cyan>Attempting to connect to your database. This may take a moment...</cyan>"
             )
+
+            # noinspection PyPep8Naming
+            SqlAlchemyDatasource = load_class(
+                class_name="SqlAlchemyDatasource",
+                module_name="great_expectations.datasource",
+            )
+
             configuration = SqlAlchemyDatasource.build_configuration(
                 credentials="${" + datasource_name + "}"
             )
@@ -777,14 +728,7 @@ def _collect_redshift_credentials(default_credentials=None):
 def _add_spark_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
-    library_status_code: Union[int, None] = library_install_load_check(
-        python_import_name="pyspark", pip_library_name="pyspark"
-    )
-    if library_status_code == 0:
-        reload_modules_containing_pattern(
-            pattern=r"([^#]*import\s+pyspark.*)|([^#]*from\s+.*pyspark(\..*)?\s+import.*)"
-        )
-    elif library_status_code is not None:
+    if not _verify_pyspark_dependent_modules():
         return None
 
     if passthrough_generator_only:
@@ -911,6 +855,8 @@ def get_batch_kwargs(
                 have changed after this method's execution. If the returned batch_kwargs is None, it means
                 that the batch_kwargs_generator will know to yield batch_kwargs when called.
     """
+    global SqlAlchemyDatasource
+
     try:
         available_data_assets_dict = context.get_available_data_asset_names(
             datasource_names=datasource_name
@@ -938,6 +884,11 @@ def get_batch_kwargs(
         )
         return batch_kwargs
 
+    # noinspection PyPep8Naming
+    SqlAlchemyDatasource = load_class(
+        class_name="SqlAlchemyDatasource", module_name="great_expectations.datasource"
+    )
+
     if isinstance(
         context.get_datasource(datasource_name), (PandasDatasource, SparkDFDatasource)
     ):
@@ -954,6 +905,7 @@ def get_batch_kwargs(
         generator_asset, batch_kwargs = _get_batch_kwargs_for_sqlalchemy_datasource(
             context, datasource_name, additional_batch_kwargs=additional_batch_kwargs
         )
+
     else:
         raise ge_exceptions.DataContextError(
             "Datasource {0:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {1:s}".format(
@@ -1258,6 +1210,170 @@ Enter an SQL query
             cli_message("""<red>ERROR: {}</red>""".format(str(error)))
 
     return generator_asset, batch_kwargs
+
+
+def _verify_sqlalchemy_dependent_modules(
+    force_reload_if_package_loaded: bool = False,
+) -> bool:
+    global SqlAlchemyDatasource
+
+    verification_result: Dict[str, bool]
+
+    verification_result = verify_library_dependent_modules(
+        python_import_name="sqlalchemy",
+        pip_library_name="sqlalchemy",
+        pattern=r"([^#]*import\s+sqlalchemy.*)|([^#]*from\s+.*sqlalchemy(\..*|_dataset|_datasource)?\s+import.*)",
+        force_reload_if_package_loaded=force_reload_if_package_loaded,
+    )
+    success: bool = verification_result["success"]
+    reloaded: bool = verification_result["reloaded"]
+
+    if reloaded:
+        # noinspection PyPep8Naming
+        SqlAlchemyDatasource = load_class(
+            class_name="SqlAlchemyDatasource",
+            module_name="great_expectations.datasource",
+        )
+
+    return success
+
+
+def _verify_mysql_dependent_modules(
+    force_reload_if_package_loaded: bool = False,
+) -> bool:
+    verification_result: Dict[str, bool]
+
+    verification_result = verify_library_dependent_modules(
+        python_import_name="pymysql",
+        pip_library_name="pymysql",
+        pattern=r"[^#]*import\s+pymysql.*]",
+        force_reload_if_package_loaded=force_reload_if_package_loaded,
+    )
+    success: bool = verification_result["success"]
+    reloaded: bool = verification_result["reloaded"]
+
+    if reloaded:
+        # Replace with "load_class()" (import) statements, required after the "pymysql" library reloaded.
+        pass
+
+    return success
+
+
+def _verify_postgresql_dependent_modules(
+    force_reload_if_package_loaded: bool = False,
+) -> bool:
+    verification_result: Dict[str, bool]
+
+    verification_result = verify_library_dependent_modules(
+        python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
+        pip_library_name="psycopg2-binary",
+        pattern=r"[^#]*import\s+sqlalchemy\.dialects\.postgresql\.psycopg2.*",
+        force_reload_if_package_loaded=force_reload_if_package_loaded,
+    )
+    success: bool = verification_result["success"]
+    reloaded: bool = verification_result["reloaded"]
+
+    if reloaded:
+        # Replace with "load_class()" (import) statements, required after the "psycopg2-binary" library reloaded.
+        pass
+
+    return success
+
+
+def _verify_redshift_dependent_modules(
+    force_reload_if_package_loaded: bool = False,
+) -> bool:
+    verification_result: Dict[str, bool]
+
+    verification_result = verify_library_dependent_modules(
+        python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
+        pip_library_name="psycopg2-binary",
+        pattern=r"[^#]*import\s+sqlalchemy\.dialects\.postgresql\.psycopg2.*",
+        force_reload_if_package_loaded=force_reload_if_package_loaded,
+    )
+    postgresql_success: bool = verification_result["success"]
+    postgresql_reloaded: bool = verification_result["reloaded"]
+
+    verification_result = verify_library_dependent_modules(
+        python_import_name="psycopg2",
+        pip_library_name="psycopg2-binary",
+        pattern=r"[^#]*import\s+psycopg2.*",
+        force_reload_if_package_loaded=force_reload_if_package_loaded,
+    )
+    psycopg2_success: bool = verification_result["success"]
+    psycopg2_reloaded: bool = verification_result["reloaded"]
+
+    if not (postgresql_success and psycopg2_success):
+        return False
+
+    if postgresql_reloaded or psycopg2_reloaded:
+        # Replace with "load_class()" (import) statements, required after the "psycopg2-binary" library reloaded.
+        pass
+
+    return True
+
+
+def _verify_snowflake_dependent_modules(
+    force_reload_if_package_loaded: bool = False,
+) -> bool:
+    verification_result: Dict[str, bool]
+
+    verification_result = verify_library_dependent_modules(
+        python_import_name="snowflake.sqlalchemy.snowdialect",
+        pip_library_name="snowflake-sqlalchemy",
+        pattern=r"[^#]*import\s+snowflake\.sqlalchemy\.snowdialect.*",
+        force_reload_if_package_loaded=force_reload_if_package_loaded,
+    )
+    success: bool = verification_result["success"]
+    reloaded: bool = verification_result["reloaded"]
+
+    if reloaded:
+        # Replace with "load_class()" (import) statements, required after the "snowflake-sqlalchemy" library reloaded.
+        pass
+
+    return success
+
+
+def _verify_bigquery_dependent_modules(
+    force_reload_if_package_loaded: bool = False,
+) -> bool:
+    verification_result: Dict[str, bool]
+
+    verification_result = verify_library_dependent_modules(
+        python_import_name="pybigquery",
+        pip_library_name="pybigquery",
+        pattern=r"[^#]*import\s+pybigquery.*",
+        force_reload_if_package_loaded=force_reload_if_package_loaded,
+    )
+    success: bool = verification_result["success"]
+    reloaded: bool = verification_result["reloaded"]
+
+    if reloaded:
+        # Replace with "load_class()" (import) statements, required after the "pybigquery" library reloaded.
+        pass
+
+    return success
+
+
+def _verify_pyspark_dependent_modules(
+    force_reload_if_package_loaded: bool = False,
+) -> bool:
+    verification_result: Dict[str, bool]
+
+    verification_result = verify_library_dependent_modules(
+        python_import_name="pyspark",
+        pip_library_name="pyspark",
+        pattern=r"([^#]*import\s+pyspark.*)|([^#]*from\s+.*pyspark(\..*)?\s+import.*)",
+        force_reload_if_package_loaded=force_reload_if_package_loaded,
+    )
+    success: bool = verification_result["success"]
+    reloaded: bool = verification_result["reloaded"]
+
+    if reloaded:
+        # Replace with "load_class()" (import) statements, required after the "pyspark" library reloaded.
+        pass
+
+    return success
 
 
 def profile_datasource(
