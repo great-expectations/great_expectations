@@ -70,8 +70,13 @@ def import_library_module(
 
 
 def load_class(class_name, module_name):
-    verify_dynamic_loading_support(module_name=module_name)
+    try:
+        verify_dynamic_loading_support(module_name=module_name)
+    except FileNotFoundError:
+        raise PluginModuleNotFoundError(module_name)
+
     module_obj: Union[ModuleType, None] = import_library_module(module_name=module_name)
+
     if module_obj is None:
         raise PluginModuleNotFoundError(module_name)
     try:
