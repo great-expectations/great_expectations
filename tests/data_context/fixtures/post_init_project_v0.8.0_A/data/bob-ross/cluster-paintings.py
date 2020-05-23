@@ -10,11 +10,10 @@ import csv
 import math
 
 import numpy as np
-from scipy.cluster.vq import kmeans, vq, whiten
+from scipy.cluster.vq import kmeans, whiten
 
 
 def main():
-
     # load data into vectors of 1s and 0s for each tag
     with open("elements-by-episode.csv", "r") as csvfile:
         reader = csv.reader(csvfile)

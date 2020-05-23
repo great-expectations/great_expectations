@@ -44,9 +44,9 @@ jobs:
     - stage: test
       dist: xenial
       install:
-        - pip install black==19.10b0
+        - pip install -r requirements-dev.txt
       script:
-        # NOTE: we could also consider isort, but its sort order depends on installed libraries or else libraries must be explicitly declared individually in its configuration
+        - isort --check-only --skip docs/
         - black --check --exclude docs/ .
     - stage: test
       dist: trusty

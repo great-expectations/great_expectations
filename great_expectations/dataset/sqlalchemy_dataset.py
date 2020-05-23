@@ -6,11 +6,12 @@ import warnings
 from datetime import datetime
 from functools import wraps
 from importlib import import_module
-from typing import List, Any
+from typing import Any, List
 
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
@@ -416,14 +417,22 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return self.engine.dialect
 
     def attempt_allowing_relative_error(self):
-        detected_redshift = check_sql_engine_dialect(
-            actual_sql_engine_dialect=self.sql_engine_dialect,
-            candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
-        )
-        detected_psycopg2 = check_sql_engine_dialect(
-            actual_sql_engine_dialect=self.sql_engine_dialect,
-            candidate_sql_engine_dialect=sqlalchemy_psycopg2.PGDialect_psycopg2,
-        )
+        try:
+            detected_redshift = check_sql_engine_dialect(
+                actual_sql_engine_dialect=self.sql_engine_dialect,
+                candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
+            )
+        except AttributeError:
+            # sqlalchemy_redshift could be None if it was not available to import
+            detected_redshift = False
+        try:
+            detected_psycopg2 = check_sql_engine_dialect(
+                actual_sql_engine_dialect=self.sql_engine_dialect,
+                candidate_sql_engine_dialect=sqlalchemy_psycopg2.PGDialect_psycopg2,
+            )
+        except AttributeError:
+            # sqlalchemy_psycopg2 could be None if it was not available to import
+            detected_psycopg2 = False
         return detected_redshift or detected_psycopg2
 
     def head(self, n=5):

@@ -5,9 +5,10 @@ import subprocess
 import mock
 import pytest
 from click.testing import CliRunner
+from ruamel.yaml import YAML
+
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from ruamel.yaml import YAML
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
@@ -248,6 +249,7 @@ batches:
 
     assert (
         """datasource: mydatasource
+      data_asset_name: Titanic
     expectation_suite_names: # one or more suites may validate against a single batch
       - Titanic.warning
 """

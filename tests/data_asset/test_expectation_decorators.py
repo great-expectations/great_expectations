@@ -1,4 +1,5 @@
 import pytest
+
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationKwargs,
@@ -305,7 +306,6 @@ def test_column_map_expectation_decorator():
 
 
 def test_column_aggregate_expectation_decorator():
-
     # Create a new CustomPandasDataset to
     # (1) demonstrate that custom subclassing works, and
     # (2) Test expectation business logic without dependencies on any other functions.
@@ -383,7 +383,6 @@ def test_column_aggregate_expectation_decorator():
 
 
 def test_column_pair_map_expectation_decorator():
-
     # Create a new CustomPandasDataset to
     # (1) Demonstrate that custom subclassing works, and
     # (2) Test expectation business logic without dependencies on any other functions.

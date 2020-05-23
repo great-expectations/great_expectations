@@ -51,7 +51,7 @@ Key features
 
     Expectations are the workhorse abstraction in Great Expectations. Like assertions in traditional python unit tests, Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests, Great Expectations applies Expectations to data instead of code.
 
-    Great Expectations currently supports native execution of Expectations in three environments: pandas, SQL (through the SQLAlchemy core), and Spark. This approach follows the philosophy of "take the compute to the data." Future releases of Great Expectations will extend this functionality to other frameworks, such as dask and BigQuery.
+    Great Expectations currently supports native execution of Expectations in three environments: pandas, SQL (including distributed environments like BigQuery and Redshift), and Spark. This approach follows the philosophy of "take the compute to the data." Future releases of Great Expectations will extend this functionality to other frameworks, such as dask.
 
 **Automated data profiling**
 
@@ -59,7 +59,7 @@ Key features
 
 **DataContexts and DataSources**
 
-    ...allow you to configure connections your data stores, using names you’re already familiar with: “the ml_training_results bucket in S3,” “the Users table in Redshift.” Great Expectations provides convenience libraries to introspect most common data stores (Ex: SQL databases, data directories and S3 buckets.) We are also working to integrate with pipeline execution frameworks (Ex: Airflow, dbt, Dagster, Prefect). The Great Expectations framework lets you fetch, validate, profile, and document your data in a way that’s meaningful within your existing infrastructure and work environment.
+    ...allow you to configure connections to your data stores, using names you’re already familiar with: “the ml_training_results bucket in S3,” “the Users table in Redshift.” Great Expectations provides convenience libraries to introspect most common data stores (Ex: SQL databases, data directories and S3 buckets.) We are also working to integrate with pipeline execution frameworks (Ex: Airflow, dbt, Dagster, Prefect). The Great Expectations framework lets you fetch, validate, profile, and document your data in a way that’s meaningful within your existing infrastructure and work environment.
 
 **Tooling for validation**
 
@@ -67,9 +67,9 @@ Key features
 
     Great Expectations also provides robust concepts of Batches and Runs. Although we sometimes talk informally about validating "dataframes" or "tables," it’s much more common to validate batches of new data—subsets of tables, rather than whole tables. DataContexts provide simple, universal syntax to generate, fetch, and validate Batches of data from any of your DataSources.
 
-**Compile to Docs**
+**Data Docs**
 
-    As of v0.7.0, Great Expectations includes new classes and methods to `render` Expectations to clean, human-readable documentation. Since docs are compiled from tests and you are running tests against new data as it arrives, your documentation is guaranteed to never go stale.
+    Great Expectations can render Expectations to clean, human-readable documentation. Since docs are compiled from tests and you are running tests against new data as it arrives, your documentation is guaranteed to never go stale.
 
 
 *******************
@@ -109,14 +109,12 @@ What does Great Expectations NOT do?
 
    Great Expectations is Python-based. You can invoke it from the command line without using a Python programming environment, but if you're working in another ecosystem, other tools might be a better choice. If you're running in a pure R environment, you might consider `assertR <https://github.com/ropensci/assertr>`__ as an alternative. Within the TensorFlow ecosystem, `TFDV <https://www.tensorflow.org/tfx/guide/tfdv>`__ fulfills a similar function as Great Expectations.
 
-*********************************
-Who maintains Great Expectations?
-*********************************
 
-Great Expectations is under active development by James Campbell, Abe Gong, Eugene Mandel and Rob Lim, with help from many others.
+*********************
+How do I get started?
+*********************
 
-If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public Slack channel: https://greatexpectations.io/slack
 
-If you'd like to contribute to Great Expectations, please head to the :ref:`community` section.
+Check out :ref:`Getting started` to set up your first deployment of Great Expectations, and learn important concepts along the way.
 
-If you'd like hands-on assistance setting up Great Expectations, establishing a healthy practice of data testing, or adding functionality to Great Expectations, please see options for consulting help `here <https://greatexpectations.io/consulting/>`__.
+For other questions and resources, please visit :ref:`Community resources`.

@@ -5,6 +5,7 @@ from functools import partial
 from io import StringIO
 
 import pandas as pd
+
 from great_expectations.core.batch import Batch
 from great_expectations.datasource.types import BatchMarkers
 from great_expectations.exceptions import BatchKwargsError

@@ -10,12 +10,16 @@ from collections import Counter, defaultdict, namedtuple
 from collections.abc import Hashable
 from functools import wraps
 
+from dateutil.parser import ParserError, parse
+from marshmallow import ValidationError
+
 from great_expectations import __version__ as ge_version
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
+    RunIdentifier,
     expectationSuiteSchema,
 )
 from great_expectations.core.id_dict import BatchKwargs
@@ -27,7 +31,6 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
-from marshmallow import ValidationError
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -760,6 +763,8 @@ class DataAsset(object):
         catch_exceptions=True,
         result_format=None,
         only_return_failures=False,
+        run_name=None,
+        run_time=None,
     ):
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
@@ -769,9 +774,9 @@ class DataAsset(object):
             expectation_suite (json or None): \
                 If None, uses the expectations config generated with the DataAsset during the current session. \
                 If a JSON file, validates those expectations.
-            run_id (str): \
-                A string used to identify this validation result as part of a collection of validations. See \
-                DataContext for more information.
+            run_name (str): \
+                Used to identify this validation result as part of a collection of validations. \
+                See DataContext for more information.
             data_context (DataContext): \
                 A datacontext object to use as part of validation for binding evaluation parameters and \
                 registering validation results.
@@ -827,6 +832,29 @@ class DataAsset(object):
            AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
         try:
+            validation_time = datetime.datetime.now(datetime.timezone.utc)
+
+            assert not (run_id and run_name) and not (
+                run_id and run_time
+            ), "Please provide either a run_id or run_name and/or run_time."
+            if isinstance(run_id, str) and not run_name:
+                warnings.warn(
+                    "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                    "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
+                    "and run_time (both optional). Instead of providing a run_id, you may also provide"
+                    "run_name and run_time separately.",
+                    DeprecationWarning,
+                )
+                try:
+                    run_time = parse(run_id)
+                except ParserError:
+                    pass
+                run_id = RunIdentifier(run_name=run_id, run_time=run_time)
+            elif isinstance(run_id, dict):
+                run_id = RunIdentifier(**run_id)
+            elif not isinstance(run_id, RunIdentifier):
+                run_id = RunIdentifier(run_name=run_name, run_time=run_time)
+
             self._active_validation = True
 
             # If a different validation data context was provided, override
@@ -1006,9 +1034,6 @@ class DataAsset(object):
 
             expectation_suite_name = expectation_suite.expectation_suite_name
 
-            if run_id is None:
-                run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
             result = ExpectationSuiteValidationResult(
                 results=results,
                 success=statistics.success,
@@ -1026,6 +1051,7 @@ class DataAsset(object):
                     "batch_kwargs": self.batch_kwargs,
                     "batch_markers": self.batch_markers,
                     "batch_parameters": self.batch_parameters,
+                    "validation_time": validation_time,
                 },
             )
 

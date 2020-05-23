@@ -6,13 +6,14 @@ import sys
 from datetime import datetime
 
 import tzlocal
+from IPython.core.display import HTML, display
+
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ProfilingResultsColumnSectionRenderer,
     ValidationResultsColumnSectionRenderer,
 )
 from great_expectations.render.view import DefaultJinjaSectionView
-from IPython.core.display import HTML, display
 
 
 def set_data_source(context, data_source_type=None):

@@ -2,10 +2,11 @@
 import os
 
 from click.testing import CliRunner
+from ruamel.yaml import YAML
+
 from great_expectations import __version__ as ge_version
 from great_expectations.cli import cli
 from great_expectations.exceptions import ConfigNotFoundError
-from ruamel.yaml import YAML
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 yaml = YAML()
@@ -50,7 +51,6 @@ Commands:
   project              Project operations
   store                Store operations
   suite                Expectation Suite operations
-  tap                  Tap operations
   validation-operator  Validation Operator operations
 """
     )

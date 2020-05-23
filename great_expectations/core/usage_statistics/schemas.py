@@ -43,7 +43,8 @@ anonymized_class_info_schema = {
                 "parent_class": {"type": "string", "maxLength": 256},
                 "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
             },
-            "additionalProperties": True,  # we don't want this to be true, but this is required to allow show_cta_footer
+            "additionalProperties": True,
+            # we don't want this to be true, but this is required to allow show_cta_footer
             "required": ["parent_class",],
         }
     ],

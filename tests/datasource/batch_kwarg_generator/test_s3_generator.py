@@ -3,11 +3,12 @@ import logging
 import boto3
 import pandas as pd
 import pytest
+from moto import mock_s3
+
 from great_expectations.datasource.batch_kwargs_generator.s3_batch_kwargs_generator import (
     S3GlobReaderBatchKwargsGenerator,
 )
 from great_expectations.exceptions import BatchKwargsError
-from moto import mock_s3
 
 
 @pytest.fixture(scope="module")
@@ -91,7 +92,9 @@ def test_s3_generator_basic_operation(s3_generator):
     # We should observe that glob, prefix, delimiter all work together
     # They can be defined in the generator or overridden by a particular asset
     # Under the hood, we use the S3 ContinuationToken options to lazily fetch data
-    batch_kwargs = [kwargs for kwargs in s3_generator.get_iterator("data")]
+    batch_kwargs = [
+        kwargs for kwargs in s3_generator.get_iterator(data_asset_name="data")
+    ]
     assert len(batch_kwargs) == 2
     assert batch_kwargs[0]["reader_options"]["sep"] == ","
     assert batch_kwargs[0]["s3"] in [
@@ -101,7 +104,9 @@ def test_s3_generator_basic_operation(s3_generator):
 
     # When a prefix and delimiter do not yield objects, there are no objects returned; raise an error
     with pytest.raises(BatchKwargsError) as err:
-        batch_kwargs = [kwargs for kwargs in s3_generator.get_iterator("other")]
+        batch_kwargs = [
+            kwargs for kwargs in s3_generator.get_iterator(data_asset_name="other")
+        ]
         # The error should show the common prefixes
     assert "common_prefixes" in err.value.batch_kwargs
 
@@ -115,7 +120,9 @@ def test_s3_generator_incremental_fetch(s3_generator, caplog):
     # When max_keys is not set, it defaults to 1000, so all items are returned in the first iterator batch,
     # causing only one fetch (and one log entry referencing the startup of the method)
     caplog.clear()
-    batch_kwargs = [kwargs for kwargs in s3_generator.get_iterator("data")]
+    batch_kwargs = [
+        kwargs for kwargs in s3_generator.get_iterator(data_asset_name="data")
+    ]
     assert len(caplog.records) == 2
     assert len(batch_kwargs) == 2
 
@@ -125,7 +132,8 @@ def test_s3_generator_incremental_fetch(s3_generator, caplog):
     # refetch operations
     caplog.clear()
     batch_kwargs = [
-        kwargs for kwargs in s3_generator.get_iterator("other_empty_delimiter")
+        kwargs
+        for kwargs in s3_generator.get_iterator(data_asset_name="other_empty_delimiter")
     ]
     assert len(caplog.records) == 4
     assert len(batch_kwargs) == 3
@@ -133,7 +141,9 @@ def test_s3_generator_incremental_fetch(s3_generator, caplog):
 
 def test_s3_generator_get_directories(s3_generator):
     # Verify that an asset configured to return directories can do so
-    batch_kwargs_list = [kwargs for kwargs in s3_generator.get_iterator("data_dirs")]
+    batch_kwargs_list = [
+        kwargs for kwargs in s3_generator.get_iterator(data_asset_name="data_dirs")
+    ]
     assert 3 == len(batch_kwargs_list)
     paths = set([batch_kwargs["s3"] for batch_kwargs in batch_kwargs_list])
     assert {
@@ -145,13 +155,14 @@ def test_s3_generator_get_directories(s3_generator):
 
 def test_s3_generator_limit(s3_generator):
     batch_kwargs_list = [
-        kwargs for kwargs in s3_generator.get_iterator("data", limit=10)
+        kwargs for kwargs in s3_generator.get_iterator(data_asset_name="data", limit=10)
     ]
     assert all(["limit" in batch_kwargs for batch_kwargs in batch_kwargs_list])
 
 
 def test_s3_generator_reader_method_configuration(s3_generator):
     batch_kwargs_list = [
-        kwargs for kwargs in s3_generator.get_iterator("delta_files", limit=10)
+        kwargs
+        for kwargs in s3_generator.get_iterator(data_asset_name="delta_files", limit=10)
     ]
     assert batch_kwargs_list[0]["reader_method"] == "delta"

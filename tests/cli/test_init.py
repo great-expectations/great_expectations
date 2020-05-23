@@ -4,6 +4,7 @@ from unittest import mock
 
 import pytest
 from click.testing import CliRunner
+
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
@@ -26,17 +27,21 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     root_dir = tmp_path_factory.mktemp("hiya")
     root_dir = str(root_dir)
     os.makedirs(os.path.join(root_dir, "data"))
+    data_folder_path = os.path.join(root_dir, "data")
     data_path = os.path.join(root_dir, "data", "Titanic.csv")
     fixture_path = file_relative_path(
         __file__, os.path.join("..", "test_sets", "Titanic.csv")
     )
     shutil.copy(fixture_path, data_path)
 
+    # Create a new project from scratch that we will use for the test in the next step
+
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "-d", root_dir],
-        input="Y\n1\n1\n{}\n\n\n\n".format(data_path, catch_exceptions=False),
+        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
+        catch_exceptions=False,
     )
     stdout = result.output
     assert result.exit_code == 0
@@ -96,17 +101,22 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     root_dir = tmp_path_factory.mktemp("hiya")
     root_dir = str(root_dir)
     os.makedirs(os.path.join(root_dir, "data"))
+    data_folder_path = os.path.join(root_dir, "data")
     data_path = os.path.join(root_dir, "data", "Titanic.csv")
     fixture_path = file_relative_path(
         __file__, os.path.join("..", "test_sets", "Titanic.csv")
     )
     shutil.copy(fixture_path, data_path)
 
+    # Create a new project from scratch that we will use for the test in the next step
+
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "-d", root_dir],
-        input="Y\n1\n1\n{}\n\n\n\n".format(data_path, catch_exceptions=False),
+        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(
+            data_folder_path, data_path, catch_exceptions=False
+        ),
     )
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
@@ -116,6 +126,8 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
         )
         in mock_webbrowser.call_args[0][0]
     )
+
+    # Now the test begins - rerun the init on an existing project
 
     runner = CliRunner(mix_stderr=False)
     with pytest.warns(
@@ -147,7 +159,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
     result = runner.invoke(
         cli,
         ["init"],
-        input="Y\n2\n6\nmy_db\nsqlite:////not_a_real.db\nn\n",
+        input="\n\n2\n6\nmy_db\nsqlite:////not_a_real.db\n\nn\n",
         catch_exceptions=False,
     )
     stdout = result.output
@@ -157,7 +169,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "Which database backend are you using" in stdout
     assert "What is the url/connection string for the sqlalchemy connection" in stdout
-    assert "Give your new data source a short name" in stdout
+    assert "Give your new Datasource a short name" in stdout
     assert "Attempting to connect to your database. This may take a moment" in stdout
     assert "Cannot connect to the database" in stdout
 
