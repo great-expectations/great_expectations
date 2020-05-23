@@ -4,7 +4,10 @@
 Changelog
 #########
 
-0.11-develop
+develop
+-----------------
+
+0.11.0
 -----------------
 * [BREAKING] ``run_id`` is now typed using the new ``RunIdentifier`` class, which consists of a ``run_time`` and
   ``run_name``. Existing projects that have Expectation Suite Validation Results must be migrated.
@@ -24,9 +27,6 @@ Changelog
 * Removed deprecated cli tap command
 * Added of 0.11 upgrade helper
 * Corrected Scaffold maturity language in notebook to Experimental
-
-develop
------------------
 * Updated the installation/configuration documentation for Snowflake users
 * [ENHANCEMENT] Improved error messages for misconfigured checkpoints.
 * [BUGFIX] Fixed bug that could cause some substituted variables in DataContext config to be saved to `great_expectations.yml`
