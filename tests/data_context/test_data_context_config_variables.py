@@ -137,6 +137,7 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
         config_dict = yaml.load(data)
     expected_config = DataContextConfig.from_commented_map(config_dict)
     expected_config_dict = dataContextConfigSchema.dump(expected_config)
+    expected_config_dict.pop("anonymous_usage_statistics")
 
     # instantiate data_context twice to go through cycle of loading config from file then saving
     context = ge.data_context.DataContext(context_path)
@@ -144,6 +145,7 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     context_config_dict = dataContextConfigSchema.dump(
         ge.data_context.DataContext(context_path)._project_config
     )
+    context_config_dict.pop("anonymous_usage_statistics")
 
     assert context_config_dict == expected_config_dict
 
