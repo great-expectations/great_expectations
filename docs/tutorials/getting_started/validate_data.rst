@@ -1,7 +1,7 @@
 .. _getting_started__validate_data:
 
-Validate some data
-=========================================================
+Set up your first Checkpoint
+============================
 
 As we said earlier, validation the core operation of Great Expectations: “Validate X data against Y Expectations.”
 
