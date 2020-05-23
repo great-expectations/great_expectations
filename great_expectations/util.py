@@ -38,29 +38,29 @@ templates, and assets is supported in your execution environment.  This error is
         raise FileNotFoundError(message)
 
 
-def import_library_module(module_name: str) -> Union[ModuleType, None]:
-    module_obj: Union[ModuleType, None]
-    try:
-        module_obj = importlib.import_module(module_name)
-    except ModuleNotFoundError:
-        module_obj = None
-
-    return module_obj
-
-
-def get_module_object(module_name: str, pattern: str = None) -> Union[ModuleType, None]:
+def import_library_module(
+    module_name: str, pattern: str = None
+) -> Union[ModuleType, None]:
     """
     :param module_name: a fully-qualified name of a module (e.g., "great_expectations.dataset.sqlalchemy_dataset")
     :param pattern: an optional non-compiled regular expression string to be required to match in the source code
     :return: raw source code of the module (if can be retrieved)
     """
-    module_obj: Union[ModuleType, None] = import_library_module(module_name=module_name)
+    module_obj: Union[ModuleType, None]
+
+    try:
+        module_obj = importlib.import_module(module_name)
+    except ModuleNotFoundError:
+        module_obj = None
+
     if module_obj is None:
         return None
+
+    if pattern is None:
+        return module_obj
+
     try:
         module_source_code: str = inspect.getsource(module_obj)
-        if pattern is None:
-            return module_obj
         regex_pattern: re.Pattern = re.compile(pattern)
         if regex_pattern.match(module_source_code):
             return module_obj
