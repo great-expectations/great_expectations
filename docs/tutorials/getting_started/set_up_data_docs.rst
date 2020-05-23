@@ -10,18 +10,19 @@ Go ahead and tell the CLI you want to build Data Docs:
 .. code-block:: bash
 
     Would you like to build Data Docs? [Y/n]: 
-
+    
     The following Data Docs sites will be built:
-
-     - local_site: file:///Users/eugenemandel/projects/fellows/great_expectations/uncommitted/data_docs/local_site/index.html
-
-    OK to proceed? [Y/n]: 
-
+    
+     - local_site: file:///home/ubuntu/example_project/great_expectations/uncommitted/data_docs/local_site/index.html
+    
+    Would you like to proceed? [Y/n]: 
+    
     Building Data Docs...
-
+    
     Done building Data Docs
-
+    
     Would you like to view your new Expectations in Data Docs? This will open a new browser window. [Y/n]: 
+
 
 
 When you open the window, you'll see a static website that looks like this:

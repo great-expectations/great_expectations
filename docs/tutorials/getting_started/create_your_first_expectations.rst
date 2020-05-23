@@ -34,7 +34,7 @@ The CLI will help you create your first Expectations. You can accept the default
     
     Great Expectations will store these expectations in a new Expectation Suite 'npidata_pfile_20200511-20200517.warning' here:
     
-      file:///users/ubuntu/example_project/great_expectations/expectations/npidata_pfile_20200511-20200517/warning.json
+      file:///home/ubuntu/example_project/great_expectations/expectations/npidata_pfile_20200511-20200517/warning.json
     
     Would you like to proceed? [Y/n]: 
     
