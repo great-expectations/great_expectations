@@ -5,8 +5,7 @@ import uuid
 import warnings
 from datetime import datetime
 from functools import wraps
-from importlib import import_module
-from typing import Any, List
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -17,6 +16,7 @@ from great_expectations.dataset.util import (
     check_sql_engine_dialect,
     get_approximate_percentile_disc_sql,
 )
+from great_expectations.util import import_library_module
 
 from .dataset import Dataset
 from .pandas_dataset import PandasDataset
@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
+    from sqlalchemy.dialects import registry
     from sqlalchemy.engine import reflection
     from sqlalchemy.sql.expression import BinaryExpression, literal
     from sqlalchemy.sql.operators import custom_op
@@ -35,12 +36,13 @@ except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
-    DefaultDialect = Any
-    WithinGroup = Any
+    DefaultDialect = None
+    WithinGroup = None
 
 try:
     import psycopg2
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
+# except (ImportError, KeyError):
 except ImportError:
     sqlalchemy_psycopg2 = None
 
@@ -50,7 +52,13 @@ except ImportError:
     sqlalchemy_redshift = None
 
 try:
+    # from snowflake.sqlalchemy import URL
     import snowflake.sqlalchemy.snowdialect
+
+    # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
+    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+    registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
+# except (ImportError, KeyError):
 except ImportError:
     snowflake = None
 
@@ -343,19 +351,25 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             "oracle",
         ]:
             # These are the officially included and supported dialects by sqlalchemy
-            self.dialect = import_module(
-                "sqlalchemy.dialects." + self.engine.dialect.name
+            self.dialect = import_library_module(
+                module_name="sqlalchemy.dialects." + self.engine.dialect.name
             )
 
             if engine and engine.dialect.name.lower() in ["sqlite", "mssql"]:
                 # sqlite/mssql temp tables only persist within a connection so override the engine
                 self.engine = engine.connect()
         elif self.engine.dialect.name.lower() == "snowflake":
-            self.dialect = import_module("snowflake.sqlalchemy.snowdialect")
+            self.dialect = import_library_module(
+                module_name="snowflake.sqlalchemy.snowdialect"
+            )
         elif self.engine.dialect.name.lower() == "redshift":
-            self.dialect = import_module("sqlalchemy_redshift.dialect")
+            self.dialect = import_library_module(
+                module_name="sqlalchemy_redshift.dialect"
+            )
         elif self.engine.dialect.name.lower() == "bigquery":
-            self.dialect = import_module("pybigquery.sqlalchemy_bigquery")
+            self.dialect = import_library_module(
+                module_name="pybigquery.sqlalchemy_bigquery"
+            )
         else:
             self.dialect = None
 
@@ -419,13 +433,20 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return self.engine.dialect
 
     def attempt_allowing_relative_error(self):
-        detected_redshift = check_sql_engine_dialect(
-            actual_sql_engine_dialect=self.sql_engine_dialect,
-            candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
+        detected_redshift = (
+            sqlalchemy_redshift is not None
+            and check_sql_engine_dialect(
+                actual_sql_engine_dialect=self.sql_engine_dialect,
+                candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
+            )
         )
-        detected_psycopg2 = check_sql_engine_dialect(
-            actual_sql_engine_dialect=self.sql_engine_dialect,
-            candidate_sql_engine_dialect=sqlalchemy_psycopg2.PGDialect_psycopg2,
+        # noinspection PyTypeChecker
+        detected_psycopg2 = (
+            sqlalchemy_psycopg2 is not None
+            and check_sql_engine_dialect(
+                actual_sql_engine_dialect=self.sql_engine_dialect,
+                candidate_sql_engine_dialect=sqlalchemy_psycopg2.PGDialect_psycopg2,
+            )
         )
         return detected_redshift or detected_psycopg2
 

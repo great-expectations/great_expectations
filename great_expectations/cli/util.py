@@ -2,12 +2,14 @@ import importlib
 import re
 import sys
 from types import ModuleType
-from typing import Union
+from typing import Dict, Union
+
+import pkg_resources
 
 from great_expectations.cli.python_subprocess import (
     execute_shell_command_with_progress_polling,
 )
-from great_expectations.util import get_module_object, import_library_module
+from great_expectations.util import import_library_module
 
 try:
     from termcolor import colored
@@ -143,26 +145,67 @@ def library_install_load_check(
     status_code: int = execute_shell_command_with_progress_polling(
         f"pip install {pip_library_name}"
     )
+
+    pkg_resources.working_set = pkg_resources.WorkingSet._build_master()
+
     library_loadable: bool = is_library_loadable(library_name=python_import_name)
 
     if status_code == 0 and library_loadable:
         return 0
 
-    cli_message(
-        f"""<red>ERROR: Great Expectations relies on the library `{pip_library_name}` to connect to your data.</red>
-- Please `pip install {pip_library_name}` before trying again."""
-    )
-    if status_code == 0 or status_code is None:
+    if not library_loadable:
+        cli_message(
+            f"""<red>ERROR: Great Expectations relies on the library `{pip_library_name}` to connect to your data.</red>
+        - Please `pip install {pip_library_name}` before trying again."""
+        )
         return 1
 
     return status_code
 
 
 def reload_modules_containing_pattern(pattern: str = None) -> None:
+    module_name: str
     for module_name in get_ge_module_names():
-        module_obj = get_module_object(module_name=module_name, pattern=pattern)
-        if module_obj is not None:
-            _ = importlib.reload(module_obj)
+        if module_name in sys.modules.keys():
+            module_obj: Union[ModuleType, None] = import_library_module(
+                module_name=module_name, pattern=pattern
+            )
+            if module_obj is not None:
+                try:
+                    _ = importlib.reload(module_obj)
+                except RuntimeError:
+                    pass
+
+
+def verify_library_dependent_modules(
+    python_import_name: str,
+    pip_library_name: str,
+    pattern: str = None,
+    force_reload_if_package_loaded: bool = False,
+) -> Dict[str, bool]:
+    library_status_code: Union[int, None]
+
+    library_status_code = library_install_load_check(
+        python_import_name=python_import_name, pip_library_name=pip_library_name
+    )
+
+    do_reload: bool
+    success: bool
+
+    if library_status_code == 0:
+        do_reload = True
+        success = True
+    elif library_status_code is None:
+        do_reload = force_reload_if_package_loaded
+        success = True
+    else:
+        do_reload = False
+        success = False
+
+    if do_reload:
+        reload_modules_containing_pattern(pattern=pattern)
+
+    return {"success": success, "reloaded": do_reload}
 
 
 def get_ge_module_names() -> list:

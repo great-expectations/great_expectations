@@ -3,7 +3,7 @@ import sys
 import time
 import traceback
 from subprocess import PIPE, CalledProcessError, CompletedProcess, Popen, run
-from typing import Any, Union
+from typing import Union
 
 import click
 from great_expectations.core import logger
@@ -73,13 +73,15 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
 
     status_code: int
 
-    length_100_percent = 100
-    fraction_1_percent = 1.0 / length_100_percent
+    bar_length_100_percent: int = 100
 
-    poll_period_seconds = 1
+    max_work_amount: int = bar_length_100_percent
 
-    gathered = 0
-    with click.progressbar(length=length_100_percent, label=command) as bar:
+    poll_period_seconds: int = 1
+
+    gathered: int = 0
+    progress: float
+    with click.progressbar(length=bar_length_100_percent, label=command) as bar:
         try:
             # noinspection PyArgumentList
             with Popen(
@@ -104,23 +106,33 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
                 errors=None,
                 text=None,
             ) as proc:
-                poll_status_code: Union[int, Any] = proc.poll()
+                poll_status_code: Union[int, None] = proc.poll()
                 poll_stdout: str = proc.stdout.readline()
                 while poll_status_code is None:
-                    gathered += len(poll_stdout)
-                    progress = fraction_1_percent * gathered
-                    bar.pos = int(progress * (length_100_percent - 1)) + 1
+                    gathered += max([len(poll_stdout), poll_period_seconds])
+                    progress = float(gathered) / max_work_amount
+                    excess: float = progress - 1.0
+                    if excess > 0:
+                        if 0.0 < excess <= 1.0:
+                            max_work_amount += 2.0 * excess * max_work_amount
+                        elif 1.0 < excess <= 2.0:
+                            max_work_amount += 5.0 * excess * max_work_amount
+                        elif 2.0 < excess <= 1.0e1:
+                            max_work_amount += 1.0e1 * excess * max_work_amount
+                        else:
+                            max_work_amount += 1.0e2 * excess * max_work_amount
+                        progress = float(gathered) / max_work_amount
+                    bar.pos = int(progress * (bar_length_100_percent - 1)) + 1
                     bar.update(0)
                     time.sleep(poll_period_seconds)
                     poll_status_code = proc.poll()
                     poll_stdout = proc.stdout.readline()
-                gathered += len(poll_stdout)
-                progress = fraction_1_percent * gathered
-                bar.pos = int(progress * (length_100_percent - 1)) + 1
-                bar.update(0)
                 status_code = proc.returncode
                 if status_code != poll_status_code:
                     status_code = 1
+                else:
+                    bar.pos = bar_length_100_percent
+                    bar.update(0)
         except CalledProcessError as cpe:
             status_code = cpe.returncode
             sys.stderr.write(cpe.output)
