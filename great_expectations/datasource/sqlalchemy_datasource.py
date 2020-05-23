@@ -124,7 +124,6 @@ class SqlAlchemyDatasource(Datasource):
                 self.drivername = drivername
                 self.engine = create_engine(options)
                 self.engine.connect()
-
         except (
             sqlalchemy.exc.OperationalError,
             sqlalchemy.exc.DatabaseError,
