@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
 import os
 
 import mock
+
 from great_expectations.cli import toolkit
 
 

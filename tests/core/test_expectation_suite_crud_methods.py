@@ -1,6 +1,5 @@
-import json
-
 import pytest
+
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 
 from .test_expectation_suite import baseline_suite, exp1, exp2, exp3, exp4
@@ -48,7 +47,6 @@ def test_append_expectation(empty_suite, exp1, exp2):
 
 
 def test_find_expectation_indexes(baseline_suite, exp5):
-
     # Passing no parameters "finds" all Expectations
     assert baseline_suite.find_expectation_indexes() == [0, 1]
 
@@ -125,7 +123,6 @@ def test_find_expectation_indexes(baseline_suite, exp5):
 
 
 def test_find_expectation_indexes_on_empty_suite(empty_suite):
-
     assert (
         empty_suite.find_expectation_indexes(
             expectation_type="expect_column_values_to_not_be_null"

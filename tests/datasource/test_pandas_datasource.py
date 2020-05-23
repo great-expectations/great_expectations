@@ -5,6 +5,8 @@ import shutil
 
 import pandas as pd
 import pytest
+from ruamel.yaml import YAML
+
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.util import nested_update
@@ -17,7 +19,6 @@ from great_expectations.datasource.types.batch_kwargs import (
 )
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.validator.validator import Validator
-from ruamel.yaml import YAML
 
 yaml = YAML()
 
@@ -69,11 +70,13 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
     assert isinstance(batch.batch_markers, BatchMarkers)
 
 
-def test_create_pandas_datasource(data_context, tmp_path_factory):
+def test_create_pandas_datasource(
+    data_context_parameterized_expectation_suite, tmp_path_factory
+):
     basedir = tmp_path_factory.mktemp("test_create_pandas_datasource")
     name = "test_pandas_datasource"
     class_name = "PandasDatasource"
-    data_context.add_datasource(
+    data_context_parameterized_expectation_suite.add_datasource(
         name,
         class_name=class_name,
         batch_kwargs_generators={
@@ -84,7 +87,7 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
         },
     )
 
-    data_context_config = data_context.get_config()
+    data_context_config = data_context_parameterized_expectation_suite.get_config()
 
     assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["class_name"] == class_name
@@ -93,7 +96,11 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
     # We should now see updated configs
     # Finally, we should be able to confirm that the folder structure is as expected
     with open(
-        os.path.join(data_context.root_directory, "great_expectations.yml"), "r"
+        os.path.join(
+            data_context_parameterized_expectation_suite.root_directory,
+            "great_expectations.yml",
+        ),
+        "r",
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
@@ -111,7 +118,9 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
     )
 
 
-def test_pandas_datasource_custom_data_asset(data_context, test_folder_connection_path):
+def test_pandas_datasource_custom_data_asset(
+    data_context_parameterized_expectation_suite, test_folder_connection_path
+):
     name = "test_pandas_datasource"
     class_name = "PandasDatasource"
 
@@ -119,7 +128,7 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
         "module_name": "custom_pandas_dataset",
         "class_name": "CustomPandasDataset",
     }
-    data_context.add_datasource(
+    data_context_parameterized_expectation_suite.add_datasource(
         name,
         class_name=class_name,
         data_asset_type=data_asset_type_config,
@@ -133,7 +142,11 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
 
     # We should now see updated configs
     with open(
-        os.path.join(data_context.root_directory, "great_expectations.yml"), "r"
+        os.path.join(
+            data_context_parameterized_expectation_suite.root_directory,
+            "great_expectations.yml",
+        ),
+        "r",
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
@@ -147,10 +160,12 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
     )
 
     # We should be able to get a dataset of the correct type from the datasource.
-    data_context.create_expectation_suite(expectation_suite_name="test")
-    batch = data_context.get_batch(
+    data_context_parameterized_expectation_suite.create_expectation_suite(
+        expectation_suite_name="test"
+    )
+    batch = data_context_parameterized_expectation_suite.get_batch(
         expectation_suite_name="test",
-        batch_kwargs=data_context.build_batch_kwargs(
+        batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
             datasource=name, batch_kwargs_generator="subdir_reader", name="test"
         ),
     )
@@ -159,11 +174,12 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
     assert res.success is True
 
 
-def test_pandas_source_read_csv(data_context, tmp_path_factory):
-
+def test_pandas_source_read_csv(
+    data_context_parameterized_expectation_suite, tmp_path_factory
+):
     basedir = tmp_path_factory.mktemp("test_create_pandas_datasource")
     shutil.copy(file_relative_path(__file__, "../test_sets/unicode.csv"), basedir)
-    data_context.add_datasource(
+    data_context_parameterized_expectation_suite.add_datasource(
         "mysource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
@@ -176,15 +192,19 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
         },
     )
 
-    data_context.create_expectation_suite(expectation_suite_name="unicode")
-    batch = data_context.get_batch(
-        data_context.build_batch_kwargs("mysource", "subdir_reader", "unicode"),
+    data_context_parameterized_expectation_suite.create_expectation_suite(
+        expectation_suite_name="unicode"
+    )
+    batch = data_context_parameterized_expectation_suite.get_batch(
+        data_context_parameterized_expectation_suite.build_batch_kwargs(
+            "mysource", "subdir_reader", "unicode"
+        ),
         "unicode",
     )
     assert len(batch["Μ"] == 1)
     assert "😁" in list(batch["Μ"])
 
-    data_context.add_datasource(
+    data_context_parameterized_expectation_suite.add_datasource(
         "mysource2",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
@@ -196,13 +216,15 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
         },
     )
 
-    batch = data_context.get_batch(
-        data_context.build_batch_kwargs("mysource2", "subdir_reader", "unicode"),
+    batch = data_context_parameterized_expectation_suite.get_batch(
+        data_context_parameterized_expectation_suite.build_batch_kwargs(
+            "mysource2", "subdir_reader", "unicode"
+        ),
         "unicode",
     )
     assert "😁" in list(batch["Μ"])
 
-    data_context.add_datasource(
+    data_context_parameterized_expectation_suite.add_datasource(
         "mysource3",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
@@ -216,24 +238,26 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
     )
 
     with pytest.raises(UnicodeError, match="UTF-16 stream does not start with BOM"):
-        batch = data_context.get_batch(
-            data_context.build_batch_kwargs("mysource3", "subdir_reader", "unicode"),
+        batch = data_context_parameterized_expectation_suite.get_batch(
+            data_context_parameterized_expectation_suite.build_batch_kwargs(
+                "mysource3", "subdir_reader", "unicode"
+            ),
             "unicode",
         )
 
     with pytest.raises(LookupError, match="unknown encoding: blarg"):
-        batch_kwargs = data_context.build_batch_kwargs(
+        batch_kwargs = data_context_parameterized_expectation_suite.build_batch_kwargs(
             "mysource3", "subdir_reader", "unicode"
         )
         batch_kwargs.update({"reader_options": {"encoding": "blarg"}})
-        batch = data_context.get_batch(
+        batch = data_context_parameterized_expectation_suite.get_batch(
             batch_kwargs=batch_kwargs, expectation_suite_name="unicode"
         )
 
     with pytest.raises(LookupError, match="unknown encoding: blarg"):
-        batch = data_context.get_batch(
+        batch = data_context_parameterized_expectation_suite.get_batch(
             expectation_suite_name="unicode",
-            batch_kwargs=data_context.build_batch_kwargs(
+            batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
                 "mysource",
                 "subdir_reader",
                 "unicode",
@@ -241,8 +265,8 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
             ),
         )
 
-    batch = data_context.get_batch(
-        batch_kwargs=data_context.build_batch_kwargs(
+    batch = data_context_parameterized_expectation_suite.get_batch(
+        batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
             "mysource2",
             "subdir_reader",
             "unicode",

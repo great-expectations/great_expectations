@@ -104,11 +104,18 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     blocks += result
 
             if len(blocks) > 0:
+                rendered_component_type_init_kwargs = {
+                    cls._content_block_type: blocks,
+                    "styling": cls._get_content_block_styling(),
+                }
+                rendered_component_type_default_init_kwargs = getattr(
+                    cls, "_rendered_component_default_init_kwargs", {}
+                )
+                rendered_component_type_init_kwargs.update(
+                    rendered_component_type_default_init_kwargs
+                )
                 content_block = cls._rendered_component_type(
-                    **{
-                        cls._content_block_type: blocks,
-                        "styling": cls._get_content_block_styling(),
-                    }
+                    **rendered_component_type_init_kwargs
                 )
                 cls._process_content_block(content_block, has_failed_evr=has_failed_evr)
 

@@ -1,16 +1,16 @@
 import datetime
 import json
 
-import great_expectations as ge
 import pandas as pd
 import pytest
+
+import great_expectations as ge
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
 from great_expectations.profile import ColumnsExistProfiler
 from tests.test_utils import expectationValidationResultSchema
 
 
 def test_expect_column_values_to_be_dateutil_parseable():
-
     D = ge.dataset.PandasDataset(
         {
             "c1": ["03/06/09", "23 April 1973", "January 9, 2016"],
@@ -168,7 +168,6 @@ def test_expect_column_values_to_be_json_parseable():
 
 
 def test_expectation_decorator_summary_mode():
-
     df = ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5, 6, 7, 7, None, None],})
     df.set_default_expectation_argument("result_format", "COMPLETE")
     df.set_default_expectation_argument("include_config", False)

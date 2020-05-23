@@ -1,11 +1,12 @@
 import os
 
 import nbformat
+from nbconvert.preprocessors import ExecutePreprocessor
+
 from great_expectations import DataContext
 from great_expectations.render.renderer.suite_scaffold_notebook_renderer import (
     SuiteScaffoldNotebookRenderer,
 )
-from nbconvert.preprocessors import ExecutePreprocessor
 
 
 def test_render_snapshot_test(titanic_data_context):
@@ -27,7 +28,7 @@ def test_render_snapshot_test(titanic_data_context):
         "cells": [
             {
                 "cell_type": "markdown",
-                "source": """# Scaffold a new Expectation Suite (BETA)
+                "source": """# Scaffold a new Expectation Suite (Experimental)
 This process helps you avoid writing lots of boilerplate when authoring suites by allowing you to select columns you care about and letting a profiler write some candidate expectations for you to adjust.
 
 **Expectation Suite Name**: `my_suite`
@@ -41,7 +42,7 @@ We'd love it if you **reach out to us on** the [**Great Expectations Slack Chann
                 "execution_count": None,
                 "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.profile import BasicSuiteBuilderProfiler\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "my_suite"\nsuite = context.create_expectation_suite(\n    expectation_suite_name, overwrite_existing=True\n)\n\nbatch_kwargs = {\n    "path": "'
                 + csv_path
-                + '",\n    "datasource": "mydatasource",\n}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                + '",\n    "datasource": "mydatasource",\n    "data_asset_name": "Titanic",\n}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -94,7 +95,7 @@ contains a list of possible expectations.""",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\n# Let\'s make a simple sortable timestamp. Note this could come from your pipeline runner.\nrun_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nexpectation_suite_identifier = list(results["details"].keys())[0]\nvalidation_result_identifier = ValidationResultIdentifier(\n    expectation_suite_identifier=expectation_suite_identifier,\n    batch_identifier=batch.batch_kwargs.to_id(),\n    run_id=run_id\n)\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\n# Let\'s make a simple sortable timestamp. Note this could come from your pipeline runner.\nrun_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
             {

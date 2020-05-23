@@ -3,6 +3,7 @@ import glob
 import logging
 import os
 import re
+import warnings
 
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
@@ -46,7 +47,12 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                   partition_regex: wifi-((0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])-20\d\d).*\.log
                   reader_method: csv
     """
-    recognized_batch_parameters = {"name", "reader_method", "reader_options", "limit"}
+    recognized_batch_parameters = {
+        "data_asset_name",
+        "reader_method",
+        "reader_options",
+        "limit",
+    }
 
     def __init__(
         self,
@@ -109,16 +115,28 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         known_assets = []
         if not os.path.isdir(self.base_directory):
             return {"names": [(asset, "path") for asset in known_assets]}
-        for generator_asset in self.asset_globs.keys():
-            batch_paths = self._get_generator_asset_paths(generator_asset)
-            if len(batch_paths) > 0 and generator_asset not in known_assets:
-                known_assets.append(generator_asset)
+        for data_asset_name in self.asset_globs.keys():
+            batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
+            if len(batch_paths) > 0 and data_asset_name not in known_assets:
+                known_assets.append(data_asset_name)
 
         return {"names": [(asset, "path") for asset in known_assets]}
 
-    def get_available_partition_ids(self, generator_asset):
-        glob_config = self._get_generator_asset_config(generator_asset)
-        batch_paths = self._get_generator_asset_paths(generator_asset)
+    # TODO: deprecate generator_asset argument
+    def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
+        assert (generator_asset and not data_asset_name) or (
+            not generator_asset and data_asset_name
+        ), "Please provide either generator_asset or data_asset_name."
+        if generator_asset:
+            warnings.warn(
+                "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
+                "Please update code accordingly.",
+                DeprecationWarning,
+            )
+            data_asset_name = generator_asset
+
+        glob_config = self._get_data_asset_config(data_asset_name)
+        batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
         partition_ids = [
             self._partitioner(path, glob_config)
             for path in batch_paths
@@ -128,15 +146,15 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
     def _build_batch_kwargs(self, batch_parameters):
         try:
-            generator_asset = batch_parameters.pop("name")
+            data_asset_name = batch_parameters.pop("data_asset_name")
         except KeyError:
             raise BatchKwargsError(
                 "Unable to build BatchKwargs: no name provided in batch_parameters.",
                 batch_kwargs=batch_parameters,
             )
 
-        glob_config = self._get_generator_asset_config(generator_asset)
-        batch_paths = self._get_generator_asset_paths(generator_asset)
+        glob_config = self._get_data_asset_config(data_asset_name)
+        batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
         partition_id = batch_parameters.pop("partition_id", None)
 
         if partition_id:
@@ -148,8 +166,8 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             if len(path) != 1:
                 raise BatchKwargsError(
                     "Unable to identify partition %s for asset %s"
-                    % (partition_id, generator_asset),
-                    {generator_asset: generator_asset, partition_id: partition_id},
+                    % (partition_id, data_asset_name),
+                    {data_asset_name: data_asset_name, partition_id: partition_id},
                 )
             batch_kwargs = self._build_batch_kwargs_from_path(
                 path[0], glob_config, **batch_parameters
@@ -158,37 +176,37 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
         else:
             return self.yield_batch_kwargs(
-                generator_asset=generator_asset, **batch_parameters
+                data_asset_name=data_asset_name, **batch_parameters
             )
 
-    def _get_generator_asset_paths(self, generator_asset):
+    def _get_data_asset_paths(self, data_asset_name):
         """
-        Returns a list of filepaths associated with the given generator_asset
+        Returns a list of filepaths associated with the given data_asset_name
 
         Args:
-            generator_asset:
+            data_asset_name:
 
         Returns:
             paths (list)
         """
-        glob_config = self._get_generator_asset_config(generator_asset)
+        glob_config = self._get_data_asset_config(data_asset_name)
         return glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
 
-    def _get_generator_asset_config(self, generator_asset):
+    def _get_data_asset_config(self, data_asset_name):
         try:
-            return self.asset_globs[generator_asset]
+            return self.asset_globs[data_asset_name]
         except KeyError:
             batch_kwargs = {
-                "generator_asset": generator_asset,
+                "data_asset_name": data_asset_name,
             }
             raise BatchKwargsError(
-                "Unknown asset_name %s" % generator_asset, batch_kwargs
+                "Unknown asset_name %s" % data_asset_name, batch_kwargs
             )
 
     def _get_iterator(
-        self, generator_asset, reader_method=None, reader_options=None, limit=None
+        self, data_asset_name, reader_method=None, reader_options=None, limit=None
     ):
-        glob_config = self._get_generator_asset_config(generator_asset)
+        glob_config = self._get_data_asset_config(data_asset_name)
         paths = glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
         return self._build_batch_kwargs_path_iter(
             paths,

@@ -10,6 +10,10 @@ from great_expectations.util import load_class, verify_dynamic_loading_support
 
 
 class MetricStore(Store):
+    """
+    A MetricStore stores ValidationMetric information to be used between runs.
+    """
+
     _key_class = ValidationMetricIdentifier
 
     def __init__(self, store_backend=None):
@@ -27,18 +31,22 @@ class MetricStore(Store):
 
             if issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
-                store_backend["table_name"] = store_backend.get(
-                    "table_name", "ge_metrics"
-                )
-                store_backend["key_columns"] = store_backend.get(
-                    "key_columns",
-                    [
-                        "run_id",
-                        "expectation_suite_identifier",
-                        "metric_name",
-                        "metric_kwargs_id",
-                    ],
-                )
+                if "table_name" not in store_backend:
+                    store_backend["table_name"] = store_backend.get(
+                        "table_name", "ge_metrics"
+                    )
+                if "key_columns" not in store_backend:
+                    store_backend["key_columns"] = store_backend.get(
+                        "key_columns",
+                        [
+                            "run_name",
+                            "run_time",
+                            "data_asset_name",
+                            "expectation_suite_identifier",
+                            "metric_name",
+                            "metric_kwargs_id",
+                        ],
+                    )
 
         super().__init__(store_backend=store_backend)
 
@@ -79,7 +87,7 @@ class EvaluationParameterStore(MetricStore):
 
     def get_bind_params(self, run_id):
         params = {}
-        for k in self._store_backend.list_keys((run_id,)):
+        for k in self._store_backend.list_keys(run_id.to_tuple()):
             key = self.tuple_to_key(k)
             params[key.to_evaluation_parameter_urn()] = self.get(key)
         return params

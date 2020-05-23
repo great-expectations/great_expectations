@@ -1,14 +1,15 @@
 import copy
 import inspect
 import logging
+from collections import OrderedDict
 from datetime import datetime
 from functools import reduce, wraps
 from typing import List
-from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 
