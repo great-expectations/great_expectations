@@ -16,34 +16,32 @@ The CLI will help you create your first Expectations. You can accept the default
 .. code-block:: bash
 
     Would you like to profile new Expectations for a single data asset within your new Datasource? [Y/n]: 
-
-    Would you like to: 
+    
+    Would you like to:
         1. choose from a list of data assets in this datasource
         2. enter the path of a data file
     : 1
-
+    
     Which data would you like to use?
-        1. 7210_1 (file)
-        2. Datafiniti_Womens_Shoes (file)
-        3. Datafiniti_Womens_Shoes_Jun19 (file)
+        1. npidata_pfile_20200511-20200517 (file)
         Don't see the name of the data asset in the list above? Just type it
     : 1
-
-    Name the new Expectation Suite [7210_1.warning]: 
-
-    Great Expectations will choose a couple of columns and generate Expectations about them
+    
+    Name the new Expectation Suite [npidata_pfile_20200511-20200517.warning]: 
+    
+    Great Expectations will choose a couple of columns and generate expectations about them
     to demonstrate some examples of assertions you can make about your data.
-        
-    Great Expectations will store these expectations in a new Expectation Suite '7210_1.warning' here:
-
-      file:///Users/eugenemandel/projects/fellows/great_expectations/expectations/7210_1/warning.json
-
-    OK to proceed? [Y/n]: 
-
+    
+    Great Expectations will store these expectations in a new Expectation Suite 'npidata_pfile_20200511-20200517.warning' here:
+    
+      file:///users/ubuntu/example_project/great_expectations/expectations/npidata_pfile_20200511-20200517/warning.json
+    
+    Would you like to proceed? [Y/n]: 
+    
     Generating example Expectation Suite...
-
+    
     Done generating example Expectation Suite
-
+    
 What just happened?
 -------------------
 
@@ -74,8 +72,49 @@ If you open up the suite in ``great_expectations/expectations/something-somethin
 
 .. code-block:: JSON
 
-    #FIXME
-
+    {
+      "data_asset_type": "Dataset",
+      "expectation_suite_name": "npidata_pfile_20200511-20200517.warning",
+      "expectations": [
+        {
+          "expectation_type": "expect_table_row_count_to_be_between",
+          "kwargs": {
+            "max_value": 20884,
+            "min_value": 17087
+          },
+          "meta": {
+            "BasicSuiteBuilderProfiler": {
+              "confidence": "very low"
+            }
+          }
+        },
+        {
+          "expectation_type": "expect_table_column_count_to_equal",
+          "kwargs": {
+            "value": 330
+          },
+          "meta": {
+            "BasicSuiteBuilderProfiler": {
+              "confidence": "very low"
+            }
+          }
+        },
+        {
+          "expectation_type": "expect_table_columns_to_match_ordered_list",
+          "kwargs": {
+            "column_list": [
+              "NPI",
+              "Entity Type Code",
+              "Replacement NPI",
+              "Employer Identification Number (EIN)",
+              "Provider Organization Name (Legal Business Name)",
+              "Provider Last Name (Legal Name)",
+              "Provider First Name",
+              "Provider Middle Name",
+              "Provider Name Prefix Text",
+              "Provider Name Suffix Text",
+              "Provider Credential Text",
+        ...
 
 There's a lot of information here. (This is good.)
 
