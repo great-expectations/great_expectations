@@ -425,6 +425,11 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             if not _verify_postgresql_dependent_modules():
                 return None
 
+            # if not _verify_sqlalchemy_dependent_modules(
+            #         force_reload_if_package_loaded=True
+            # ):
+            #     return None
+
             credentials = _collect_postgres_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.REDSHIFT:
             if not _verify_redshift_dependent_modules():
@@ -1217,15 +1222,17 @@ def _verify_sqlalchemy_dependent_modules(
 ) -> bool:
     global SqlAlchemyDatasource
 
-    verification_result: Dict[str, bool]
-
-    verification_result = verify_library_dependent_modules(
+    verification_result: Dict[str, bool] = verify_library_dependent_modules(
         python_import_name="sqlalchemy",
         pip_library_name="sqlalchemy",
-        pattern=r"([^#]*import\s+sqlalchemy.*)|([^#]*from\s+.*sqlalchemy(\..*|_dataset|_datasource)?\s+import.*)",
+        pattern=r"([^#].*import\s+sqlalchemy.*)|([^#]*from\s+.*sqlalchemy(\..*|_dataset|_datasource)?\s+import.*)",
         force_reload_if_package_loaded=force_reload_if_package_loaded,
     )
     success: bool = verification_result["success"]
+
+    if not success:
+        return False
+
     reloaded: bool = verification_result["reloaded"]
 
     if reloaded:
@@ -1235,28 +1242,30 @@ def _verify_sqlalchemy_dependent_modules(
             module_name="great_expectations.datasource",
         )
 
-    return success
+    return True
 
 
 def _verify_mysql_dependent_modules(
     force_reload_if_package_loaded: bool = False,
 ) -> bool:
-    verification_result: Dict[str, bool]
-
-    verification_result = verify_library_dependent_modules(
+    verification_result: Dict[str, bool] = verify_library_dependent_modules(
         python_import_name="pymysql",
         pip_library_name="pymysql",
-        pattern=r"[^#]*import\s+pymysql.*]",
+        pattern=r"[^#].*import\s+pymysql.*]",
         force_reload_if_package_loaded=force_reload_if_package_loaded,
     )
     success: bool = verification_result["success"]
+
+    if not success:
+        return False
+
     reloaded: bool = verification_result["reloaded"]
 
     if reloaded:
         # Replace with "load_class()" (import) statements, required after the "pymysql" library reloaded.
         pass
 
-    return success
+    return True
 
 
 def _verify_postgresql_dependent_modules(
@@ -1267,44 +1276,24 @@ def _verify_postgresql_dependent_modules(
     verification_result = verify_library_dependent_modules(
         python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
         pip_library_name="psycopg2-binary",
-        pattern=r"[^#]*import\s+sqlalchemy\.dialects\.postgresql\.psycopg2.*",
-        force_reload_if_package_loaded=force_reload_if_package_loaded,
-    )
-    success: bool = verification_result["success"]
-    reloaded: bool = verification_result["reloaded"]
-
-    if reloaded:
-        # Replace with "load_class()" (import) statements, required after the "psycopg2-binary" library reloaded.
-        pass
-
-    return success
-
-
-def _verify_redshift_dependent_modules(
-    force_reload_if_package_loaded: bool = False,
-) -> bool:
-    verification_result: Dict[str, bool]
-
-    verification_result = verify_library_dependent_modules(
-        python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
-        pip_library_name="psycopg2-binary",
-        pattern=r"[^#]*import\s+sqlalchemy\.dialects\.postgresql\.psycopg2.*",
+        pattern=r"[^#].*import\s+sqlalchemy\.dialects\.postgresql\.psycopg2.*",
         force_reload_if_package_loaded=force_reload_if_package_loaded,
     )
     postgresql_success: bool = verification_result["success"]
-    postgresql_reloaded: bool = verification_result["reloaded"]
 
     verification_result = verify_library_dependent_modules(
         python_import_name="psycopg2",
         pip_library_name="psycopg2-binary",
-        pattern=r"[^#]*import\s+psycopg2.*",
+        pattern=r"[^#].*import\s+psycopg2.*",
         force_reload_if_package_loaded=force_reload_if_package_loaded,
     )
     psycopg2_success: bool = verification_result["success"]
-    psycopg2_reloaded: bool = verification_result["reloaded"]
 
     if not (postgresql_success and psycopg2_success):
         return False
+
+    postgresql_reloaded: bool = verification_result["reloaded"]
+    psycopg2_reloaded: bool = verification_result["reloaded"]
 
     if postgresql_reloaded or psycopg2_reloaded:
         # Replace with "load_class()" (import) statements, required after the "psycopg2-binary" library reloaded.
@@ -1313,67 +1302,101 @@ def _verify_redshift_dependent_modules(
     return True
 
 
-def _verify_snowflake_dependent_modules(
+def _verify_redshift_dependent_modules(
     force_reload_if_package_loaded: bool = False,
 ) -> bool:
-    verification_result: Dict[str, bool]
+    if not _verify_postgresql_dependent_modules(
+        force_reload_if_package_loaded=force_reload_if_package_loaded
+    ):
+        return False
 
-    verification_result = verify_library_dependent_modules(
-        python_import_name="snowflake.sqlalchemy.snowdialect",
-        pip_library_name="snowflake-sqlalchemy",
-        pattern=r"[^#]*import\s+snowflake\.sqlalchemy\.snowdialect.*",
+    verification_result: Dict[str, bool] = verify_library_dependent_modules(
+        python_import_name="sqlalchemy_redshift.dialect",
+        pip_library_name="sqlalchemy-redshift",
+        pattern=r"[^#].*import\s+sqlalchemy\-redshift.*",
         force_reload_if_package_loaded=force_reload_if_package_loaded,
     )
     success: bool = verification_result["success"]
+
+    if not success:
+        return False
+
+    reloaded: bool = verification_result["reloaded"]
+
+    if reloaded:
+        # Replace with "load_class()" (import) statements, required after the "sqlalchemy-redshift" library reloaded.
+        pass
+
+    return True
+
+
+def _verify_snowflake_dependent_modules(
+    force_reload_if_package_loaded: bool = False,
+) -> bool:
+    verification_result: Dict[str, bool] = verify_library_dependent_modules(
+        python_import_name="snowflake.sqlalchemy.snowdialect",
+        pip_library_name="snowflake-sqlalchemy",
+        pattern=r"[^#].*import\s+snowflake\.sqlalchemy\.snowdialect.*",
+        force_reload_if_package_loaded=force_reload_if_package_loaded,
+    )
+    success: bool = verification_result["success"]
+
+    if not success:
+        return False
+
     reloaded: bool = verification_result["reloaded"]
 
     if reloaded:
         # Replace with "load_class()" (import) statements, required after the "snowflake-sqlalchemy" library reloaded.
         pass
 
-    return success
+    return True
 
 
 def _verify_bigquery_dependent_modules(
     force_reload_if_package_loaded: bool = False,
 ) -> bool:
-    verification_result: Dict[str, bool]
-
-    verification_result = verify_library_dependent_modules(
+    verification_result: Dict[str, bool] = verify_library_dependent_modules(
         python_import_name="pybigquery",
         pip_library_name="pybigquery",
-        pattern=r"[^#]*import\s+pybigquery.*",
+        pattern=r"[^#].*import\s+pybigquery.*",
         force_reload_if_package_loaded=force_reload_if_package_loaded,
     )
     success: bool = verification_result["success"]
+
+    if not success:
+        return False
+
     reloaded: bool = verification_result["reloaded"]
 
     if reloaded:
         # Replace with "load_class()" (import) statements, required after the "pybigquery" library reloaded.
         pass
 
-    return success
+    return True
 
 
 def _verify_pyspark_dependent_modules(
     force_reload_if_package_loaded: bool = False,
 ) -> bool:
-    verification_result: Dict[str, bool]
-
-    verification_result = verify_library_dependent_modules(
+    verification_result: Dict[str, bool] = verify_library_dependent_modules(
         python_import_name="pyspark",
         pip_library_name="pyspark",
-        pattern=r"([^#]*import\s+pyspark.*)|([^#]*from\s+.*pyspark(\..*)?\s+import.*)",
+        pattern=r"([^#].*import\s+pyspark.*)|([^#]*from\s+.*pyspark(\..*)?\s+import.*)",
         force_reload_if_package_loaded=force_reload_if_package_loaded,
     )
     success: bool = verification_result["success"]
+
+    if not success:
+        return False
+
     reloaded: bool = verification_result["reloaded"]
 
     if reloaded:
         # Replace with "load_class()" (import) statements, required after the "pyspark" library reloaded.
         pass
 
-    return success
+    return True
 
 
 def profile_datasource(

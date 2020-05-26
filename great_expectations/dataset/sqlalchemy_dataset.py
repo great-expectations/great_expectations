@@ -52,7 +52,6 @@ except ImportError:
     sqlalchemy_redshift = None
 
 try:
-    # from snowflake.sqlalchemy import URL
     import snowflake.sqlalchemy.snowdialect
 
     # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
