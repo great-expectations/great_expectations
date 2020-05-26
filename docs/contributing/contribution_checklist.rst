@@ -11,7 +11,7 @@ Following these instructions helps us make sure the code review and merge proces
 Before submitting a pull request
 --------------------------------
 
-Once your code is ready, please go through the following checklist before submitting a pull request. 
+Once your code is ready, please go through the following checklist before submitting a pull request.
 
 
 **1. Have you signed the CLA?**
