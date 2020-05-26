@@ -423,4 +423,8 @@ You can also disable usage statistics system-wide by setting the ``GE_USAGE_STAT
 As always, please reach out `on Slack <https://greatexpectations.io/slack>`__ if you have any questions or comments.
 
 .. discourse::
+<<<<<<< HEAD
     :topic_identifier: 159
+=======
+    :topic_identifier: 38
+>>>>>>> adding discuss comments plug in and comments on docs/how_to_guides/spare_parts/data_context_reference.rst

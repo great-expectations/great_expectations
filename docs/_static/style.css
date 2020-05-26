@@ -63,11 +63,7 @@ a {
 
 .wy-side-nav-search > a,
 .wy-side-nav-search .wy-dropdown > a {
-<<<<<<< HEAD
   display: none !important;
-=======
-  display: none;
->>>>>>> hiding white icon above search bar in left column
 }
 
 .wy-nav-content {
