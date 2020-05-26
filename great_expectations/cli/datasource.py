@@ -425,11 +425,6 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             if not _verify_postgresql_dependent_modules():
                 return None
 
-            # if not _verify_sqlalchemy_dependent_modules(
-            #         force_reload_if_package_loaded=True
-            # ):
-            #     return None
-
             credentials = _collect_postgres_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.REDSHIFT:
             if not _verify_redshift_dependent_modules():
