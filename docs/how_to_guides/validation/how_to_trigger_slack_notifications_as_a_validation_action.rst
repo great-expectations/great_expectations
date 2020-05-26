@@ -1,16 +1,56 @@
 .. _how_to_guides__validation__how_to_trigger_slack_notifications_as_a_validation_action:
 
-How to trigger slack notifications as a Validation Action
+How to trigger Slack notifications as a Validation Action
 =========================================================
 
-.. admonition:: Admonition from Mr. Dickens
+This guide will help you trigger Slack notifications as a :ref:`Validation Action <validation_actions>`_
+.  It will allow you to send a Slack message including information about a Validation Result, including whether or not the Validation succeeded.
 
-    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
+.. admonition:: Prerequisites: This how-to guide assumes that you have already:
+
+    - Configured a Slack app with the Webhook function enabled (See Additional Resources below for more information on setting up a new Slack app).
+    - Obtained the Webhook address for your Slack app.
+    - Identified the Slack channel that messages will be sent to.
+
+Steps
+-----
+
+1. Open ``uncommitted/config_variables.yml`` file and add ``validation_notification_slack_webhook`` variable by adding the following line:
+
+.. code-block:: yaml
+
+    validation_notification_slack_webhook: [address to web hook]
 
 
-This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
+2. Open ``great_expectations.yml`` and add ``send_slack_notification_on_validation_result`` action to ``validation_operators``. Make sure the following section exists in the ``great_expectations.yml`` file.
 
-If it would be useful to you, please comment and/or upvote below.
+.. code-block:: yaml
 
-If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
-    
+    validation_operators:
+        action_list_operator:
+            # To learn how to configure sending Slack notifications during evaluation
+            # (and other customizations), read: https://docs.greatexpectations.io/en/latest/reference/validation_operators/action_list_validation_operator.html
+            class_name: ActionListValidationOperator
+            action_list:
+            #--------------------------------
+            # here is what you will be adding
+            #--------------------------------
+            - name: send_slack_notification_on_validation_result # name can be set to any value
+              action:
+                class_name: SlackNotificationAction
+                # put the actual webhook URL in the uncommitted/config_variables.yml file
+                slack_webhook: ${validation_notification_slack_webhook}
+                notify_on: all # possible values: "all", "failure", "success"
+                renderer:
+                  module_name: great_expectations.render.renderer.slack_renderer
+                  class_name: SlackRenderer
+
+3. Run Validation checkpoint to receive Slack notification on the success or failure of validation suite.  If successful, you should receive a Slack message that looks like this:
+
+    .. image:: ../../images/slack_notification_example.png
+
+
+Additional resources
+--------------------
+
+- Instructions on how to set up a Slack app with webhook can be found in the documentation for the `Slack API <https://api.slack.com/messaging/webhooks#>`_

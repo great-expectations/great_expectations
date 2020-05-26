@@ -1,7 +1,7 @@
-.. _how_to_guides__creating_and_editing_expectations__how_to_create_expectations_with_interactive_evaluation_disabled:
+.. _how_to_guides__creating_and_editing_expectations__how_to_create_and_or_edit_an_expectation_suite_using_a_disposable_notebook:
 
-How to create Expectations with interactive evaluation disabled
-===============================================================
+How to create and/or edit an Expectation Suite using a disposable notebook
+==========================================================================
 
 .. admonition:: Admonition from Mr. Dickens
 

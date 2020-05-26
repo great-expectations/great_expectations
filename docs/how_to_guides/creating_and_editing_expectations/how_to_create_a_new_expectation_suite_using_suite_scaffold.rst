@@ -1,7 +1,7 @@
-.. _how_to_guides__creating_and_editing_expectations__how_to_create_expectations_with_interactive_evaluation_disabled:
+.. _how_to_guides__creating_and_editing_expectations__how_to_create_a_new_expectation_suite_using_suite_scaffold:
 
-How to create Expectations with interactive evaluation disabled
-===============================================================
+How to create a new Expectation Suite using `suite scaffold`
+============================================================
 
 .. admonition:: Admonition from Mr. Dickens
 

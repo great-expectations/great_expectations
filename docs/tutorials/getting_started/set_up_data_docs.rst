@@ -1,4 +1,4 @@
-.. _getting_started__set_up_auto_docs:
+.. _getting_started__set_up_data_docs:
 
 Set up Data Docs
 ================
@@ -9,19 +9,19 @@ Go ahead and tell the CLI you want to build Data Docs:
 
 .. code-block:: bash
 
-    Would you like to build Data Docs? [Y/n]: 
+    Would you like to build Data Docs? [Y/n]:
 
     The following Data Docs sites will be built:
 
      - local_site: file:///Users/eugenemandel/projects/fellows/great_expectations/uncommitted/data_docs/local_site/index.html
 
-    OK to proceed? [Y/n]: 
+    OK to proceed? [Y/n]:
 
     Building Data Docs...
 
     Done building Data Docs
 
-    Would you like to view your new Expectations in Data Docs? This will open a new browser window. [Y/n]: 
+    Would you like to view your new Expectations in Data Docs? This will open a new browser window. [Y/n]:
 
 
 When you open the window, you'll see a static website that looks like this:
