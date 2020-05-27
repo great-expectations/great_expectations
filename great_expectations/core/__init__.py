@@ -318,7 +318,9 @@ class RunIdentifier(DataContextKey):
 
     def __init__(self, run_name=None, run_time=None):
         super(RunIdentifier, self).__init__()
-        assert isinstance(run_name, str), "run_name must be an instance of str"
+        assert run_name is None or isinstance(
+            run_name, str
+        ), "run_name must be an instance of str"
         assert run_time is None or isinstance(run_time, (datetime.datetime, str)), (
             "run_time must be either None or " "an instance of str or datetime"
         )
