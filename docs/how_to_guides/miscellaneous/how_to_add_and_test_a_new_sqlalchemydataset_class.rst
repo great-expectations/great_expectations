@@ -7,7 +7,7 @@ This guide will help you extend the Great Expectations execution layer to work o
 
 .. warning::
 
-   This guide is a working checklist. We improve it each time we add support for a new SQL dialect. But it still has rough edges, and adding support for a new database will probably never be a cookie-cutter operation.
+   This guide is a working checklist. We improve it each time we add support for a new SQL dialect, but it still has rough edges. And adding support for a new database will probably never be a cookie-cutter operation.
 
    If you're interested in extending Great Expectations in this way, please reach out on `Slack <greatexpectations.io/slack>`__ in the ``#contributors-contributing`` channel, and we'll work with you to get there.
 
@@ -107,8 +107,8 @@ The core team will not be able to merge your contribution until they're able to 
             * In ``dataset_sample_data`` : ``"presto": {"infinities": "DOUBLE", "nulls": "DOUBLE", "naturals": "DOUBLE"},``
 
 
-4. Make changes to test_utils.py
-################################
+4. Make changes to tests/test_utils.py
+######################################
 
     * **Add a try-except clause to import dialect-specific types and map them to generic types.**
 
@@ -188,41 +188,55 @@ The core team will not be able to merge your contribution until they're able to 
 
 Since Great Expectations already has rich tests for Expectations, we recommend test-driven development when adding support for a new SQL dialect.
 
+You can run the main dev loop with:
+
+.. code-block:: bash
+
+    pytest --no-postgresql --no-spark tests/test_definitions/test_expectations.py
+
+You may need to add specific spot checks to text fixture JSON objects, such as: ``tests/test_definitions/column_map_expectations/expect_column_values_to_be_of_type.json``
 
 
+Once Expectation tests pass, make sure all the remaining tests pass:
 
+.. code-block:: bash
 
-
+    pytest --no-postgresql --no-spark
 
 4. Wrap up
 ##############################
 
 
+.. warning::
+
+   This guide covers steps to add support for a new SQL dialect to SqlAlchemyDataset, and make it testable. To fully enable this SQL dialect in the Great Expectations ecosystem, you may also want to:
+   
+   - develop a Datasource for this dialect
+   - develop a CLI integration for this dialect
+
 
 Additional notes
 ----------------
 
-You may also need to add specific “spot checks” to text fixture JSON objects, such as:`tests/test_definitions/column_map_expectations/expect_column_values_to_be_of_type.json`
+Future work:
 
-TO DO:
-* Pull out `_identify_dialect` into its own function.
-* Change `no_sqllite` to `include_dialect` or something similar
-* Refactor temporary_notimplemented_list to be part of Dataasset, so that it can actually affect behavior.
+* Factor ``_identify_dialect`` out of ``SqlAlchemyDataset.__init__`` into its own function.
+* Instead of only including pytest options to turn off tests (i.e. include everything by default and blacklist exceptions), add the ability to selectively turn on tests (i.e. exclude everything by default and whitelist exceptions). This would make it much easier to only run tests for a specific backend when developing for that backend.
+* Refactor the ``temporary_notimplemented_list`` to be part of ``DataAsset``, so that it can actually control which Expectations are run.
 
+    * This would allow developers to start development of a new backend without having to immediately implement every single Expectation.
+    * Essentially, this would decouple setting up schemas, types and fixtures from implementation of all Expectations.
+    * It would also pave the way to developing an automated test grid for Expectations by backend. (We should also fetch the info from ``suppress_test_for`` and ``only_for`` from the test fixtures and include it in the master lists.)
 
-
-
-
-
-
-
-
-
+* Refactor ``pytest_generate_tests`` so that data loading is done inside tests, not as part of test setup. This would enable a better dev loop for fixing typing errors.
+* Allow developers to cache test fixtures in the target backend. This would greatly speed up the dev cycle.
 
 Additional resources
 --------------------
 
 - You can see worked examples of previous PRs of this type here:
 
-    * XXXX
-    * YYY
+    * {{Example will go here}}
+    * {{Example will go here}}
+
+
