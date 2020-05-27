@@ -1,8 +1,6 @@
 from copy import deepcopy
 from typing import Dict, List, Union
 
-from marshmallow import Schema, fields, post_load, pre_dump
-
 from great_expectations.core import (
     ExpectationSuiteValidationResult,
     RunIdentifier,
@@ -14,6 +12,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.types import DictDot
+from marshmallow import Schema, fields, post_load, pre_dump
 
 
 class ValidationOperatorResult(DictDot):
@@ -50,7 +49,12 @@ class ValidationOperatorResult(DictDot):
         self._run_results = run_results
         self._evaluation_parameters = evaluation_parameters
         self._validation_operator_config = validation_operator_config
-        self._success = success
+        self._success = success or all(
+            [
+                run_result["validation_result"].success
+                for run_result in run_results.values()
+            ]
+        )
 
         self._validation_results = None
         self._data_assets_validated = None
@@ -88,13 +92,6 @@ class ValidationOperatorResult(DictDot):
 
     @property
     def success(self) -> bool:
-        if self._success is None:
-            self._success = all(
-                [
-                    run_result["validation_result"].success
-                    for run_result in self.run_results.values()
-                ]
-            )
         return self._success
 
     def list_batch_identifiers(self) -> List[str]:
