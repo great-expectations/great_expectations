@@ -7,6 +7,11 @@ TEMPLATE: How to {do something}
 
 This guide will help you {do something.} {That something is important or useful, because of some reason.}
 
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - You have adopted a puppy
+
 Steps
 -----
 
