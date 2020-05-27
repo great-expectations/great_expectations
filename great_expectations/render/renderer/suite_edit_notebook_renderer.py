@@ -2,6 +2,7 @@ import os
 from typing import Union
 
 import nbformat
+
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.render.renderer.renderer import Renderer
