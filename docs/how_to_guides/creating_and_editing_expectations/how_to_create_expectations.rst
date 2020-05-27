@@ -287,7 +287,10 @@ To view the expectation suite you just created as HTML, rebuild the data docs an
     batch.save_expectation_suite(discard_failed_expectations=False)
 
     # This step is optional, but useful - evaluate the expectations against the current batch of data
-    run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+    run_id = {
+      "run_name": "some_string_that_uniquely_identifies_this_run",
+      "run_time": datetime.utcnow()
+    }
     results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
     expectation_suite_identifier = list(results["details"].keys())[0]
     validation_result_identifier = ValidationResultIdentifier(
