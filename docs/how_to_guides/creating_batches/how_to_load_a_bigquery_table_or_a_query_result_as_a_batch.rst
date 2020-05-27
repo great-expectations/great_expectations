@@ -6,12 +6,10 @@ How to load a BigQuery table or a query result as a batch
 This guide will help you load a BigQuery table or a query result as a batch. This is important when you want to validate
 a table or the result of a query against an Expectation Suite. When you use a BigQuery Datasource, the validation is done in BigQuery itself. Your data is not downloaded.
 
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-.. admonition:: Prerequisites: This how-to guide assumes that you have:
-
-    - a Data Context object:
-
-        - with a SQLAlchemy Datasource that is configured to connect to your BigQuery account
+  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Configured a BigQuery datasource <how_to_guides__configuring_datasources__how_to_configure_a_pandas_filesystem_datasource>`
 
 Steps
 -----
