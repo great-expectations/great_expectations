@@ -424,7 +424,11 @@ As always, please reach out `on Slack <https://greatexpectations.io/slack>`__ if
 
 .. discourse::
 <<<<<<< HEAD
+<<<<<<< HEAD
     :topic_identifier: 159
 =======
     :topic_identifier: 38
 >>>>>>> adding discuss comments plug in and comments on docs/how_to_guides/spare_parts/data_context_reference.rst
+=======
+    :topic_identifier: 159
+>>>>>>> fixed topic
