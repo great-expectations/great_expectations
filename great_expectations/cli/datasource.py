@@ -452,6 +452,11 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             if not _verify_bigquery_dependent_modules():
                 return None
 
+            if not _verify_sqlalchemy_dependent_modules(
+                force_reload_if_package_loaded=True
+            ):
+                return None
+
             credentials = _collect_bigquery_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.OTHER:
             sqlalchemy_url = click.prompt(
@@ -1352,7 +1357,7 @@ def _verify_bigquery_dependent_modules(
     force_reload_if_package_loaded: bool = False,
 ) -> bool:
     verification_result: Dict[str, bool] = verify_library_dependent_modules(
-        python_import_name="pybigquery",
+        python_import_name="pybigquery.sqlalchemy_bigquery",
         pip_library_name="pybigquery",
         pattern=r"[^#].*import\s+pybigquery.*",
         force_reload_if_package_loaded=force_reload_if_package_loaded,
