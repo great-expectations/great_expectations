@@ -5,21 +5,18 @@ How to write a how to guide
 
 This guide shows how to create a new how-to guide in Great Expectations. By writing guides with consistent structure and styling, you can get your PRs approved faster and make the Great Expectations docs discoverable, useful, and maintainable.
 
-.. admonition:: Prerequisites: This how-to guide assumes you have already:
-
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
-  - You have adopted a puppy
 
 Steps
 -----
 
 1. Copy the :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>` to the appropriate subdirectory of ``docs/how_to_guides/``, and rename it.
 2. Write a title and purpose paragraph.
-3. Fill in the Steps section, making sure to include bash, yml, and code snippets as appropriate.
-4. Starting from a clean install of Great Expectations, follow your own steps from start to finish, to make sure there aren’t any gaps.
-5. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
-6. Scan your article to make sure it follows the :ref:`Style guide`. If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
-7. Submit your PR!
+3. Fill out the Prerequisites info box (see :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>`). The header of the info box says: "This how-to guide assumes you have already:". Place each prerequisite under its own bullet and phrase it using the style in the template: "did something".
+4. Fill in the Steps section, making sure to include bash, yml, and code snippets as appropriate.
+5. Starting from a clean install of Great Expectations, follow your own steps from start to finish, to make sure there aren’t any gaps.
+6. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
+7. Scan your article to make sure it follows the :ref:`Style guide`. If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
+8. Submit your PR!
 
 Additional Notes
 ----------------
