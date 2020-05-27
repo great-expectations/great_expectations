@@ -1,6 +1,8 @@
 from copy import deepcopy
 from typing import Dict, List, Union
 
+from marshmallow import Schema, fields, post_load, pre_dump
+
 from great_expectations.core import (
     ExpectationSuiteValidationResult,
     RunIdentifier,
@@ -12,7 +14,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.types import DictDot
-from marshmallow import Schema, fields, post_load, pre_dump
 
 
 class ValidationOperatorResult(DictDot):
