@@ -6,9 +6,6 @@ from collections import namedtuple
 from copy import deepcopy
 
 from dateutil.parser import parse
-from IPython import get_ipython
-from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
-
 from great_expectations import __version__ as ge_version
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import IDDict
@@ -22,6 +19,8 @@ from great_expectations.exceptions import (
     UnavailableMetricError,
 )
 from great_expectations.types import DictDot
+from IPython import get_ipython
+from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 
 logger = logging.getLogger(__name__)
 
@@ -329,9 +328,9 @@ class RunIdentifier(DataContextKey):
                     f'Unable to parse provided run_time str ("{run_time}") to datetime. Defaulting '
                     f"run_time to current time."
                 )
-                run_time = datetime.datetime.now(datetime.timezone.utc)
+                run_time = datetime.datetime.utcnow()
 
-        self._run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
+        self._run_time = run_time or datetime.datetime.utcnow()
 
     @property
     def run_name(self):
@@ -342,10 +341,16 @@ class RunIdentifier(DataContextKey):
         return self._run_time
 
     def to_tuple(self):
-        return self._run_name or "__none__", self._run_time.isoformat()
+        return (
+            self._run_name or "__none__",
+            self._run_time.strftime("%Y%m%dT%H%M%S.%fZ"),
+        )
 
     def to_fixed_length_tuple(self):
-        return self._run_name or "__none__", self._run_time.isoformat()
+        return (
+            self._run_name or "__none__",
+            self._run_time.strftime("%Y%m%dT%H%M%S.%fZ"),
+        )
 
     def __repr__(self):
         return json.dumps(self.to_json_dict())
@@ -368,7 +373,7 @@ class RunIdentifier(DataContextKey):
 
 class RunIdentifierSchema(Schema):
     run_name = fields.Str()
-    run_time = fields.DateTime(format="iso")
+    run_time = fields.DateTime(format="%Y%m%dT%H%M%S.%fZ")
 
     @post_load
     def make_run_identifier(self, data, **kwargs):
@@ -639,7 +644,8 @@ class ExpectationSuite(object):
             self.meta["citations"] = []
         self.meta["citations"].append(
             {
-                "citation_date": citation_date or datetime.datetime.now().isoformat(),
+                "citation_date": citation_date
+                or datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ"),
                 "batch_kwargs": batch_kwargs,
                 "batch_markers": batch_markers,
                 "batch_parameters": batch_parameters,

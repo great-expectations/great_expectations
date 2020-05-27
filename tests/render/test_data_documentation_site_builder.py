@@ -3,7 +3,6 @@ import shutil
 
 import pytest
 from freezegun import freeze_time
-
 from great_expectations import DataContext
 from great_expectations.core import RunIdentifier
 from great_expectations.data_context.store import ExpectationsStore, ValidationsStore
@@ -261,7 +260,7 @@ def test_configuration_driven_site_builder(
         "validations",
         expectation_suite_path_component,
         run_id.run_name,
-        run_id.run_time.isoformat(),
+        run_id.run_time.strftime("%Y%m%dT%H%M%S.%fZ"),
         batch.batch_id + ".html",
     )
 
@@ -301,7 +300,7 @@ def test_configuration_driven_site_builder(
         "validations",
         expectation_suite_path_component,
         run_id.run_name,
-        run_id.run_time.isoformat(),
+        run_id.run_time.strftime("%Y%m%dT%H%M%S.%fZ"),
         batch.batch_id + ".html",
     )
 

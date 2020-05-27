@@ -1,9 +1,8 @@
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import datetime
 
 import click
-
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
@@ -279,7 +278,7 @@ Let us help you specify the batch of data your want the validation operator to v
                     batches_to_validate.append(batch)
 
             if run_name is None:
-                run_name = datetime.now(timezone.utc).isoformat()
+                run_name = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
 
             run_id = RunIdentifier(run_name=run_name)
 

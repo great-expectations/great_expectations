@@ -3,7 +3,6 @@ import os
 from collections import OrderedDict
 
 from dateutil.parser import ParserError, parse
-
 from great_expectations.core import RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
@@ -51,7 +50,7 @@ class ValidationResultsPageRenderer(Renderer):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
-                run_time = parse(run_id).isoformat()
+                run_time = parse(run_id).strftime("%Y%m%dT%H%M%S.%fZ")
             except ParserError:
                 run_time = "__none__"
             run_name = run_id
@@ -60,7 +59,7 @@ class ValidationResultsPageRenderer(Renderer):
             run_time = run_id.get("run_time") or "__none__"
         elif isinstance(run_id, RunIdentifier):
             run_name = run_id.run_name or "__none__"
-            run_time = run_id.run_time.isoformat()
+            run_time = run_id.run_time.strftime("%Y%m%dT%H%M%S.%fZ")
         batch_id = BatchKwargs(validation_results.meta["batch_kwargs"]).to_id()
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         batch_kwargs = validation_results.meta.get("batch_kwargs")
@@ -237,7 +236,7 @@ class ValidationResultsPageRenderer(Renderer):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
-                run_time = parse(run_id).isoformat()
+                run_time = parse(run_id).strftime("%Y%m%dT%H%M%S.%fZ")
             except ParserError:
                 run_time = "__none__"
             run_name = run_id
@@ -246,7 +245,7 @@ class ValidationResultsPageRenderer(Renderer):
             run_time = run_id.get("run_time") or "__none__"
         elif isinstance(run_id, RunIdentifier):
             run_name = run_id.run_name or "__none__"
-            run_time = run_id.run_time.isoformat()
+            run_time = run_id.run_time.strftime("%Y%m%dT%H%M%S.%fZ")
         ge_version = validation_results.meta["great_expectations.__version__"]
 
         return RenderedTableContent(
@@ -711,7 +710,7 @@ class ProfilingResultsPageRenderer(Renderer):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
-                run_time = parse(run_id).isoformat()
+                run_time = parse(run_id).strftime("%Y%m%dT%H%M%S.%fZ")
             except ParserError:
                 run_time = "__none__"
             run_name = run_id
@@ -720,7 +719,7 @@ class ProfilingResultsPageRenderer(Renderer):
             run_time = run_id.get("run_time") or "__none__"
         elif isinstance(run_id, RunIdentifier):
             run_name = run_id.run_name or "__none__"
-            run_time = run_id.run_time.isoformat()
+            run_time = run_id.run_time.strftime("%Y%m%dT%H%M%S.%fZ")
 
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         batch_kwargs = validation_results.meta.get("batch_kwargs")
