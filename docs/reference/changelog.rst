@@ -6,6 +6,8 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] Fixed bug that was caused by comparison between timezone aware and non-aware datetimes
+* [DOCS] Updated docs with info on typed run ids and validation operator results
 
 0.11.0
 -----------------
