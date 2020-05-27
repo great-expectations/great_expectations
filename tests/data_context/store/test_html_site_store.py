@@ -73,7 +73,7 @@ test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir0/
                 b/
                     c/
                         quarantine/
-                            2019-09-26T13:42:41/
+                            20190926T134241.000000Z/
                                 prod-100.html
                                 prod-20.html
 """

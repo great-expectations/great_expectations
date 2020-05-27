@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import mistune
-
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.render.renderer import (
     ExpectationSuitePageRenderer,
@@ -265,7 +264,7 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
         "table": [
             ["Great Expectations Version", "0.9.7+17.g02805059.dirty"],
             ["Run Name", "20200322T170247.671855Z"],
-            ["Run Time", "2020-03-22T17:02:47.671855+00:00"],
+            ["Run Time", "20200322T170247.671855Z"],
         ],
     }
 

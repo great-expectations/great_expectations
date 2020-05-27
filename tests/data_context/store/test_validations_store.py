@@ -171,7 +171,7 @@ test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir0/
                     20190926T134241.000000Z/
                         batch_id.json
                 prod-20/
-                    2019-09-26T13:42:41/
+                    20190926T134241.000000Z/
                         batch_id.json
 """
     )

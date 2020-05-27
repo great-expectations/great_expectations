@@ -515,7 +515,7 @@ def test_site_builder_usage_statistics_enabled(
         [index_page_path] + expectation_suite_pages + profiling_results_pages
     )
 
-    expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=2019-09-24T23:18:36&dataContextId=f43d4897-385f-4366-82b0-1a8eda2bf79c"
+    expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=20190924T231836.000000Z&dataContextId=f43d4897-385f-4366-82b0-1a8eda2bf79c"
 
     for page_path in page_paths_to_check:
         with open(page_path[7:]) as f:
@@ -565,7 +565,7 @@ def test_site_builder_usage_statistics_disabled(
         [index_page_path] + expectation_suite_pages + profiling_results_pages
     )
 
-    expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=2019-09-24T23:18:36"
+    expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=20190924T231836.000000Z"
 
     for page_path in page_paths_to_check:
         with open(page_path[7:]) as f:
