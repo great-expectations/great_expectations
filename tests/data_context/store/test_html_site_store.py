@@ -3,9 +3,6 @@ import datetime
 import boto3
 import pytest
 from freezegun import freeze_time
-from marshmallow import ValidationError
-from moto import mock_s3
-
 from great_expectations.data_context.store import HtmlSiteStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -14,6 +11,8 @@ from great_expectations.data_context.types.resource_identifiers import (
     validationResultIdentifierSchema,
 )
 from great_expectations.util import gen_directory_tree_str
+from marshmallow import ValidationError
+from moto import mock_s3
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -142,7 +141,7 @@ def test_HtmlSiteStore_S3_backend():
     ) == {
         "test/prefix/index.html",
         "test/prefix/expectations/asset/quarantine.html",
-        "test/prefix/validations/asset/quarantine/20191007T151224.1234Z_prod_100/2019-09-26T13:42:41+00:00/1234.html",
+        "test/prefix/validations/asset/quarantine/20191007T151224.1234Z_prod_100/20190926T134241.000000Z/1234.html",
     }
 
     index_content = (

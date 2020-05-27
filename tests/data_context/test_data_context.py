@@ -4,8 +4,6 @@ import shutil
 
 import pytest
 from freezegun import freeze_time
-from ruamel.yaml import YAML
-
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -34,6 +32,7 @@ from great_expectations.exceptions import (
     DataContextError,
 )
 from great_expectations.util import gen_directory_tree_str
+from ruamel.yaml import YAML
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -460,7 +459,7 @@ project_path/
                         Titanic/
                             BasicDatasetProfiler/
                                 profiling/
-                                    2019-09-26T13:42:41+00:00/
+                                    20190926T134241.000000Z/
                                         {}.json
 """.format(
             titanic_profiled_batch_id
@@ -541,19 +540,19 @@ data_docs/
                     f1/
                         BasicDatasetProfiler/
                             profiling/
-                                2019-09-26T13:42:41+00:00/
+                                20190926T134241.000000Z/
                                     {0:s}.html
                     f2/
                         BasicDatasetProfiler/
                             profiling/
-                                2019-09-26T13:42:41+00:00/
+                                20190926T134241.000000Z/
                                     {1:s}.html
             titanic/
                 subdir_reader/
                     Titanic/
                         BasicDatasetProfiler/
                             profiling/
-                                2019-09-26T13:42:41+00:00/
+                                20190926T134241.000000Z/
                                     {2:s}.html
 """.format(
             f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id
