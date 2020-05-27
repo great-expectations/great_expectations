@@ -1,5 +1,4 @@
 import nbformat
-
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.dataset import Dataset
@@ -73,8 +72,18 @@ Let's save the scaffolded expectation suite as a JSON file in the
             """\
 context.save_expectation_suite(suite, expectation_suite_name)
 
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+\"""
+Let's create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation
+arguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline
+runner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object.
+Note - any provided datetime will be assumed to be a UTC time. If no instantiation arguments are given, run_name will
+be None and run_time will default to the current UTC datetime.
+\"""
+
+run_id = {
+  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here
+  "run_time": datetime.utcnow()
+}
 
 results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
 validation_result_identifier = results.list_validation_result_identifiers()[0]
