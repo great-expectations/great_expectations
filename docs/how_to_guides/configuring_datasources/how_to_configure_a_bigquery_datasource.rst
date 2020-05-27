@@ -1,59 +1,61 @@
-.. _how_to_guides__configuring_datasources__how_to_configure_a_pandas_filesystem_datasource:
+.. _how_to_guides__configuring_datasources__how_to_configure_a_bigquery_datasource:
 
 How to configure a BigQuery Datasource
-======================================
+=========================================================
 
-To add a BigQuery datasource do this:
+This guide will help you add a BigQuery project (or a dataset) as a Datasource. This will allow you to validate tables and queries within this project. When you use a BigQuery Datasource, the validation is done in BigQuery itself. Your data is not downloaded.
 
-1. Run ``great_expectations datasource new``
-2. Choose the *SQL* option from the menu.
-3. When asked which SQLAlchemy driver to use, enter ``other``.
-4. Consult the `PyBigQuery <https://github.com/mxmzdlv/pybigquery`_ docs
-   for help building a connection string for your BigQuery cluster. It will look
-   something like this:
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - Followed the `Google Cloud library guide <https://googleapis.dev/python/google-api-core/latest/auth.html>`_ for authentication
+  - Installed the pybigquery package for the BigQuery sqlalchemy dialect (``pip install pybigquery``)
+
+Steps
+-----
+
+
+1. First, run this CLI command:
+
+.. code-block:: bash
+
+    great_expectations datasource new
+
+
+2. Choose "Big Query" from the list of database engines, when prompted.
+3. Consult the `PyBigQuery <https://github.com/mxmzdlv/pybigquery`_ docs
+   for help building a connection string for your BigQuery cluster.
+
+    If you want GE to connect to your BigQuery project (without specifying a particular dataset), the URL should be:
 
     .. code-block:: python
 
         "bigquery://project-name"
 
 
-5. Paste in this connection string and finish out the interactive prompts.
-6. Should you need to modify your connection string you can manually edit the
-   ``great_expectations/uncommitted/config_variables.yml`` file.
+    If you want GE to connect to a particular dataset inside your BigQuery project, the URL should be:
 
-Custom queries with a SQL Datasource
-------------------------------------
-
-While other backends use temporary tables to generate batches of data from
-custom queries, BigQuery does not support ephemeral temporary tables. As a
-work-around, GE will create or replace a *permanent table* when the user supplies
-a custom query.
-
-Users can specify a table via a Batch Kwarg called ``bigquery_temp_table``:
 
     .. code-block:: python
 
-        batch_kwargs = {
-            "query": "SELECT * FROM `my-project.my_dataset.my_table`",
-            "bigquery_temp_table": "my_other_dataset.temp_table"
-        }
+        "bigquery://project-name/dataset-name"
 
-Otherwise, default behavior depends on how the pybigquery engine is configured:
 
-If a default BigQuery dataset is defined in the connection string
-(for example, ``bigquery://project-name/dataset-name``), and no ``bigquery_temp_table``
-Batch Kwarg is supplied, then GE will create a permanent table with a random
-UUID in that location (e.g. ``project-name.dataset-name.ge_tmp_1a1b6511_03e6_4e18_a1b2_d85f9e9045c3``).
+    If you want GE to connect to one of the Google's public datasets, the URL should be:
 
-If a default BigQuery dataset is not defined in the connection string
-(for example, ``bigquery://project-name``) and no ``bigquery_temp_table`` Batch Kwawrg
-is supplied, then custom queries will fail.
+    .. code-block:: python
+
+        "bigquery://project-name/bigquery-public-data"
+
+5. Paste in this connection string when prompted for SQLAlchemy URL and finish out the interactive prompts.
+6. Should you need to modify your connection string you can manually edit the
+   ``great_expectations/uncommitted/config_variables.yml`` file.
 
 
 Additional notes
 ----------------
 
-Follow the `Google Cloud library guide <https://googleapis.dev/python/google-api-core/latest/auth.html>`_
-for authentication.
+Environment variables can be used to store the SQLAlchemy URL instead of the file, if preferred - search documentation for "Managing Environment and Secrets".
 
-Install the pybigquery package for the BigQuery sqlalchemy dialect (``pip install pybigquery``)
+Additional resources
+--------------------
