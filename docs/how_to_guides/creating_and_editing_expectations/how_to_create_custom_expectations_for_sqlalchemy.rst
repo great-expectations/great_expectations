@@ -1,7 +1,7 @@
-.. _how_to_guides__creating_and_editing_expectations__how_to_create_expectations_with_interactive_evaluation_disabled:
+.. _how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations_for_sqlalchemy:
 
-How to create Expectations with interactive evaluation disabled
-===============================================================
+How to create custom Expectations for SQLAlchemy
+================================================
 
 .. admonition:: Admonition from Mr. Dickens
 

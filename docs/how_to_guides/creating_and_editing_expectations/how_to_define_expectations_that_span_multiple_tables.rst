@@ -1,7 +1,7 @@
-.. _how_to_guides__creating_and_editing_expectations__how_to_create_expectations_with_interactive_evaluation_disabled:
+.. _how_to_guides__creating_and_editing_expectations__how_to_define_expectations_that_span_multiple_tables:
 
-How to create Expectations with interactive evaluation disabled
-===============================================================
+How to define Expectations that span multiple tables
+====================================================
 
 .. admonition:: Admonition from Mr. Dickens
 

@@ -61,6 +61,11 @@ a {
   }
 }
 
+.wy-side-nav-search > a,
+.wy-side-nav-search .wy-dropdown > a {
+  display: none;
+}
+
 .wy-nav-content {
   width: auto !important;
   max-width: max-content !important;
