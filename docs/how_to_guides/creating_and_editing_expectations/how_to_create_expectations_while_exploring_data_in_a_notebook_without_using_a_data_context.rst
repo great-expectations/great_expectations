@@ -1,7 +1,7 @@
-.. _how_to_guides__creating_and_editing_expectations__how_to_create_expectations_with_interactive_evaluation_disabled:
+.. _how_to_guides__creating_and_editing_expectations__how_to_create_expectations_while_exploring_data_in_a_notebook_without_using_a_data_context:
 
-How to create Expectations with interactive evaluation disabled
-===============================================================
+How to create Expectations while exploring data in a notebook, without using a Data Context.
+============================================================================================
 
 .. admonition:: Admonition from Mr. Dickens
 
