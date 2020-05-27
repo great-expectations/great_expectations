@@ -5,6 +5,13 @@ How to write a how to guide
 
 This guide shows how to create a new how-to guide in Great Expectations. By writing guides with consistent structure and styling, you can get your PRs approved faster and make the Great Expectations docs discoverable, useful, and maintainable.
 
+.. admonition:: Prerequisites: This how-to guide assumes that you have:
+
+    - a Data Context object:
+
+        - with a kitten
+        - and a puppy
+
 Steps
 -----
 

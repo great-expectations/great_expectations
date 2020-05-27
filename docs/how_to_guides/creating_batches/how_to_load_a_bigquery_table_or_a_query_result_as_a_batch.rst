@@ -7,13 +7,17 @@ This guide will help you load a BigQuery table or a query result as a batch. Thi
 a table or the result of a query against an Expectation Suite. When you use a BigQuery Datasource, the validation is done in BigQuery itself. Your data is not downloaded.
 
 
+.. admonition:: Prerequisites: This how-to guide assumes that you have:
+
+    - a Data Context object:
+
+        - with a SQLAlchemy Datasource that is configured to connect to your BigQuery account
+
 Steps
 -----
 
-1. First, make sure that you have a Data Context object with a SQLAlchemy Datasource that is configured to connect to your BigQuery account.
 
-
-2. Next, construct the Batch Kwargs that describe your table or query to GE:
+1. First, construct the Batch Kwargs that describe your table or query to GE:
 
 
 **If you want to refer to a table:**
@@ -44,7 +48,7 @@ BigQuery does not support ephemeral temporary tables. As a
 work-around, GE will create or replace a *permanent table*.
 
 The user must provide the name of the table via an additional key when constructing
-BatchKwargs for the query: ``bigquery_temp_table``.
+Batch Kwargs for the query: ``bigquery_temp_table``.
 
 Here is an example:
 
@@ -57,7 +61,7 @@ Here is an example:
 
 
 
-3. Use the BatchKwargs to load a Batch or pass them to a Validation Operator.
+2. Use the BatchKwargs to load a Batch or pass them to a Validation Operator.
 
 
 Additional notes
