@@ -138,7 +138,6 @@ def library_install_load_check(
         pip_library_name: name of the library to load
         python_import_name (str): a module to import to verify installation
     """
-    # TODO[Taylor+Alex] integration tests
     if is_library_loadable(library_name=python_import_name):
         return None
 
