@@ -3,8 +3,6 @@ import datetime
 import boto3
 import pytest
 from freezegun import freeze_time
-from moto import mock_s3
-
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
@@ -12,6 +10,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.util import gen_directory_tree_str
+from moto import mock_s3
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -94,7 +93,14 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
         my_store.get("not_a_ValidationResultIdentifier")
 
     ns_1 = ValidationResultIdentifier.from_tuple(
-        ("a", "b", "c", "quarantine", datetime.datetime.now(), "prod-100")
+        (
+            "a",
+            "b",
+            "c",
+            "quarantine",
+            datetime.datetime.now(datetime.timezone.utc),
+            "prod-100",
+        )
     )
     my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
     assert my_store.get(ns_1) == ExpectationSuiteValidationResult(
@@ -102,7 +108,14 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
     )
 
     ns_2 = ValidationResultIdentifier.from_tuple(
-        ("a", "b", "c", "quarantine", datetime.datetime.now(), "prod-200")
+        (
+            "a",
+            "b",
+            "c",
+            "quarantine",
+            datetime.datetime.now(datetime.timezone.utc),
+            "prod-200",
+        )
     )
     my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
     assert my_store.get(ns_2) == ExpectationSuiteValidationResult(
@@ -147,7 +160,13 @@ def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
     )
 
     ns_2 = ValidationResultIdentifier.from_tuple(
-        ("asset", "quarantine", "prod-20", datetime.datetime.now(), "batch_id")
+        (
+            "asset",
+            "quarantine",
+            "prod-20",
+            datetime.datetime.now(datetime.timezone.utc),
+            "batch_id",
+        )
     )
     my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
     assert my_store.get(ns_2) == ExpectationSuiteValidationResult(

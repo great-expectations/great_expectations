@@ -6,9 +6,6 @@ from collections import namedtuple
 from copy import deepcopy
 
 from dateutil.parser import parse
-from IPython import get_ipython
-from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
-
 from great_expectations import __version__ as ge_version
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import IDDict
@@ -22,6 +19,8 @@ from great_expectations.exceptions import (
     UnavailableMetricError,
 )
 from great_expectations.types import DictDot
+from IPython import get_ipython
+from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 
 logger = logging.getLogger(__name__)
 
@@ -319,6 +318,10 @@ class RunIdentifier(DataContextKey):
 
     def __init__(self, run_name=None, run_time=None):
         super(RunIdentifier, self).__init__()
+        assert isinstance(run_name, str), "run_name must be an instance of str"
+        assert run_time is None or isinstance(run_time, (datetime.datetime, str)), (
+            "run_time must be either None or " "an instance of str or datetime"
+        )
         self._run_name = run_name
 
         if isinstance(run_time, str):
@@ -329,9 +332,12 @@ class RunIdentifier(DataContextKey):
                     f'Unable to parse provided run_time str ("{run_time}") to datetime. Defaulting '
                     f"run_time to current time."
                 )
-                run_time = datetime.datetime.utcnow()
+                run_time = datetime.datetime.now(datetime.timezone.utc)
 
-        self._run_time = run_time or datetime.datetime.utcnow()
+        run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
+        if not run_time.tzinfo:
+            run_time = run_time.replace(tzinfo=datetime.timezone.utc)
+        self._run_time = run_time
 
     @property
     def run_name(self):
@@ -646,7 +652,9 @@ class ExpectationSuite(object):
         self.meta["citations"].append(
             {
                 "citation_date": citation_date
-                or datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ"),
+                or datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                ),
                 "batch_kwargs": batch_kwargs,
                 "batch_markers": batch_markers,
                 "batch_parameters": batch_parameters,

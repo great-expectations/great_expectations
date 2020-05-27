@@ -2,7 +2,6 @@ import os
 from typing import Union
 
 import nbformat
-
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.render.renderer.renderer import Renderer
@@ -66,7 +65,7 @@ We'd love it if you **reach out to us on** the [**Great Expectations Slack Chann
             batch_kwargs = dict()
         self.add_code_cell(
             """\
-from datetime import datetime
+import datetime
 import great_expectations as ge
 import great_expectations.jupyter_ux
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
@@ -113,7 +112,7 @@ be None and run_time will default to the current UTC datetime.
 
 run_id = {
   "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here
-  "run_time": datetime.utcnow()
+  "run_time": datetime.datetime.now(datetime.timezone.utc)
 }
 
 results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)

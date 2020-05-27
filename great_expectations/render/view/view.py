@@ -8,6 +8,12 @@ from string import Template as pTemplate
 from uuid import uuid4
 
 import mistune
+from great_expectations import __version__ as ge_version
+from great_expectations.render.types import (
+    RenderedComponentContent,
+    RenderedContent,
+    RenderedDocumentContent,
+)
 from jinja2 import (
     ChoiceLoader,
     Environment,
@@ -15,13 +21,6 @@ from jinja2 import (
     PackageLoader,
     contextfilter,
     select_autoescape,
-)
-
-from great_expectations import __version__ as ge_version
-from great_expectations.render.types import (
-    RenderedComponentContent,
-    RenderedContent,
-    RenderedDocumentContent,
 )
 
 
@@ -105,7 +104,7 @@ class DefaultJinjaView(object):
         env.filters["add_data_context_id_to_url"] = self.add_data_context_id_to_url
 
         template = env.get_template(template)
-        template.globals["now"] = datetime.datetime.utcnow
+        template.globals["now"] = lambda: datetime.datetime.now(datetime.timezone.utc)
 
         return template
 
@@ -113,7 +112,7 @@ class DefaultJinjaView(object):
     def add_data_context_id_to_url(self, jinja_context, url, add_datetime=True):
         data_context_id = jinja_context.get("data_context_id")
         if add_datetime:
-            datetime_iso_string = datetime.datetime.utcnow().strftime(
+            datetime_iso_string = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
             url += "?d=" + datetime_iso_string

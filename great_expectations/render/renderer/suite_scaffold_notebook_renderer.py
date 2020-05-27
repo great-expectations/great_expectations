@@ -1,5 +1,4 @@
 import nbformat
-
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.dataset import Dataset
@@ -33,7 +32,7 @@ We'd love it if you **reach out to us on** the [**Great Expectations Slack Chann
             self.batch_kwargs = dict()
         self.add_code_cell(
             """\
-from datetime import datetime
+import datetime
 import great_expectations as ge
 import great_expectations.jupyter_ux
 from great_expectations.profile import BasicSuiteBuilderProfiler
@@ -83,7 +82,7 @@ be None and run_time will default to the current UTC datetime.
 
 run_id = {
   "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here
-  "run_time": datetime.utcnow()
+  "run_time": datetime.datetime.now(datetime.timezone.utc)
 }
 
 results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)

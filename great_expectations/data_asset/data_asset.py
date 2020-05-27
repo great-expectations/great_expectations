@@ -11,8 +11,6 @@ from collections.abc import Hashable
 from functools import wraps
 
 from dateutil.parser import ParserError, parse
-from marshmallow import ValidationError
-
 from great_expectations import __version__ as ge_version
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -31,6 +29,7 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
+from marshmallow import ValidationError
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -832,7 +831,9 @@ class DataAsset(object):
            AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
         try:
-            validation_time = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+            validation_time = datetime.datetime.now(datetime.timezone.utc).strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            )
 
             assert not (run_id and run_name) and not (
                 run_id and run_time

@@ -313,7 +313,7 @@ be None and run_time will default to the current UTC datetime.
 
     run_id = {
       "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here
-      "run_time": datetime.utcnow()
+      "run_time": datetime.now(datetime.timezone.utc)
     }
 
 When you integrate validation in your pipeline, your pipeline runner probably has a run id that can be inserted here to make smoother integration.
