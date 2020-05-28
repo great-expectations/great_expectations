@@ -15,7 +15,7 @@ Steps
 -----
 
 
-1. First, run this CLI command:
+1. Run the following CLI command to begin the interactive Datasource creation process:
 
 .. code-block:: bash
 
