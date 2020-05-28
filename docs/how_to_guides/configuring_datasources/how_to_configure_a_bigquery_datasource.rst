@@ -25,7 +25,7 @@ Steps
 2. Choose "Big Query" from the list of database engines, when prompted.
 3. Identify the connection string you would like Great Expectations to use to connect to BigQuery, using the examples below and the `PyBigQuery <https://github.com/mxmzdlv/pybigquery>`_ documentation.
 
-    If you want GE to connect to your BigQuery project (without specifying a particular dataset), the URL should be:
+    If you want Great Expectations to connect to your BigQuery project (without specifying a particular dataset), the URL should be:
 
     .. code-block:: python
 
