@@ -18,3 +18,6 @@ The purpose of these is expectations is to provide examples of data assertions, 
 They are intended only a starting point for you to build upon.
 
 The command concludes by saving the newly generated Expectation Suite as a JSON file and rendering the expectation suite into an HTML page in Data Docs.
+
+.. discourse::
+    :topic_identifier: 199

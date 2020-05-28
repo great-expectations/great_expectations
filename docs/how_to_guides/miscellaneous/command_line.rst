@@ -638,7 +638,7 @@ great_expectations checkpoint
 
 A checkpoint is a bundle of one or more batches of data with one or more Expectation Suites.
 A checkpoint can be as simple as one batch of data paired with one Expectation Suite.
-A checkpoint can be as complex as many batches of data across different datasources paired with one or more Expectation Suites each. 
+A checkpoint can be as complex as many batches of data across different datasources paired with one or more Expectation Suites each.
 
 .. tip::
     Checkpoints are an ideal way to embed Great Expectations into your pipeline or use Great Expectations adjacent to your pipeline.
@@ -884,7 +884,7 @@ If you want to enable autocompletion for the Great Expectations CLI, you can exe
 .. code-block:: bash
 
    $ eval "$(_GREAT_EXPECTATIONS_COMPLETE=source_bash great_expectations)"
-   
+
 for bash
 
 .. code-block:: zsh
