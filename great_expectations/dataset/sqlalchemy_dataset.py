@@ -64,7 +64,7 @@ except ImportError:
 try:
     import pybigquery.sqlalchemy_bigquery
 
-    # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
+    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
     registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "BigQueryDialect")
     try:
