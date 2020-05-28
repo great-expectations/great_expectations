@@ -27,24 +27,24 @@ Steps
 
     If you want Great Expectations to connect to your BigQuery project (without specifying a particular dataset), the URL should be:
 
-    .. code-block:: python
+    .. code-block:: bash
 
-        "bigquery://project-name"
+        bigquery://project-name
 
 
     If you want Great Expectations to connect to a particular dataset inside your BigQuery project, the URL should be:
 
 
-    .. code-block:: python
+    .. code-block:: bash
 
-        "bigquery://project-name/dataset-name"
+        bigquery://project-name/dataset-name
 
 
     If you want Great Expectations to connect to one of the Google's public datasets, the URL should be:
 
-    .. code-block:: python
+    .. code-block:: bash
 
-        "bigquery://project-name/bigquery-public-data"
+        bigquery://project-name/bigquery-public-data
 
 5. Enter the connection string when prompted, and finish completing the interactive prompts.
 6. Should you need to modify your connection string, you can manually edit the
