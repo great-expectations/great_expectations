@@ -24,7 +24,6 @@ Steps
 
 2. Choose "Big Query" from the list of database engines, when prompted.
 3. Consult the `PyBigQuery <https://github.com/mxmzdlv/pybigquery`_ docs
-   for help building a connection string for your BigQuery cluster.
 
     If you want GE to connect to your BigQuery project (without specifying a particular dataset), the URL should be:
 
