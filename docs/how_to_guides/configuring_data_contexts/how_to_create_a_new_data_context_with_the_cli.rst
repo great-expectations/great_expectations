@@ -3,10 +3,10 @@
 How to create a new Data Context with the CLI
 =============================================
 
-We recommend you create new Data Contexts by using the a ``greate_expectations init`` CLI command in the directory where you want to deploy Great Expectations.
+We recommend that you create new Data Contexts by using the a ``greate_expectations init`` command in the directory where you want to deploy Great Expectations.
 
 .. code-block:: bash
 
     great_expectations init
 
-Please see the :ref:`Getting Started <_getting_started__initialize_a_data_context>`_ section for additional information.
+Please see the :ref:`Getting Started <_getting_started__initialize_a_data_context>` section for a more detailed tutorial on Data Contexts and getting a new project up and running.
