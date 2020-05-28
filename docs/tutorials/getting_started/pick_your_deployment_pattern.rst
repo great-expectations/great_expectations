@@ -27,11 +27,12 @@ Here's an overview of the components of a typical Great Expectations deployment:
     * :ref:`Additional Datasources and Generators`
     * :ref:`Options for hosting Data Docs`
     * :ref:`Additional Validation Operators and Actions`
+    * :ref:`Options for triggering Validation`
 
-* Key workflows
-
-    * :ref:`Creating and editing Expectations`
-    * :ref:`Triggering validation`
+..    * Key workflows
+..
+..        * :ref:`Creating and editing Expectations`
+..        * :ref:`Triggering validation`
 
 
 Options for storing Great Expectations configuration
@@ -114,28 +115,19 @@ Modifying :ref:`Validation Operators` themselves is more advanced work. You can 
 * :ref:`How to configure an ActionListValidationOperator`
 * :ref:`How to implement a custom Validation Operator`
 
-Creating and editing Expectations
+.. Creating and editing Expectations
+.. ---------------------------------
+.. 
+.. #FIXME: Need words here.
+.. 
+.. #FIXME: Need list here, after we wrangle the how-to guides for creating and editing Expectations.
+
+Options for triggering Validation
 ---------------------------------
 
-#FIXME: Need words here.
+There are two primary patterns for deploying Checkpoints. Sometimes Checkpoints are executed during data processing (e.g. as a task within Airflow). From this vantage point, they can control program flow. Sometimes Checkpoints are executed against materialized data. Great Expectations supports both patterns. There are also some rare instances where you may want to validate data without using a Checkpoint.
 
-#FIXME: Need list here, after we wrangle the how-to guides for creating and editing Expectations.
-
-Triggering validation
----------------------
-
-There are two primary paths to validate data 
-
-* :ref:`How to create a new Checkpoint`
-* :ref:`How to add validations, data, or suites to a Checkpoint`
 * :ref:`How to run a Checkpoint in Airflow`
 * :ref:`How to run a Checkpoint in python`
 * :ref:`How to run a Checkpoint in terminal`
 * :ref:`How to validate data without a Checkpoint`
-
-Conclusion
-----------
-
-#FIXME: Need words here.
-
-#FIXME: Need words from Dickens here.
