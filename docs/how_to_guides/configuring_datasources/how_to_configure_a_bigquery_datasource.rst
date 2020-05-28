@@ -40,7 +40,7 @@ Steps
         "bigquery://project-name/dataset-name"
 
 
-    If you want GE to connect to one of the Google's public datasets, the URL should be:
+    If you want Great Expectations to connect to one of the Google's public datasets, the URL should be:
 
     .. code-block:: python
 
