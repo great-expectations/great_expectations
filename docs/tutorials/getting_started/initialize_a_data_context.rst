@@ -106,6 +106,7 @@ You should see this:
         great_expectations
         |-- great_expectations.yml
         |-- expectations
+        |-- checkpoints
         |-- notebooks
         |-- plugins
         |-- .gitignore
