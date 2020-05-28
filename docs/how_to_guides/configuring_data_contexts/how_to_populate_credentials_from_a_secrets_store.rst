@@ -12,3 +12,6 @@ This guide is a stub. We all know that it will be useful, but no one has made ti
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
 
 If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
+
+.. discourse::
+    :topic_identifier: 162
