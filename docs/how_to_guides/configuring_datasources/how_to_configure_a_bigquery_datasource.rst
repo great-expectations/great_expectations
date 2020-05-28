@@ -32,7 +32,7 @@ Steps
         "bigquery://project-name"
 
 
-    If you want GE to connect to a particular dataset inside your BigQuery project, the URL should be:
+    If you want Great Expectations to connect to a particular dataset inside your BigQuery project, the URL should be:
 
 
     .. code-block:: python
