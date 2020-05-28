@@ -147,3 +147,6 @@ For more information on static site hosting in AWS, see the following:
 To discuss with the Great Expectations community, please visit this topic in our community discussion forum:
 
  - `https://discuss.greatexpectations.io/t/ge-with-databricks-delta/82/3 <https://discuss.greatexpectations.io/t/ge-with-databricks-delta/82/3>`_
+
+ .. discourse::
+    :topic_identifier: 234

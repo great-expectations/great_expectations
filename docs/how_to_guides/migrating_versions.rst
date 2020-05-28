@@ -500,3 +500,6 @@ In version 0.7, GE introduced several new features, and significantly changed th
 
  - The term "autoinspect" is no longer used directly, having been replaced by a much more flexible :ref:`profiling`
    feature.
+
+   .. discourse::
+      :topic_identifier: 235
