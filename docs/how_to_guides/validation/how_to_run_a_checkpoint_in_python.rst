@@ -14,6 +14,11 @@ This is useful if your pipeline environment or orchestration engine does not hav
 Steps
 -----
 
+If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+
+If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
+
+
 1. First, generate the python with the command:
 
 .. code-block:: bash
@@ -93,3 +98,6 @@ Steps
 
 4. This python can then be invoked directly using python `python great_expectations/uncommitted/run_my_checkpoint.py`
 or the python code can be embedded in your pipeline.
+
+.. discourse::
+    :topic_identifier: 225

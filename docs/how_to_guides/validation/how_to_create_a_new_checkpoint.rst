@@ -27,3 +27,11 @@ Steps
     A checkpoint named `my_checkpoint` was added to your project!
     - To edit this checkpoint edit the checkpoint file: /home/ubuntu/my_project/great_expectations/checkpoints/my_checkpoint.yml
     - To run this checkpoint run `great_expectations checkpoint run my_checkpoint`
+
+
+If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+
+If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
+
+.. discourse::
+    :topic_identifier: 220
