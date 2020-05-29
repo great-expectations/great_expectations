@@ -13,7 +13,7 @@ This guide will help you create a new Checkpoint.
 Steps
 -----
 
-1. First, expect_table_row_count_to_be_between
+1. First, run the CLI command below.
 
 .. code-block:: bash
 
