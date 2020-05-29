@@ -1,4 +1,4 @@
-.. _how_to_create_a_new_expectation_suite_using_the_cli:
+
 
 How to create a new Expectation Suite using the CLI
 ***************************************************
@@ -20,4 +20,4 @@ They are intended only a starting point for you to build upon.
 The command concludes by saving the newly generated Expectation Suite as a JSON file and rendering the expectation suite into an HTML page in Data Docs.
 
 .. discourse::
-    :topic_identifier: 199
+    :topic_identifier: 240

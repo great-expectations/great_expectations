@@ -327,9 +327,9 @@ For rapid prototyping, the following syntax allows quick iteration on the logic 
 .. code-block:: bash
 
     >> DataAsset.test_expectation_function(my_func)
-    
+
     >> Dataset.test_column_map_expectation_function(my_map_func, column='my_column')
-    
+
     >> Dataset.test_column_aggregate_expectation_function(my_agg_func, column='my_column')
 
 These functions will return output just like regular expectations. However, they will NOT save a copy of the
@@ -438,5 +438,3 @@ structure below.
         "success": False,
         "unexpected_list": [2,2,2,2,2,2,2,2]
     }
-
-

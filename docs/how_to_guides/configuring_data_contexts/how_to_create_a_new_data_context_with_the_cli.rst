@@ -10,3 +10,7 @@ We recommend that you create new Data Contexts by using the a ``greate_expectati
     great_expectations init
 
 Please see the :ref:`Getting Started <_getting_started__initialize_a_data_context>` section for a more detailed tutorial on Data Contexts and getting a new project up and running.
+
+.. discourse::
+    :topic_identifier: 160
+    
