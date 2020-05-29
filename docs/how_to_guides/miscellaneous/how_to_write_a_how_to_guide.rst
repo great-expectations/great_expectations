@@ -17,10 +17,10 @@ Steps
 6. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
 7. Create and publish a Discuss Article using the title of your How-to as the title of our article. If your guide is a stub copy and paste the body from this `discuss article <https://discuss.greatexpectations.io/t/how-to-configure-an-actionlistvalidationoperator/219>`_  and replace the link with your guide's link. If it is not a stub remove *Please comment +1 if this How to is important to you.* from the body.
 8. After publishing the discuss article find the topic_id at the end of the articles URL /t/how-to-configure-an-actionlistvalidationoperator/**219** and add this code to the bottom of your guide:  
-``.. discourse::``  
-``	:topic_identifier: <topic_id>``
-8. Scan your article to make sure it follows the :ref:`Style guide`. If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
-9. Submit your PR!
+``.. discourse:: </br>  
+	:topic_identifier: <topic_id>``
+9. Scan your article to make sure it follows the :ref:`Style guide`. If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
+10. Submit your PR!
 
 Additional Notes
 ----------------
