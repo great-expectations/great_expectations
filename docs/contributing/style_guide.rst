@@ -96,3 +96,5 @@ Within the table of contents, each section has specific role to play. Broadly sp
 
     * Yep: The ``init`` command will walk you through setting up a new project and connecting to your data.
     * Nope: The `init` command will walk you through setting up a new project and connecting to your data.
+
+* **For inline bash blocks, do not include a leading $.** It makes it hard for users to copy-paste code blocks.

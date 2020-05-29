@@ -10,7 +10,9 @@ class SlackRenderer(Renderer):
 
     def render(self, validation_result=None):
         # Defaults
-        timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
+        timestamp = datetime.datetime.strftime(
+            datetime.datetime.now(datetime.timezone.utc), "%x %X %Z"
+        )
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )

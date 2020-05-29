@@ -1744,7 +1744,9 @@ class ExpectationExplorer(object):
     def create_expectation_widget(
         self, data_asset, expectation_validation_result, collapsed=False
     ):
-        validation_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
+        validation_time = datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%d %H:%M"
+        )
         data_asset_name = data_asset.data_asset_name
         data_asset_state = self.state["data_assets"].get(data_asset_name)
         expectation_type = (

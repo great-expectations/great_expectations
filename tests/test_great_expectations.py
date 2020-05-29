@@ -785,7 +785,7 @@ def test_validate():
         meta={
             "expectation_suite_name": "titanic",
             "run_id": {"run_name": None, "run_time": "1955-11-05T00:00:00+00:00"},
-            "validation_time": "1955-11-05T00:00:00+00:00",
+            "validation_time": "19551105T000000.000000Z",
             "batch_kwargs": {"ge_batch_id": "1234"},
             "batch_markers": {},
             "batch_parameters": {},
