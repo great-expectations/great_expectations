@@ -68,35 +68,65 @@ This is an example of invoking an instance of a Validation Operator from Python:
 
     results = context.run_validation_operator(
         assets_to_validate=[batch0, batch1, ...],
-        run_id="some_string_that_uniquely_identifies_this_run",
+        run_id=RunIdentifier(**{
+          "run_name": "some_string_that_uniquely_identifies_this_run",
+          "run_time": "2020-04-29T10:46:03.197008"  # optional run timestamp, defaults to current UTC datetime
+        }),  # you may also pass in a dictionary with run_name and run_time keys
         validation_operator_name="operator_instance_name",
     )
 
 * `assets_to_validate` - an iterable that specifies the data assets that the operator will validate. The members of the list can be either batches or triples that will allow the operator to fetch the batch: (data_asset_name, expectation_suite_name, batch_kwargs) using this method: :py:meth:`~great_expectations.data_context.BaseDataContext.get_batch`
-* run_id - pipeline run id, a timestamp or any other string that is meaningful to you and will help you refer to the result of this operation later
+* run_id - pipeline run id of type RunIdentifier, consisting of a run_time (always assumed to be UTC time) and run_name string that is meaningful to you and will help you refer to the result of this operation later
 * validation_operator_name you can instances of a class that implements a Validation Operator
 
-The `run` method returns a result object.
+The `run` method returns a ValidationOperatorResult object.
 
 The value of "success" is True if no critical expectation suites ("failure") failed to validate (non-critical warning") expectation suites are allowed to fail without affecting the success status of the run.
 
 .. code-block:: json
 
     {
-        "data_asset_identifiers": list of data asset identifiers
-        "success": True/False,
-        "failure": {
-            expectation suite identifier: {
-                "validation_result": validation result,
-                "action_results": {action name: action result object}
-            }
-        }
-        "warning": {
-            expectation suite identifier: {
-                "validation_result": validation result,
-                "action_results": {action name: action result object}
+        "run_id": {"run_time": "20200527T041833.074212Z", "run_name": "my_run_name"},
+        "success": True,
+        "evaluation_parameters": None,
+        "validation_operator_config": {
+            "class_name": "WarningAndFailureExpectationSuitesValidationOperator",
+            "module_name": "great_expectations.validation_operators",
+            "name": "warning_and_failure_operator",
+            "kwargs": {
+                "action_list": [
+                    {
+                        "name": "store_validation_result",
+                        "action": {"class_name": "StoreValidationResultAction"},
+                    },
+                    {
+                        "name": "store_evaluation_params",
+                        "action": {"class_name": "StoreEvaluationParametersAction"},
+                    },
+                    {
+                        "name": "update_data_docs",
+                        "action": {"class_name": "UpdateDataDocsAction"},
+                    },
+                ],
+                "base_expectation_suite_name": ...,
+                "expectation_suite_name_suffixes": ...,
+                "stop_on_first_error": ...,
+                "slack_webhook": ...,
+                "notify_on": ...,
+            },
+        },
+        "run_results": {
+            ValidationResultIdentifier: {
+                "validation_result": ExpectationSuiteValidationResult object,
+                "expectation_suite_severity_level": "warning",
+                "actions_results": {
+                    "store_validation_result": {},
+                    "store_evaluation_params": {},
+                    "update_data_docs": {},
+                },
             }
         }
     }
+
 
 

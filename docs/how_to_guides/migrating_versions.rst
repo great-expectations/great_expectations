@@ -52,10 +52,10 @@ run_id and ValidationMetric Changes
 
 ``run_id`` is now typed using the new ``RunIdentifier`` class, with optional ``run_name`` and ``run_time`` instantiation
 arguments. The ``run_name`` can be any string (this could come from your pipeline runner, e.g. Airflow run id). The ``run_time``
-can be either a dateutil parsable string or a datetime object. If no instantiation arguments are provided, ``run_name`` will be
-``None`` (and appear as "__none__" in stores) and ``run_time`` will default to the current UTC datetime. This change
-affects all Great Expectations classes that have a ``run_id`` attribute as well as any functions or methods that accept
-a ``run_id`` argument.
+can be either a dateutil parsable string or a datetime object. Note - any provided datetime will be assumed to be a UTC time.
+If no instantiation arguments are provided, ``run_name`` will be ``None`` (and appear as "__none__" in stores) and ``run_time``
+will default to the current UTC datetime. This change affects all Great Expectations classes that have a ``run_id`` attribute
+as well as any functions or methods that accept a ``run_id`` argument.
 
 ``data_asset_name`` (if available) is now added to ``batch_kwargs`` by ``batch_kwargs_generators``.
 Because of this newly exposed key in ``batch_kwargs``, ``ValidationMetric`` and associated ``ValidationMetricIdentifier``
@@ -109,7 +109,8 @@ If you are using any Great Expectations methods that accept a ``run_id`` argumen
 the new ``RunIdentifier`` type (or a dictionary with ``run_name`` and ``run_time`` keys). For now, methods with a
 ``run_id`` parameter will continue to accept strings. In this case, the provided ``run_id`` string will be converted to
 a ``RunIdentifier`` object, acting as the ``run_name``. If the ``run_id`` string can also be parsed as a datetime, it
-will also be used for the ``run_time`` attribute, otherwise, the current UTC time is used.
+will also be used for the ``run_time`` attribute, otherwise, the current UTC time is used. All times are assumed to be
+UTC times.
 
 If your code uses output from Validation Operators, it must be updated to handle the new ValidationOperatorResult
 type.

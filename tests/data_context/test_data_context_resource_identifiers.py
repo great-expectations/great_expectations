@@ -33,13 +33,13 @@ def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
         "suite",
         "name",
         "my_run_id",
-        "2019-09-26T13:42:41+00:00",
+        "20190926T134241.000000Z",
         "my_batch_identifier",
     )
     assert validation_result_identifier.to_fixed_length_tuple() == (
         "my.expectation.suite.name",
         "my_run_id",
-        "2019-09-26T13:42:41+00:00",
+        "20190926T134241.000000Z",
         "my_batch_identifier",
     )
 
@@ -52,13 +52,13 @@ def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
         "suite",
         "name",
         "__none__",
-        "2019-09-26T13:42:41+00:00",
+        "20190926T134241.000000Z",
         "my_batch_identifier",
     )
     assert validation_result_identifier_no_run_id.to_fixed_length_tuple() == (
         "my.expectation.suite.name",
         "__none__",
-        "2019-09-26T13:42:41+00:00",
+        "20190926T134241.000000Z",
         "my_batch_identifier",
     )
 
@@ -71,13 +71,13 @@ def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
         "suite",
         "name",
         "my_run_id",
-        "2019-09-26T13:42:41+00:00",
+        "20190926T134241.000000Z",
         "__none__",
     )
     assert validation_result_identifier_no_batch_identifier.to_fixed_length_tuple() == (
         "my.expectation.suite.name",
         "my_run_id",
-        "2019-09-26T13:42:41+00:00",
+        "20190926T134241.000000Z",
         "__none__",
     )
 
@@ -90,12 +90,12 @@ def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
         "suite",
         "name",
         "__none__",
-        "2019-09-26T13:42:41+00:00",
+        "20190926T134241.000000Z",
         "__none__",
     )
     assert validation_result_identifier_no_run_id_no_batch_identifier.to_fixed_length_tuple() == (
         "my.expectation.suite.name",
         "__none__",
-        "2019-09-26T13:42:41+00:00",
+        "20190926T134241.000000Z",
         "__none__",
     )
