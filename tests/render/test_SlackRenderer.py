@@ -65,9 +65,9 @@ def test_SlackRenderer():
     ][0]["text"]["text"].replace("09/24/2019 23:18:36", "LOCALEDATE")
     rendered_output["blocks"][0]["text"]["text"] = rendered_output["blocks"][0]["text"][
         "text"
-    ].replace("09/24/2019 11:18:36 PM", "LOCALEDATE")
+    ].replace("09/24/2019 11:18:36 PM UTC", "LOCALEDATE")
     rendered_output["blocks"][0]["text"]["text"] = rendered_output["blocks"][0]["text"][
         "text"
-    ].replace("09/24/2019 23:18:36", "LOCALEDATE")
+    ].replace("09/24/2019 23:18:36 UTC", "LOCALEDATE")
 
     assert rendered_output == expected_renderer_output
