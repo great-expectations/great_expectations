@@ -41,7 +41,14 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
     ns_1 = SiteSectionIdentifier(
         site_section_name="validations",
         resource_identifier=ValidationResultIdentifier.from_tuple(
-            ("a", "b", "c", "quarantine", datetime.datetime.now(), "prod-100")
+            (
+                "a",
+                "b",
+                "c",
+                "quarantine",
+                datetime.datetime.now(datetime.timezone.utc),
+                "prod-100",
+            )
         ),
     )
     my_store.set(ns_1, "aaa")
@@ -50,7 +57,14 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
     ns_2 = SiteSectionIdentifier(
         site_section_name="validations",
         resource_identifier=ValidationResultIdentifier.from_tuple(
-            ("a", "b", "c", "quarantine", datetime.datetime.now(), "prod-20")
+            (
+                "a",
+                "b",
+                "c",
+                "quarantine",
+                datetime.datetime.now(datetime.timezone.utc),
+                "prod-20",
+            )
         ),
     )
     my_store.set(ns_2, "bbb")
@@ -74,7 +88,7 @@ test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir0/
                 b/
                     c/
                         quarantine/
-                            2019-09-26T13:42:41/
+                            20190926T134241.000000Z/
                                 prod-100.html
                                 prod-20.html
 """
@@ -142,7 +156,7 @@ def test_HtmlSiteStore_S3_backend():
     ) == {
         "test/prefix/index.html",
         "test/prefix/expectations/asset/quarantine.html",
-        "test/prefix/validations/asset/quarantine/20191007T151224.1234Z_prod_100/2019-09-26T13:42:41+00:00/1234.html",
+        "test/prefix/validations/asset/quarantine/20191007T151224.1234Z_prod_100/20190926T134241.000000Z/1234.html",
     }
 
     index_content = (

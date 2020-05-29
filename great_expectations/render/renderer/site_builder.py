@@ -616,26 +616,26 @@ class DefaultSiteIndexBuilder(object):
         calls to action.
         """
         create_expectations = CallToActionButton(
-            "How To Create Expectations",
+            "How to Create Expectations",
             # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html",
+            "https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations.html",
         )
         see_glossary = CallToActionButton(
-            "See more kinds of Expectations",
+            "See More Kinds of Expectations",
             "http://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html",
         )
         validation_playground = CallToActionButton(
-            "How To Validate data",
+            "How to Validate Data",
             # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/tutorials/validate_data.html",
+            "https://docs.greatexpectations.io/en/latest/how_to_guides/validation.html",
         )
         customize_data_docs = CallToActionButton(
-            "How To Customize Data Docs",
+            "How to Customize Data Docs",
             "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs",
         )
-        s3_team_site = CallToActionButton(
-            "How To Set up a team site on AWS S3",
-            "https://docs.greatexpectations.io/en/latest/tutorials/publishing_data_docs_to_s3.html",
+        team_site = CallToActionButton(
+            "How to Set Up a Team Site",
+            "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs.html",
         )
         # TODO gallery does not yet exist
         # gallery = CallToActionButton(
@@ -648,8 +648,7 @@ class DefaultSiteIndexBuilder(object):
 
         # Show these no matter what
         results.append(validation_playground)
-        results.append(customize_data_docs)
-        results.append(s3_team_site)
+        results.append(team_site)
 
         if usage_statistics:
             for button in results:

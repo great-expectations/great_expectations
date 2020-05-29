@@ -832,7 +832,9 @@ class DataAsset(object):
            AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
         try:
-            validation_time = datetime.datetime.now(datetime.timezone.utc)
+            validation_time = datetime.datetime.now(datetime.timezone.utc).strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            )
 
             assert not (run_id and run_name) and not (
                 run_id and run_time
