@@ -18,6 +18,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.types.base import MINIMUM_SUPPORTED_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -25,6 +26,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.datasource import Datasource
 from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
 from great_expectations.profile import BasicSuiteBuilderProfiler
+from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 
 
 class MyYAML(YAML):
@@ -420,6 +422,26 @@ def load_data_context_with_error_handling(directory: str, from_cli_upgrade_comma
     except ge_exceptions.PluginClassNotFoundError as err:
         cli_message(err.cli_colored_message)
         sys.exit(1)
+
+
+def upgrade_project(context_root_dir, ge_config_version, from_cli_upgrade_command=False):
+    upgrade_helper = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
+    target_ge_config_version = int(ge_config_version) + 1
+    continuation_message = "Ok, exiting now. To upgrade at a later time, use the following command: " \
+                           "great_expectations project upgrade\n\nTo learn more about the upgrade process, visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
+    if from_cli_upgrade_command:
+        upgrade_prompt = f"Your project appears to have an out-of-date config version ({ge_config_version}) - the version " \
+                         f"number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}.\n\nWould you like to run the " \
+                         f"Upgrade Helper to bring your project up-to-date?"
+    else:
+        upgrade_prompt = f"Your project appears to have an out-of-date config version ({ge_config_version}) - the version " \
+                         f"number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}.\nIn order to proceed, " \
+                         f"your project must be upgraded.\n\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
+
+    confirm_proceed_or_exit(confirm_prompt=upgrade_prompt, continuation_message=continuation_message)
+
+    while ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+        pass
 
 
 def confirm_proceed_or_exit(
