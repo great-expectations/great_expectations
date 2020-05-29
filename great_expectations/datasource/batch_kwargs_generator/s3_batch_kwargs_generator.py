@@ -331,7 +331,9 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             if matches is None:
                 logger.warning("No match found for key: %s" % key)
                 return (
-                    datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+                    datetime.datetime.now(datetime.timezone.utc).strftime(
+                        "%Y%m%dT%H%M%S.%fZ"
+                    )
                     + "__unmatched"
                 )
             else:
@@ -342,7 +344,9 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                         "No match group %d in key %s" % (match_group_id, key)
                     )
                     return (
-                        datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+                        datetime.datetime.now(datetime.timezone.utc).strftime(
+                            "%Y%m%dT%H%M%S.%fZ"
+                        )
                         + "__no_match_group"
                     )
 

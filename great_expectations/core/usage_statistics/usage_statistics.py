@@ -160,7 +160,10 @@ class UsageStatisticsHandler(object):
     def build_envelope(self, message):
         message["version"] = "1.0.0"
         message["event_time"] = (
-            datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+            datetime.datetime.now(datetime.timezone.utc).strftime(
+                "%Y-%m-%dT%H:%M:%S.%f"
+            )[:-3]
+            + "Z"
         )
         message["data_context_id"] = self._data_context_id
         message["data_context_instance_id"] = self._data_context_instance_id
