@@ -8,6 +8,7 @@ develop
 -----------------
 * [BUGFIX] Fixed bug that was caused by comparison between timezone aware and non-aware datetimes
 * [DOCS] Updated docs with info on typed run ids and validation operator results
+* [BUGFIX] Update call-to-action buttons on index page with correct URLs
 
 0.11.0
 -----------------
