@@ -412,7 +412,9 @@ def load_data_context_with_error_handling(directory: str) -> DataContext:
 
 
 def confirm_proceed_or_exit(
+    confirm_prompt="Would you like to proceed?",
     continuation_message="Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
+    exit_on_no=True
 ):
     """
     Every CLI command that starts a potentially lengthy (>1 sec) computation
@@ -423,7 +425,14 @@ def confirm_proceed_or_exit(
 
     The goal of this standardization is for the users to expect consistency -
     if you saw one command, you know what to expect from all others.
+
+    If the user does not confirm, the program should exit. The purpose of the exit_on_no parameter is to provide
+    the option to perform cleanup actions before exiting outside of the function.
     """
-    if not click.confirm("Would you like to proceed?", default=True):
+    if not click.confirm(confirm_prompt, default=True):
         cli_message(continuation_message)
-        exit(0)
+        if exit_on_no:
+            exit(0)
+        else:
+            return False
+    return True
