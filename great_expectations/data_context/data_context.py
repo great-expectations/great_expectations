@@ -13,11 +13,8 @@ import warnings
 import webbrowser
 from typing import Dict, List, Optional, Union
 
-from dateutil.parser import ParserError, parse
-from marshmallow import ValidationError
-from ruamel.yaml import YAML, YAMLError
-
 import great_expectations.exceptions as ge_exceptions
+from dateutil.parser import ParserError, parse
 from great_expectations.core import (
     ExpectationSuite,
     RunIdentifier,
@@ -39,6 +36,8 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
+    CURRENT_CONFIG_VERSION,
+    MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     DatasourceConfig,
@@ -63,6 +62,8 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import Validator
+from marshmallow import ValidationError
+from ruamel.yaml import YAML, YAMLError
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -2229,6 +2230,51 @@ class DataContext(BaseDataContext):
 
         logger.debug("Using project config: {}".format(yml_path))
         return result
+
+    @classmethod
+    def get_ge_config_version(cls, context_root_dir=None):
+        yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
+        if yml_path is None:
+            return
+
+        with open(yml_path) as f:
+            config_dict = yaml.load(f)
+
+        config_version = config_dict.get("config_version")
+        return float(config_version) if config_version else None
+
+    @classmethod
+    def set_ge_config_version(cls, config_version, context_root_dir=None):
+        if not isinstance(config_version, (int, float)):
+            raise ge_exceptions.UnsupportedConfigVersionError(
+                "The argument `config_version` must be a number.",
+            )
+
+        if config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+            raise ge_exceptions.UnsupportedConfigVersionError(
+                "Invalid config version ({}).\n    The version number must be at least {}. ".format(
+                    config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
+                ),
+            )
+        elif config_version > CURRENT_CONFIG_VERSION:
+            raise ge_exceptions.UnsupportedConfigVersionError(
+                "Invalid config version ({}).\n    The maximum valid version is {}.".format(
+                    config_version, CURRENT_CONFIG_VERSION
+                ),
+            )
+
+        yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
+        if yml_path is None:
+            return False
+
+        with open(yml_path) as f:
+            config_dict = yaml.load(f)
+            config_dict["config_version"] = config_version
+
+        with open(yml_path, "w") as f:
+            yaml.dump(config_dict, f)
+
+        return True
 
     @classmethod
     def find_context_yml_file(cls, search_start_dir=None):
