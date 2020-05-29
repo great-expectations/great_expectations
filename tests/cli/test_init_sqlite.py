@@ -98,11 +98,9 @@ def test_cli_init_on_new_project(
 
     obs_tree = gen_directory_tree_str(ge_dir)
 
-    # Instead of monkey patching datetime, just regex out the time directories
-    date_safe_obs_tree = re.sub(r"\d*T\d*\.\d*Z", "9999.9999", obs_tree)
     # Instead of monkey patching guids, just regex out the guids
     guid_safe_obs_tree = re.sub(
-        r"[a-z0-9]{32}(?=\.(json|html))", "foobarbazguid", date_safe_obs_tree
+        r"[a-z0-9]{32}(?=\.(json|html))", "foobarbazguid", obs_tree
     )
     # print(guid_safe_obs_tree)
     assert (
@@ -163,13 +161,13 @@ great_expectations/
                         data_docs_default_styles.css
                 validations/
                     warning/
-                        9999.9999/
-                            2019-09-26T13:42:41+00:00/
+                        20190926T134241.000000Z/
+                            20190926T134241.000000Z/
                                 foobarbazguid.html
         validations/
             warning/
-                9999.9999/
-                    2019-09-26T13:42:41+00:00/
+                20190926T134241.000000Z/
+                    20190926T134241.000000Z/
                         foobarbazguid.json
 """
     )
