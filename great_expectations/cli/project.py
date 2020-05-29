@@ -1,14 +1,11 @@
 import sys
 
 import click
-
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.upgrade_helpers import UpgradeHelperV11
 from great_expectations.cli.util import cli_message
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
-
-GE_UPGRADE_HELPERS = {"0.11": UpgradeHelperV11}
 
 
 @click.group()
