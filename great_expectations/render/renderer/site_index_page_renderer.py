@@ -3,6 +3,7 @@ import json
 import logging
 import traceback
 
+import tzlocal
 from dateutil.parser import parse
 
 from great_expectations.render.types import (
@@ -293,9 +294,12 @@ class SiteIndexPageRenderer(Renderer):
     @classmethod
     def _get_formatted_datetime(cls, _datetime):
         if isinstance(_datetime, datetime.datetime):
-            return _datetime.strftime("%m/%d/%Y %H:%M:%S")
+            local_datetime = _datetime.astimezone(tz=tzlocal.get_localzone())
+            return local_datetime.strftime("%m/%d/%Y %H:%M:%S %Z")
         elif isinstance(_datetime, str):
-            return parse(_datetime).strftime("%m/%d/%Y %H:%M:%S")
+            dt = parse(_datetime)
+            local_datetime = dt.astimezone(tz=tzlocal.get_localzone())
+            return local_datetime.strftime("%m/%d/%Y %H:%M:%S %Z")
         else:
             return None
 

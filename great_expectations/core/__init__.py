@@ -319,6 +319,12 @@ class RunIdentifier(DataContextKey):
 
     def __init__(self, run_name=None, run_time=None):
         super(RunIdentifier, self).__init__()
+        assert run_name is None or isinstance(
+            run_name, str
+        ), "run_name must be an instance of str"
+        assert run_time is None or isinstance(run_time, (datetime.datetime, str)), (
+            "run_time must be either None or " "an instance of str or datetime"
+        )
         self._run_name = run_name
 
         if isinstance(run_time, str):
@@ -331,7 +337,14 @@ class RunIdentifier(DataContextKey):
                 )
                 run_time = datetime.datetime.now(datetime.timezone.utc)
 
-        self._run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
+        run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
+        if not run_time.tzinfo:
+            # this takes the given time and just adds timezone (no conversion)
+            run_time = run_time.replace(tzinfo=datetime.timezone.utc)
+        else:
+            # this takes given time and converts to utc
+            run_time = run_time.astimezone(tz=datetime.timezone.utc)
+        self._run_time = run_time
 
     @property
     def run_name(self):
@@ -342,10 +355,16 @@ class RunIdentifier(DataContextKey):
         return self._run_time
 
     def to_tuple(self):
-        return self._run_name or "__none__", self._run_time.isoformat()
+        return (
+            self._run_name or "__none__",
+            self._run_time.strftime("%Y%m%dT%H%M%S.%fZ"),
+        )
 
     def to_fixed_length_tuple(self):
-        return self._run_name or "__none__", self._run_time.isoformat()
+        return (
+            self._run_name or "__none__",
+            self._run_time.strftime("%Y%m%dT%H%M%S.%fZ"),
+        )
 
     def __repr__(self):
         return json.dumps(self.to_json_dict())
@@ -639,7 +658,10 @@ class ExpectationSuite(object):
             self.meta["citations"] = []
         self.meta["citations"].append(
             {
-                "citation_date": citation_date or datetime.datetime.now().isoformat(),
+                "citation_date": citation_date
+                or datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                ),
                 "batch_kwargs": batch_kwargs,
                 "batch_markers": batch_markers,
                 "batch_parameters": batch_parameters,
