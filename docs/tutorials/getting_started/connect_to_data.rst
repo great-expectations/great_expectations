@@ -6,41 +6,42 @@ Connect to data
 Once you have a DataContext, you'll want to connect to data.  In Great Expectations, :ref:`Datasources` simplify connections, by managing configuration and providing a consistent, cross-platform API for referencing data.
 
 Let's configure your first Datasource, by following the next steps in the CLI init flow:
-
+    
 .. code-block:: bash
-
+    
     Would you like to configure a Datasource? [Y/n]: 
-
-    What data would you like Great Expectations to connect to?    
+    
+    What data would you like Great Expectations to connect to?
         1. Files on a filesystem (for processing with Pandas or Spark)
         2. Relational database (SQL)
     : 1
-
+    
     What are you processing your files with?
         1. Pandas
         2. PySpark
     : 1
-
+    
     Enter the path (relative or absolute) of the root directory where the data files are stored.
-    : /Users/eugenemandel/project_data/womens-shoes-prices
-
+    : my_data
+    
     Give your new Datasource a short name.
-      [womens-shoes-prices__dir]: 
-
-    Great Expectations will now add a new Datasource 'womens-shoes-prices__dir' to your deployment,
+     [my_data__dir]: 
+    
+    Great Expectations will now add a new Datasource 'my_data__dir' to your deployment,
     by adding this entry to your great_expectations.yml:
-
-      womens-shoes-prices__dir:
+    
+      my_data__dir:
         data_asset_type:
           class_name: PandasDataset
           module_name: great_expectations.dataset
         batch_kwargs_generators:
           subdir_reader:
             class_name: SubdirReaderBatchKwargsGenerator
-            base_directory: /Users/eugenemandel/project_data/womens-shoes-prices
-
-    OK to proceed? [Y/n]: 
-
+            base_directory: ../my_data
+        class_name: PandasDatasource
+    
+    
+    Would you like to proceed? [Y/n]: 
 
 That's it! You just configured your first Datasource!
 
@@ -75,23 +76,25 @@ Configuring Datasources
 
 When you completed those last few steps in ``great_expectations init``, you told Great Expectations that
 
-1. You want to create a new Datasource called ``womens-shoes-prices__dir``.
+1. You want to create a new Datasource called ``my_data__dir``.
 2. You want to use Pandas as your :ref:`Execution Engine <Execution Engines>`, hence ``data_asset_type.class_name = PandasDataset``.
 3. You want to create a BatchKwarg Generator called ``subdir_reader`` using the class ``SubdirReaderBatchKwargsGenerator``.
-4. This particular Generator connects to data in files within a local directory, specified here as ``/Users/eugenemandel/project_data/womens-shoes-prices``.
+4. This particular Generator connects to data in files within a local directory, specified here as ``../my_data``.
 
 Based on that information, the CLI added the following entry into your ``great_expectations.yml`` file, under the ``datasources`` header:
 
 .. code-block:: yaml
 
-    womens-shoes-prices__dir:
+    my_data__dir:
       data_asset_type:
         class_name: PandasDataset
         module_name: great_expectations.dataset
       batch_kwargs_generators:
         subdir_reader:
           class_name: SubdirReaderBatchKwargsGenerator
-          base_directory: /Users/eugenemandel/project_data/womens-shoes-prices
+          base_directory: ../my_data
+      class_name: PandasDatasource
+
 
 In the future, you can modify or delete your configuration by editing your ``great_expectations.yml`` file directly. For instructions on how to configure various Datasources, check out :ref:`How-to guides for configuring Datasources <how_to_guides__configuring_datasources>`.
 

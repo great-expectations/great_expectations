@@ -258,7 +258,9 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             if matches is None:
                 logger.warning("No match found for path: %s" % path)
                 return (
-                    datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+                    datetime.datetime.now(datetime.timezone.utc).strftime(
+                        "%Y%m%dT%H%M%S.%fZ"
+                    )
                     + "__unmatched"
                 )
             else:
@@ -269,7 +271,9 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                         "No match group %d in path %s" % (match_group_id, path)
                     )
                     return (
-                        datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+                        datetime.datetime.now(datetime.timezone.utc).strftime(
+                            "%Y%m%dT%H%M%S.%fZ"
+                        )
                         + "__no_match_group"
                     )
 

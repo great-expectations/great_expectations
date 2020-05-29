@@ -89,3 +89,7 @@ Additional notes
     Great Expectations will choose which Expectations **might make sense** for a column based on the type and cardinality of the data in each selected column.
 
     You will definitely want to edit the Suite to hone it after scaffolding.
+
+
+.. discourse::
+    :topic_identifier: 199

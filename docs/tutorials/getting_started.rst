@@ -4,11 +4,6 @@
 Getting started
 ###############
 
-.. warning::
-
-   We're really excited about our new documentation, but this Getting Started Guide is brand new and still incomplete. Please refer to the older getting started materials at https://docs.greatexpectations.io/en/0.10.12/getting_started/cli_init.html as needed to help you get going!
-
-
 Welcome to Great Expectations! This tutorial will help you set up your first deployment of Great Expectactions. We'll also introduce important concepts, with links to detailed material you can dig into later.
 
 Please follow these steps to get started:
@@ -103,14 +98,14 @@ Please follow these steps to get started:
          <strong class="fa-stack-1x">
             5
          </strong>
-      </span> Validate some data</h2>
+      </span> Set up your first Checkpoint</h2>
    </embed>
 
 .. container:: custom-indented-paragraph
 
-   Maecenas varius purus odio, nec condimentum nisi viverra et. Ut eu ornare ex, sed finibus dolor. Suspendisse potenti. Nulla vel massa ornare, ultrices odio nec, porttitor sapien. #FIXME
-   
-   Curabitur vehicula placerat porttitor. Sed a sem tortor. Curabitur lobortis, massa vitae dignissim posuere, leo dolor hendrerit est, non sollicitudin eros metus quis velit. Curabitur ut enim vitae velit euismod ullamcorper. Duis vehicula vel metus at aliquet. Pellentesque lacinia mi id mollis pharetra. Donec at maximus erat. Praesent ut odio ante. #FIXME
+   In normal usage, the best way to validate data is with a :ref:`Checkpoint`. Checkpoints simplify deployment, by pre-specifying the data and Expectations that to validate at any given point in your data infrastructure, along with follow-up actions to trigger based on the results of validation.
+
+   Follow these instructions to :ref:`set up your first Checkpoint`.
 
 .. raw:: html
 

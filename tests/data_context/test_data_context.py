@@ -460,7 +460,7 @@ project_path/
                         Titanic/
                             BasicDatasetProfiler/
                                 profiling/
-                                    2019-09-26T13:42:41+00:00/
+                                    20190926T134241.000000Z/
                                         {}.json
 """.format(
             titanic_profiled_batch_id
@@ -541,19 +541,19 @@ data_docs/
                     f1/
                         BasicDatasetProfiler/
                             profiling/
-                                2019-09-26T13:42:41+00:00/
+                                20190926T134241.000000Z/
                                     {0:s}.html
                     f2/
                         BasicDatasetProfiler/
                             profiling/
-                                2019-09-26T13:42:41+00:00/
+                                20190926T134241.000000Z/
                                     {1:s}.html
             titanic/
                 subdir_reader/
                     Titanic/
                         BasicDatasetProfiler/
                             profiling/
-                                2019-09-26T13:42:41+00:00/
+                                20190926T134241.000000Z/
                                     {2:s}.html
 """.format(
             f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id
