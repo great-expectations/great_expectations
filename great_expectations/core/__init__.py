@@ -6,9 +6,6 @@ from collections import namedtuple
 from copy import deepcopy
 
 from dateutil.parser import parse
-from IPython import get_ipython
-from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
-
 from great_expectations import __version__ as ge_version
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import IDDict
@@ -22,6 +19,8 @@ from great_expectations.exceptions import (
     UnavailableMetricError,
 )
 from great_expectations.types import DictDot
+from IPython import get_ipython
+from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 
 logger = logging.getLogger(__name__)
 
@@ -339,7 +338,11 @@ class RunIdentifier(DataContextKey):
 
         run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
         if not run_time.tzinfo:
+            # this takes the given time and just adds timezone (no conversion)
             run_time = run_time.replace(tzinfo=datetime.timezone.utc)
+        else:
+            # this takes given time and converts to utc
+            run_time = run_time.astimezone(tz=datetime.timezone.utc)
         self._run_time = run_time
 
     @property
@@ -383,7 +386,7 @@ class RunIdentifier(DataContextKey):
 
 class RunIdentifierSchema(Schema):
     run_name = fields.Str()
-    run_time = fields.DateTime(format="%Y%m%dT%H%M%S.%fZ")
+    run_time = fields.DateTime(format="iso")
 
     @post_load
     def make_run_identifier(self, data, **kwargs):
