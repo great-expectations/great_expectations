@@ -48,7 +48,7 @@ def test_SlackRenderer():
                 "elements": [
                     {
                         "type": "mrkdwn",
-                        "text": "Learn how to review validation results: https://docs.greatexpectations.io/en/latest/features/validation.html#reviewing-validation-results",
+                        "text": "Learn how to review validation results in Data Docs: https://docs.greatexpectations.io/en/latest/tutorials/getting_started/set_up_data_docs.html#_getting_started__set_up_data_docs",
                     }
                 ],
             },
