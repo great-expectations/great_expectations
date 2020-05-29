@@ -390,16 +390,27 @@ def select_datasource(context: DataContext, datasource_name: str = None) -> Data
     return data_source
 
 
-def load_data_context_with_error_handling(directory: str) -> DataContext:
+def load_data_context_with_error_handling(directory: str, from_cli_upgrade_command: bool = False) -> DataContext:
     """Return a DataContext with good error handling and exit codes."""
     # TODO consolidate all the myriad CLI tests into this
     try:
         context = DataContext(directory)
         return context
+    except ge_exceptions.UnsupportedConfigVersionError as err:
+        ge_config_version = DataContext.get_ge_config_version(context_root_dir=directory)
+        upgrade_helper = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version)) if ge_config_version else None
+        if not upgrade_helper and ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+            upgrade_project(
+                context_root_dir=directory,
+                ge_config_version=ge_config_version,
+                from_cli_upgrade_command=from_cli_upgrade_command
+            )
+        else:
+            cli_message("<red>{}</red>".format(err.message))
+            sys.exit(1)
     except (
         ge_exceptions.ConfigNotFoundError,
         ge_exceptions.InvalidConfigError,
-        ge_exceptions.UnsupportedConfigVersionError,
     ) as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)
