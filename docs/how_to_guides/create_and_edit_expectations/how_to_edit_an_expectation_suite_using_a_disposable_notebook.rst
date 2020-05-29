@@ -32,3 +32,6 @@ To make this easier still, the Data Docs page for each Expectation Suite has the
 Simply press the "How to Edit This Suite" button, and copy/paste the :ref:`CLI <command_line>` command into your terminal.
 
 .. image:: ../../images/edit_e_s_popup.png
+
+.. discourse::
+    :topic_identifier: 214

@@ -48,7 +48,7 @@ def test_SlackRenderer():
                 "elements": [
                     {
                         "type": "mrkdwn",
-                        "text": "Learn how to review validation results: https://docs.greatexpectations.io/en/latest/features/validation.html#reviewing-validation-results",
+                        "text": "Learn how to review validation results in Data Docs: https://docs.greatexpectations.io/en/latest/tutorials/getting_started/set_up_data_docs.html#_getting_started__set_up_data_docs",
                     }
                 ],
             },
@@ -65,9 +65,9 @@ def test_SlackRenderer():
     ][0]["text"]["text"].replace("09/24/2019 23:18:36", "LOCALEDATE")
     rendered_output["blocks"][0]["text"]["text"] = rendered_output["blocks"][0]["text"][
         "text"
-    ].replace("09/24/2019 11:18:36 PM", "LOCALEDATE")
+    ].replace("09/24/2019 11:18:36 PM UTC", "LOCALEDATE")
     rendered_output["blocks"][0]["text"]["text"] = rendered_output["blocks"][0]["text"][
         "text"
-    ].replace("09/24/2019 23:18:36", "LOCALEDATE")
+    ].replace("09/24/2019 23:18:36 UTC", "LOCALEDATE")
 
     assert rendered_output == expected_renderer_output

@@ -50,7 +50,7 @@ def test_StoreAction():
     )
 
     expected_run_id = RunIdentifier(
-        run_name="prod_20190801", run_time="2019-09-26T13:42:41+00:00"
+        run_name="prod_20190801", run_time="20190926T134241.000000Z"
     )
 
     assert len(fake_in_memory_store.list_keys()) == 1

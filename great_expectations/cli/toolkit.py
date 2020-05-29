@@ -183,7 +183,7 @@ Great Expectations will store these expectations in a new Expectation Suite '{0:
 
     # TODO this may not apply
     cli_message("\nGenerating example Expectation Suite...")
-    run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+    run_id = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
     profiling_results = context.profile_data_asset(
         datasource_name,
         batch_kwargs_generator_name=batch_kwargs_generator_name,

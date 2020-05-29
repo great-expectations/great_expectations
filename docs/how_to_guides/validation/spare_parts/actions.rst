@@ -8,29 +8,6 @@ An action is a way to take an arbitrary method and make it configurable and runn
 
 The only requirement from an action is for it to have a take_action method.
 
-
-SlackNotificationAction
-------------------------
-
-SlackNotificationAction is a validation action that sends a Slack notification to a given webhook
-
-Configuration
-~~~~~~~~~~~~~
-
-.. code-block:: yaml
-
-    - name: send_slack_notification_on_validation_result
-    action:
-      class_name: SlackNotificationAction
-      # put the actual webhook URL in the uncommitted/config_variables.yml file
-      slack_webhook: ${validation_notification_slack_webhook}
-      notify_on: all # possible values: "all", "failure", "success"
-
-      renderer:
-        module_name: great_expectations.render.renderer.slack_renderer
-        class_name: SlackRenderer
-
-
 StoreValidationResultAction
 -----------
 

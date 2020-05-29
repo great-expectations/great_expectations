@@ -158,7 +158,11 @@ class SparkDFDatasource(Datasource):
 
         # We need to build batch_markers to be used with the DataFrame
         batch_markers = BatchMarkers(
-            {"ge_load_time": datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")}
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
         )
 
         if "path" in batch_kwargs or "s3" in batch_kwargs:
