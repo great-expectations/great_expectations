@@ -1,16 +1,19 @@
-.. _how_to_guides__miscellaneous__how_to_write_a_how_to_guide:
+.. _how_to_guides__miscellaneous__how_to_add_comments_to_a_page_in_documentation:
 
 How to add comments to a page on docs.greatexpectations.io
 ==========================================================
 
 Many of the pages in Great Expectations' documentation allow comments through our discussion forum. Here's how to enable comments, specifically on :ref:`How-to Guides`.
 
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+  - :ref:`Written a new How-to Guide <how_to_guides__miscellaneous__how_to_write_a_how_to_guide>`
+
 
 Steps
 -----
 
-1. Write a new How-to Guide, or convert an existing stub into a fully-fledged guide.
-2. Create and publish an article on the `Great Expectations discussion forum <https://discuss.greatexpectations.io/>`_.
+1. Create and publish an article on the `Great Expectations discussion forum <https://discuss.greatexpectations.io/>`_.
 
 	- Please use the title of your How-to Guide as the title of the article (Ex: "How to configure an ActionListValidationOperator").
 	- Please copy and paste this text into the body of the article, and replace the link with your guide's link.
@@ -21,7 +24,7 @@ Steps
         
         Please comment +1 if this How-to Guide is important to you.
 	
-3. After publishing the article, find the ``topic_id`` at the end of the article's URL: (Ex: ``219`` in ``/t/how-to-configure-an-actionlistvalidationoperator/219``). Please add this code to the bottom of your Guide, and replace ``{topic_id}`` with the real id.
+2. After publishing the article, find the ``topic_id`` at the end of the article's URL: (Ex: ``219`` in ``/t/how-to-configure-an-actionlistvalidationoperator/219``). Please add this code to the bottom of your Guide, and replace ``{topic_id}`` with the real id.
 
 .. raw:: html
 
