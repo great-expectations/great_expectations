@@ -51,3 +51,9 @@ Additional resources
 --------------------
 
 - `Links in RST <https://docutils.sourceforge.io/docs/user/rst/quickref.html#hyperlink-targets>`_ are a pain.
+
+Comments
+--------
+
+.. discourse::
+   :topic_identifier: {{topic_id}}
