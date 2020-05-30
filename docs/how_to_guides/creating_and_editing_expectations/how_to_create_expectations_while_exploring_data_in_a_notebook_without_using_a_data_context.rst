@@ -107,7 +107,7 @@ All of these steps take place within your notebook:
         my_df.get_expectation_suite(discard_failed_expectations=False)
 
 
-5. **Review your Expectations.**
+5. **Save your Expectation Suite.**
 
     Expectation Suites can be serialized as JSON objects, so you can save your Expectation Suite like this:
 
