@@ -3,6 +3,8 @@
 How to create Expectations while exploring data in a notebook, without using a Data Context.
 ============================================================================================
 
+Building :ref:`Expectations` as you conduct exploratory data analysis is a great way to ensure that your insights about data processes and pipelines remain part of your team's knowledge.
+
 This guide will help you get started quickly in Great Expectations, without even setting up a :ref:`Data Context`. All you need is a notebook and some data.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
@@ -10,9 +12,7 @@ This guide will help you get started quickly in Great Expectations, without even
     - Installed Great Expectations (e.g. ``pip install great_expectations``)
     - Have access to a notebook (e.g. ``jupyter notebook``, ``jupyter lab``, etc.)
     - Be able to access data from your notebook
-    - Nothing else
-
-    Unlike most how-to guides, these instructions do *not* assume that you have configured a Data Context by running ``great_expectations init``. You can find more guides like this here: “reference/A magic-free introduction to GE”
+    - Nothing else. Unlike most how-to guides, these instructions do *not* assume that you have configured a Data Context by running ``great_expectations init``.
 
 Steps
 -----
@@ -45,7 +45,7 @@ All of these steps take place within your notebook:
 
     Similarly wrapped versions of other pandas methods (``read_excel``, ``read_table``, ``read_parquet``, ``read_pickle``, ``read_json``, etc.) are also available. Please see the <great_expectations utils module> for details.
 
-    If you wish to load data from somewhere else (e.g. from a SQL database or blob store), please fetch a copy of the data locally, or :ref:`configure a Datasource`_. (In the future, you will likely want to configure Datasources anyway, to take advantage of more of <Great Expectations' advanced features>.)
+    If you wish to load data from somewhere else (e.g. from a SQL database or blob store), please fetch a copy of the data locally, or :ref:`configure a Datasource <tutorials__getting_started__connect_to_data>`. (In the future, you will likely want to configure Datasources anyway, to take advantage of more of Great Expectations' advanced features.)
 
     As another option, if you have already instantiated a ``pandas.Dataframe``, you can use ``from_pandas``:
 
@@ -59,29 +59,28 @@ All of these steps take place within your notebook:
 
 3. **Explore your data and add Expectations.**
 
-    All of the methods in step 1 will produce ``my_df``, a ``PandasDataAsset``. ``PandasDataAsset`` is a subclass of ``pandas.DataFrame``, which means that you can use all of pandas' normal methods on it.
+    Each of the methods in step 1 will produce ``my_df``, a ``PandasDataAsset``. ``PandasDataAsset`` is a subclass of ``pandas.DataFrame``, which means that you can use all of pandas' normal methods on it.
 
     .. code-block:: python
 
         my_df.head()
         my_df.Sex.value_counts()
-        my_df[my_df.Sex=="M"].head()
-        my_df.group_by(...)
+        my_df[my_df.Sex=="male"].head()
         # etc., etc. 
         
-    In addition to these methods, ``my_df`` has access to a wide array of :ref:`Expectations` methods. (You can see the full list here.) By convention, every Expectation method name starts with the name ``expect_...``, so you can quickly access the full list with tab-based autocomplete:
+    In addition, ``my_df`` has access to a wide array of Expectations. You can see the full list :ref:`here <Glossary of Expectations>`. By convention, every Expectation method name starts with the name ``expect_...``, so you can quickly access the full list with tab-based autocomplete:
 
     .. image:: ../../images/expectation_autocomplete.gif
 
     |
 
-    When you invoke an Expectation, it will immediately evaluate against your data and return a dictionary containing the result and a list of exceptions. This instant feedback helps you zero in on exceptions very quickly, taking a lot of the pain and guesswork out of data exploration.
+    When you invoke an Expectation, it will immediately be validated against your data. The returned object will contain the result and a list of exceptions. This instant feedback helps you zero in on exceptions very quickly, taking a lot of the guesswork out of data exploration.
 
     .. image:: ../../images/expectation_notebook_interactive_loop.gif
 
     |
 
-    Hint: it's common to encounter data issues where most cases match, but you can't guarantee 100% adherence. In these cases, consider using a ``mostly`` parameter. This parameter is an option for all <Expectations that are applied on a row-by-row basis>, and allows you to build wiggle room into your data validation.
+    Hint: it's common to encounter data issues where most cases match, but you can't guarantee 100% adherence. In these cases, consider using a ``mostly`` parameter. This parameter is an option for all Expectations that are applied on a row-by-row basis, and allows you to control the level of wiggle room you want built into your data validation.
 
     .. figure:: ../../images/interactive_mostly.gif
 
@@ -89,33 +88,51 @@ All of these steps take place within your notebook:
 
     |
 
-4. **Review and save your Expectations.**
+4. **Review your Expectations.**
 
-    As you run Expectations in your notebook, ``my_df`` will build up a running list of Expectations.
+    As you run Expectations in your notebook, ``my_df`` will build up a running list of Expectations. By default, Great Expectations will recognize and replace duplicate Expectations, so that only the most recent version is stored. (See :ref:`Determining duplicate results` below for details.)
 
-    Great Expectations is smart enough to recognize and replace duplicate Expectations. (For more details, see XXX.)
+    You can get the config file for your Expectations by running:
+
+    .. code-block:: python
+    
+        my_df.get_expectation_suite()
+
+    which will return an :ref:`ExpectationSuite` object.
+
+    By default, ``get_expectation_suite()`` only returns Expectations with ``success=True`` on their most recent validation. You can override this behavior with:
+    
+    .. code-block:: python
+
+        my_df.get_expectation_suite(discard_failed_expectations=False)
 
 
+5. **Review your Expectations.**
+
+    Expectation Suites can be serialized as JSON objects, so you can save your Expectation Suite like this:
+
+    .. code-block:: python
+    
+        import json
+
+        with open( "my_expectation_file.json", "w") as my_file:
+            my_file.write(
+                json.dumps(my_df.get_expectation_suite().to_json_dict())
+            )
+    
+    As you develop more Expectation Suites, you'll probably want some kind of system for naming and organizing them, not to mention matching them up with data, validating them, and keeping track of validation results.
+
+    When you get to this stage, we recommend following the :ref:`Getting started` tutorial to set up a :ref:`Data Context`. You can get through the basics in less than half an hour, and setting up a Data Context will unlock many additional power tools within Great Expectations.
+        
 Additional notes
 ----------------
-
-Building Expectations as you conduct exploratory data analysis is a great way to ensure that your insights about data processes and pipelines remain part of your team's knowledge.
-
-Great Expectations's library of Expectations has been developed by a broad cross-section of data scientists and engineers. Check out the :ref:`expectation_glossary`; it covers all kinds of practical use cases:
-
-* Foreign key verification and row-based accounting for ETL
-* Form validation and regex pattern-matching for names, URLs, dates, addresses, etc.
-* Checks for missing data
-* Crosstabs
-* Distributions for statistical modeling.
-* etc.
 
 Adding notes and metadata
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can also add notes or even structured metadata to Expectations:
+You can also add notes and structured metadata to Expectations:
 
-.. code-block:: bash
+.. code-block:: python
 
     >> my_df.expect_column_values_to_match_regex(
         "Name",
@@ -126,11 +143,83 @@ You can also add notes or even structured metadata to Expectations:
             }
        )
 
+Determining duplicate results
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As a general rule, 
+
+    - If a given Expectation has no ``column`` parameters, it will replace another Expectation(s) of the same type.
+
+        Example:
+        
+        .. code-block:: python
+        
+            expect_table_row_count_to_equal(100)
+
+        will overwrite
+        
+        .. code-block:: python
+
+            expect_table_row_count_to_equal(200)
+
+    - If a given Expectation has one or more ``column`` parameters, it will replace another Expectation(s) of the same type with the same column parameter(s).
+
+        Example:
+
+        .. code-block:: python
+        
+            expect_column_values_to_be_between(
+                column="percent_agree",
+                min_value=0,
+                max_value=100,
+            )
+
+        will overwrite
+        
+        .. code-block:: python
+
+            expect_column_values_to_be_between(
+                column="percent_agree",
+                min_value=10,
+                max_value=90,
+            )
+        
+        or
+
+        .. code-block:: python
+
+            expect_column_values_to_be_between(
+                column="percent_agree",
+                min_value=0,
+                max_value=100,
+                mostly=.80,
+            )
+
+        but not
+
+        .. code-block:: python
+
+            expect_column_values_to_be_between(
+                column="percent_agreement",
+                min_value=0,
+                max_value=100,
+                mostly=.80,
+            )
+        
+        and not
+
+        .. code-block:: python
+
+            expect_column_mean_to_be_between(
+                column="percent",
+                min_value=65,
+                max_value=75,
+            )
+
 Additional resources
 --------------------
 
-- An example notebook.
-- Glossary of Expectations
+- :ref:`Glossary of Expectations`
 
 
 Comments
