@@ -98,4 +98,4 @@ Based on that information, the CLI added the following entry into your ``great_e
 
 In the future, you can modify or delete your configuration by editing your ``great_expectations.yml`` file directly. For instructions on how to configure various Datasources, check out :ref:`How-to guides for configuring Datasources <how_to_guides__configuring_datasources>`.
 
-For now, let's continue to :ref:`getting_started__create_your_first_expectations`.
+For now, let's continue to :ref:`tutorials__getting_started__create_your_first_expectations`.
