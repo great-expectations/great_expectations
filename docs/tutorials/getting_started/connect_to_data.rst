@@ -1,4 +1,4 @@
-.. _getting_started__connect_to_data:
+.. _tutorials__getting_started__connect_to_data:
 
 Connect to data
 ===============

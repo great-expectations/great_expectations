@@ -1,4 +1,4 @@
-.. _getting_started__customize_your_deployment:
+.. _tutorials__getting_started__customize_your_deployment:
 
 Customize your deployment
 =========================
