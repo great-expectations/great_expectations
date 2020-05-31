@@ -43,7 +43,7 @@ The CLI will help you create your first Expectations. You can accept the default
     Done generating example Expectation Suite
 
 
-:: _tutorials__getting_started__create_your_first_expectations__what_just_happened:
+.. _tutorials__getting_started__create_your_first_expectations__what_just_happened:
 
 What just happened?
 -------------------
