@@ -394,5 +394,6 @@ usage_statistics_record_schema = {
 
 if __name__ == "__main__":
     import json
+
     with open("usage_statistics_record_schema.json", "w") as outfile:
         json.dump(usage_statistics_record_schema, outfile, indent=2)
