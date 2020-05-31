@@ -3,17 +3,256 @@
 How to create custom Expectations for pandas
 ============================================
 
-.. admonition:: Admonition from Mr. Dickens
+Custom Expectations let you extend the logic for validating data to use any criteria you choose. This guide will show you how to extend the ``PandasDataset`` class with your own :ref:`Expectations`.
 
-    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+    - Installed Great Expectations (e.g. ``pip install great_expectations``)
+    - Have access to a notebook (e.g. ``jupyter notebook``, ``jupyter lab``, etc.)
+    - Be able to access data from your notebook
+    - Nothing else. Unlike most how-to guides, these instructions do *not* assume that you have configured a Data Context by running ``great_expectations init``.
+
+Steps
+-----
+
+1. **Import great_expectations and PandasDataset and MetaPandasDataset**
+
+    .. code-block:: python
+
+        import great_expectations as ge
+        from great_expectations.dataset import (
+            PandasDataset,
+            MetaPandasDataset,
+        )
+
+    ``PandasDataset`` is the parent class used for executing Expectations on pandas Dataframes. Most of the core Expectations are built using decorators defined in ``MetaPandasDataset``. These decorators greatly streamline the task of extending Great Expectations with custom Expectation logic.
+
+2. **Define a class inheriting from PandasDataset**
+
+    .. code-block:: python
+
+        class MyCustomPandasDataset(PandasDataset):
+
+            _data_asset_type = "MyCustomPandasDataset"
+
+    Setting the ``_data_asset_type`` is not strictly necessary, but can be helpful for tracking the lineage of instantiated Expectations and :ref:`Validation Results`.
+
+3. **Within your new class, define Expectations using decorators from MetaPandasDataset**
+
+    ``column_map_expectations`` are Expectations that are applied to a single column, on a row-by-row basis. To learn about other Expectation types, please see :ref:`Other Expectation decorators` below.
+
+    The ``@MetaPandasDataset.column_map_expectation`` decorator wraps your custom function with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like ``mostly`` and ``result_format``. Your custom function can focus exclusively on the business logic of passing or failing the Expectation.
+
+    In the simplest case, they could be as simple as one-line lambda functions.
+
+    .. code-block:: python
+
+        @MetaPandasDataset.column_map_expectation
+        def expect_column_values_to_be_even(self, column):
+            return column.map(lambda x: x%2==0)
 
 
-This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
+    To use the ``column_map_expectation`` decorator, your custom function must accept at least two arguments: ``self`` and ``column``. When the user invokes your Expectation, they will pass a string containing the column name. The decorator will then fetch the appropriate column and pass all of the non-null values to your function as a pandas ``Series``. Your function must then return a Series of boolean values in the same order, with the same index.
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+    Custom functions can also accept additional arguments:
 
-If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
+    .. code-block:: python
 
+        @MetaPandasDataset.column_map_expectation
+        def expect_column_values_to_be_less_than(self, column, value):
+            return column.map(lambda x: x<value)
+
+    Custom functions can have complex internal logic:
+
+    .. code-block:: python
+
+        @MetaPandasDataset.column_map_expectation
+        def expect_column_value_word_counts_to_be_between(self, column, min_value=None, max_value=None):        
+            def count_words(string):
+                word_list = re.findall("(\S+)", string)
+                return len(word_list)
+
+            word_counts = column.map(lambda x: count_words(str(x)))
+
+            if min_value != None and max_value != None:
+                return word_counts.map(lambda x: min_value <= x <= max_value)
+            elif min_value != None and max_value == None:
+                return word_counts.map(lambda x: min_value <= x)
+            elif min_value == None and max_value != None:
+                return word_counts.map(lambda x: x <= max_value)
+            else:
+                return word_counts.map(lambda x: True)
+
+    Custom functions can reference external modules and methods:
+
+    .. code-block:: python
+
+        import pytz
+
+        @MetaPandasDataset.column_map_expectation
+        def expect_column_values_to_be_valid_timezones(self, column, timezone_values=pytz.all_timezones):
+            return column.map(lambda x: x in timezone_values)
+
+    By convention, ``column_map_expectations`` always start with ``expect_column_values_...`` or ``expect_column_value_...`` (Ex: ``expect_column_value_word_counts_to_be_between``). Following this pattern is highly recommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you.
+
+
+4. **Load some data**
+
+    To make your new Expectations available for validation, you can instantiate a ``MyCustomPandasDataset`` as follows:
+
+    .. code-block:: python
+
+        my_df = ge.read_csv("./data/Titanic.csv", dataset_class=MyCustomPandasDataset)
+
+    You can also coerce an existing pandas DataFrame to your class using ``from_pandas``:
+
+    .. code-block:: python
+
+        my_df = pd.read_csv("./data/Titanic.csv")
+        ge.from_pandas(my_other_df, dataset_class=MyCustomPandasDataset)
+
+    The same method can be used to coerce an existing Great Expectations DataAsset to your class, even though it's not actually from pandas:
+
+    .. code-block:: python
+
+        my_df = ge.read_csv("./data/Titanic.csv")
+        ge.from_pandas(my_other_df, dataset_class=MyCustomPandasDataset)
+    
+
+5. **Test your Expectations**
+
+    At this point, you can test your new Expectations exactly like built-in Expectations. All out-of-the-box Expectations will still be available, plus your new methods.
+
+    .. code-block:: python
+
+        my_df.expect_column_values_to_be_even("Survived")
+
+    returns
+
+    .. code-block:: json
+
+        {
+            "success": false,
+            "meta": {},
+            "result": {
+                "element_count": 1313,
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_count": 450,
+                "unexpected_percent": 34.27265803503427,
+                "unexpected_percent_nonmissing": 34.27265803503427,
+                "partial_unexpected_list": [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+            },
+            "exception_info": null
+        }
+
+    As mentioned previously, that the ``column_map_expectation`` decorator extends the arguments to include other arguments, like ``mostly``. Please see the module documentation for full details.
+
+    .. code-block:: python
+
+        my_df.expect_column_values_to_be_even("Survived", mostly=.6)
+
+    returns
+
+    .. code-block:: json
+
+        {
+            "success": true,
+            "meta": {},
+            "result": {
+                "element_count": 1313,
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_count": 450,
+                "unexpected_percent": 34.27265803503427,
+                "unexpected_percent_nonmissing": 34.27265803503427,
+                "partial_unexpected_list": [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+            },
+            "exception_info": null
+        }
+
+    Often, the best development loop for custom Expectations is iterative: editing Expectations in ``MyCustomPandasDataset``, then re-running the cells to load data and execute Expectations on data.
+
+Additional notes
+----------------
+
+
+Other Expectation decorators
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Aside from ``column_map_expectations``, there are several other types of Expectations you can create.
+
+- ``column_aggregate_expectations`` generate a single observed value for a whole column.
+- ``column_pair_map_`` and ``column_pair_aggregate_expectations`` apply to pairs of columns.
+- ``multicolumn_map_`` and ``multicolumn_aggregate_expectations`` apply to multiple columns.
+- It's also possible to define table-level Expectations using the ``@expectations`` decorator.
+- Not to mention non-tabular Expectations, using other DataAsset types, like :ref:`FileDataAsset`.
+
+Please refere to the module documentation and tests for details on how to implement each of these.
+
+
+Additional resources
+--------------------
+
+Here's a single code block containing all the code in this article:
+
+.. code-block:: python
+
+    import re
+    import pytz
+    
+    class MyCustomPandasDataset(PandasDataset):
+
+        _data_asset_type = "MyCustomPandasDataset"
+
+        @MetaPandasDataset.column_map_expectation
+        def expect_column_values_to_be_even(self, column):
+            return column.map(lambda x: x%2==0)
+
+        @MetaPandasDataset.column_map_expectation
+        def expect_column_value_most_common_characters_to_be(self, column, values):
+            return column.map(lambda x: set(get_most_common_characters(x))==set(values))
+
+        @MetaPandasDataset.column_map_expectation
+        def expect_column_value_word_counts_to_be_between(self, column, min_value=None, max_value=None):        
+            def count_words(string):
+                word_list = re.findall("(\S+)", string)
+                return len(word_list)
+
+            word_counts = column.map(lambda x: count_words(str(x)))
+
+            if min_value != None and max_value != None:
+                return word_counts.map(lambda x: min_value <= x <= max_value)
+            elif min_value != None and max_value == None:
+                return word_counts.map(lambda x: min_value <= x)
+            elif min_value == None and max_value != None:
+                return word_counts.map(lambda x: x <= max_value)
+            else:
+                return word_counts.map(lambda x: True)
+
+        @MetaPandasDataset.column_map_expectation
+        def expect_column_values_to_be_valid_timezones(self, column, timezone_values=pytz.all_timezones):
+            return column.map(lambda x: x in timezone_values)
+    
+    #Instantiate the class in several different ways
+    my_df = ge.read_csv("my_data/Titanic.csv", dataset_class=MyCustomPandasDataset)
+
+    my_other_df = pd.read_csv("my_data/Titanic.csv")
+    ge.from_pandas(my_other_df, dataset_class=MyCustomPandasDataset)
+
+    my_other_df = ge.read_csv("my_data/Titanic.csv")
+    ge.from_pandas(my_other_df, dataset_class=MyCustomPandasDataset)
+
+    # Run Expectations in assertions so that they can be used as tests for this guide
+    assert my_df.expect_column_values_to_be_in_set("Sex", value_set=["Male", "Female"]).success == False
+    assert my_df.expect_column_values_to_be_even("Survived").success == False
+    assert my_df.expect_column_values_to_be_even("Survived", mostly=.6).success == True
+    assert my_df.expect_column_value_word_counts_to_be_between("Name", 3, 5).success == False
+    assert my_df.expect_column_value_word_counts_to_be_between("Name", 3, 5, mostly=.9).success == True
+    assert my_df.expect_column_values_to_be_valid_timezones("Name", mostly=.9).success == False
+
+Comments
+--------
 
 .. discourse::
     :topic_identifier: 201
