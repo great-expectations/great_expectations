@@ -47,12 +47,12 @@ def project_check_config(directory):
 )
 def project_upgrade(directory):
     """Upgrade a project after installing the next Great Expectations major version."""
-    cli_message("Checking project...\n")
+    cli_message("Checking project...")
     if load_data_context_with_error_handling(
         directory=directory, from_cli_upgrade_command=True
     ):
         up_to_date_message = "Your project is up-to-date - no upgrade is necessary."
-        cli_message(f"<green>{up_to_date_message}</green>")
+        cli_message(f"<blue>{up_to_date_message}</blue>")
         sys.exit(0)
 
 
