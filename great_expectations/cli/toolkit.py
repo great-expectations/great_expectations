@@ -525,9 +525,11 @@ def confirm_proceed_or_exit(
     If the user does not confirm, the program should exit. The purpose of the exit_on_no parameter is to provide
     the option to perform cleanup actions before exiting outside of the function.
     """
-    if not click.confirm(confirm_prompt, default=True):
-        cli_message(continuation_message)
+    confirm_prompt_colorized = cli_colorize_string(confirm_prompt)
+    continuation_message_colorized = cli_colorize_string(continuation_message)
+    if not click.confirm(confirm_prompt_colorized, default=True):
         if exit_on_no:
+            cli_message(continuation_message_colorized)
             exit(0)
         else:
             return False
