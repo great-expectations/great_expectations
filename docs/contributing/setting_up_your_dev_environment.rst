@@ -6,7 +6,7 @@ Setting up your dev environment
 ===============================
 
 Prerequisites
--------------------
+-------------
 
 In order to contribute to Great Expectations, you will need the following:
 
@@ -116,7 +116,7 @@ Depending on which features of Great Expectations you want to work on, you may w
     * Documentation will be generated in ``docs/build/html/`` with the ``index.html`` as the index page.
 
 Run tests to confirm that everything is working
------------------------------------------
+-----------------------------------------------
 
 You can run all tests by running ``pytest`` in the great_expectations directory root. Please see :ref:`contributing_testing` for testing options and details.
 
