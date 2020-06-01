@@ -6,6 +6,8 @@ import traceback
 from dateutil.parser import ParserError, parse
 
 from great_expectations import DataContext
+from great_expectations.cli.upgrade_helpers.base_upgrade_helper import BaseUpgradeHelper
+from great_expectations.cli.util import cli_message
 from great_expectations.data_context.store import (
     DatabaseStoreBackend,
     HtmlSiteStore,
@@ -21,7 +23,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 
 
-class UpgradeHelperV11:
+class UpgradeHelperV11(BaseUpgradeHelper):
     def __init__(self, data_context=None, context_root_dir=None):
         assert (
             data_context or context_root_dir
@@ -41,7 +43,20 @@ class UpgradeHelperV11:
                 "database_store_backends": [],
                 "unsupported": [],
             },
-            "exceptions": [],
+            "exceptions": [
+                # {
+                #     "validation_store_name": store_name
+                #     "src": src_url,
+                #     "dest": dest_url,
+                #     "exception_message": exception_message,
+                # },
+                # {
+                #     "site_name": site_name,
+                #     "src": src_url,
+                #     "dest": dest_url,
+                #     "exception_message": exception_message,
+                # }
+            ],
             "upgraded_validations_stores": {
                 # STORE_NAME: {
                 #     "validations_updated": [{
@@ -418,7 +433,7 @@ class UpgradeHelperV11:
             doc_sites_with_unsupported_backends,
         )
 
-    def get_upgrade_prompt(self):
+    def get_upgrade_overview(self):
         (
             skip_with_database_backends,
             skip_with_unsupported_backends,
@@ -437,24 +452,145 @@ class UpgradeHelperV11:
             ].keys()
         ]
 
-        upgrade_text = f"""\
-**WARNING!**: This automated upgrade helper is currently experimental. Before proceeding, please make sure you have
-appropriate backups of your project.
+        upgrade_overview = f"""\
+<cyan>\
+++====================================++
+|| UpgradeHelperV11: Upgrade Overview ||
+++====================================++\
+</cyan>
 
-The following Stores and/or Data Docs sites will be upgraded:
-    - Validation Stores: {", ".join(validations_store_name_checklist) if validations_store_name_checklist else "None"}
-    - Data Docs Sites: {", ".join(site_name_checklist) if site_name_checklist else "None"}
-
-The following Stores and/or Data Docs sites must be upgraded manually, due to having a database backend, or backend
-type that is unsupported or unrecognized. Please consult the 0.11.x migration guide for more information:
-https://docs.greatexpectations.io/how_to_guides/migrating_versions.html
-    - Stores with database backends: {", ".join(skip_with_database_backends) if skip_with_database_backends else "None"}
-    - Stores with unsupported/unrecognized backends: {", ".join(skip_with_unsupported_backends) if skip_with_unsupported_backends else "None"}
-    - Data Docs sites with unsupported/unrecognized backends: {", ".join(skip_doc_sites_with_unsupported_backends) if skip_doc_sites_with_unsupported_backends else "None"}
-
-Would you like to proceed?
+UpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x. 
 """
-        return upgrade_text
+        if not any([validations_store_name_checklist, site_name_checklist, skip_with_database_backends,
+                skip_with_unsupported_backends, skip_doc_sites_with_unsupported_backends]):
+            upgrade_overview += """
+<blue>\
+Good news! No special upgrade steps are required to bring your project up to date.
+The Upgrade Helper will simply increment the config_version of your great_expectations.yml for you.
+</blue>
+Would you like to proceed? 
+"""
+        else:
+            upgrade_overview += """
+<red>**WARNING**: Before proceeding, please make sure you have appropriate backups of your project.</red>
+"""
+            if validations_store_name_checklist or site_name_checklist:
+                upgrade_overview += """
+<cyan>\
+Automated Steps
+================
+</cyan>
+The following Stores and/or Data Docs sites will be upgraded:
+
+"""
+                upgrade_overview += f"""\
+    - Validation Stores: {", ".join(validations_store_name_checklist)}
+""" if validations_store_name_checklist else ""
+                upgrade_overview += f"""\
+    - Data Docs Sites: {", ".join(site_name_checklist)}
+""" if site_name_checklist else ""
+
+            if any([skip_with_database_backends, skip_with_unsupported_backends,
+                   skip_doc_sites_with_unsupported_backends]):
+                upgrade_overview += """
+<cyan>\
+Manual Steps
+=============
+</cyan>
+The following Stores and/or Data Docs sites must be upgraded manually, due to having a database backend, or backend
+type that is unsupported or unrecognized:
+
+"""
+                upgrade_overview += f"""\
+    - Stores with database backends: {", ".join(skip_with_database_backends)}
+""" if skip_with_database_backends else ""
+                upgrade_overview += f"""\
+    - Stores with unsupported/unrecognized backends: {", ".join(skip_with_unsupported_backends)} 
+""" if skip_with_unsupported_backends else ""
+                upgrade_overview += f"""\
+    - Data Docs sites with unsupported/unrecognized backends: {", ".join(skip_doc_sites_with_unsupported_backends)}
+""" if skip_doc_sites_with_unsupported_backends else ""
+
+            upgrade_overview += """
+<cyan>\
+Upgrade Confirmation
+=====================
+</cyan>
+Please consult the 0.11.x migration guide for instructions on how to complete any required manual steps or
+to learn more about the automated upgrade process:
+
+    <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html#id1</cyan>
+    
+Would you like to proceed with the project upgrade?\
+"""
+        return upgrade_overview, True
+
+    def _save_upgrade_log(self):
+        current_time = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
+        dest_path = os.path.join(
+            self.data_context._context_root_directory,
+            "uncommitted",
+            "logs",
+            "project_upgrades",
+            f"UpgradeHelperV11_{current_time}.json"
+        )
+        dest_dir, dest_filename = os.path.split(dest_path)
+        os.makedirs(dest_dir, exist_ok=True)
+
+        with open(dest_path, "w") as outfile:
+            json.dump(self.upgrade_log, outfile, indent=2)
+
+        return dest_path
+
+    def _generate_upgrade_report(self):
+        upgrade_log_path = self._save_upgrade_log()
+        skipped_stores_or_sites = any(self._get_skipped_store_and_site_names())
+        exceptions = self.upgrade_log.get("exceptions")
+        if skipped_stores_or_sites or exceptions:
+            increment_version = False
+        else:
+            increment_version = True
+        upgrade_report = f"""\
+<cyan>\
+++================++
+|| Upgrade Report ||
+++================++\
+</cyan>
+"""
+        if increment_version:
+            upgrade_report += f"""
+<blue>\
+Your project was successfully upgraded and is now compatible with Great Expectations 0.11.x.
+The config_version of your great_expectations.yml has been automatically incremented to 2.0.
+
+A log detailing the upgrade can be found here:
+
+    - {upgrade_log_path}
+</blue>
+"""
+        else:
+            if exceptions:
+                upgrade_report += f"""
+<red>\
+The Upgrade Helper encountered some exceptions during the upgrade process.
+Please review the exceptions section of the upgrade log and migrate the affected files manually, 
+as detailed in the 0.11.x migration guide.
+
+The upgrade log can be found here:
+
+    - {upgrade_log_path}
+</red>
+"""
+            else:
+                upgrade_report += f"""
+<yellow>\
+The Upgrade Helper has completed the automated upgrade steps.
+A log detailing the upgrade can be found here:
+
+    - {upgrade_log_path}\
+</yellow>\
+"""
+        return upgrade_report, increment_version
 
     def upgrade_project(self):
         try:
@@ -481,4 +617,8 @@ Would you like to proceed?
         except Exception:
             pass
 
-        return self.upgrade_log
+        # return a report of what happened, boolean indicating whether version should be incremented
+        # if the version should not be incremented, the report should include instructions for steps to
+        # be performed manually
+        upgrade_report, increment_version = self._generate_upgrade_report()
+        return upgrade_report, increment_version
