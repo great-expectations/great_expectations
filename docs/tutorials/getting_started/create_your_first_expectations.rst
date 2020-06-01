@@ -1,4 +1,4 @@
-.. _getting_started__create_your_first_expectations:
+.. _tutorials__getting_started__create_your_first_expectations:
 
 Create your first Expectations
 ==============================
@@ -41,7 +41,10 @@ The CLI will help you create your first Expectations. You can accept the default
     Generating example Expectation Suite...
     
     Done generating example Expectation Suite
-    
+
+
+.. _tutorials__getting_started__create_your_first_expectations__what_just_happened:
+
 What just happened?
 -------------------
 
@@ -49,15 +52,7 @@ You can create and edit Expectations using several different workflows. The CLI 
 
 This Profiler connected to your data (using the Datasource you configured in the previous step), took a quick look at the contents, and produced an initial set of Expectations. These Expectations are not intended to be very smart. Instead, the goal is to quickly provide some good examples, so that you're not starting from a blank slate.
 
-Later, you should also take a look at other workflows for :ref:`Creating and editing Expectations`, such as:
-
-    * #FIXME: Finalize this list after we flesh out the how-tos for creating and editing expectations
-    * :ref:`How to edit Expectations in a disposable notebook`
-    * :ref:`How to adjust Expectations in a disposable notebook after Validation`
-    * :ref:`How to profile many tables at once`
-    * :ref:`How to calibrate Expectation Suite parameters using multibatch profiling`
-
-Creating and editing Expectations is a very active area of work in the Great Expectations community. Stay tuned for improvements over time.
+Later, you should also take a look at other workflows for :ref:`Creating and editing Expectations`. Creating and editing Expectations is a very active area of work in the Great Expectations community. Stay tuned for improvements over time.
 
 Note: the Profiler also validated the source data using the new Expectations, producing a set of :ref:`Validation Results`. We'll explain why in the next step of the tutorial.
 
