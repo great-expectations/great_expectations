@@ -464,10 +464,10 @@ UpgradeHelperV11 will upgrade your project to be compatible with Great Expectati
         if not any([validations_store_name_checklist, site_name_checklist, skip_with_database_backends,
                 skip_with_unsupported_backends, skip_doc_sites_with_unsupported_backends]):
             upgrade_overview += """
-<blue>\
+<green>\
 Good news! No special upgrade steps are required to bring your project up to date.
 The Upgrade Helper will simply increment the config_version of your great_expectations.yml for you.
-</blue>
+</green>
 Would you like to proceed? 
 """
         else:
@@ -510,6 +510,14 @@ type that is unsupported or unrecognized:
                 upgrade_overview += f"""\
     - Data Docs sites with unsupported/unrecognized backends: {", ".join(skip_doc_sites_with_unsupported_backends)}
 """ if skip_doc_sites_with_unsupported_backends else ""
+            else:
+                upgrade_overview += """
+<cyan>\
+Manual Steps
+=============
+</cyan>
+No manual upgrade steps are required.
+"""
 
             upgrade_overview += """
 <cyan>\
@@ -559,14 +567,14 @@ Would you like to proceed with the project upgrade?\
 """
         if increment_version:
             upgrade_report += f"""
-<blue>\
+<green>\
 Your project was successfully upgraded to be compatible with Great Expectations 0.11.x.
 The config_version of your great_expectations.yml has been automatically incremented to 2.0.
 
 A log detailing the upgrade can be found here:
 
     - {upgrade_log_path}\
-</blue>\
+</green>\
 """
         else:
             if exceptions:

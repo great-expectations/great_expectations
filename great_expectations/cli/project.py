@@ -54,7 +54,7 @@ def project_upgrade(directory):
         directory=directory, from_cli_upgrade_command=True
     ):
         up_to_date_message = "Your project is up-to-date - no upgrade is necessary.\n"
-        cli_message(f"<blue>{up_to_date_message}</blue>")
+        cli_message(f"<green>{up_to_date_message}</green>")
         sys.exit(0)
 
 

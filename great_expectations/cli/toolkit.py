@@ -431,7 +431,7 @@ def upgrade_project(context_root_dir, ge_config_version, from_cli_upgrade_comman
                            "<cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade " \
                            "process, visit " \
                            "<cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html" \
-                           "</cyan>."
+                           "</cyan>.\n"
     if from_cli_upgrade_command:
         message = f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - " \
                          f"the version " \
@@ -490,9 +490,10 @@ def upgrade_project(context_root_dir, ge_config_version, from_cli_upgrade_comman
             sys.exit(0)
 
     cli_message(SECTION_SEPARATOR)
-    upgrade_success_message = "<blue>Upgrade complete. Exiting...</blue>\n"
+    upgrade_success_message = "<green>Upgrade complete. Exiting...</green>\n"
     upgrade_incomplete_message = f"""\
 <red>The Upgrade Helper was unable to perform a complete project upgrade. Next steps:</red>
+
     - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above
     - When complete, increment the config_version key in your <cyan>great_expectations.yml</cyan> to <cyan>{
     ge_config_version + 1}</cyan>\n
