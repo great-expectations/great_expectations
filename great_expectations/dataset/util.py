@@ -584,7 +584,7 @@ def get_approximate_percentile_disc_sql(
             "approximate "
             + str(
                 stmt.compile(
-                    dialect=sql_engine_dialect, compile_kwargs={"literal_binds": True},
+                    dialect=sql_engine_dialect, compile_kwargs={"literal_binds": True}
                 )
             )
             for stmt in selects

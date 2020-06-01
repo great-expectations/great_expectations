@@ -29,7 +29,9 @@ try:
     from sqlalchemy.engine import reflection
     from sqlalchemy.sql.expression import BinaryExpression, literal
     from sqlalchemy.sql.operators import custom_op
-    from sqlalchemy.sql.elements import WithinGroup
+    from sqlalchemy.sql.selectable import Select, CTE
+    from sqlalchemy.sql.elements import Label, WithinGroup
+    from sqlalchemy.engine.result import RowProxy
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.exc import ProgrammingError
 except ImportError:
@@ -629,46 +631,128 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return column_median
 
     def get_column_quantiles(
-        self, column: str, quantiles, allow_relative_error: bool = False
-    ):
+        self, column: str, quantiles: tuple, allow_relative_error: bool = False
+    ) -> list:
         if self.sql_engine_dialect.name.lower() == "mssql":
-            # mssql requires over(), so we add an empty over() clause
-            selects: List[WithinGroup] = [
-                sa.func.percentile_disc(quantile)
-                .within_group(sa.column(column).asc())
-                .over()
-                for quantile in quantiles
-            ]
+            return self._get_column_quantiles_mssql(column=column, quantiles=quantiles)
         elif self.sql_engine_dialect.name.lower() == "bigquery":
-            # BigQuery does not support "WITHIN", so we need a special case for it
-            selects: List[WithinGroup] = [
-                sa.func.percentile_disc(sa.column(column), quantile).over()
-                for quantile in quantiles
-            ]
+            return self._get_column_quantiles_bigquery(
+                column=column, quantiles=quantiles
+            )
+        elif self.sql_engine_dialect.name.lower() == "mysql":
+            return self._get_column_quantiles_mysql(column=column, quantiles=quantiles)
         else:
-            selects: List[WithinGroup] = [
-                sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
-                for quantile in quantiles
-            ]
+            return self._get_column_quantiles_generic_sqlalchemy(
+                column=column,
+                quantiles=quantiles,
+                allow_relative_error=allow_relative_error,
+            )
+
+    def _get_column_quantiles_mssql(self, column: str, quantiles: tuple) -> list:
+        # mssql requires over(), so we add an empty over() clause
+        selects: List[WithinGroup] = [
+            sa.func.percentile_disc(quantile)
+            .within_group(sa.column(column).asc())
+            .over()
+            for quantile in quantiles
+        ]
+        quantiles_query: Select = sa.select(selects).select_from(self._table)
 
         try:
-            quantiles = self.engine.execute(
-                sa.select(selects).select_from(self._table)
+            quantiles_results: RowProxy = self.engine.execute(
+                quantiles_query
             ).fetchone()
+            return list(quantiles_results)
+        except ProgrammingError as pe:
+            exception_message: str = "An SQL syntax Exception occurred."
+            exception_traceback: str = traceback.format_exc()
+            exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+
+    def _get_column_quantiles_bigquery(self, column: str, quantiles: tuple) -> list:
+        # BigQuery does not support "WITHIN", so we need a special case for it
+        selects: List[WithinGroup] = [
+            sa.func.percentile_disc(sa.column(column), quantile).over()
+            for quantile in quantiles
+        ]
+        quantiles_query: Select = sa.select(selects).select_from(self._table)
+
+        try:
+            quantiles_results: RowProxy = self.engine.execute(
+                quantiles_query
+            ).fetchone()
+            return list(quantiles_results)
+        except ProgrammingError as pe:
+            exception_message: str = "An SQL syntax Exception occurred."
+            exception_traceback: str = traceback.format_exc()
+            exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+
+    def _get_column_quantiles_mysql(self, column: str, quantiles: tuple) -> list:
+        # MySQL does not support "percentile_disc", so we implement it as a compound query.
+        # Please see https://stackoverflow.com/questions/19770026/calculate-percentile-value-using-mysql for reference.
+        percent_rank_query: CTE = sa.select(
+            [
+                sa.column(column),
+                sa.func.percent_rank()
+                .over(order_by=sa.column(column).desc())
+                .label("p"),
+            ]
+        ).order_by(sa.column("p").desc()).select_from(self._table).cte("t")
+
+        selects: List[WithinGroup] = []
+        for idx, quantile in enumerate(quantiles):
+            quantile_column: Label = sa.func.first_value(sa.column(column)).over(
+                order_by=sa.case(
+                    [(percent_rank_query.c.p < quantile, percent_rank_query.c.p)],
+                    else_=None,
+                ).desc()
+            ).label(f"q_{idx}")
+            selects.append(quantile_column)
+        quantiles_query: Select = sa.select(selects).distinct().order_by(
+            percent_rank_query.c.p.desc()
+        )
+
+        try:
+            quantiles_results: RowProxy = self.engine.execute(
+                quantiles_query
+            ).fetchone()
+            return list(quantiles_results)
+        except ProgrammingError as pe:
+            exception_message: str = "An SQL syntax Exception occurred."
+            exception_traceback: str = traceback.format_exc()
+            exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+
+    def _get_column_quantiles_generic_sqlalchemy(
+        self, column: str, quantiles: tuple, allow_relative_error: bool
+    ) -> list:
+        selects: List[WithinGroup] = [
+            sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
+            for quantile in quantiles
+        ]
+        quantiles_query: Select = sa.select(selects).select_from(self._table)
+
+        try:
+            quantiles_results: RowProxy = self.engine.execute(
+                quantiles_query
+            ).fetchone()
+            return list(quantiles_results)
         except ProgrammingError:
             # ProgrammingError: (psycopg2.errors.SyntaxError) Aggregate function "percentile_disc" is not supported;
             # use approximate percentile_disc or percentile_cont instead.
             if self.attempt_allowing_relative_error():
                 # Redshift does not have a percentile_disc method, but does support an approximate version.
+                sql_approx: str = get_approximate_percentile_disc_sql(
+                    selects=selects, sql_engine_dialect=self.sql_engine_dialect
+                )
+                selects_approx: List[WithinGroup] = [sa.text(sql_approx)]
+                quantiles_query_approx: Select = sa.select(selects_approx).select_from(
+                    self._table
+                )
                 if allow_relative_error:
-                    sql_approx: str = get_approximate_percentile_disc_sql(
-                        selects=selects, sql_engine_dialect=self.sql_engine_dialect
-                    )
-                    selects = [sa.text(sql_approx)]
                     try:
-                        quantiles = self.engine.execute(
-                            sa.select(selects).select_from(self._table)
+                        quantiles_results: RowProxy = self.engine.execute(
+                            quantiles_query_approx
                         ).fetchone()
+                        return list(quantiles_results)
                     except ProgrammingError as pe:
                         exception_message: str = "An SQL syntax Exception occurred."
                         exception_traceback: str = traceback.format_exc()
@@ -685,8 +769,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     f'The SQL engine dialect "{str(self.sql_engine_dialect)}" does not support computing quantiles with '
                     "approximation error; set allow_relative_error to False to disable approximate quantiles."
                 )
-
-        return list(quantiles)
 
     def get_column_stdev(self, column):
         if self.sql_engine_dialect.name.lower() != "mssql":
@@ -803,7 +885,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         else:
             condition = max_condition
 
-        query = query = (
+        query = (
             sa.select([sa.func.count((sa.column(column)))])
             .where(sa.and_(sa.column(column) != None, condition))
             .select_from(self._table)
@@ -838,11 +920,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         #
         # 3. We currently don't make it possible to select from a table in one query, but create a temporary table in
         # another schema, except for with BigQuery and (now) snowflake, where you can specify the table name (and
-        # potentially trip of database, schema, table) in the batch_kwargs.
+        # potentially triple of database, schema, table) in the batch_kwargs.
         #
         # The SqlAlchemyDataset interface essentially predates the batch_kwargs concept and so part of what's going
         # on, I think, is a mismatch between those. I think we should rename custom_sql -> "temp_table_query" or
         # similar, for example.
+        # TODO: <Alex>This code needs cleaning (e.g., the "MySQL" and generic cases are identical).</Alex>
         ###
 
         if self.sql_engine_dialect.name.lower() == "bigquery":
