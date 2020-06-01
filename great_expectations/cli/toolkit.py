@@ -427,23 +427,84 @@ def load_data_context_with_error_handling(directory: str, from_cli_upgrade_comma
 
 
 def upgrade_project(context_root_dir, ge_config_version, from_cli_upgrade_command=False):
-    upgrade_helper = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
-    target_ge_config_version = int(ge_config_version) + 1
-    continuation_message = "Ok, exiting now. To upgrade at a later time, use the following command: " \
-                           "great_expectations project upgrade\n\nTo learn more about the upgrade process, visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
+    continuation_message = "\nOk, exiting now. To upgrade at a later time, use the following command: " \
+                           "<cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade " \
+                           "process, visit " \
+                           "<cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html" \
+                           "</cyan>."
     if from_cli_upgrade_command:
-        upgrade_prompt = f"Your project appears to have an out-of-date config version ({ge_config_version}) - the version " \
-                         f"number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}.\n\nWould you like to run the " \
-                         f"Upgrade Helper to bring your project up-to-date?"
+        message = f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - " \
+                         f"the version " \
+                         f"number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}.</red>"
     else:
-        upgrade_prompt = f"Your project appears to have an out-of-date config version ({ge_config_version}) - the version " \
+        message = f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - " \
+                         f"the version " \
                          f"number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}.\nIn order to proceed, " \
-                         f"your project must be upgraded.\n\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
+                         f"your project must be upgraded.</red>"
 
+    cli_message(message)
+    upgrade_prompt = "\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
     confirm_proceed_or_exit(confirm_prompt=upgrade_prompt, continuation_message=continuation_message)
+    cli_message(SECTION_SEPARATOR)
 
+    # use loop in case multiple upgrades need to take place
     while ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
-        pass
+        upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
+        if not upgrade_helper_class:
+            break
+        target_ge_config_version = int(ge_config_version) + 1
+        # set version temporarily to MINIMUM_SUPPORTED_CONFIG_VERSION to get functional DataContext
+        DataContext.set_ge_config_version(config_version=MINIMUM_SUPPORTED_CONFIG_VERSION, context_root_dir=context_root_dir)
+        upgrade_helper = upgrade_helper_class(context_root_dir=context_root_dir)
+        upgrade_overview, confirmation_required = upgrade_helper.get_upgrade_overview()
+
+        if confirmation_required:
+            upgrade_confirmed = confirm_proceed_or_exit(
+                confirm_prompt=upgrade_overview,
+                continuation_message=continuation_message,
+                exit_on_no=False
+            )
+        else:
+            upgrade_confirmed = True
+
+        if upgrade_confirmed:
+            cli_message("\nUpgrading project...")
+            cli_message(SECTION_SEPARATOR)
+            # run upgrade and get report of what was done, if version number should be incremented
+            upgrade_report, increment_version = upgrade_helper.upgrade_project()
+            # display report to user
+            cli_message(upgrade_report)
+            # set config version to target version
+            if increment_version:
+                DataContext.set_ge_config_version(target_ge_config_version, context_root_dir,
+                                                  validate_config_version=False)
+                ge_config_version += 1
+            else:
+                # restore version number to current number
+                DataContext.set_ge_config_version(ge_config_version, context_root_dir, validate_config_version=False)
+                break
+        else:
+            # restore version number to current number
+            DataContext.set_ge_config_version(ge_config_version, context_root_dir, validate_config_version=False)
+            cli_message(continuation_message)
+            sys.exit(0)
+
+    cli_message(SECTION_SEPARATOR)
+    upgrade_success_message = "<blue>Your project was upgraded successfully and is now up-to-date. Exiting...</blue>"
+    upgrade_incomplete_message = f"""\
+<red>The Upgrade Helper was unable to perform a complete project upgrade. Next steps:</red>
+    - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above
+    - When complete, increment the config_version key in your <cyan>great_expectations.yml</cyan> to <cyan>{
+    ge_config_version + 1}</cyan>\n
+To learn more about the upgrade process, visit \
+<cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>
+"""
+
+    if ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+        cli_message(upgrade_incomplete_message)
+    else:
+        cli_message(upgrade_success_message)
+    sys.exit(0)
 
 
 def confirm_proceed_or_exit(
