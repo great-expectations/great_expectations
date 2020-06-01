@@ -55,7 +55,7 @@ Steps
 Additional notes
 ----------------
 
-Environment variables can be used to store the SQLAlchemy URL instead of the file, if preferred - see :ref:`environment_and_secrets`.
+Environment variables can be used to store the SQLAlchemy URL instead of the file, if preferred - search documentation for "Managing Environment and Secrets".
 
 Additional resources
 --------------------

@@ -61,6 +61,11 @@ a {
   }
 }
 
+.wy-side-nav-search > a,
+.wy-side-nav-search .wy-dropdown > a {
+  display: none !important;
+}
+
 .wy-nav-content {
   width: auto !important;
   max-width: max-content !important;
@@ -252,6 +257,12 @@ a {
 
 #header-mobile {
   display: none;
+}
+
+#discourse-comments {
+  padding: 16px;
+  margin-bottom: 32px;
+  background-color: #fff;
 }
 
 @media only screen and (max-width: 768px) {

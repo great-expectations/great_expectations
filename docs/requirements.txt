@@ -3,3 +3,4 @@ sybil>=1.2.1
 sphinx_rtd_theme>=0.4.3
 sphinxcontrib-contentui>=0.2.4
 sphinx-gitstamp>=0.3.1
+git+https://github.com/pdavide/sphinxcontrib-discourse

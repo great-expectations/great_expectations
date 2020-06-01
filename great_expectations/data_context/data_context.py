@@ -865,7 +865,9 @@ class BaseDataContext(object):
             )
 
         if run_id is None and run_name is None:
-            run_name = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+            run_name = datetime.datetime.now(datetime.timezone.utc).strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            )
             logger.info("Setting run_name to: {}".format(run_name))
         if evaluation_parameters is None:
             return validation_operator.run(
