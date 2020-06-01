@@ -11,9 +11,10 @@ from ruamel.yaml.compat import StringIO
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.docs import build_docs
-from great_expectations.cli.util import cli_message
+from great_expectations.cli.util import cli_message, cli_colorize_string
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
@@ -399,9 +400,10 @@ def load_data_context_with_error_handling(directory: str, from_cli_upgrade_comma
         context = DataContext(directory)
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
+        directory = directory or DataContext.find_context_root_dir()
         ge_config_version = DataContext.get_ge_config_version(context_root_dir=directory)
-        upgrade_helper = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version)) if ge_config_version else None
-        if not upgrade_helper and ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+        upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version)) if ge_config_version else None
+        if upgrade_helper_class and ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
             upgrade_project(
                 context_root_dir=directory,
                 ge_config_version=ge_config_version,
