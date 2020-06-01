@@ -2244,24 +2244,25 @@ class DataContext(BaseDataContext):
         return float(config_version) if config_version else None
 
     @classmethod
-    def set_ge_config_version(cls, config_version, context_root_dir=None):
+    def set_ge_config_version(cls, config_version, context_root_dir=None, validate_config_version=True):
         if not isinstance(config_version, (int, float)):
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "The argument `config_version` must be a number.",
             )
 
-        if config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
-            raise ge_exceptions.UnsupportedConfigVersionError(
-                "Invalid config version ({}).\n    The version number must be at least {}. ".format(
-                    config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
-                ),
-            )
-        elif config_version > CURRENT_CONFIG_VERSION:
-            raise ge_exceptions.UnsupportedConfigVersionError(
-                "Invalid config version ({}).\n    The maximum valid version is {}.".format(
-                    config_version, CURRENT_CONFIG_VERSION
-                ),
-            )
+        if validate_config_version:
+            if config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+                raise ge_exceptions.UnsupportedConfigVersionError(
+                    "Invalid config version ({}).\n    The version number must be at least {}. ".format(
+                        config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
+                    ),
+                )
+            elif config_version > CURRENT_CONFIG_VERSION:
+                raise ge_exceptions.UnsupportedConfigVersionError(
+                    "Invalid config version ({}).\n    The maximum valid version is {}.".format(
+                        config_version, CURRENT_CONFIG_VERSION
+                    ),
+                )
 
         yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
         if yml_path is None:
