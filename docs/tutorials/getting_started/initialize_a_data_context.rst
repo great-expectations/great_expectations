@@ -1,4 +1,4 @@
-.. _getting_started__initialize_a_data_context:
+.. _tutorials__getting_started__initialize_a_data_context:
 
 Initialize a Data Context
 ===============================================
