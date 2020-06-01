@@ -6,15 +6,13 @@ import warnings
 from typing import Union
 
 import click
-from ruamel.yaml import YAML
-from ruamel.yaml.compat import StringIO
-
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.docs import build_docs
-from great_expectations.cli.util import cli_message, cli_colorize_string
+from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
+from great_expectations.cli.util import cli_colorize_string, cli_message
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
@@ -27,7 +25,8 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.datasource import Datasource
 from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
 from great_expectations.profile import BasicSuiteBuilderProfiler
-from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
+from ruamel.yaml import YAML
+from ruamel.yaml.compat import StringIO
 
 
 class MyYAML(YAML):
@@ -393,7 +392,9 @@ def select_datasource(context: DataContext, datasource_name: str = None) -> Data
     return data_source
 
 
-def load_data_context_with_error_handling(directory: str, from_cli_upgrade_command: bool = False) -> DataContext:
+def load_data_context_with_error_handling(
+    directory: str, from_cli_upgrade_command: bool = False
+) -> DataContext:
     """Return a DataContext with good error handling and exit codes."""
     # TODO consolidate all the myriad CLI tests into this
     try:
@@ -401,13 +402,22 @@ def load_data_context_with_error_handling(directory: str, from_cli_upgrade_comma
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
         directory = directory or DataContext.find_context_root_dir()
-        ge_config_version = DataContext.get_ge_config_version(context_root_dir=directory)
-        upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version)) if ge_config_version else None
-        if upgrade_helper_class and ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+        ge_config_version = DataContext.get_ge_config_version(
+            context_root_dir=directory
+        )
+        upgrade_helper_class = (
+            GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
+            if ge_config_version
+            else None
+        )
+        if (
+            upgrade_helper_class
+            and ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION
+        ):
             upgrade_project(
                 context_root_dir=directory,
                 ge_config_version=ge_config_version,
-                from_cli_upgrade_command=from_cli_upgrade_command
+                from_cli_upgrade_command=from_cli_upgrade_command,
             )
         else:
             cli_message("<red>{}</red>".format(err.message))
@@ -426,25 +436,37 @@ def load_data_context_with_error_handling(directory: str, from_cli_upgrade_comma
         sys.exit(1)
 
 
-def upgrade_project(context_root_dir, ge_config_version, from_cli_upgrade_command=False):
-    continuation_message = "\nOk, exiting now. To upgrade at a later time, use the following command: " \
-                           "<cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade " \
-                           "process, visit " \
-                           "<cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html" \
-                           "</cyan>.\n"
+def upgrade_project(
+    context_root_dir, ge_config_version, from_cli_upgrade_command=False
+):
+    continuation_message = (
+        "\nOk, exiting now. To upgrade at a later time, use the following command: "
+        "<cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade "
+        "process, visit "
+        "<cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
+        "</cyan>.\n"
+    )
     if from_cli_upgrade_command:
-        message = f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - " \
-                         f"the version " \
-                         f"number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}.</red>"
+        message = (
+            f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
+            f"the version "
+            f"number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}.</red>"
+        )
     else:
-        message = f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - " \
-                         f"the version " \
-                         f"number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}.\nIn order to proceed, " \
-                         f"your project must be upgraded.</red>"
+        message = (
+            f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
+            f"the version "
+            f"number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}.\nIn order to proceed, "
+            f"your project must be upgraded.</red>"
+        )
 
     cli_message(message)
-    upgrade_prompt = "\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
-    confirm_proceed_or_exit(confirm_prompt=upgrade_prompt, continuation_message=continuation_message)
+    upgrade_prompt = (
+        "\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
+    )
+    confirm_proceed_or_exit(
+        confirm_prompt=upgrade_prompt, continuation_message=continuation_message
+    )
     cli_message(SECTION_SEPARATOR)
 
     # use loop in case multiple upgrades need to take place
@@ -454,7 +476,10 @@ def upgrade_project(context_root_dir, ge_config_version, from_cli_upgrade_comman
             break
         target_ge_config_version = int(ge_config_version) + 1
         # set version temporarily to MINIMUM_SUPPORTED_CONFIG_VERSION to get functional DataContext
-        DataContext.set_ge_config_version(config_version=MINIMUM_SUPPORTED_CONFIG_VERSION, context_root_dir=context_root_dir)
+        DataContext.set_ge_config_version(
+            config_version=MINIMUM_SUPPORTED_CONFIG_VERSION,
+            context_root_dir=context_root_dir,
+        )
         upgrade_helper = upgrade_helper_class(context_root_dir=context_root_dir)
         upgrade_overview, confirmation_required = upgrade_helper.get_upgrade_overview()
 
@@ -462,7 +487,7 @@ def upgrade_project(context_root_dir, ge_config_version, from_cli_upgrade_comman
             upgrade_confirmed = confirm_proceed_or_exit(
                 confirm_prompt=upgrade_overview,
                 continuation_message=continuation_message,
-                exit_on_no=False
+                exit_on_no=False,
             )
         else:
             upgrade_confirmed = True
@@ -476,16 +501,23 @@ def upgrade_project(context_root_dir, ge_config_version, from_cli_upgrade_comman
             cli_message(upgrade_report)
             # set config version to target version
             if increment_version:
-                DataContext.set_ge_config_version(target_ge_config_version, context_root_dir,
-                                                  validate_config_version=False)
+                DataContext.set_ge_config_version(
+                    target_ge_config_version,
+                    context_root_dir,
+                    validate_config_version=False,
+                )
                 ge_config_version += 1
             else:
                 # restore version number to current number
-                DataContext.set_ge_config_version(ge_config_version, context_root_dir, validate_config_version=False)
+                DataContext.set_ge_config_version(
+                    ge_config_version, context_root_dir, validate_config_version=False
+                )
                 break
         else:
             # restore version number to current number
-            DataContext.set_ge_config_version(ge_config_version, context_root_dir, validate_config_version=False)
+            DataContext.set_ge_config_version(
+                ge_config_version, context_root_dir, validate_config_version=False
+            )
             cli_message(continuation_message)
             sys.exit(0)
 
@@ -511,7 +543,7 @@ To learn more about the upgrade process, visit \
 def confirm_proceed_or_exit(
     confirm_prompt="Would you like to proceed?",
     continuation_message="Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
-    exit_on_no=True
+    exit_on_no=True,
 ):
     """
     Every CLI command that starts a potentially lengthy (>1 sec) computation

@@ -2244,7 +2244,9 @@ class DataContext(BaseDataContext):
         return float(config_version) if config_version else None
 
     @classmethod
-    def set_ge_config_version(cls, config_version, context_root_dir=None, validate_config_version=True):
+    def set_ge_config_version(
+        cls, config_version, context_root_dir=None, validate_config_version=True
+    ):
         if not isinstance(config_version, (int, float)):
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "The argument `config_version` must be a number.",

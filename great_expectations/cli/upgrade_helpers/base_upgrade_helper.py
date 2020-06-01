@@ -7,4 +7,3 @@ class BaseUpgradeHelper(ABC):
     @abstractmethod
     def upgrade_project(self):
         pass
-
