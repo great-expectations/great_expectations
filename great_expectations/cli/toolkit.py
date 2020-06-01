@@ -490,7 +490,7 @@ def upgrade_project(context_root_dir, ge_config_version, from_cli_upgrade_comman
             sys.exit(0)
 
     cli_message(SECTION_SEPARATOR)
-    upgrade_success_message = "<blue>Your project was upgraded successfully and is now up-to-date. Exiting...</blue>"
+    upgrade_success_message = "<blue>Upgrade complete. Exiting...</blue>\n"
     upgrade_incomplete_message = f"""\
 <red>The Upgrade Helper was unable to perform a complete project upgrade. Next steps:</red>
     - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above

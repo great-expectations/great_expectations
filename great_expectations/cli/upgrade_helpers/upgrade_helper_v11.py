@@ -560,13 +560,13 @@ Would you like to proceed with the project upgrade?\
         if increment_version:
             upgrade_report += f"""
 <blue>\
-Your project was successfully upgraded and is now compatible with Great Expectations 0.11.x.
+Your project was successfully upgraded to be compatible with Great Expectations 0.11.x.
 The config_version of your great_expectations.yml has been automatically incremented to 2.0.
 
 A log detailing the upgrade can be found here:
 
-    - {upgrade_log_path}
-</blue>
+    - {upgrade_log_path}\
+</blue>\
 """
         else:
             if exceptions:
@@ -578,8 +578,8 @@ as detailed in the 0.11.x migration guide.
 
 The upgrade log can be found here:
 
-    - {upgrade_log_path}
-</red>
+    - {upgrade_log_path}\
+</red>\
 """
             else:
                 upgrade_report += f"""
