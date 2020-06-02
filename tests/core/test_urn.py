@@ -1,8 +1,8 @@
 from urllib.parse import parse_qs
 
+import pytest
 from pyparsing import ParseException
 
-import pytest
 from great_expectations.core.urn import ge_urn
 
 
