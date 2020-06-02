@@ -6,8 +6,8 @@ Changelog
 
 develop
 -----------------
-* [BUGFIX] Fixed bug that was caused by comparison between timezone aware and non-aware datetimes
-* [DOCS] Updated docs with info on typed run ids and validation operator results
+* [FEATURE] Added new cli upgrade helper to help facilitate upgrading projects to be compatible with GE 0.11.
+  See :ref:`upgrading_to_0.11` for more info.
 
 0.11.1
 -----------------
@@ -19,10 +19,10 @@ develop
 -----------------
 * [BREAKING] ``run_id`` is now typed using the new ``RunIdentifier`` class, which consists of a ``run_time`` and
   ``run_name``. Existing projects that have Expectation Suite Validation Results must be migrated.
-  See :ref:`Upgrading to 0.11` for instructions.
+  See :ref:`upgrading_to_0.11` for instructions.
 * [BREAKING] ``ValidationMetric`` and ``ValidationMetricIdentifier`` objects now have a ``data_asset_name`` attribute.
   Existing projects with evaluation parameter stores that have database backends must be migrated.
-  See :ref:`Upgrading to 0.11` for instructions.
+  See :ref:`upgrading_to_0.11` for instructions.
 * [BREAKING] ``ValidationOperator.run`` now returns an instance of new type, ``ValidationOperatorResult`` (instead of a
   dictionary). If your code uses output from Validation Operators, it must be updated.
 * Major update to the styling and organization of documentation! Watch for more content and reorganization as we continue to improve the documentation experience with Great Expectations.
