@@ -3,11 +3,11 @@
 How to create custom Expectations for SQLAlchemy
 ================================================
 
-Custom Expectations let you extend the logic for validating data to use any criteria you choose. This guide will show you how to extend the ``PandasDataset`` class with your own :ref:`Expectations`.
+Custom Expectations let you extend the logic for validating data to use any criteria you choose. This guide will show you how to extend the ``SqlAlchemyDataset`` class with your own :ref:`Expectations`.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - Installed Great Expectations (e.g. ``pip install great_expectations``)
+    - Installed Great Expectations and sqlalchemy (e.g. ``pip install great_expectations sqlalchemy``)
     - Have access to a notebook (e.g. ``jupyter notebook``, ``jupyter lab``, etc.)
     - Be able to access data from your notebook
     - Nothing else. Unlike most how-to guides, these instructions do *not* assume that you have configured a Data Context by running ``great_expectations init``.
@@ -25,7 +25,7 @@ Steps
             MetaSqlAlchemyDataset,
         )
 
-    ``SqlAlchemyDataset`` is the parent class used for executing Expectations using sqlalchemy. Most of the core Expectations are built using decorators defined in ``MetaSqlAlchemyDataset``. These decorators greatly streamline the task of extending Great Expectations with custom Expectation logic.
+    ``SqlAlchemyDataset`` is the parent class used for executing Expectations using sqlalchemy. Most of the core Expectations are built using decorators defined in ``MetaSqlAlchemyDataset``. These decorators streamline the task of extending Great Expectations with custom Expectation logic.
 
 2. **Define a class inheriting from SqlAlchemyDataset**
 
@@ -39,9 +39,9 @@ Steps
 
 3. **Within your new class, define Expectations using decorators from MetaSqlAlchemyDataset**
 
-    ``column_map_expectations`` are Expectations that are applied to a single column, on a row-by-row basis. To learn about other Expectation types, please see :ref:`Other Expectation decorators` <<<somewhere_else>>>.
+    ``column_map_expectations`` are Expectations that are applied to a single column, on a row-by-row basis. To learn about other Expectation types, please see :ref:`Other Expectation decorators` below.
 
-    The ``@MetaSqlAlchemyDataset.column_map_expectation`` decorator wraps your custom function with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like ``mostly`` and ``result_format``. Your custom function can focus exclusively on the business logic of passing or failing the Expectation.
+    The ``@MetaSqlAlchemyDataset.column_map_expectation`` decorator wraps a custom function with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining required arguments like ``mostly`` and ``result_format``. Your custom function can focus exclusively on the business logic of passing or failing the Expectation.
 
     In the simplest case, they could be as simple as one-line lambda functions.
 
