@@ -3,16 +3,48 @@
 How to configure an Expectation store on a filesystem
 =====================================================
 
-.. admonition:: Admonition from Mr. Dickens
 
-    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
+This guide will help you configure the location of the expectation store in the filesystem. By default, newly profiled Expectations in an Expectation Suite, in JSON format in a subdirectory of your ``great_expectations`` folder.
+
+.. admonition:: Prerequisites: This how-to guide assumes that you have already:
+
+    - Configured a Data Context
+    - Have a new location of a filesystem where you would like. tHis could be either a new local location, or a shared location.
+
+Steps
+-----
+
+1. Open ``great_expectations.yml`` file and look for the following line.
+
+.. code-block:: yaml
+
+    expectations_store_name: expectations_store
+
+    stores:
+        expectations_store:
+            class_name: ExpectationsStore
+            store_backend:
+                class_name: TupleFilesystemStoreBackend
+                base_directory: expectations/
 
 
-This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
+2. mModi
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
 
-If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
+
+.. code-block:: yaml
+
+    expectations_store_name: new_expectations_store
+
+    stores:
+        new_expectations_store:
+            class_name: ExpectationsStore
+            store_backend:
+                class_name: TupleFilesystemStoreBackend
+                base_directory: new_expectations_location/
+
+
+
 
 .. discourse::
     :topic_identifier: 182
