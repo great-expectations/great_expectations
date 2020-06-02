@@ -8,6 +8,7 @@ develop
 -----------------
 
 * [BUGFIX] Fixed bug preventing GCS Data Docs sites to cleaned
+* [BUGFIX] Correct doc link in checkpoint yml
 
 0.11.1
 -----------------
