@@ -9,6 +9,12 @@ develop
 * [BUGFIX] Fixed bug that was caused by comparison between timezone aware and non-aware datetimes
 * [DOCS] Updated docs with info on typed run ids and validation operator results
 
+0.11.1
+-----------------
+* [BUGFIX] Fixed bug that was caused by comparison between timezone aware and non-aware datetimes
+* [DOCS] Updated docs with info on typed run ids and validation operator results
+* [BUGFIX] Update call-to-action buttons on index page with correct URLs
+
 0.11.0
 -----------------
 * [BREAKING] ``run_id`` is now typed using the new ``RunIdentifier`` class, which consists of a ``run_time`` and

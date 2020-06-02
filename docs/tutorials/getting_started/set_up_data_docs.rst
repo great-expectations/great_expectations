@@ -1,4 +1,4 @@
-.. _getting_started__set_up_auto_docs:
+.. _tutorials__getting_started__set_up_data_docs:
 
 Set up Data Docs
 ================

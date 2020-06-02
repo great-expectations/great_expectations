@@ -1,4 +1,4 @@
-.. _getting_started__customize_your_deployment:
+.. _tutorials__getting_started__customize_your_deployment:
 
 Customize your deployment
 =========================
@@ -7,7 +7,7 @@ At this point, you have your first, working deployment of Great Expectations. Yo
 
 Congratulations! You're off to a very good start.
 
-The next step is to customize your deployment by upgrading specific components of your deployment. :ref:`Data Contexts` make this modular, so that you can add or swap out one component at a time. Most of these changes are quick, incremental steps---so you can upgrade from a basic demo deployment to a full production deployment at your own pace and be confident that your Data Context will continue to work at every step along the way.
+The next step is to customize your deployment by upgrading specific components of your deployment. Data Contexts make this modular, so that you can add or swap out one component at a time. Most of these changes are quick, incremental steps---so you can upgrade from a basic demo deployment to a full production deployment at your own pace and be confident that your Data Context will continue to work at every step along the way.
 
 This last section of the :ref:`getting_started` tutorial is designed to present you with clear options for upgrading your deployment. For specific implementation steps, please check out the linked :ref:`how_to_guides`.
 
@@ -106,7 +106,6 @@ Most teams will want to configure various :ref:`Validation Actions` as part of t
 * :ref:`How to re-render Data Docs as a Validation Action`
 * :ref:`How to store Validation Results as a Validation Action`
 * :ref:`How to trigger slack notifications as a Validation Action`
-* :ref:`How to implement a custom Validation Action`
 
 Modifying :ref:`Validation Operators` themselves is more advanced work. You can learn how here.
 

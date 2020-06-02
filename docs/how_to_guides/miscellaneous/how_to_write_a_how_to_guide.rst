@@ -18,20 +18,24 @@ Steps
 7. Scan your article to make sure it follows the :ref:`Style guide`. If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
 8. Submit your PR!
 
+.. warning::
+
+	To enable comments on your How-to guide, please follow :ref:`these instructions <how_to_guides__miscellaneous__how_to_add_comments_to_a_page_in_documentation>`.
+
 Additional Notes
 ----------------
 
 Purpose of a how-to guide
 #########################
 
-The purpose of a how-to guide is to *replicate*, NOT to *teach or explain*. Teaching and explaining Great Expectations concepts are covered in the :ref:`reference__core_concepts`_ reference section.
+The purpose of a how-to guide is to *replicate*, NOT to *teach or explain*. Teaching and explaining Great Expectations concepts are covered in the :ref:`reference__core_concepts` reference section.
 
 	* Assume that the user has already successfully run ``great_expectations init`` and has a working deployment of Great Expectations.
 	* Assume that the user is already familiar with core concepts in Great Expectations: Expectations, Data Contexts, Validation, Datasources, etc. etc. You don’t need to spend any time explaining these things.
 	* If you’re integrating with another system, assume that the user is familiar with that system. ie. If you’re writing the "How to configure a Snowflake Datasource," don’t spend any words explaining Snowflake or any of its core concepts.
 	* If there are important, non-obvious principles for how Great Expectations relates to other systems, you may include them in the guide. If they are short (1-2 sentences, max), they can go in the Steps section. Otherwise, please put them in Additional Notes.
 
-Remember, the goal is to help users successfully replicate specific steps as simply as possible. Surprisingly often, it turns out to best to not include explanation at all, since it can distract from the main purpose of the guide. If you feel you must include it, shorter is better. 
+Remember, the goal is to help users successfully replicate specific steps as simply as possible. Surprisingly often, it turns out to best to not include explanation at all, since it can distract from the main purpose of the guide. If you feel you must include it, shorter is better.
 
 Structure of a how-to guide
 ###########################
@@ -51,9 +55,9 @@ With rare exceptions, How-to guides follow this structure:
     "This guide will help you publish an Data Docs site directly to S3. Publishing a site this way makes reviewing and acting on Validation Results easy in a team, and provides a central location to review Expectations."
 
 Sometimes motivation can be a simple statement of purpose:
-    
+
     "This guide will help you connect to a MongoDB Datasource.”
-    
+
 If the user has data in Mongo and wants to configure a Datasource, no additional justification is needed.
 
 **Steps**: Steps describe the golden path steps for successful replication.
@@ -70,3 +74,6 @@ Additional Resources
 --------------------
 
 - `Links in RST <https://docutils.sourceforge.io/docs/user/rst/quickref.html#hyperlink-targets>`_ are a pain.
+
+.. discourse::
+   :topic_identifier: 230

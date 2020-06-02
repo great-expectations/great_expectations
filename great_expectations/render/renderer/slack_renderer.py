@@ -93,13 +93,13 @@ class SlackRenderer(Renderer):
         if custom_blocks:
             query["blocks"].append(custom_blocks)
 
-        documentation_url = "https://docs.greatexpectations.io/en/latest/features/validation.html#reviewing-validation-results"
+        documentation_url = "https://docs.greatexpectations.io/en/latest/tutorials/getting_started/set_up_data_docs.html#_getting_started__set_up_data_docs"
         footer_section = {
             "type": "context",
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": "Learn how to review validation results: {}".format(
+                    "text": "Learn how to review validation results in Data Docs: {}".format(
                         documentation_url
                     ),
                 }

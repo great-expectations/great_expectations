@@ -638,7 +638,7 @@ great_expectations checkpoint
 
 A checkpoint is a bundle of one or more batches of data with one or more Expectation Suites.
 A checkpoint can be as simple as one batch of data paired with one Expectation Suite.
-A checkpoint can be as complex as many batches of data across different datasources paired with one or more Expectation Suites each. 
+A checkpoint can be as complex as many batches of data across different datasources paired with one or more Expectation Suites each.
 
 .. tip::
     Checkpoints are an ideal way to embed Great Expectations into your pipeline or use Great Expectations adjacent to your pipeline.
@@ -687,41 +687,7 @@ The new checkpoint file (``great_expectations/checkpoints/source_tables.yml``) w
         expectation_suite_names: # one or more suites may validate against a single batch
           - npi.warning
 
-You can edit this file to add batches of data and expectation suites across your project.
-
-For example to make this checkpoint **validate multiple source files before and after their ingestion into your data lake** your checkpoint might look like this:
-
-.. note:: Note in this example we have 4 batches of data from 2 different datasources (files and a database) and multiple suites can be run against a given batch.
-
-.. code-block:: yaml
-
-    validation_operator_name: action_list_operator
-    batches:
-      - batch_kwargs:
-          path: /Users/me/pipeline/source_files/npi.csv
-          datasource: files_datasource
-          reader_method: read_csv
-        expectation_suite_names:
-          - npi.warning
-          - npi.critical
-      - batch_kwargs:
-          path: /Users/me/pipeline/source_files/claims.csv
-          datasource: files_datasource
-          reader_method: read_csv
-        expectation_suite_names:
-          - claims.warning
-      - batch_kwargs:
-          table: npi
-          datasource: data_lake
-        expectation_suite_names:
-          - npi.warning
-          - npi.critical
-      - batch_kwargs:
-          table: claims
-          datasource: data_lake
-        expectation_suite_names:
-          - claims.warning
-
+You can edit this file to add batches of data and expectation suites across your project. To find out more see this guide:  :ref:`how_to_guides__validation__how_to_add_validations_data_or_suites_to_a_checkpoint`
 
 If you are using a SQL datasource you will be guided through a series of prompts that helps you choose a table or write a SQL query.
 
@@ -884,7 +850,7 @@ If you want to enable autocompletion for the Great Expectations CLI, you can exe
 .. code-block:: bash
 
    $ eval "$(_GREAT_EXPECTATIONS_COMPLETE=source_bash great_expectations)"
-   
+
 for bash
 
 .. code-block:: zsh

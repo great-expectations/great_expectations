@@ -1,4 +1,4 @@
-.. _getting_started__validate_data:
+.. _tutorials__getting_started__set_up_your_first_checkpoint:
 
 Set up your first Checkpoint
 ============================

@@ -339,7 +339,11 @@ class RunIdentifier(DataContextKey):
 
         run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
         if not run_time.tzinfo:
+            # this takes the given time and just adds timezone (no conversion)
             run_time = run_time.replace(tzinfo=datetime.timezone.utc)
+        else:
+            # this takes given time and converts to utc
+            run_time = run_time.astimezone(tz=datetime.timezone.utc)
         self._run_time = run_time
 
     @property
@@ -383,7 +387,7 @@ class RunIdentifier(DataContextKey):
 
 class RunIdentifierSchema(Schema):
     run_name = fields.Str()
-    run_time = fields.DateTime(format="%Y%m%dT%H%M%S.%fZ")
+    run_time = fields.DateTime(format="iso")
 
     @post_load
     def make_run_identifier(self, data, **kwargs):
