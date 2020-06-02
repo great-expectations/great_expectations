@@ -22,10 +22,8 @@ from great_expectations.core import (
     RunIdentifier,
     expectationSuiteSchema,
 )
+from great_expectations.core.evaluation_parameters import build_evaluation_parameters
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.data_asset.evaluation_parameters import (
-    build_evaluation_parameters,
-)
 from great_expectations.data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
