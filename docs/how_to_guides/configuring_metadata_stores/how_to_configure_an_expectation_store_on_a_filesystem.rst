@@ -3,16 +3,81 @@
 How to configure an Expectation store on a filesystem
 =====================================================
 
-.. admonition:: Admonition from Mr. Dickens
 
-    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
+By default, newly profiled Expectations are stored in JSON format in the ``expectations/`` subdirectory of your ``great_expectations`` folder.  This guide will help you configure a new storage location for Expectations on your filesystem.
+
+.. admonition:: Prerequisites: This how-to guide assumes that you have already:
+
+    - Configured a Data Context
+    - Configured an Expectation Suite
+    - Determined a new storage location where you would like to store Expectations. This can either be a local path, or a path to a network filesystem.
+
+Steps
+-----
+
+1. First create a new folder where you would to store your Expectations, and move your existing Expectation files over to the new location. In our case, the name of the Expectations file is ``npi_expectations`` and the path to our new storage location is ``/shared_expectations``.
+
+.. code-block:: bash
+
+    # in the great_expectations folder
+    mkdir shared_expectations
+    mv expectations/npi_expectations.json /shared_expectations
 
 
-This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
+2. Next open the ``great_expectations.yml`` file and look for the following lines.
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+.. code-block:: yaml
 
-If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
+    expectations_store_name: expectations_store
+
+    stores:
+        expectations_store:
+            class_name: ExpectationsStore
+            store_backend:
+                class_name: TupleFilesystemStoreBackend
+                base_directory: expectations/
+
+    The configuration file tells ``Great Expectations`` to look for Expectations in a ``store`` called ``expectation_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
+
+3. The following change to the YAML file will tell `Great Expectations`` to look for Expectations in  ``shared_expectations_filesystem_store`` with the ``base_directory`` set to ``shared_expectations/``.
+
+.. code-block:: yaml
+
+    expectations_store_name: shared_expectations_filesystem_store
+
+    stores:
+        shared_expectations_filesystem_store:
+            class_name: ExpectationsStore
+            store_backend:
+                class_name: TupleFilesystemStoreBackend
+                base_directory: shared_expectations/
+
+
+
+4. Confirm that the location has been updated by running ``great_expectations store list``.
+
+.. code-block:: bash
+
+    great_expectations store list
+
+    3 Stores found:
+
+    - name: shared_expectations_filesystem_store
+    class_name: ExpectationsStore
+    store_backend:
+        class_name: TupleFilesystemStoreBackend
+        base_directory: shared_expectations/
+
+
+5. Confirm that Expectations can be read from the new storage location by running ``great_expectations suite list``.
+
+.. code-block:: bash
+
+    great_expectations suite list
+
+    1 Expectation Suite found:
+        - npi_expectations
+
 
 .. discourse::
     :topic_identifier: 182
