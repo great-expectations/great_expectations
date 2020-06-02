@@ -39,7 +39,7 @@ Steps
 
 3. **Within your new class, define Expectations using decorators from MetaSqlAlchemyDataset**
 
-    ``column_map_expectations`` are Expectations that are applied to a single column, on a row-by-row basis. To learn about other Expectation types, please see :ref:`Other Expectation decorators` below.
+    ``column_map_expectations`` are Expectations that are applied to a single column, on a row-by-row basis.
 
     The ``@MetaSqlAlchemyDataset.column_map_expectation`` decorator wraps a custom function with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining required arguments like ``mostly`` and ``result_format``. Your custom function can focus exclusively on the business logic of passing or failing the Expectation.
 
@@ -51,11 +51,39 @@ Steps
         def expect_column_values_to_be_even(self, column):
             return (sa.column(column) % 2 == 0)
 
-    To use the ``column_map_expectation`` decorator, your custom function must accept at least two arguments: ``self`` and ``column``. When the user invokes your Expectation, they will pass a string containing the column name. <<#FIXME: The decorator will then fetch the appropriate column and pass all of the non-null values to your function as a pandas ``Series``. Your function must then return a Series of boolean values in the same order, with the same index.>>
+    The business logic for developing SQL queries using ``MetaSqlAlchemyDataset`` deocrators is a little diffeent from ``MetaPandasDataset``. To use the ``column_map_expectation`` decorator, both require that your custom function accept at least two arguments: ``self`` and ``column``. Both create a function API where the user passes a string containing the column name to your Expectation.
+    
+    In the case of ``MetaSqlAlchemyDataset``, the column name string will be passed through to your custom function unaltered. From there, you can use sqlalchemy's ``sqlalchemy.column`` method to create a ``ColumnClause`` based on it. Your function must return a valid ``ColumnClause``, which the decorator will combine with other SqlAlchemy methods to covert your logic into valid SQL queries and wrap the results as an :ref:``ExpectationValiadationResult``.
 
     By convention, ``column_map_expectations`` always start with ``expect_column_values_...`` or ``expect_column_value_...`` (Ex: ``expect_column_value_word_counts_to_be_between``). Following this pattern is highly recommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you.
 
-    Please see <<<XXX>>> for additional details on implementing ``column_map_expectations``.
+    |
+
+    You can also define ``column_aggregate_expectations``, which generate a single observed value for a whole column and evaluate it against some criteria. Like ``column_map_expectations``, ``column_aggregate_expectations`` also take at least two arguments (``self`` and ``column``). In this case, it's your responsibility to create all the logic for the full query, then wrap the result in a return object with a Boolean ``success`` value and ``observed_value`` nested inside ``result``.
+    
+    .. code-block:: python
+
+        @MetaSqlAlchemyDataset.column_aggregate_expectation
+        def expect_column_mode_to_equal(self, column, value):
+            mode_query = sa.select([
+                sa.column(column).label('value'),
+                sa.func.count(sa.column(column)).label('frequency')
+            ]).select_from(self._table).group_by(sa.column(column)).order_by(sa.desc(sa.column('frequency')))
+
+            mode = self.engine.execute(mode_query).scalar()
+            return {
+                "success": mode == value,
+                "result": {
+                    "observed_value": mode,
+                }
+            }
+
+    By convention, ``column_aggregate_expectations`` always start with ``expect_column_{property}_...`` (Ex: ``expect_column_mean_to_be_between``, ``expect_column_most_common_value_to_be_in_set``, ``expect_column_chisquare_test_p_value_to_be_greater_than``). Following this pattern is highly recommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you.
+
+    |
+
+    Please see the :ref:`SqlAlchemyDataset` module for additional examples of how to contruct logic for Expectations. To learn about other Expectation types, please see :ref:`Other Expectation decorators` below.
+
 
 4. **Load some data**
 
@@ -142,7 +170,27 @@ Steps
             "meta": {}
         }
 
-    Often, the best development loop for custom Expectations is iterative: editing Expectations in ``MyCustomPandasDataset``, then re-running the cells to load data and execute Expectations on data.
+    .. code-block:: python
+
+        my_batch.expect_column_mode_to_equal("ReportsTo", value=2)
+
+    returns
+
+    .. code-block:: json
+
+        {
+            "exception_info": null,
+            "success": true,
+            "result": {
+                "observed_value": 2,
+                "element_count": 8,
+                "missing_count": 1,
+                "missing_percent": 12.5
+            },
+            "meta": {}
+        }
+
+    Often, the best development loop for custom Expectations is iterative: editing Expectations in ``MyCustomSqlAlchemyDataset``, then re-running the cells to load data and execute Expectations on data.
 
 Additional notes
 ----------------
@@ -176,8 +224,24 @@ Here's a single code block containing all the code in this article:
 
         _data_asset_type = "CustomSqlAlchemyDataset"
 
+        @MetaSqlAlchemyDataset.column_map_expectation
         def expect_column_values_to_be_even(self, column):
             return (sa.column(column) % 2 == 0)
+
+        @MetaSqlAlchemyDataset.column_aggregate_expectation
+        def expect_column_mode_to_equal(self, column, value):
+            mode_query = sa.select([
+                sa.column(column).label('value'),
+                sa.func.count(sa.column(column)).label('frequency')
+            ]).select_from(self._table).group_by(sa.column(column)).order_by(sa.desc(sa.column('frequency')))
+
+            mode = self.engine.execute(mode_query).scalar()
+            return {
+                "success": mode == value,
+                "result": {
+                    "observed_value": mode,
+                }
+            }
 
     # Loading a DataAsset using bare SQLAlchemy
     my_data_asset = CustomSqlAlchemyDataset("employees", sa.create_engine("sqlite:///data/chinook.db"))
