@@ -4,12 +4,11 @@ import locale
 import os
 import shutil
 
+import great_expectations as ge
 import numpy as np
 import pandas as pd
 import pytest
 from freezegun import freeze_time
-
-import great_expectations as ge
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -2134,6 +2133,28 @@ def titanic_multibatch_data_context(tmp_path_factory):
         str(os.path.join(context_path, "../data/titanic/Titanic_1912.csv")),
     )
     return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def v10_project_directory(tmp_path_factory):
+    """
+    GE 0.10.x project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v10_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__, "./test_fixtures/upgrade_helper/great_expectations_v10_project/"
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, "./test_fixtures/upgrade_helper/great_expectations_v1_basic.yml"
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
 
 
 @pytest.fixture
