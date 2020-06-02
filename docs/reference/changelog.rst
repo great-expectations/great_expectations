@@ -8,6 +8,7 @@ develop
 -----------------
 * [BUGFIX] Fixed bug where evaluation parameters used in arithmetic expressions would not be identified as upstream dependencies.
 * [ENHANCEMENT] Add formatted __repr__ for ValidationOperatorResult
+* [BUGFIX] Fix issue where DatabaseStoreBackend threw IntegrityError when storing same metric twice
 
 
 0.11.1
