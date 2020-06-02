@@ -18,7 +18,7 @@ try:
     )
     from sqlalchemy.engine.url import URL
     from sqlalchemy.engine.reflection import Inspector
-    from sqlalchemy.exc import SQLAlchemyError, NoSuchTableError
+    from sqlalchemy.exc import SQLAlchemyError, NoSuchTableError, IntegrityError
 except ImportError:
     sqlalchemy = None
     create_engine = None
@@ -97,7 +97,15 @@ class DatabaseStoreBackend(StoreBackend):
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
         cols["value"] = value
         ins = self._table.insert().values(**cols)
-        self.engine.execute(ins)
+        try:
+            self.engine.execute(ins)
+        except IntegrityError as e:
+            if self._get(key) == value:
+                logger.info(f"Key {str(key)} already exists with the same value.")
+            else:
+                raise ge_exceptions.StoreBackendError(
+                    "Integrity error {str(e)} while trying to store key"
+                )
 
     def _move(self):
         raise NotImplementedError
