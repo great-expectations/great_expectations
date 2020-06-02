@@ -1,9 +1,9 @@
 from urllib.parse import parse_qs
 
-import pytest
 from pyparsing import ParseException
 
-from great_expectations.core import ge_urn
+import pytest
+from great_expectations.core.urn import ge_urn
 
 
 def test_ge_validations_urn():

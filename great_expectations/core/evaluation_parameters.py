@@ -19,7 +19,7 @@ from pyparsing import (
     delimitedList,
 )
 
-from great_expectations.core import ge_urn
+from great_expectations.core.urn import ge_urn
 from great_expectations.exceptions import EvaluationParameterError
 
 logger = logging.getLogger(__name__)
@@ -207,6 +207,67 @@ def build_evaluation_parameters(
 
 
 expr = EvaluationParameterParser()
+
+
+def find_evaluation_parameter_dependencies(parameter_expression):
+    """Parse a parameter expression to identify dependencies including GE URNs.
+
+    Args:
+        parameter_expression: the parameter to parse
+
+    Returns:
+        a dictionary including:
+          - "urns": set of strings that are valid GE URN objects
+          - "other": set of non-GE URN strings that are required to evaluate the parameter expression
+
+    """
+    expr = EvaluationParameterParser()
+
+    dependencies = {"urns": set(), "other": set()}
+    # Calling get_parser clears the stack
+    parser = expr.get_parser()
+    try:
+        _ = parser.parseString(parameter_expression, parseAll=True)
+    except ParseException as err:
+        raise EvaluationParameterError(
+            f"Unable to parse evaluation parameter: {str(err)} at line {err.line}, column {err.column}"
+        )
+    except AttributeError as err:
+        raise EvaluationParameterError(
+            f"Unable to parse evaluation parameter: {str(err)}"
+        )
+
+    for word in expr.exprStack:
+        if isinstance(word, (int, float)):
+            continue
+
+        if not isinstance(word, str):
+            # If we have a function that itself is a tuple (e.g. (trunc, 1))
+            continue
+
+        if word in expr.opn or word in expr.fn or word == "unary -":
+            # operations and functions
+            continue
+
+        # if this is parseable as a number, then we do not include it
+        try:
+            _ = float(word)
+            continue
+        except ValueError:
+            pass
+
+        try:
+            _ = ge_urn.parseString(word)
+            dependencies["urns"].add(word)
+            continue
+        except ParseException:
+            # This particular evaluation_parameter or operator is not a valid URN
+            pass
+
+        # If we got this far, it's a legitimate "other" evaluation parameter
+        dependencies["other"].add(word)
+
+    return dependencies
 
 
 def parse_evaluation_parameter(
