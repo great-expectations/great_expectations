@@ -8,6 +8,7 @@ develop
 -----------------
 
 * [BUGFIX] Fixed bug preventing GCS Data Docs sites to cleaned
+* [FEATURE] Removed unnecessary call to context.build_data_docs in rendered notebooks
 
 0.11.1
 -----------------
