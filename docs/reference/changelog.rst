@@ -7,6 +7,7 @@ Changelog
 develop
 -----------------
 * [BUGFIX] Fixed bug where evaluation parameters used in arithmetic expressions would not be identified as upstream dependencies.
+* [ENHANCEMENT] Add formatted __repr__ for ValidationOperatorResult
 
 
 0.11.1
