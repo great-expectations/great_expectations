@@ -7,6 +7,8 @@ Changelog
 develop
 -----------------
 
+* [BUGFIX] Fixed bug preventing GCS Data Docs sites to cleaned
+
 0.11.1
 -----------------
 * [BUGFIX] Fixed bug that was caused by comparison between timezone aware and non-aware datetimes
