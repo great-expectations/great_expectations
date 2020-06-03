@@ -45,6 +45,8 @@ To add a Snowflake datasource do this:
 
     will appear on your Terminal screen. After this confirmation, you can proceed with exploring the data sets in your
     new Snowflake data source.
+#.
+    Should you need to modify your connection string you can manually edit the ``great_expectations/uncommitted/config_variables.yml`` file.
 
 ----------------
 Additional Notes
@@ -56,9 +58,9 @@ Additional Notes
     ::
         pip install sqlalchemy snowflake-connector-python snowflake-sqlalchemy
 
-    Otherwise, your ``great_expectations init`` workflow will be interrupted, and you will be be prompted to do so,
-    which means that you will have to rerun ``great_expectations init`` after these packages are installed.  Except for
-    having to switch back and forth between ``great_expectations init`` and your Terminal ``shell``, the procedure will
+    Otherwise, your ``great_expectations datasource new`` workflow will be interrupted, and you will be be prompted to do so,
+    which means that you will have to rerun ``great_expectations datasource new`` after these packages are installed.  Except for
+    having to switch back and forth between ``great_expectations datasource new`` and your Terminal ``shell``, the procedure will
     continue without any problems, because Great Expectations will pick up from where it left off.
 #.
     When using the Snowflake dialect, `SqlAlchemyDataset` will create a **transient** table instead of a **temporary**
