@@ -14,6 +14,7 @@ develop
 * [BUGFIX] Fix issue where DatabaseStoreBackend threw IntegrityError when storing same metric twice
 * [BUGFIX] Fixed bug preventing GCS Data Docs sites to cleaned
 * [BUGFIX] Correct doc link in checkpoint yml
+* [BUGFIX] Fix S3 Batch Kwargs Generator incorrect migration to new build_batch_kwargs API
 
 0.11.1
 -----------------

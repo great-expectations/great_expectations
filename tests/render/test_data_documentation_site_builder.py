@@ -134,7 +134,7 @@ def test_configuration_driven_site_builder(
     batch_kwargs = context.build_batch_kwargs(
         datasource=datasource_name,
         batch_kwargs_generator=generator_name,
-        name=data_asset_name,
+        data_asset_name=data_asset_name,
     )
 
     expectation_suite_name = "{}.{}.{}.{}".format(
