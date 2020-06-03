@@ -9,6 +9,9 @@ develop
 * [FEATURE] Added new cli upgrade helper to help facilitate upgrading projects to be compatible with GE 0.11.
   See :ref:`upgrading_to_0.11` for more info.
 
+* [BUGFIX] Fixed bug preventing GCS Data Docs sites to cleaned
+* [BUGFIX] Correct doc link in checkpoint yml
+
 0.11.1
 -----------------
 * [BUGFIX] Fixed bug that was caused by comparison between timezone aware and non-aware datetimes
