@@ -100,7 +100,9 @@ great_expectations/
         data_docs/
             local_site/
                 expectations/
+                    .gitkeep
                 static/
+                    .gitkeep
                 validations/
                     diabetic_data/
                         warning/
@@ -211,7 +213,9 @@ great_expectations/
         data_docs/
             local_site/
                 expectations/
+                    .gitkeep
                 static/
+                    .gitkeep
                 validations/
                     diabetic_data/
                         warning/
@@ -372,7 +376,9 @@ great_expectations/
         data_docs/
             local_site/
                 expectations/
+                    .gitkeep
                 static/
+                    .gitkeep
                 validations/
                     diabetic_data/
                         warning/
@@ -531,7 +537,9 @@ great_expectations/
         data_docs/
             local_site/
                 expectations/
+                    .gitkeep
                 static/
+                    .gitkeep
                 validations/
                     diabetic_data/
                         warning/
