@@ -69,3 +69,10 @@ Additional Notes
     table when passing in `query` Batch Kwargs or providing `custom_sql` to its constructor. Consequently, users
     **must** provide a `snowflake_transient_table` in addition to the `query` parameter. Any existing table with that
     name will be overwritten.
+#.
+    Note that your Snowflake connection can be equivalently described under the '<your_new_snowflake_data_source>' key in your
+    "uncommitted/config_variables.yml" file as follows:
+
+    .. code-block:: python
+
+        "snowflake://<user_login_name>:<password>@<account_name>/<database_name>/<schema_name>?warehouse=<warehouse_name>&role=<role_name>"
