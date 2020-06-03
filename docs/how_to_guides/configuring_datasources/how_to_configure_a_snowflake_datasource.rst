@@ -55,7 +55,9 @@ Additional Notes
 #.
     Assuming that you intend to use Great Expectations with the data in Snowflake, you may wish to install the required
     modules first:
-    ::
+
+    .. code-block:: python
+
         pip install sqlalchemy snowflake-connector-python snowflake-sqlalchemy
 
     Otherwise, your ``great_expectations datasource new`` workflow will be interrupted, and you will be be prompted to do so,
