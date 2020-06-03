@@ -86,8 +86,11 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
+        .gitkeep
     expectations/
+        .gitkeep
     notebooks/
+        .gitkeep
     plugins/
         custom_store_backends/
             __init__.py
@@ -194,8 +197,11 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
+        .gitkeep
     expectations/
+        .gitkeep
     notebooks/
+        .gitkeep
     plugins/
         custom_store_backends/
             __init__.py
@@ -352,8 +358,11 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
+        .gitkeep
     expectations/
+        .gitkeep
     notebooks/
+        .gitkeep
     plugins/
         custom_store_backends/
             __init__.py
@@ -508,8 +517,11 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
+        .gitkeep
     expectations/
+        .gitkeep
     notebooks/
+        .gitkeep
     plugins/
         custom_store_backends/
             __init__.py
