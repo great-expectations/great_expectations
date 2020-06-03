@@ -6,6 +6,10 @@ How to Configure a Redshift Datasource
 
 This guide shows how to connect to a Redshift Datasource.
 
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+
 -----
 Steps
 -----
@@ -74,4 +78,11 @@ Additional Notes
         "postgresql+psycopg2://username:password@host:port/database_name?sslmode=require"
 #.
     Depending on your Redshift cluster configuration, you may or may not need the ``sslmode`` parameter.
+
+--------
+Comments
+--------
+
+    .. discourse::
+        :topic_identifier: {169}
 
