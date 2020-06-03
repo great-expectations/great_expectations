@@ -9,18 +9,19 @@ This guide shows how to create a new how-to guide in Great Expectations. By writ
 Steps
 -----
 
-1. Copy the :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>` to the appropriate subdirectory of ``docs/how_to_guides/``, and rename it.
-2. Write a title and purpose paragraph.
-3. Fill out the Prerequisites info box (see :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>`). The header of the info box says: "This how-to guide assumes you have already:". Place each prerequisite under its own bullet and phrase it using the style in the template: "did something".
-4. Fill in the Steps section, making sure to include bash, yml, and code snippets as appropriate.
-5. Starting from a clean install of Great Expectations, follow your own steps from start to finish, to make sure there aren’t any gaps.
-6. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
-7. Scan your article to make sure it follows the :ref:`Style guide`. If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
-8. Submit your PR!
+#. Copy the :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>` to the appropriate subdirectory of ``docs/how_to_guides/``, and rename it.
+#. Write a title and purpose paragraph.
+#. Decide whether you're writing a :ref:`code-heavy or process-heavy <Code-heavy vs process-heavy guide>` guide, and :ref:`adjust your formatting <Indentation, bolding, and code blocks>` appropriately.
+#. Fill out the Prerequisites info box (see :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>`). The header of the info box says: "This how-to guide assumes you have already:". Place each prerequisite under its own bullet and phrase it using the style in the template: "done something".
+#. Fill in the Steps section, making sure to include bash, yml, and code snippets as appropriate.
 
-.. warning::
-
-	To enable comments on your How-to guide, please follow :ref:`these instructions <how_to_guides__miscellaneous__how_to_add_comments_to_a_page_in_documentation>`.
+	- Hint: it's often most efficient to run through the technical steps in a notebook or at the command line before starting to write. Then you can simply copy-paste content into code blocks, and write headers and text to connect them.
+	- After you finish writing, you should definitely follow your own steps from start to finish at least once, to make sure there aren’t any gaps.
+	
+#. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
+#. Enable comments for your How-to guide, by following :ref:`these instructions <how_to_guides__miscellaneous__how_to_add_comments_to_a_page_in_documentation>`.
+#. Scan your article to make sure it follows the :ref:`Style guide`. If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
+#. Submit your PR!
 
 Additional Notes
 ----------------
@@ -69,6 +70,40 @@ If the user has data in Mongo and wants to configure a Datasource, no additional
 **Additional notes**: This section covers errata that would be distracting to include in Steps. It’s fine for it to be empty.
 
 **Additional resources**: Additional resources, usually external (i.e. not within the Great Expectations documentation) and usually shown as a list. To avoid link rot, please use this section sparingly, and prefer links to stable, well-maintained resources.
+
+Code-heavy vs process-heavy guides
+##################################
+
+Broadly speaking, there are two kinds of How-to Guides: code-heavy and process-heavy. All guides are about following a specific sequence of steps. In code-heavy guides, most or all of the steps are expressed in technical syntax: code snippets, JSON or YAML objects, CLI commands, etc. In process-heavy guides, many of the steps are things that must be done manually.
+
+Most guides are code-heavy. Because it's about writing, this guide happens to be process-heavy.
+
+When writing a guide that could go either way, please prefer code-heavy, since they tend to make for better replication.
+
+Indentation, bolding, and code blocks
+#####################################
+
+**For code-heavy guides**
+
+- Treat the first sentence of each step like a header.
+	- Use short, complete, imperative sentences: ("Paste the YAML snippet into your config file", "Run great_expectations init")
+	- Header text should be **bold**.
+	- Avoid links or inline code, since RST files do note support nesting them within bolded text. If your header must include text that would normally be a link or inline code, please repeat it in the body text, and use a link or code block there.
+- Indent content within steps.
+- Any time the user needs to do something, it should be in a code block.
+	- Please follow this convention even if the text in the code block is somewhat redundant against the text of the step. 
+	- Clear, sequential code blocks are easy for the eye to follow. They encourage a health copy-and-modify development pattern.
+- All of these styles are modeled in the :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>`.
+
+**For code-heavy guides**
+
+- Do not separate headers or bold first sentences.
+- Avoid big blocks of text without visual cues for how to read it. Indentation and sub-bullets are your friends.
+- When including a code block, please follow the same conventions as for code-heavy blocks.
+- All of these styles are modeled in the this rst file.
+
+
+
 
 Additional Resources
 --------------------
