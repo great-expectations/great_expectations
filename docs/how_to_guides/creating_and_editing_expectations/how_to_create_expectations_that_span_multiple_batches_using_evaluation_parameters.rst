@@ -1,0 +1,139 @@
+.. _how_to_guides__creating_and_editing_expectations__how_to_create_expectations_that_span_multiple_tables_using_evaluation_parameters:
+
+How to create Expectations that span multiple Batches using Evaluation Parameters
+=================================================================================
+
+This guide will help you create Expectations that span multiple :ref:`Batches` of data using :ref:`Evaluation Parameters`. This pattern is useful for things like verifying that row counts between tables stay consistent.
+
+
+Data Assets within a Validation operation. This is done
+
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - Configured a :ref:`Datasource <Datasources>` (or Datasources) with at least two Data Assets.
+  - Also created :ref:`Expectation Suites` for those Data Assets.
+  - Have a working :ref:`Evaluation Parameter Store`. (The default in-memory store from ``great_expectations init`` can work for this.)
+  - Have a working :ref:`Validation Operator`. (The default Validation Operator from ``great_expectations init`` can work for this.)
+
+Steps
+-----
+
+In a notebook, 
+
+#. **Import great_expectations and instantiate your Data Context**
+
+    .. code-block:: python
+
+        import great_expectations as ge
+        context = ge.DataContext()
+
+#. **Instantiate two Batches**
+
+    We'll call one of these Batches the *upstream* Batch and the other the *downstream* Batch. Evaluation Parameters will allow us to use Validation Results from the upstream Batch as parameters passed into Expectations on the downstream.
+    
+    It's common (but not required) for both Batches to come from the same :ref:`Datasource <Datasources>` and :ref:`BatchKwargsGenerator`.
+
+    .. code-block:: python
+
+        upstream_batch = context.get_batch(
+            context.build_batch_kwargs("my_datasource", "my_generator_name", "my_data_asset_name_1"),
+            expectation_suite_name='my_expectation_suite_1'
+        )
+
+        downstream_batch = context.get_batch(
+            context.build_batch_kwargs("my_datasource", "my_generator_name", "my_data_asset_name_2"),
+            expectation_suite_name='my_expectation_suite_2'
+        )
+
+#. **Define an Expectation using an Evaluation Parameter on the downstream Batch.**
+
+    .. code-block:: python
+
+        eval_param_urn = 'urn:great_expectations:validations:my_expectation_suite_1:expect_table_row_count_to_be_between.result.observed_value'
+        downstream_batch.expect_table_row_count_to_equal(
+            value={
+                '$PARAMETER': eval_param_urn, # this is the actual parameter we're going to use in the validation
+                '$PARAMETER.' + eval_param_urn: 10  # this is a *temporary* value so we can execute the notebook
+            }
+        )
+    
+    The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during validation, it will replace the ``URN`` with a value retrieved from an :ref:`Evaluation Parameter Store` or :ref:`Metrics Store`.
+    
+    This declaration above includes two ``$PARAMETERS``. The first is the real parameter that will be used after the Expectation Suite is stored and deployed in a Validation Operator. The second parameter supports immediate evaluation in the notebook.
+
+    When executed in the notebook, this Expectation will generate an :ref:`Expectation Validation Result`:
+
+    .. code-block:: python
+
+        {
+            "result": {
+                "observed_value": 506
+            },
+            "meta": {},
+            "exception_info": null,
+            "success": false
+        }
+
+    .. warning::
+
+        Your URN must be exactly correct in order to work in production. Unfortunately, successful execution at this stage does not guarantee that the URN is specified correctly and that the intended parameters will be available when executed later.
+        
+#. **Save your Expectation Suite**
+
+    .. code-block:: python
+
+        downstream_batch.save_expectation_suite(discard_failed_expectations=False)
+
+    This step is necessary, because your ``$PARAMETER`` will only function properly when invoked within a Validation operation with multiple Batches, the simplest way to execute such an operation invoke is through a :ref:`Validation Operator`, and Validation Operators are configured to load Expectation Suites from Expectation Stores, not memory.
+
+#. **Execute an existing Validation Operator on your upstream and downstream batches.**
+
+    You can do this within your notebook by running ``context.run_validation_operator``:
+
+    .. code-block:: python
+
+        results = context.run_validation_operator(
+            "action_list_operator",
+            assets_to_validate=[
+                upstream_batch,
+                downstream_batch,
+            ]
+        )
+
+#. **Rebuild Data Docs and review results in docs.**
+
+    You can do this within your notebook by running:
+
+    .. code-block:: python
+
+        context.build_data_docs()
+
+    You can also execute from the command line with:
+
+    .. code-block:: bash
+
+        great_expectations docs build
+
+    Once your Docs rebuild, open them in a browser and navigate to the page for the new Validation Result.
+
+    If your Evaluation Parameter was executed successfully, you'll see something like this:
+
+    .. image:: ../../images/evaluation_parameter_success.png
+
+    |
+
+    If it encountered an error, you'll see something like this. The most common problem is a mis-specified URN name.
+
+    .. image:: ../../images/evaluation_parameter_error.png
+
+    .. warning::
+        
+        In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the `Great Expectations discussion forum <discuss.great_expectations.io>`_ and `Slack channel <great_expectations.io/slack>`_.
+
+
+Comments
+--------
+
+.. discourse::
+    :topic_identifier: 206
