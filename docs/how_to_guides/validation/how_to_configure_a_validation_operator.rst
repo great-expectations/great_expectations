@@ -3,16 +3,44 @@
 How to configure a Validation Operator
 ======================================
 
-.. admonition:: Admonition from Mr. Dickens
+This guide will help you configure a :ref:`Validation Operator <validation_operators_and_actions>`. This will allow you to validate tables and queries within this project.
 
-    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - Created at least one Expectation Suite
+
+Steps
+-----
 
 
-This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
+1. Open your project's great_expectations.yml configuration file and navigate to the `validation_operators` section.
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+2. Find the class name of the Validation Operator you want to add to your project. This can be one of the Validation Operators that are included in
+Great Expectations or a class that you implemented.
 
-If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
+3. For this example let's assume the class name is `AmazingValidationOperator`.
+
+.. code-block:: yaml
+
+    validation_operators:
+      action_list_operator:
+        class_name: AmazingValidationOperator
+
+
+2. Choose "Big Query" from the list of database engines, when prompted.
+3. Identify the connection string you would like Great Expectations to use to connect to BigQuery, using the examples below and the `PyBigQuery <https://github.com/mxmzdlv/pybigquery>`_ documentation.
+
+6. Should you need to modify your connection string, you can manually edit the
+   ``great_expectations/uncommitted/config_variables.yml`` file.
+
+
+Additional notes
+----------------
+
+
+Additional resources
+--------------------
 
 .. discourse::
     :topic_identifier: 217
