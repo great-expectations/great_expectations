@@ -74,3 +74,4 @@ Additional Notes
         "postgresql+psycopg2://username:password@host:port/database_name?sslmode=require"
 #.
     Depending on your Redshift cluster configuration, you may or may not need the ``sslmode`` parameter.
+
