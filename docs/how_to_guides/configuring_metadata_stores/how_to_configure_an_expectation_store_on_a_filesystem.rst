@@ -30,7 +30,9 @@ Steps
 
     The configuration file tells ``Great Expectations`` to look for Expectations in a ``store`` called ``expectation_store``. Further down, the ``base_directory`` for ``expectations_store`` is set to ``expectations/``, which is the default.
 
-2. The following changes will change it to ``new_expectations_store`` with the ``base_directory`` set to ``new_expectations_location``
+2. Update your configuration following the example below. This example would change the Store name to ``new_expectations_store`` with the ``base_directory`` set to ``new_expectations_location``.
+
+    Paths are relative to the directory where ``great_expectations.yml`` is stored.
 
 
 .. code-block:: yaml
