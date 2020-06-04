@@ -274,3 +274,7 @@ a {
     display: block;
   }
 }
+
+.rst-content .sidebar {
+  margin-top: 80px !important;
+}
