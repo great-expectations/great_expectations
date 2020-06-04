@@ -131,6 +131,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
     )
     stdout = result.stdout
 
+    # fmt: off
     assert "Checking project..." in stdout
     assert (
         "Your project appears to have an out-of-date config version (1.0) - the version number must be at least 2."
@@ -142,6 +143,10 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
     )
     assert (
         """\
+++====================================++
+|| UpgradeHelperV11: Upgrade Overview ||
+++====================================++
+
 UpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x.
 
 **WARNING**: Before proceeding, please make sure you have appropriate backups of your project.
@@ -232,6 +237,7 @@ great_expectations/
                         20200430T191246.763896Z/
                             c3b4c5df224fef4b1a056a0f3b93aba5.json
 """
+    # fmt: on
     obs_project_tree_str = gen_directory_tree_str(v10_project_directory)
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number incremented
@@ -284,6 +290,7 @@ def test_project_upgrade_with_manual_steps(v10_project_directory, caplog):
     )
     stdout = result.stdout
 
+    # fmt: off
     assert "Checking project..." in stdout
     assert (
         "Your project appears to have an out-of-date config version (1.0) - the version number must be at least 2."
@@ -395,6 +402,7 @@ great_expectations/
                         20200430T191246.763896Z/
                             c3b4c5df224fef4b1a056a0f3b93aba5.json
 """
+    # fmt: on
     obs_project_tree_str = gen_directory_tree_str(v10_project_directory)
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number not incremented
@@ -447,6 +455,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
     )
     stdout = result.stdout
 
+    # fmt: off
     assert "Checking project..." in stdout
     assert (
         "Your project appears to have an out-of-date config version (1.0) - the version number must be at least 2."
@@ -556,6 +565,7 @@ great_expectations/
                         20200430T191246.763896Z/
                             c3b4c5df224fef4b1a056a0f3b93aba5.json
 """
+    # fmt: off
     obs_project_tree_str = gen_directory_tree_str(v10_project_directory)
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number not incremented
@@ -585,5 +595,6 @@ great_expectations/
         f".json"
     ) as f:
         obs_upgrade_log_dict = json.load(f)
+        obs_upgrade_log_dict["exceptions"][0]["exception_message"] = ""
 
     assert obs_upgrade_log_dict == expected_upgrade_log_dict
