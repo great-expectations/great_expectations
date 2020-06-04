@@ -2178,7 +2178,11 @@ class DataContext(BaseDataContext):
         """List checkpoints. (Experimental)"""
         # TODO mark experimental
         files = self._list_ymls_in_checkpoints_directory()
-        return [os.path.basename(f)[:-4] for f in files if os.path.basename(f).endswith(".yml")]
+        return [
+            os.path.basename(f)[:-4]
+            for f in files
+            if os.path.basename(f).endswith(".yml")
+        ]
 
     def get_checkpoint(self, checkpoint_name: str) -> dict:
         """Load a checkpoint. (Experimental)"""
