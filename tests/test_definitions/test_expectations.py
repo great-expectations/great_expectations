@@ -2,6 +2,9 @@ import glob
 import json
 import logging
 import os
+import random
+import string
+import tempfile
 from collections import OrderedDict
 
 import pandas as pd
@@ -20,6 +23,7 @@ from ..test_utils import (
 )
 
 logger = logging.getLogger(__name__)
+tmp_dir = str(tempfile.mkdtemp())
 
 
 def pytest_generate_tests(metafunc):
@@ -46,18 +50,44 @@ def pytest_generate_tests(metafunc):
                 test_configuration = json.load(file, object_pairs_hook=OrderedDict)
 
                 for d in test_configuration["datasets"]:
-                    skip_expectation = False
-                    # Pass the test if we are in a test condition that is a known exception
+                    datasets = []
                     if candidate_test_is_on_temporary_notimplemented_list(
                         c, test_configuration["expectation_type"]
                     ):
                         skip_expectation = True
-
-                    if skip_expectation:
                         schemas = data_asset = None
                     else:
-                        schemas = d["schemas"] if "schemas" in d else None
-                        data_asset = get_dataset(c, d["data"], schemas=schemas)
+                        skip_expectation = False
+                        if isinstance(d["data"], list):
+                            sqlite_db_path = os.path.abspath(
+                                os.path.join(
+                                    tmp_dir,
+                                    "sqlite_db"
+                                    + "".join(
+                                        [
+                                            random.choice(
+                                                string.ascii_letters + string.digits
+                                            )
+                                            for _ in range(8)
+                                        ]
+                                    )
+                                    + ".db",
+                                )
+                            )
+                            for dataset in d["data"]:
+                                datasets.append(
+                                    get_dataset(
+                                        c,
+                                        dataset["data"],
+                                        dataset.get("schemas"),
+                                        table_name=dataset.get("dataset_name"),
+                                        sqlite_db_path=sqlite_db_path,
+                                    )
+                                )
+                            data_asset = datasets[0]
+                        else:
+                            schemas = d["schemas"] if "schemas" in d else None
+                            data_asset = get_dataset(c, d["data"], schemas=schemas)
 
                     for test in d["tests"]:
                         generate_test = True
