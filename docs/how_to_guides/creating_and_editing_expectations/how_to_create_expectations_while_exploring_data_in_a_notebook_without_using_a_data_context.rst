@@ -74,7 +74,7 @@ All of these steps take place within your notebook:
 
     |
 
-    When you invoke an Expectation, it will immediately be validated against your data. The returned object will contain the result and a list of exceptions. This instant feedback helps you zero in on exceptions very quickly, taking a lot of the guesswork out of data exploration.
+    When you invoke an Expectation, it will immediately be validated against your data. The returned object will contain the result and a list of unexpected values. This instant feedback helps you zero in on unexpected data very quickly, taking a lot of the guesswork out of data exploration.
 
     .. image:: ../../images/expectation_notebook_interactive_loop.gif
 
