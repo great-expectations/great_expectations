@@ -23,18 +23,21 @@ To add a Pandas datasource do this:
 #.
     When asked *What are you processing your files with?*, choose ``Pandas`` (i.e., type ``1`` and press `ENTER`).
 #.
-    When prompted to *Enter the path (relative or absolute) of the root directory where the data files are stored.*, type in the ``path/to/directory/containing/your/data/files`` and press `ENTER`.
+    When prompted to *Enter the path (relative or absolute) of the root directory where the data files are stored.*, type in the ``/path/to/directory/containing/your/data/files`` and press `ENTER`.
 #.
     When asked *Would you like to profile new Expectations for a single data asset within your new Datasource?*, and press `ENTER`.
 #.
     Next, if you select *choose from a list of data assets in this datasource* (option ``1``), then select the number, corresponding to your data file of interest, from the list of your data files in the above directory, which will be presented to you, displayed on your Terminal screen.
-    Alternatively, you can choose option ``2`` and then type in ``path/to/your/data/file`` (including the file extension) and press `ENTER`.
+    Alternatively, you can choose option ``2`` and then type in ``/path/to/your/data/file`` (including the file extension) and press `ENTER`.
 #.
     Finally, if all goes well, some informational messages will appear on your Terminal screen.  After this, you can proceed with exploring the data sets in your new Pandas data source.
 
 ----------------
 Additional Notes
 ----------------
+
+#.
+    Relative path locations should be specified from the perspective of the directory, in which the ``great_expectations datasource new`` command is executed.
 
 #.
     Note that if upon entering the path of the root directory where the data files are stored, you select *choose from a list of data assets in this datasource* (option ``1``), then only the root names of the available data files in that directory will be listed (i.e., without their file extensions).
