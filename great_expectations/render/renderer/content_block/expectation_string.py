@@ -449,6 +449,26 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         ]
 
     @classmethod
+    def expect_table_row_count_to_equal_other_table(
+        cls, expectation, styling=None, include_column_name=True
+    ):
+        params = substitute_none_for_missing(expectation.kwargs, ["other_table_name"])
+        template_str = "Row count must equal the row count of table $other_table_name."
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    @classmethod
     def expect_column_distinct_values_to_be_in_set(
         cls, expectation, styling=None, include_column_name=True
     ):
