@@ -146,7 +146,7 @@ Steps
             "exception_info": null
         }
 
-    As mentioned previously, that the ``column_map_expectation`` decorator extends the arguments to include other arguments, like ``mostly``. Please see the module documentation for full details.
+    As mentioned previously, the ``column_map_expectation`` decorator extends the arguments to include other arguments, like ``mostly``. Please see the module documentation for full details.
 
     .. code-block:: python
 
