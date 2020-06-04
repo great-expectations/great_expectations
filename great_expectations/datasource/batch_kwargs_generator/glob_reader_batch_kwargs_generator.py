@@ -49,6 +49,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
     """
     recognized_batch_parameters = {
         "data_asset_name",
+        "partition_id",
         "reader_method",
         "reader_options",
         "limit",
@@ -153,11 +154,11 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 batch_kwargs=batch_parameters,
             )
 
-        glob_config = self._get_data_asset_config(data_asset_name)
-        batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
         partition_id = batch_parameters.pop("partition_id", None)
 
         if partition_id:
+            glob_config = self._get_data_asset_config(data_asset_name)
+            batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
             path = [
                 path
                 for path in batch_paths
