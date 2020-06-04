@@ -7,8 +7,9 @@ Changelog
 develop
 -----------------
 * [FEATURE] Add support for expect_volumn_values_to_match_json_schema exception for Spark backend (thanks @chipmyersjr!)
-* [BUGFIX] Fixed bug where evaluation parameters used in arithmetic expressions would not be identified as upstream dependencies.
 * [ENHANCEMENT] Add formatted __repr__ for ValidationOperatorResult
+* [BUGFIX] Fix object name construction when calling SqlAlchemyDataset.head (thanks @mascah!)
+* [BUGFIX] Fixed bug where evaluation parameters used in arithmetic expressions would not be identified as upstream dependencies.
 * [BUGFIX] Fix issue where DatabaseStoreBackend threw IntegrityError when storing same metric twice
 * [BUGFIX] Fixed bug preventing GCS Data Docs sites to cleaned
 * [BUGFIX] Correct doc link in checkpoint yml
