@@ -46,7 +46,8 @@ Steps
 
         bigquery://project-name/bigquery-public-data
 
-5. Enter the connection string when prompted, and finish completing the interactive prompts.
+5. Enter the connection string when prompted (and press Enter when asked "Would you like to proceed? [Y/n]:").
+
 6. Should you need to modify your connection string, you can manually edit the
    ``great_expectations/uncommitted/config_variables.yml`` file.
 

@@ -736,24 +736,39 @@ class BaseDataContext(object):
         return data_asset_names
 
     def build_batch_kwargs(
-        self, datasource, batch_kwargs_generator, name=None, partition_id=None, **kwargs
+        self,
+        datasource,
+        batch_kwargs_generator,
+        data_asset_name=None,
+        partition_id=None,
+        **kwargs,
     ):
         """Builds batch kwargs using the provided datasource, batch kwargs generator, and batch_parameters.
 
         Args:
             datasource (str): the name of the datasource for which to build batch_kwargs
             batch_kwargs_generator (str): the name of the batch kwargs generator to use to build batch_kwargs
-            name (str): an optional name batch_parameter
+            data_asset_name (str): an optional name batch_parameter
             **kwargs: additional batch_parameters
 
         Returns:
             BatchKwargs
 
         """
+        if kwargs.get("name"):
+            if data_asset_name:
+                raise ValueError(
+                    "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
+                )
+            warnings.warn(
+                "name is being deprecated as a batch_parameter. Please use data_asset_name instead.",
+                DeprecationWarning,
+            )
+            data_asset_name = kwargs.pop("name")
         datasource_obj = self.get_datasource(datasource)
         batch_kwargs = datasource_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
-            name=name,
+            data_asset_name=data_asset_name,
             partition_id=partition_id,
             **kwargs,
         )
