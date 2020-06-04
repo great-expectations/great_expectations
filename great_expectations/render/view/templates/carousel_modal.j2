@@ -4,11 +4,11 @@
 
 {% set glossary_url = "http://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=walkthrough&utm_medium=glossary" %}
 
-{% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
+{% if renderer_type in ["ValidationResultsPageRenderer", "ProfilingResultsPageRenderer"] %}
   {% set static_images_dir = ((expectation_suite_name_dot_count + 3) * "../") + "static/images/" -%}
-{% elif utm_medium == "expectation-suite-page" %}
+{% elif renderer_type == "ExpectationSuitePageRenderer" %}
   {% set static_images_dir = ((expectation_suite_name_dot_count + 1) * "../") + "static/images/" -%}
-{% elif utm_medium == "index-page" %}
+{% elif renderer_type == "SiteIndexPageRenderer" %}
   {% set static_images_dir = "./static/images/" -%}
 {% endif %}
 <style type="text/css">
