@@ -5,18 +5,21 @@ import logging
 import os
 import platform
 import sys
+import textwrap
 import uuid
 
 import click
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext, rtd_url_ge_version
 from great_expectations.cli import toolkit
+from great_expectations.cli.cli_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.docs import build_docs
-from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.data_context.types.base import DatasourceConfigSchema
 from great_expectations.datasource import (
     PandasDatasource,
     SparkDFDatasource,
@@ -369,9 +372,29 @@ def _add_pandas_datasource(
             }
         )
 
-    context.add_datasource(
-        name=datasource_name, class_name="PandasDatasource", **configuration
+        configuration["class_name"] = "PandasDatasource"
+        errors = DatasourceConfigSchema().validate(configuration)
+        if len(errors) != 0:
+            raise ge_exceptions.GreatExpectationsError(
+                "Invalid Datasource configuration: {0:s}".format(errors)
+            )
+
+    cli_message(
+        """
+Great Expectations will now add a new Datasource '{0:s}' to your deployment, by adding this entry to your great_expectations.yml:
+
+{1:s}
+""".format(
+            datasource_name,
+            textwrap.indent(toolkit.yaml.dump({datasource_name: configuration}), "  "),
+        )
     )
+
+    toolkit.confirm_proceed_or_exit(
+        "Okay, exiting now. To learn more about adding datasources, run great_expectations datasource --help or visit https://docs.greatexpectations.io/"
+    )
+
+    context.add_datasource(name=datasource_name, **configuration)
     return datasource_name
 
 
@@ -453,14 +476,25 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                 return None
             credentials = _collect_mysql_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.POSTGRES:
-            if not load_library("psycopg2"):
+            if not load_library(
+                "psycopg2",
+                "pip install psycopg2 (or if on macOS pip install psycopg2-binary)",
+            ):
                 return None
             credentials = _collect_postgres_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.REDSHIFT:
-            if not load_library("psycopg2"):
+            if not load_library(
+                "psycopg2",
+                "pip install psycopg2 (or if on macOS pip install psycopg2-binary)",
+            ):
                 return None
             credentials = _collect_redshift_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.SNOWFLAKE:
+            cli_message(
+                "<yellow>Please consider going through "
+                "https://docs.greatexpectations.io/en/latest/reference/integrations/snowflake.html for helpful "
+                "information regarding connecting Great Expectations to Snowflake.</yellow>\n"
+            )
             if not load_library(
                 "snowflake",
                 install_instructions_string="pip install snowflake-sqlalchemy",
@@ -497,9 +531,30 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             configuration = SqlAlchemyDatasource.build_configuration(
                 credentials="${" + datasource_name + "}"
             )
-            context.add_datasource(
-                name=datasource_name, class_name="SqlAlchemyDatasource", **configuration
+
+            configuration["class_name"] = "SqlAlchemyDatasource"
+            errors = DatasourceConfigSchema().validate(configuration)
+            if len(errors) != 0:
+                raise ge_exceptions.GreatExpectationsError(
+                    "Invalid Datasource configuration: {0:s}".format(errors)
+                )
+
+            cli_message(
+                """
+Great Expectations will now add a new Datasource '{0:s}' to your deployment, by adding this entry to your great_expectations.yml:
+
+{1:s}
+The credentials will be saved in uncommitted/config_variables.yml under the key '{0:s}'
+""".format(
+                    datasource_name,
+                    textwrap.indent(
+                        toolkit.yaml.dump({datasource_name: configuration}), "  "
+                    ),
+                )
             )
+
+            toolkit.confirm_proceed_or_exit()
+            context.add_datasource(name=datasource_name, **configuration)
             cli_message(msg_success_database)
             break
         except ModuleNotFoundError as de:
@@ -784,10 +839,26 @@ def _add_spark_datasource(
                 }
             }
         )
+        configuration["class_name"] = "SparkDFDatasource"
+        errors = DatasourceConfigSchema().validate(configuration)
+        if len(errors) != 0:
+            raise ge_exceptions.GreatExpectationsError(
+                "Invalid Datasource configuration: {0:s}".format(errors)
+            )
 
-    context.add_datasource(
-        name=datasource_name, class_name="SparkDFDatasource", **configuration
+    cli_message(
+        """
+Great Expectations will now add a new Datasource '{0:s}' to your deployment, by adding this entry to your great_expectations.yml:
+
+{1:s}
+""".format(
+            datasource_name,
+            textwrap.indent(toolkit.yaml.dump({datasource_name: configuration}), "  "),
+        )
     )
+    toolkit.confirm_proceed_or_exit()
+
+    context.add_datasource(name=datasource_name, **configuration)
     return datasource_name
 
 
@@ -837,14 +908,14 @@ def get_batch_kwargs(
     context,
     datasource_name=None,
     batch_kwargs_generator_name=None,
-    generator_asset=None,
+    data_asset_name=None,
     additional_batch_kwargs=None,
 ):
     """
     This method manages the interaction with user necessary to obtain batch_kwargs for a batch of a data asset.
 
-    In order to get batch_kwargs this method needs datasource_name, batch_kwargs_generator_name and generator_asset
-    to combine them into a fully qualified data asset identifier(datasource_name/batch_kwargs_generator_name/generator_asset).
+    In order to get batch_kwargs this method needs datasource_name, batch_kwargs_generator_name and data_asset_name
+    to combine them into a fully qualified data asset identifier(datasource_name/batch_kwargs_generator_name/data_asset_name).
     All three arguments are optional. If they are present, the method uses their values. Otherwise, the method
     prompts user to enter them interactively. Since it is possible for any of these three components to be
     passed to this method as empty values and to get their values after interacting with user, this method
@@ -863,9 +934,9 @@ def get_batch_kwargs(
     :param context:
     :param datasource_name:
     :param batch_kwargs_generator_name:
-    :param generator_asset:
+    :param data_asset_name:
     :param additional_batch_kwargs:
-    :return: a tuple: (datasource_name, batch_kwargs_generator_name, generator_asset, batch_kwargs). The components
+    :return: a tuple: (datasource_name, batch_kwargs_generator_name, data_asset_name, batch_kwargs). The components
                 of the tuple were passed into the methods as optional arguments, but their values might
                 have changed after this method's execution. If the returned batch_kwargs is None, it means
                 that the batch_kwargs_generator will know to yield batch_kwargs when called.
@@ -888,12 +959,12 @@ def get_batch_kwargs(
             available_data_assets_dict=available_data_assets_dict,
         )
 
-    # if the user provided us with the batch kwargs generator name and the generator asset, we have everything we need -
+    # if the user provided us with the batch kwargs generator name and the data asset, we have everything we need -
     # let's ask the generator to build batch kwargs for this asset - we are done.
-    if batch_kwargs_generator_name is not None and generator_asset is not None:
+    if batch_kwargs_generator_name is not None and data_asset_name is not None:
         generator = datasource.get_batch_kwargs_generator(batch_kwargs_generator_name)
         batch_kwargs = generator.build_batch_kwargs(
-            generator_asset, **additional_batch_kwargs
+            data_asset_name, **additional_batch_kwargs
         )
         return batch_kwargs
 
@@ -901,7 +972,7 @@ def get_batch_kwargs(
         context.get_datasource(datasource_name), (PandasDatasource, SparkDFDatasource)
     ):
         (
-            generator_asset,
+            data_asset_name,
             batch_kwargs,
         ) = _get_batch_kwargs_from_generator_or_from_file_path(
             context,
@@ -910,7 +981,7 @@ def get_batch_kwargs(
         )
 
     elif isinstance(context.get_datasource(datasource_name), SqlAlchemyDatasource):
-        generator_asset, batch_kwargs = _get_batch_kwargs_for_sqlalchemy_datasource(
+        data_asset_name, batch_kwargs = _get_batch_kwargs_for_sqlalchemy_datasource(
             context, datasource_name, additional_batch_kwargs=additional_batch_kwargs
         )
     else:
@@ -920,7 +991,7 @@ def get_batch_kwargs(
             )
         )
 
-    return datasource_name, batch_kwargs_generator_name, generator_asset, batch_kwargs
+    return (datasource_name, batch_kwargs_generator_name, data_asset_name, batch_kwargs)
 
 
 def _get_batch_kwargs_from_generator_or_from_file_path(
@@ -962,7 +1033,7 @@ We could not determine the format of the file. What is it?
         "4": "json",
     }
 
-    generator_asset = None
+    data_asset_name = None
 
     datasource = context.get_datasource(datasource_name)
     if batch_kwargs_generator_name is not None:
@@ -1000,24 +1071,24 @@ We could not determine the format of the file. What is it?
                 )
             )
 
-            generator_asset_selection = click.prompt(prompt, show_default=False)
+            data_asset_name_selection = click.prompt(prompt, show_default=False)
 
-            generator_asset_selection = generator_asset_selection.strip()
+            data_asset_name_selection = data_asset_name_selection.strip()
             try:
-                data_asset_index = int(generator_asset_selection) - 1
+                data_asset_index = int(data_asset_name_selection) - 1
                 try:
-                    generator_asset = [name[0] for name in available_data_asset_names][
+                    data_asset_name = [name[0] for name in available_data_asset_names][
                         data_asset_index
                     ]
                 except IndexError:
                     pass
             except ValueError:
-                generator_asset = generator_asset_selection
+                data_asset_name = data_asset_name_selection
 
             batch_kwargs = generator.build_batch_kwargs(
-                generator_asset, **additional_batch_kwargs
+                data_asset_name, **additional_batch_kwargs
             )
-            return generator_asset, batch_kwargs
+            return (data_asset_name, batch_kwargs)
 
     # No generator name was passed or the user chose to enter a file path
 
@@ -1098,7 +1169,19 @@ We have saved your setup progress. When you are ready, run great_expectations in
                     )
                     sys.exit(1)
 
-    return generator_asset, batch_kwargs
+    if data_asset_name is None and batch_kwargs.get("path"):
+        try:
+            # Try guessing a filename
+            filename = os.path.split(batch_kwargs.get("path"))[1]
+            # Take all but the last part after the period
+            filename = ".".join(filename.split(".")[:-1])
+            data_asset_name = filename
+        except (OSError, IndexError):
+            pass
+
+    batch_kwargs["data_asset_name"] = data_asset_name
+
+    return (data_asset_name, batch_kwargs)
 
 
 def _get_batch_kwargs_for_sqlalchemy_datasource(
@@ -1119,7 +1202,7 @@ Enter an SQL query
     if additional_batch_kwargs is None:
         additional_batch_kwargs = {}
 
-    generator_asset = None
+    data_asset_name = None
 
     datasource = context.get_datasource(datasource_name)
 
@@ -1186,7 +1269,7 @@ Enter an SQL query
                 try:
                     data_asset_index = int(selection) - 1
                     try:
-                        generator_asset = [
+                        data_asset_name = [
                             name[0] for name in available_data_asset_names
                         ][data_asset_index]
                     except IndexError:
@@ -1199,7 +1282,7 @@ Enter an SQL query
 
             if query is None:
                 batch_kwargs = temp_generator.build_batch_kwargs(
-                    generator_asset, **additional_batch_kwargs
+                    data_asset_name, **additional_batch_kwargs
                 )
                 batch_kwargs.update(temp_table_kwargs)
             else:
@@ -1216,7 +1299,9 @@ Enter an SQL query
         except KeyError as error:
             cli_message("""<red>ERROR: {}</red>""".format(str(error)))
 
-    return generator_asset, batch_kwargs
+    batch_kwargs["data_asset_name"] = data_asset_name
+
+    return data_asset_name, batch_kwargs
 
 
 def profile_datasource(
@@ -1420,7 +1505,7 @@ Enter the path (relative or absolute) of the root directory where the data files
 """
 
 msg_prompt_datasource_name = """
-Give your new data source a short name.
+Give your new Datasource a short name.
 """
 
 msg_db_config = """

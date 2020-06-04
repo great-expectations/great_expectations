@@ -43,7 +43,8 @@ anonymized_class_info_schema = {
                 "parent_class": {"type": "string", "maxLength": 256},
                 "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
             },
-            "additionalProperties": True,  # we don't want this to be true, but this is required to allow show_cta_footer
+            "additionalProperties": True,
+            # we don't want this to be true, but this is required to allow show_cta_footer
             "required": ["parent_class",],
         }
     ],
@@ -315,6 +316,7 @@ usage_statistics_record_schema = {
         "data_context_id": {"type": "string", "format": "uuid"},
         "data_context_instance_id": {"type": "string", "format": "uuid"},
         "ge_version": {"type": "string", "maxLength": 32},
+        "x-forwarded-for": {"type": "string"},
         "success": {"type": ["boolean", "null"]},
     },
     "oneOf": [
@@ -389,3 +391,9 @@ usage_statistics_record_schema = {
         "event_payload",
     ],
 }
+
+if __name__ == "__main__":
+    import json
+
+    with open("usage_statistics_record_schema.json", "w") as outfile:
+        json.dump(usage_statistics_record_schema, outfile, indent=2)

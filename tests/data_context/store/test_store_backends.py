@@ -3,16 +3,16 @@ import os
 import boto3
 import pytest
 from botocore.exceptions import ClientError
+from moto import mock_s3
+
 from great_expectations.data_context.store import (
     InMemoryStoreBackend,
     TupleFilesystemStoreBackend,
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
 )
-from great_expectations.exceptions import StoreBackendError
+from great_expectations.exceptions import StoreBackendError, StoreError
 from great_expectations.util import gen_directory_tree_str
-from mock import patch
-from moto import mock_s3
 
 
 def test_StoreBackendValidation():
@@ -52,7 +52,7 @@ def test_InMemoryStoreBackend():
     assert my_store.has_key(("C",)) is False
     assert my_store.list_keys() == [("A",), ("B",)]
 
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(StoreError):
         my_store.get_url_for_key(my_key)
 
 

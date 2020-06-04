@@ -44,7 +44,12 @@ class ValidationsStore(Store):
                 )
                 store_backend["key_columns"] = store_backend.get(
                     "key_columns",
-                    ["expectation_suite_name", "run_id", "batch_identifier"],
+                    [
+                        "expectation_suite_name",
+                        "run_name",
+                        "run_time",
+                        "batch_identifier",
+                    ],
                 )
         super().__init__(
             store_backend=store_backend, runtime_environment=runtime_environment

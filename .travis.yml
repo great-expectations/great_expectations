@@ -44,9 +44,9 @@ jobs:
     - stage: test
       dist: xenial
       install:
-        - pip install black==19.10b0
+        - pip install -r requirements-dev.txt
       script:
-        # NOTE: we could also consider isort, but its sort order depends on installed libraries or else libraries must be explicitly declared individually in its configuration
+        - isort --check-only --skip docs/
         - black --check --exclude docs/ .
     - stage: test
       dist: trusty
@@ -124,7 +124,7 @@ jobs:
     - stage: deploy
       python: 3.6
       script:
-        - git tag --annotate 0.10.11 -m "0.10.11" || echo "tag exists, skipping"
+        - git tag --annotate 0.11.1 -m "0.11.1" || echo "tag exists, skipping"
       deploy:
         provider: pypi
         edge: true

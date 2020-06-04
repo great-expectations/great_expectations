@@ -7,6 +7,7 @@ import time
 import uuid
 
 import pandas as pd
+
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
 
@@ -31,7 +32,7 @@ def main(
 
     print("Beginning to construct a DataContext.")
     config = DataContextConfig(
-        config_version=1,
+        config_version=2,
         datasources={"pandas": {"class_name": "PandasDatasource"}},
         expectations_store_name="expectations",
         validations_store_name="validations",
