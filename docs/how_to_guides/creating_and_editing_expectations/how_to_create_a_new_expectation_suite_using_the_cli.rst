@@ -1,4 +1,4 @@
-
+.. _how_to_guides__creating_and_editing_expectations__how_to_create_a_new_expectation_suite_using_the_cli:
 
 How to create a new Expectation Suite using the CLI
 ***************************************************

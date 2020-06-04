@@ -51,6 +51,7 @@ def s3_generator(mock_s3_bucket, basic_sparkdf_datasource):
             "data": {
                 "prefix": "data/",
                 "delimiter": "",
+                "partition_regex": r"data/for/(.*)\.csv",
                 "regex_filter": r"data/for/.*\.csv",
             },
             "data_dirs": {"prefix": "data/", "directory_assets": True},
@@ -71,6 +72,8 @@ def s3_generator(mock_s3_bucket, basic_sparkdf_datasource):
                 "reader_options": {"sep": "\t"},
                 "max_keys": 1,
             },
+            "dir": {"prefix": "data/", "directory_assets": True,},
+            "dir_misconfigured": {"prefix": "data/", "directory_assets": False,},
         },
     )
     yield generator
@@ -79,15 +82,15 @@ def s3_generator(mock_s3_bucket, basic_sparkdf_datasource):
 def test_s3_generator_basic_operation(s3_generator):
     # S3 Generator sees *only* configured assets
     assets = s3_generator.get_available_data_asset_names()
-    assert set(assets["names"]) == set(
-        [
-            ("data", "file"),
-            ("data_dirs", "file"),
-            ("other", "file"),
-            ("delta_files", "file"),
-            ("other_empty_delimiter", "file"),
-        ]
-    )
+    assert set(assets["names"]) == {
+        ("data", "file"),
+        ("data_dirs", "file"),
+        ("other", "file"),
+        ("delta_files", "file"),
+        ("other_empty_delimiter", "file"),
+        ("dir_misconfigured", "file"),
+        ("dir", "file"),
+    }
 
     # We should observe that glob, prefix, delimiter all work together
     # They can be defined in the generator or overridden by a particular asset
@@ -166,3 +169,30 @@ def test_s3_generator_reader_method_configuration(s3_generator):
         for kwargs in s3_generator.get_iterator(data_asset_name="delta_files", limit=10)
     ]
     assert batch_kwargs_list[0]["reader_method"] == "delta"
+
+
+def test_s3_generator_build_batch_kwargs_no_partition_id(s3_generator):
+    batch_kwargs = s3_generator.build_batch_kwargs("data")
+    assert batch_kwargs["s3"] in [
+        "s3a://test_bucket/data/for/you.csv",
+        "s3a://test_bucket/data/for/me.csv",
+    ]
+
+
+def test_s3_generator_build_batch_kwargs_partition_id(s3_generator):
+    batch_kwargs = s3_generator.build_batch_kwargs("data", "you")
+    assert batch_kwargs["s3"] == "s3a://test_bucket/data/for/you.csv"
+
+
+def test_s3_generator_directory_asset(s3_generator):
+    batch_kwargs = s3_generator.build_batch_kwargs("dir")
+    assert batch_kwargs["s3"] in [
+        "s3a://test_bucket/data/for/",
+        "s3a://test_bucket/data/to/",
+    ]
+
+
+def test_s3_generator_misconfigured_directory_asset(s3_generator):
+    with pytest.raises(BatchKwargsError) as exc:
+        _ = s3_generator.build_batch_kwargs("dir_misconfigured")
+    assert "The asset may not be configured correctly." in str(exc.value)

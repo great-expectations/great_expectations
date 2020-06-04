@@ -105,7 +105,7 @@ def test_build_batch_kwargs_for_query_path(
     generator = QueryBatchKwargsGenerator(
         name=generator_name, datasource=basic_sqlalchemy_datasource
     )
-    batch_kwargs = generator.build_batch_kwargs(name="example")
+    batch_kwargs = generator.build_batch_kwargs(data_asset_name="example")
 
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceQueryBatchKwargs)
     assert batch_kwargs.query == query_str
