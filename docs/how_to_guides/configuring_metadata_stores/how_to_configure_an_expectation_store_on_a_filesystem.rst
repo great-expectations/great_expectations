@@ -8,8 +8,8 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 
 .. admonition:: Prerequisites: This how-to guide assumes that you have already:
 
-    - Configured a Data Context
-    - Configured an Expectation Suite
+    - Configured a :ref:`Data Context <_how_to_guides__configuring_data_contexts__how_to_create_a_new_data_context_with_the_cli>`.
+    - Configured an :ref:`Expectation Suite <_how_to_guides__creating_and_editing_expectations__how_to_create_a_new_expectation_suite_using_the_cli>`.
     - Determined a new storage location where you would like to store Expectations. This can either be a local path, or a path to a network filesystem.
 
 Steps
@@ -37,9 +37,13 @@ Steps
                 class_name: TupleFilesystemStoreBackend
                 base_directory: expectations/
 
-    The configuration file tells ``Great Expectations`` to look for Expectations in a ``store`` called ``expectation_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
 
-3. The following change to the YAML file will tell `Great Expectations`` to look for Expectations in  ``shared_expectations_filesystem_store`` with the ``base_directory`` set to ``shared_expectations/``.
+The configuration file tells ``Great Expectations`` to look for Expectations in a ``store`` called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
+
+3. Update your configuration following the example below. This example would change the Store name to ``shared_expectations_filesystem_store`` with the ``base_directory`` set to ``shared_expectations/``.
+
+    Paths are relative to the directory where ``great_expectations.yml`` is stored.
+
 
 .. code-block:: yaml
 
@@ -78,6 +82,12 @@ Steps
     1 Expectation Suite found:
         - npi_expectations
 
+Additional resources
+--------------------
+
+If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+
+If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
 
 .. discourse::
     :topic_identifier: 182
