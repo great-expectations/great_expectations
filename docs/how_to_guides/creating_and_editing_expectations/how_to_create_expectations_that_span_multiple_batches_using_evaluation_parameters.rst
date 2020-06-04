@@ -45,6 +45,14 @@ In a notebook,
             expectation_suite_name='my_expectation_suite_2'
         )
 
+#. **Disable interactive evaluation for the downstream Batch.**
+
+    .. code-block:: python
+
+        downstream_batch.set_config_value("interactive_evaluation", False)
+
+    Disabling interactive evaluation allows you to declare an expectation even when it cannot be evaluated immediately.
+
 #. **Define an Expectation using an Evaluation Parameter on the downstream Batch.**
 
     .. code-block:: python
