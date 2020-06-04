@@ -40,7 +40,7 @@ We'd love it if you **reach out to us on** the [**Great Expectations Slack Chann
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.profile import BasicSuiteBuilderProfiler\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "my_suite"\nsuite = context.create_expectation_suite(\n    expectation_suite_name, overwrite_existing=True\n)\n\nbatch_kwargs = {\n    "path": "'
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.profile import BasicSuiteBuilderProfiler\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "my_suite"\nsuite = context.create_expectation_suite(\n    expectation_suite_name, overwrite_existing=True\n)\n\nbatch_kwargs = {\n    "path": "'
                 + csv_path
                 + '",\n    "datasource": "mydatasource",\n    "data_asset_name": "Titanic",\n}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
@@ -95,7 +95,7 @@ contains a list of possible expectations.""",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\n# Let\'s make a simple sortable timestamp. Note this could come from your pipeline runner.\nrun_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\n"""\nLet\'s create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation\narguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline\nrunner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object.\nNote - any provided datetime will be assumed to be a UTC time. If no instantiation arguments are given, run_name will\nbe None and run_time will default to the current UTC datetime.\n"""\n\nrun_id = {\n  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n  "run_time": datetime.datetime.now(datetime.timezone.utc)\n}\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
             {

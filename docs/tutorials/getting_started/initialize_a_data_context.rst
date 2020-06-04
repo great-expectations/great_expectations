@@ -1,4 +1,4 @@
-.. _getting_started__initialize_a_data_context:
+.. _tutorials__getting_started__initialize_a_data_context:
 
 Initialize a Data Context
 ===============================================
@@ -22,47 +22,59 @@ or git, you may want to check out the :ref:`supporting_resources` section before
 
 .. code-block:: bash
 
-    $ pip install great_expectations
+    pip install great_expectations
 
 To install from a git branch, use the following command (replace ``develop`` below with the name of the branch you want to use):
 
 .. code-block:: bash
 
-    $ git clone https://github.com/great-expectations/great_expectations.git
-    $ cd great_expectations/
-    $ git checkout develop
-    $ pip install -e .
+    git clone https://github.com/great-expectations/great_expectations.git
+    cd great_expectations/
+    git checkout develop
+    pip install -e .
 
 To install from a git fork, use the following command (replace ``great-expectations`` below with the name of the fork, which is usually your github username):
 
 .. code-block:: bash
 
-    $ pip install -e .
-    $ git clone https://github.com/great-expectations/great_expectations.git
-    $ pip install great_expectations/
+    pip install -e .
+    git clone https://github.com/great-expectations/great_expectations.git
+    pip install great_expectations/
 
 If you intend to develop within the Great Expectations (e.g. to contribute back to the project), check out :ref:`contributing_setting_up_your_dev_environment` in the contributor documentation.
 
-Downloading Example Data
------------------------------------------------
-For this tutorial, we will use a sample dataset released by the `Centers of Medicare and Medicaid <https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/DataDissemination>`_.
-It includes the National Provider Identifier (NPI) information for unique health care providers in the United States that you can download from an S3 bucket.
+Download example data
+---------------------
 
-Before you download the data, we recommend you create a test directory where your data is eventually going to be stored. In our case we will use the name ``ge_example_project``
+For this tutorial, we will use a simplified version of the National Provider Identifier (NPI) database. It's a public dataset released by the `Centers of Medicare and Medicaid Services <https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/DataDissemination>`_, intended as a master list of health care providers in the United States. NPI data is famously messy---a great place to see the value of data testing and documentation in action.
 
-.. code-block:: bash
-   $ mkdir ge_example_project
-   $ cd ge_example_project
-   $ mkdir data
-   $ cd data
-
-To download this project use the following ``wget`` command, which should download it to your current directory. Make sure you download the file and unzip it in a directory that you can access. You will need it in initializing the great_expectations data context.
+To avoid confusion during the tutorial, we recommend you set up the following directory structure before you download the data:
 
 .. code-block:: bash
 
-    $ wget https://superconductive-public.s3.amazonaws.com/data/npi/weekly/npidata_pfile_20200511-20200517.csv.gz
-    $ gunzip npidata_pfile_20200511-20200517.csv.gz
+   mkdir example_project
+   mkdir example_project/my_data
+   cd example_project
 
+To download the NPI data using wget, please run:
+
+.. code-block:: bash
+
+    wget https://superconductive-public.s3.amazonaws.com/data/npi/weekly/npidata_pfile_20200511-20200517.csv.gz -O my_data
+
+Alternatively, you can use curl:
+
+.. code-block:: bash
+
+    curl https://superconductive-public.s3.amazonaws.com/data/npi/weekly/npidata_pfile_20200511-20200517.csv.gz -o my_data/npidata_pfile_20200511-20200517.csv.gz
+
+Finally, to unzip the data, please run:
+
+.. code-block:: bash
+
+    gunzip my_data/npidata_pfile_20200511-20200517.csv.gz
+
+Once unzipped, the data should be 22MB on disk.
 
 Run ``great_expectations init``
 -----------------------------------------------
@@ -87,33 +99,23 @@ You should see this:
                                     |_|
                  ~ Always know what to expect from your data ~
 
-    In a few minutes you will see Great Expectations in action on your data!
+    Let's configure a new Data Context.
 
     First, Great Expectations will create a new directory:
 
-    #FIXME: Adjust this here, and in init_messages.py
-
-In a few minutes you will see Great Expectations in action on your data!
-
-First, Great Expectations will create a new directory:
-
-.. code-block::
-
         great_expectations
-        |-- expectations
         |-- great_expectations.yml
+        |-- expectations
         |-- checkpoints
         |-- notebooks
-        |   |-- pandas
-        |   |-- spark
-        |   |-- sql
         |-- plugins
-        |   |-- ...
+        |-- .gitignore
         |-- uncommitted
             |-- config_variables.yml
-            |-- ...
+            |-- documentation
+            |-- validations
 
-    OK to proceed? [Y/n]:
+    OK to proceed? [Y/n]: 
 
 Let's pause there for a moment.
 
@@ -127,7 +129,7 @@ Once you finish going through ``init``, your ``great_expectations/`` directory w
 * The ``uncommitted/`` directory contains files that shouldn't live in version control. It has a ``.gitignore`` configured to exclude all its contents from version control. The main contents of the directory are:
 
   * ``uncommitted/config_variables.yml``, which will hold sensitive information, such as database credentials and other secrets.
-  * ``uncommitted/validations``, which will hold :ref:`Validation Results` generated by Great Expectations.
   * ``uncommitted/documentation``, which will contains :ref:`Data Docs` generated from Expectations, Validation Results, and other metadata.
+  * ``uncommitted/validations``, which will hold :ref:`Validation Results` generated by Great Expectations.
 
 Back in your terminal, go ahead and hit ``Enter`` to proceed.

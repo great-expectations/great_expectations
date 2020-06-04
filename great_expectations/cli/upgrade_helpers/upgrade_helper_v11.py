@@ -318,7 +318,9 @@ class UpgradeHelperV11:
     def _get_tuple_filesystem_store_backend_run_time(self, source_key, store_backend):
         run_name = source_key[-2]
         try:
-            self.validation_run_times[run_name] = parse(run_name).isoformat()
+            self.validation_run_times[run_name] = parse(run_name).strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            )
         except ParserError:
             source_path = os.path.join(
                 store_backend.full_base_directory,
@@ -326,8 +328,8 @@ class UpgradeHelperV11:
             )
             path_mod_timestamp = os.path.getmtime(source_path)
             path_mod_iso_str = datetime.datetime.fromtimestamp(
-                path_mod_timestamp, tz=datetime.timezone.utc
-            ).isoformat()
+                path_mod_timestamp
+            ).strftime("%Y%m%dT%H%M%S.%fZ")
             self.validation_run_times[run_name] = path_mod_iso_str
 
     def _get_tuple_s3_store_backend_run_time(self, source_key, store_backend):
@@ -337,13 +339,17 @@ class UpgradeHelperV11:
         run_name = source_key[-2]
 
         try:
-            self.validation_run_times[run_name] = parse(run_name).isoformat()
+            self.validation_run_times[run_name] = parse(run_name).strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            )
         except ParserError:
             source_path = store_backend._convert_key_to_filepath(source_key)
             if not source_path.startswith(store_backend.prefix):
                 source_path = os.path.join(store_backend.prefix, source_path)
             source_object = s3.Object(store_backend.bucket, source_path)
-            source_object_last_mod = source_object.last_modified.isoformat()
+            source_object_last_mod = source_object.last_modified.strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            )
 
             self.validation_run_times[run_name] = source_object_last_mod
 
@@ -355,14 +361,16 @@ class UpgradeHelperV11:
         run_name = source_key[-2]
 
         try:
-            self.validation_run_times[run_name] = parse(run_name).isoformat()
+            self.validation_run_times[run_name] = parse(run_name).strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            )
         except ParserError:
             source_path = store_backend._convert_key_to_filepath(source_key)
             if not source_path.startswith(store_backend.prefix):
                 source_path = os.path.join(store_backend.prefix, source_path)
             source_blob_created_time = bucket.get_blob(
                 source_path
-            ).time_created.isoformat()
+            ).time_created.strftime("%Y%m%dT%H%M%S.%fZ")
 
             self.validation_run_times[run_name] = source_blob_created_time
 

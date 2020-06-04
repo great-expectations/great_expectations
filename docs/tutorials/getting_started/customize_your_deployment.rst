@@ -1,4 +1,4 @@
-.. _getting_started__customize_your_deployment:
+.. _tutorials__getting_started__customize_your_deployment:
 
 Customize your deployment
 =========================
@@ -7,7 +7,7 @@ At this point, you have your first, working deployment of Great Expectations. Yo
 
 Congratulations! You're off to a very good start.
 
-The next step is to customize your deployment by upgrading specific components of your deployment. :ref:`Data Contexts` make this modular, so that you can add or swap out one component at a time. Most of these changes are quick, incremental steps---so you can upgrade from a basic demo deployment to a full production deployment at your own pace and be confident that your Data Context will continue to work at every step along the way.
+The next step is to customize your deployment by upgrading specific components of your deployment. Data Contexts make this modular, so that you can add or swap out one component at a time. Most of these changes are quick, incremental steps---so you can upgrade from a basic demo deployment to a full production deployment at your own pace and be confident that your Data Context will continue to work at every step along the way.
 
 This last section of the :ref:`getting_started` tutorial is designed to present you with clear options for upgrading your deployment. For specific implementation steps, please check out the linked :ref:`how_to_guides`.
 
@@ -27,11 +27,12 @@ Here's an overview of the components of a typical Great Expectations deployment:
     * :ref:`Additional Datasources and Generators`
     * :ref:`Options for hosting Data Docs`
     * :ref:`Additional Validation Operators and Actions`
+    * :ref:`Options for triggering Validation`
 
-* Key workflows
-
-    * :ref:`Creating and editing Expectations`
-    * :ref:`Triggering validation`
+..    * Key workflows
+..
+..        * :ref:`Creating and editing Expectations`
+..        * :ref:`Triggering validation`
 
 
 Options for storing Great Expectations configuration
@@ -105,7 +106,6 @@ Most teams will want to configure various :ref:`Validation Actions` as part of t
 * :ref:`How to re-render Data Docs as a Validation Action`
 * :ref:`How to store Validation Results as a Validation Action`
 * :ref:`How to trigger slack notifications as a Validation Action`
-* :ref:`How to implement a custom Validation Action`
 
 Modifying :ref:`Validation Operators` themselves is more advanced work. You can learn how here.
 
@@ -114,28 +114,19 @@ Modifying :ref:`Validation Operators` themselves is more advanced work. You can 
 * :ref:`How to configure an ActionListValidationOperator`
 * :ref:`How to implement a custom Validation Operator`
 
-Creating and editing Expectations
+.. Creating and editing Expectations
+.. ---------------------------------
+.. 
+.. #FIXME: Need words here.
+.. 
+.. #FIXME: Need list here, after we wrangle the how-to guides for creating and editing Expectations.
+
+Options for triggering Validation
 ---------------------------------
 
-#FIXME: Need words here.
+There are two primary patterns for deploying Checkpoints. Sometimes Checkpoints are executed during data processing (e.g. as a task within Airflow). From this vantage point, they can control program flow. Sometimes Checkpoints are executed against materialized data. Great Expectations supports both patterns. There are also some rare instances where you may want to validate data without using a Checkpoint.
 
-#FIXME: Need list here, after we wrangle the how-to guides for creating and editing Expectations.
-
-Triggering validation
----------------------
-
-There are two primary paths to validate data 
-
-* :ref:`How to create a new Checkpoint`
-* :ref:`How to add validations, data, or suites to a Checkpoint`
 * :ref:`How to run a Checkpoint in Airflow`
 * :ref:`How to run a Checkpoint in python`
 * :ref:`How to run a Checkpoint in terminal`
 * :ref:`How to validate data without a Checkpoint`
-
-Conclusion
-----------
-
-#FIXME: Need words here.
-
-#FIXME: Need words from Dickens here.
