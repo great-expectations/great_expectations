@@ -1,3 +1,4 @@
+import json
 from copy import deepcopy
 from typing import Dict, List, Union
 
@@ -274,6 +275,9 @@ class ValidationOperatorResult(DictDot):
 
     def to_json_dict(self):
         return validationOperatorResultSchema.dump(self)
+
+    def __repr__(self):
+        return json.dumps(self.to_json_dict(), indent=2)
 
 
 class ValidationOperatorResultSchema(Schema):

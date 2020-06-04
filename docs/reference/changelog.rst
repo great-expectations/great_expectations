@@ -6,11 +6,17 @@ Changelog
 
 develop
 -----------------
+* [FEATURE] Add support for expect_volumn_values_to_match_json_schema exception for Spark backend (thanks @chipmyersjr!)
+* [ENHANCEMENT] Add formatted __repr__ for ValidationOperatorResult
+* [ENHANCEMENT] add option to suppress logging when getting expectation suite
+* [BUGFIX] Fix object name construction when calling SqlAlchemyDataset.head (thanks @mascah!)
+* [BUGFIX] Fixed bug where evaluation parameters used in arithmetic expressions would not be identified as upstream dependencies.
+* [BUGFIX] Fix issue where DatabaseStoreBackend threw IntegrityError when storing same metric twice
 * [FEATURE] Added new cli upgrade helper to help facilitate upgrading projects to be compatible with GE 0.11.
   See :ref:`upgrading_to_0.11` for more info.
-
 * [BUGFIX] Fixed bug preventing GCS Data Docs sites to cleaned
 * [BUGFIX] Correct doc link in checkpoint yml
+* [BUGFIX] Fix S3 Batch Kwargs Generator incorrect migration to new build_batch_kwargs API
 
 0.11.1
 -----------------

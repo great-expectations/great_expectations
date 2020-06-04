@@ -159,21 +159,19 @@ class BatchKwargsGenerator(object):
             self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
             return self._data_asset_iterators[data_asset_name][0]
 
-    # TODO: deprecate generator_asset argument
-    def build_batch_kwargs(
-        self, name=None, partition_id=None, data_asset_name=None, **kwargs
-    ):
+    def build_batch_kwargs(self, data_asset_name=None, partition_id=None, **kwargs):
         assert (
-            (name and not data_asset_name) or (not name and data_asset_name),
+            (kwargs.get("name") and not data_asset_name)
+            or (not kwargs.get("name") and data_asset_name),
             "Please provide either name or data_asset_name.",
         )
-        if name:
+        if kwargs.get("name"):
             warnings.warn(
                 "The 'name' argument will be deprecated and renamed to 'data_asset_name'. "
                 "Please update code accordingly.",
                 DeprecationWarning,
             )
-            data_asset_name = name
+            data_asset_name = kwargs.pop("name")
 
         """The key workhorse. Docs forthcoming."""
         if data_asset_name is not None:
