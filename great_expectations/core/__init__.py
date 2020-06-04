@@ -5,10 +5,8 @@ import warnings
 from collections import namedtuple
 from copy import deepcopy
 
+from dateutil.parser import ParserError as DateUtilParserError
 from dateutil.parser import parse
-from IPython import get_ipython
-from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
-
 from great_expectations import __version__ as ge_version
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.evaluation_parameters import (
@@ -25,6 +23,8 @@ from great_expectations.exceptions import (
     UnavailableMetricError,
 )
 from great_expectations.types import DictDot
+from IPython import get_ipython
+from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 
 logger = logging.getLogger(__name__)
 
@@ -318,12 +318,18 @@ class RunIdentifier(DataContextKey):
         if isinstance(run_time, str):
             try:
                 run_time = parse(run_time)
-            except ParserError:
+            except (DateUtilParserError, TypeError):
                 warnings.warn(
                     f'Unable to parse provided run_time str ("{run_time}") to datetime. Defaulting '
                     f"run_time to current time."
                 )
                 run_time = datetime.datetime.now(datetime.timezone.utc)
+
+        if not run_time:
+            try:
+                run_time = parse(run_name)
+            except (DateUtilParserError, TypeError):
+                run_time = None
 
         run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
         if not run_time.tzinfo:
