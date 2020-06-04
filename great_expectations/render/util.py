@@ -52,8 +52,9 @@ def num_to_str(f, precision=DEFAULT_PRECISION, use_locale=False, no_scientific=F
         # result = '≈' + result
         #  ≈  # \u2248
         result = "≈" + result
-    if "e" not in result and "E" not in result:
-        result = result.rstrip("0").rstrip(locale.localeconv().get("decimal_point"))
+    decimal_char = locale.localeconv().get("decimal_point")
+    if "e" not in result and "E" not in result and decimal_char in result:
+        result = result.rstrip("0").rstrip(decimal_char)
     return result
 
 
