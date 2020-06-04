@@ -39,6 +39,8 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
+    CURRENT_CONFIG_VERSION,
+    MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     DatasourceConfig,
@@ -736,24 +738,39 @@ class BaseDataContext(object):
         return data_asset_names
 
     def build_batch_kwargs(
-        self, datasource, batch_kwargs_generator, name=None, partition_id=None, **kwargs
+        self,
+        datasource,
+        batch_kwargs_generator,
+        data_asset_name=None,
+        partition_id=None,
+        **kwargs,
     ):
         """Builds batch kwargs using the provided datasource, batch kwargs generator, and batch_parameters.
 
         Args:
             datasource (str): the name of the datasource for which to build batch_kwargs
             batch_kwargs_generator (str): the name of the batch kwargs generator to use to build batch_kwargs
-            name (str): an optional name batch_parameter
+            data_asset_name (str): an optional name batch_parameter
             **kwargs: additional batch_parameters
 
         Returns:
             BatchKwargs
 
         """
+        if kwargs.get("name"):
+            if data_asset_name:
+                raise ValueError(
+                    "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
+                )
+            warnings.warn(
+                "name is being deprecated as a batch_parameter. Please use data_asset_name instead.",
+                DeprecationWarning,
+            )
+            data_asset_name = kwargs.pop("name")
         datasource_obj = self.get_datasource(datasource)
         batch_kwargs = datasource_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
-            name=name,
+            data_asset_name=data_asset_name,
             partition_id=partition_id,
             **kwargs,
         )
@@ -2229,6 +2246,54 @@ class DataContext(BaseDataContext):
 
         logger.debug("Using project config: {}".format(yml_path))
         return result
+
+    @classmethod
+    def get_ge_config_version(cls, context_root_dir=None):
+        yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
+        if yml_path is None:
+            return
+
+        with open(yml_path) as f:
+            config_dict = yaml.load(f)
+
+        config_version = config_dict.get("config_version")
+        return float(config_version) if config_version else None
+
+    @classmethod
+    def set_ge_config_version(
+        cls, config_version, context_root_dir=None, validate_config_version=True
+    ):
+        if not isinstance(config_version, (int, float)):
+            raise ge_exceptions.UnsupportedConfigVersionError(
+                "The argument `config_version` must be a number.",
+            )
+
+        if validate_config_version:
+            if config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+                raise ge_exceptions.UnsupportedConfigVersionError(
+                    "Invalid config version ({}).\n    The version number must be at least {}. ".format(
+                        config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
+                    ),
+                )
+            elif config_version > CURRENT_CONFIG_VERSION:
+                raise ge_exceptions.UnsupportedConfigVersionError(
+                    "Invalid config version ({}).\n    The maximum valid version is {}.".format(
+                        config_version, CURRENT_CONFIG_VERSION
+                    ),
+                )
+
+        yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
+        if yml_path is None:
+            return False
+
+        with open(yml_path) as f:
+            config_dict = yaml.load(f)
+            config_dict["config_version"] = config_version
+
+        with open(yml_path, "w") as f:
+            yaml.dump(config_dict, f)
+
+        return True
 
     @classmethod
     def find_context_yml_file(cls, search_start_dir=None):

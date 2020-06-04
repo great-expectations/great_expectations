@@ -1135,23 +1135,29 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
 
 def test_build_batch_kwargs(titanic_multibatch_data_context):
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", name="titanic", partition_id="Titanic_1912"
+        "mydatasource",
+        "mygenerator",
+        data_asset_name="titanic",
+        partition_id="Titanic_1912",
     )
     assert os.path.relpath("./data/titanic/Titanic_1912.csv") in batch_kwargs["path"]
 
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", name="titanic", partition_id="Titanic_1911"
+        "mydatasource",
+        "mygenerator",
+        data_asset_name="titanic",
+        partition_id="Titanic_1911",
     )
     assert os.path.relpath("./data/titanic/Titanic_1911.csv") in batch_kwargs["path"]
 
     paths = []
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", name="titanic"
+        "mydatasource", "mygenerator", data_asset_name="titanic"
     )
     paths.append(os.path.basename(batch_kwargs["path"]))
 
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", name="titanic"
+        "mydatasource", "mygenerator", data_asset_name="titanic"
     )
     paths.append(os.path.basename(batch_kwargs["path"]))
 
