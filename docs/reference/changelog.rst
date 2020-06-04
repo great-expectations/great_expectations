@@ -6,6 +6,7 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] object name construction when calling SqlAlchemyDataset.head (thanks @mascah!)
 
 0.11.0
 -----------------
