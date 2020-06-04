@@ -13,11 +13,8 @@ import warnings
 import webbrowser
 from typing import Dict, List, Optional, Union
 
-from dateutil.parser import ParserError, parse
-from marshmallow import ValidationError
-from ruamel.yaml import YAML, YAMLError
-
 import great_expectations.exceptions as ge_exceptions
+from dateutil.parser import ParserError, parse
 from great_expectations.core import (
     ExpectationSuite,
     RunIdentifier,
@@ -63,6 +60,8 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import Validator
+from marshmallow import ValidationError
+from ruamel.yaml import YAML, YAMLError
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -1785,7 +1784,7 @@ class BaseDataContext(object):
             )
             try:
                 run_time = parse(run_id)
-            except ParserError:
+            except (ParserError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):

@@ -4,7 +4,6 @@ import warnings
 from enum import Enum
 
 from dateutil.parser import ParserError, parse
-
 from great_expectations.core import RunIdentifier
 from great_expectations.exceptions import GreatExpectationsError
 
@@ -100,7 +99,7 @@ class DatasetProfiler(DataAssetProfiler):
             )
             try:
                 run_time = parse(run_id)
-            except ParserError:
+            except (ParserError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):

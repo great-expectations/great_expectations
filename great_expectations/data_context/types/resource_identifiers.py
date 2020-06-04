@@ -3,12 +3,11 @@ import warnings
 from typing import Union
 
 from dateutil.parser import ParserError, parse
-from marshmallow import Schema, fields, post_load
-
 from great_expectations.core import IDDict, RunIdentifier, RunIdentifierSchema
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.exceptions import DataContextError, InvalidDataContextKeyError
+from marshmallow import Schema, fields, post_load
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +117,7 @@ class ValidationResultIdentifier(DataContextKey):
             )
             try:
                 run_time = parse(run_id)
-            except ParserError:
+            except (ParserError, TypeError):
                 run_time = None
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):

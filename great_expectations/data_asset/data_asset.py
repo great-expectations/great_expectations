@@ -11,8 +11,6 @@ from collections.abc import Hashable
 from functools import wraps
 
 from dateutil.parser import ParserError, parse
-from marshmallow import ValidationError
-
 from great_expectations import __version__ as ge_version
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -29,6 +27,7 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
+from marshmallow import ValidationError
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -853,7 +852,7 @@ class DataAsset(object):
                 )
                 try:
                     run_time = parse(run_id)
-                except ParserError:
+                except (ParserError, TypeError):
                     pass
                 run_id = RunIdentifier(run_name=run_id, run_time=run_time)
             elif isinstance(run_id, dict):

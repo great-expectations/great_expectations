@@ -3,7 +3,6 @@ import os
 from collections import OrderedDict
 
 from dateutil.parser import ParserError, parse
-
 from great_expectations.core import RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
@@ -52,7 +51,7 @@ class ValidationResultsPageRenderer(Renderer):
         if isinstance(run_id, str):
             try:
                 run_time = parse(run_id).strftime("%Y%m%dT%H%M%S.%fZ")
-            except ParserError:
+            except (ParserError, TypeError):
                 run_time = "__none__"
             run_name = run_id
         elif isinstance(run_id, dict):
@@ -238,7 +237,7 @@ class ValidationResultsPageRenderer(Renderer):
         if isinstance(run_id, str):
             try:
                 run_time = parse(run_id).strftime("%Y%m%dT%H%M%S.%fZ")
-            except ParserError:
+            except (ParserError, TypeError):
                 run_time = "__none__"
             run_name = run_id
         elif isinstance(run_id, dict):
@@ -712,7 +711,7 @@ class ProfilingResultsPageRenderer(Renderer):
         if isinstance(run_id, str):
             try:
                 run_time = parse(run_id).strftime("%Y%m%dT%H%M%S.%fZ")
-            except ParserError:
+            except (ParserError, TypeError):
                 run_time = "__none__"
             run_name = run_id
         elif isinstance(run_id, dict):
