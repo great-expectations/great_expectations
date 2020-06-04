@@ -61,7 +61,6 @@ In a notebook,
         downstream_batch.expect_table_row_count_to_equal(
             value={
                 '$PARAMETER': eval_param_urn, # this is the actual parameter we're going to use in the validation
-                '$PARAMETER.' + eval_param_urn: 10  # this is a *temporary* value so we can execute the notebook
             }
         )
     
