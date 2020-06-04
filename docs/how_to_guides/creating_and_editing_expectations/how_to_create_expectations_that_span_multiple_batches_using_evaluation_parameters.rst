@@ -6,7 +6,6 @@ How to create Expectations that span multiple Batches using Evaluation Parameter
 This guide will help you create Expectations that span multiple :ref:`Batches` of data using :ref:`Evaluation Parameters`. This pattern is useful for things like verifying that row counts between tables stay consistent.
 
 
-Data Assets within a Validation operation. This is done
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
