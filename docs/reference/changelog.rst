@@ -6,6 +6,8 @@ Changelog
 
 develop
 -----------------
+* [FEATURE] Add support for expect_volumn_values_to_match_json_schema exception for Spark backend (thanks @chipmyersjr!)
+
 
 0.11.0
 -----------------
@@ -30,7 +32,6 @@ develop
 * Updated the installation/configuration documentation for Snowflake users
 * [ENHANCEMENT] Improved error messages for misconfigured checkpoints.
 * [BUGFIX] Fixed bug that could cause some substituted variables in DataContext config to be saved to `great_expectations.yml`
-* [FEATURE] Add support for expect_volumn_values_to_match_json_schema exception for Spark backend
 
 0.10.12
 -----------------
