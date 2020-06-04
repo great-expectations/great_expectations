@@ -8,8 +8,8 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 
 .. admonition:: Prerequisites: This how-to guide assumes that you have already:
 
-    - Configured a :ref:`Data Context <_how_to_guides__configuring_data_contexts__how_to_create_a_new_data_context_with_the_cli>`.
-    - Configured an :ref:`Expectation Suite <_how_to_guides__creating_and_editing_expectations__how_to_create_a_new_expectation_suite_using_the_cli>`.
+    - Configured a :ref:`Data Context <how_to_guides__configuring_data_contexts__how_to_create_a_new_data_context_with_the_cli>`.
+    - Configured an :ref:`Expectation Suite <how_to_guides__creating_and_editing_expectations__how_to_create_a_new_expectation_suite_using_the_cli>`.
     - Determined a new storage location where you would like to store Expectations. This can either be a local path, or a path to a network filesystem.
 
 Steps
