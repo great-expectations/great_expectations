@@ -1,4 +1,4 @@
-.. _getting_started__set_up_auto_docs:
+.. _tutorials__getting_started__set_up_data_docs:
 
 Set up Data Docs
 ================
@@ -10,38 +10,38 @@ Go ahead and tell the CLI you want to build Data Docs:
 .. code-block:: bash
 
     Would you like to build Data Docs? [Y/n]: 
-
+    
     The following Data Docs sites will be built:
-
-     - local_site: file:///Users/eugenemandel/projects/fellows/great_expectations/uncommitted/data_docs/local_site/index.html
-
-    OK to proceed? [Y/n]: 
-
+    
+     - local_site: file:///home/ubuntu/example_project/great_expectations/uncommitted/data_docs/local_site/index.html
+    
+    Would you like to proceed? [Y/n]: 
+    
     Building Data Docs...
-
+    
     Done building Data Docs
-
+    
     Would you like to view your new Expectations in Data Docs? This will open a new browser window. [Y/n]: 
 
-
-When you open the window, you'll see a static website that looks like this:
-
-<<<SCREENSHOT GOES HERE>>>
 
 What just happened?
 -------------------
 
 In the previous step, our data Profiler generated a set of new Expectations. We just used Data Docs to compile those Expectations to HTML, which you can see here. This page is *prescriptive*: it describes how data *should* look:
 
-<<<SCREENSHOT GOES HERE>>>
+When you open the window, you'll see a static website that looks like this:
 
-As mentioned in the previous step, our Profiler also generated Validation Results, which you can see here. This page is *descriptive*: it describes how a specific batch of data (in this case, the data we Profiled) actually looked when validated.
+.. figure:: ../../images/prescriptive_view.png
 
-<<<SCREENSHOT GOES HERE>>>
+.. As mentioned in the previous step, our Profiler also generated Validation Results, which you can see here. This page is *descriptive*: it describes how a specific batch of data (in this case, the data we Profiled) actually looked when validated.
 
-Finally, your static site includes a set of pages for future data validations. These pages are *diagnostic*: they describe whether and how a specific batch of data differed from the ideal prescribed by a set of Expectations.
+.. <<<SCREENSHOT GOES HERE>>>
 
-<<<SCREENSHOT GOES HERE>>>
+.. Finally,
+
+In addition, your static site includes a set of pages for future data validations. These pages are *diagnostic*: they describe whether and how a specific batch of data differed from the ideal prescribed by a set of Expectations.
+
+.. figure:: ../../images/diagnostic_view.png
 
 For now, your static site is built and stored locally. In the last step of the tutorial, we'll explain options for configuring, hosting and sharing it.
 

@@ -51,7 +51,7 @@ After completing all the validations, it sends a Slack notification with the suc
 
 Read more about WarningAndFailureExpectationSuitesValidationOperator here: :ref:`warning_and_failure_expectation_suites_validation_operator`
 
-
+.. _validation_actions:
 *****************
 ValidationActions
 *****************
@@ -63,5 +63,3 @@ An action is a way to take an arbitrary method and make it configurable and runn
 The only requirement from an action is for it to have a take_action method.
 
 GE comes with a list of actions that we consider useful and you can reuse in your pipelines. Most of them take in validation results and do something with them.
-
-
