@@ -109,7 +109,7 @@ Steps
         my_data_asset = context.get_batch(
             my_batch_kwargs,
             ExpectationSuite("my_temporary_test_suite"),
-            CustomSqlAlchemyDataset,
+            data_asset_type=CustomSqlAlchemyDataset,
         )
 
 5. **Test your Expectations**
