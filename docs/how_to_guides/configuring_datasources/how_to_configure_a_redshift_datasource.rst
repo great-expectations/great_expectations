@@ -84,5 +84,5 @@ Comments
 --------
 
     .. discourse::
-        :topic_identifier: {169}
+        :topic_identifier: 169
 

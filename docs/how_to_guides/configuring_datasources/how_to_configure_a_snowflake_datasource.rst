@@ -86,5 +86,5 @@ Comments
 --------
 
     .. discourse::
-        :topic_identifier: {171}
+        :topic_identifier: 171
 
