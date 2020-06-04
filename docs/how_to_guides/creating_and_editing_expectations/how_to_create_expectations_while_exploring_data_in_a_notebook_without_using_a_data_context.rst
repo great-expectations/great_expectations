@@ -55,7 +55,7 @@ All of these steps take place within your notebook:
             my_pandas_dataframe
         )
 
-    This method will convert your boring old pandas ``DataFrame`` into a new and exciting great_expectations ``PandasDataAsset``. The two classes are absolutely identical, except that ``PandasDataAsset`` has access to Great Expectations' methods.
+    This method will convert your boring old pandas ``DataFrame`` into a new and exciting great_expectations ``PandasDataset``. The two classes are absolutely identical, except that ``PandasDataset`` has access to Great Expectations' methods.
 
 3. **Explore your data and add Expectations.**
 
