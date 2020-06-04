@@ -14,7 +14,7 @@ Would you like to run the Upgrade Helper to bring your project up-to-date? [Y/n]
 || UpgradeHelperV11: Upgrade Overview ||
 ++====================================++
 
-UpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x. 
+UpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x.
 
 **WARNING**: Before proceeding, please make sure you have appropriate backups of your project.
 
@@ -38,7 +38,7 @@ Please consult the 0.11.x migration guide for instructions on how to complete an
 to learn more about the automated upgrade process:
 
     https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html#id1
-    
+
 Would you like to proceed with the project upgrade? [Y/n]: 
 
 Upgrading project...[0m
