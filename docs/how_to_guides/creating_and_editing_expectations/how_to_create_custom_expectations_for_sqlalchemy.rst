@@ -43,7 +43,7 @@ Steps
 
     The ``@MetaSqlAlchemyDataset.column_map_expectation`` decorator wraps a custom function with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining required arguments like ``mostly`` and ``result_format``. Your custom function can focus exclusively on the business logic of passing or failing the Expectation.
 
-    In the simplest case, they could be as simple as one-line lambda functions.
+    In the simplest case, they could be as simple as one-line SQL conditions, expressed using SqlAlchemy.
 
     .. code-block:: python
 
