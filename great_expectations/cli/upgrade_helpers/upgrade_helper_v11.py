@@ -4,7 +4,6 @@ import os
 import traceback
 
 from dateutil.parser import ParserError, parse
-
 from great_expectations import DataContext
 from great_expectations.cli.upgrade_helpers.base_upgrade_helper import BaseUpgradeHelper
 from great_expectations.cli.util import cli_message
@@ -459,16 +458,23 @@ class UpgradeHelperV11(BaseUpgradeHelper):
 ++====================================++\
 </cyan>
 
-UpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x. 
+UpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x.
 """
-        if not any([validations_store_name_checklist, site_name_checklist, skip_with_database_backends,
-                skip_with_unsupported_backends, skip_doc_sites_with_unsupported_backends]):
+        if not any(
+            [
+                validations_store_name_checklist,
+                site_name_checklist,
+                skip_with_database_backends,
+                skip_with_unsupported_backends,
+                skip_doc_sites_with_unsupported_backends,
+            ]
+        ):
             upgrade_overview += """
 <green>\
 Good news! No special upgrade steps are required to bring your project up to date.
 The Upgrade Helper will simply increment the config_version of your great_expectations.yml for you.
 </green>
-Would you like to proceed? 
+Would you like to proceed?
 """
         else:
             upgrade_overview += """
@@ -483,15 +489,28 @@ Automated Steps
 The following Stores and/or Data Docs sites will be upgraded:
 
 """
-                upgrade_overview += f"""\
+                upgrade_overview += (
+                    f"""\
     - Validation Stores: {", ".join(validations_store_name_checklist)}
-""" if validations_store_name_checklist else ""
-                upgrade_overview += f"""\
+"""
+                    if validations_store_name_checklist
+                    else ""
+                )
+                upgrade_overview += (
+                    f"""\
     - Data Docs Sites: {", ".join(site_name_checklist)}
-""" if site_name_checklist else ""
+"""
+                    if site_name_checklist
+                    else ""
+                )
 
-            if any([skip_with_database_backends, skip_with_unsupported_backends,
-                   skip_doc_sites_with_unsupported_backends]):
+            if any(
+                [
+                    skip_with_database_backends,
+                    skip_with_unsupported_backends,
+                    skip_doc_sites_with_unsupported_backends,
+                ]
+            ):
                 upgrade_overview += """
 <cyan>\
 Manual Steps
@@ -501,15 +520,27 @@ The following Stores and/or Data Docs sites must be upgraded manually, due to ha
 type that is unsupported or unrecognized:
 
 """
-                upgrade_overview += f"""\
+                upgrade_overview += (
+                    f"""\
     - Stores with database backends: {", ".join(skip_with_database_backends)}
-""" if skip_with_database_backends else ""
-                upgrade_overview += f"""\
-    - Stores with unsupported/unrecognized backends: {", ".join(skip_with_unsupported_backends)} 
-""" if skip_with_unsupported_backends else ""
-                upgrade_overview += f"""\
+"""
+                    if skip_with_database_backends
+                    else ""
+                )
+                upgrade_overview += (
+                    f"""\
+    - Stores with unsupported/unrecognized backends: {", ".join(skip_with_unsupported_backends)}
+"""
+                    if skip_with_unsupported_backends
+                    else ""
+                )
+                upgrade_overview += (
+                    f"""\
     - Data Docs sites with unsupported/unrecognized backends: {", ".join(skip_doc_sites_with_unsupported_backends)}
-""" if skip_doc_sites_with_unsupported_backends else ""
+"""
+                    if skip_doc_sites_with_unsupported_backends
+                    else ""
+                )
             else:
                 upgrade_overview += """
 <cyan>\
@@ -528,19 +559,21 @@ Please consult the 0.11.x migration guide for instructions on how to complete an
 to learn more about the automated upgrade process:
 
     <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html#id1</cyan>
-    
+
 Would you like to proceed with the project upgrade?\
 """
         return upgrade_overview, True
 
     def _save_upgrade_log(self):
-        current_time = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
+        current_time = datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y%m%dT%H%M%S.%fZ"
+        )
         dest_path = os.path.join(
             self.data_context._context_root_directory,
             "uncommitted",
             "logs",
             "project_upgrades",
-            f"UpgradeHelperV11_{current_time}.json"
+            f"UpgradeHelperV11_{current_time}.json",
         )
         dest_dir, dest_filename = os.path.split(dest_path)
         os.makedirs(dest_dir, exist_ok=True)
@@ -581,7 +614,7 @@ A log detailing the upgrade can be found here:
                 upgrade_report += f"""
 <red>\
 The Upgrade Helper encountered some exceptions during the upgrade process.
-Please review the exceptions section of the upgrade log and migrate the affected files manually, 
+Please review the exceptions section of the upgrade log and migrate the affected files manually,
 as detailed in the 0.11.x migration guide.
 
 The upgrade log can be found here:

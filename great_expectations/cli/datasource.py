@@ -9,7 +9,6 @@ import textwrap
 import uuid
 
 import click
-
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext, rtd_url_ge_version
 from great_expectations.cli import toolkit
@@ -392,7 +391,7 @@ Great Expectations will now add a new Datasource '{0:s}' to your deployment, by 
 
     toolkit.confirm_proceed_or_exit(
         continuation_message="Okay, exiting now. To learn more about adding datasources, run great_expectations "
-                             "datasource --help or visit https://docs.greatexpectations.io/"
+        "datasource --help or visit https://docs.greatexpectations.io/"
     )
 
     context.add_datasource(name=datasource_name, **configuration)
