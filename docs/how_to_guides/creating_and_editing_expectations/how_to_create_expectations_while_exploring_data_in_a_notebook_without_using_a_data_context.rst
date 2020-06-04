@@ -59,7 +59,7 @@ All of these steps take place within your notebook:
 
 3. **Explore your data and add Expectations.**
 
-    Each of the methods in step 1 will produce ``my_df``, a ``PandasDataAsset``. ``PandasDataAsset`` is a subclass of ``pandas.DataFrame``, which means that you can use all of pandas' normal methods on it.
+    Each of the methods in step 1 will produce ``my_df``, a ``PandasDataset``. ``PandasDataset`` is a subclass of ``pandas.DataFrame``, which means that you can use all of pandas' normal methods on it.
 
     .. code-block:: python
 
