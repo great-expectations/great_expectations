@@ -17,6 +17,7 @@ develop
 * [BUGFIX] Fixed bug preventing GCS Data Docs sites to cleaned
 * [BUGFIX] Correct doc link in checkpoint yml
 * [BUGFIX] Fix S3 Batch Kwargs Generator incorrect migration to new build_batch_kwargs API
+* [BUGFIX] Fix issue where data docs could remove trailing zeros from values when low precision was requested
 
 0.11.1
 -----------------
