@@ -11,7 +11,7 @@ This guide will help you get started quickly in Great Expectations, without even
 
     - Installed Great Expectations (e.g. ``pip install great_expectations``)
     - Have access to a notebook (e.g. ``jupyter notebook``, ``jupyter lab``, etc.)
-    - Be able to access data from your notebook
+    - Obtained a sample of data to use for exploration
     - Nothing else. Unlike most how-to guides, these instructions do *not* assume that you have configured a Data Context by running ``great_expectations init``.
 
 Steps
