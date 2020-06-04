@@ -7,7 +7,7 @@ repos:
       - id: end-of-file-fixer
         exclude: docs/.*|tests/test_sets/broken_excel_file\.xls
       - id: trailing-whitespace
-        exclude: docs/.*|tests/.fixture
+        exclude: docs/.*|tests/.*.fixture
       - id: requirements-txt-fixer
         exclude: docs/.*
   - repo: https://github.com/timothycrosley/isort
