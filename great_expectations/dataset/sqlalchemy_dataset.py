@@ -498,8 +498,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ),
         )
 
-    def get_row_count(self):
-        count_query = sa.select([sa.func.count()]).select_from(self._table)
+    def get_row_count(self, table_name=None):
+        if table_name is None:
+            table_name = self._table
+        else:
+            table_name = sa.table(table_name)
+        count_query = sa.select([sa.func.count()]).select_from(table_name)
         return int(self.engine.execute(count_query).scalar())
 
     def get_column_count(self):
@@ -992,6 +996,70 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 for col_name, col_type in col_info
             ]
         return col_dict
+
+    ###
+    ###
+    ###
+    #
+    # Table Expectation Implementations
+    #
+    ###
+    ###
+    ###
+
+    # noinspection PyUnusedLocal
+    @DocInherit
+    @MetaSqlAlchemyDataset.expectation(["other_table_name"])
+    def expect_table_row_count_to_equal_other_table(
+        self,
+        other_table_name,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        """Expect the number of rows in this table to equal the number of rows in a different table.
+
+        expect_table_row_count_to_equal is a :func:`expectation \
+        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        ``column_map_expectation`` or ``column_aggregate_expectation``.
+
+        Args:
+            other_table_name (str): \
+                The name of the other table to which to compare.
+
+        Other Parameters:
+            result_format (string or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
+
+        Returns:
+           An ExpectationSuiteValidationResult
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        See Also:
+            expect_table_row_count_to_be_between
+        """
+        row_count = self.get_row_count()
+        other_table_row_count = self.get_row_count(table_name=other_table_name)
+
+        return {
+            "success": row_count == other_table_row_count,
+            "result": {
+                "observed_value": {"self": row_count, "other": other_table_row_count,}
+            },
+        }
 
     ###
     ###
