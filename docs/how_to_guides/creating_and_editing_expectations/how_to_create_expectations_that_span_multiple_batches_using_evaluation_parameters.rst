@@ -91,7 +91,7 @@ In a notebook,
 
         downstream_batch.save_expectation_suite(discard_failed_expectations=False)
 
-    This step is necessary, because your ``$PARAMETER`` will only function properly when invoked within a Validation operation with multiple Batches, the simplest way to execute such an operation invoke is through a :ref:`Validation Operator`, and Validation Operators are configured to load Expectation Suites from Expectation Stores, not memory.
+    This step is necessary because your ``$PARAMETER`` will only function properly when invoked within a Validation operation with multiple Batches. The simplest way to execute such an operation is through a :ref:`Validation Operator`, and Validation Operators are configured to load Expectation Suites from Expectation Stores, not memory.
 
 #. **Execute an existing Validation Operator on your upstream and downstream batches.**
 
