@@ -131,73 +131,17 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
     )
     stdout = result.stdout
 
-    # fmt: off
-    assert "Checking project..." in stdout
-    assert (
-        "Your project appears to have an out-of-date config version (1.0) - the version number must be at least 2."
-        in stdout
-    )
-    assert (
-        "Would you like to run the Upgrade Helper to bring your project up-to-date? [Y/n]:"
-        in stdout
-    )
-    assert (
-        """\
-++====================================++
-|| UpgradeHelperV11: Upgrade Overview ||
-++====================================++
-
-UpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x.
-
-**WARNING**: Before proceeding, please make sure you have appropriate backups of your project.
-
-Automated Steps
-================
-
-The following Stores and/or Data Docs sites will be upgraded:
-
-    - Validation Stores: validations_store
-    - Data Docs Sites: local_site
-
-Manual Steps
-=============
-
-No manual upgrade steps are required.
-
-Upgrade Confirmation
-=====================
-
-Please consult the 0.11.x migration guide for instructions on how to complete any required manual steps or
-to learn more about the automated upgrade process:
-
-    https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html#id1
-
-Would you like to proceed with the project upgrade? [Y/n]:
-
-Upgrading project...\
-"""
-        in stdout
-    )
-    assert (
-        "Your project was successfully upgraded to be compatible with Great Expectations 0.11.x."
-        in stdout
-    )
-    assert (
-        "The config_version of your great_expectations.yml has been automatically incremented to 2.0."
-        in stdout
-    )
-    assert (
-        f"""\
-A log detailing the upgrade can be found here:
-
-    - {v10_project_directory}/uncommitted/logs/project_upgrades/UpgradeHelperV11_20190926T134241.000000Z.json[0m[0m
-
-================================================================================
-[0m
-[32mUpgrade complete. Exiting...\
-"""
-        in stdout
-    )
+    with open(
+        file_relative_path(
+            __file__,
+            "../../test_fixtures/upgrade_helper/test_basic_project_upgrade_expected_stdout.fixture",
+        )
+    ) as f:
+        expected_stdout = f.read()
+        expected_stdout = expected_stdout.replace(
+            "GE_PROJECT_DIR", v10_project_directory
+        )
+        assert stdout == expected_stdout
 
     expected_project_tree_str = """\
 great_expectations/
@@ -237,7 +181,6 @@ great_expectations/
                         20200430T191246.763896Z/
                             c3b4c5df224fef4b1a056a0f3b93aba5.json
 """
-    # fmt: on
     obs_project_tree_str = gen_directory_tree_str(v10_project_directory)
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number incremented
@@ -290,79 +233,17 @@ def test_project_upgrade_with_manual_steps(v10_project_directory, caplog):
     )
     stdout = result.stdout
 
-    # fmt: off
-    assert "Checking project..." in stdout
-    assert (
-        "Your project appears to have an out-of-date config version (1.0) - the version number must be at least 2."
-        in stdout
-    )
-    assert (
-        "Would you like to run the Upgrade Helper to bring your project up-to-date? [Y/n]:"
-        in stdout
-    )
-    assert (
-        """\
-++====================================++
-|| UpgradeHelperV11: Upgrade Overview ||
-++====================================++
-
-UpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x.
-
-**WARNING**: Before proceeding, please make sure you have appropriate backups of your project.
-
-Automated Steps
-================
-
-The following Stores and/or Data Docs sites will be upgraded:
-
-    - Validation Stores: validations_store
-    - Data Docs Sites: local_site
-
-Manual Steps
-=============
-
-The following Stores and/or Data Docs sites must be upgraded manually, due to having a database backend, or backend
-type that is unsupported or unrecognized:
-
-    - Stores with database backends: validations_db_store, evaluation_parameter_db_store
-    - Stores with unsupported/unrecognized backends: validations_unrecognized_store_backend
-    - Data Docs sites with unsupported/unrecognized backends: local_site_unrecognized_backend
-
-Upgrade Confirmation
-=====================
-
-Please consult the 0.11.x migration guide for instructions on how to complete any required manual steps or
-to learn more about the automated upgrade process:
-
-    https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html#id1
-
-Would you like to proceed with the project upgrade? [Y/n]:
-
-Upgrading project...\
-"""
-        in stdout
-    )
-    assert "The Upgrade Helper has completed the automated upgrade steps." in stdout
-    assert (
-        f"""\
-A log detailing the upgrade can be found here:
-
-    - {v10_project_directory}/uncommitted/logs/project_upgrades/UpgradeHelperV11_20190926T134241.000000Z.json[0m[0m\
-"""
-        in stdout
-    )
-
-    assert (
-        """
-[31mThe Upgrade Helper was unable to perform a complete project upgrade. Next steps:[0m
-
-    - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above
-    - When complete, increment the config_version key in your [36mgreat_expectations.yml[0m to [36m2.0[0m
-
-To learn more about the upgrade process, visit [36mhttps://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html[0m
-"""
-        in stdout
-    )
+    with open(
+        file_relative_path(
+            __file__,
+            "../../test_fixtures/upgrade_helper/test_project_upgrade_with_manual_steps_expected_stdout.fixture",
+        )
+    ) as f:
+        expected_stdout = f.read()
+        expected_stdout = expected_stdout.replace(
+            "GE_PROJECT_DIR", v10_project_directory
+        )
+        assert stdout == expected_stdout
 
     expected_project_tree_str = """\
 great_expectations/
@@ -402,7 +283,6 @@ great_expectations/
                         20200430T191246.763896Z/
                             c3b4c5df224fef4b1a056a0f3b93aba5.json
 """
-    # fmt: on
     obs_project_tree_str = gen_directory_tree_str(v10_project_directory)
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number not incremented
@@ -455,77 +335,17 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
     )
     stdout = result.stdout
 
-    # fmt: off
-    assert "Checking project..." in stdout
-    assert (
-        "Your project appears to have an out-of-date config version (1.0) - the version number must be at least 2."
-        in stdout
-    )
-    assert (
-        "Would you like to run the Upgrade Helper to bring your project up-to-date? [Y/n]:"
-        in stdout
-    )
-    assert (
-        """\
-++====================================++
-|| UpgradeHelperV11: Upgrade Overview ||
-++====================================++
-
-UpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x.
-
-**WARNING**: Before proceeding, please make sure you have appropriate backups of your project.
-
-Automated Steps
-================
-
-The following Stores and/or Data Docs sites will be upgraded:
-
-    - Validation Stores: validations_store
-    - Data Docs Sites: local_site, s3_site_broken
-
-Manual Steps
-=============
-
-No manual upgrade steps are required.
-
-Upgrade Confirmation
-=====================
-
-Please consult the 0.11.x migration guide for instructions on how to complete any required manual steps or
-to learn more about the automated upgrade process:
-
-    https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html#id1
-
-Would you like to proceed with the project upgrade? [Y/n]:
-
-Upgrading project...\
-"""
-        in stdout
-    )
-    assert (
-        "The Upgrade Helper encountered some exceptions during the upgrade process."
-        in stdout
-    )
-
-    assert f"""
-Please review the exceptions section of the upgrade log and migrate the affected files manually,
-as detailed in the 0.11.x migration guide.
-
-The upgrade log can be found here:
-
-    - {v10_project_directory}/uncommitted/logs/project_upgrades/UpgradeHelperV11_20190926T134241.000000Z.json[0m[0m\
-"""
-    assert (
-        """
-[31mThe Upgrade Helper was unable to perform a complete project upgrade. Next steps:[0m
-
-    - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above
-    - When complete, increment the config_version key in your [36mgreat_expectations.yml[0m to [36m2.0[0m
-
-To learn more about the upgrade process, visit [36mhttps://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html[0m
-"""
-        in stdout
-    )
+    with open(
+        file_relative_path(
+            __file__,
+            "../../test_fixtures/upgrade_helper/test_project_upgrade_with_exception_expected_stdout.fixture",
+        )
+    ) as f:
+        expected_stdout = f.read()
+        expected_stdout = expected_stdout.replace(
+            "GE_PROJECT_DIR", v10_project_directory
+        )
+        assert stdout == expected_stdout
 
     expected_project_tree_str = """\
 great_expectations/
@@ -565,7 +385,6 @@ great_expectations/
                         20200430T191246.763896Z/
                             c3b4c5df224fef4b1a056a0f3b93aba5.json
 """
-    # fmt: off
     obs_project_tree_str = gen_directory_tree_str(v10_project_directory)
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number not incremented
