@@ -8,6 +8,7 @@ develop
 -----------------
 * [FEATURE] Add support for expect_volumn_values_to_match_json_schema exception for Spark backend (thanks @chipmyersjr!)
 * [ENHANCEMENT] Add formatted __repr__ for ValidationOperatorResult
+* [ENHANCEMENT] add option to suppress logging when getting expectation suite
 * [BUGFIX] Fix object name construction when calling SqlAlchemyDataset.head (thanks @mascah!)
 * [BUGFIX] Fixed bug where evaluation parameters used in arithmetic expressions would not be identified as upstream dependencies.
 * [BUGFIX] Fix issue where DatabaseStoreBackend threw IntegrityError when storing same metric twice
