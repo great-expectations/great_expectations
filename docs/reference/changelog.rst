@@ -17,6 +17,8 @@ develop
 * [BUGFIX] Fixed bug preventing GCS Data Docs sites to cleaned
 * [BUGFIX] Correct doc link in checkpoint yml
 * [BUGFIX] Fix S3 Batch Kwargs Generator incorrect migration to new build_batch_kwargs API
+* [BUGFIX] Fix missing images in data docs walkthrough modal
+* [BUGFIX] Fix bug in checkpoints that was causing incorrect run_time to be set
 
 0.11.1
 -----------------
