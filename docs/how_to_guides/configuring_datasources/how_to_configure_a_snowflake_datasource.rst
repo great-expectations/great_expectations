@@ -1,7 +1,7 @@
 .. _how_to_guides__configuring_datasources__how_to_configure_a_snowflake_datasource:
 
 #######################################
-How to Configure a Snowflake Datasource
+How to configure a Snowflake Datasource
 #######################################
 
 This guide shows how to connect to a Snowflake Datasource.

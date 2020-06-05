@@ -1,7 +1,7 @@
 .. _how_to_guides__configuring_datasources__how_to_configure_a_redshift_datasource:
 
 ######################################
-How to Configure a Redshift Datasource
+How to configure a Redshift Datasource
 ######################################
 
 This guide shows how to connect to a Redshift Datasource.
