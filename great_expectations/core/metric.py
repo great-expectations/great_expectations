@@ -120,7 +120,7 @@ class ValidationMetric(Metric):
             )
             try:
                 run_time = parse(run_id)
-            except ParserError:
+            except (ParserError, TypeError):
                 run_time = None
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):
@@ -170,7 +170,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
             )
             try:
                 run_time = parse(run_id)
-            except ParserError:
+            except (ParserError, TypeError):
                 run_time = None
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):

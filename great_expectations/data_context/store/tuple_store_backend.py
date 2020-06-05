@@ -619,7 +619,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
 
     def remove_key(self, key):
         from google.cloud import storage
-        from gcloud.exceptions import NotFound
+        from google.cloud.exceptions import NotFound
 
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
