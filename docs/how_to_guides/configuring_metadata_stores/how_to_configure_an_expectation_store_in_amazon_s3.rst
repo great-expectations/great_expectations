@@ -63,7 +63,7 @@ The configuration file tells Great Expectations to look for Expectations in a st
             prefix: '<your_s3_bucket_folder_name>'
 
 
-5. Confirm that Expectations can be read from the the S3 Bucket by running ``great_expectations suite list``.  In our case, ''npi_expectations`` is the Expectation that is located in our S3 bucket.
+5. Confirm that Expectations can be read from the the S3 Bucket by running ``great_expectations suite list``.  In our case, ``npi_expectations`` is the Expectation that is located in our S3 bucket.
 
     .. code-block:: bash
 
