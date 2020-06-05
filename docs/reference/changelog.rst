@@ -6,6 +6,9 @@ Changelog
 
 develop
 -----------------
+
+0.11.2
+-----------------
 * [FEATURE] Add support for expect_volumn_values_to_match_json_schema exception for Spark backend (thanks @chipmyersjr!)
 * [ENHANCEMENT] Add formatted __repr__ for ValidationOperatorResult
 * [ENHANCEMENT] add option to suppress logging when getting expectation suite
