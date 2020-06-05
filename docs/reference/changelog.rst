@@ -7,8 +7,23 @@ Changelog
 develop
 -----------------
 
+0.11.2
+-----------------
+* [FEATURE] Add support for expect_volumn_values_to_match_json_schema exception for Spark backend (thanks @chipmyersjr!)
+* [ENHANCEMENT] Add formatted __repr__ for ValidationOperatorResult
+* [ENHANCEMENT] add option to suppress logging when getting expectation suite
+* [BUGFIX] Fix object name construction when calling SqlAlchemyDataset.head (thanks @mascah!)
+* [BUGFIX] Fixed bug where evaluation parameters used in arithmetic expressions would not be identified as upstream dependencies.
+* [BUGFIX] Fix issue where DatabaseStoreBackend threw IntegrityError when storing same metric twice
+* [FEATURE] Added new cli upgrade helper to help facilitate upgrading projects to be compatible with GE 0.11.
+  See :ref:`upgrading_to_0.11` for more info.
 * [BUGFIX] Fixed bug preventing GCS Data Docs sites to cleaned
 * [BUGFIX] Correct doc link in checkpoint yml
+* [BUGFIX] Fixed issue where CLI checkpoint list truncated names (#1518)
+* [BUGFIX] Fix S3 Batch Kwargs Generator incorrect migration to new build_batch_kwargs API
+* [BUGFIX] Fix missing images in data docs walkthrough modal
+* [BUGFIX] Fix bug in checkpoints that was causing incorrect run_time to be set
+* [BUGFIX] Fix issue where data docs could remove trailing zeros from values when low precision was requested
 
 0.11.1
 -----------------
@@ -20,10 +35,10 @@ develop
 -----------------
 * [BREAKING] ``run_id`` is now typed using the new ``RunIdentifier`` class, which consists of a ``run_time`` and
   ``run_name``. Existing projects that have Expectation Suite Validation Results must be migrated.
-  See :ref:`Upgrading to 0.11` for instructions.
+  See :ref:`upgrading_to_0.11` for instructions.
 * [BREAKING] ``ValidationMetric`` and ``ValidationMetricIdentifier`` objects now have a ``data_asset_name`` attribute.
   Existing projects with evaluation parameter stores that have database backends must be migrated.
-  See :ref:`Upgrading to 0.11` for instructions.
+  See :ref:`upgrading_to_0.11` for instructions.
 * [BREAKING] ``ValidationOperator.run`` now returns an instance of new type, ``ValidationOperatorResult`` (instead of a
   dictionary). If your code uses output from Validation Operators, it must be updated.
 * Major update to the styling and organization of documentation! Watch for more content and reorganization as we continue to improve the documentation experience with Great Expectations.

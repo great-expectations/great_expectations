@@ -6,6 +6,10 @@ How to Configure a Snowflake Datasource
 
 This guide shows how to connect to a Snowflake Datasource.
 
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+
 -----
 Steps
 -----
@@ -76,3 +80,11 @@ Additional Notes
     .. code-block:: python
 
         "snowflake://<user_login_name>:<password>@<account_name>/<database_name>/<schema_name>?warehouse=<warehouse_name>&role=<role_name>"
+
+--------
+Comments
+--------
+
+    .. discourse::
+        :topic_identifier: 171
+

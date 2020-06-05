@@ -6,6 +6,10 @@ How to configure a Redshift Datasource
 
 This guide shows how to connect to a Redshift Datasource.
 
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+
 -----
 Steps
 -----
@@ -148,5 +152,14 @@ Additional Notes
 #.
     Depending on your Redshift cluster configuration, you may or may not need the ``sslmode`` parameter.
 
+
 #.
     Should you need to modify your connection string, you can manually edit the ``great_expectations/uncommitted/config_variables.yml`` file.
+
+--------
+Comments
+--------
+
+    .. discourse::
+        :topic_identifier: 169
+
