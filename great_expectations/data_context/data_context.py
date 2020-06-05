@@ -1787,7 +1787,7 @@ class BaseDataContext(object):
             )
             try:
                 run_time = parse(run_id)
-            except ParserError:
+            except (ParserError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):
@@ -2178,7 +2178,11 @@ class DataContext(BaseDataContext):
         """List checkpoints. (Experimental)"""
         # TODO mark experimental
         files = self._list_ymls_in_checkpoints_directory()
-        return [os.path.basename(f).rstrip(".yml") for f in files]
+        return [
+            os.path.basename(f)[:-4]
+            for f in files
+            if os.path.basename(f).endswith(".yml")
+        ]
 
     def get_checkpoint(self, checkpoint_name: str) -> dict:
         """Load a checkpoint. (Experimental)"""
