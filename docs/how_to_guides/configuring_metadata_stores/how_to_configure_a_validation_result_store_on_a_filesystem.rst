@@ -1,18 +1,60 @@
-.. _how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_on_a_filesystem:
+.. _how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_on_a_filesystem:
 
 How to configure a Validation Result store on a filesystem
-==========================================================
+=====================================================
 
-.. admonition:: Admonition from Mr. Dickens
+By default, Validation results are stored in the ``great_expectations/uncommitted/validations/`` directory.  Since Validations may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.
 
-    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
+This guide will help you configure a new storage location for Validations on your filesystem.
+
+.. admonition:: Prerequisites: This how-to guide assumes that you have already:
+
+    - Configured a :ref:`Data Context <tutorials__getting_started__initialize_a_data_context>`.
+    - Configured an :ref:`Expectation Suite <tutorials__getting_started__create_your_first_expectations>`.
+    - Configured a :ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>`.
+    - Determined a new storage location where you would like to store Validations. This can either be a local path, or a path to a secure network filesystem.
+
+Steps
+-----
+
+1. Open the ``great_expectations.yml`` file and look for the following lines.
+
+.. code-block:: yaml
+
+    validations_store_name: validations_store
+
+    stores:
+        validations_store:
+            class_name: ValidationsStore
+            store_backend:
+                class_name: TupleFilesystemStoreBackend
+                base_directory: uncommitted/validations/
 
 
-This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
+The configuration file tells Great Expectations to look for Validations in a store called ``validations_store``. The ``base_directory`` is set to ``uncommitted/validations`` by default.
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+2. Update your configuration file using the example below. In our case, Validations store is being set to ``shared_validations_filesystem_store``, but it can be any name you like.  Also, the ``base_directory`` is being set to ``uncommitted/shared_validations/``, but it can be set to any path accessible by Great Expectations.  Copy existing Validation results to the new folder if necessary.
 
-If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
+.. code-block:: yaml
+
+    expectations_store_name: shared_validations_filesystem_store
+
+    stores:
+        shared_validations_filesystem_store:
+            class_name: ValidationsStore
+            store_backend:
+                class_name: TupleFilesystemStoreBackend
+                base_directory: uncommitted/shared_validations/
+
+3. Confirm that the Validation store has been updated by re-running a Checkpoint: ``great_expectations checkpoint run check_1``. You can also visualize the results by re-building :ref:`Data Docs <tutorials__getting_started__set_up_data_docs>`.
+
+.. code-block:: bash
+
+    great_expectations checkpoint run check_1  # check_1 is the name of our Checkpoint
+
+    Validation Succeeded!
+
+
 
 .. discourse::
     :topic_identifier: 176
