@@ -1,8 +1,8 @@
 .. _how_to_guides__configuring_datasources__how_to_configure_a_snowflake_datasource:
 
-######################################
+#######################################
 How to configure a Snowflake Datasource
-######################################
+#######################################
 
 This guide shows how to connect to a Snowflake Datasource.
 
@@ -76,13 +76,13 @@ To add a Snowflake datasource, do this:
         Next, we will configure database credentials and store them in the `my_snowflake_db` section
         of this config file: great_expectations/uncommitted/config_variables.yml:
 
-        What is the user login name for the snowflake connection? []:
+        What is the user login name for the snowflake connection? []: myusername
         What is the password for the snowflake connection?:
-        What is the account name for the snowflake connection (include region -- ex 'ABCD.us-east-1')? []:
-        What is database name for the snowflake connection? (optional -- leave blank for none) []:
-        What is schema name for the snowflake connection? (optional -- leave blank for none) []:
-        What is warehouse name for the snowflake connection? (optional -- leave blank for none) []:
-        What is role name for the snowflake connection? (optional -- leave blank for none) []:
+        What is the account name for the snowflake connection (include region -- ex 'ABCD.us-east-1')? [xyz12345.us-east-1]:
+        What is database name for the snowflake connection? (optional -- leave blank for none) []: MY_DATABASE
+        What is schema name for the snowflake connection? (optional -- leave blank for none) []: MY_SCHEMA
+        What is warehouse name for the snowflake connection? (optional -- leave blank for none) []: MY_COMPUTE_WH
+        What is role name for the snowflake connection? (optional -- leave blank for none) []: MY_ROLE
 
     Great Expectations will store these secrets privately on your machine. They will not be committed to git.
 
@@ -138,19 +138,22 @@ To add a Snowflake datasource, do this:
 Additional Notes
 ----------------
 
-#. When using the Snowflake dialect, `SqlAlchemyDataset` will create a **transient** table instead of a **temporary**
+#.
+    When using the Snowflake dialect, `SqlAlchemyDataset` will create a **transient** table instead of a **temporary**
     table when passing in `query` Batch Kwargs or providing `custom_sql` to its constructor. Consequently, users
     **must** provide a `snowflake_transient_table` in addition to the `query` parameter. Any existing table with that
     name will be overwritten.
 
-#. Note that your Snowflake connection can be equivalently described under the '<your_new_snowflake_data_source>' key in your
-    "uncommitted/config_variables.yml" file as follows:
+#.
+    Should you need to modify your connection string, you can manually edit the ``great_expectations/uncommitted/config_variables.yml`` file.
 
-    .. code-block:: python
+#.
+    You can edit the  ``great_expectations/uncommitted/config_variables.yml``file to accomplish the connection configuration without using the CLI.  The entry would have the following format:
 
-        "snowflake://<user_login_name>:<password>@<account_name>/<database_name>/<schema_name>?warehouse=<warehouse_name>&role=<role_name>"
+    .. code-block:: yaml
 
-#. Should you need to modify your connection string, you can manually edit the ``great_expectations/uncommitted/config_variables.yml`` file.
+        my_snowflake_db:
+            url: "snowflake://<user_login_name>:<password>@<account_name>/<database_name>/<schema_name>?warehouse=<warehouse_name>&role=<role_name>"
 
 --------
 Comments

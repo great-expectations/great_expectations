@@ -77,12 +77,12 @@ To add a Redshift datasource, do this:
         Next, we will configure database credentials and store them in the `my_redshift_db` section
         of this config file: great_expectations/uncommitted/config_variables.yml:
 
-        What is the host for the Redshift connection? []: 
+        What is the host for the Redshift connection? []: my-datawarehouse-name.abcde1qrstuw.us-east-1.redshift.amazonaws.com
         What is the port for the Redshift connection? [5439]: 
-        What is the username for the Redshift connection? []: 
+        What is the username for the Redshift connection? []: myusername
         What is the password for the Redshift connection?: 
-        What is the database name for the Redshift connection? []: 
-        What is sslmode name for the Redshift connection? [prefer]: 
+        What is the database name for the Redshift connection? []: my_database
+        What is sslmode name for the Redshift connection? [prefer]: prefer
 
     Great Expectations will store these secrets privately on your machine. They will not be committed to git.
 
@@ -142,19 +142,18 @@ Additional Notes
 ----------------
 
 #.
-    Note that your Redshift connection can be equivalently described under the '<your_new_redshift_data_source>' key in your
-    "uncommitted/config_variables.yml" file as follows:
-
-    .. code-block:: python
-
-        "postgresql+psycopg2://username:password@host:port/database_name?sslmode=require"
-
-#.
     Depending on your Redshift cluster configuration, you may or may not need the ``sslmode`` parameter.
-
 
 #.
     Should you need to modify your connection string, you can manually edit the ``great_expectations/uncommitted/config_variables.yml`` file.
+
+#.
+    You can edit the ``great_expectations/uncommitted/config_variables.yml`` file to accomplish the connection configuration without using the CLI.  The entry would have the following format:
+
+    .. code-block:: yaml
+
+        my_redshift_db:
+            url: "postgresql+psycopg2://username:password@host:port/database_name?sslmode=require"
 
 --------
 Comments
