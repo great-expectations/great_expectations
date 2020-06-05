@@ -3,7 +3,7 @@
 How to trigger Slack notifications as a Validation Action
 =========================================================
 
-This guide will help you trigger Slack notifications as a :ref:`Validation Action <validation_actions>`_
+This guide will help you trigger Slack notifications as a :ref:`Validation Action <validation_actions>`
 .  It will allow you to send a Slack message including information about a Validation Result, including whether or not the Validation succeeded.
 
 .. admonition:: Prerequisites: This how-to guide assumes that you have already:
