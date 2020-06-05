@@ -3,16 +3,83 @@
 How to configure an Expectation store in Amazon S3
 ==================================================
 
-.. admonition:: Admonition from Mr. Dickens
+By default, newly profiled Expectations are stored in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder.  This guide will help you configure Great Expectations to store them in an Amazon S3 bucket.
 
-    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
+.. admonition:: Prerequisites: This how-to guide assumes that you have already:
+
+    - Configured a :ref:`Data Context <tutorials__getting_started__initialize_a_data_context>`.
+    - Configured an :ref:`Expectations Suite <tutorials__getting_started__create_your_first_expectations>`.
+    - Configured `boto3 <https://github.com/boto/boto3>`_ to connect to the Amazon S3 bucket where Expectations will be stored.
+
+Steps
+-----
+1. Look for the following lines in the ``great_expectations.yml`` file.
+
+    .. code-block:: yaml
+
+        expectations_store_name: expectations_store
+
+        stores:
+            expectations_store:
+                class_name: ExpectationsStore
+                store_backend:
+                    class_name: TupleFilesystemStoreBackend
+                    base_directory: expectations/
+
+The configuration file tells Great Expectations to look for Expectations in a store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
 
 
-This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
+2. Update your configuration file to include a new store for Expectations on S3.  In our case the, name is set to ``expectations_S3_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder where Expectation files are located.
+
+    .. code-block:: yaml
+
+        expectations_store_name: expectations_S3_store
+
+        stores:
+            expectations_S3_store:
+                class_name: ExpectationsStore
+                store_backend:
+                    class_name: TupleS3StoreBackend
+                    bucket: '<your_s3_bucket_name>'
+                    prefix: '<your_s3_bucket_folder_name>'
+
+3. Confirm that the S3 Expectations store has been added by running ``great_expectations store list``. Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``expectations_S3_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in the S3 bucket as long as we set the ``expectations_name`` variable to ``expectations_S3_store``.
+
+    .. code-block:: bash
+
+        great_expectations store list
+
+        - name: expectations_store
+        class_name: ExpectationsStore
+        store_backend:
+            class_name: TupleFilesystemStoreBackend
+            base_directory: expectations/
+
+        - name: expectations_S3_store
+        class_name: ExpectationsStore
+        store_backend:
+            class_name: TupleS3StoreBackend
+            bucket: '<your_s3_bucket_name>'
+            prefix: '<your_s3_bucket_folder_name>'
+
+
+5. Confirm that Expectations can be read from the the S3 Bucket by running ``great_expectations suite list``.  In our case, ''npi_expectations`` is the Expectation that is located in our S3 bucket.
+
+    .. code-block:: bash
+
+        great_expectations suite list
+
+        1 Expectation Suite found:
+            - npi_expectations
+
+
+Additional resources
+--------------------
+
+- Instructions on how to set up `boto3 <https://github.com/boto/boto3>`_ with AWS can be found at boto3's `documentation site <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_.
 
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
 
-If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
-
 .. discourse::
     :topic_identifier: 178
+
