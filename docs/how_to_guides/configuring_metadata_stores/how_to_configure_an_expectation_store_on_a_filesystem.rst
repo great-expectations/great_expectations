@@ -3,48 +3,16 @@
 How to configure an Expectation store on a filesystem
 =====================================================
 
+.. admonition:: Admonition from Mr. Dickens
 
-By default, newly profiled Expectations are stored in JSON format in the ``expectations`` subdirectory of your ``great_expectations`` folder.  This guide will help you configure the location of the Expectation store in the filesystem.
-
-.. admonition:: Prerequisites: This how-to guide assumes that you have already:
-
-    - Configured a Data Context
-    - Configured an Expectation Suite
-    - Determined a new path where you would like to store Expectations. This can either be a local path, or a path to a network filesystem.
-
-Steps
------
-
-1. Open ``great_expectations.yml`` file and look for the following lines.
-
-.. code-block:: yaml
-
-    expectations_store_name: expectations_store
-
-    stores:
-        expectations_store:
-            class_name: ExpectationsStore
-            store_backend:
-                class_name: TupleFilesystemStoreBackend
-                base_directory: expectations/
-
-    The configuration file tells ``Great Expectations`` to look for Expectations in a ``store`` called ``expectation_store``. Further down, the ``base_directory`` for ``expectations_store`` is set to ``expectations/``, which is the default.
-
-2. The following changes will change it to ``new_expectations_store`` with the ``base_directory`` set to ``new_expectations_location``
+    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
 
 
-.. code-block:: yaml
+This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
 
-    expectations_store_name: new_expectations_store
+If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
 
-    stores:
-        new_expectations_store:
-            class_name: ExpectationsStore
-            store_backend:
-                class_name: TupleFilesystemStoreBackend
-                base_directory: new_expectations_location/
-
-3. Re-run the Expectation suite to confirm that expectations are actually being stored in ``new_expectations_location/``
+If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
 
 .. discourse::
     :topic_identifier: 182
