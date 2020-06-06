@@ -38,7 +38,7 @@ Steps
                 base_directory: expectations/
 
 
-The configuration file tells ``Great Expectations`` to look for Expectations in a ``store`` called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
+The configuration file tells Great Expectations to look for Expectations in a Store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
 
 3. Update your configuration following the example below. This example would change the Store name to ``shared_expectations_filesystem_store`` with the ``base_directory`` set to ``shared_expectations/``.
 
@@ -82,10 +82,6 @@ The configuration file tells ``Great Expectations`` to look for Expectations in 
     1 Expectation Suite found:
         - npi_expectations
 
-Additional resources
---------------------
-
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
 
 .. discourse::
     :topic_identifier: 182
