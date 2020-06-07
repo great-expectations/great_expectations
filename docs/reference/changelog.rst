@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+* [FEATURE] Add support for expect_column_values_to_match_regex_list exception for Spark backend
 
 0.11.4
 -----------------

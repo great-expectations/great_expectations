@@ -2,6 +2,7 @@ import copy
 import inspect
 import json
 import logging
+import re
 from collections import OrderedDict
 from datetime import datetime
 from functools import reduce, wraps
@@ -11,7 +12,6 @@ import jsonschema
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 
@@ -1131,6 +1131,41 @@ class SparkDFDataset(MetaSparkDFDataset):
         meta=None,
     ):
         return column.withColumn("__success", ~column[0].rlike(regex))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_match_regex_list(
+        self,
+        column,
+        regex_list,
+        match_on="any",
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        def check_regex_any(value):
+            for regex in regex_list:
+                if re.match(regex, str(value)):
+                    return True
+            return False
+
+        def check_regex_all(value):
+            for regex in regex_list:
+                if re.match(regex, str(value)) is None:
+                    return False
+            return True
+
+        check_regex_any_udf = udf(check_regex_any, sparktypes.StringType())
+        check_regex_all_udf = udf(check_regex_all, sparktypes.StringType())
+
+        if match_on == "any":
+            return column.withColumn("__success", check_regex_any_udf(column[0]))
+        elif match_on == "all":
+            return column.withColumn("__success", check_regex_all_udf(column[0]))
+        else:
+            raise ValueError("match_on must be either 'any' or 'all'")
 
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
