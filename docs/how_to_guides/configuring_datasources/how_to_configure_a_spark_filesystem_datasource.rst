@@ -1,10 +1,10 @@
-.. _how_to_guides__configuring_datasources__how_to_configure_a_pandas_filesystem_datasource:
+.. _how_to_guides__configuring_datasources__how_to_configure_a_spark_filesystem_datasource:
 
 ###############################################
-How to configure a Pandas/filesystem Datasource
+How to configure a Spark/filesystem Datasource
 ###############################################
 
-This guide shows how to connect to a Pandas Datasource such that the data is accessible in the form of files on a local or NFS type of a filesystem.
+This guide shows how to connect to a Spark Datasource such that the data is accessible in the form of files on a local or NFS type of a filesystem.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -14,7 +14,7 @@ This guide shows how to connect to a Pandas Datasource such that the data is acc
 Steps
 -----
 
-To add a filesystem-backed Pandas datasource do this:
+To add a filesystem-backed Spark datasource do this:
 
 #. **Run datasource new**
 
@@ -33,14 +33,14 @@ To add a filesystem-backed Pandas datasource do this:
             2. Relational database (SQL)
         : 1
 
-#. **Choose Pandas**
+#. **Choose PySpark**
 
     .. code-block:: bash
 
         What are you processing your files with?
             1. Pandas
             2. PySpark
-        : 1
+        : 2
 
 #. **Specify the directory path for data files**
 
@@ -51,7 +51,7 @@ To add a filesystem-backed Pandas datasource do this:
 
 #. **Give your Datasource a name**
 
-    When prompted, provide a custom name for your filesystem-backed Pandas data source, or hit Enter to accept the default.
+    When prompted, provide a custom name for your filesystem-backed Spark data source, or hit Enter to accept the default.
 
     .. code-block:: bash
 
@@ -64,13 +64,14 @@ To add a filesystem-backed Pandas datasource do this:
 
           my_data_files_dir:
             data_asset_type:
-              class_name: PandasDataset
+              class_name: SparkDFDataset
               module_name: great_expectations.dataset
+            spark_config: {}
             batch_kwargs_generators:
               subdir_reader:
                 class_name: SubdirReaderBatchKwargsGenerator
                 base_directory: /path/to/directory/containing/your/data/files
-            class_name: PandasDatasource
+            class_name: SparkDFDatasource
 
             Would you like to proceed? [Y/n]:
 
@@ -94,7 +95,7 @@ To add a filesystem-backed Pandas datasource do this:
     In this case, please check your data directory path, permissions, etc. and try again.
 
 #.
-    Finally, if all goes well and you receive a confirmation on your Terminal screen, you can proceed with exploring the data sets in your new filesystem-backed Pandas data source.
+    Finally, if all goes well and you receive a confirmation on your Terminal screen, you can proceed with exploring the data sets in your new filesystem-backed Spark data source.
 
 ----------------
 Additional Notes
@@ -114,5 +115,5 @@ Comments
 --------
 
     .. discourse::
-        :topic_identifier: 167
+        :topic_identifier: 251
 
