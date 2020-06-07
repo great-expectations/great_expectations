@@ -6,6 +6,7 @@ Changelog
 
 develop
 -----------------
+* [ENHANCEMENT] Removed the misleading scary "Site doesn't exist or is inaccessible" message that the CLI displayed before building Data Docs for the first time.
 
 0.11.2
 -----------------
