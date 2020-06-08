@@ -36,7 +36,7 @@ except ImportError:
     datasource_initialization_exceptions = (
         sqlalchemy.exc.OperationalError,
         sqlalchemy.exc.DatabaseError,
-        sqlalchemy.exc.ArgumentError
+        sqlalchemy.exc.ArgumentError,
     )
 
 
