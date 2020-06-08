@@ -55,8 +55,9 @@ class DefaultJinjaView(object):
 
     _template = NoOpTemplate
 
-    def __init__(self, custom_styles_directory=None):
+    def __init__(self, custom_styles_directory=None, custom_views_directory=None):
         self.custom_styles_directory = custom_styles_directory
+        self.custom_views_directory = custom_views_directory
 
     def render(self, document, template=None, **kwargs):
         self._validate_document(document)
@@ -80,6 +81,8 @@ class DefaultJinjaView(object):
 
         if self.custom_styles_directory:
             loaders.append(FileSystemLoader(self.custom_styles_directory))
+        if self.custom_views_directory:
+            loaders.append(FileSystemLoader(self.custom_views_directory))
 
         env = Environment(
             loader=ChoiceLoader(loaders),
