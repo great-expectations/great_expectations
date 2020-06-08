@@ -11,7 +11,7 @@ Steps
 
 #. Copy the :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>` to the appropriate subdirectory of ``docs/how_to_guides/``, and rename it.
 #. Write a title and purpose paragraph.
-#. Decide whether you're writing a :ref:`code-heavy or process-heavy <Code-heavy vs process-heavy guide>` guide, and :ref:`adjust your formatting <Indentation, bolding, and code blocks>` appropriately.
+#. Decide whether you're writing a :ref:`code-heavy or process-heavy <Code-heavy vs process-heavy guides>` guide, and :ref:`adjust your formatting <Indentation, bolding, and code blocks>` appropriately.
 #. Fill out the Prerequisites info box (see :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>`). The header of the info box says: "This how-to guide assumes you have already:". Place each prerequisite under its own bullet and phrase it using the style in the template: "done something".
 #. Fill in the Steps section, making sure to include bash, yml, and code snippets as appropriate.
 
@@ -76,9 +76,7 @@ Code-heavy vs process-heavy guides
 
 Broadly speaking, there are two kinds of How-to Guides: code-heavy and process-heavy. All guides are about following a specific sequence of steps. In code-heavy guides, most or all of the steps are expressed in technical syntax: code snippets, JSON or YAML objects, CLI commands, etc. In process-heavy guides, many of the steps are things that must be done manually.
 
-Most guides are code-heavy. Because it's about writing, this guide happens to be process-heavy.
-
-When writing a guide that could go either way, please prefer code-heavy, since they tend to make for better replication.
+Most guides are code-heavy. When writing a guide that could go either way, please prefer code-heavy, since they tend to make for better replication. (This guide happens to be process-heavy, because it's about writing.)
 
 Indentation, bolding, and code blocks
 #####################################
@@ -86,23 +84,25 @@ Indentation, bolding, and code blocks
 **For code-heavy guides**
 
 - Treat the first sentence of each step like a header.
+
 	- Use short, complete, imperative sentences: ("Paste the YAML snippet into your config file", "Run great_expectations init")
 	- Header text should be **bold**.
-	- Avoid links or inline code, since RST files do note support nesting them within bolded text. If your header must include text that would normally be a link or inline code, please repeat it in the body text, and use a link or code block there.
+	- Avoid `links <great_expectations.io>`_ or ``inline code`` in headers, since RST files do not support nesting them within bolded text. If your header must include text that would normally be a link or inline code, please repeat it in the body text, and use a link or code block there.
+
 - Indent content within steps.
 - Any time the user needs to do something, it should be in a code block.
+
 	- Please follow this convention even if the text in the code block is somewhat redundant against the text of the step. 
 	- Clear, sequential code blocks are easy for the eye to follow. They encourage a health copy-and-modify development pattern.
-- All of these styles are modeled in the :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>`.
 
-**For code-heavy guides**
+- All of these styles are modeled in the :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>`. If you use that template as your guide, you'll be off to a very good start.
+
+**For process-heavy guides**
 
 - Do not separate headers or bold first sentences.
 - Avoid big blocks of text without visual cues for how to read it. Indentation and sub-bullets are your friends.
-- When including a code block, please follow the same conventions as for code-heavy blocks.
-- All of these styles are modeled in the this rst file.
-
-
+- When including a code block, please follow the same conventions as for code-heavy guides.
+- All of these styles are modeled in the this .rst file.
 
 
 Additional Resources
