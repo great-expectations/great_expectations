@@ -129,13 +129,8 @@ def build_docs(context, site_name=None, view=True):
 
     msg = "\nThe following Data Docs sites will be built:\n\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
-        if index_page_locator_info.startswith("file"):
-            msg += " - <cyan>{}:</cyan> ".format(site_name)
-            msg += "{}\n".format(index_page_locator_info)
-        else:
-            r = requests.get(index_page_locator_info, stream=True)
-            msg += " - <cyan>{}:</cyan> ".format(site_name)
-            msg += "{}\n".format(index_page_locator_info)
+        msg += " - <cyan>{}:</cyan> ".format(site_name)
+        msg += "{}\n".format(index_page_locator_info)
 
     cli_message(msg)
     toolkit.confirm_proceed_or_exit()
