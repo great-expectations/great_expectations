@@ -5,8 +5,6 @@ How to create Expectations that span multiple Batches using Evaluation Parameter
 
 This guide will help you create Expectations that span multiple :ref:`Batches` of data using :ref:`Evaluation Parameters`. This pattern is useful for things like verifying that row counts between tables stay consistent.
 
-
-
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
   - :ref:`Set up a working deployment of Great Expectations <getting_started>`
@@ -51,7 +49,7 @@ In a notebook,
 
         downstream_batch.set_config_value("interactive_evaluation", False)
 
-    Disabling interactive evaluation allows you to declare an expectation even when it cannot be evaluated immediately.
+    Disabling interactive evaluation allows you to declare an Expectation even when it cannot be evaluated immediately.
 
 #. **Define an Expectation using an Evaluation Parameter on the downstream Batch.**
 
@@ -68,17 +66,15 @@ In a notebook,
     
     This declaration above includes two ``$PARAMETERS``. The first is the real parameter that will be used after the Expectation Suite is stored and deployed in a Validation Operator. The second parameter supports immediate evaluation in the notebook.
 
-    When executed in the notebook, this Expectation will generate an :ref:`Expectation Validation Result`:
+    When executed in the notebook, this Expectation will generate an :ref:`Expectation Validation Result`. Most values will be missing, since interactive evaluation was disabled.
 
     .. code-block:: python
 
         {
-            "result": {
-                "observed_value": 506
-            },
             "meta": {},
-            "exception_info": null,
-            "success": false
+            "success": null,
+            "result": {},
+            "exception_info": null
         }
 
     .. warning::
