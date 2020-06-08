@@ -6,6 +6,8 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] Use renderer_type to set paths in jinja templates instead of utm_medium since utm_medium is optional
+* [ENHANCEMENT] Bring in custom_views_directory in DefaultJinjaView to enable custom jinja templates stored in plugins dir
 
 0.11.2
 -----------------
