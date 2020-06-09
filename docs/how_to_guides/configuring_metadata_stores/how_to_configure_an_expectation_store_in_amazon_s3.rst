@@ -29,7 +29,7 @@ Steps
 The configuration file tells Great Expectations to look for Expectations in a store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
 
 
-2. Update your configuration file to include a new store for Expectations on S3.  In our case the, name is set to ``expectations_S3_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder where Expectation files are located.
+2. Update your configuration file to include a new store for Expectations on S3.  In our case the, name is set to ``expectations_S3_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder where Expectation files are located.  If you are also storing :ref:`Validations in S3, <how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_s3>` please ensure that the ``prefix`` values are disjoint and one is not a substring of the other
 
     .. code-block:: yaml
 
@@ -63,14 +63,7 @@ The configuration file tells Great Expectations to look for Expectations in a st
             prefix: '<your_s3_bucket_folder_name>'
 
 
-4. Confirm that Expectations can be read from the the S3 Bucket by running ``great_expectations suite list``.  In our case, ``npi_expectations`` is the Expectation that is located in our S3 bucket.
-
-    .. code-block:: bash
-
-        great_expectations suite list
-
-        1 Expectation Suite found:
-            - npi_expectations
+4. Confirm that the Validation store has been updated by running a :ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>`, or visualize the results by re-building :ref:`Data Docs <tutorials__getting_started__set_up_data_docs>`.
 
 
 Additional resources
