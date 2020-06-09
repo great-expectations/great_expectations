@@ -7,6 +7,10 @@ except ImportError:
 
 
 def cli_message(string):
+    print(cli_colorize_string(string))
+
+
+def cli_colorize_string(string):
     # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
     flags = re.DOTALL
     mod_string = re.sub(
@@ -25,7 +29,7 @@ def cli_message(string):
         "<red>(.*?)</red>", colored("\g<1>", "red"), mod_string, flags=flags
     )
 
-    print(colored(mod_string))
+    return colored(mod_string)
 
 
 def cli_message_list(string_list, list_intro_string=None):
