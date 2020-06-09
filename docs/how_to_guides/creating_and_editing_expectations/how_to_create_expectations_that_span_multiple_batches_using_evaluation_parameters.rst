@@ -33,13 +33,15 @@ In a notebook,
 
     .. code-block:: python
 
+        batch_kwargs_1 = context.build_batch_kwargs("my_datasource", "my_generator_name", "my_data_asset_name_1"),
         upstream_batch = context.get_batch(
-            context.build_batch_kwargs("my_datasource", "my_generator_name", "my_data_asset_name_1"),
+            batch_kwargs_1,
             expectation_suite_name='my_expectation_suite_1'
         )
 
+        batch_kwargs_2 = context.build_batch_kwargs("my_datasource", "my_generator_name", "my_data_asset_name_2"),
         downstream_batch = context.get_batch(
-            context.build_batch_kwargs("my_datasource", "my_generator_name", "my_data_asset_name_2"),
+            batch_kwargs_2,
             expectation_suite_name='my_expectation_suite_2'
         )
 
@@ -91,15 +93,15 @@ In a notebook,
 
 #. **Execute an existing Validation Operator on your upstream and downstream batches.**
 
-    You can do this within your notebook by running ``context.run_validation_operator``:
+    You can do this within your notebook by running ``context.run_validation_operator``. You can use the same ``batch_kwargs`` from the top of your notebook---they'll be used to fetch the same data.
 
     .. code-block:: python
 
         results = context.run_validation_operator(
             "action_list_operator",
             assets_to_validate=[
-                upstream_batch,
-                downstream_batch,
+                (batch_kwargs_1, "my_expectation_suite_1"),
+                (batch_kwargs_2, "my_expectation_suite_2"),
             ]
         )
 
