@@ -1,10 +1,10 @@
 .. _how_to_guides__configuring_data_contexts__how_to_populate_credentials_from_yaml_file:
 
-How to Populate Credentials From a YAML File
+How to populate credentials from a yaml file
 =============================================
 
 This guide will explain how to populate credentials (or any value) in your ``great_expectations.yml`` project config from 
-another ``YAML`` file.
+another yaml file.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -13,7 +13,7 @@ another ``YAML`` file.
 Steps
 -----
 
-1. Save your desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml`` or another ``YAML`` file of your choosing.
+1. Save your desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml`` or another yaml file of your choosing.
 
   .. admonition:: Note:
 
@@ -43,7 +43,7 @@ Steps
 
   .. admonition:: Note:
 
-    The same syntax is used to make variable substitutions from environment variables, which take precedence over values defined in a config variables ``YAML`` file.
+    The same syntax is used to make variable substitutions from environment variables, which take precedence over values defined in a config variables yaml file.
 
   .. code-block:: yaml
   
