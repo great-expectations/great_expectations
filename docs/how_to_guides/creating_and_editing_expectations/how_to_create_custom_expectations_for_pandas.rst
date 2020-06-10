@@ -7,10 +7,10 @@ Custom Expectations let you extend the logic for validating data to use any crit
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - Installed Great Expectations (e.g. ``pip install great_expectations``)
+    - :ref:`Set up a working deployment of Great Expectations <getting_started>`
     - Have access to a notebook (e.g. ``jupyter notebook``, ``jupyter lab``, etc.)
     - Be able to access data from your notebook
-    - Nothing else. Unlike most how-to guides, these instructions do *not* assume that you have configured a Data Context by running ``great_expectations init``.
+    - :ref:`Configured a pandas Datasource <how_to_guides__configuring_datasources__how_to_configure_a_pandas_filesystem_datasource>`
 
 Steps
 -----
@@ -111,13 +111,10 @@ Steps
         my_df = pd.read_csv("./data/Titanic.csv")
         ge.from_pandas(my_other_df, dataset_class=MyCustomPandasDataset)
 
-    The same method can be used to coerce an existing Great Expectations DataAsset to your class, even though it's not actually from pandas:
-
-    .. code-block:: python
-
-        my_df = ge.read_csv("./data/Titanic.csv")
-        ge.from_pandas(my_other_df, dataset_class=MyCustomPandasDataset)
+    Note: We're using the ``read_csv`` method to fetch data, instead of the more typical ``DataContext.get_batch``. This is for convenience--it 
     
+    In a moment, we'll demonstrate how to configure 
+
 
 5. **Test your Expectations**
 
@@ -173,6 +170,89 @@ Steps
 
     Often, the best development loop for custom Expectations is iterative: editing Expectations in ``MyCustomPandasDataset``, then re-running the cells to load data and execute Expectations on data.
 
+    |
+
+    At this point, your custom Expectations work---but only within a notebook. Next, let's configure them to work from within a Datasource in your Data Context.
+
+#. **Save your MyCustomPandasDataset class to a Plugin module**
+
+    The simplest way to do this is to create a new, single-file python module within your ``great_expectations/plugins/`` directory. Name it something like ``custom_pandas_dataset.py``. Copy the full contents of your ``MyCustomPandasDataset`` class into this file. Make sure to include any required imports, too.
+
+    When you instantiate a Data Context, Great Expectations automatically adds ``plugins/`` to the python namespace, so your class can be imported as ``custom_pandas_dataset.MyCustomPandasDataset``. For more information, please see :ref:`Plugins`.
+    
+#. **Configure your Datasource(s)**
+
+    Now, open your ``great_expectations.yml`` file. Assuming that you've previously :ref:`configured a pandas Datasource <how_to_guides__configuring_datasources__how_to_configure_a_pandas_filesystem_datasource>`, you should see a configuration block similar to this, under the ``datasources`` key:
+
+    .. code-block:: yaml
+
+        my_data__dir:
+            module_name: great_expectations.datasource
+            class_name: PandasDatasource
+
+            data_asset_type:
+                module_name: great_expectations.dataset
+                class_name: PandasDataset
+
+            batch_kwargs_generators:
+                subdir_reader:
+                class_name: SubdirReaderBatchKwargsGenerator
+                base_directory: ../my_data
+
+    In the ``data_asset_type`` section, replace ``module_name`` and ``class_name`` with names for your module and class:
+
+    .. code-block:: yaml
+
+        data_asset_type:
+            module_name: custom_pandas_dataset
+            class_name: MyCustomPandasDataset
+
+    Now, any time you load data through the ``my_data__dir`` Datasource, it will be loaded as a ``MyCustomPandasDataset``, with all of your new Expectations available.
+
+    If you have other ``PandasDatasources`` in your configuration, you may want to switch them to use your new ``data_asset_type``, too.
+
+#. **Test loading a new Batch through the DataContext**
+
+    You can test this configuration as follows:
+
+    .. code-block:: python
+
+        context = ge.DataContext()
+        context.create_expectation_suite("my_new_suite")
+        my_batch = context.get_batch({
+            "path": "my_data/Titanic.csv",
+            "datasource": "my_data__dir"
+        }, "my_new_suite")
+
+        my_batch.expect_column_values_to_be_even("Age")
+
+
+    Executing this Expectation should return something like:
+
+    .. code-block:: json
+
+        {
+            "result": {
+                "element_count": 1313,
+                "missing_count": 557,
+                "missing_percent": 42.421934501142424,
+                "unexpected_count": 344,
+                "unexpected_percent": 26.199543031226202,
+                "unexpected_percent_nonmissing": 45.5026455026455,
+                "partial_unexpected_list": [
+                    29.0,
+                    25.0,
+                    0.92,
+                    ...
+                    59.0,
+                    45.0
+                ]
+            },
+            "success": false,
+            "meta": {},
+            "exception_info": null
+        }
+
 Additional notes
 ----------------
 
@@ -180,21 +260,13 @@ Additional notes
 Other Expectation decorators
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Aside from ``column_map_expectations``, there are several other types of Expectations you can create.
-
-- ``column_aggregate_expectations`` generate a single observed value for a whole column.
-- ``column_pair_map_`` and ``column_pair_aggregate_expectations`` apply to pairs of columns.
-- ``multicolumn_map_`` and ``multicolumn_aggregate_expectations`` apply to multiple columns.
-- It's also possible to define table-level Expectations using the ``@expectations`` decorator.
-- Not to mention non-tabular Expectations, using other DataAsset types, like :ref:`FileDataAsset`.
-
-Please refere to the module documentation and tests for details on how to implement each of these.
+Aside from ``column_map_expectations``, there are several other types of Expectations you can create. Please see the ``Expectation Decorators`` docs for details.
 
 
 Additional resources
 --------------------
 
-Here's a single code block containing all the code in this article:
+Here's a single code block containing all the notebook code in this article:
 
 .. code-block:: python
 
