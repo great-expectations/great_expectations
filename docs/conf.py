@@ -57,7 +57,7 @@ discourse_url = "https://discuss.greatexpectations.io/"
 source_suffix = ".rst"
 
 # The master toctree document.
-master_doc = "index"
+index_doc = "index"
 
 # General information about the project.
 project = u"great_expectations"
@@ -204,7 +204,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (
-        master_doc,
+        index_doc,
         "great_expectations.tex",
         u"great\\_expectations Documentation",
         u"The Great Expectations Team",
@@ -218,7 +218,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "great_expectations", u"great_expectations Documentation", [author], 1)
+    (index_doc, "great_expectations", u"great_expectations Documentation", [author], 1)
 ]
 
 
@@ -229,7 +229,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (
-        master_doc,
+        index_doc,
         "great_expectations",
         u"great_expectations Documentation",
         author,
