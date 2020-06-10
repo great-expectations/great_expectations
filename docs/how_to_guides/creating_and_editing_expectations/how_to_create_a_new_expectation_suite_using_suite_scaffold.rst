@@ -81,7 +81,7 @@ Steps
         scaffold_config = {
             "included_columns": included_columns,
             # "excluded_columns": [],
-            "included_expectations": ['expect_column_values_to_not_be_null'a],
+            "included_expectations": ['expect_column_values_to_not_be_null'],
             # "excluded_expectations": [],
         }
 
