@@ -79,6 +79,8 @@ Steps
 
     By convention, ``column_aggregate_expectations`` always start with ``expect_column_{property}_...`` (Ex: ``expect_column_mean_to_be_between``, ``expect_column_most_common_value_to_be_in_set``, ``expect_column_chisquare_test_p_value_to_be_greater_than``). Following this pattern is highly recommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you.
 
+    ``Dataset`` objects also provide access to several helper functions which can compute and cache aggregate values that you can use in your custom expectation, such as `get_column_mean(column_name)` or `get_column_max`. See the Dataset module docs for more information.
+    
     |
 
     Please see the :ref:`SqlAlchemyDataset` module for additional examples of how to contruct logic for Expectations. To learn about other Expectation types, please see :ref:`Other Expectation decorators` below.
