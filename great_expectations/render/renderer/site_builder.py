@@ -131,6 +131,15 @@ class SiteBuilder(object):
                 plugins_directory, "custom_data_docs", "styles"
             )
 
+        # set custom_views_directory if present
+        custom_views_directory = None
+        if plugins_directory and os.path.isdir(
+            os.path.join(plugins_directory, "custom_data_docs", "views")
+        ):
+            custom_views_directory = os.path.join(
+                plugins_directory, "custom_data_docs", "views"
+            )
+
         if site_index_builder is None:
             site_index_builder = {"class_name": "DefaultSiteIndexBuilder"}
 
@@ -195,6 +204,7 @@ class SiteBuilder(object):
                     "data_context": data_context,
                     "target_store": self.target_store,
                     "custom_styles_directory": custom_styles_directory,
+                    "custom_views_directory": custom_views_directory,
                     "data_context_id": self.data_context_id,
                     "show_how_to_buttons": self.show_how_to_buttons,
                 },
@@ -217,6 +227,7 @@ class SiteBuilder(object):
             runtime_environment={
                 "data_context": data_context,
                 "custom_styles_directory": custom_styles_directory,
+                "custom_views_directory": custom_views_directory,
                 "show_how_to_buttons": self.show_how_to_buttons,
                 "target_store": self.target_store,
                 "site_name": self.site_name,
@@ -293,6 +304,7 @@ class DefaultSiteSectionBuilder(object):
         target_store,
         source_store_name,
         custom_styles_directory=None,
+        custom_views_directory=None,
         show_how_to_buttons=True,
         run_name_filter=None,
         validation_results_limit=None,
@@ -338,7 +350,10 @@ class DefaultSiteSectionBuilder(object):
         module_name = view.get("module_name") or module_name
         self.view_class = instantiate_class_from_config(
             config=view,
-            runtime_environment={"custom_styles_directory": custom_styles_directory},
+            runtime_environment={
+                "custom_styles_directory": custom_styles_directory,
+                "custom_views_directory": custom_views_directory,
+            },
             config_defaults={"module_name": module_name},
         )
         if not self.view_class:
@@ -458,6 +473,7 @@ class DefaultSiteIndexBuilder(object):
         data_context,
         target_store,
         custom_styles_directory=None,
+        custom_views_directory=None,
         show_how_to_buttons=True,
         validation_results_limit=None,
         renderer=None,
@@ -505,7 +521,10 @@ class DefaultSiteIndexBuilder(object):
         module_name = view.get("module_name") or module_name
         self.view_class = instantiate_class_from_config(
             config=view,
-            runtime_environment={"custom_styles_directory": custom_styles_directory},
+            runtime_environment={
+                "custom_styles_directory": custom_styles_directory,
+                "custom_views_directory": custom_views_directory,
+            },
             config_defaults={"module_name": module_name},
         )
         if not self.view_class:
@@ -622,7 +641,7 @@ class DefaultSiteIndexBuilder(object):
         )
         see_glossary = CallToActionButton(
             "See More Kinds of Expectations",
-            "http://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html",
+            "https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html",
         )
         validation_playground = CallToActionButton(
             "How to Validate Data",
