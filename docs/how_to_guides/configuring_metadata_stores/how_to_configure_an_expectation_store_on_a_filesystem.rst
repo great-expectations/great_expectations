@@ -21,7 +21,7 @@ Steps
 
     # in the great_expectations folder
     mkdir shared_expectations
-    mv expectations/npi_expectations.json /shared_expectations
+    mv expectations/npi_expectations.json shared_expectations/
 
 
 2. Next open the ``great_expectations.yml`` file and look for the following lines.
