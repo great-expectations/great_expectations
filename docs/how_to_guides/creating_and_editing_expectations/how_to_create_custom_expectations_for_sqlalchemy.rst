@@ -51,7 +51,7 @@ Steps
         def expect_column_values_to_be_even(self, column):
             return (sa.column(column) % 2 == 0)
 
-    The business logic for developing SQL queries using ``MetaSqlAlchemyDataset`` deocrators is a little diffeent from ``MetaPandasDataset``. To use the ``column_map_expectation`` decorator, both require that your custom function accept at least two arguments: ``self`` and ``column``. Both create a function API where the user passes a string containing the column name to your Expectation.
+    To use the ``column_map_expectation`` decorator, your custom function must accept at least two arguments: ``self`` and ``column``. The column name string will be passed through to your custom function unaltered. From there, you can use sqlalchemy's ``sqlalchemy.column`` method to create a ``ColumnClause`` based on it. Your function must return a valid ``ColumnClause``, which the decorator will combine with other SqlAlchemy methods to covert your logic into valid SQL queries and wrap the results as an :ref:``ExpectationValiadationResult``.
     
     In the case of ``MetaSqlAlchemyDataset``, the column name string will be passed through to your custom function unaltered. From there, you can use sqlalchemy's ``sqlalchemy.column`` method to create a ``ColumnClause`` based on it. Your function must return a valid ``ColumnClause``, which the decorator will combine with other SqlAlchemy methods to covert your logic into valid SQL queries and wrap the results as an :ref:``ExpectationValiadationResult``.
 
