@@ -53,7 +53,6 @@ Steps
 
     To use the ``column_map_expectation`` decorator, your custom function must accept at least two arguments: ``self`` and ``column``. The column name string will be passed through to your custom function unaltered. From there, you can use sqlalchemy's ``sqlalchemy.column`` method to create a ``ColumnClause`` based on it. Your function must return a valid ``ColumnClause``, which the decorator will combine with other SqlAlchemy methods to covert your logic into valid SQL queries and wrap the results as an :ref:``ExpectationValiadationResult``.
     
-    In the case of ``MetaSqlAlchemyDataset``, the column name string will be passed through to your custom function unaltered. From there, you can use sqlalchemy's ``sqlalchemy.column`` method to create a ``ColumnClause`` based on it. Your function must return a valid ``ColumnClause``, which the decorator will combine with other SqlAlchemy methods to covert your logic into valid SQL queries and wrap the results as an :ref:``ExpectationValiadationResult``.
 
     By convention, ``column_map_expectations`` always start with ``expect_column_values_...`` or ``expect_column_value_...`` (Ex: ``expect_column_value_word_counts_to_be_between``). Following this pattern is highly recommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you.
 
