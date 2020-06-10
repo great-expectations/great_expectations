@@ -5,12 +5,16 @@ import warnings
 from collections import namedtuple
 from copy import deepcopy
 
+from dateutil.parser import ParserError as DateUtilParserError
 from dateutil.parser import parse
 from IPython import get_ipython
 from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.core.evaluation_parameters import (
+    find_evaluation_parameter_dependencies,
+)
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import nested_update
@@ -63,21 +67,6 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
     if "column" in metric_kwargs:
         return "column=" + metric_kwargs.get("column")
     return None
-
-
-def parse_evaluation_parameter_urn(urn):
-    if urn.startswith("urn:great_expectations:validations:"):
-        split = urn.split(":")
-        if len(split) == 6:
-            return EvaluationParameterIdentifier(split[3], split[4], split[5])
-        elif len(split) == 5:
-            return EvaluationParameterIdentifier(split[3], split[4], None)
-        else:
-            raise ParserError(
-                "Unable to parse URN: must have 5 or 6 components to be a valid GE URN"
-            )
-
-    raise ParserError("Unrecognized evaluation parameter urn {}".format(urn))
 
 
 def convert_to_json_serializable(data):
@@ -330,12 +319,18 @@ class RunIdentifier(DataContextKey):
         if isinstance(run_time, str):
             try:
                 run_time = parse(run_time)
-            except ParserError:
+            except (DateUtilParserError, TypeError):
                 warnings.warn(
                     f'Unable to parse provided run_time str ("{run_time}") to datetime. Defaulting '
                     f"run_time to current time."
                 )
                 run_time = datetime.datetime.now(datetime.timezone.utc)
+
+        if not run_time:
+            try:
+                run_time = parse(run_name)
+            except (DateUtilParserError, TypeError):
+                run_time = None
 
         run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
         if not run_time.tzinfo:
@@ -452,6 +447,36 @@ class ExpectationKwargs(dict):
         return myself
 
 
+def _deduplicate_evaluation_parameter_dependencies(dependencies):
+    deduplicated = dict()
+    for suite_name, required_metrics in dependencies.items():
+        deduplicated[suite_name] = []
+        metrics = set()
+        metric_kwargs = dict()
+        for metric in required_metrics:
+            if isinstance(metric, str):
+                metrics.add(metric)
+            elif isinstance(metric, dict):
+                # There is a single metric_kwargs_id object in this construction
+                for kwargs_id, metric_list in metric["metric_kwargs_id"].items():
+                    if kwargs_id not in metric_kwargs:
+                        metric_kwargs[kwargs_id] = set()
+                    for metric_name in metric_list:
+                        metric_kwargs[kwargs_id].add(metric_name)
+        deduplicated[suite_name] = list(metrics)
+        if len(metric_kwargs) > 0:
+            deduplicated[suite_name] = deduplicated[suite_name] + [
+                {
+                    "metric_kwargs_id": {
+                        metric_kwargs: list(metrics_set)
+                        for (metric_kwargs, metrics_set) in metric_kwargs.items()
+                    }
+                }
+            ]
+
+    return deduplicated
+
+
 class ExpectationConfiguration(DictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
@@ -535,56 +560,46 @@ class ExpectationConfiguration(DictDot):
         return myself
 
     def get_evaluation_parameter_dependencies(self):
-        dependencies = {}
+        parsed_dependencies = dict()
         for key, value in self.kwargs.items():
             if isinstance(value, dict) and "$PARAMETER" in value:
-                if value["$PARAMETER"].startswith(
-                    "urn:great_expectations:validations:"
-                ):
-                    try:
-                        evaluation_parameter_id = parse_evaluation_parameter_urn(
-                            value["$PARAMETER"]
-                        )
-                    except ParserError:
-                        logger.warning(
-                            "Unable to parse great_expectations urn {}".format(
-                                value["$PARAMETER"]
-                            )
-                        )
-                        continue
+                param_string_dependencies = find_evaluation_parameter_dependencies(
+                    value["$PARAMETER"]
+                )
+                nested_update(parsed_dependencies, param_string_dependencies)
 
-                    if evaluation_parameter_id.metric_kwargs_id is None:
-                        nested_update(
-                            dependencies,
-                            {
-                                evaluation_parameter_id.expectation_suite_name: [
-                                    evaluation_parameter_id.metric_name
-                                ]
-                            },
-                        )
-                    else:
-                        nested_update(
-                            dependencies,
-                            {
-                                evaluation_parameter_id.expectation_suite_name: [
-                                    {
-                                        "metric_kwargs_id": {
-                                            evaluation_parameter_id.metric_kwargs_id: [
-                                                evaluation_parameter_id.metric_name
-                                            ]
-                                        }
-                                    }
-                                ]
-                            },
-                        )
-                    # if evaluation_parameter_id.expectation_suite_name not in dependencies:
-                    #     dependencies[evaluation_parameter_id.expectation_suite_name] = {"metric_kwargs_id": {}}
-                    #
-                    # if evaluation_parameter_id.metric_kwargs_id not in dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"]:
-                    #     dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"][evaluation_parameter_id.metric_kwargs_id] = []
-                    # dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"][
-                    #     evaluation_parameter_id.metric_kwargs_id].append(evaluation_parameter_id.metric_name)
+        dependencies = dict()
+        urns = parsed_dependencies.get("urns", [])
+        for string_urn in urns:
+            try:
+                urn = ge_urn.parseString(string_urn)
+            except ParserError:
+                logger.warning(
+                    "Unable to parse great_expectations urn {}".format(
+                        value["$PARAMETER"]
+                    )
+                )
+                continue
 
+            if not urn.get("metric_kwargs"):
+                nested_update(
+                    dependencies, {urn["expectation_suite_name"]: [urn["metric_name"]]},
+                )
+            else:
+                nested_update(
+                    dependencies,
+                    {
+                        urn["expectation_suite_name"]: [
+                            {
+                                "metric_kwargs_id": {
+                                    urn["metric_kwargs"]: [urn["metric_name"]]
+                                }
+                            }
+                        ]
+                    },
+                )
+
+        dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
 
 
@@ -742,6 +757,7 @@ class ExpectationSuite(object):
             t = expectation.get_evaluation_parameter_dependencies()
             nested_update(dependencies, t)
 
+        dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
 
     def get_citations(self, sort=True, require_batch_kwargs=False):

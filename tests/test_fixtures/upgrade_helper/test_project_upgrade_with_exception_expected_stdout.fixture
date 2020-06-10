@@ -1,0 +1,68 @@
+
+Checking project...[0m
+
+================================================================================
+[0m
+[31m
+Your project appears to have an out-of-date config version (1.0) - the version number must be at least 2.[0m[0m
+
+Would you like to run the Upgrade Helper to bring your project up-to-date? [Y/n]: 
+
+================================================================================
+[0m
+++====================================++
+|| UpgradeHelperV11: Upgrade Overview ||
+++====================================++
+
+UpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x.
+
+**WARNING**: Before proceeding, please make sure you have appropriate backups of your project.
+
+Automated Steps
+================
+
+The following Stores and/or Data Docs sites will be upgraded:
+
+    - Validation Stores: validations_store
+    - Data Docs Sites: local_site, s3_site_broken
+
+Manual Steps
+=============
+
+No manual upgrade steps are required.
+
+Upgrade Confirmation
+=====================
+
+Please consult the 0.11.x migration guide for instructions on how to complete any required manual steps or
+to learn more about the automated upgrade process:
+
+    https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html#id1
+
+Would you like to proceed with the project upgrade? [Y/n]: 
+
+Upgrading project...[0m
+
+================================================================================
+[0m
+[36m++================++
+|| Upgrade Report ||
+++================++[0m
+
+[31mThe Upgrade Helper encountered some exceptions during the upgrade process.
+Please review the exceptions section of the upgrade log and migrate the affected files manually,
+as detailed in the 0.11.x migration guide.
+
+The upgrade log can be found here:
+
+    - GE_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV11_20190926T134241.000000Z.json[0m[0m
+
+================================================================================
+[0m
+[31mThe Upgrade Helper was unable to perform a complete project upgrade. Next steps:[0m
+
+    - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above
+    - When complete, increment the config_version key in your [36mgreat_expectations.yml[0m to [36m2.0[0m
+
+To learn more about the upgrade process, visit [36mhttps://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html[0m
+[0m
