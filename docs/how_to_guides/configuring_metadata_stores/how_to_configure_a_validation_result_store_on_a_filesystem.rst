@@ -1,4 +1,4 @@
-.. _how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_on_a_filesystem:
+.. _how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_on_a_filesystem:
 
 How to configure a Validation Result store on a filesystem
 =====================================================
