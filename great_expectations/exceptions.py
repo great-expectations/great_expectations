@@ -126,6 +126,10 @@ class StoreError(DataContextError):
     pass
 
 
+class InvalidKeyError(StoreError):
+    pass
+
+
 class InvalidCacheValueError(GreatExpectationsError):
     def __init__(self, result_dict):
         template = """\

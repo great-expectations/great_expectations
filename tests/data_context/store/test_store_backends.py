@@ -11,7 +11,7 @@ from great_expectations.data_context.store import (
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
 )
-from great_expectations.exceptions import StoreBackendError, StoreError
+from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.util import gen_directory_tree_str
 
 
@@ -117,8 +117,8 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
         filepath_template="my_file_{0}",
     )
 
-    # OPPORTUNITY: potentially standardize error instead of allowing each StoreBackend to raise its own error types
-    with pytest.raises(FileNotFoundError):
+    # OPPORTUNITY: potentially standardize error instead of allowing each StoreBackend to raise its own error types --> now handled by a more-general InvalidKeyError
+    with pytest.raises(InvalidKeyError):
         my_store.get(("AAA",))
 
     my_store.set(("AAA",), "aaa")
@@ -138,7 +138,7 @@ test_TupleFilesystemStoreBackend__dir0/
 """
     )
     my_store.remove_key(("BBB",))
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(InvalidKeyError):
         assert my_store.get(("BBB",)) == ""
 
 
@@ -230,9 +230,8 @@ def test_TupleS3StoreBackend_with_prefix():
     ) == "https://s3.amazonaws.com/%s/%s/my_file_BBB" % (bucket, prefix)
 
     my_store.remove_key(("BBB",))
-    with pytest.raises(ClientError) as exc:
+    with pytest.raises(InvalidKeyError):
         my_store.get(("BBB",))
-    assert exc.value.response["Error"]["Code"] == "NoSuchKey"
 
 
 @mock_s3
