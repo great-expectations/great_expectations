@@ -6,6 +6,16 @@ Changelog
 
 develop
 -----------------
+* [ENHANCEMENT] Removed the misleading scary "Site doesn't exist or is inaccessible" message that the CLI displayed before building Data Docs for the first time.
+* [ENHANCEMENT] Catch sqlalchemy.exc.ArgumentError and google.auth.exceptions.GoogleAuthError in SqlAlchemyDatasource __init__ and re-raise them as DatasourceInitializationError - this allows the CLI to execute its retry logic when users provide a malformed SQLAlchemy URL or attempt to connect to a BigQuery project without having proper authentication.
+* [BUGFIX] Fixed issue where the URL of the Glossary of Expectations article in the auto-generated suite edit notebook was wrong (out of date) (#1557).
+* [BUGFIX] Use renderer_type to set paths in jinja templates instead of utm_medium since utm_medium is optional
+* [ENHANCEMENT] Bring in custom_views_directory in DefaultJinjaView to enable custom jinja templates stored in plugins dir
+* [BUGFIX] fixed glossary links in walkthrough modal, README, CTA button, scaffold notebook
+
+
+0.11.2
+-----------------
 * [FEATURE] Add support for expect_volumn_values_to_match_json_schema exception for Spark backend (thanks @chipmyersjr!)
 * [ENHANCEMENT] Add formatted __repr__ for ValidationOperatorResult
 * [ENHANCEMENT] add option to suppress logging when getting expectation suite
@@ -18,6 +28,8 @@ develop
 * [BUGFIX] Correct doc link in checkpoint yml
 * [BUGFIX] Fixed issue where CLI checkpoint list truncated names (#1518)
 * [BUGFIX] Fix S3 Batch Kwargs Generator incorrect migration to new build_batch_kwargs API
+* [BUGFIX] Fix missing images in data docs walkthrough modal
+* [BUGFIX] Fix bug in checkpoints that was causing incorrect run_time to be set
 * [BUGFIX] Fix issue where data docs could remove trailing zeros from values when low precision was requested
 
 0.11.1

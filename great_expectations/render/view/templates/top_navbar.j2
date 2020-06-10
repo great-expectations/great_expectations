@@ -2,13 +2,13 @@
   {% set expectation_suite_name_dot_count = expectation_suite_name.count(".") -%}
 {% endif %}
 
-{% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
+{% if "ValidationResults" in renderer_type or "ProfilingResults" in renderer_type %}
   {% set home_url =  ((expectation_suite_name_dot_count + 4) * "../") + "index.html" -%}
   {% set static_images_dir = ((expectation_suite_name_dot_count + 4) * "../") + "static/images/" -%}
-{% elif utm_medium == "expectation-suite-page" %}
+{% elif "ExpectationSuite" in renderer_type %}
   {% set home_url = ((expectation_suite_name_dot_count + 1) * "../") + "index.html" -%}
   {% set static_images_dir = ((expectation_suite_name_dot_count + 1) * "../") + "static/images/" -%}
-{% elif utm_medium == "index-page" %}
+{% elif "SiteIndex" in renderer_type %}
   {% set home_url = "#" -%}
 {% endif %}
 

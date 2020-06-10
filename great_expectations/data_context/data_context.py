@@ -1408,7 +1408,7 @@ class BaseDataContext(object):
                             the resources in this list. This supports incremental build
                             of data docs sites (e.g., when a new validation result is created)
                             and avoids full rebuild.
-        :param dry_run: a flag, if True, the method returna the structure containing the
+        :param dry_run: a flag, if True, the method returns a structure containing the
                             URLs of the sites that *would* be built, but it does not build
                             these sites. The motivation for adding this flag was to allow
                             the CLI to display the the URLs before building and to let users
@@ -1787,7 +1787,7 @@ class BaseDataContext(object):
             )
             try:
                 run_time = parse(run_id)
-            except ParserError:
+            except (ParserError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):

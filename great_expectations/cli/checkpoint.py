@@ -128,7 +128,7 @@ def _load_checkpoint_yml_template() -> dict:
 )
 @mark.cli_as_experimental
 def checkpoint_list(directory):
-    """Run a checkpoint. (Experimental)"""
+    """List configured checkpoints. (Experimental)"""
     context = toolkit.load_data_context_with_error_handling(directory)
 
     checkpoints = context.list_checkpoints()

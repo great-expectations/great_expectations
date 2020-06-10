@@ -52,7 +52,7 @@ class ValidationResultsPageRenderer(Renderer):
         if isinstance(run_id, str):
             try:
                 run_time = parse(run_id).strftime("%Y%m%dT%H%M%S.%fZ")
-            except ParserError:
+            except (ParserError, TypeError):
                 run_time = "__none__"
             run_name = run_id
         elif isinstance(run_id, dict):
@@ -238,7 +238,7 @@ class ValidationResultsPageRenderer(Renderer):
         if isinstance(run_id, str):
             try:
                 run_time = parse(run_id).strftime("%Y%m%dT%H%M%S.%fZ")
-            except ParserError:
+            except (ParserError, TypeError):
                 run_time = "__none__"
             run_name = run_id
         elif isinstance(run_id, dict):
@@ -712,7 +712,7 @@ class ProfilingResultsPageRenderer(Renderer):
         if isinstance(run_id, str):
             try:
                 run_time = parse(run_id).strftime("%Y%m%dT%H%M%S.%fZ")
-            except ParserError:
+            except (ParserError, TypeError):
                 run_time = "__none__"
             run_name = run_id
         elif isinstance(run_id, dict):
