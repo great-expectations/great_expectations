@@ -11,6 +11,7 @@ develop
 * [BUGFIX] Fixed issue where the URL of the Glossary of Expectations article in the auto-generated suite edit notebook was wrong (out of date) (#1557).
 * [BUGFIX] Use renderer_type to set paths in jinja templates instead of utm_medium since utm_medium is optional
 * [ENHANCEMENT] Bring in custom_views_directory in DefaultJinjaView to enable custom jinja templates stored in plugins dir
+* [BUGFIX] fixed glossary links in walkthrough modal, README, CTA button
 
 0.11.2
 -----------------
