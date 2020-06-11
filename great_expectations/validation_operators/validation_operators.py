@@ -116,13 +116,13 @@ class ActionListValidationOperator(ValidationOperator):
                     class_name: SlackRenderer
     """
 
-    def __init__(self, data_context, action_list, name, result_format='SUMMARY'):
+    def __init__(self, data_context, action_list, name, result_format="SUMMARY"):
         super().__init__()
         self.data_context = data_context
         self.name = name
 
         self.result_format = result_format
-        assert result_format in ['BOOLEAN_ONLY', 'BASIC', 'SUMMARY', 'COMPLETE']
+        assert result_format in ["BOOLEAN_ONLY", "BASIC", "SUMMARY", "COMPLETE"]
 
         # SHOULD DO SOME VALIDATION THAT ITS EITHER SUMMARY OR COMPLETE HERE
 
@@ -142,7 +142,7 @@ class ActionListValidationOperator(ValidationOperator):
             module_name = "great_expectations.validation_operators"
             new_action = instantiate_class_from_config(
                 config=config,
-                runtime_environment={"data_context": self.data_context,},
+                runtime_environment={"data_context": self.data_context},
                 config_defaults={"module_name": module_name},
             )
             if not new_action:
@@ -160,8 +160,9 @@ class ActionListValidationOperator(ValidationOperator):
                 "class_name": "ActionListValidationOperator",
                 "module_name": "great_expectations.validation_operators",
                 "name": self.name,
-                "kwargs": {"action_list": self.action_list,
-                           "result_format": self.result_format,
+                "kwargs": {
+                    "action_list": self.action_list,
+                    "result_format": self.result_format,
                 },
             }
         return self._validation_operator_config
@@ -393,7 +394,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         stop_on_first_error=False,
         slack_webhook=None,
         notify_on="all",
-        result_format='SUMMARY',
+        result_format="SUMMARY",
     ):
         super(WarningAndFailureExpectationSuitesValidationOperator, self).__init__(
             data_context, action_list, name
@@ -413,8 +414,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         self.slack_webhook = slack_webhook
         self.notify_on = notify_on
         self.result_format = result_format
-        assert result_format in ['BOOLEAN_ONLY', 'BASIC', 'SUMMARY', 'COMPLETE']
-
+        assert result_format in ["BOOLEAN_ONLY", "BASIC", "SUMMARY", "COMPLETE"]
 
     @property
     def validation_operator_config(self) -> dict:
@@ -500,13 +500,13 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         run_name_element = {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*Run Name:* {}".format(run_name),},
+            "text": {"type": "mrkdwn", "text": "*Run Name:* {}".format(run_name)},
         }
         query["blocks"].append(run_name_element)
 
         run_time_element = {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*Run Time:* {}".format(run_time),},
+            "text": {"type": "mrkdwn", "text": "*Run Time:* {}".format(run_time)},
         }
         query["blocks"].append(run_time_element)
 
