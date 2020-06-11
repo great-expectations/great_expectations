@@ -12,7 +12,7 @@ This guide will help you run a Great Expectations checkpoint in Apache Airflow, 
 - :ref:`Created a checkpoint for that Expectation Suite and a data asset <how_to_guides__validation__how_to_create_a_new_checkpoint>`
 - Created an Airflow DAG file
 
-Using checkpoints is the most straightforward way to trigger a validation run from within Airflow. The following section describe two alternative approaches to accomplishing this.
+Using checkpoints is the most straightforward way to trigger a validation run from within Airflow. The following sections describe two alternative approaches to accomplishing this.
 
 Running a checkpoint with a BashOperator
 ----------
