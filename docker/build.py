@@ -1,11 +1,13 @@
-from docker import APIClient
-import docker
 import logging
-import click
+import pathlib
+import sys
 from typing import List
 
-import sys
-import pathlib
+import click
+
+import docker
+import versioneer
+from docker import APIClient
 
 PROJECT_ROOT = str(pathlib.Path(__file__).parent.parent.absolute())
 try:
@@ -13,7 +15,6 @@ try:
 except ValueError:
     sys.path.append(PROJECT_ROOT)
 
-import versioneer
 
 
 logging.basicConfig(
