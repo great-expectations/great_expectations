@@ -17,7 +17,7 @@ Steps
 
   .. admonition:: Note:
 
-    Environment variable substitution is only supported in the ``great_expectations.yml`` config file.
+Environment variable substitution is only supported in the great_expectations.yml config file. It's not recursive. For example, you cannot use substitution in `config_variables.yml``.
 
   .. code-block:: yaml
     
