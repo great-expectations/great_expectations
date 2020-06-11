@@ -129,7 +129,6 @@ class ActionListValidationOperator(ValidationOperator):
         self.name = name
 
         result_format = parse_result_format(result_format)
-        print(result_format)
         assert result_format["result_format"] in [
             "BOOLEAN_ONLY",
             "BASIC",
@@ -428,7 +427,6 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         self.slack_webhook = slack_webhook
         self.notify_on = notify_on
         result_format = parse_result_format(result_format)
-        print(result_format)
         assert result_format["result_format"] in [
             "BOOLEAN_ONLY",
             "BASIC",
