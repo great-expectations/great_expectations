@@ -135,9 +135,7 @@ class ActionListValidationOperator(ValidationOperator):
             "SUMMARY",
             "COMPLETE",
         ]
-        self.result_format = result_format["result_format"]
-
-        # SHOULD DO SOME VALIDATION THAT ITS EITHER SUMMARY OR COMPLETE HERE
+        self.result_format = result_format
 
         self.action_list = action_list
         self.actions = OrderedDict()
@@ -215,6 +213,7 @@ class ActionListValidationOperator(ValidationOperator):
         evaluation_parameters=None,
         run_name=None,
         run_time=None,
+        result_format=None,
     ):
         assert not (run_id and run_name) and not (
             run_id and run_time
@@ -252,7 +251,7 @@ class ActionListValidationOperator(ValidationOperator):
             )
             batch_validation_result = batch.validate(
                 run_id=run_id,
-                result_format=self.result_format,
+                result_format=result_format if result_format else self.result_format,
                 evaluation_parameters=evaluation_parameters,
             )
             run_result_obj["validation_result"] = batch_validation_result
@@ -433,7 +432,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             "SUMMARY",
             "COMPLETE",
         ]
-        self.result_format = result_format["result_format"]
+        self.result_format = result_format
 
     @property
     def validation_operator_config(self) -> dict:
@@ -555,6 +554,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         evaluation_parameters=None,
         run_name=None,
         run_time=None,
+        result_format=None,
     ):
         assert not (run_id and run_name) and not (
             run_id and run_time
@@ -627,7 +627,9 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 failure_run_result_obj = {"expectation_suite_severity_level": "failure"}
                 failure_validation_result = batch.validate(
                     failure_expectation_suite,
-                    result_format=self.result_format,
+                    result_format=result_format
+                    if result_format
+                    else self.result_format,
                     evaluation_parameters=evaluation_parameters,
                 )
                 failure_run_result_obj["validation_result"] = failure_validation_result
@@ -671,7 +673,9 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 warning_run_result_obj = {"expectation_suite_severity_level": "warning"}
                 warning_validation_result = batch.validate(
                     warning_expectation_suite,
-                    result_format=self.result_format,
+                    result_format=result_format
+                    if result_format
+                    else self.result_format,
                     evaluation_parameters=evaluation_parameters,
                 )
                 warning_run_result_obj["validation_result"] = warning_validation_result
