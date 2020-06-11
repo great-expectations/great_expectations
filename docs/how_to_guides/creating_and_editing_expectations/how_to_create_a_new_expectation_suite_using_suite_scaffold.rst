@@ -3,7 +3,7 @@
 How to create a new Expectation Suite using ``suite scaffold``
 ==============================================================
 
-``great_expectations suite scaffold`` helps you quickly create of :ref:`Expectation Suites` through an interactive development loop that comnbines :ref:`Profilers` and :ref:`Data Docs`.
+``great_expectations suite scaffold`` helps you quickly create of :ref:`Expectation Suites` through an interactive development loop that combines :ref:`Profilers` and :ref:`Data Docs`.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 

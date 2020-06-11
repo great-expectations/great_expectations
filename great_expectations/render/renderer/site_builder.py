@@ -641,7 +641,7 @@ class DefaultSiteIndexBuilder(object):
         )
         see_glossary = CallToActionButton(
             "See More Kinds of Expectations",
-            "http://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html",
+            "https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html",
         )
         validation_playground = CallToActionButton(
             "How to Validate Data",
