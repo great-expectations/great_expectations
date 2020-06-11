@@ -6,6 +6,7 @@ from dateutil.parser import ParserError, parse
 
 from great_expectations.core import RunIdentifier
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -116,13 +117,26 @@ class ActionListValidationOperator(ValidationOperator):
                     class_name: SlackRenderer
     """
 
-    def __init__(self, data_context, action_list, name, result_format="SUMMARY"):
+    def __init__(
+        self,
+        data_context,
+        action_list,
+        name,
+        result_format={"result_format": "SUMMARY"},
+    ):
         super().__init__()
         self.data_context = data_context
         self.name = name
 
-        self.result_format = result_format
-        assert result_format in ["BOOLEAN_ONLY", "BASIC", "SUMMARY", "COMPLETE"]
+        result_format = parse_result_format(result_format)
+        print(result_format)
+        assert result_format["result_format"] in [
+            "BOOLEAN_ONLY",
+            "BASIC",
+            "SUMMARY",
+            "COMPLETE",
+        ]
+        self.result_format = result_format["result_format"]
 
         # SHOULD DO SOME VALIDATION THAT ITS EITHER SUMMARY OR COMPLETE HERE
 
@@ -394,7 +408,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         stop_on_first_error=False,
         slack_webhook=None,
         notify_on="all",
-        result_format="SUMMARY",
+        result_format={"result_format": "SUMMARY"},
     ):
         super(WarningAndFailureExpectationSuitesValidationOperator, self).__init__(
             data_context, action_list, name
@@ -413,8 +427,15 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         self.slack_webhook = slack_webhook
         self.notify_on = notify_on
-        self.result_format = result_format
-        assert result_format in ["BOOLEAN_ONLY", "BASIC", "SUMMARY", "COMPLETE"]
+        result_format = parse_result_format(result_format)
+        print(result_format)
+        assert result_format["result_format"] in [
+            "BOOLEAN_ONLY",
+            "BASIC",
+            "SUMMARY",
+            "COMPLETE",
+        ]
+        self.result_format = result_format["result_format"]
 
     @property
     def validation_operator_config(self) -> dict:
