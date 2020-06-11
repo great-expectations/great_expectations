@@ -16,8 +16,8 @@ import versioneer
 
 
 logging.basicConfig(
-    format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',
-    level=logging.INFO
+    format="[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s",
+    level=logging.INFO,
 )
 
 PYTHON_DOCKER_TAGS = [
@@ -28,8 +28,17 @@ PYTHON_DOCKER_TAGS = [
 DOCKER_REPOSITORY = "great-expectations"
 
 client = docker.from_env()
-python_docker_tags_opt = click.option("--python-docker-tags", "-p", multiple=True, default=PYTHON_DOCKER_TAGS, help="Build the image on top of these python images", show_default=True)
-great_expectations_version_opt = click.option("--ge-version", "-g", default=versioneer.get_version(), show_default=True)
+python_docker_tags_opt = click.option(
+    "--python-docker-tags",
+    "-p",
+    multiple=True,
+    default=PYTHON_DOCKER_TAGS,
+    help="Build the image on top of these python images",
+    show_default=True,
+)
+great_expectations_version_opt = click.option(
+    "--ge-version", "-g", default=versioneer.get_version(), show_default=True
+)
 
 
 def mk_image_tag(python_docker_tag: str, ge_version: str):
@@ -51,18 +60,19 @@ def build_images(python_docker_tags: List[str], ge_version: str):
         logging.info("Building image with tag: " + tag)
 
         client.images.build(
-            path="docker/",
-            tag=tag,
-            buildargs={
-                "PYTHON_DOCKER_TAG": python_docker_tag
-            }
+            path="docker/", tag=tag, buildargs={"PYTHON_DOCKER_TAG": python_docker_tag}
         )
 
 
 @cli.command()
 @python_docker_tags_opt
 @great_expectations_version_opt
-@click.option("--repository", "-r", default=DOCKER_REPOSITORY, help="Target repository for the docker images")
+@click.option(
+    "--repository",
+    "-r",
+    default=DOCKER_REPOSITORY,
+    help="Target repository for the docker images",
+)
 def push_images(python_docker_tags: List[str], ge_version: str, repository: str):
     for python_docker_tag in python_docker_tags:
         tag = mk_image_tag(python_docker_tag, ge_version)
@@ -70,5 +80,5 @@ def push_images(python_docker_tags: List[str], ge_version: str, repository: str)
         logging.info(f"Pushing image {repository}/{tag}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()
