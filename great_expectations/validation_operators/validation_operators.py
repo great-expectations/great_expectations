@@ -122,6 +122,8 @@ class ActionListValidationOperator(ValidationOperator):
         self.name = name
 
         self.result_format = result_format
+        assert result_format in ['BOOLEAN_ONLY', 'BASIC', 'SUMMARY', 'COMPLETE']
+
         # SHOULD DO SOME VALIDATION THAT ITS EITHER SUMMARY OR COMPLETE HERE
 
         self.action_list = action_list
@@ -411,6 +413,8 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         self.slack_webhook = slack_webhook
         self.notify_on = notify_on
         self.result_format = result_format
+        assert result_format in ['BOOLEAN_ONLY', 'BASIC', 'SUMMARY', 'COMPLETE']
+
 
     @property
     def validation_operator_config(self) -> dict:
