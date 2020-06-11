@@ -278,3 +278,20 @@ a {
 .rst-content .sidebar {
   margin-top: 80px !important;
 }
+
+/***** Ugly hacks to show how to hack *****/
+dl.class {
+  border: 2px solid blue;
+}
+
+dl.class dt{
+  border: 2px solid red;
+}
+
+dl.method{
+  border: 2px solid red;
+}
+
+dl.method dt{
+  background-color: red;
+}
