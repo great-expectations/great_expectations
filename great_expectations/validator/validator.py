@@ -1,15 +1,11 @@
 """This is currently helping bridge APIs"""
-from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
+from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.types import ClassConfig
-from great_expectations.util import (
-    load_class,
-    verify_dynamic_loading_support,
-)
+from great_expectations.util import load_class, verify_dynamic_loading_support
 
 
 class Validator(object):
-
     def __init__(self, batch, expectation_suite, expectation_engine=None, **kwargs):
         self.batch = batch
         self.expectation_suite = expectation_suite
@@ -19,10 +15,9 @@ class Validator(object):
 
         if isinstance(expectation_engine, ClassConfig):
             module_name = expectation_engine.module_name or "great_expectations.dataset"
-            verify_dynamic_loading_support(module_name=module_name, package_name=None)
+            verify_dynamic_loading_support(module_name=module_name)
             expectation_engine = load_class(
-                class_name=expectation_engine.class_name,
-                module_name=module_name
+                class_name=expectation_engine.class_name, module_name=module_name
             )
 
         self.expectation_engine = expectation_engine
@@ -30,6 +25,7 @@ class Validator(object):
             # Guess the engine
             try:
                 import pandas as pd
+
                 if isinstance(batch.data, pd.DataFrame):
                     self.expectation_engine = PandasDataset
             except ImportError:
@@ -41,13 +37,16 @@ class Validator(object):
         if self.expectation_engine is None:
             try:
                 import pyspark
+
                 if isinstance(batch.data, pyspark.sql.DataFrame):
                     self.expectation_engine = SparkDFDataset
             except ImportError:
                 pass
 
         if self.expectation_engine is None:
-            raise ValueError("Unable to identify expectation_engine. It must be a subclass of DataAsset.")
+            raise ValueError(
+                "Unable to identify expectation_engine. It must be a subclass of DataAsset."
+            )
 
         self.init_kwargs = kwargs
 
@@ -56,7 +55,10 @@ class Validator(object):
             import pandas as pd
 
             if not isinstance(self.batch["data"], pd.DataFrame):
-                raise ValueError("PandasDataset expectation_engine requires a Pandas Dataframe for its batch")
+                raise ValueError(
+                    "PandasDataset expectation_engine requires a Pandas Dataframe for its batch"
+                )
+
             return self.expectation_engine(
                 self.batch.data,
                 expectation_suite=self.expectation_suite,
@@ -70,7 +72,10 @@ class Validator(object):
 
         elif issubclass(self.expectation_engine, SqlAlchemyDataset):
             if not isinstance(self.batch.data, SqlAlchemyBatchReference):
-                raise ValueError("SqlAlchemyDataset expectation_engine requires a SqlAlchemyBatchReference for its batch")
+                raise ValueError(
+                    "SqlAlchemyDataset expectation_engine requires a SqlAlchemyBatchReference for its batch"
+                )
+
             init_kwargs = self.batch.data.get_init_kwargs()
             init_kwargs.update(self.init_kwargs)
             return self.expectation_engine(
@@ -87,7 +92,10 @@ class Validator(object):
             import pyspark
 
             if not isinstance(self.batch.data, pyspark.sql.DataFrame):
-                raise ValueError("SparkDFDataset expectation_engine requires a spark DataFrame for its batch")
+                raise ValueError(
+                    "SparkDFDataset expectation_engine requires a spark DataFrame for its batch"
+                )
+
             return self.expectation_engine(
                 spark_df=self.batch.data,
                 expectation_suite=self.expectation_suite,

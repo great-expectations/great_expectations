@@ -1,6 +1,6 @@
 from .view import (
-    DefaultJinjaPageView,
+    DefaultJinjaComponentView,
     DefaultJinjaIndexPageView,
+    DefaultJinjaPageView,
     DefaultJinjaSectionView,
-    DefaultJinjaComponentView
 )

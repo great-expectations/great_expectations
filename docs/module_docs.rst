@@ -1,7 +1,7 @@
 .. _module_docs:
 
 Module docs
-==================
+===========
 
 .. toctree::
    :maxdepth: 2
@@ -16,5 +16,5 @@ Module docs
    /module_docs/store_module
    /module_docs/validation_operators_module
    /module_docs/great_expectations_module
-
-
+   /module_docs/cli_module
+   /module_docs/core_module

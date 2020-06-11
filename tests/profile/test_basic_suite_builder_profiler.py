@@ -3,6 +3,7 @@ import os
 from collections import OrderedDict
 
 import pytest
+from freezegun import freeze_time
 from numpy import Infinity
 
 import great_expectations as ge
@@ -314,7 +315,9 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
 
     context.create_expectation_suite("default")
     datasource = context.datasources["rad_datasource"]
-    base_dir = datasource.config["batch_kwargs_generators"]["subdir_reader"]["base_directory"]
+    base_dir = datasource.config["batch_kwargs_generators"]["subdir_reader"][
+        "base_directory"
+    ]
     batch_kwargs = {
         "datasource": "rad_datasource",
         "path": os.path.join(base_dir, "f1.csv"),
@@ -346,6 +349,7 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
         "expectation_suite_name",
         "great_expectations.__version__",
         "run_id",
+        "validation_time",
     }
 
     assert expectation_suite.meta["notes"] == {
@@ -439,6 +443,7 @@ def test_context_profiler(filesystem_csv_data_context):
     assert set(expectation_types) == expected_expectation_types
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     """
     A snapshot regression test for BasicSuiteBuilderProfiler.
@@ -490,8 +495,9 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
     del evrs.meta["run_id"]
     del evrs.meta["batch_kwargs"]["ge_batch_id"]
+    del evrs.meta["validation_time"]
 
-    assert expected_evrs == evrs
+    assert evrs == expected_evrs
 
 
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
@@ -590,6 +596,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_ha
                             [Infinity, Infinity],
                         ],
                     },
+                    "allow_relative_error": False,
                 },
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
                 "expectation_type": "expect_column_quantile_values_to_be_between",
@@ -645,6 +652,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_ha
                             [2.3, 4.3],
                         ],
                     },
+                    "allow_relative_error": False,
                 },
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
                 "expectation_type": "expect_column_quantile_values_to_be_between",
@@ -692,6 +700,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_ha
                             [6.0, 8.0],
                         ],
                     },
+                    "allow_relative_error": False,
                 },
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
                 "expectation_type": "expect_column_quantile_values_to_be_between",
@@ -789,6 +798,7 @@ def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(pandas_datase
                             [6.0, 8.0],
                         ],
                     },
+                    "allow_relative_error": False,
                 },
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
                 "expectation_type": "expect_column_quantile_values_to_be_between",
@@ -1064,6 +1074,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectation
                             [Infinity, Infinity],
                         ],
                     },
+                    "allow_relative_error": False,
                 },
                 "expectation_type": "expect_column_quantile_values_to_be_between",
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
@@ -1119,6 +1130,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectation
                             [2.3, 4.3],
                         ],
                     },
+                    "allow_relative_error": False,
                 },
                 "expectation_type": "expect_column_quantile_values_to_be_between",
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
@@ -1166,6 +1178,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectation
                             [6.0, 8.0],
                         ],
                     },
+                    "allow_relative_error": False,
                 },
                 "expectation_type": "expect_column_quantile_values_to_be_between",
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
@@ -1266,6 +1279,7 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_not_real_expectations_in_excl
         )
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuration():
     """
     A snapshot regression test for BasicSuiteBuilderProfiler.
@@ -1311,5 +1325,6 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuratio
     del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
     del evrs.meta["run_id"]
     del evrs.meta["batch_kwargs"]["ge_batch_id"]
+    del evrs.meta["validation_time"]
 
-    assert expected_evrs == evrs
+    assert evrs == expected_evrs

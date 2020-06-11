@@ -1,12 +1,12 @@
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.validation_operators import (
-    ValidationAction,
-    StoreMetricsAction,
     NoOpAction,
-    StoreValidationResultAction,
-    StoreEvaluationParametersAction,
     SlackNotificationAction,
-    UpdateDataDocsAction
+    StoreEvaluationParametersAction,
+    StoreMetricsAction,
+    StoreValidationResultAction,
+    UpdateDataDocsAction,
+    ValidationAction,
 )
 
 
@@ -22,7 +22,7 @@ class ActionAnonymizer(Anonymizer):
             StoreEvaluationParametersAction,
             SlackNotificationAction,
             UpdateDataDocsAction,
-            ValidationAction
+            ValidationAction,
         ]
 
     def anonymize_action_info(self, action_name, action_obj):
@@ -32,7 +32,7 @@ class ActionAnonymizer(Anonymizer):
         self.anonymize_object_info(
             object_=action_obj,
             anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes
+            ge_classes=self._ge_classes,
         )
 
         return anonymized_info_dict

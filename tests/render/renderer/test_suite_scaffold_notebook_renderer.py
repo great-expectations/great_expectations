@@ -1,11 +1,9 @@
 import os
 
 import nbformat
-import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
-from great_expectations.exceptions import DataContextError
 from great_expectations.render.renderer.suite_scaffold_notebook_renderer import (
     SuiteScaffoldNotebookRenderer,
 )
@@ -16,10 +14,10 @@ def test_render_snapshot_test(titanic_data_context):
         "mydatasource", "mygenerator", "Titanic"
     )
     csv_path = batch_kwargs["path"]
-    renderer = SuiteScaffoldNotebookRenderer(
-        titanic_data_context, "my_suite", batch_kwargs
-    )
-    obs = renderer.render(None, None)
+    suite_name = "my_suite"
+    suite = titanic_data_context.create_expectation_suite(suite_name)
+    renderer = SuiteScaffoldNotebookRenderer(titanic_data_context, suite, batch_kwargs)
+    obs = renderer.render(None)
     assert isinstance(obs, nbformat.NotebookNode)
     ## NOTE!!! - When updating this snapshot be sure to include the dynamic
     # csv_path in the second cell due to pytest fixtures
@@ -30,21 +28,32 @@ def test_render_snapshot_test(titanic_data_context):
         "cells": [
             {
                 "cell_type": "markdown",
-                "source": "# Scaffold a new Expectation Suite (BETA)\nUse this notebook to scaffold a new expectations suite. This process helps you\navoid writing lots of boilerplate when authoring suites.\n\n**Expectation Suite Name**: `my_suite`\n\nWe'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)",
+                "source": """# Scaffold a new Expectation Suite (Experimental)
+This process helps you avoid writing lots of boilerplate when authoring suites by allowing you to select columns you care about and letting a profiler write some candidate expectations for you to adjust.
+
+**Expectation Suite Name**: `my_suite`
+
+We'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)""",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.profile import BasicSuiteBuilderProfiler\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "my_suite"\nsuite = context.create_expectation_suite(\n    expectation_suite_name, overwrite_existing=True\n)\n\nbatch_kwargs = {\n    "path": "'
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.profile import BasicSuiteBuilderProfiler\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "my_suite"\nsuite = context.create_expectation_suite(\n    expectation_suite_name, overwrite_existing=True\n)\n\nbatch_kwargs = {\n    "path": "'
                 + csv_path
-                + '",\n    "datasource": "mydatasource",\n}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                + '",\n    "datasource": "mydatasource",\n    "data_asset_name": "Titanic",\n}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Select the columns you want to scaffold expectations on\n\nSimply uncomment columns that are important. You can select multiple lines and\nuse a jupyter keyboard shortcut to toggle each line: **Linux/Windows**:\n`Ctrl-/`, **macOS**: `Cmd-/`",
+                "source": """## Select the columns you want to scaffold expectations on
+
+Great Expectations will choose which expectations might make sense for a column based on the **data type** and **cardinality** of the data in each selected column.
+
+Simply uncomment columns that are important. You can select multiple lines and
+use a jupyter keyboard shortcut to toggle each line: **Linux/Windows**:
+`Ctrl-/`, **macOS**: `Cmd-/`""",
                 "metadata": {},
             },
             {
@@ -56,31 +65,42 @@ def test_render_snapshot_test(titanic_data_context):
             },
             {
                 "cell_type": "markdown",
-                "source": "## Run the scaffolder\n\nThis is highly configurable depending on your goals. You can include or exclude\ncolumns, and include or exclude expectation types (when applicable). [The \nExpectation Glossary](http://docs.greatexpectations.io/en/latest/expectation_glossary.html) \ncontains a list of possible expectations.\n\nNote that the profiler is not very smart, so it does it's best to decide on\napplicability.\n\n**To get to a production grade suite, you should [edit this \nsuite](http://docs.greatexpectations.io/en/latest/command_line.html#great-expectations-suite-edit) \nafter this scaffold gets you close to what you want.**",
+                "source": """## Run the scaffolder
+
+The suites generated here are **not meant to be production suites** - they are **scaffolds to build upon**.
+
+**To get to a production grade suite, will definitely want to [edit this
+suite](http://docs.greatexpectations.io/en/latest/command_line.html#great-expectations-suite-edit)
+after scaffolding gets you close to what you want.**
+
+This is highly configurable depending on your goals. You can include or exclude
+columns, and include or exclude expectation types (when applicable). [The
+Expectation Glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=scaffold_expectations)
+contains a list of possible expectations.""",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": '# Wipe the suite clean to prevent unwanted expectations on the batch\nsuite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)\nbatch = context.get_batch(batch_kwargs, suite)\n\nscaffold_config = {\n    "included_columns": included_columns,\n    # "excluded_columns": [],\n    # "included_expectations: [],\n    # "excluded_expectations: [],\n}\nsuite, evr = BasicSuiteBuilderProfiler().profile(batch, profiler_configuration=scaffold_config)',
+                "source": '# Wipe the suite clean to prevent unwanted expectations on the batch\nsuite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)\nbatch = context.get_batch(batch_kwargs, suite)\n\nscaffold_config = {\n    "included_columns": included_columns,\n    # "excluded_columns": [],\n    # "included_expectations": [],\n    # "excluded_expectations": [],\n}\nsuite, evr = BasicSuiteBuilderProfiler().profile(batch, profiler_configuration=scaffold_config)',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & review the scaffolded Expectation Suite\n\nLet's save the scaffolded expectation suite as a JSON file in the \n`great_expectations/expectations` directory of your project and rebuild the Data\n Docs site to make reviewing the scaffolded suite easy.",
+                "source": "## Save & review the scaffolded Expectation Suite\n\nLet's save the scaffolded expectation suite as a JSON file in the\n`great_expectations/expectations` directory of your project and rebuild the Data\n Docs site to make reviewing the scaffolded suite easy.",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\n# Let\'s make a simple sortable timestamp. Note this could come from your pipeline runner.\nrun_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nexpectation_suite_identifier = list(results["details"].keys())[0]\nvalidation_result_identifier = ValidationResultIdentifier(\n    expectation_suite_identifier=expectation_suite_identifier,\n    batch_identifier=batch.batch_kwargs.to_id(),\n    run_id=run_id\n)\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\n"""\nLet\'s create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation\narguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline\nrunner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object.\nNote - any provided datetime will be assumed to be a UTC time. If no instantiation arguments are given, run_name will\nbe None and run_time will default to the current UTC datetime.\n"""\n\nrun_id = {\n  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n  "run_time": datetime.datetime.now(datetime.timezone.utc)\n}\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Next steps\nAfter you are happy with this scaffolded Expectation Suite in Data Docs you \nshould edit this suite to make finer grained adjustments to the expectations. \nThis is be done by running `great_expectations suite edit my_suite`.",
+                "source": "## Next steps\nAfter you are happy with this scaffolded Expectation Suite in Data Docs you\nshould edit this suite to make finer grained adjustments to the expectations.\nThis is be done by running `great_expectations suite edit my_suite`.",
                 "metadata": {},
             },
         ],
@@ -111,12 +131,13 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     root_dir = context.root_directory
     uncommitted_dir = os.path.join(root_dir, "uncommitted")
     suite_name = "my_suite"
+    suite = context.create_expectation_suite(suite_name)
 
     csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
     batch_kwargs = {"datasource": "mydatasource", "path": csv_path}
 
     # Sanity check test setup
-    assert context.list_expectation_suite_names() == []
+    assert context.list_expectation_suite_names() == [suite_name]
     assert context.list_datasources() == [
         {
             "module_name": "great_expectations.datasource",
@@ -139,9 +160,7 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     assert not os.path.isfile(notebook_path)
 
     # Create notebook
-    renderer = SuiteScaffoldNotebookRenderer(
-        titanic_data_context, suite_name, batch_kwargs
-    )
+    renderer = SuiteScaffoldNotebookRenderer(titanic_data_context, suite, batch_kwargs)
     renderer.render_to_disk(notebook_path)
     assert os.path.isfile(notebook_path)
 
@@ -168,36 +187,3 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     }
     suite = context.get_expectation_suite(suite_name)
     assert suite.expectations
-
-
-def test_notebook_rendering_throws_error_on_existing_suite(
-    titanic_data_context,
-):
-    """
-    To set this test up we:
-    - create a suite
-
-    We then:
-    - create a scaffold notebook for the same suite and expect an error during rendering
-    """
-    context = titanic_data_context
-    root_dir = context.root_directory
-    uncommitted_dir = os.path.join(root_dir, "uncommitted")
-    suite_name = "my_suite"
-
-    csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
-    batch_kwargs = {"datasource": "mydatasource", "path": csv_path}
-    suite = context.create_expectation_suite(suite_name)
-    context.save_expectation_suite(suite)
-
-    # Sanity check test setup
-    assert context.list_expectation_suite_names() == [suite_name]
-    notebook_path = os.path.join(uncommitted_dir, f"{suite_name}.ipynb")
-    assert not os.path.isfile(notebook_path)
-
-    # Create notebook
-    with pytest.raises(DataContextError):
-        renderer = SuiteScaffoldNotebookRenderer(
-            titanic_data_context, suite_name, batch_kwargs
-        )
-        renderer.render_to_disk(notebook_path)

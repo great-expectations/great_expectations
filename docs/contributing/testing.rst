@@ -2,13 +2,13 @@
 
 
 Testing
-==============
+=======
 
 
 .. _contributing_testing__running_tests:
 
 Running tests
-------------------------
+-------------
 
 You can run all unit tests by running ``pytest`` in the ``great_expectations`` directory root.
 
@@ -35,7 +35,7 @@ Note: as of early 2020, the tests generate many warnings. Most of these are gene
 .. _contributing_testing__writing_unit_tests:
 
 Writing unit and integration tests
------------------------------------------
+----------------------------------
 
 Production code in Great Expectations must be thoroughly tested. In general, we insist on unit tests for all branches of every method, including likely error states. Most new feature contributions should include several unit tests. Contributions that modify or extend existing features should include a test of the new behavior.
 
@@ -47,7 +47,7 @@ Note: we do not currently test Great Expectations against all types of SQL datab
 
 
 Unit tests for Expectations
----------------------------------------
+---------------------------
 
 One of Great Expectations' important promises is that the same Expectation will produce the same result across all supported execution environments: pandas, sqlalchemy, and Spark.
 
@@ -160,6 +160,6 @@ You can run just the Expectation tests with ``pytest tests/test_definitions/test
 
 
 Manual testing
----------------------------------------------
+--------------
 
 We do manual testing (e.g. against various databases and backends) before major releases and in response to specific bugs and issues.

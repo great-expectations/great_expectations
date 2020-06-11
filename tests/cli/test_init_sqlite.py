@@ -4,6 +4,7 @@ import shutil
 
 import pytest
 from click.testing import CliRunner
+from freezegun import freeze_time
 from sqlalchemy import create_engine
 
 from great_expectations import DataContext
@@ -37,6 +38,7 @@ def titanic_sqlite_db_file(tmp_path_factory):
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@freeze_time("09/26/2019 13:42:41")
 def test_cli_init_on_new_project(
     mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file
 ):
@@ -51,22 +53,21 @@ def test_cli_init_on_new_project(
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(
-            engine.url, catch_exceptions=False
-        ),
+        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(engine.url),
+        catch_exceptions=False,
     )
     stdout = result.output
-    assert len(stdout) < 3000, "CLI output is unreasonably long."
+    assert len(stdout) < 6000, "CLI output is unreasonably long."
 
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "Which database backend are you using" in stdout
-    assert "Give your new data source a short name" in stdout
+    assert "Give your new Datasource a short name" in stdout
     assert "What is the url/connection string for the sqlalchemy connection" in stdout
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
     assert "Which table would you like to use?" in stdout
-    assert "Name the new expectation suite [main.titanic.warning]" in stdout
+    assert "Name the new Expectation Suite [main.titanic.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
         in stdout
@@ -74,22 +75,12 @@ def test_cli_init_on_new_project(
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
-    assert "A new Expectation suite 'warning' was added to your project" in stdout
     assert "Great Expectations is now set up" in stdout
 
     context = DataContext(ge_dir)
     assert len(context.list_datasources()) == 1
-    assert context.list_datasources() == [
-        {
-            "class_name": "SqlAlchemyDatasource",
-            "name": "titanic",
-            "module_name": "great_expectations.datasource",
-            'credentials': {
-                'url': str(engine.url)},
-            'data_asset_type': {'class_name': 'SqlAlchemyDataset',
-                                'module_name': 'great_expectations.dataset'},
-        }
-    ]
+    assert context.list_datasources()[0]["class_name"] == "SqlAlchemyDatasource"
+    assert context.list_datasources()[0]["name"] == "titanic"
 
     first_suite = context.list_expectation_suites()[0]
     suite = context.get_expectation_suite(first_suite.expectation_suite_name)
@@ -107,18 +98,18 @@ def test_cli_init_on_new_project(
 
     obs_tree = gen_directory_tree_str(ge_dir)
 
-    # Instead of monkey patching datetime, just regex out the time directories
-    date_safe_obs_tree = re.sub(r"\d*T\d*\.\d*Z", "9999.9999", obs_tree)
     # Instead of monkey patching guids, just regex out the guids
     guid_safe_obs_tree = re.sub(
-        r"[a-z0-9]{32}(?=\.(json|html))", "foobarbazguid", date_safe_obs_tree
+        r"[a-z0-9]{32}(?=\.(json|html))", "foobarbazguid", obs_tree
     )
+    # print(guid_safe_obs_tree)
     assert (
         guid_safe_obs_tree
         == """\
 great_expectations/
     .gitignore
     great_expectations.yml
+    checkpoints/
     expectations/
         warning.json
     notebooks/
@@ -163,17 +154,21 @@ great_expectations/
                         short-logo-vector.svg
                         short-logo.png
                         validation_failed_unexpected_values.gif
+                    scripts/
+                        bootstrap-table-filter-control.min.js
                     styles/
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
                 validations/
                     warning/
-                        9999.9999/
-                            foobarbazguid.html
+                        20190926T134241.000000Z/
+                            20190926T134241.000000Z/
+                                foobarbazguid.html
         validations/
             warning/
-                9999.9999/
-                    foobarbazguid.json
+                20190926T134241.000000Z/
+                    20190926T134241.000000Z/
+                        foobarbazguid.json
 """
     )
 
@@ -205,22 +200,23 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(
-            engine_url_with_added_whitespace, catch_exceptions=False
+        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(
+            engine_url_with_added_whitespace
         ),
+        catch_exceptions=False,
     )
     stdout = result.output
-    assert len(stdout) < 3000, "CLI output is unreasonably long."
+    assert len(stdout) < 6000, "CLI output is unreasonably long."
 
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "Which database backend are you using" in stdout
-    assert "Give your new data source a short name" in stdout
+    assert "Give your new Datasource a short name" in stdout
     assert "What is the url/connection string for the sqlalchemy connection" in stdout
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
     assert "Which table would you like to use?" in stdout
-    assert "Name the new expectation suite [main.titanic.warning]" in stdout
+    assert "Name the new Expectation Suite [main.titanic.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
         in stdout
@@ -228,7 +224,6 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
-    assert "A new Expectation suite 'warning' was added to your project" in stdout
     assert "Great Expectations is now set up" in stdout
 
     context = DataContext(ge_dir)
@@ -238,10 +233,11 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
             "class_name": "SqlAlchemyDatasource",
             "name": "titanic",
             "module_name": "great_expectations.datasource",
-            'credentials': {
-                'url': str(engine.url)},
-            'data_asset_type': {'class_name': 'SqlAlchemyDataset',
-                                'module_name': 'great_expectations.dataset'},
+            "credentials": {"url": str(engine.url)},
+            "data_asset_type": {
+                "class_name": "SqlAlchemyDataset",
+                "module_name": "great_expectations.dataset",
+            },
         }
     ]
 
@@ -285,13 +281,13 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
     runner = CliRunner(mix_stderr=False)
     url = "sqlite:///{}".format(titanic_sqlite_db_file)
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+    with pytest.warns(
+        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
+    ):
         result = runner.invoke(
             cli,
             ["init", "-d", project_dir],
-            input="2\n5\nsqlite\nsqlite:///{}\n1\nmy_suite\n\n".format(
-                titanic_sqlite_db_file
-            ),
+            input="\n\n2\n6\nsqlite\n{}\n\n\n1\nmy_suite\n\n\n\n".format(url),
             catch_exceptions=False,
         )
     stdout = result.stdout
@@ -315,7 +311,6 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert "What is the url/connection string for the sqlalchemy connection?" in stdout
     assert "Which table would you like to use?" in stdout
     assert "Great Expectations connected to your database" in stdout
-    assert "A new Expectation suite 'my_suite' was added to your project" in stdout
     assert "This looks like an existing project that" not in stdout
 
     config = _load_config_file(os.path.join(ge_dir, DataContext.GE_YML))
@@ -327,10 +322,11 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
             "class_name": "SqlAlchemyDatasource",
             "name": "sqlite",
             "module_name": "great_expectations.datasource",
-            'credentials': {
-                'url': url},
-            'data_asset_type': {'class_name': 'SqlAlchemyDataset',
-                                'module_name': 'great_expectations.dataset'},
+            "credentials": {"url": url},
+            "data_asset_type": {
+                "class_name": "SqlAlchemyDataset",
+                "module_name": "great_expectations.dataset",
+            },
         }
     ]
     assert context.list_expectation_suites()[0].expectation_suite_name == "my_suite"
@@ -377,7 +373,7 @@ def initialized_sqlite_project(
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url),
+        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(engine.url),
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -399,10 +395,11 @@ def initialized_sqlite_project(
             "class_name": "SqlAlchemyDatasource",
             "name": "titanic",
             "module_name": "great_expectations.datasource",
-            'credentials': {
-                'url': str(engine.url)},
-            'data_asset_type': {'class_name': 'SqlAlchemyDataset',
-                                'module_name': 'great_expectations.dataset'},
+            "credentials": {"url": str(engine.url)},
+            "data_asset_type": {
+                "class_name": "SqlAlchemyDataset",
+                "module_name": "great_expectations.dataset",
+            },
         }
     ]
     return project_dir
@@ -487,7 +484,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", project_dir], input="Y\n", catch_exceptions=False,
+            cli, ["init", "-d", project_dir], input="\n\n", catch_exceptions=False,
         )
     stdout = result.stdout
 
@@ -537,7 +534,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
         result = runner.invoke(
             cli,
             ["init", "-d", project_dir],
-            input="1\nsink_me\n\n\n".format(
+            input="\n1\nsink_me\n\n\n\n".format(
                 os.path.join(project_dir, "data/Titanic.csv")
             ),
             catch_exceptions=False,
@@ -556,9 +553,8 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert "Always know what to expect from your data" in stdout
     assert "Which table would you like to use?" in stdout
     assert "Generating example Expectation Suite..." in stdout
-    assert "The following Data Docs sites were built" in stdout
+    assert "The following Data Docs sites will be built" in stdout
     assert "Great Expectations is now set up" in stdout
-    assert "A new Expectation suite 'sink_me' was added to your project" in stdout
 
     assert "Error: invalid input" not in stdout
     assert "This looks like an existing project that" not in stdout

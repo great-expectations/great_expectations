@@ -14,10 +14,7 @@
 #     ValidationResultSuite,
 # )
 
-from .configurations import (
-    # Config,
-    ClassConfig
-)
+from .configurations import ClassConfig  # Config,
 
 
 class DictDot(object):

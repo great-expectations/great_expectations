@@ -21,7 +21,7 @@ class BatchKwargsAnonymizer(Anonymizer):
             "query_parameters",
             "offset",
             "snowflake_transient_table",
-            "bigquery_temp_table"
+            "bigquery_temp_table",
         ]
 
     def anonymize_batch_kwargs(self, batch_kwargs):

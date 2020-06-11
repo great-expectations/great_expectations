@@ -1,7 +1,8 @@
 .. _supporting_resources:
 
-Supporting Resources
-=====================
+####################
+Supporting resources
+####################
 
 Great Expectations requires a python compute environment and access to data, either locally or
 through a database or distributed cluster. In addition, developing with great expectations relies
@@ -9,9 +10,6 @@ heavily on tools in the Python engineering ecosystem: pip, virtual environments,
 We also assume some level of familiarity with git and version control.
 
 See the links below for good, practical tutorials for these tools.
-
-Tools Reference
-==================
 
 pip
 -------------------------------------------
@@ -39,18 +37,3 @@ git
     * https://git-scm.com/
     * https://reference.github.com/
     * https://www.atlassian.com/git/tutorials
-
-
-Installing from github
-===========================
-
-If you plan to make changes to great expectations or live on the bleeding edge, you may want to clone from GitHub and \
-pip install using the `--editable <https://stackoverflow.com/questions/35064426/when-would-the-e-editable-option-be-\
-useful-with-pip-install>`__ flag.
-
-.. code-block:: bash
-
-    $ git clone https://github.com/great-expectations/great_expectations.git
-    $ pip install -e great_expectations/
-
-

@@ -1,11 +1,4 @@
 import re
-import sys
-from functools import wraps
-
-import six
-
-from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli.cli_logging import logger
 
 try:
     from termcolor import colored
@@ -14,6 +7,10 @@ except ImportError:
 
 
 def cli_message(string):
+    print(cli_colorize_string(string))
+
+
+def cli_colorize_string(string):
     # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
     flags = re.DOTALL
     mod_string = re.sub(
@@ -32,7 +29,7 @@ def cli_message(string):
         "<red>(.*?)</red>", colored("\g<1>", "red"), mod_string, flags=flags
     )
 
-    six.print_(colored(mod_string))
+    return colored(mod_string)
 
 
 def cli_message_list(string_list, list_intro_string=None):
@@ -47,14 +44,18 @@ def action_list_to_string(action_list):
     """Util function for turning an action list into pretty string"""
     action_list_string = ""
     for idx, action in enumerate(action_list):
-        action_list_string += "{} ({})".format(action["name"], action["action"]["class_name"])
+        action_list_string += "{} ({})".format(
+            action["name"], action["action"]["class_name"]
+        )
         if idx == len(action_list) - 1:
             continue
         action_list_string += " => "
     return action_list_string
 
 
-def cli_message_dict(dict_, indent=3, bullet_char="-", message_list=None, recursion_flag=False):
+def cli_message_dict(
+    dict_, indent=3, bullet_char="-", message_list=None, recursion_flag=False
+):
     """Util function for displaying nested dicts representing ge objects in cli"""
     if message_list is None:
         message_list = []
@@ -73,7 +74,9 @@ def cli_message_dict(dict_, indent=3, bullet_char="-", message_list=None, recurs
     if dict_.get("action_list"):
         action_list = dict_.pop("action_list")
         action_list_string = action_list_to_string(action_list)
-        message = "{}<cyan>action_list:</cyan> {}".format(" " * indent, action_list_string)
+        message = "{}<cyan>action_list:</cyan> {}".format(
+            " " * indent, action_list_string
+        )
         message_list.append(message)
     sorted_keys = sorted(dict_.keys())
     for key in sorted_keys:
@@ -84,7 +87,12 @@ def cli_message_dict(dict_, indent=3, bullet_char="-", message_list=None, recurs
         if isinstance(dict_[key], dict):
             message = "{}<cyan>{}:</cyan>".format(" " * indent, key)
             message_list.append(message)
-            cli_message_dict(dict_[key], indent=indent + 2, message_list=message_list, recursion_flag=True)
+            cli_message_dict(
+                dict_[key],
+                indent=indent + 2,
+                message_list=message_list,
+                recursion_flag=True,
+            )
         else:
             message = "{}<cyan>{}:</cyan> {}".format(" " * indent, key, str(dict_[key]))
             message_list.append(message)
@@ -101,37 +109,4 @@ def is_sane_slack_webhook(url):
     if url is None:
         return False
 
-    return "https://hooks.slack.com/" in url.strip()
-
-
-def load_expectation_suite(context, suite_name):
-    """
-    Load an expectation suite from a given context.
-
-    Handles a suite name with or without `.json`
-    """
-    if suite_name.endswith(".json"):
-        suite_name = suite_name[:-5]
-    try:
-        suite = context.get_expectation_suite(suite_name)
-        return suite
-    except ge_exceptions.DataContextError as e:
-        cli_message(
-            f"<red>Could not find a suite named `{suite_name}`.</red> Please check "
-            "the name by running `great_expectations suite list` and try again."
-        )
-        logger.info(e)
-        sys.exit(1)
-
-
-def mark_cli_as_experimental(func):
-    """Apply as a decorator to CLI commands that are Experimental."""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        cli_message(
-            "<yellow>Heads up! This feature is Experimental. It may change. "
-            "Please give us your feedback!</yellow>"
-        )
-        func(*args, **kwargs)
-
-    return wrapper
+    return url.strip().startswith("https://hooks.slack.com/")

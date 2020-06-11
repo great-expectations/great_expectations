@@ -1,0 +1,56 @@
+{
+  "skipped_validations_stores": {
+    "database_store_backends": [
+      {
+        "store_name": "validations_db_store",
+        "store_backend_class": "DatabaseStoreBackend"
+      }
+    ],
+    "unsupported": [
+      {
+        "store_name": "validations_unrecognized_store_backend",
+        "store_backend_class": "MyCustomStoreBackend"
+      }
+    ]
+  },
+  "skipped_docs_validations_stores": {
+    "unsupported": [
+      {
+        "site_name": "local_site_unrecognized_backend",
+        "validations_store_backend_class": "MyCustomStoreBackend"
+      }
+    ]
+  },
+  "skipped_metrics_stores": {
+    "database_store_backends": [
+      {
+        "store_name": "evaluation_parameter_db_store",
+        "store_backend_class": "DatabaseStoreBackend"
+      }
+    ],
+    "unsupported": []
+  },
+  "exceptions": [],
+  "upgraded_validations_stores": {
+    "validations_store": {
+      "validations_updated": [
+        {
+          "src": "file://GE_PROJECT_DIR/uncommitted/validations/diabetic_data/warning/20200430T191246.763896Z/c3b4c5df224fef4b1a056a0f3b93aba5.json",
+          "dest": "file://GE_PROJECT_DIR/uncommitted/validations/diabetic_data/warning/20200430T191246.763896Z/20200430T191246.763896Z/c3b4c5df224fef4b1a056a0f3b93aba5.json"
+        }
+      ],
+      "exceptions": false
+    }
+  },
+  "upgraded_docs_site_validations_stores": {
+    "local_site": {
+      "validation_result_pages_updated": [
+        {
+          "src": "file://GE_PROJECT_DIR/uncommitted/data_docs/local_site/validations/diabetic_data/warning/20200430T191246.763896Z/c3b4c5df224fef4b1a056a0f3b93aba5.html",
+          "dest": "file://GE_PROJECT_DIR/uncommitted/data_docs/local_site/validations/diabetic_data/warning/20200430T191246.763896Z/20200430T191246.763896Z/c3b4c5df224fef4b1a056a0f3b93aba5.html"
+        }
+      ],
+      "exceptions": false
+    }
+  }
+}

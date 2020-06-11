@@ -1,53 +1,54 @@
-import logging
+import datetime
 import json
-# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
+import logging
+import warnings
 from collections import namedtuple
 from copy import deepcopy
-import datetime
 
-from six import string_types
-
+from dateutil.parser import ParserError as DateUtilParserError
+from dateutil.parser import parse
 from IPython import get_ipython
-from marshmallow import Schema, fields, ValidationError, post_load, pre_dump
+from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 
 from great_expectations import __version__ as ge_version
+from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.core.evaluation_parameters import (
+    find_evaluation_parameter_dependencies,
+)
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import nested_update
-from great_expectations.types import DictDot
-
 from great_expectations.exceptions import (
+    InvalidCacheValueError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
-    UnavailableMetricError,
     ParserError,
-    InvalidCacheValueError,
+    UnavailableMetricError,
 )
+from great_expectations.types import DictDot
 
 logger = logging.getLogger(__name__)
 
-RESULT_FORMATS = [
-    "BOOLEAN_ONLY",
-    "BASIC",
-    "COMPLETE",
-    "SUMMARY"
-]
+RESULT_FORMATS = ["BOOLEAN_ONLY", "BASIC", "COMPLETE", "SUMMARY"]
 
-EvaluationParameterIdentifier = namedtuple("EvaluationParameterIdentifier", ["expectation_suite_name", "metric_name",
-                                                                             "metric_kwargs_id"])
+EvaluationParameterIdentifier = namedtuple(
+    "EvaluationParameterIdentifier",
+    ["expectation_suite_name", "metric_name", "metric_kwargs_id"],
+)
 
 
 # function to determine if code is being run from a Jupyter notebook
 def in_jupyter_notebook():
     try:
         shell = get_ipython().__class__.__name__
-        if shell == 'ZMQInteractiveShell':
-            return True   # Jupyter notebook or qtconsole
-        elif shell == 'TerminalInteractiveShell':
+        if shell == "ZMQInteractiveShell":
+            return True  # Jupyter notebook or qtconsole
+        elif shell == "TerminalInteractiveShell":
             return False  # Terminal running IPython
         else:
             return False  # Other type (?)
     except NameError:
-        return False      # Probably standard Python interpreter
+        return False  # Probably standard Python interpreter
 
 
 def get_metric_kwargs_id(metric_name, metric_kwargs):
@@ -68,19 +69,6 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
     return None
 
 
-def parse_evaluation_parameter_urn(urn):
-    if urn.startswith("urn:great_expectations:validations:"):
-        split = urn.split(":")
-        if len(split) == 6:
-            return EvaluationParameterIdentifier(split[3], split[4], split[5])
-        elif len(split) == 5:
-            return EvaluationParameterIdentifier(split[3], split[4], None)
-        else:
-            raise ParserError("Unable to parse URN: must have 5 or 6 components to be a valid GE URN")
-
-    raise ParserError("Unrecognized evaluation parameter urn {}".format(urn))
-
-
 def convert_to_json_serializable(data):
     """
     Helper function to convert an object to one that is json serializable
@@ -97,15 +85,22 @@ def convert_to_json_serializable(data):
     """
     import numpy as np
     import pandas as pd
-    from six import string_types, integer_types
     import datetime
     import decimal
     import sys
 
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
-    if isinstance(data, (ExpectationConfiguration, ExpectationSuite, ExpectationValidationResult,
-                         ExpectationSuiteValidationResult)):
+    if isinstance(
+        data,
+        (
+            ExpectationConfiguration,
+            ExpectationSuite,
+            ExpectationValidationResult,
+            ExpectationSuiteValidationResult,
+            RunIdentifier,
+        ),
+    ):
         return data.to_json_dict()
 
     try:
@@ -118,7 +113,7 @@ def convert_to_json_serializable(data):
     except ValueError:
         pass
 
-    if isinstance(data, (string_types, integer_types, float, bool)):
+    if isinstance(data, (str, int, float, bool)):
         # No problem to encode json
         return data
 
@@ -169,23 +164,30 @@ def convert_to_json_serializable(data):
         # keys must be strings. So, we use a very ugly serialization strategy
         index_name = data.index.name or "index"
         value_name = data.name or "value"
-        return [{
-            index_name: convert_to_json_serializable(idx),
-            value_name: convert_to_json_serializable(val)
-        } for idx, val in data.iteritems()]
+        return [
+            {
+                index_name: convert_to_json_serializable(idx),
+                value_name: convert_to_json_serializable(val),
+            }
+            for idx, val in data.iteritems()
+        ]
 
     elif isinstance(data, pd.DataFrame):
-        return convert_to_json_serializable(data.to_dict(orient='records'))
+        return convert_to_json_serializable(data.to_dict(orient="records"))
 
     elif isinstance(data, decimal.Decimal):
         if not (-1e-55 < decimal.Decimal.from_float(float(data)) - data < 1e-55):
-            logger.warning("Using lossy conversion for decimal %s to float object to support serialization." % str(
-                data))
+            logger.warning(
+                "Using lossy conversion for decimal %s to float object to support serialization."
+                % str(data)
+            )
         return float(data)
 
     else:
-        raise TypeError('%s is of type %s which cannot be serialized.' % (
-            str(data), type(data).__name__))
+        raise TypeError(
+            "%s is of type %s which cannot be serialized."
+            % (str(data), type(data).__name__)
+        )
 
 
 def ensure_json_serializable(data):
@@ -204,14 +206,21 @@ def ensure_json_serializable(data):
     """
     import numpy as np
     import pandas as pd
-    from six import string_types, integer_types
     import datetime
     import decimal
 
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
-    if isinstance(data, (ExpectationConfiguration, ExpectationSuite, ExpectationValidationResult,
-                         ExpectationSuiteValidationResult)):
+    if isinstance(
+        data,
+        (
+            ExpectationConfiguration,
+            ExpectationSuite,
+            ExpectationValidationResult,
+            ExpectationSuiteValidationResult,
+            RunIdentifier,
+        ),
+    ):
         return
 
     try:
@@ -224,7 +233,7 @@ def ensure_json_serializable(data):
     except ValueError:
         pass
 
-    if isinstance(data, (string_types, integer_types, float, bool)):
+    if isinstance(data, (str, int, float, bool)):
         # No problem to encode json
         return
 
@@ -273,43 +282,146 @@ def ensure_json_serializable(data):
         # keys must be strings. So, we use a very ugly serialization strategy
         index_name = data.index.name or "index"
         value_name = data.name or "value"
-        _ = [{index_name: ensure_json_serializable(idx), value_name: ensure_json_serializable(val)}
-             for idx, val in data.iteritems()]
+        _ = [
+            {
+                index_name: ensure_json_serializable(idx),
+                value_name: ensure_json_serializable(val),
+            }
+            for idx, val in data.iteritems()
+        ]
         return
     elif isinstance(data, pd.DataFrame):
-        return ensure_json_serializable(data.to_dict(orient='records'))
+        return ensure_json_serializable(data.to_dict(orient="records"))
 
     elif isinstance(data, decimal.Decimal):
         return
 
     else:
-        raise InvalidExpectationConfigurationError('%s is of type %s which cannot be serialized to json' % (
-            str(data), type(data).__name__))
+        raise InvalidExpectationConfigurationError(
+            "%s is of type %s which cannot be serialized to json"
+            % (str(data), type(data).__name__)
+        )
+
+
+class RunIdentifier(DataContextKey):
+    """A RunIdentifier identifies a run (collection of validations) by run_name and run_time."""
+
+    def __init__(self, run_name=None, run_time=None):
+        super(RunIdentifier, self).__init__()
+        assert run_name is None or isinstance(
+            run_name, str
+        ), "run_name must be an instance of str"
+        assert run_time is None or isinstance(run_time, (datetime.datetime, str)), (
+            "run_time must be either None or " "an instance of str or datetime"
+        )
+        self._run_name = run_name
+
+        if isinstance(run_time, str):
+            try:
+                run_time = parse(run_time)
+            except (DateUtilParserError, TypeError):
+                warnings.warn(
+                    f'Unable to parse provided run_time str ("{run_time}") to datetime. Defaulting '
+                    f"run_time to current time."
+                )
+                run_time = datetime.datetime.now(datetime.timezone.utc)
+
+        if not run_time:
+            try:
+                run_time = parse(run_name)
+            except (DateUtilParserError, TypeError):
+                run_time = None
+
+        run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
+        if not run_time.tzinfo:
+            # this takes the given time and just adds timezone (no conversion)
+            run_time = run_time.replace(tzinfo=datetime.timezone.utc)
+        else:
+            # this takes given time and converts to utc
+            run_time = run_time.astimezone(tz=datetime.timezone.utc)
+        self._run_time = run_time
+
+    @property
+    def run_name(self):
+        return self._run_name
+
+    @property
+    def run_time(self):
+        return self._run_time
+
+    def to_tuple(self):
+        return (
+            self._run_name or "__none__",
+            self._run_time.strftime("%Y%m%dT%H%M%S.%fZ"),
+        )
+
+    def to_fixed_length_tuple(self):
+        return (
+            self._run_name or "__none__",
+            self._run_time.strftime("%Y%m%dT%H%M%S.%fZ"),
+        )
+
+    def __repr__(self):
+        return json.dumps(self.to_json_dict())
+
+    def __str__(self):
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def to_json_dict(self):
+        myself = runIdentifierSchema.dump(self)
+        return myself
+
+    @classmethod
+    def from_tuple(cls, tuple_):
+        return cls(tuple_[0], tuple_[1])
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        return cls(tuple_[0], tuple_[1])
+
+
+class RunIdentifierSchema(Schema):
+    run_name = fields.Str()
+    run_time = fields.DateTime(format="iso")
+
+    @post_load
+    def make_run_identifier(self, data, **kwargs):
+        return RunIdentifier(**data)
 
 
 class ExpectationKwargs(dict):
-    ignored_keys = ['result_format', 'include_config', 'catch_exceptions']
+    ignored_keys = ["result_format", "include_config", "catch_exceptions"]
 
     """ExpectationKwargs store information necessary to evaluate an expectation."""
+
     def __init__(self, *args, **kwargs):
         include_config = kwargs.pop("include_config", None)
         if include_config is not None and not isinstance(include_config, bool):
-            raise InvalidExpectationKwargsError("include_config must be a boolean value")
+            raise InvalidExpectationKwargsError(
+                "include_config must be a boolean value"
+            )
 
         result_format = kwargs.get("result_format", None)
         if result_format is None:
             pass
         elif result_format in RESULT_FORMATS:
             pass
-        elif isinstance(result_format, dict) and result_format.get('result_format', None) in RESULT_FORMATS:
+        elif (
+            isinstance(result_format, dict)
+            and result_format.get("result_format", None) in RESULT_FORMATS
+        ):
             pass
         else:
-            raise InvalidExpectationKwargsError("result format must be one of the valid formats: %s"
-                                                % str(RESULT_FORMATS))
+            raise InvalidExpectationKwargsError(
+                "result format must be one of the valid formats: %s"
+                % str(RESULT_FORMATS)
+            )
 
         catch_exceptions = kwargs.pop("catch_exceptions", None)
         if catch_exceptions is not None and not isinstance(catch_exceptions, bool):
-            raise InvalidExpectationKwargsError("catch_exceptions must be a boolean value")
+            raise InvalidExpectationKwargsError(
+                "catch_exceptions must be a boolean value"
+            )
 
         super(ExpectationKwargs, self).__init__(*args, **kwargs)
         ensure_json_serializable(self)
@@ -318,9 +430,9 @@ class ExpectationKwargs(dict):
         try:
             n_self_keys = len([k for k in self.keys() if k not in self.ignored_keys])
             n_other_keys = len([k for k in other.keys() if k not in self.ignored_keys])
-            return n_self_keys == n_other_keys and all([
-                self[k] == other[k] for k in self.keys() if k not in self.ignored_keys
-            ])
+            return n_self_keys == n_other_keys and all(
+                [self[k] == other[k] for k in self.keys() if k not in self.ignored_keys]
+            )
         except KeyError:
             return False
 
@@ -335,16 +447,50 @@ class ExpectationKwargs(dict):
         return myself
 
 
+def _deduplicate_evaluation_parameter_dependencies(dependencies):
+    deduplicated = dict()
+    for suite_name, required_metrics in dependencies.items():
+        deduplicated[suite_name] = []
+        metrics = set()
+        metric_kwargs = dict()
+        for metric in required_metrics:
+            if isinstance(metric, str):
+                metrics.add(metric)
+            elif isinstance(metric, dict):
+                # There is a single metric_kwargs_id object in this construction
+                for kwargs_id, metric_list in metric["metric_kwargs_id"].items():
+                    if kwargs_id not in metric_kwargs:
+                        metric_kwargs[kwargs_id] = set()
+                    for metric_name in metric_list:
+                        metric_kwargs[kwargs_id].add(metric_name)
+        deduplicated[suite_name] = list(metrics)
+        if len(metric_kwargs) > 0:
+            deduplicated[suite_name] = deduplicated[suite_name] + [
+                {
+                    "metric_kwargs_id": {
+                        metric_kwargs: list(metrics_set)
+                        for (metric_kwargs, metrics_set) in metric_kwargs.items()
+                    }
+                }
+            ]
+
+    return deduplicated
+
+
 class ExpectationConfiguration(DictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
     def __init__(self, expectation_type, kwargs, meta=None, success_on_last_run=None):
-        if not isinstance(expectation_type, string_types):
-            raise InvalidExpectationConfigurationError("expectation_type must be a string")
+        if not isinstance(expectation_type, str):
+            raise InvalidExpectationConfigurationError(
+                "expectation_type must be a string"
+            )
         self._expectation_type = expectation_type
         if not isinstance(kwargs, dict):
-            raise InvalidExpectationConfigurationError("expectation configuration kwargs must be an "
-                                                       "ExpectationKwargs object.")
+            raise InvalidExpectationConfigurationError(
+                "expectation configuration kwargs must be an "
+                "ExpectationKwargs object."
+            )
         self._kwargs = ExpectationKwargs(kwargs)
         if meta is None:
             meta = {}
@@ -368,27 +514,33 @@ class ExpectationConfiguration(DictDot):
                 try:
                     other = expectationConfigurationSchema.load(other)
                 except ValidationError:
-                    logger.debug("Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
-                                 "dict other could not be instantiated as an ExpectationConfiguration")
+                    logger.debug(
+                        "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
+                        "dict other could not be instantiated as an ExpectationConfiguration"
+                    )
                     return NotImplemented
             else:
                 # Delegate comparison to the other instance
                 return NotImplemented
-        return all((
-            self.expectation_type == other.expectation_type,
-            self.kwargs.isEquivalentTo(other.kwargs)
-        ))
+        return all(
+            (
+                self.expectation_type == other.expectation_type,
+                self.kwargs.isEquivalentTo(other.kwargs),
+            )
+        )
 
     def __eq__(self, other):
         """ExpectationConfiguration equality does include meta, but ignores instance identity."""
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
-        return all((
-            self.expectation_type == other.expectation_type,
-            self.kwargs == other.kwargs,
-            self.meta == other.meta
-        ))
+        return all(
+            (
+                self.expectation_type == other.expectation_type,
+                self.kwargs == other.kwargs,
+                self.meta == other.meta,
+            )
+        )
 
     def __ne__(self, other):
         # By using the == operator, the returned NotImplemented is handled correctly.
@@ -433,47 +585,59 @@ class ExpectationConfiguration(DictDot):
         myself = expectationConfigurationSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
-        myself['kwargs'] = convert_to_json_serializable(myself['kwargs'])
+        myself["kwargs"] = convert_to_json_serializable(myself["kwargs"])
         return myself
 
     def get_evaluation_parameter_dependencies(self):
-        dependencies = {}
+        parsed_dependencies = dict()
         for key, value in self.kwargs.items():
-            if isinstance(value, dict) and '$PARAMETER' in value:
-                if value["$PARAMETER"].startswith("urn:great_expectations:validations:"):
-                    try:
-                        evaluation_parameter_id = parse_evaluation_parameter_urn(value["$PARAMETER"])
-                    except ParserError:
-                        logger.warning("Unable to parse great_expectations urn {}".format(value["$PARAMETER"]))
-                        continue
+            if isinstance(value, dict) and "$PARAMETER" in value:
+                param_string_dependencies = find_evaluation_parameter_dependencies(
+                    value["$PARAMETER"]
+                )
+                nested_update(parsed_dependencies, param_string_dependencies)
 
-                    if evaluation_parameter_id.metric_kwargs_id is None:
-                        nested_update(dependencies, {
-                            evaluation_parameter_id.expectation_suite_name: [evaluation_parameter_id.metric_name]
-                        })
-                    else:
-                        nested_update(dependencies, {
-                            evaluation_parameter_id.expectation_suite_name: [{
+        dependencies = dict()
+        urns = parsed_dependencies.get("urns", [])
+        for string_urn in urns:
+            try:
+                urn = ge_urn.parseString(string_urn)
+            except ParserError:
+                logger.warning(
+                    "Unable to parse great_expectations urn {}".format(
+                        value["$PARAMETER"]
+                    )
+                )
+                continue
+
+            if not urn.get("metric_kwargs"):
+                nested_update(
+                    dependencies, {urn["expectation_suite_name"]: [urn["metric_name"]]},
+                )
+            else:
+                nested_update(
+                    dependencies,
+                    {
+                        urn["expectation_suite_name"]: [
+                            {
                                 "metric_kwargs_id": {
-                                    evaluation_parameter_id.metric_kwargs_id: [evaluation_parameter_id.metric_name]
+                                    urn["metric_kwargs"]: [urn["metric_name"]]
                                 }
-                            }]
-                        })
-                    # if evaluation_parameter_id.expectation_suite_name not in dependencies:
-                    #     dependencies[evaluation_parameter_id.expectation_suite_name] = {"metric_kwargs_id": {}}
-                    #
-                    # if evaluation_parameter_id.metric_kwargs_id not in dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"]:
-                    #     dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"][evaluation_parameter_id.metric_kwargs_id] = []
-                    # dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"][
-                    #     evaluation_parameter_id.metric_kwargs_id].append(evaluation_parameter_id.metric_name)
+                            }
+                        ]
+                    },
+                )
 
+        dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
 
 
 class ExpectationConfigurationSchema(Schema):
     expectation_type = fields.Str(
         required=True,
-        error_messages={"required": "expectation_type missing in expectation configuration"}
+        error_messages={
+            "required": "expectation_type missing in expectation configuration"
+        },
     )
     kwargs = fields.Dict()
     meta = fields.Dict()
@@ -505,13 +669,17 @@ class ExpectationSuite(object):
         expectations=None,
         evaluation_parameters=None,
         data_asset_type=None,
-        meta=None
+        meta=None,
     ):
         self.expectation_suite_name = expectation_suite_name
         if expectations is None:
             expectations = []
-        self.expectations = [ExpectationConfiguration(**expectation) if isinstance(expectation, dict) else
-                             expectation for expectation in expectations]
+        self.expectations = [
+            ExpectationConfiguration(**expectation)
+            if isinstance(expectation, dict)
+            else expectation
+            for expectation in expectations
+        ]
         if evaluation_parameters is None:
             evaluation_parameters = {}
         self.evaluation_parameters = evaluation_parameters
@@ -522,16 +690,28 @@ class ExpectationSuite(object):
         ensure_json_serializable(meta)
         self.meta = meta
 
-    def add_citation(self, comment, batch_kwargs=None, batch_markers=None, batch_parameters=None, citation_date=None):
+    def add_citation(
+        self,
+        comment,
+        batch_kwargs=None,
+        batch_markers=None,
+        batch_parameters=None,
+        citation_date=None,
+    ):
         if "citations" not in self.meta:
             self.meta["citations"] = []
-        self.meta["citations"].append({
-            "citation_date": citation_date or datetime.datetime.now().isoformat(),
-            "batch_kwargs": batch_kwargs,
-            "batch_markers": batch_markers,
-            "batch_parameters": batch_parameters,
-            "comment": comment
-        })
+        self.meta["citations"].append(
+            {
+                "citation_date": citation_date
+                or datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                ),
+                "batch_kwargs": batch_kwargs,
+                "batch_markers": batch_markers,
+                "batch_parameters": batch_parameters,
+                "comment": comment,
+            }
+        )
 
     def isEquivalentTo(self, other):
         """
@@ -546,14 +726,19 @@ class ExpectationSuite(object):
                 try:
                     other = expectationSuiteSchema.load(other)
                 except ValidationError:
-                    logger.debug("Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
-                                 "dict other could not be instantiated as an ExpectationConfiguration")
+                    logger.debug(
+                        "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
+                        "dict other could not be instantiated as an ExpectationConfiguration"
+                    )
                     return NotImplemented
             else:
                 # Delegate comparison to the other instance
                 return NotImplemented
         return all(
-            [mine.isEquivalentTo(theirs) for (mine, theirs) in zip(self.expectations, other.expectations)]
+            [
+                mine.isEquivalentTo(theirs)
+                for (mine, theirs) in zip(self.expectations, other.expectations)
+            ]
         )
 
     def __eq__(self, other):
@@ -561,13 +746,15 @@ class ExpectationSuite(object):
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
-        return all((
-            self.expectation_suite_name == other.expectation_suite_name,
-            self.expectations == other.expectations,
-            self.evaluation_parameters == other.evaluation_parameters,
-            self.data_asset_type == other.data_asset_type,
-            self.meta == other.meta,
-        ))
+        return all(
+            (
+                self.expectation_suite_name == other.expectation_suite_name,
+                self.expectations == other.expectations,
+                self.evaluation_parameters == other.evaluation_parameters,
+                self.data_asset_type == other.data_asset_type,
+                self.meta == other.meta,
+            )
+        )
 
     def __ne__(self, other):
         # By using the == operator, the returned NotImplemented is handled correctly.
@@ -583,12 +770,14 @@ class ExpectationSuite(object):
         myself = expectationSuiteSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
-        myself['expectations'] = convert_to_json_serializable(myself['expectations'])
+        myself["expectations"] = convert_to_json_serializable(myself["expectations"])
         try:
-            myself['evaluation_parameters'] = convert_to_json_serializable(myself['evaluation_parameters'])
+            myself["evaluation_parameters"] = convert_to_json_serializable(
+                myself["evaluation_parameters"]
+            )
         except KeyError:
             pass  # Allow evaluation parameters to be missing if empty
-        myself['meta'] = convert_to_json_serializable(myself['meta'])
+        myself["meta"] = convert_to_json_serializable(myself["meta"])
         return myself
 
     def get_evaluation_parameter_dependencies(self):
@@ -597,6 +786,7 @@ class ExpectationSuite(object):
             t = expectation.get_evaluation_parameter_dependencies()
             nested_update(dependencies, t)
 
+        dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
 
     def get_citations(self, sort=True, require_batch_kwargs=False):
@@ -609,7 +799,11 @@ class ExpectationSuite(object):
 
     def get_table_expectations(self):
         """Return a list of table expectations."""
-        return [e for e in self.expectations if e.expectation_type.startswith("expect_table_")]
+        return [
+            e
+            for e in self.expectations
+            if e.expectation_type.startswith("expect_table_")
+        ]
 
     def get_column_expectations(self):
         """Return a list of column map expectations."""
@@ -627,8 +821,8 @@ class ExpectationSuite(object):
     def _sort_citations(citations):
         return sorted(citations, key=lambda x: x["citation_date"])
 
-
-    def _copy_and_clean_up_expectation(self,
+    def _copy_and_clean_up_expectation(
+        self,
         expectation,
         discard_result_format_kwargs=True,
         discard_include_config_kwargs=True,
@@ -652,7 +846,7 @@ class ExpectationSuite(object):
           Returns:
               A copy of the provided expectation with `success_on_last_run` and other specified key-value pairs removed
 
-          Note: 
+          Note:
               This method may move to ExpectationConfiguration, minus the "copy" part.
         """
         new_expectation = deepcopy(expectation)
@@ -733,10 +927,8 @@ class ExpectationSuite(object):
         """
         self.expectations.append(expectation_config)
 
-    def find_expectation_indexes(self,
-        expectation_type=None,
-        column=None,
-        expectation_kwargs=None
+    def find_expectation_indexes(
+        self, expectation_type=None, column=None, expectation_kwargs=None
     ):
         """Find matching expectations and return their indexes.
         Args:
@@ -751,9 +943,15 @@ class ExpectationSuite(object):
         if expectation_kwargs is None:
             expectation_kwargs = {}
 
-        if "column" in expectation_kwargs and column is not None and column is not expectation_kwargs["column"]:
-            raise ValueError("Conflicting column names in find_expectation_indexes: %s and %s" % (
-                column, expectation_kwargs["column"]))
+        if (
+            "column" in expectation_kwargs
+            and column is not None
+            and column is not expectation_kwargs["column"]
+        ):
+            raise ValueError(
+                "Conflicting column names in find_expectation_indexes: %s and %s"
+                % (column, expectation_kwargs["column"])
+            )
 
         if column is not None:
             expectation_kwargs["column"] = column
@@ -766,7 +964,7 @@ class ExpectationSuite(object):
                 match = True
 
                 for k, v in expectation_kwargs.items():
-                    if k in exp['kwargs'] and exp['kwargs'][k] == v:
+                    if k in exp["kwargs"] and exp["kwargs"][k] == v:
                         continue
                     else:
                         match = False
@@ -776,7 +974,8 @@ class ExpectationSuite(object):
 
         return match_indexes
 
-    def find_expectations(self,
+    def find_expectations(
+        self,
         expectation_type=None,
         column=None,
         expectation_kwargs=None,
@@ -802,9 +1001,7 @@ class ExpectationSuite(object):
         """
 
         match_indexes = self.find_expectation_indexes(
-            expectation_type,
-            column,
-            expectation_kwargs,
+            expectation_type, column, expectation_kwargs,
         )
 
         return self._copy_and_clean_up_expectations_from_indexes(
@@ -814,7 +1011,8 @@ class ExpectationSuite(object):
             discard_catch_exceptions_kwargs,
         )
 
-    def remove_expectation(self,
+    def remove_expectation(
+        self,
         expectation_type=None,
         column=None,
         expectation_kwargs=None,
@@ -842,9 +1040,7 @@ class ExpectationSuite(object):
         """
 
         match_indexes = self.find_expectation_indexes(
-            expectation_type,
-            column,
-            expectation_kwargs,
+            expectation_type, column, expectation_kwargs,
         )
 
         return self.remove_expectations_by_index(
@@ -864,14 +1060,20 @@ class ExpectationSuite(object):
         elif len(index_list) > 1:
             if not remove_multiple_matches:
                 raise ValueError(
-                    'Multiple expectations matched arguments. No expectations removed.')
+                    "Multiple expectations matched arguments. No expectations removed."
+                )
             else:
 
                 if not dry_run:
-                    self.expectations = [i for j, i in enumerate(
-                        self.expectations) if j not in index_list]
+                    self.expectations = [
+                        i
+                        for j, i in enumerate(self.expectations)
+                        if j not in index_list
+                    ]
                 else:
-                    return self._copy_and_clean_up_expectations_from_indexes(index_list)
+                    return self._copy_and_clean_up_expectations_from_indexes(
+                        index_list
+                    )
 
         else:  # Exactly one match
             expectation = self._copy_and_clean_up_expectation(
@@ -935,7 +1137,6 @@ class ExpectationSuite(object):
         return matched_expectation
         
 
-
 class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
     expectations = fields.List(fields.Nested(ExpectationConfigurationSchema))
@@ -946,12 +1147,12 @@ class ExpectationSuiteSchema(Schema):
     # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;
     # doing so could also allow us not to have to make a copy of data in the pre_dump method.
     def clean_empty(self, data):
-        if not hasattr(data, 'evaluation_parameters'):
+        if not hasattr(data, "evaluation_parameters"):
             pass
         elif len(data.evaluation_parameters) == 0:
             del data.evaluation_parameters
 
-        if not hasattr(data, 'meta'):
+        if not hasattr(data, "meta"):
             pass
         elif data.meta is None or data.meta == []:
             pass
@@ -974,7 +1175,14 @@ class ExpectationSuiteSchema(Schema):
 
 
 class ExpectationValidationResult(object):
-    def __init__(self, success=None, expectation_config=None, result=None, meta=None, exception_info=None):
+    def __init__(
+        self,
+        success=None,
+        expectation_config=None,
+        result=None,
+        meta=None,
+        exception_info=None,
+    ):
         if result and not self.validate_result_dict(result):
             raise InvalidCacheValueError(result)
         self.success = success
@@ -1004,18 +1212,28 @@ class ExpectationValidationResult(object):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
         try:
-            return all((
-                self.success == other.success,
-                (self.expectation_config is None and other.expectation_config is None) or
-                (self.expectation_config is not None and self.expectation_config.isEquivalentTo(
-                    other.expectation_config)),
-                # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
-                # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparision is
-                # handled appropriately.
-                (self.result is None and other.result is None) or (all(self.result) == all(other.result)),
-                self.meta == other.meta,
-                self.exception_info == other.exception_info
-            ))
+            return all(
+                (
+                    self.success == other.success,
+                    (
+                        self.expectation_config is None
+                        and other.expectation_config is None
+                    )
+                    or (
+                        self.expectation_config is not None
+                        and self.expectation_config.isEquivalentTo(
+                            other.expectation_config
+                        )
+                    ),
+                    # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
+                    # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparision is
+                    # handled appropriately.
+                    (self.result is None and other.result is None)
+                    or (all(self.result) == all(other.result)),
+                    self.meta == other.meta,
+                    self.exception_info == other.exception_info,
+                )
+            )
         except (ValueError, TypeError):
             # if invalid comparisons are attempted, the objects are not equal.
             return False
@@ -1033,12 +1251,18 @@ class ExpectationValidationResult(object):
     def validate_result_dict(self, result):
         if result.get("unexpected_count") and result["unexpected_count"] < 0:
             return False
-        if result.get("unexpected_percent") and (result["unexpected_percent"] < 0 or result["unexpected_percent"] > 100):
+        if result.get("unexpected_percent") and (
+            result["unexpected_percent"] < 0 or result["unexpected_percent"] > 100
+        ):
             return False
-        if result.get("missing_percent") and (result["missing_percent"] < 0 or result["missing_percent"] > 100):
+        if result.get("missing_percent") and (
+            result["missing_percent"] < 0 or result["missing_percent"] > 100
+        ):
             return False
         if result.get("unexpected_percent_nonmissing") and (
-                result["unexpected_percent_nonmissing"] < 0 or result["unexpected_percent_nonmissing"] > 100):
+            result["unexpected_percent_nonmissing"] < 0
+            or result["unexpected_percent_nonmissing"] > 100
+        ):
             return False
         if result.get("missing_count") and result["missing_count"] < 0:
             return False
@@ -1048,36 +1272,48 @@ class ExpectationValidationResult(object):
         myself = expectationValidationResultSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
-        if 'result' in myself:
-            myself['result'] = convert_to_json_serializable(myself['result'])
-        if 'meta' in myself:
-            myself['meta'] = convert_to_json_serializable(myself['meta'])
-        if 'exception_info' in myself:
-            myself['exception_info'] = convert_to_json_serializable(myself['exception_info'])
+        if "result" in myself:
+            myself["result"] = convert_to_json_serializable(myself["result"])
+        if "meta" in myself:
+            myself["meta"] = convert_to_json_serializable(myself["meta"])
+        if "exception_info" in myself:
+            myself["exception_info"] = convert_to_json_serializable(
+                myself["exception_info"]
+            )
         return myself
 
     def get_metric(self, metric_name, **kwargs):
         if not self.expectation_config:
-            raise UnavailableMetricError("No ExpectationConfig found in this ExpectationValidationResult. Unable to "
-                                         "return a metric.")
+            raise UnavailableMetricError(
+                "No ExpectationConfig found in this ExpectationValidationResult. Unable to "
+                "return a metric."
+            )
 
         metric_name_parts = metric_name.split(".")
         metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
 
         if metric_name_parts[0] == self.expectation_config.expectation_type:
-            curr_metric_kwargs = get_metric_kwargs_id(metric_name, self.expectation_config.kwargs)
+            curr_metric_kwargs = get_metric_kwargs_id(
+                metric_name, self.expectation_config.kwargs
+            )
             if metric_kwargs_id != curr_metric_kwargs:
-                raise UnavailableMetricError("Requested metric_kwargs_id (%s) does not match the configuration of this "
-                                             "ExpectationValidationResult (%s)." % (metric_kwargs_id or "None",
-                                                                                    curr_metric_kwargs or "None"))
+                raise UnavailableMetricError(
+                    "Requested metric_kwargs_id (%s) does not match the configuration of this "
+                    "ExpectationValidationResult (%s)."
+                    % (metric_kwargs_id or "None", curr_metric_kwargs or "None")
+                )
             if len(metric_name_parts) < 2:
-                raise UnavailableMetricError("Expectation-defined metrics must include a requested metric.")
+                raise UnavailableMetricError(
+                    "Expectation-defined metrics must include a requested metric."
+                )
             elif len(metric_name_parts) == 2:
                 if metric_name_parts[1] == "success":
                     return self.success
                 else:
-                    raise UnavailableMetricError("Metric name must have more than two parts for keys other than "
-                                                 "success.")
+                    raise UnavailableMetricError(
+                        "Metric name must have more than two parts for keys other than "
+                        "success."
+                    )
             elif metric_name_parts[1] == "result":
                 try:
                     if len(metric_name_parts) == 3:
@@ -1085,8 +1321,10 @@ class ExpectationValidationResult(object):
                     elif metric_name_parts[2] == "details":
                         return self.result["details"].get(metric_name_parts[3])
                 except KeyError:
-                    raise UnavailableMetricError("Unable to get metric {} -- KeyError in "
-                                                 "ExpectationValidationResult.".format(metric_name))
+                    raise UnavailableMetricError(
+                        "Unable to get metric {} -- KeyError in "
+                        "ExpectationValidationResult.".format(metric_name)
+                    )
         raise UnavailableMetricError("Unrecognized metric name {}".format(metric_name))
 
 
@@ -1121,7 +1359,14 @@ class ExpectationValidationResultSchema(Schema):
 
 
 class ExpectationSuiteValidationResult(DictDot):
-    def __init__(self, success=None, results=None, evaluation_parameters=None, statistics=None, meta=None):
+    def __init__(
+        self,
+        success=None,
+        results=None,
+        evaluation_parameters=None,
+        statistics=None,
+        meta=None,
+    ):
         self.success = success
         if results is None:
             results = []
@@ -1134,7 +1379,9 @@ class ExpectationSuiteValidationResult(DictDot):
         self.statistics = statistics
         if meta is None:
             meta = {}
-        ensure_json_serializable(meta)  # We require meta information to be serializable.
+        ensure_json_serializable(
+            meta
+        )  # We require meta information to be serializable.
         self.meta = meta
         self._metrics = {}
 
@@ -1143,13 +1390,15 @@ class ExpectationSuiteValidationResult(DictDot):
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
-        return all((
-            self.success == other.success,
-            self.results == other.results,
-            self.evaluation_parameters == other.evaluation_parameters,
-            self.statistics == other.statistics,
-            self.meta == other.meta
-        ))
+        return all(
+            (
+                self.success == other.success,
+                self.results == other.results,
+                self.evaluation_parameters == other.evaluation_parameters,
+                self.statistics == other.statistics,
+                self.meta == other.meta,
+            )
+        )
 
     def __repr__(self):
         return json.dumps(self.to_json_dict(), indent=2)
@@ -1161,9 +1410,11 @@ class ExpectationSuiteValidationResult(DictDot):
         myself = deepcopy(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
-        myself['evaluation_parameters'] = convert_to_json_serializable(myself['evaluation_parameters'])
-        myself['statistics'] = convert_to_json_serializable(myself['statistics'])
-        myself['meta'] = convert_to_json_serializable(myself['meta'])
+        myself["evaluation_parameters"] = convert_to_json_serializable(
+            myself["evaluation_parameters"]
+        )
+        myself["statistics"] = convert_to_json_serializable(myself["statistics"])
+        myself["meta"] = convert_to_json_serializable(myself["meta"])
         myself = expectationSuiteValidationResultSchema.dump(myself)
         return myself
 
@@ -1177,7 +1428,9 @@ class ExpectationSuiteValidationResult(DictDot):
             if len(metric_name_parts) == 2:
                 return self.statistics.get(metric_name_parts[1])
             else:
-                raise UnavailableMetricError("Unrecognized metric {}".format(metric_name))
+                raise UnavailableMetricError(
+                    "Unrecognized metric {}".format(metric_name)
+                )
 
         # Expose expectation-defined metrics
         elif metric_name_parts[0].lower().startswith("expect_"):
@@ -1187,7 +1440,10 @@ class ExpectationSuiteValidationResult(DictDot):
             else:
                 for result in self.results:
                     try:
-                        if metric_name_parts[0] == result.expectation_config.expectation_type:
+                        if (
+                            metric_name_parts[0]
+                            == result.expectation_config.expectation_type
+                        ):
                             metric_value = result.get_metric(metric_name, **kwargs)
                             break
                     except UnavailableMetricError:
@@ -1196,8 +1452,11 @@ class ExpectationSuiteValidationResult(DictDot):
                     self._metrics[(metric_name, metric_kwargs_id)] = metric_value
                     return metric_value
 
-        raise UnavailableMetricError("Metric {} with metric_kwargs_id {} is not available.".format(metric_name,
-                                                                                                   metric_kwargs_id))
+        raise UnavailableMetricError(
+            "Metric {} with metric_kwargs_id {} is not available.".format(
+                metric_name, metric_kwargs_id
+            )
+        )
 
 
 class ExpectationSuiteValidationResultSchema(Schema):
@@ -1224,3 +1483,4 @@ expectationConfigurationSchema = ExpectationConfigurationSchema()
 expectationSuiteSchema = ExpectationSuiteSchema()
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
+runIdentifierSchema = RunIdentifierSchema()

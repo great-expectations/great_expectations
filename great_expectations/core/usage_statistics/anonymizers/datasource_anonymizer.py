@@ -1,5 +1,10 @@
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.datasource import Datasource, PandasDatasource, SqlAlchemyDatasource, SparkDFDatasource
+from great_expectations.datasource import (
+    Datasource,
+    PandasDatasource,
+    SparkDFDatasource,
+    SqlAlchemyDatasource,
+)
 
 
 class DatasourceAnonymizer(Anonymizer):
@@ -11,22 +16,21 @@ class DatasourceAnonymizer(Anonymizer):
             PandasDatasource,
             SqlAlchemyDatasource,
             SparkDFDatasource,
-            Datasource
+            Datasource,
         ]
 
-    def anonymize_datasource_info(self, datasource_obj):
+    def anonymize_datasource_info(self, name, config):
         anonymized_info_dict = dict()
-        name = datasource_obj.name
         anonymized_info_dict["anonymized_name"] = self.anonymize(name)
 
         self.anonymize_object_info(
-            object_=datasource_obj,
             anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes
+            ge_classes=self._ge_classes,
+            object_config=config,
         )
 
         if anonymized_info_dict.get("parent_class") == "SqlAlchemyDatasource":
-            sqlalchemy_dialect = datasource_obj.engine.name
+            sqlalchemy_dialect = config["engine"]
             anonymized_info_dict["sqlalchemy_dialect"] = sqlalchemy_dialect
 
         return anonymized_info_dict

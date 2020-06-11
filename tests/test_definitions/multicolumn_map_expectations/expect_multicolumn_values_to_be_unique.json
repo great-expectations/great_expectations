@@ -9,6 +9,16 @@
       "a" : [1, 1, 1, 1, 1, 2, 2, 2, 2, null],
       "b" : [1, 2, 1, 2, 1, 2, 1, 2, 1, null]
     },
+    "schemas": {
+      "spark": {
+        "w": "IntegerType",
+        "x": "IntegerType",
+        "y": "IntegerType",
+        "z": "IntegerType",
+        "a": "IntegerType",
+        "b": "IntegerType"
+      }
+    },
     "tests" : [{
       "title": "Basic test; ignore if all are missing (the default behavior)",
       "exact_match_out" : false,
