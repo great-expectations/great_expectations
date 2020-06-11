@@ -37,22 +37,13 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.todo",
     "sphinx.ext.coverage",
-    # "sphinx.ext.autosummary",
     # 'sphinx.ext.mathjax'
     "sphinx.ext.napoleon",
     "sphinxcontrib.contentui",
     "sphinx_gitstamp",
     "sphinx.ext.autosectionlabel",
     "sphinxcontrib.discourse",
-    # 'autoapi.sphinx'
 ]
-
-# autosummary_generate = True
-
-# autoapi_modules = {'great_expectations': {
-#     "override" : True,
-#     "output" : "auto"
-# }}
 
 autoapi_type = 'python'
 autoapi_dirs = ['../great_expectations']
