@@ -16,14 +16,40 @@ Steps
 
 To add an S3-backed Pandas datasource do this:
 
-#. **Edit your "great_expectations/great_expectations.yml" file**
+#. **Edit your great_expectations/great_expectations.yml file**
+
+    Update your ``datasources:`` section to include a ``PandasDatasource``.
 
     If the ``datasources:`` key does not exist, then enter it on a line by itself.  Note that the colon character (**:**) must included.  If this key and a data source section underneath it already exists, then proceed to the next step.
 
-    In the ``datasources:`` section, paste the following set of YAML configuration directives.  The left-most entry, ``pandas_s3:``, must be indented by 2 characters.
+    .. code-block:: yaml
+
+    datasources:
+      pandas_s3:
+        class_name: PandasDatasource
+
+#. **Load data from S3 using native S3 path-based Batch Kwargs.**
+
+    Because Pandas provides native support for reading from S3 paths, this simple configuration will allow loading datasources from S3 using native S3 paths.
+
+    .. code-block:: python
+
+    context = DataContext()
+    batch_kwargs = {
+        "datasource": "pandas_s3",
+        "path": "s3a://my_bucket/my_prefix/key.csv",
+    }
+    batch = context.get_batch(batch_kwargs, "existing_expectation_suite_name")
+
+#. **Optionally, configure a BatchKwargsGenerator that will allow you to generate Data Assets and Partitions from your S3 bucket.**
+
+    Update your datasource configuration to include the new Batch Kwargs Generator:
+
+    To accomplish this, paste the following set of YAML configuration directives into the ``datasources:`` section.  The left-most entry, ``pandas_s3:``, must be indented by 2 characters.
 
     .. code-block:: yaml
 
+    datasources:
       pandas_s3:
         class_name: PandasDatasource
         batch_kwargs_generators:
@@ -45,6 +71,8 @@ To add an S3-backed Pandas datasource do this:
           class_name: PandasDataset
           module_name: great_expectations.dataset
 
+    Update the configuration of the ``assets:`` section to reflect your project's data storage system.  There is no limit on the number of data assets, but you should only keep the ones that are actually used in the configuration file (i.e., delete the unused ones from the above template and/or add as many as needed for your project).
+
     In the above YAML code snippet, all relative indentations should be two characters wide.  In addition, while the order of data sources in the ``great_expectations/great_expectations.yml`` configuration file does not matter,
     the indentations of all data source sections must be the same.  In other words, if there are multiple data sources, their names must line up:
 
@@ -64,9 +92,9 @@ To add an S3-backed Pandas datasource do this:
     on the number of data assets, but you should only keep the ones that are actually used in the configuration file (i.e., delete the
     unused ones from the above template and/or add as many as needed for your project).
 
-#. **Run suite scaffold**
+#. **Optionally, run ``great_expectations suite scaffold`` to verify your new Datasource and BatchKwargsGenerator configurations.**
 
-    Since you edited the Great Expectations configuration file, the updated configuration must be tested to make sure that no errors were introduced.
+    Since you edited the Great Expectations configuration file, the updated configuration should be tested to make sure that no errors were introduced.
 
     From the command line, run:
 
@@ -82,7 +110,7 @@ To add an S3-backed Pandas datasource do this:
             3. pandas_s3
         : 3
 
-    If ``pandas_s3`` is the only available data source, then you will not be offered a choice of the data source; in this case, the ``pandas_s3`` data source will be chosen automatically.
+    Note: If ``pandas_s3`` is the only available data source, then you will not be offered a choice of the data source; in this case, the ``pandas_s3`` data source will be chosen automatically.
 
 #. **Choose to see "a list of data assets in this datasource"**
 
@@ -92,6 +120,8 @@ To add an S3-backed Pandas datasource do this:
             1. choose from a list of data assets in this datasource
             2. enter the path of a data file
         : 1
+
+    Verify that all your data assets appear in the list:
 
 #. **Verify that all your data assets appear in the list**
 
@@ -105,6 +135,7 @@ To add an S3-backed Pandas datasource do this:
         :
 
     When you select the number corresponding to a data asset, a Jupyter notebook will open, pre-populated with the code for adding expectations to the expectation suite specified on the command line against the data set you selected.
+
     Check the composition of the ``batch_kwargs`` variable at the top of the notebook to make sure that the S3 file used appropriately corresponds to the data set you selected.
     Repeat this check for all data sets you configured.  An inconsistency is likely due to an incorrect regular expression pattern in the respective data set configuration.
 
@@ -126,6 +157,8 @@ Additional Notes
             sep: ","
 
         max_keys: 100  # The maximum number of keys to fetch in a single request to S3 (default is 100).
+
+#.  Errors in generated BatchKwargs during configuration of the S3GlobReaderBatchKwargsGenerator are likely due to an incorrect regular expression pattern in the respective data set configuration.
 
 #.
     The default values of the various options satisfy the vast majority of scenarios.  However, in certain cases, the developers may need to override them.
