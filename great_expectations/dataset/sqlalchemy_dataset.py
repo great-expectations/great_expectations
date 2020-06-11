@@ -44,8 +44,7 @@ except ImportError:
 try:
     import psycopg2
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
-# except (ImportError, KeyError):
-except ImportError:
+except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
 
 try:
@@ -59,8 +58,7 @@ try:
     # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
     registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
-# except (ImportError, KeyError):
-except ImportError:
+except (ImportError, KeyError):
     snowflake = None
 
 try:
@@ -667,6 +665,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             exception_message: str = "An SQL syntax Exception occurred."
             exception_traceback: str = traceback.format_exc()
             exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+            logger.error(exception_message)
+            raise pe
 
     def _get_column_quantiles_bigquery(self, column: str, quantiles: tuple) -> list:
         # BigQuery does not support "WITHIN", so we need a special case for it
@@ -685,6 +685,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             exception_message: str = "An SQL syntax Exception occurred."
             exception_traceback: str = traceback.format_exc()
             exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+            logger.error(exception_message)
+            raise pe
 
     def _get_column_quantiles_mysql(self, column: str, quantiles: tuple) -> list:
         # MySQL does not support "percentile_disc", so we implement it as a compound query.
@@ -720,7 +722,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             exception_message: str = "An SQL syntax Exception occurred."
             exception_traceback: str = traceback.format_exc()
             exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+            logger.error(exception_message)
+            raise pe
 
+    # Support for computing the quantiles column for PostGreSQL and Redshift is included in the same method as that for
+    # the generic sqlalchemy compatible DBMS engine, because distinguishing between them is oftentimes impossible.  The
+    # only difference is that Redshift and/or PostGreSQL sometimes do not support the aggregate function
+    # "percentile_disc", but do support the approximate percentile_disc or percentile_cont function version instead.
     def _get_column_quantiles_generic_sqlalchemy(
         self, column: str, quantiles: tuple, allow_relative_error: bool
     ) -> list:
