@@ -116,10 +116,13 @@ class ActionListValidationOperator(ValidationOperator):
                     class_name: SlackRenderer
     """
 
-    def __init__(self, data_context, action_list, name):
+    def __init__(self, data_context, action_list, name, result_format='SUMMARY'):
         super().__init__()
         self.data_context = data_context
         self.name = name
+
+        self.result_format = result_format
+        # SHOULD DO SOME VALIDATION THAT ITS EITHER SUMMARY OR COMPLETE HERE
 
         self.action_list = action_list
         self.actions = OrderedDict()
@@ -155,7 +158,9 @@ class ActionListValidationOperator(ValidationOperator):
                 "class_name": "ActionListValidationOperator",
                 "module_name": "great_expectations.validation_operators",
                 "name": self.name,
-                "kwargs": {"action_list": self.action_list},
+                "kwargs": {"action_list": self.action_list,
+                           "result_format": self.result_format,
+                },
             }
         return self._validation_operator_config
 
@@ -231,7 +236,7 @@ class ActionListValidationOperator(ValidationOperator):
             )
             batch_validation_result = batch.validate(
                 run_id=run_id,
-                result_format="SUMMARY",
+                result_format=self.result_format,
                 evaluation_parameters=evaluation_parameters,
             )
             run_result_obj["validation_result"] = batch_validation_result
@@ -386,6 +391,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         stop_on_first_error=False,
         slack_webhook=None,
         notify_on="all",
+        result_format='SUMMARY',
     ):
         super(WarningAndFailureExpectationSuitesValidationOperator, self).__init__(
             data_context, action_list, name
@@ -404,6 +410,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         self.slack_webhook = slack_webhook
         self.notify_on = notify_on
+        self.result_format = result_format
 
     @property
     def validation_operator_config(self) -> dict:
@@ -419,6 +426,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                     "stop_on_first_error": self.stop_on_first_error,
                     "slack_webhook": self.slack_webhook,
                     "notify_on": self.notify_on,
+                    "result_format": self.result_format,
                 },
             }
         return self._validation_operator_config
@@ -596,7 +604,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 failure_run_result_obj = {"expectation_suite_severity_level": "failure"}
                 failure_validation_result = batch.validate(
                     failure_expectation_suite,
-                    result_format="SUMMARY",
+                    result_format=self.result_format,
                     evaluation_parameters=evaluation_parameters,
                 )
                 failure_run_result_obj["validation_result"] = failure_validation_result
@@ -640,7 +648,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 warning_run_result_obj = {"expectation_suite_severity_level": "warning"}
                 warning_validation_result = batch.validate(
                     warning_expectation_suite,
-                    result_format="SUMMARY",
+                    result_format=self.result_format,
                     evaluation_parameters=evaluation_parameters,
                 )
                 warning_run_result_obj["validation_result"] = warning_validation_result
