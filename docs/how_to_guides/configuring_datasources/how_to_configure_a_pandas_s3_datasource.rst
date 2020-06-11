@@ -22,9 +22,9 @@ To add an S3-backed Pandas datasource do this:
 
     .. code-block:: yaml
 
-    datasources:
-      pandas_s3:
-        class_name: PandasDatasource
+        datasources:
+          pandas_s3:
+            class_name: PandasDatasource
 
 #. **Load data from S3 using native S3 path-based Batch Kwargs.**
 
@@ -45,27 +45,27 @@ To add an S3-backed Pandas datasource do this:
 
     .. code-block:: yaml
 
-    datasources:
-      pandas_s3:
-        class_name: PandasDatasource
-        batch_kwargs_generators:
-          pandas_s3_generator:
-            class_name: S3GlobReaderBatchKwargsGenerator
-            bucket: your_s3_bucket # Only the bucket name here (i.e., no prefix)
-            assets:
-              your_first_data_asset_name:
-                prefix: prefix_to_folder_containing_your_first_data_asset_files/ # trailing slash is important
-                regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
-              your_second_data_asset_name:
-                prefix: prefix_to_folder_containing_your_second_data_asset_files/ # trailing slash is important
-                regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
-              your_third_data_asset_name:
-                prefix: prefix_to_folder_containing_your_third_data_asset_files/ # trailing slash is important
-                regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
-        module_name: great_expectations.datasource
-        data_asset_type:
-          class_name: PandasDataset
-          module_name: great_expectations.dataset
+        datasources:
+          pandas_s3:
+            class_name: PandasDatasource
+            batch_kwargs_generators:
+              pandas_s3_generator:
+                class_name: S3GlobReaderBatchKwargsGenerator
+                bucket: your_s3_bucket # Only the bucket name here (i.e., no prefix)
+                assets:
+                  your_first_data_asset_name:
+                    prefix: prefix_to_folder_containing_your_first_data_asset_files/ # trailing slash is important
+                    regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
+                  your_second_data_asset_name:
+                    prefix: prefix_to_folder_containing_your_second_data_asset_files/ # trailing slash is important
+                    regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
+                  your_third_data_asset_name:
+                    prefix: prefix_to_folder_containing_your_third_data_asset_files/ # trailing slash is important
+                    regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
+            module_name: great_expectations.datasource
+            data_asset_type:
+              class_name: PandasDataset
+              module_name: great_expectations.dataset
 
     Update the configuration of the ``assets:`` section to reflect your project's data storage system.  There is no limit on the number of data assets, but you should only keep the ones that are actually used in the configuration file (i.e., delete the unused ones from the above template and/or add as many as needed for your project).
 
@@ -75,21 +75,21 @@ To add an S3-backed Pandas datasource do this:
 
     Since you edited the Great Expectations configuration file, the updated configuration should be tested to make sure that no errors were introduced.
 
-    From the command line, run:
+    #. **From the command line, run:**
 
-    .. code-block:: bash
+        .. code-block:: bash
 
-        great_expectations suite scaffold name_of_new_expectation_suite
+            great_expectations suite scaffold name_of_new_expectation_suite
 
-    .. code-block:: bash
+        .. code-block:: bash
 
-        Select a datasource
-            1. local_filesystem
-            2. some_sql_db
-            3. pandas_s3
-        : 3
+            Select a datasource
+                1. local_filesystem
+                2. some_sql_db
+                3. pandas_s3
+            : 3
 
-    Note: If ``pandas_s3`` is the only available data source, then you will not be offered a choice of the data source; in this case, the ``pandas_s3`` data source will be chosen automatically.
+        Note: If ``pandas_s3`` is the only available data source, then you will not be offered a choice of the data source; in this case, the ``pandas_s3`` data source will be chosen automatically.
 
     #. **Choose to see "a list of data assets in this datasource"**
 
