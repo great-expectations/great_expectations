@@ -16,7 +16,6 @@ except ValueError:
     sys.path.append(PROJECT_ROOT)
 
 
-
 logging.basicConfig(
     format="[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s",
     level=logging.INFO,
