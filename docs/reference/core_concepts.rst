@@ -39,13 +39,15 @@ Suites should have names corresponding to the kind of data they define, like “
 Validation
 **********
 
-Great Expectations makes it possible to validate your data against an Expectation Suite. Validation produces a detailed report of how the data meets your expectations -- and where it doesn’t.
+Great Expectations makes it possible to validate data against an Expectation Suite. Validation produces a detailed report of how the data meets your expectations -- and where it does not.
 
 .. attention::
 
    The DataAsset class will be refactored and renamed in an upcoming release of Great Expectations to make it easier to create custom expectations and ensure Expectation Implementations are consistent across different validation engines.
 
-A **DataAsset** is a Great Expectations object that can create and validate Expectations against specific data. DataAssets are connected to data. A DataAsset can evaluate Expectations wherever you access your data, using different **ValidationEngines** such as Pandas, Spark, or SqlAlchemy.
+A **DataAsset** is a Great Expectations object that can create and validate Expectations against specific data. DataAssets are connected to data and can evaluate Expectations wherever you access your data.
+
+An **Execution Engine** provides the computing resources that will be used to actually perform validation. Great Expectations can take advantage of many different Execution Engines, such as Pandas, Spark, or SqlAlchemy, and even translate the same expectations to validate data using different engines.
 
 An **Expectation Validation Result** captures the output of checking an expectation against data. It describes whether
 the data met the expectation, and additional metrics from the data such as the percentage of unique values or observed mean.
@@ -54,7 +56,7 @@ An **Expectation Suite Validation Result** combines multiple Expectation Validat
 validation into a single report.
 
 A **Metric** is a value produced by Great Expectations when evaluating one or more batches of data, such as an
-observed mean or distribution of data.
+observed mean or distribution of data. Metrics can be addressed in Great Expectations using standardized names that refer to the specific Batch and Expectation that produced them.
 
 A **Validation Operator** stitches together resources provided by the Data Context to provide an easy way to deploy Great Expectations in your environment. It executes configurable **Action**s such as updating Data Docs, sending a notification to your team about validation results, or storing a result in a shared S3 bucket.
 
@@ -64,10 +66,9 @@ A **Checkpoint** is a configuration for a Validation Operator that specifies whi
    :maxdepth: 2
 
    /reference/core_concepts/validation.rst
-   /reference/core_concepts/validation_operators_and_actions.rst
    /reference/core_concepts/validation_result.rst
-   /reference/core_concepts/metric_reference.rst
    /reference/core_concepts/metrics.rst
+   /reference/core_concepts/validation_operators_and_actions.rst
 
 .. _reference__core_concepts__data_contexts:
 
@@ -83,11 +84,11 @@ related to your validation are appropriately versioned and visible to your team.
 
 A **Store** provides a consistent API to manage access to Expectations, Expectation Suite Validation Results and other Great Expectations assets, making it easy to share resources across a team that uses AWS, Azure, GCP, local storage, or something else entirely.
 
-An **Evaluation Parameter** Store makes it possible to build expectation suites that depend on values from other batches
-of data, such as ensuring that the number of rows in a downstream dataset equals the number of unique values from an upstream one. A Data Context can manage a store to facilitate that validation scenario.
+A **Metric Store** facilitates saving any metric or statistic generated during validation, for example making it easy to create a dashboard showing key output from running Great Expectations.
 
-A **Metric** Store makes facilitates saving any metric or statistic generated during validation, for example making it easy to create a dashboard showing key output from running Great Expectations.
+An **Evaluation Parameter Store** is a kind of Metric Store that makes it possible to build expectation suites that depend on values from other batches of data, such as ensuring that the number of rows in a downstream dataset equals the number of unique values from an upstream one. A Data Context can manage a store to facilitate that validation scenario.
 
+Using the Data Context **Plugins Directory** it is possible to dynamically add additional resources
 
 .. toctree::
    :maxdepth: 2
