@@ -83,5 +83,45 @@ The configuration file tells Great Expectations to look for Expectations in a St
         - npi_expectations
 
 
+Additional Notes
+----------------
+
+- For best practices, we highly recommend that you store Expectations in a version-control system like Git. The JSON format of Expectations will allow for informative diff-statements and effective tracking of modifications. In the example below, 2 changes have been made to ``npi_expectations``.  The Expectation ```expect_table_column_count_to_equal`` was been changed from ``330`` to ``333`` to ``331``.
+
+
+.. code-block:: bash
+
+  git log -p npi_expectations.json
+
+  commit cbc127fb27095364c3c1fcbf6e7f078369b07455
+      changed expect_table_column_count_to_equal to 331
+
+  diff --git a/great_expectations/expectations/npi_expectations.json b/great_expectations/expectations/npi_expectations.json
+
+  --- a/great_expectations/expectations/npi_expectations.json
+  +++ b/great_expectations/expectations/npi_expectations.json
+  @@ -17,7 +17,7 @@
+       {
+         "expectation_type": "expect_table_column_count_to_equal",
+         "kwargs": {
+  -        "value": 333
+  +        "value": 331
+         }
+  commit 05b3c8c1ed35d183bac1717d4877fe13bc574963
+    changed expect_table_column_count_to_equal to 333
+
+  diff --git a/great_expectations/expectations/npi_expectations.json b/great_expectations/expectations/npi_expectations.json
+  --- a/great_expectations/expectations/npi_expectations.json
+  +++ b/great_expectations/expectations/npi_expectations.json
+       {
+         "expectation_type": "expect_table_column_count_to_equal",
+         "kwargs": {
+  -        "value": 330
+  +        "value": 333
+         }
+
+
+
+
 .. discourse::
     :topic_identifier: 182
