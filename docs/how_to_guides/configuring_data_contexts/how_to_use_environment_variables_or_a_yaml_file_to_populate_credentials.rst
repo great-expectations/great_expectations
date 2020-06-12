@@ -69,7 +69,7 @@ Steps
           username: ${POSTGRES_USERNAME}
           password: ${POSTGRES_PW}
           database: ${POSTGRES_DB}
-      my_postgres_db_config_yaml:
+      my_other_postgres_db:
         class_name: SqlAlchemyDatasource
         data_asset_type:
           class_name: SqlAlchemyDataset
