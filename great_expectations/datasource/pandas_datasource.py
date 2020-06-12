@@ -1,6 +1,7 @@
 import datetime
 import logging
 import uuid
+import warnings
 from functools import partial
 from io import StringIO
 
@@ -197,6 +198,10 @@ class PandasDatasource(Datasource):
             df = reader_fn(path, **reader_options)
 
         elif "s3" in batch_kwargs:
+            warnings.warn(
+                "Direct GE Support for the s3 BatchKwarg will be removed in a future release. Please use a path including the s3a:// protocol instead.",
+                DeprecationWarning,
+            )
             try:
                 import boto3
 
