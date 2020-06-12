@@ -488,13 +488,16 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
         if "partial_unexpected_counts" in result.result:
             result.result.pop("partial_unexpected_counts")
 
-    # Version and RUN-ID will be different
+    # Version, run_id, batch id will be different
     del expected_evrs.meta["great_expectations.__version__"]
     del evrs.meta["great_expectations.__version__"]
+
     del expected_evrs.meta["run_id"]
-    del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
     del evrs.meta["run_id"]
+
+    del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
     del evrs.meta["batch_kwargs"]["ge_batch_id"]
+
     del evrs.meta["validation_time"]
 
     assert evrs == expected_evrs
@@ -607,7 +610,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_ha
                 "expectation_type": "expect_column_values_to_be_unique",
             },
             {
-                "kwargs": {"column": "nulls", "mostly": 0.4714285714285715},
+                "kwargs": {"column": "nulls", "mostly": 0.47},
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
                 "expectation_type": "expect_column_values_to_not_be_null",
             },
@@ -908,7 +911,7 @@ def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
             },
             {
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
-                "kwargs": {"column": "nulls", "mostly": 0.4714285714285715},
+                "kwargs": {"column": "nulls", "mostly": 0.47},
                 "expectation_type": "expect_column_values_to_not_be_null",
             },
         ],
@@ -1085,7 +1088,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectation
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
             },
             {
-                "kwargs": {"column": "nulls", "mostly": 0.4714285714285715},
+                "kwargs": {"column": "nulls", "mostly": 0.47},
                 "expectation_type": "expect_column_values_to_not_be_null",
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
             },
@@ -1231,7 +1234,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_excluded_columns_are_fals
             {
                 "expectation_type": "expect_column_values_to_not_be_null",
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
-                "kwargs": {"column": "nulls", "mostly": 0.4714285714285715},
+                "kwargs": {"column": "nulls", "mostly": 0.47},
             },
         ],
     )
