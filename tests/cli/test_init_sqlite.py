@@ -154,8 +154,6 @@ great_expectations/
                         short-logo-vector.svg
                         short-logo.png
                         validation_failed_unexpected_values.gif
-                    scripts/
-                        bootstrap-table-filter-control.min.js
                     styles/
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
