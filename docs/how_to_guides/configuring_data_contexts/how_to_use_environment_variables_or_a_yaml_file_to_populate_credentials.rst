@@ -1,6 +1,6 @@
 .. _how_to_guides__configuring_data_contexts__how_to_use_environment_variables_or_a_yaml_file_to_populate_credentials:
 
-How to Use Environment Variables or a YAML File to Populate Credentials
+How to use environment variables or a yaml file to populate credentials
 =========================================================================================
 
 This guide will explain how to use environment variables and/or a ``YAML`` file to populate credentials (or any value) in your ``great_expectations.yml`` project config. 
