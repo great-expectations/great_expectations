@@ -476,6 +476,14 @@ def _deduplicate_evaluation_parameter_dependencies(dependencies):
 
     return deduplicated
 
+class ExpectationIdentityConfiguration(DictDot):
+    pass
+
+class ExpectationValidationConfiguration(DictDot):
+    pass
+
+class ExpectationRuntimeConfiguration(DictDot):
+    pass
 
 class ExpectationConfiguration(DictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
@@ -506,6 +514,84 @@ class ExpectationConfiguration(DictDot):
     @property
     def kwargs(self):
         return self._kwargs
+
+    @property
+    def identity_config(self) -> ExpectationIdentityConfiguration:
+        #Logic for column_*_expectations
+        if 'column' in self.kwargs:
+            return ExpectationIdentityConfiguration({
+                "expectation_type" : self.expectation_type,
+                "expectation_kwargs" : {
+                    "column" : self.kwargs['column'],
+                }
+            })
+
+        #Logic for column_pair_*_expectations
+        elif 'column_A' in self.kwargs and 'column_B' in self.kwargs:
+            return ExpectationIdentityConfiguration({
+                "expectation_type" : self.expectation_type,
+                "expectation_kwargs" : {
+                    "column_A" : self.kwargs["column_A"],
+                    "column_B" : self.kwargs["column_B"],
+                }
+            })
+
+        #Logic for multicolumn_expectations
+        elif 'column_list' in self.kwargs:
+            return ExpectationIdentityConfiguration({
+                "expectation_type" : self.expectation_type,
+                "expectation_kwargs" : {
+                    "column_list" : self.kwargs["column_list"],
+                },
+            })
+
+        #Logic for all remaining expectations
+        else:
+            return ExpectationIdentityConfiguration({
+                "expectation_type": self.expectation_type,
+            })
+
+    @property
+    def validation_kwargs(self) -> ExpectationValidationConfiguration:
+        key_list = self._kwargs.keys()
+
+        key_list.difference_update(
+            self.identity_config["expectation_kwargs"].keys()
+        )
+        key_list.difference_update({
+            "result_format",
+            "include_config",
+            "catch_exceptions",
+            "meta",
+        })
+        return ExpectationValidationConfiguration({ key: value for key, value self._kwargs.items() if key in key_list})
+
+    @property
+    def runtime_kwargs(self) -> ExpectationRuntimeConfiguration:
+        return ExpectationRuntimeConfiguration({ key: value for key, value self._kwargs.items() if key in {
+            "result_format",
+            "include_config",
+            "catch_exceptions",
+            "meta", # Is this where we want to handle meta?
+        }})
+
+
+    def isIdentityEquivalentTo(self,
+        other:ExpectationConfiguration
+    ) -> bool:
+        return self.identity_config == other.identity_config
+
+    def isValidationEquivalentTo(self,
+        other:ExpectationConfiguration
+    ) -> bool:
+        return self.identity_config == other.identity_config and
+            self.validation_kwargs == other.validation_kwargs
+
+    def isRuntimeEquivalentTo(self,
+        other:ExpectationConfiguration
+    ) -> bool:
+        return self.kwargs == other.kwargs
+
 
     def isEquivalentTo(self, other):
         """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""

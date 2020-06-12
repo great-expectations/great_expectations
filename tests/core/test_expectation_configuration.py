@@ -74,6 +74,12 @@ def test_expectation_configuration_equivalence(
     assert config1.isEquivalentTo(config4)  # different result format
     assert not config1.isEquivalentTo(config5)  # different value_set
 
+def test_expectation_configuration_equivalence_2(
+    config1, config2, config3, config4, config5
+):
+    
+
+
 
 def test_update_kwargs(config1):
 
@@ -152,4 +158,3 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies():
             }
         ]
     } == dependencies
-
