@@ -3,7 +3,7 @@
 How to use environment variables or a yaml file to populate credentials
 =========================================================================================
 
-This guide will explain how to use environment variables and/or a ``YAML`` file to populate credentials (or any value) in your ``great_expectations.yml`` project config. 
+This guide will explain how to use environment variables and/or a yaml file to populate credentials (or any value) in your ``great_expectations.yml`` project config. 
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
