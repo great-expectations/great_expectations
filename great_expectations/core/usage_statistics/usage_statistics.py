@@ -357,6 +357,23 @@ def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name
     return payload
 
 
+def add_datasource_usage_statistics(data_context, name, **kwargs):
+    try:
+        data_context_id = data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+
+    datasource_anonymizer = DatasourceAnonymizer(data_context_id)
+    payload = {}
+    try:
+        payload = datasource_anonymizer.anonymize_datasource_info(name, kwargs)
+    except Exception:
+        logger.debug(
+            "add_datasource_usage_statistics: Unable to create add_datasource_usage_statistics payload field"
+        )
+    return payload
+
+
 def send_usage_message(data_context, event, event_payload=None, success=None):
     """send a usage statistics message."""
     try:

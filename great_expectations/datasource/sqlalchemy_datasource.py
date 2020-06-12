@@ -141,6 +141,25 @@ class SqlAlchemyDatasource(Datasource):
                 self.engine = create_engine(options)
                 self.engine.connect()
 
+            # since we switched to lazy loading of Datasources when we initialise a DataContext,
+            # the dialect of SQLAlchemy Datasources cannot be obtained reliably when we send
+            # "data_context.__init__" events.
+            # This event fills in the SQLAlchemy dialect.
+            if data_context is not None and getattr(
+                data_context, "_usage_statistics_handler", None
+            ):
+                handler = data_context._usage_statistics_handler
+                handler.send_usage_message(
+                    event="datasource.sqlalchemy.connect",
+                    event_payload={
+                        "anonymized_name": handler._datasource_anonymizer.anonymize(
+                            self.name
+                        ),
+                        "sqlalchemy_dialect": self.engine.name,
+                    },
+                    success=True,
+                )
+
         except datasource_initialization_exceptions as sqlalchemy_error:
             raise DatasourceInitializationError(self._name, str(sqlalchemy_error))
 
