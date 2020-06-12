@@ -56,7 +56,7 @@ Steps
     # great_expectations/great_expectations.yml
   
     datasources:
-      my_postgres_db_env_vars:
+      my_postgres_db:
         class_name: SqlAlchemyDatasource
         data_asset_type:
           class_name: SqlAlchemyDataset
