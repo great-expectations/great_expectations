@@ -5,6 +5,9 @@
 Core concepts
 #############
 
+A **Dataset** is a collection of similar records. How do you know when a collection of records is one dataset versus two datasets or when two datasets really are part of the same dataset? We think the answer is not about the records, but about your *purpose*; a dataset is a thing about which you would like to track metadata (and especially, *expectations*). *A collection of records is a dataset when it's worth giving it a name.*
+
+
 
 .. _reference__core_concepts__expectations:
 
@@ -20,8 +23,7 @@ Expectations are assertions for data. They help accelerate data engineering and 
 
 **Expectation Implementations** provide the critical translation layer between what we expect and how to verify the expectation in data or express it in :ref:`data_docs`. Expectation Implementations are tailored for specific validation engines where the actual expectation is executed.
 
-**Expectation Suites** combine multiple Expectation Configurations into an overall description of a dataset. Expectation
-Suites should have names corresponding to the kind of data they define, like “NPI” for National Provider Identifier data or “company.users” for a users table.
+**Expectation Suites** combine multiple Expectation Configurations into an overall description of a dataset. Expectation Suites should have names corresponding to the kind of data they define, like “NPI” for National Provider Identifier data or “company.users” for a users table.
 
 .. toctree::
    :maxdepth: 2
@@ -88,7 +90,7 @@ A **Metric Store** facilitates saving any metric or statistic generated during v
 
 An **Evaluation Parameter Store** is a kind of Metric Store that makes it possible to build expectation suites that depend on values from other batches of data, such as ensuring that the number of rows in a downstream dataset equals the number of unique values from an upstream one. A Data Context can manage a store to facilitate that validation scenario.
 
-Using the Data Context **Plugins Directory** it is possible to dynamically add additional resources
+**Plugins** are python packages and modules that can be dynamically loaded by the Data Context to support additional functionality, such as a new type of Expectation or Store Backend.
 
 .. toctree::
    :maxdepth: 2
@@ -117,7 +119,7 @@ Datasources, Batch Kwargs Generators, Batch Parameters, and Batch Kwargs make it
 - How do I use Great Expectations to store Batch Kwargs configurations or logically describe data when I need to build equivalent Batch Kwargs for different datasources?
 - How do I know what data is available from my datasource?
 
-A **Datasource** is a connection to a **Validation Engine** (a compute environment such as Pandas, Spark, or a SQL-compatible database) and one or more data storage locations. For a SQL database, the Validation Engine and data storage locations will be the same, but for Spark or Pandas, you may be reading data from a remote location such as an S3 bucket but validating it in a cluster or local machine. The Datasource produces Batches of data that Great Expectations can validate in that environment.
+A **Datasource** is a connection to an **Execution Engine** (a compute environment such as Pandas, Spark, or a SQL-compatible database) and one or more **Data Connections**. For a SQL database, the Validation Engine and data storage locations will be the same, but for Spark or Pandas, you may be reading data from a remote location such as an S3 bucket but validating it in a cluster or local machine. The Datasource produces Batches of data that Great Expectations can validate in that environment.
 
 **Batch Kwargs** are specific instructions for a Datasource about what data should be prepared as a Batch for
 validation. The Batch could reference a specific database table, the most recent log file delivered to S3, or a subset of one of those objects, for example just the first 10,000 rows.
