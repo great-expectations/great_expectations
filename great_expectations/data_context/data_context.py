@@ -1,6 +1,3 @@
-"""Check it out. I'm a docstring.
-"""
-
 import configparser
 import copy
 import datetime
