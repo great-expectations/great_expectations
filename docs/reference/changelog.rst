@@ -14,7 +14,7 @@ develop
 * [BUGFIX] fixed glossary links in walkthrough modal, README, CTA button, scaffold notebook
 * [BUGFIX] Improved TupleGCSStoreBackend configurability (#1398 #1399)
 * [BUGFIX] Data Docs: switch bootstrap-table-filter-control.min.js to CDN
-
+* [ENHANCEMENT] BasicSuiteBuilderProfiler now rounds mostly values for readability
 
 0.11.2
 -----------------
