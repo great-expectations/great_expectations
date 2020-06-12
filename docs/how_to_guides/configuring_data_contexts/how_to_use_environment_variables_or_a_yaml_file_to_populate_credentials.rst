@@ -23,7 +23,7 @@ Steps
     export POSTGRES_PW=''
     export POSTGRES_DB=postgres
 
-2. Save desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml`` or another ``YAML`` file of your choosing.
+2. Save desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml`` or another yaml file of your choosing.
 
   .. admonition:: Note:
 
