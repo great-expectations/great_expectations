@@ -75,7 +75,7 @@ Steps
           class_name: SqlAlchemyDataset
           module_name: great_expectations.dataset
         module_name: great_expectations.datasource
-        credentials: ${my_postgres_db_yaml_creds}
+        credentials: ${my_other_postgres_db_yaml_creds}
 
 Additional Notes
 --------------------
