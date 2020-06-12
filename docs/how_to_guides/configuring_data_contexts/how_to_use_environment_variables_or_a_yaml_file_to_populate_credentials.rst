@@ -33,7 +33,7 @@ Steps
     
     # great_expectations/uncommitted/config_variables.yml
 
-    my_postgres_db_yaml_creds:
+    my_other_postgres_db_yaml_creds:
       drivername: postgres
       host: localhost
       port: '5432'
