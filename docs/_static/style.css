@@ -278,3 +278,29 @@ a {
 .rst-content .sidebar {
   margin-top: 80px !important;
 }
+
+/*** Make the API Reference breadcrumbs look kind of normal ***/
+ul.wy-breadcrumbs li code span.pre{
+  font-size: 16px;
+  font-family: HKGroteskPro, serif;
+  font-weight: 400;
+  color: rgb(155, 89, 182);
+}
+
+/***** Ugly hacks to start to mess with module doc formatting *****
+dl.class {
+  border: 2px solid blue;
+}
+
+dl.class dt{
+  border: 2px solid red;
+}
+
+dl.method{
+  border: 2px solid red;
+}
+
+dl.method dt{
+  background-color: red;
+}
+*/

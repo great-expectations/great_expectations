@@ -15,6 +15,7 @@ develop
 * [BUGFIX] Improved TupleGCSStoreBackend configurability (#1398 #1399)
 * [BUGFIX] Data Docs: switch bootstrap-table-filter-control.min.js to CDN
 * [ENHANCEMENT] BasicSuiteBuilderProfiler now rounds mostly values for readability
+* [DOCS] Add AutoAPI as the primary source for API Reference docs.
 
 0.11.2
 -----------------
