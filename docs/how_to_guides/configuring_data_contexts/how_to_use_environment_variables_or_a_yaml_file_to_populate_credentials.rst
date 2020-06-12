@@ -12,7 +12,7 @@ This guide will explain how to use environment variables and/or a yaml file to p
 Steps
 ------
 
-1. Save desired credentials or config values to environment variables - these take precedence over variables defined in a config variables ``YAML``.
+1. Save desired credentials or config values to environment variables - these take precedence over variables defined in a config variables yaml.
 
   .. code-block:: bash
   
