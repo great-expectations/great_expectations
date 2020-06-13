@@ -23,21 +23,22 @@ except ImportError:
     logger.debug("Unable to import sqlalchemy.")
 
 
-try:
-    import google.auth
+if sqlalchemy != None:
+    try:
+        import google.auth
 
-    datasource_initialization_exceptions = (
-        sqlalchemy.exc.OperationalError,
-        sqlalchemy.exc.DatabaseError,
-        sqlalchemy.exc.ArgumentError,
-        google.auth.exceptions.GoogleAuthError,
-    )
-except ImportError:
-    datasource_initialization_exceptions = (
-        sqlalchemy.exc.OperationalError,
-        sqlalchemy.exc.DatabaseError,
-        sqlalchemy.exc.ArgumentError,
-    )
+        datasource_initialization_exceptions = (
+            sqlalchemy.exc.OperationalError,
+            sqlalchemy.exc.DatabaseError,
+            sqlalchemy.exc.ArgumentError,
+            google.auth.exceptions.GoogleAuthError,
+        )
+    except ImportError:
+        datasource_initialization_exceptions = (
+            sqlalchemy.exc.OperationalError,
+            sqlalchemy.exc.DatabaseError,
+            sqlalchemy.exc.ArgumentError,
+        )
 
 
 class SqlAlchemyDatasource(Datasource):

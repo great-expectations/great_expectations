@@ -84,11 +84,24 @@ Within the table of contents, each section has specific role to play. Broadly sp
 
 * **Class names are written in upper camel case, and always linked on first reference.** Good: "ValidationOperator." Bad: "validationOperator", "validation operator". If a word is both a core concept and a class name, prefer the core concept unless the text refers specifically to the class.
 
-**File names and RST refs**
+**File names, RST refs, and links**
 
 * **File names should parallel titles, so that URLs and titles are similar.** For example: the page titled ``Initialize a project`` has this filename: ``initialize_a_project.rst``, which produces this URL: ``initialize_a_project.html``
 * **Use snake case for file names**.
 * **Refs are ``_{filename}`` or ``_{folder_name}__{filename}``.** Ex: ``_getting_started__initialize_a_project``
+
+* **Links to docs in the API Reference section**
+
+    * Link to a module: :mod:`great_expectations.data_context.data_context`
+    * Abbreviated link to a module: :mod:`~great_expectations.data_context.data_context`
+    * Link to a class: :py:class:`great_expectations.data_context.data_context.BaseDataContext`
+    * Abbreviated link to a class: :py:class:`~great_expectations.data_context.data_context.BaseDataContext`
+    * Link to a method in a class: :py:meth:`great_expectations.data_context.data_context.BaseDataContext.validate_config`
+    * Abbreviated link to a method in a class: :py:meth:`~great_expectations.data_context.data_context.BaseDataContext.validate_config`
+    * Link to an attribute in a class: :py:attr:`great_expectations.data_context.data_context.BaseDataContext.GE_DIR`
+    * Abbreviated link to an attribute in a class: :py:attr:`~great_expectations.data_context.data_context.BaseDataContext.GE_DIR`
+    * Link to a function in a module: :py:attr:`great_expectations.jupyter_ux.display_column_evrs_as_section`
+    * Abbreviated to a function in a module: :py:attr:`~great_expectations.jupyter_ux.display_column_evrs_as_section`
 
 **Code formatting**
 
