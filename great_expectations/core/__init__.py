@@ -26,6 +26,7 @@ from great_expectations.exceptions import (
     UnavailableMetricError,
 )
 from great_expectations.types import DictDot
+from great_expectations.types.base import DotDict
 
 logger = logging.getLogger(__name__)
 
@@ -476,13 +477,13 @@ def _deduplicate_evaluation_parameter_dependencies(dependencies):
 
     return deduplicated
 
-class ExpectationIdentityConfiguration(DictDot):
+class ExpectationIdentityConfiguration(DotDict):
     pass
 
-class ExpectationValidationConfiguration(DictDot):
+class ExpectationValidationConfiguration(DotDict):
     pass
 
-class ExpectationRuntimeConfiguration(DictDot):
+class ExpectationRuntimeConfiguration(DotDict):
     pass
 
 class ExpectationConfiguration(DictDot):
@@ -521,7 +522,7 @@ class ExpectationConfiguration(DictDot):
         if 'column' in self.kwargs:
             return ExpectationIdentityConfiguration({
                 "expectation_type" : self.expectation_type,
-                "expectation_kwargs" : {
+                "kwargs" : {
                     "column" : self.kwargs['column'],
                 }
             })
@@ -530,7 +531,7 @@ class ExpectationConfiguration(DictDot):
         elif 'column_A' in self.kwargs and 'column_B' in self.kwargs:
             return ExpectationIdentityConfiguration({
                 "expectation_type" : self.expectation_type,
-                "expectation_kwargs" : {
+                "kwargs" : {
                     "column_A" : self.kwargs["column_A"],
                     "column_B" : self.kwargs["column_B"],
                 }
@@ -540,7 +541,7 @@ class ExpectationConfiguration(DictDot):
         elif 'column_list' in self.kwargs:
             return ExpectationIdentityConfiguration({
                 "expectation_type" : self.expectation_type,
-                "expectation_kwargs" : {
+                "kwargs" : {
                     "column_list" : self.kwargs["column_list"],
                 },
             })
@@ -549,14 +550,15 @@ class ExpectationConfiguration(DictDot):
         else:
             return ExpectationIdentityConfiguration({
                 "expectation_type": self.expectation_type,
+                "kwargs": {},
             })
 
     @property
-    def validation_kwargs(self) -> ExpectationValidationConfiguration:
-        key_list = self._kwargs.keys()
+    def validation_config(self) -> ExpectationValidationConfiguration:
+        key_list = set(self._kwargs.keys())
 
         key_list.difference_update(
-            self.identity_config["expectation_kwargs"].keys()
+            set(self.identity_config["kwargs"].keys())
         )
         key_list.difference_update({
             "result_format",
@@ -564,34 +566,40 @@ class ExpectationConfiguration(DictDot):
             "catch_exceptions",
             "meta",
         })
-        return ExpectationValidationConfiguration({ key: value for key, value self._kwargs.items() if key in key_list})
+
+        return ExpectationValidationConfiguration({
+            key: value for key, value in self._kwargs.items() if key in key_list
+        })
 
     @property
-    def runtime_kwargs(self) -> ExpectationRuntimeConfiguration:
-        return ExpectationRuntimeConfiguration({ key: value for key, value self._kwargs.items() if key in {
-            "result_format",
-            "include_config",
-            "catch_exceptions",
-            "meta", # Is this where we want to handle meta?
-        }})
+    def runtime_config(self) -> ExpectationRuntimeConfiguration:
+        return ExpectationRuntimeConfiguration({
+            key: value for key, value in self._kwargs.items() if key in {
+                "result_format",
+                "include_config",
+                "catch_exceptions",
+                # "meta", # Is this where we want to handle meta?
+            }
+        })
 
 
     def isIdentityEquivalentTo(self,
-        other:ExpectationConfiguration
+        other: "ExpectationConfiguration"
     ) -> bool:
         return self.identity_config == other.identity_config
 
     def isValidationEquivalentTo(self,
-        other:ExpectationConfiguration
+        other: "ExpectationConfiguration"
     ) -> bool:
-        return self.identity_config == other.identity_config and
-            self.validation_kwargs == other.validation_kwargs
+        return self.identity_config == other.identity_config and \
+            self.validation_config == other.validation_config
 
     def isRuntimeEquivalentTo(self,
-        other:ExpectationConfiguration
+        other: "ExpectationConfiguration"
     ) -> bool:
-        return self.kwargs == other.kwargs
-
+        return self.identity_config == other.identity_config and \
+            self.validation_config == other.validation_config and \
+            self.runtime_config == other.runtime_config
 
     def isEquivalentTo(self, other):
         """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""
