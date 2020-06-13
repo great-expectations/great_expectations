@@ -628,8 +628,8 @@ def test_cli_datasource_with_failed_connection(
     stdout = result.stdout
     config = yaml.load(open(config_path, "r"))
     datasources = config["datasources"]
-    print("="*80)
-    print(stdout)
+    # print("="*80)
+    # print(stdout)
 
     assert "Cannot connect to the database." in stdout
     assert 'invalid port number: "99999"' in stdout
@@ -669,8 +669,8 @@ def test_cli_datasource_with_failed_connection(
     stdout = result.stdout
     config = yaml.load(open(config_path, "r"))
     datasources = config["datasources"]
-    # print("="*80)
-    # print(stdout)
+    print("="*80)
+    print(stdout)
 
     assert "Cannot connect to the database." in stdout
     assert 'invalid port number: "99999"' in stdout

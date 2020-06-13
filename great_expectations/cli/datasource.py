@@ -546,6 +546,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             datasource = context._build_datasource_from_config(
                 datasource_name, configuration, substitute_variables=True
             )
+            print("Connection successful!")
 
             cli_message(
                 """
@@ -575,32 +576,53 @@ The credentials will be saved in uncommitted/config_variables.yml under the key 
         except DatasourceInitializationError as de:
             cli_message(msg_cannot_connect_to_database.format(str(de)))
             if not click.confirm("Enter the credentials again?", default=True):
-                context.add_datasource(
-                    datasource_name,
-                    initialize=False,
-                    module_name="great_expectations.datasource",
-                    class_name="SqlAlchemyDatasource",
-                    data_asset_type={"class_name": "SqlAlchemyDataset"},
-                    credentials="${" + datasource_name + "}",
-                )
-                # TODO this message about continuing may not be accurate
+
                 cli_message(
                     """
-Datasource {0:s} was saved to {1:s}.
-Credentials have been saved to {2:s}.
-Since we could not connect to the database, you can complete troubleshooting in the configuration files documented here:
-<blue>https://docs.greatexpectations.io/en/latest/tutorials/add-sqlalchemy-datasource.html?utm_source=cli&utm_medium=init&utm_campaign={3:s}#{4:s}</blue> .
+Here is the config that would have been added to your {0:s}:
 
-After you connect to the datasource, run great_expectations init to continue.
+{1:s}
+
+Here is the config that would have been added to your credentials.yml:
 
 """.format(
-                        datasource_name,
+                        DataContext.GE_YML,
+                        textwrap.indent(
+                            toolkit.yaml.dump({datasource_name: configuration}), "  "
+                        ),
                         DataContext.GE_YML,
                         context.get_config()["config_variables_file_path"],
                         rtd_url_ge_version,
                         selected_database.value.lower(),
                     )
                 )
+
+#                 context.add_datasource(
+#                     datasource_name,
+#                     initialize=False,
+#                     module_name="great_expectations.datasource",
+#                     class_name="SqlAlchemyDatasource",
+#                     data_asset_type={"class_name": "SqlAlchemyDataset"},
+#                     credentials="${" + datasource_name + "}",
+#                 )
+#                 # TODO this message about continuing may not be accurate
+#                 cli_message(
+#                     """
+# Datasource {0:s} was saved to {1:s}.
+# Credentials have been saved to {2:s}.
+# Since we could not connect to the database, you can complete troubleshooting in the configuration files documented here:
+# <blue>https://docs.greatexpectations.io/en/latest/tutorials/add-sqlalchemy-datasource.html?utm_source=cli&utm_medium=init&utm_campaign={3:s}#{4:s}</blue> .
+
+# After you connect to the datasource, run great_expectations init to continue.
+
+# """.format(
+#                         datasource_name,
+#                         DataContext.GE_YML,
+#                         context.get_config()["config_variables_file_path"],
+#                         rtd_url_ge_version,
+#                         selected_database.value.lower(),
+#                     )
+#                 )
                 return None
 
     return datasource_name
