@@ -140,10 +140,19 @@ def test_expectation_config_properties(
         }
     }
     assert config1.validation_config == {
-        "value_set": [1, 2, 3],
+        "expectation_type" : "expect_column_values_to_be_in_set",
+        "kwargs" : {
+            "column": "a",
+            "value_set": [1, 2, 3],
+        }
     }
     assert config1.runtime_config == {
-        "result_format": "BASIC"
+        "expectation_type" : "expect_column_values_to_be_in_set",
+        "kwargs" : {
+            "column": "a",
+            "value_set": [1, 2, 3],
+            "result_format": "BASIC",
+        }
     }
 
 
@@ -152,11 +161,19 @@ def test_expectation_config_properties(
         "kwargs" : {}
     }
     assert config6.validation_config == {
-        "min_value": 0,
-        "max_value": 100,
+        "expectation_type" : "expect_table_row_count_to_be_between",
+        "kwargs" : {
+            "min_value": 0,
+            "max_value": 100,
+        }
     }
     assert config6.runtime_config == {
-        "result_format": "BASIC"
+        "expectation_type" : "expect_table_row_count_to_be_between",
+        "kwargs" : {
+            "min_value": 0,
+            "max_value": 100,
+            "result_format": "BASIC",
+        }
     }
 
 
@@ -167,11 +184,21 @@ def test_expectation_config_properties(
         }
     }
     assert config7.validation_config == {
-        "min_value": 0,
-        "max_value": 100,
+        "expectation_type" : "expect_column_mean_to_be_between",
+        "kwargs" : {
+            "column": "a",
+            "min_value": 0,
+            "max_value": 100,
+        }
     }
     assert config7.runtime_config == {
-        "result_format": "BASIC"
+        "expectation_type" : "expect_column_mean_to_be_between",
+        "kwargs" : {
+            "column": "a",
+            "min_value": 0,
+            "max_value": 100,
+            "result_format": "BASIC",
+        }
     }
 
     assert config8.identity_config == {
@@ -182,10 +209,21 @@ def test_expectation_config_properties(
         }
     }
     assert config8.validation_config == {
-        "mostly": .9
+        "expectation_type" : "expect_column_pair_values_to_be_equal",
+        "kwargs" : {
+            "column_A": "a",
+            "column_B": "b",
+            "mostly": .9,
+        }
     }
     assert config8.runtime_config == {
-        "result_format": "COMPLETE"
+        "expectation_type" : "expect_column_pair_values_to_be_equal",
+        "kwargs" : {
+            "column_A": "a",
+            "column_B": "b",
+            "mostly": .9,
+            "result_format": "COMPLETE",
+        }
     }
 
 
@@ -195,9 +233,18 @@ def test_expectation_config_properties(
             "column_list": ["a", "b", "c"]
         }
     }
-    assert config9.validation_config == {}
+    assert config9.validation_config == {
+        "expectation_type" : "expect_multicolumn_values_to_be_unique",
+        "kwargs" : {
+            "column_list": ["a", "b", "c"]
+        }
+    }
     assert config9.runtime_config == {
-        "result_format": "COMPLETE"
+        "expectation_type" : "expect_multicolumn_values_to_be_unique",
+        "kwargs" : {
+            "column_list": ["a", "b", "c"],
+            "result_format": "COMPLETE",
+        }
     }
 
 def test_expectation_configuration_equivalence_2():

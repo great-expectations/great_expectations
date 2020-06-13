@@ -518,6 +518,10 @@ class ExpectationConfiguration(DictDot):
 
     @property
     def identity_config(self) -> ExpectationIdentityConfiguration:
+        """determines the data on which an Expectation should be applied.
+        
+        expectation_type is always part of an ExpectationIdentityConfig. Depending on the Expectation, additional keyword arguments may also be considered as part of the expectation identity, such as `column` or `row_condition`
+        """
         #Logic for column_*_expectations
         if 'column' in self.kwargs:
             return ExpectationIdentityConfiguration({
@@ -555,31 +559,32 @@ class ExpectationConfiguration(DictDot):
 
     @property
     def validation_config(self) -> ExpectationValidationConfiguration:
-        key_list = set(self._kwargs.keys())
-
-        key_list.difference_update(
-            set(self.identity_config["kwargs"].keys())
-        )
-        key_list.difference_update({
-            "result_format",
-            "include_config",
-            "catch_exceptions",
-            "meta",
-        })
+        """describes all elements of configuration required to evaluate the boolean `success` value that the Expectation will return when validated on data.
+        
+        In addition to any keyword arguments used in the identity_config, it would include the configured `value_set` for `expect_column_values_to_be_in_set`, for example, and the value of a `mostly` parameter if set.
+        """
 
         return ExpectationValidationConfiguration({
-            key: value for key, value in self._kwargs.items() if key in key_list
+            "expectation_type": self.expectation_type,
+            "kwargs" : {
+                key: value for key, value in self.kwargs.items() if key not in {
+                    "result_format",
+                    "include_config",
+                    "catch_exceptions",
+                }
+            }
         })
 
     @property
     def runtime_config(self) -> ExpectationRuntimeConfiguration:
+        """Beyond identity_config and validation_config, runtime_config adds additional keyword arguments that do not affect `success`, but can affect other metadata returned from validation, such as result_format and catch_exceptions.
+        
+        Note that runtime_configs can affect performance, even if they don't affect results. For example, `result_format="COMPLETE"` might take longer to execute because of additional information collection requirements.
+        """
+
         return ExpectationRuntimeConfiguration({
-            key: value for key, value in self._kwargs.items() if key in {
-                "result_format",
-                "include_config",
-                "catch_exceptions",
-                # "meta", # Is this where we want to handle meta?
-            }
+            "expectation_type": self.expectation_type,
+            "kwargs": self.kwargs,
         })
 
 
