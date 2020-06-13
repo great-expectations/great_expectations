@@ -119,6 +119,7 @@ def test_expectation_configuration_equivalence(
     config1, config2, config3, config4, config5
 ):
     """Equivalence should depend only on properties that affect the result of the expectation."""
+
     assert config1.isEquivalentTo(config2)  # no difference
     assert config2.isEquivalentTo(config1)
     assert config1.isEquivalentTo(config3)  # different meta

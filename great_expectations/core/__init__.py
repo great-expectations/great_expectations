@@ -608,6 +608,14 @@ class ExpectationConfiguration(DictDot):
 
     def isEquivalentTo(self, other):
         """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""
+
+        warnings.warn(
+            "ExpectationConfiguration.isEquivalentTo will be deprecated in the future."
+            "Please choose the appropriate replacement from isIdentityEquivalentTo,"
+            "isValidationEquivalentTo, isRuntimeEquivalentTo, or __eq__.",
+            DeprecationWarning,
+        )
+
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
