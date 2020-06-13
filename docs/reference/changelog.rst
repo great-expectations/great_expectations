@@ -4,9 +4,6 @@
 Changelog
 #########
 
-develop
------------------
-
 0.11.4
 -----------------
 * [BUGIFX] Fixed an error that crashed the CLI when called in an environment with neither SQLAlchemy nor google.auth installed
