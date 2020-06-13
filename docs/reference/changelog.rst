@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+* [ENHANCEMENT] Added 3 new usage stats events: "cli.new_ds_choice", "data_context.add_datasource", and "datasource.sqlalchemy.connect"
 
 0.11.4
 -----------------
