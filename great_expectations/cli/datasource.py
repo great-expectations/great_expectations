@@ -586,7 +586,8 @@ The credentials will be saved in uncommitted/config_variables.yml under the key 
                 # TODO this message about continuing may not be accurate
                 cli_message(
                     """
-We saved datasource {0:s} in {1:s} and the credentials you entered in {2:s}.
+Datasource {0:s} was saved to {1:s}.
+Credentials have been saved to {2:s}.
 Since we could not connect to the database, you can complete troubleshooting in the configuration files documented here:
 <blue>https://docs.greatexpectations.io/en/latest/tutorials/add-sqlalchemy-datasource.html?utm_source=cli&utm_medium=init&utm_campaign={3:s}#{4:s}</blue> .
 

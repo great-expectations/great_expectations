@@ -14,7 +14,7 @@ from tests.cli.utils import (
 
 
 def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
-    """Test an empty project and after adding a single datasource."""
+    """Test an empty project before and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
 
@@ -154,7 +154,7 @@ def _add_datasource__with_two_generators_and_credentials_to_context(
     return context
 
 
-def test_cli_datasorce_new_connection_string(
+def test_cli_datasource_new_connection_string(
     empty_data_context, empty_sqlite_db, caplog
 ):
     project_root_dir = empty_data_context.root_directory
@@ -601,4 +601,80 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
     suites = expectations_store.list_keys()
     assert len(suites) == 0
 
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+def test_cli_datasource_with_failed_connection(
+    empty_data_context, empty_sqlite_db, caplog
+):
+    project_root_dir = empty_data_context.root_directory
+    config_path = os.path.join(project_root_dir, DataContext.GE_YML)
+    
+    context = DataContext(project_root_dir)
+    assert context.list_datasources() == []
+
+    config = yaml.load(open(config_path, "r"))
+    datasources = config["datasources"]
+    assert len(datasources.keys()) == 0
+
+    runner = CliRunner(mix_stderr=False)
+
+    # Run datasource new with invalid parameters and give up
+    result = runner.invoke(
+        cli,
+        ["datasource", "new", "-d", project_root_dir],
+        input="2\n2\nmynewsource\n\n99999\n\n\n\nn\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    config = yaml.load(open(config_path, "r"))
+    datasources = config["datasources"]
+    print("="*80)
+    print(stdout)
+
+    assert "Cannot connect to the database." in stdout
+    assert 'invalid port number: "99999"' in stdout
+    assert not 'Credentials have been saved' in stdout
+    assert len(datasources.keys()) == 0
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+    # Run datasource new with invalid parameters, retry successfully, but do not save the results
+    result = runner.invoke(
+        cli,
+        ["datasource", "new", "-d", project_root_dir],
+        input="2\n2\nmynewsource\n\n99999\n\n\n\ny\nlocalhost\n5432\npostgres\n\ntest_ci\nn\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    config = yaml.load(open(config_path, "r"))
+    datasources = config["datasources"]
+    # print("="*80)
+    # print(stdout)
+
+    assert "Cannot connect to the database." in stdout
+    assert 'invalid port number: "99999"' in stdout
+    assert 'Connection successful!' in stdout
+    assert not 'Credentials have been saved' in stdout
+    assert len(datasources.keys()) == 0
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+    # Run datasource new with invalid parameters, retry successfully, and save the results
+    result = runner.invoke(
+        cli,
+        ["datasource", "new", "-d", project_root_dir],
+        input="2\n2\nmynewsource\n\n99999\n\n\n\ny\nlocalhost\n5432\npostgres\n\ntest_ci\ny\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    config = yaml.load(open(config_path, "r"))
+    datasources = config["datasources"]
+    # print("="*80)
+    # print(stdout)
+
+    assert "Cannot connect to the database." in stdout
+    assert 'invalid port number: "99999"' in stdout
+    assert 'Connection successful!' in stdout
+    assert 'Credentials have been saved' in stdout
+    assert len(datasources.keys()) == 1
     assert_no_logging_messages_or_tracebacks(caplog, result)
