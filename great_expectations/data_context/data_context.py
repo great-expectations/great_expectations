@@ -941,6 +941,7 @@ class BaseDataContext(object):
         # context provides. Datasources should not see unsubstituted variables in their config.
         if initialize:
             datasource = self._build_datasource_from_config(
+                name,
                 self._project_config_with_variables_substituted.datasources[name]
             )
             self._cached_datasources[name] = datasource

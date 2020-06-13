@@ -7,6 +7,7 @@ import platform
 import sys
 import textwrap
 import uuid
+import copy
 
 import click
 
@@ -20,7 +21,10 @@ from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import DatasourceConfigSchema
-from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.data_context.util import (
+    instantiate_class_from_config,
+    substitute_all_config_variables,
+)
 from great_expectations.datasource import (
     PandasDatasource,
     SparkDFDatasource,
@@ -524,14 +528,12 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                 show_default=False,
             ).strip()
             credentials = {"url": sqlalchemy_url}
-
-        context.save_config_variable(datasource_name, credentials)
   
         try:
+            # Test the configuration before saving.
             cli_message(
                 "<cyan>Attempting to connect to your database. This may take a moment...</cyan>"
-            )
-
+            )            
             configuration = SqlAlchemyDatasource.build_configuration(
                 credentials="${" + datasource_name + "}"
             )
@@ -543,10 +545,15 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                     "Invalid Datasource configuration: {0:s}".format(errors)
                 )
 
+            # We will need to overwrite parts of this config,
+            # but we also need to display and save an unmodified version later,
+            # so let's make a copy.
+            test_configuration = copy.deepcopy(configuration)
+            test_configuration = substitute_all_config_variables(test_configuration, {datasource_name: credentials})
             datasource = context._build_datasource_from_config(
-                datasource_name, configuration, substitute_variables=True
+                datasource_name, test_configuration
             )
-            print("Connection successful!")
+            cli_message(msg_success_database)
 
             cli_message(
                 """
@@ -563,10 +570,25 @@ The credentials will be saved in uncommitted/config_variables.yml under the key 
             )
 
             toolkit.confirm_proceed_or_exit()
-            # context.add_datasource(name=datasource_name, **configuration)
+            
             # Note: configuration contains a name parameter, so we shouldn't specify name again when calling add_datasource
-            context.add_datasource(initialize=False, **configuration)
-            cli_message(msg_success_database)
+            context.add_datasource(name=datasource_name, initialize=False, **configuration)
+            # context.add_datasource(initialize=False, **configuration)
+            context.save_config_variable(datasource_name, credentials)
+
+            cli_message(
+                """
+    Datasource {0:s} was saved to {1:s}.
+    Credentials have been saved to {2:s}.
+""".format(
+                    datasource_name,
+                    DataContext.GE_YML,
+                    context.get_config()["config_variables_file_path"],
+                    rtd_url_ge_version,
+                    selected_database.value.lower(),
+                )
+            )
+
             break
 
         except ModuleNotFoundError as de:
@@ -575,7 +597,8 @@ The credentials will be saved in uncommitted/config_variables.yml under the key 
 
         except DatasourceInitializationError as de:
             cli_message(msg_cannot_connect_to_database.format(str(de)))
-            if not click.confirm("Enter the credentials again?", default=True):
+            print(configuration)
+            if not click.confirm("\nEnter the credentials again?", default=True):
 
                 cli_message(
                     """
@@ -583,46 +606,19 @@ Here is the config that would have been added to your {0:s}:
 
 {1:s}
 
-Here is the config that would have been added to your credentials.yml:
+This command would also have modified your {2:s}.
+To avoid disclosing sensititve credentials, those changes are not shown here.
 
 """.format(
                         DataContext.GE_YML,
                         textwrap.indent(
                             toolkit.yaml.dump({datasource_name: configuration}), "  "
                         ),
-                        DataContext.GE_YML,
                         context.get_config()["config_variables_file_path"],
                         rtd_url_ge_version,
                         selected_database.value.lower(),
                     )
                 )
-
-#                 context.add_datasource(
-#                     datasource_name,
-#                     initialize=False,
-#                     module_name="great_expectations.datasource",
-#                     class_name="SqlAlchemyDatasource",
-#                     data_asset_type={"class_name": "SqlAlchemyDataset"},
-#                     credentials="${" + datasource_name + "}",
-#                 )
-#                 # TODO this message about continuing may not be accurate
-#                 cli_message(
-#                     """
-# Datasource {0:s} was saved to {1:s}.
-# Credentials have been saved to {2:s}.
-# Since we could not connect to the database, you can complete troubleshooting in the configuration files documented here:
-# <blue>https://docs.greatexpectations.io/en/latest/tutorials/add-sqlalchemy-datasource.html?utm_source=cli&utm_medium=init&utm_campaign={3:s}#{4:s}</blue> .
-
-# After you connect to the datasource, run great_expectations init to continue.
-
-# """.format(
-#                         datasource_name,
-#                         DataContext.GE_YML,
-#                         context.get_config()["config_variables_file_path"],
-#                         rtd_url_ge_version,
-#                         selected_database.value.lower(),
-#                     )
-#                 )
                 return None
 
     return datasource_name

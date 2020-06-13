@@ -159,10 +159,12 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
     result = runner.invoke(
         cli,
         ["init"],
-        input="\n\n2\n6\nmy_db\nsqlite:////not_a_real.db\n\nn\n",
+        input="\n\n2\n6\nmy_db\nsqlite:////not_a_real.db\nn\n",
         catch_exceptions=False,
     )
     stdout = result.output
+    # print(stdout)
+
     assert mock_webbrowser.call_count == 0
 
     assert "Always know what to expect from your data" in stdout
@@ -184,25 +186,14 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
     assert os.path.isdir(ge_dir)
     config_path = os.path.join(ge_dir, DataContext.GE_YML)
     assert os.path.isfile(config_path)
-
     config = yaml.load(open(config_path, "r"))
-    assert config["datasources"] == {
-        "my_db": {
-            "data_asset_type": {
-                "module_name": None,
-                "class_name": "SqlAlchemyDataset",
-            },
-            "credentials": "${my_db}",
-            "class_name": "SqlAlchemyDatasource",
-            "module_name": "great_expectations.datasource",
-        }
-    }
-
-    config_path = os.path.join(
+    assert config["datasources"] == {}
+    
+    uncommitted_config_path = os.path.join(
         ge_dir, DataContext.GE_UNCOMMITTED_DIR, "config_variables.yml"
     )
-    config = yaml.load(open(config_path, "r"))
-    assert config["my_db"] == {"url": "sqlite:////not_a_real.db"}
+    uncommitted_config = yaml.load(open(uncommitted_config_path, "r"))
+    assert not "my_db" in uncommitted_config
 
     obs_tree = gen_directory_tree_str(os.path.join(root_dir, "great_expectations"))
     assert (

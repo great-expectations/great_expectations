@@ -653,7 +653,7 @@ def test_cli_datasource_with_failed_connection(
 
     assert "Cannot connect to the database." in stdout
     assert 'invalid port number: "99999"' in stdout
-    assert 'Connection successful!' in stdout
+    assert 'Great Expectations connected to your database!' in stdout
     assert not 'Credentials have been saved' in stdout
     assert len(datasources.keys()) == 0
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -674,7 +674,7 @@ def test_cli_datasource_with_failed_connection(
 
     assert "Cannot connect to the database." in stdout
     assert 'invalid port number: "99999"' in stdout
-    assert 'Connection successful!' in stdout
+    assert 'Great Expectations connected to your database!' in stdout
     assert 'Credentials have been saved' in stdout
     assert len(datasources.keys()) == 1
     assert_no_logging_messages_or_tracebacks(caplog, result)
