@@ -597,7 +597,6 @@ The credentials will be saved in uncommitted/config_variables.yml under the key 
 
         except DatasourceInitializationError as de:
             cli_message(msg_cannot_connect_to_database.format(str(de)))
-            print(configuration)
             if not click.confirm("\nEnter the credentials again?", default=True):
 
                 cli_message(
