@@ -7,6 +7,10 @@ Changelog
 develop
 -----------------
 
+0.11.4
+-----------------
+* [BUGIFX] Fixed an error that crashed the CLI when called in an environment with neither SQLAlchemy nor google.auth installed
+
 0.11.3
 -----------------
 * [ENHANCEMENT] Removed the misleading scary "Site doesn't exist or is inaccessible" message that the CLI displayed before building Data Docs for the first time.
