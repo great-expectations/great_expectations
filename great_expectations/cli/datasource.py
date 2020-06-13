@@ -20,6 +20,7 @@ from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import DatasourceConfigSchema
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import (
     PandasDatasource,
     SparkDFDatasource,
@@ -435,6 +436,11 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
         "\n<green>Great Expectations connected to your database!</green>"
     )
 
+    msg_cannot_connect_to_database = """
+<red>Cannot connect to the database.</red>
+  - Please check your environment and the configuration you provided.
+  - Database Error: {0:s}"""
+
     if not load_library("sqlalchemy"):
         return None
 
@@ -520,15 +526,12 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             credentials = {"url": sqlalchemy_url}
 
         context.save_config_variable(datasource_name, credentials)
-
-        message = """
-<red>Cannot connect to the database.</red>
-  - Please check your environment and the configuration you provided.
-  - Database Error: {0:s}"""
+  
         try:
             cli_message(
                 "<cyan>Attempting to connect to your database. This may take a moment...</cyan>"
             )
+
             configuration = SqlAlchemyDatasource.build_configuration(
                 credentials="${" + datasource_name + "}"
             )
@@ -539,6 +542,10 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                 raise ge_exceptions.GreatExpectationsError(
                     "Invalid Datasource configuration: {0:s}".format(errors)
                 )
+
+            datasource = context._build_datasource_from_config(
+                datasource_name, configuration, substitute_variables=True
+            )
 
             cli_message(
                 """
@@ -555,15 +562,18 @@ The credentials will be saved in uncommitted/config_variables.yml under the key 
             )
 
             toolkit.confirm_proceed_or_exit()
-            context.add_datasource(name=datasource_name, **configuration)
+            # context.add_datasource(name=datasource_name, **configuration)
+            # Note: configuration contains a name parameter, so we shouldn't specify name again when calling add_datasource
+            context.add_datasource(initialize=False, **configuration)
             cli_message(msg_success_database)
             break
+
         except ModuleNotFoundError as de:
-            cli_message(message.format(str(de)))
+            cli_message(msg_cannot_connect_to_database.format(str(de)))
             return None
 
         except DatasourceInitializationError as de:
-            cli_message(message.format(str(de)))
+            cli_message(msg_cannot_connect_to_database.format(str(de)))
             if not click.confirm("Enter the credentials again?", default=True):
                 context.add_datasource(
                     datasource_name,
@@ -1027,6 +1037,11 @@ We could not determine the format of the file. What is it?
     4. JSON
 """
 
+    msg_file_load_error = """
+<red>Cannot load file.</red>
+  - Please check the file and try again or select a different data file.
+  - Error: {0:s}"""
+
     reader_method_file_extensions = {
         "1": "csv",
         "2": "parquet",
@@ -1157,11 +1172,7 @@ We could not determine the format of the file. What is it?
                 batch = datasource.get_batch(batch_kwargs=batch_kwargs)
                 break
             except Exception as e:
-                file_load_error_message = """
-<red>Cannot load file.</red>
-  - Please check the file and try again or select a different data file.
-  - Error: {0:s}"""
-                cli_message(file_load_error_message.format(str(e)))
+                cli_message(msg_file_load_error.format(str(e)))
                 if not click.confirm("\nTry again?", default=True):
                     cli_message(
                         """

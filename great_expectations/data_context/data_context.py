@@ -941,7 +941,7 @@ class BaseDataContext(object):
         # context provides. Datasources should not see unsubstituted variables in their config.
         if initialize:
             datasource = self._build_datasource_from_config(
-                name, self._project_config_with_variables_substituted.datasources[name]
+                self._project_config_with_variables_substituted.datasources[name]
             )
             self._cached_datasources[name] = datasource
         else:
@@ -974,11 +974,22 @@ class BaseDataContext(object):
     def get_config(self):
         return self._project_config
 
-    def _build_datasource_from_config(self, name, config):
+    def _build_datasource_from_config(self, name, config, substitute_variables=False):
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, DatasourceConfig):
             config = datasourceConfigSchema.dump(config)
         config.update({"name": name})
+
+        if substitute_variables:
+            substitutions = {
+                **dict(self._load_config_variables_file()),
+                **dict(os.environ),
+                **self.runtime_environment,
+            }
+            config = substitute_all_config_variables(
+                config, substitutions
+            )
+
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
             config=config,
