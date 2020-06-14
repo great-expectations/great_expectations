@@ -2,7 +2,6 @@ import copy
 import inspect
 import json
 import logging
-import re
 from collections import OrderedDict
 from datetime import datetime
 from functools import reduce, wraps
@@ -1145,25 +1144,13 @@ class SparkDFDataset(MetaSparkDFDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        def check_regex_any(value):
-            for regex in regex_list:
-                if re.match(regex, str(value)):
-                    return True
-            return False
-
-        def check_regex_all(value):
-            for regex in regex_list:
-                if re.match(regex, str(value)) is None:
-                    return False
-            return True
-
-        check_regex_any_udf = udf(check_regex_any, sparktypes.StringType())
-        check_regex_all_udf = udf(check_regex_all, sparktypes.StringType())
-
         if match_on == "any":
-            return column.withColumn("__success", check_regex_any_udf(column[0]))
+            return column.withColumn("__success", column[0].rlike("|".join(regex_list)))
         elif match_on == "all":
-            return column.withColumn("__success", check_regex_all_udf(column[0]))
+            formatted_regex_list = ["(?={})".format(regex) for regex in regex_list]
+            return column.withColumn(
+                "__success", column[0].rlike("".join(formatted_regex_list))
+            )
         else:
             raise ValueError("match_on must be either 'any' or 'all'")
 
