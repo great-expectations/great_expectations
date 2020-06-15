@@ -27,6 +27,7 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
+    add_datasource_usage_statistics,
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
     usage_statistics_enabled_method,
@@ -912,6 +913,10 @@ class BaseDataContext(object):
             return []
         return list(self.validation_operators.keys())
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.add_datasource",
+        args_payload_fn=add_datasource_usage_statistics,
+    )
     def add_datasource(self, name, initialize=True, **kwargs):
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
