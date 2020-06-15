@@ -1,3 +1,4 @@
+import copy
 import enum
 import importlib
 import json
@@ -7,7 +8,6 @@ import platform
 import sys
 import textwrap
 import uuid
-import copy
 
 import click
 
