@@ -934,10 +934,7 @@ class DataAsset(object):
 
             # Warn if our version is different from the version in the configuration
             try:
-                if (
-                    expectation_suite.meta["great_expectations_version"]
-                    != ge_version
-                ):
+                if expectation_suite.meta["great_expectations_version"] != ge_version:
                     warnings.warn(
                         "WARNING: This configuration object was built using version %s of great_expectations, but "
                         "is currently being validated by version %s."
