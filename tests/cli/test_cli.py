@@ -117,6 +117,10 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
             cli, ["docs", "build", "--no-view"], catch_exceptions=False
         )
         assert error_message in result.output
+        result = runner.invoke(
+            cli, ["docs", "build", "--no-view", "--no-prompt"], catch_exceptions=False
+        )
+        assert error_message in result.output
 
         # project check-config
         result = runner.invoke(
