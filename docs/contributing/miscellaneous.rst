@@ -56,8 +56,8 @@ GE core team members use this checklist to ship releases.
 11. Check `PyPI <https://pypi.org/project/great-expectations/#history>`__ for the new release
 12. Create an annotated git tag:
 
-  * Run ``git tag -a <<VERSION>> -m "<<VERSION>>"`` with the correct new version. (Note: this is now done automatically as part of the deploy job.)
-  * Push the tag up by running ``git push origin <<VERSION>>`` with the correct new version. (Note: this might be done automatically as part of the deploy job.)
+  * Run ``git tag -a <<VERSION>> -m "<<VERSION>>"`` with the correct new version.
+  * Push the tag up by running ``git push origin <<VERSION>>`` with the correct new version.
   * Merge ``main`` into ``develop`` so that the tagged commit becomes part of the history for ``develop``: ``git checkout develop; git pull; git merge main``
   * On develop, add a new "develop" section header to changelog.rst, and push the updated file with message "Update changelog for develop"
 
