@@ -848,6 +848,7 @@ class BaseDataContext(object):
         evaluation_parameters=None,
         run_name=None,
         run_time=None,
+        result_format={"result_format": "SUMMARY"},
         **kwargs,
     ):
         """
@@ -893,6 +894,7 @@ class BaseDataContext(object):
                 run_id=run_id,
                 run_name=run_name,
                 run_time=run_time,
+                result_format=result_format,
                 **kwargs,
             )
         else:
@@ -902,6 +904,7 @@ class BaseDataContext(object):
                 evaluation_parameters=evaluation_parameters,
                 run_name=run_name,
                 run_time=run_time,
+                result_format=result_format,
                 **kwargs,
             )
 
