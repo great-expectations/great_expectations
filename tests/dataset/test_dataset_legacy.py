@@ -1,7 +1,6 @@
 from collections import OrderedDict
 
 import pytest
-
 from great_expectations.dataset import PandasDataset
 from tests.test_utils import get_dataset
 
@@ -51,4 +50,13 @@ def test_head(test_backend):
     head = dataset.head(1)
     assert isinstance(head, PandasDataset)
     assert len(head) == 1
+    assert list(head.columns) == ["a"]
+
+    # We also needed special handling for empty tables in SqlalchemyDataset
+    dataset = get_dataset(
+        test_backend, {"a": []}, schemas=schemas.get(test_backend), caching=True
+    )
+    head = dataset.head(1)
+    assert isinstance(head, PandasDataset)
+    assert len(head) == 0
     assert list(head.columns) == ["a"]
