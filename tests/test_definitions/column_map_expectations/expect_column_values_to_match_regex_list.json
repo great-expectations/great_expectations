@@ -6,6 +6,13 @@
       "x" : ["man", "plan", "canal", "panama", "hat", "bat", "bit", "bot", "but", "bet"],
       "column_name with space": ["man", "plan", "canal", "panama", "hat", "bat", "bit", "bot", "but", "bet"]
     },
+    "schemas": {
+      "spark": {
+        "w": "StringType",
+        "x": "StringType",
+        "column_name with space": "StringType"
+      }
+    },
     "tests" : [{
       "title" : "Basic positive test",
       "exact_match_out" : false,
