@@ -5,7 +5,6 @@
 Core concepts
 #############
 
-
 *****************************************
 Preamble: Concepts that are not classes
 *****************************************
@@ -68,8 +67,7 @@ An **Expectation Validation Result** captures the output of checking an expectat
 
 An **Expectation Suite Validation Result** combines multiple Expectation Validation Results and metadata about the validation into a single report.
 
-A **Metric** is a value produced by Great Expectations when evaluating one or more batches of data, such as an
-observed mean or distribution of data. Metrics can be addressed in Great Expectations using standardized names that refer to the specific Batch and Expectation that produced them.
+A **Metric** is a value produced by Great Expectations when evaluating one or more batches of data, such as an observed mean or distribution of data. Metrics can be addressed in Great Expectations using standardized names that refer to the specific Batch and Expectation that produced them.
 
 A **Validation Operator** stitches together resources provided by the Data Context to provide an easy way to deploy Great Expectations in your environment. It executes configurable **Action**s such as updating Data Docs, sending a notification to your team about validation results, or storing a result in a shared S3 bucket.
 
@@ -96,13 +94,18 @@ Data Access
 
 A **Data Asset** is a Great Expectations object that can create and validate Expectations against specific data. Data Assets are connected to data and can evaluate Expectations wherever you access your data.
 
-A **Batch** is reference to a collection of data, an Execution Engine, and metadata. The Batch is a fundamental building block for accessing data using Great Expectations.
+A **Batch** is reference to a collection of data, an Execution Engine, and metadata. The Batch is a fundamental building block for accessing data using Great Expectations, but is not the data itself. Instantiating a Batch does not necessarily "fetch" the data by immediately running a query or pulling data into memory. Instead, think of a Batch as a cache that includes the information that you will need to fetch the right data when it’s time to validate.
 
 A **Data Connection** provides configuration details for accessing an external data store, such as a database, filesystem, or cloud storage. A Batch can use information from a Data Connection, such as the connection string to a database or bucket name for a cloud storage provider, to support core operations such as Validation.
 
 A **Batch Spec** (still often referred to as **Batch Kwargs**) provides specific instructions *for an Execution Engine and Data Connection* about how to access data referred to by a Batch. The Batch Spec could reference a specific database table, the most recent log file delivered to S3, or a subset of one of those objects, for example just the first 10,000 rows.
 
-A **Batch Spec Generator** produces Batch Specs. The most basic Batch Spec Generator simply stores Batch Specs by name to make it easy to retrieve them. But Batch Spec Generators can also intelligently build Batch Specs that offer stronger guarantees about reproducibility, sampling, and compatibility with other tools. Batch Spec Generators can even help inspect data to identify and propose available Batches.
+
+A **Batch Spec Generator** produces Batch Specs. The most basic Batch Spec Generator simply stores Batch Specs by name to make it easy to retrieve them. But Batch Spec Generators can also intelligently build Batch Specs that offer stronger guarantees about reproducibility, sampling, and compatibility with other tools. Batch Spec Generators can even help inspect data to identify and propose available Batches. When customized and/or fully configured, Batch Spec Generators can:
+
+  - support a list operation over available Data Assets with the Data Connection;
+  - define logic for partitioning or "slicing" Data Assets into useful Batches, including the ability to generate parsimonious, sortable, and/or temporal descriptions of Batches; and
+  - preserve (and sometimes codify) naming conventions from your external data stores.
 
 **Batch Parameters** provide instructions to a Batch Spec Generator for how to retrieve a stored Batch Spec or build a Batch Spec that reflects partitions, deliveries, or slices of logical data assets.
 
@@ -161,12 +164,21 @@ Data Docs
 
 With Great Expectations, your tests are your docs, and your docs are your tests. Data Docs makes it possible to produce clear visual descriptions of what you expect, what you observe, and how they differ.
 
-An **Expectation Suite Renderer** creates a page that shows what you expect from data. Its language is *prescriptive*, for example translating a fully-configured ``expect_column_values_to_not_be_null`` expectation into the English phrase, "column ``address`` values must not be null, at least 80% of the time."
+.. attention::
 
-A **Validation Result Renderer** produces an overview of the result of validating a batch of data with an Expectation 
-Suite. Its language is *diagnostic*; it shows the difference between observed and expected values.
+    While Data Docs results are extremely robust, we plan to reorganize the internal API for building data docs in the future to provide a more flexible API for extending functionality.
 
-A **Descriptive Renderer** details the observed metrics produced from a validation *without comparing them to specific expected values*. Its language is descriptive; it can be a critical part of a data discovery process.
+A **Site Builder** orchestrates the construction of individual pages from raw Great Expectations objects, construction of an index, and storage of resources on a Store Backend.
+
+A **Page Builder** converts core Great Expectations objects, such as Expectation Suite Validation Results, into HTML or JSON documents that can be rendered in environments such as a web browser or Slack, using both a Renderer and a
+
+A **Renderer** converts core Great Expectations objects, such as Expectation Suite Validation Results, into an intermediate JSON-based form that includes the relevant *semantic* translation from Expectations but may not include all required formatting for the final document.
+
+- **Expectation Suite Renderer** creates a page that shows what you expect from data. Its language is *prescriptive*, for example translating a fully-configured ``expect_column_values_to_not_be_null`` expectation into the English phrase, "column ``address`` values must not be null, at least 80% of the time."
+
+- A **Validation Result Renderer** produces an overview of the result of validating a batch of data with an Expectation Suite. Its language is *diagnostic*; it shows the difference between observed and expected values.
+
+- A **Descriptive Renderer** details the observed metrics produced from a validation *without comparing them to specific expected values*. Its language is descriptive; it can be a critical part of a data discovery process.
 
 .. toctree::
    :maxdepth: 2
@@ -174,11 +186,15 @@ A **Descriptive Renderer** details the observed metrics produced from a validati
    /reference/core_concepts/data_docs.rst
    /reference/core_concepts/data_discovery.rst
 
-*********
-Profiling
-*********
+***********
+Profilers
+***********
 
-A **Profiler** uses an Execution Engine to build a new Expectation Suite. It can use zero, one, or more Batches of data to decide which Expectations to include in the new Suite. A profiler may be used to create basic high-level expectations based on a schema even without data, to create specific Expectations based on team conventions or statistical properties in a dataset, or even to generate "vacuously true" Expectations that will be evaluated and used by a Descriptive Renderer during data discovery and exploratory data analysis.
+A **Profiler** uses an Execution Engine to build a new Expectation Suite. It can use zero, one, or more Batches of data to decide which Expectations to include in the new Suite. A profiler may be used to create basic high-level expectations based on a schema even without data, to create specific Expectations based on team conventions or statistical properties in a dataset, or even to generate Expectation Suites specifically designed to be rendered by a Descriptive Renderer for data discovery.
+
+- For example, a **Suite Builder Profiler** reviews characteristics of a sample Batch of data and proposes candidate expectations to help jumpstart new users to Great Expectations.
+
+- The **Descriptive Profiler** produces Expectation Suites whose Expectations are *always (vacuously) true*. A Descriptive Profiler is not intended to produce Expectation Suites that are useful for production Validation. Instead, its goal is to use Expectations to build a collection of Metrics that are useful for understanding data.
 
 .. toctree::
    :maxdepth: 2
