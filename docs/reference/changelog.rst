@@ -12,7 +12,7 @@ develop
 * [BUGFIX] Use renderer_type to set paths in jinja templates instead of utm_medium since utm_medium is optional
 * [ENHANCEMENT] Bring in custom_views_directory in DefaultJinjaView to enable custom jinja templates stored in plugins dir
 * [BUGFIX] fixed glossary links in walkthrough modal, README, CTA button, scaffold notebook
-
+* [BUGFIX] fixed issue where calling head() on a SqlAlchemyDataset would fail if the underlying table is empty
 
 0.11.2
 -----------------
