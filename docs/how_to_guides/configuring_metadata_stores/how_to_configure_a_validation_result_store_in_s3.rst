@@ -34,7 +34,11 @@ Steps
 
 2. **Update your configuration file to include a new store for Validation results on S3.**
 
-    In the example below, the new store's name is set to ``validations_S3_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder in your S3 bucket where Validation results will be located.  If you are also storing :ref:`Expectations in S3, <how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_amazon_s3>` please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
+    In the example below, the new store's name is set to ``validations_S3_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder in your S3 bucket where Validation results will be located.
+    
+.. warning::
+
+    If you are also storing :ref:`Expectations in S3, <how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_amazon_s3>` using the same bucket, please ensure that the ``prefix`` values are disjoint and one is not a substring of the other. Otherwise, your Expectations and Validation Results Stores will not be able to identify which JSON files contain Expectations versus Validation Results.
 
 
     .. code-block:: yaml
