@@ -8,8 +8,8 @@ Custom Expectations let you extend the logic for validating data to use any crit
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
     - :ref:`Set up a working deployment of Great Expectations <getting_started>`
-    - Have access to a notebook (e.g. ``jupyter notebook``, ``jupyter lab``, etc.)
-    - Be able to access data from your notebook
+    - Launched a generic notebook (e.g. ``jupyter notebook``, ``jupyter lab``, etc.)
+    - Obtained data that can be accessed from your notebook
     - :ref:`Configured a pandas Datasource <how_to_guides__configuring_datasources__how_to_configure_a_pandas_filesystem_datasource>`
 
 Steps
@@ -108,13 +108,19 @@ Steps
 
     .. code-block:: python
 
-        my_df = pd.read_csv("./data/Titanic.csv")
-        ge.from_pandas(my_other_df, dataset_class=MyCustomPandasDataset)
+        my_pd_df = pd.read_csv("./data/Titanic.csv")
+        my_df = ge.from_pandas(my_pd_df, dataset_class=MyCustomPandasDataset)
 
-    Note: We're using the ``read_csv`` method to fetch data, instead of the more typical ``DataContext.get_batch``. This is for convenience--it 
+    As a third option:
+
+    .. code-block:: python
+
+        my_pd_df = pd.read_csv("./data/Titanic.csv")
+        my_df = MyCustomPandasDataset(my_pd_df)
+
+    Note: We're using the ``read_csv`` method to fetch data, instead of the more typical ``DataContext.get_batch``. This is for convenience: it allows us to handle the full developmentment loop for a custom Expectation within a notebook with a minimum of configuration.
     
-    In a moment, we'll demonstrate how to configure 
-
+    In a moment, we'll demonstrate how to configure a Datasource to use ``MyCustomPandasDataset`` when calling ``get_batch``.
 
 5. **Test your Expectations**
 
@@ -260,7 +266,7 @@ Additional notes
 Other Expectation decorators
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Aside from ``column_map_expectations``, there are several other types of Expectations you can create. Please see the ``Expectation Decorators`` docs for details.
+Aside from ``column_map_expectations``, there are several other types of Expectations you can create. Please see the module docs for :py:class:`~great_expectations.dataset.pandas_dataset.MetaPandasDataset` for details.
 
 
 Additional resources
