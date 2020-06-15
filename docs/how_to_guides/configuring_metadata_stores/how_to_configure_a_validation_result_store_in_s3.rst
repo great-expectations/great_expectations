@@ -9,12 +9,15 @@ This guide will help you configure a new storage location for Validations on Ama
 
     - Configured a :ref:`Data Context <tutorials__getting_started__initialize_a_data_context>`.
     - Configured an :ref:`Expectation Suite <tutorials__getting_started__create_your_first_expectations>`.
-    - Installed `boto3 <https://github.com/boto/boto3>`_ in the environment where you will run Great Expectations.
+    - Installed `boto3 <https://github.com/boto/boto3>`_ in your local environment.
     - Identified the S3 bucket and prefix where Validation results will be stored.
 
 Steps
 -----
-1. **Identify your Data Context Validations Store**
+
+1. **Configure** `boto3 <https://github.com/boto/boto3>`_ **in the environment where you will run Great Expectations**.
+
+2. **Identify your Data Context Validations Store**
 
     Look for the following section in your Data Context's ``great_expectations.yml`` file:
 
@@ -51,7 +54,7 @@ Steps
 
 3. **Confirm that the new Validations store has been added by running ``great_expectations store list``.**
 
-    Notice the output contains two Validations Stores: the original ``validations_store`` on the local filesystem and the ``validations_S3_store`` we just configured.  This is ok, since Great Expectations will look for Validation results on the S3 bucket as long as we set the ``validations_store_name`` variable to ``validations_S3_store``.  Also, copy existing Validation results to the S3 bucket if necessary.
+    Notice the output contains two Validations Stores: the original ``validations_store`` on the local filesystem and the ``validations_S3_store`` we just configured.  This is ok, since Great Expectations will look for Validation results on the S3 bucket as long as we set the ``validations_store_name`` variable to ``validations_S3_store``.
 
     .. code-block:: bash
 
@@ -70,7 +73,10 @@ Steps
             bucket: '<your_s3_bucket_name>'
             prefix: '<your_s3_bucket_folder_name>'
 
-4. **Confirm that the Validations Store has been correctly configured.**
+
+4. **Copy existing Validation results to the S3 bucket**. (This step is optional)
+
+5. **Confirm that the Validations Store has been correctly configured.**
 
     Run a :ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>` to store results in the Validations Store then visualize the results by re-building :ref:`Data Docs <tutorials__getting_started__set_up_data_docs>`.
 
@@ -79,7 +85,6 @@ Additional resources
 --------------------
 
 - Instructions on how to set up `boto3 <https://github.com/boto/boto3>`_ with AWS can be found at boto3's `documentation site <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_.
-
 
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
 
