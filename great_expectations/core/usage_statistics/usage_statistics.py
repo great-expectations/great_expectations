@@ -251,8 +251,10 @@ def usage_statistics_enabled_method(
                 message["success"] = True
                 if handler is not None:
                     handler.emit(message)
-            except Exception:
+            # except Exception:
+            except Exception  as e:
                 message["success"] = False
+                handler = get_usage_statistics_handler(args)
                 if handler:
                     handler.emit(message)
                 raise
@@ -363,7 +365,8 @@ def add_datasource_usage_statistics(data_context, name, **kwargs):
     except AttributeError:
         data_context_id = None
 
-    datasource_anonymizer = DatasourceAnonymizer(data_context_id)
+    datasource_anonymizer = data_context._usage_statistics_handler._datasource_anonymizer
+
     payload = {}
     try:
         payload = datasource_anonymizer.anonymize_datasource_info(name, kwargs)
