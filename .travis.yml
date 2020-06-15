@@ -1,6 +1,6 @@
 branches:
   only:
-    - master
+    - main
     - develop
     - "/^\\d.*/"
 language: python
@@ -16,9 +16,9 @@ env:
 stages:
   - name: test
   - name: deploy
-    if: branch = master AND type != pull_request
+    if: branch = main AND type != pull_request
   - name: experimental
-    if: branch != master
+    if: branch != main
 addons:
   postgresql: '9.4'
 services:
@@ -124,12 +124,12 @@ jobs:
     - stage: deploy
       python: 3.6
       script:
-        - git tag --annotate 0.11.1 -m "0.11.1" || echo "tag exists, skipping"
+        - git tag --annotate 0.11.4 -m "0.11.4" || echo "tag exists, skipping"
       deploy:
         provider: pypi
         edge: true
         on:
-          branch: master
+          branch: main
         distributions: sdist bdist_wheel
         skip_existing: true
         username: __token__

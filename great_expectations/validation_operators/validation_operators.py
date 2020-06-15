@@ -6,6 +6,7 @@ from dateutil.parser import ParserError, parse
 
 from great_expectations.core import RunIdentifier
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -116,10 +117,25 @@ class ActionListValidationOperator(ValidationOperator):
                     class_name: SlackRenderer
     """
 
-    def __init__(self, data_context, action_list, name):
+    def __init__(
+        self,
+        data_context,
+        action_list,
+        name,
+        result_format={"result_format": "SUMMARY"},
+    ):
         super().__init__()
         self.data_context = data_context
         self.name = name
+
+        result_format = parse_result_format(result_format)
+        assert result_format["result_format"] in [
+            "BOOLEAN_ONLY",
+            "BASIC",
+            "SUMMARY",
+            "COMPLETE",
+        ]
+        self.result_format = result_format
 
         self.action_list = action_list
         self.actions = OrderedDict()
@@ -137,7 +153,7 @@ class ActionListValidationOperator(ValidationOperator):
             module_name = "great_expectations.validation_operators"
             new_action = instantiate_class_from_config(
                 config=config,
-                runtime_environment={"data_context": self.data_context,},
+                runtime_environment={"data_context": self.data_context},
                 config_defaults={"module_name": module_name},
             )
             if not new_action:
@@ -155,7 +171,10 @@ class ActionListValidationOperator(ValidationOperator):
                 "class_name": "ActionListValidationOperator",
                 "module_name": "great_expectations.validation_operators",
                 "name": self.name,
-                "kwargs": {"action_list": self.action_list},
+                "kwargs": {
+                    "action_list": self.action_list,
+                    "result_format": self.result_format,
+                },
             }
         return self._validation_operator_config
 
@@ -194,6 +213,7 @@ class ActionListValidationOperator(ValidationOperator):
         evaluation_parameters=None,
         run_name=None,
         run_time=None,
+        result_format=None,
     ):
         assert not (run_id and run_name) and not (
             run_id and run_time
@@ -208,7 +228,7 @@ class ActionListValidationOperator(ValidationOperator):
             )
             try:
                 run_time = parse(run_id)
-            except ParserError:
+            except (ParserError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):
@@ -231,7 +251,7 @@ class ActionListValidationOperator(ValidationOperator):
             )
             batch_validation_result = batch.validate(
                 run_id=run_id,
-                result_format="SUMMARY",
+                result_format=result_format if result_format else self.result_format,
                 evaluation_parameters=evaluation_parameters,
             )
             run_result_obj["validation_result"] = batch_validation_result
@@ -386,6 +406,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         stop_on_first_error=False,
         slack_webhook=None,
         notify_on="all",
+        result_format={"result_format": "SUMMARY"},
     ):
         super(WarningAndFailureExpectationSuitesValidationOperator, self).__init__(
             data_context, action_list, name
@@ -404,6 +425,14 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         self.slack_webhook = slack_webhook
         self.notify_on = notify_on
+        result_format = parse_result_format(result_format)
+        assert result_format["result_format"] in [
+            "BOOLEAN_ONLY",
+            "BASIC",
+            "SUMMARY",
+            "COMPLETE",
+        ]
+        self.result_format = result_format
 
     @property
     def validation_operator_config(self) -> dict:
@@ -419,6 +448,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                     "stop_on_first_error": self.stop_on_first_error,
                     "slack_webhook": self.slack_webhook,
                     "notify_on": self.notify_on,
+                    "result_format": self.result_format,
                 },
             }
         return self._validation_operator_config
@@ -488,13 +518,13 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         run_name_element = {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*Run Name:* {}".format(run_name),},
+            "text": {"type": "mrkdwn", "text": "*Run Name:* {}".format(run_name)},
         }
         query["blocks"].append(run_name_element)
 
         run_time_element = {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*Run Time:* {}".format(run_time),},
+            "text": {"type": "mrkdwn", "text": "*Run Time:* {}".format(run_time)},
         }
         query["blocks"].append(run_time_element)
 
@@ -524,6 +554,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         evaluation_parameters=None,
         run_name=None,
         run_time=None,
+        result_format=None,
     ):
         assert not (run_id and run_name) and not (
             run_id and run_time
@@ -538,7 +569,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             )
             try:
                 run_time = parse(run_id)
-            except ParserError:
+            except (ParserError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):
@@ -596,7 +627,9 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 failure_run_result_obj = {"expectation_suite_severity_level": "failure"}
                 failure_validation_result = batch.validate(
                     failure_expectation_suite,
-                    result_format="SUMMARY",
+                    result_format=result_format
+                    if result_format
+                    else self.result_format,
                     evaluation_parameters=evaluation_parameters,
                 )
                 failure_run_result_obj["validation_result"] = failure_validation_result
@@ -640,7 +673,9 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 warning_run_result_obj = {"expectation_suite_severity_level": "warning"}
                 warning_validation_result = batch.validate(
                     warning_expectation_suite,
-                    result_format="SUMMARY",
+                    result_format=result_format
+                    if result_format
+                    else self.result_format,
                     evaluation_parameters=evaluation_parameters,
                 )
                 warning_run_result_obj["validation_result"] = warning_validation_result

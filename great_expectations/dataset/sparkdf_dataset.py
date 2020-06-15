@@ -1,11 +1,13 @@
 import copy
 import inspect
+import json
 import logging
 from collections import OrderedDict
 from datetime import datetime
 from functools import reduce, wraps
 from typing import List
 
+import jsonschema
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
@@ -995,6 +997,36 @@ class SparkDFDataset(MetaSparkDFDataset):
         return column.withColumn("__success", column[0].isNull())
 
     @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_match_json_schema(
+        self,
+        column,
+        json_schema,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        def matches_json_schema(val):
+            try:
+                val_json = json.loads(val)
+                jsonschema.validate(val_json, json_schema)
+                # jsonschema.validate raises an error if validation fails.
+                # So if we make it this far, we know that the validation succeeded.
+                return True
+            except jsonschema.ValidationError:
+                return False
+            except jsonschema.SchemaError:
+                raise
+            except:
+                raise
+
+        matches_json_schema_udf = udf(matches_json_schema, sparktypes.StringType())
+
+        return column.withColumn("__success", matches_json_schema_udf(column[0]))
+
+    @DocInherit
     @DataAsset.expectation(["column", "type_", "mostly"])
     def expect_column_values_to_be_of_type(
         self,
@@ -1099,6 +1131,29 @@ class SparkDFDataset(MetaSparkDFDataset):
         meta=None,
     ):
         return column.withColumn("__success", ~column[0].rlike(regex))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_match_regex_list(
+        self,
+        column,
+        regex_list,
+        match_on="any",
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        if match_on == "any":
+            return column.withColumn("__success", column[0].rlike("|".join(regex_list)))
+        elif match_on == "all":
+            formatted_regex_list = ["(?={})".format(regex) for regex in regex_list]
+            return column.withColumn(
+                "__success", column[0].rlike("".join(formatted_regex_list))
+            )
+        else:
+            raise ValueError("match_on must be either 'any' or 'all'")
 
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation

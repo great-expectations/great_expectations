@@ -1,4 +1,4 @@
-.. great_expectations documentation master file
+.. great_expectations documentation entrypoint file
 
 ##############################
 Welcome to Great Expectations!
@@ -32,3 +32,9 @@ Index
 
 * :ref:`genindex`
 * :ref:`modindex`
+
+
+.. toctree::
+   :maxdepth: 2
+
+   autoapi/index

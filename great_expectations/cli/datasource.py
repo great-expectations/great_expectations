@@ -391,7 +391,8 @@ Great Expectations will now add a new Datasource '{0:s}' to your deployment, by 
     )
 
     toolkit.confirm_proceed_or_exit(
-        "Okay, exiting now. To learn more about adding datasources, run great_expectations datasource --help or visit https://docs.greatexpectations.io/"
+        continuation_message="Okay, exiting now. To learn more about adding datasources, run great_expectations "
+        "datasource --help or visit https://docs.greatexpectations.io/"
     )
 
     context.add_datasource(name=datasource_name, **configuration)
@@ -962,7 +963,7 @@ def get_batch_kwargs(
     # if the user provided us with the batch kwargs generator name and the data asset, we have everything we need -
     # let's ask the generator to build batch kwargs for this asset - we are done.
     if batch_kwargs_generator_name is not None and data_asset_name is not None:
-        generator = datasource.get_batch_kwargs_generator(batch_kwargs_generator_name)
+        generator = data_source.get_batch_kwargs_generator(batch_kwargs_generator_name)
         batch_kwargs = generator.build_batch_kwargs(
             data_asset_name, **additional_batch_kwargs
         )

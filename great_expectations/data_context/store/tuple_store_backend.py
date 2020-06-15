@@ -518,14 +518,15 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def __init__(
         self,
         bucket,
-        prefix,
         project,
+        prefix="",
         filepath_template=None,
         filepath_prefix=None,
         filepath_suffix=None,
         forbidden_substrings=None,
         platform_specific_separator=False,
         fixed_length_key=False,
+        public_urls=True,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -538,6 +539,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         self.bucket = bucket
         self.prefix = prefix
         self.project = project
+        self._public_urls = public_urls
 
     def _move(self, source_key, dest_key, **kwargs):
         pass
@@ -586,7 +588,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             dest_filepath = os.path.join(self.prefix, dest_filepath)
 
         blob = bucket.blob(source_filepath)
-        new_blob = bucket.rename_blob(blob, dest_filepath)
+        _ = bucket.rename_blob(blob, dest_filepath)
 
     def list_keys(self):
         key_list = []
@@ -615,11 +617,21 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         path = self._convert_key_to_filepath(key)
         if not path.startswith(self.prefix):
             path = os.path.join(self.prefix, path)
-        return "https://storage.googleapis.com/" + self.bucket + "/" + path
+        if self._public_urls:
+            base_url = "https://storage.googleapis.com/"
+        else:
+            base_url = "https://storage.cloud.google.com/"
+
+        if self.prefix:
+            path_url = "/".join((self.bucket, self.prefix, path))
+        else:
+            path_url = "/".join((self.bucket, path))
+
+        return base_url + path_url
 
     def remove_key(self, key):
         from google.cloud import storage
-        from gcloud.exceptions import NotFound
+        from google.cloud.exceptions import NotFound
 
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
