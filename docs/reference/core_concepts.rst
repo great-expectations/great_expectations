@@ -113,8 +113,7 @@ Datasources, Batch Kwargs Generators, Batch Parameters, and Batch Kwargs make it
 
 - How do I get data into my Great Expectations DataAsset?
 - How do I tell my Datasource how to access my specific data?
-- How do I use Great Expectations to store Batch Kwargs configurations or logically describe data when I need to build
-equivalent Batch Kwargs for different datasources?
+- How do I use Great Expectations to store Batch Kwargs configurations or logically describe data when I need to build equivalent Batch Kwargs for different datasources?
 - How do I know what data is available from my datasource?
 
 A **Datasource** is a connection to a **Validation Engine** (a compute environment such as Pandas, Spark, or a SQL-compatible database) and one or more data storage locations. For a SQL database, the Validation Engine and data storage locations will be the same, but for Spark or Pandas, you may be reading data from a remote location such as an S3 bucket but validating it in a cluster or local machine. The Datasource produces Batches of data that Great Expectations can validate in that environment.
