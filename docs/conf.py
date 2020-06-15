@@ -32,6 +32,7 @@ sys.path.insert(0, os.path.abspath("../"))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'autoapi.extension',
     # 'sphinx_rtd_theme',
     "sphinx.ext.autodoc",
     "sphinx.ext.todo",
@@ -43,6 +44,10 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "sphinxcontrib.discourse",
 ]
+
+autoapi_type = 'python'
+autoapi_dirs = ['../great_expectations']
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
