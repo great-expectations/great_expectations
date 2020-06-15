@@ -15,7 +15,7 @@ This guide will help you configure a new storage location for Validations on Ama
 Steps
 -----
 
-1. **Configure** `boto3 <https://github.com/boto/boto3>`_ **in the environment where you will run Great Expectations**.
+1. **Configure** `boto3 <https://github.com/boto/boto3>`_ **to connect to the Amazon S3 bucket where Validation results will be stored.**
 
 2. **Identify your Data Context Validations Store**
 
@@ -78,7 +78,7 @@ Steps
             prefix: '<your_s3_bucket_folder_name>'
 
 
-4. **Copy existing Validation results to the S3 bucket**. (This step is optional)
+4. **Copy existing Validation results to the S3 bucket**. (This step is optional).
 
 5. **Confirm that the Validations Store has been correctly configured.**
 
