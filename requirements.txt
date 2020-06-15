@@ -1,5 +1,4 @@
 altair>=4.0.0,<5
-black==19.10b0
 Click>=7.0
 future>=0.16
 ipywidgets>=7.4.2
