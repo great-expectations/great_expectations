@@ -365,7 +365,10 @@ def add_datasource_usage_statistics(data_context, name, **kwargs):
     except AttributeError:
         data_context_id = None
 
-    datasource_anonymizer = data_context._usage_statistics_handler._datasource_anonymizer
+    try:
+        datasource_anonymizer = data_context._usage_statistics_handler._datasource_anonymizer
+    except Exception:
+        datasource_anonymizer = DatasourceAnonymizer(data_context_id)
 
     payload = {}
     try:
