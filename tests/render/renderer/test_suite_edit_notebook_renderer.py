@@ -23,7 +23,7 @@ def critical_suite_with_citations():
     critical_suite = {
         "expectation_suite_name": "critical",
         "meta": {
-            "great_expectations.__version__": "0.9.1+9.gf17eff1f.dirty",
+            "great_expectations_version": "0.9.1+9.gf17eff1f.dirty",
             "columns": {
                 "npi": {"description": ""},
                 "nppes_provider_last_org_name": {"description": ""},
@@ -97,7 +97,7 @@ def suite_with_multiple_citations():
     critical_suite = {
         "expectation_suite_name": "critical",
         "meta": {
-            "great_expectations.__version__": "0.9.1+9.gf17eff1f.dirty",
+            "great_expectations_version": "0.9.1+9.gf17eff1f.dirty",
             "citations": [
                 {
                     "citation_date": "2001-01-01T00:00:01.000001",
@@ -140,7 +140,7 @@ def warning_suite():
     warning_suite = {
         "expectation_suite_name": "warning",
         "meta": {
-            "great_expectations.__version__": "0.8.4.post0",
+            "great_expectations_version": "0.8.4.post0",
             "citations": [
                 {
                     "citation_date": "2020-02-28T17:34:31.307271",

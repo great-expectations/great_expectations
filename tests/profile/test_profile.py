@@ -278,7 +278,7 @@ def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
         "batch_markers",
         "batch_parameters",
         "expectation_suite_name",
-        "great_expectations.__version__",
+        "great_expectations_version",
         "run_id",
         "validation_time",
     }

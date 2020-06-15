@@ -1939,7 +1939,7 @@ class ExpectationExplorer(object):
         data_asset_state = self.state["data_assets"].get(data_asset_name, {})
         data_asset_expectations = data_asset_state.get("expectations", {})
 
-        ge_version = expectation_suite.get("meta")["great_expectations.__version__"]
+        ge_version = expectation_suite.get("meta")["great_expectations_version"]
         column_count = len(column_names)
         expectation_count = len(expectation_suite["expectations"])
 

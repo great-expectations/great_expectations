@@ -43,7 +43,7 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         ],
         expectation_suite_name="default",
         data_asset_type="Dataset",
-        meta={"great_expectations.__version__": ge.__version__},
+        meta={"great_expectations_version": ge.__version__},
     )
 
     assert output_config == df.get_expectation_suite()
@@ -72,7 +72,7 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         ],
         expectation_suite_name="default",
         data_asset_type="Dataset",
-        meta={"great_expectations.__version__": ge.__version__},
+        meta={"great_expectations_version": ge.__version__},
     )
 
     assert output_config == df.get_expectation_suite(discard_failed_expectations=False)
@@ -102,7 +102,7 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         ],
         expectation_suite_name="default",
         data_asset_type="Dataset",
-        meta={"great_expectations.__version__": ge.__version__},
+        meta={"great_expectations_version": ge.__version__},
     )
     assert output_config == df.get_expectation_suite(
         discard_result_format_kwargs=False,
@@ -288,7 +288,7 @@ def test_meta_version_warning():
             expectation_suite=ExpectationSuite(
                 expectations=[],
                 expectation_suite_name="test",
-                meta={"great_expectations.__version__": "0.0.0"},
+                meta={"great_expectations_version": "0.0.0"},
             )
         )
     assert (
@@ -827,7 +827,7 @@ def test_remove_expectation():
         ],
         expectation_suite_name="default",
         data_asset_type="Dataset",
-        meta={"great_expectations.__version__": ge.__version__},
+        meta={"great_expectations_version": ge.__version__},
     )
 
 

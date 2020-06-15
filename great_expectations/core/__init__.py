@@ -656,7 +656,7 @@ class ExpectationSuite(object):
         self.evaluation_parameters = evaluation_parameters
         self.data_asset_type = data_asset_type
         if meta is None:
-            meta = {"great_expectations.__version__": ge_version}
+            meta = {"great_expectations_version": ge_version}
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
