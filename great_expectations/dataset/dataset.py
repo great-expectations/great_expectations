@@ -4300,7 +4300,6 @@ class Dataset(MetaDataset):
         column_A,
         column_B,
         max_V=0.05,
-        method="default",
         ignore_missings=None,
         result_format=None,
         include_config=True,
@@ -4313,7 +4312,7 @@ class Dataset(MetaDataset):
         Args:
             column_A (str): The first column name
             column_B (str): The second column name
-            method (str): Method to check for independence. One of ...
+            max_V (float): Maximum allowed value of cramers V for expectation to pass.
 
         Keyword Args:
             ignore_missings (bool): \
