@@ -17,7 +17,7 @@
             "id": "datasource_gcs"
           },
           {
-            "id": "datasource_azure"
+            "id": "datasource_azure_blob_storage"
           },
           {
             "id": "datasource_postgreql"
@@ -276,4 +276,3 @@
     ]
   }
 ]
-
