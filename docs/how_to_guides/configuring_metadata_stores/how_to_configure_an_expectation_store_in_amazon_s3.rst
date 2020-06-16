@@ -20,6 +20,9 @@ Steps
 
 2. **Identify your Data Context Expectations Store**
 
+    In your ``great_expectations.yml`` , look for the following lines.  The configuration tells Great Expectations to look for Expectations in a store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
+
+
     .. code-block:: yaml
 
         expectations_store_name: expectations_store
@@ -31,12 +34,11 @@ Steps
                     class_name: TupleFilesystemStoreBackend
                     base_directory: expectations/
 
-    The configuration file tells Great Expectations to look for Expectations in a store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
 
 
 3. **Update your configuration file to include a new store for Expectations on S3.**
 
-    In our case, the name is set to ``expectations_S3_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder where Expectation files are located.
+    In our case, the name is set to ``expectations_S3_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder where Expectation files will be located.
 
 .. warning::
 
@@ -56,6 +58,15 @@ Steps
 
 
 4. **Copy existing Expectation JSON files to the S3 bucket**. (This step is optional).
+
+    One way to copy Expectations into the Amazon S3 is by using the ``aws s3 sync`` command.  As mentioned earlier, the ``base_directory`` is set to ``expectations/`` by default.  In the example below, two Expectations, ``exp1`` and ``exp2`` are copied to Amazon S3.
+
+    .. code-block:: bash
+
+        aws s3 sync '<base_directory>' s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name>' # run in
+
+        upload: ./exp1.json to s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name>'/exp1.json
+        upload: ./exp2.json to s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name>'/exp2.json
 
 
 5. **Confirm that the new Expectations store has been added by running** ``great_expectations store list``.
@@ -80,6 +91,17 @@ Steps
             prefix: '<your_s3_bucket_folder_name>'
 
 
+6. **Confirm that Expectations can be accessed from Amazon S3 by running** ``great_expectations suite list``.
+
+    The output should include the 2 Expectations we copied to Amazon S3 in Step 4: ``exp1`` and ``exp2``.
+
+    .. code-block:: bash
+
+        great_expectations suite list
+
+        2 Expectation Suites found:
+         - exp1
+         - exp2
 
 Additional resources
 --------------------
