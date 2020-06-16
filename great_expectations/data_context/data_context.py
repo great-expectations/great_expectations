@@ -243,16 +243,22 @@ Documentation Completeness - Partial
 Bug Risk - Low
 
 
+.. feature_maturity::
 
-HTMLSiteStore  - S3: 
-Beta
-API Stability - Mostly Stable (profiling)
-Implementation Completeness - Complete
-Unit Test Coverage - Complete
-Integration/Infrastructure Test Coverage - Minimal
-Documentation Completeness - Complete
-Bug Risk - Moderate
-
+    id: data_docs_store_s3
+    title:
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Beta
+    maturity_details:
+        api_stability: Mostly Stable (profiling)
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Complete
+        bug_risk: Moderate
 
 
 HTMLSiteStore  - GCS: 
