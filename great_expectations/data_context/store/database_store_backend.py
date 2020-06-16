@@ -115,9 +115,14 @@ class DatabaseStoreBackend(StoreBackend):
         return url
 
     def _convert_engine_and_key_to_url(self, key):
-        # URL is formatted in the following way
+        # SqlAlchemy engine URL is formatted in the following way
         # postgresql://postgres:password@localhost:5433/work
-        # which contains information that should not be public
+        # [engine]://[username]:[password]@[host]:[port]/[db_name]
+
+        # which contains information like username and password that should not be public
+        # This function changes the formatting to the following:
+        # [engine]://[db_name]/[key]
+
         full_url = str(self.engine.url)
         engine_name = full_url.split("://")[0]
         db_name = full_url.split("/")[-1]
