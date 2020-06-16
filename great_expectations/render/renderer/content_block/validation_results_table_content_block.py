@@ -355,6 +355,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 )
             except KeyError:
                 return "unknown % null"
+            except TypeError:
+                return "NaN% null"
         elif expectation_type == "expect_column_values_to_not_be_null":
             try:
                 null_percent = result["unexpected_percent"]
@@ -364,6 +366,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 )
             except KeyError:
                 return "unknown % not null"
+            except TypeError:
+                return "NaN% not null"
         elif result.get("unexpected_percent") is not None:
             return (
                 num_to_str(result.get("unexpected_percent"), precision=5)
