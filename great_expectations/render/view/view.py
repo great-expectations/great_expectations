@@ -47,9 +47,9 @@ class DefaultJinjaView(object):
     * Font Awesome 5.10.1
     * Bootstrap 4.3.1
     * jQuery 3.2.1
-    * Vega 5.3.5
-    * Vega-Lite 3.2.1
-    * Vega-Embed 4.0.0
+    * Vega 5
+    * Vega-Lite 4
+    * Vega-Embed 6
 
     """
 
