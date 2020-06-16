@@ -117,6 +117,209 @@ Unit Test Coverage: N/A
 Infrastructure Coverage: N/A
 Documentation Completeness: Minimal
 Bug Risk: Unknown
+
+
+
+
+
+Expectation Store - Git
+Production
+API Stability - Stable
+Implementation Completeness - Complete
+Unit Test Coverage - Complete
+Integration/Infrastructure Test Coverage - N/A
+Documentation Completeness - Complete
+Bug Risk - Low
+
+
+
+Expectation Store - Filesystem
+Production
+API Stability - Stable
+Implementation Completeness - Complete
+Unit Test Coverage - Complete
+Integration/Infrastructure Test Coverage - N/A
+Documentation Completeness - Complete
+Bug Risk - Low
+
+
+
+Expectation Store - S3: 
+Beta
+API Stability - Stable
+Implementation Completeness - Complete
+Unit Test Coverage - Complete
+Integration/Infrastructure Test Coverage - Minimal
+Documentation Completeness - Complete
+Bug Risk - Low
+
+
+
+Expectation Store - GCS: 
+Beta
+API Stability - Stable
+Implementation Completeness - Complete
+Unit Test Coverage - Complete
+Integration/Infrastructure Test Coverage - Minimal
+Documentation Completeness - Partial
+Bug Risk - Low
+
+
+Expectation Store - Azure: 
+N/A
+API Stability - Stable
+Implementation Completeness - Minimal
+Unit Test Coverage - Minimal
+Integration/Infrastructure Test Coverage - Minimal
+Documentation Completeness - Minimal
+Bug Risk - Moderate
+
+
+
+Validations Store - Git
+Production
+API Stability - Stable
+Implementation Completeness - Complete
+Unit Test Coverage - Complete
+Integration/Infrastructure Test Coverage - N/A
+Documentation Completeness - Complete
+Bug Risk - Low
+
+
+
+Validations Store - Filesystem
+Production
+API Stability - Stable
+Implementation Completeness - Complete
+Unit Test Coverage - Complete
+Integration/Infrastructure Test Coverage - N/A
+Documentation Completeness - Complete
+Bug Risk - Low
+
+
+
+Validations Store - S3: 
+Beta
+API Stability - Stable
+Implementation Completeness - Complete
+Unit Test Coverage - Complete
+Integration/Infrastructure Test Coverage - Minimal
+Documentation Completeness - Complete
+Bug Risk - Low
+
+
+
+Validations Store - GCS: 
+Beta
+API Stability - Stable
+Implementation Completeness - Complete
+Unit Test Coverage - Complete
+Integration/Infrastructure Test Coverage - Minimal
+Documentation Completeness - Partial
+Bug Risk - Low
+
+
+Validations Store - Azure: 
+N/A
+API Stability - Stable
+Implementation Completeness - Minimal
+Unit Test Coverage - Minimal
+Integration/Infrastructure Test Coverage - Minimal
+Documentation Completeness - Minimal
+Bug Risk - Moderate
+
+
+
+Validations Store - Git --> REMOVE
+HTMLSiteStore - Git --> REMOVE
+
+HTMLSiteStore - Filesystem
+Production
+API Stability - Mostly Stable (profiling)
+Implementation Completeness - Complete
+Unit Test Coverage - Complete
+Integration/Infrastructure Test Coverage - N/A
+Documentation Completeness - Partial
+Bug Risk - Low
+
+
+
+HTMLSiteStore  - S3: 
+Beta
+API Stability - Mostly Stable (profiling)
+Implementation Completeness - Complete
+Unit Test Coverage - Complete
+Integration/Infrastructure Test Coverage - Minimal
+Documentation Completeness - Complete
+Bug Risk - Moderate
+
+
+
+HTMLSiteStore  - GCS: 
+Beta
+API Stability - Mostly Stable (profiling)
+Implementation Completeness - Complete
+Unit Test Coverage - Complete
+Integration/Infrastructure Test Coverage - Minimal
+Documentation Completeness - Partial (needs auth)
+Bug Risk - Moderate (resource URL may have bugs)
+
+
+HTMLSiteStore  - Azure: 
+N/A
+API Stability - Mostly Stable (profiling)
+Implementation Completeness - Minimal
+Unit Test Coverage - Minimal
+Integration/Infrastructure Test Coverage - Minimal
+Documentation Completeness - Minimal
+Bug Risk - Moderate
+
+
+
+Checkpoint - Notebook:
+Experimental
+API Stability - Unstable - expect changes to batch definition; "assets to validate" is still totally untyped
+Implementation Completeness - Complete
+Unit Test Coverage - Partial "golden path"-focused tests (error checking tests need to be improved)
+Integration/Infrastructure Test Coverage - N/A
+Documentation Completeness - Complete
+Bug Risk - Low
+
+
+Checkpoint - Command Line:
+Experimental
+API Stability - Unstable - expect changes to batch definition; no checkpoint store)
+Implementation Completeness - Complete
+Unit Test Coverage - Complete
+Integration/Infrastructure Test Coverage - N/A
+Documentation Completeness - Complete
+Bug Risk - Low
+
+
+Checkpoint - Cron:
+Experimental
+API Stability - Unstable (expect changes to batch validation; no checkpoint store)
+Implementation Completeness - Complete
+Unit Test Coverage - Complete
+Integration/Infrastructure Test Coverage - N/A
+Documentation Completeness - Complete
+Bug Risk - Low
+
+
+Checkpoint - Airflow DAG:
+Note: does *not* include embedding in airflow UI
+Beta
+API Stability - Unstable
+Implementation Completeness - Partial [no operator, but probably don't need one]
+Unit Test Coverage - N/A
+Integration/Infrastructure Test Coverage - Minimal
+Documentation Completeness - Complete [pending how-to]
+Bug Risk - Low
+
+
+
+
+
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
