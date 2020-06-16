@@ -4,6 +4,9 @@ import json
 import logging
 import os
 import re
+import time
+from functools import wraps
+from inspect import getcallargs
 from types import ModuleType
 from typing import Union
 
@@ -15,6 +18,23 @@ from great_expectations.exceptions import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def measure_execution_time(func):
+    @wraps(func)
+    def compute_delta_t(*args, **kwargs):
+        time_begin = int(round(time.time() * 1000))
+        try:
+            return func(*args, **kwargs)
+        finally:
+            time_end = int(round(time.time() * 1000))
+            delta_t = time_end - time_begin
+            call_args = getcallargs(func, *args, **kwargs)
+            print(
+                f"Total execution time of function {func.__name__}({call_args}): {delta_t} ms."
+            )
+
+    return compute_delta_t
 
 
 def verify_dynamic_loading_support(module_name: str, package_name: str = None) -> None:

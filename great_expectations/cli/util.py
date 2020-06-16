@@ -9,7 +9,7 @@ import pkg_resources
 from great_expectations.cli.python_subprocess import (
     execute_shell_command_with_progress_polling,
 )
-from great_expectations.util import import_library_module
+from great_expectations.util import import_library_module, measure_execution_time
 
 try:
     from termcolor import colored
@@ -162,18 +162,18 @@ def library_install_load_check(
     return status_code
 
 
+@measure_execution_time
 def reload_modules_containing_pattern(pattern: str = None) -> None:
     module_name: str
     for module_name in get_ge_module_names():
-        if module_name in sys.modules.keys():
-            module_obj: Union[ModuleType, None] = import_library_module(
-                module_name=module_name, pattern=pattern
-            )
-            if module_obj is not None:
-                try:
-                    _ = importlib.reload(module_obj)
-                except RuntimeError:
-                    pass
+        module_obj: Union[ModuleType, None] = import_library_module(
+            module_name=module_name, pattern=pattern
+        )
+        if module_obj is not None:
+            try:
+                _ = importlib.reload(module_obj)
+            except RuntimeError:
+                pass
 
 
 def verify_library_dependent_modules(
