@@ -1,3 +1,4 @@
+# isort:block
 import logging
 import pathlib
 import sys
@@ -8,6 +9,8 @@ import click
 import docker
 import versioneer
 from docker import APIClient
+
+# isort:block
 
 PROJECT_ROOT = str(pathlib.Path(__file__).parent.parent.absolute())
 try:
