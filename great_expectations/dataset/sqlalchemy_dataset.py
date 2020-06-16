@@ -467,6 +467,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 )
 
             df = pd.read_sql(head_sql_str, con=self.engine)
+        except StopIteration:
+            df = pd.DataFrame(columns=self.get_table_columns())
 
         return PandasDataset(
             df,
