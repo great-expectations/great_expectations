@@ -59,11 +59,11 @@ Steps
 
 4. **Copy existing Expectation JSON files to the S3 bucket**. (This step is optional).
 
-    One way to copy Expectations into the Amazon S3 is by using the ``aws s3 sync`` command.  As mentioned earlier, the ``base_directory`` is set to ``expectations/`` by default.  In the example below, two Expectations, ``exp1`` and ``exp2`` are copied to Amazon S3.
+    One way to copy Expectations into Amazon S3 is by using the ``aws s3 sync`` command.  As mentioned earlier, the ``base_directory`` is set to ``expectations/`` by default. In the example below, two Expectations, ``exp1`` and ``exp2`` are copied to Amazon S3.  Your output should looks something like this:
 
     .. code-block:: bash
 
-        aws s3 sync '<base_directory>' s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name>' # run in
+        aws s3 sync '<base_directory>' s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name>'
 
         upload: ./exp1.json to s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name>'/exp1.json
         upload: ./exp2.json to s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name>'/exp2.json
@@ -93,7 +93,7 @@ Steps
 
 6. **Confirm that Expectations can be accessed from Amazon S3 by running** ``great_expectations suite list``.
 
-    The output should include the 2 Expectations we copied to Amazon S3 in Step 4: ``exp1`` and ``exp2``.
+    If you followed Step 4, The output should include the 2 Expectations we copied to Amazon S3: ``exp1`` and ``exp2``.
 
     .. code-block:: bash
 
