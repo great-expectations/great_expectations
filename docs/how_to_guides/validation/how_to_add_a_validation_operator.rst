@@ -44,7 +44,7 @@ The snippet below shows a portion of your ``great_expectations.yml`` configurati
 
 1. Open your project's ``great_expectations.yml`` configuration file and navigate to the ``validation_operators`` section (line 1 in the snippet). This section contains the Validation Operator instance ``action_list_operator`` that was automatically created by the ``great_expectations init`` CLI command.
 2. Add a new block after the existing Validation Operator instances. The name of the block is the name you are giving to the new Validation Operator instance (line 15 in the snippet). These names must be unique within a project.
-3. Add a ``class_name`` attribute in the new block you added in the previous step (line 16 in the snippet). The value is the name of the class that implements the Validation Operator that you are adding. This can be one of the classes that are included in Great Expectations or a class that you implemented. This example adds another instance of `ActionListValidationOperator`.
+3. Add a ``class_name`` attribute in the new block you added in the previous step (line 16 in the snippet). The value is the name of the class that implements the Validation Operator that you are adding. This can be one of the classes that are included in Great Expectations or a class that you implemented. This example adds another instance of :py:class:`great_expectations.validation_operators.validation_operators.ActionListValidationOperator`.
 
   .. admonition:: Note:
 
