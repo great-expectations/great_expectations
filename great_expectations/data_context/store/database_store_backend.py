@@ -96,7 +96,20 @@ class DatabaseStoreBackend(StoreBackend):
     def _set(self, key, value, **kwargs):
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
         cols["value"] = value
-        ins = self._table.insert().values(**cols)
+
+        if kwargs.get("allow_update", False):
+            try:
+                self._get(key)
+                ins = (
+                    self._table.update()
+                    .where(getattr(self._table.columns, self.key_columns[0]) == key[0])
+                    .values(**cols)
+                )
+            except TypeError:
+                ins = self._table.insert().values(**cols)
+        else:
+            ins = self._table.insert().values(**cols)
+
         try:
             self.engine.execute(ins)
         except IntegrityError as e:
