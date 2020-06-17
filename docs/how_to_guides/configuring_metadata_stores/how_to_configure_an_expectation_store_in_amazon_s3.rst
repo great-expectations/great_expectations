@@ -93,7 +93,7 @@ Steps
 
 6. **Confirm that Expectations can be accessed from Amazon S3 by running** ``great_expectations suite list``.
 
-    If you followed Step 4, The output should include the 2 Expectations we copied to Amazon S3: ``exp1`` and ``exp2``.
+    If you followed Step 4, The output should include the 2 Expectations we copied to Amazon S3: ``exp1`` and ``exp2``.  If you did not copy Expectations to the new Store, you will see a message saying no expectations were found.
 
     .. code-block:: bash
 
