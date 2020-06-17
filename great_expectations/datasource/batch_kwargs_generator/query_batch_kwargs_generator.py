@@ -22,7 +22,40 @@ except ImportError:
 
 
 class QueryBatchKwargsGenerator(BatchKwargsGenerator):
-    """Produce query-style batch_kwargs from sql files stored on disk
+    """Produce query-style batch_kwargs from sql files or defined queries.
+
+    By default, a QueryBatchKwargsGenerator will look for queries in the
+    ``datasources/datasource_name/generators/generator_name`` directory, and look for files ending in ``.sql``.
+
+    For example, a file stored in
+    ``datasources/datasource_name/generators/generator_name/movies_by_date.sql`` would allow you to access an
+    asset called ``movies_by_date``
+
+    Queries can be parameterized using $substitution.
+
+    Example configuration:
+
+      queries:
+        class_name: QueryBatchKwargsGenerator
+        query_store_backend:
+          class_name: TupleFilesystemStoreBackend
+          filepath_suffix: .sql
+          base_directory: queries
+
+    Example query template, to be stored in ``queries/movies_by_date.sql``
+
+    SELECT * FROM movies where '$start'::date <= release_date AND release_date <= '$end'::date;
+
+    Example usage:
+
+    context.build_batch_kwargs(
+        "my_db",
+        "query_generator",
+        "movies_by_date",
+        "query_parameters": {
+            "start": "2020-01-01",
+            "end": "2020-02-01"
+        }
     """
 
     recognized_batch_parameters = {
@@ -34,16 +67,22 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
     def __init__(
         self, name="default", datasource=None, query_store_backend=None, queries=None
     ):
-        super().__init__(name=name, datasource=datasource)
-        root_directory = None
+        super().__init__(
+            name=name, datasource=datasource
+        )
+        if (
+            datasource
+            and datasource.data_context
+            and datasource.data_context.root_directory
+        ):
+            root_directory = datasource.data_context.root_directory
+        else:
+            root_directory = None
+
         if query_store_backend is None:
             # We will choose a Tuple store if there is a configured DataContext with a root_directory,
             # and an InMemoryStore otherwise
-            if (
-                datasource
-                and datasource.data_context
-                and datasource.data_context.root_directory
-            ):
+            if root_directory:
                 query_store_backend = {
                     "class_name": "TupleFilesystemStoreBackend",
                     "base_directory": os.path.join(
@@ -55,7 +94,6 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
                     ),
                     "filepath_suffix": ".sql",
                 }
-                root_directory = datasource.data_context.root_directory
             else:
                 query_store_backend = {"class_name": "InMemoryStoreBackend"}
         module_name = "great_expectations.data_context.store"
