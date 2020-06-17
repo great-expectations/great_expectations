@@ -11,7 +11,7 @@ you can use its business rules in your project.
 
   - :ref:`Set up a working deployment of Great Expectations <getting_started>`.
   - Created at least one Expectation Suite.
-  - Created and ran at least one :ref:`Checkpoint <how_to_guides__validation__how_to_create_a_new_checkpoint>`. You will need it in order to test that your new Validation Operator is working.
+  - Created at least one :ref:`Checkpoint <how_to_guides__validation__how_to_create_a_new_checkpoint>`. You will need it in order to test that your new Validation Operator is working.
 
 Steps
 -----
