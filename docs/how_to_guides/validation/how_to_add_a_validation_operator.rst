@@ -1,7 +1,7 @@
 .. _how_to_guides__validation__how_to_add_a_validation_operator:
 
 How to add a Validation Operator
-======================================
+======================================admonition
 
 This guide will help you add a new instance of a :ref:`Validation Operator <validation_operators_and_actions>`. Validation Operators give you the ability to validate multiple batches
 of data together, and kick off Validation Actions based on the results of validation. Additionally, each Validation Operator encodes a set of business rules around validation. When you add an instance of a Validation Operator,
@@ -48,12 +48,12 @@ The snippet below shows a portion of your ``great_expectations.yml`` configurati
 
   .. admonition:: Note:
 
-    - If you are adding a custom Validation Operator, you will have to add a `module_name` attribute in addition to `class_name`. You will find more details about custom Validation Operators in this :ref:`guide <how_to_guides__validation__how_to_implement_a_custom_validation_operator>`.
+    - If you are adding a custom Validation Operator, you will have to add a ``module_name`` attribute in addition to ``class_name``. You will find more details about custom Validation Operators in this :ref:`guide <how_to_guides__validation__how_to_implement_a_custom_validation_operator>`.
 
 4. Consult the reference documentation of the class that implements the Validation Operator you are adding for additional properties (required or optional) that are specific to that class. The snippet above configured one such property specific to :ref:`ActionListValidationOperator<how_to_guides__validation__how_to_configure_an_actionlistvalidationoperator>`.
 5. Test that your new Validation Operator is configured correctly:
 
-   1. Open the configuration file of a Checkpoint you created earlier and replace the value of `validation_operator_name` with the value from Step 2 above. The details of Checkpoint configuration can be found in this :ref:`guide<how_to_guides__validation__how_to_add_validations_data_or_suites_to_a_checkpoint>`.
+   1. Open the configuration file of a Checkpoint you created earlier and replace the value of ``validation_operator_name`` with the value from Step 2 above. The details of Checkpoint configuration can be found in this :ref:`guide<how_to_guides__validation__how_to_add_validations_data_or_suites_to_a_checkpoint>`.
    2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI as explained :ref:`here<how_to_guides__validation__how_to_run_a_checkpoint_in_terminal>` or from Python, as explained :ref:`here<how_to_guides__validation__how_to_run_a_checkpoint_in_python>`.
 
 
