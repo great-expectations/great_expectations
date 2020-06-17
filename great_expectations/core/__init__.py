@@ -341,7 +341,7 @@ class ExpectationKwargs(dict):
                 "catch_exceptions must be a boolean value"
             )
 
-        super(ExpectationKwargs, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         ensure_json_serializable(self)
 
     def isEquivalentTo(self, other):

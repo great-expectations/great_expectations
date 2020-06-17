@@ -77,9 +77,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             boto3_options: dictionary of key-value pairs to use when creating boto3 client or resource objects
             max_keys: the maximum number of keys to fetch in a single list_objects request to s3
         """
-        super(S3GlobReaderBatchKwargsGenerator, self).__init__(
-            name, datasource=datasource
-        )
+        super().__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = {}
 

@@ -125,7 +125,7 @@ class PandasDatasource(Datasource):
         batch_kwargs_generators = configuration_with_defaults.pop(
             "batch_kwargs_generators", None
         )
-        super(PandasDatasource, self).__init__(
+        super().__init__(
             name,
             data_context=data_context,
             data_asset_type=data_asset_type,
@@ -143,9 +143,7 @@ class PandasDatasource(Datasource):
         self, reader_method=None, reader_options=None, limit=None, dataset_options=None,
     ):
         # Note that we do not pass limit up, since even that will be handled by PandasDatasource
-        batch_kwargs = super(PandasDatasource, self).process_batch_parameters(
-            dataset_options=dataset_options
-        )
+        batch_kwargs = super().process_batch_parameters(dataset_options=dataset_options)
 
         # Apply globally-configured reader options first
         if self._reader_options:

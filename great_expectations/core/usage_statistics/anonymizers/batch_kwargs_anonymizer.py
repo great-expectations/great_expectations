@@ -3,7 +3,7 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 
 class BatchKwargsAnonymizer(Anonymizer):
     def __init__(self, salt=None):
-        super(BatchKwargsAnonymizer, self).__init__(salt=salt)
+        super().__init__(salt=salt)
 
         self._ge_batch_kwarg_keys = [
             "datasource",

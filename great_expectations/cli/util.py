@@ -1,8 +1,7 @@
 import importlib
 import re
-import sys
 from types import ModuleType
-from typing import Dict, Union
+from typing import Union
 
 import pkg_resources
 
@@ -119,11 +118,40 @@ def is_sane_slack_webhook(url):
     return url.strip().startswith("https://hooks.slack.com/")
 
 
-def is_library_loadable(library_name: str) -> bool:
-    module_obj: Union[ModuleType, None] = import_library_module(
-        module_name=library_name
+SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES = [
+    # 'great_expectations.datasource.batch_kwargs_generator.query_batch_kwargs_generator',
+    "great_expectations.datasource.batch_kwargs_generator.table_batch_kwargs_generator",
+    "great_expectations.dataset.sqlalchemy_dataset",
+    "great_expectations.validator.validator",
+    "great_expectations.datasource.sqlalchemy_datasource",
+]
+
+
+def verify_library_dependent_modules(
+    python_import_name: str, pip_library_name: str, module_names_to_reload: list = None
+) -> bool:
+    library_status_code: Union[int, None]
+
+    library_status_code = library_install_load_check(
+        python_import_name=python_import_name, pip_library_name=pip_library_name
     )
-    return module_obj is not None
+
+    do_reload: bool
+    success: bool
+
+    if library_status_code is None or library_status_code == 0:
+        do_reload = (
+            module_names_to_reload is not None and len(module_names_to_reload) > 0
+        )
+        success = True
+    else:
+        do_reload = False
+        success = False
+
+    if do_reload:
+        reload_modules(module_names=module_names_to_reload)
+
+    return success
 
 
 def library_install_load_check(
@@ -162,55 +190,21 @@ def library_install_load_check(
     return status_code
 
 
-@measure_execution_time
-def reload_modules_containing_pattern(pattern: str = None) -> None:
+def is_library_loadable(library_name: str) -> bool:
+    module_obj: Union[ModuleType, None] = import_library_module(
+        module_name=library_name
+    )
+    return module_obj is not None
+
+
+def reload_modules(module_names: list) -> None:
     module_name: str
-    for module_name in get_ge_module_names():
+    for module_name in module_names:
         module_obj: Union[ModuleType, None] = import_library_module(
-            module_name=module_name, pattern=pattern
+            module_name=module_name
         )
         if module_obj is not None:
             try:
                 _ = importlib.reload(module_obj)
             except RuntimeError:
                 pass
-
-
-def verify_library_dependent_modules(
-    python_import_name: str,
-    pip_library_name: str,
-    pattern: str = None,
-    force_reload_if_package_loaded: bool = False,
-) -> Dict[str, bool]:
-    library_status_code: Union[int, None]
-
-    library_status_code = library_install_load_check(
-        python_import_name=python_import_name, pip_library_name=pip_library_name
-    )
-
-    do_reload: bool
-    success: bool
-
-    if library_status_code == 0:
-        do_reload = True
-        success = True
-    elif library_status_code is None:
-        do_reload = force_reload_if_package_loaded
-        success = True
-    else:
-        do_reload = False
-        success = False
-
-    if do_reload:
-        reload_modules_containing_pattern(pattern=pattern)
-
-    return {"success": success, "reloaded": do_reload}
-
-
-def get_ge_module_names() -> list:
-    module_name: str
-    return [
-        module_name
-        for module_name in sys.modules.keys()
-        if module_name.split(".")[0] == "great_expectations"
-    ]

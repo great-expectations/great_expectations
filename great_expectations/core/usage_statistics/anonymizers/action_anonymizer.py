@@ -12,7 +12,7 @@ from great_expectations.validation_operators import (
 
 class ActionAnonymizer(Anonymizer):
     def __init__(self, salt=None):
-        super(ActionAnonymizer, self).__init__(salt=salt)
+        super().__init__(salt=salt)
 
         # ordered bottom up in terms of inheritance order
         self._ge_classes = [

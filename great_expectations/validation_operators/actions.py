@@ -54,7 +54,7 @@ class NoOpAction(ValidationAction):
     def __init__(
         self, data_context,
     ):
-        super(NoOpAction, self).__init__(data_context)
+        super().__init__(data_context)
 
     def _run(
         self, validation_result_suite, validation_result_suite_identifier, data_asset
@@ -92,7 +92,7 @@ class SlackNotificationAction(ValidationAction):
             slack_webhook: incoming Slack webhook to which to send notification
             notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
         """
-        super(SlackNotificationAction, self).__init__(data_context)
+        super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer, runtime_environment={}, config_defaults={},
         )
@@ -157,7 +157,7 @@ class StoreValidationResultAction(ValidationAction):
                 should be used to param_store the validation result
         """
 
-        super(StoreValidationResultAction, self).__init__(data_context)
+        super().__init__(data_context)
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
         else:
@@ -203,7 +203,7 @@ class StoreEvaluationParametersAction(ValidationAction):
             target_store_name: the name of the store in the data context which
                 should be used to store the evaluation parameters
         """
-        super(StoreEvaluationParametersAction, self).__init__(data_context)
+        super().__init__(data_context)
 
         if target_store_name is None:
             self.target_store = data_context.evaluation_parameter_store
@@ -248,7 +248,7 @@ class StoreMetricsAction(ValidationAction):
             target_store_name: the name of the store in the data context which
                 should be used to store the metrics
         """
-        super(StoreMetricsAction, self).__init__(data_context)
+        super().__init__(data_context)
         self._requested_metrics = requested_metrics
         self._target_store_name = target_store_name
         try:
@@ -298,7 +298,7 @@ class UpdateDataDocsAction(ValidationAction):
         :param data_context: data context
         :param site_names: *optional* List of site names for building data docs
         """
-        super(UpdateDataDocsAction, self).__init__(data_context)
+        super().__init__(data_context)
         if target_site_names:
             warnings.warn(
                 "target_site_names is deprecated. Please use site_names instead.",

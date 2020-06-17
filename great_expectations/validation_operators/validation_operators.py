@@ -329,7 +329,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         slack_webhook=None,
         notify_on="all",
     ):
-        super(WarningAndFailureExpectationSuitesValidationOperator, self).__init__(
+        super().__init__(
             data_context, action_list,
         )
 

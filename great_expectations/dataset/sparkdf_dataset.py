@@ -49,7 +49,7 @@ class MetaSparkDFDataset(Dataset):
     """
 
     def __init__(self, *args, **kwargs):
-        super(MetaSparkDFDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @classmethod
     def column_map_expectation(cls, func):
@@ -364,7 +364,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         self._persist = kwargs.pop("persist", True)
         if self._persist:
             self.spark_df.persist()
-        super(SparkDFDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def head(self, n=5):
         """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
