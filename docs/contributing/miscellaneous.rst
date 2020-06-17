@@ -15,7 +15,7 @@ Core team
 * `Tal Gluck <https://github.com/talagluck>`__
 * `Kyle Eaton <https://github.com/kyleaton>`__
 * `Sam Bail <https://github.com/spbail>`__
-* `Priya Joseph <https://github.com/ayirplm>`__
+* `William Shin <https://github.com/Shinnnyshinshin>`__
 * `Ben Castleton <https://github.com/bhcastleton>`__
 
 
@@ -36,35 +36,39 @@ Release checklist
 
 GE core team members use this checklist to ship releases.
 
-* If this is a major release (incrementing either the first or second version number) the manual acceptance testing must be completed.
+1. If this is a major release (incrementing either the first or second version number) the manual acceptance testing must be completed.
 
   * This `private google doc <https://docs.google.com/document/d/16QJPSCawEkwuEjShZeHa01TlQm9nbUwS6GwmFewJ3EY>`_ outlines the procedure. (Note this will be made public eventually)
 
-* Merge all approved PRs into ``develop``.
-* Make a new branch from ``develop`` called something like ``release-prep``.
-* In this branch, update the version number in the ``.travis.yml`` file (look in the deploy section). (This sed snippet is handy if you change the numbers ``sed -i '' 's/0\.9\.6/0\.9\.7/g' .travis.yml``)
+2. Merge all approved PRs into ``develop``.
+3. Make a new branch from ``develop`` called something like ``release-prep-2020-06-01``.
+4. In this branch, update the version number in the ``.travis.yml`` file (look in the deploy section). (This sed snippet is handy if you change the numbers ``sed -i '' 's/0\.9\.6/0\.9\.7/g' .travis.yml``)
 
-* Update the ``changelog.rst``: move all things under ``develop`` under a new heading with the new release number.
+5. Update the ``changelog.rst``: move all things under ``develop`` under a new heading with the new release number.
 
   * Verify that any changes to requirements are specifically identified in the changelog
 
-* Submit this as a PR against ``develop``
-* After successful checks, get it approved and merged.
-* Update your local branches and switch to main: ``git fetch --all; git checkout main; git pull``.
-* Merge the now-updated ``develop`` branch into ``main`` and trigger the release: ``git merge origin/develop; git push``
-* Wait for all the builds to complete (including the deploy job).
-* Check `PyPI <https://pypi.org/project/great-expectations/#history>`__ for the new release
-* Create an annotated git tag:
+6. Submit this as a PR against ``develop``
+7. After successful checks, get it approved and merged.
+8. Update your local branches and switch to main: ``git fetch --all; git checkout main; git pull``.
+9. Merge the now-updated ``develop`` branch into ``main`` and trigger the release: ``git merge origin/develop; git push``
+10. Wait for all the build to complete. It should include 4 test jobs and a deploy job, which handles the actual publishing of code to pypi. You can watch the progress of these builds on Travis.
+11. Check `PyPI <https://pypi.org/project/great-expectations/#history>`__ for the new release
+12. Create an annotated git tag:
 
-  * Run ``git tag -a <<VERSION>> -m "<<VERSION>>"`` with the correct new version
-  * Push the tag up by running ``git push origin <<VERSION>>`` with the correct new version
+  * Run ``git tag -a <<VERSION>> -m "<<VERSION>>"`` with the correct new version.
+  * Push the tag up by running ``git push origin <<VERSION>>`` with the correct new version.
   * Merge ``main`` into ``develop`` so that the tagged commit becomes part of the history for ``develop``: ``git checkout develop; git pull; git merge main``
   * On develop, add a new "develop" section header to changelog.rst, and push the updated file with message "Update changelog for develop"
 
-* `Create the release on GitHub <https://github.com/great-expectations/great_expectations/releases>`__ with the version number. Copy the changelog notes into the release notes, and update any rst-specific links to use github issue numbers.
-* Notify kyle@superconductive.com about any community-contributed PRs that should be celebrated.
-* Socialize the release on GE slack by copying the changelog with an optional nice personal message (thank people if you can)
-* Review the automatically-generated PR for conda-forge (https://github.com/conda-forge/great-expectations-feedstock/pulls), updating requirements as necessary and verifying the build status.
+13. `Create the release on GitHub <https://github.com/great-expectations/great_expectations/releases>`__ with the version number. Copy the changelog notes into the release notes, and update any rst-specific links to use github issue numbers.
+
+  * The deploy step will automatically create a draft for the release.
+  * Generally, we use the name of the tag (Ex: "0.11.2") as the release title.
+  
+14. Notify kyle@superconductive.com about any community-contributed PRs that should be celebrated.
+15. Socialize the release on GE slack by copying the changelog with an optional nice personal message (thank people if you can)
+16. Review the automatically-generated PR for conda-forge (https://github.com/conda-forge/great-expectations-feedstock/pulls), updating requirements as necessary and verifying the build status.
 
 Beta Release Notes
 
