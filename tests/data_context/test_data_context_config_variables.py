@@ -236,7 +236,7 @@ def test_substitute_env_var_in_config_variable_file(monkeypatch):
     with open(
             file_relative_path(
                 __file__,
-                "../../test_fixtures/upgrade_helper/UpgradeHelperV11_basic_upgrade_log.json",
+                "../test_fixtures/great_expectations_basic_with_variables.yml",
             )
     ) as f:
         config = yaml.load(f)
