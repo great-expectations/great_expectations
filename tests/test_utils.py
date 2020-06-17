@@ -257,39 +257,46 @@ def get_dataset(
         return SqlAlchemyDataset(
             table_name, engine=conn, profiler=profiler, caching=caching
         )
-    #
-    # elif dataset_type == "mysql":
-    #     from sqlalchemy import create_engine
-    #
-    #     engine = create_engine("mysql://root@localhost/test_ci")
-    #     conn = engine.connect()
-    #
-    #     sql_dtypes = {}
-    #     if (
-    #         schemas
-    #         and "mysql" in schemas
-    #         and isinstance(engine.dialect, mysqltypes.dialect)
-    #     ):
-    #         schema = schemas["mysql"]
-    #         sql_dtypes = {col: MYSQL_TYPES[dtype] for (col, dtype) in schema.items()}
-    #         for col in schema:
-    #             type_ = schema[col]
-    #             if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-    #                 df[col] = pd.to_numeric(df[col], downcast="signed")
-    #             elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-    #                 df[col] = pd.to_numeric(df[col])
-    #             elif type_ in ["DATETIME", "TIMESTAMP"]:
-    #                 df[col] = pd.to_datetime(df[col])
-    #
-    #     tablename = "test_data_" + "".join(
-    #         [random.choice(string.ascii_letters + string.digits) for n in range(8)]
-    #     )
-    #     df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
-    #
-    #     # Build a SqlAlchemyDataset using that database
-    #     return SqlAlchemyDataset(
-    #         tablename, engine=conn, profiler=profiler, caching=caching
-    #     )
+
+    elif dataset_type == "mysql":
+        from sqlalchemy import create_engine
+
+        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
+        conn = engine.connect()
+
+        sql_dtypes = {}
+        if (
+            schemas
+            and "mysql" in schemas
+            and isinstance(engine.dialect, mysqltypes.dialect)
+        ):
+            schema = schemas["mysql"]
+            sql_dtypes = {col: MYSQL_TYPES[dtype] for (col, dtype) in schema.items()}
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast="signed")
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+
+        if table_name is None:
+            table_name = "test_data_" + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+        df.to_sql(
+            name=table_name,
+            con=conn,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+        )
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(
+            table_name, engine=conn, profiler=profiler, caching=caching
+        )
 
     elif dataset_type == "SparkDFDataset":
         from pyspark.sql import SparkSession
