@@ -1,7 +1,7 @@
 .. _how_to_guides__validation__how_to_add_a_validation_operator:
 
 How to add a Validation Operator
-======================================admonition
+======================================
 
 This guide will help you add a new instance of a :ref:`Validation Operator <validation_operators_and_actions>`. Validation Operators give you the ability to validate multiple batches
 of data together, and kick off Validation Actions based on the results of validation. Additionally, each Validation Operator encodes a set of business rules around validation. When you add an instance of a Validation Operator,
