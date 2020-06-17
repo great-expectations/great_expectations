@@ -18,15 +18,15 @@ from great_expectations.exceptions import (
 logger = logging.getLogger(__name__)
 
 
-def measure_execution_time(func):
+def measure_execution_time(func) -> int:
     @wraps(func)
     def compute_delta_t(*args, **kwargs):
-        time_begin = int(round(time.time() * 1000))
+        time_begin: int = int(round(time.time() * 1000))
         try:
             return func(*args, **kwargs)
         finally:
-            time_end = int(round(time.time() * 1000))
-            delta_t = time_end - time_begin
+            time_end: int = int(round(time.time() * 1000))
+            delta_t: int = time_end - time_begin
             call_args = getcallargs(func, *args, **kwargs)
             print(
                 f"Total execution time of function {func.__name__}({call_args}): {delta_t} ms."
