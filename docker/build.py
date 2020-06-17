@@ -7,16 +7,15 @@ from typing import List
 import click
 
 import docker
-import versioneer
 from docker import APIClient
-
-# isort:block
 
 PROJECT_ROOT = str(pathlib.Path(__file__).parent.parent.absolute())
 try:
     sys.path.index(PROJECT_ROOT)
 except ValueError:
     sys.path.append(PROJECT_ROOT)
+
+import versioneer  # isort:skip
 
 
 logging.basicConfig(
