@@ -103,6 +103,25 @@ Depending on which features of Great Expectations you want to work on, you may w
             sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) FATAL:  database "test_ci" does not exist
             (Background on this error at: http://sqlalche.me/e/e3q8)
 
+
+**If you want to develop against local mysql:**
+
+    * To simplify setup, the repository includes a docker-compose file that can stand up a local mysqldb container. To use it, you'll need to have `docker installed <https://docs.docker.com/install/>`__.
+    * Navigate to ``assets/docker/mysql`` in  your ``great_expectations`` repo and run ``docker-compose up -d``
+    * Run ``docker-compose exec mysql_db mysql -e 'create database test_ci;'`` to
+    * Within the same directory, you can run ``docker-compose ps`` to verify that the container is running. You should see something like:
+
+        .. code-block::
+
+                  Name                   Command             State                 Ports
+            ------------------------------------------------------------------------------------------
+            mysql_mysql_db_1   docker-entrypoint.sh mysqld   Up      0.0.0.0:3306->3306/tcp, 33060/tcp
+
+..
+
+    * Once you’re done testing, you can shut down your mysql container by running ``docker-compose down`` from the same directory.
+    * Caution: If another service is using port 3306, docker may start the container but silently fail to set up the port.
+
 **If you want to develop against local Spark:**
 
     * In most cases, ``pip install requirements-dev.txt`` should set up pyspark for you.

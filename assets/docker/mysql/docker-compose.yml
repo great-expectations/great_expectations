@@ -1,0 +1,14 @@
+version: '3.2'
+services:
+  mysql_db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+    networks:
+      - dbnet
+    ports:
+      - "3306:3306"
+
+networks:
+  dbnet:
+    driver: bridge
