@@ -4,7 +4,17 @@
 Changelog
 #########
 
-develop
+Develop
+-----------------
+* [ENHANCEMENT] Added 3 new usage stats events: "cli.new_ds_choice", "data_context.add_datasource", and "datasource.sqlalchemy.connect"
+* [FEATURE] Add support for expect_column_values_to_match_regex_list exception for Spark backend
+* [BUGFIX] fixed issue where calling head() on a SqlAlchemyDataset would fail if the underlying table is empty
+
+0.11.4
+-----------------
+* [BUGIFX] Fixed an error that crashed the CLI when called in an environment with neither SQLAlchemy nor google.auth installed
+
+0.11.3
 -----------------
 * [ENHANCEMENT] Removed the misleading scary "Site doesn't exist or is inaccessible" message that the CLI displayed before building Data Docs for the first time.
 * [ENHANCEMENT] Catch sqlalchemy.exc.ArgumentError and google.auth.exceptions.GoogleAuthError in SqlAlchemyDatasource __init__ and re-raise them as DatasourceInitializationError - this allows the CLI to execute its retry logic when users provide a malformed SQLAlchemy URL or attempt to connect to a BigQuery project without having proper authentication.
@@ -13,7 +23,9 @@ develop
 * [ENHANCEMENT] Bring in custom_views_directory in DefaultJinjaView to enable custom jinja templates stored in plugins dir
 * [BUGFIX] fixed glossary links in walkthrough modal, README, CTA button, scaffold notebook
 * [BUGFIX] Improved TupleGCSStoreBackend configurability (#1398 #1399)
-
+* [BUGFIX] Data Docs: switch bootstrap-table-filter-control.min.js to CDN
+* [ENHANCEMENT] BasicSuiteBuilderProfiler now rounds mostly values for readability
+* [DOCS] Add AutoAPI as the primary source for API Reference docs.
 
 0.11.2
 -----------------

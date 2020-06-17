@@ -1133,6 +1133,29 @@ class SparkDFDataset(MetaSparkDFDataset):
         return column.withColumn("__success", ~column[0].rlike(regex))
 
     @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_match_regex_list(
+        self,
+        column,
+        regex_list,
+        match_on="any",
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        if match_on == "any":
+            return column.withColumn("__success", column[0].rlike("|".join(regex_list)))
+        elif match_on == "all":
+            formatted_regex_list = ["(?={})".format(regex) for regex in regex_list]
+            return column.withColumn(
+                "__success", column[0].rlike("".join(formatted_regex_list))
+            )
+        else:
+            raise ValueError("match_on must be either 'any' or 'all'")
+
+    @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
     def expect_column_pair_values_to_be_equal(
         self,

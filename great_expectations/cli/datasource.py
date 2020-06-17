@@ -339,6 +339,13 @@ What are you processing your files with?
 def _add_pandas_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
+    send_usage_message(
+        data_context=context,
+        event="cli.new_ds_choice",
+        success=True,
+        event_payload={"type": "pandas"},
+    )
+
     if passthrough_generator_only:
         datasource_name = "files_datasource"
         configuration = PandasDatasource.build_configuration()
@@ -373,6 +380,7 @@ def _add_pandas_datasource(
         )
 
         configuration["class_name"] = "PandasDatasource"
+        configuration["module_name"] = "great_expectations.datasource"
         errors = DatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
             raise ge_exceptions.GreatExpectationsError(
@@ -451,6 +459,13 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
     )  # don't show user a zero index list :)
 
     selected_database = list(SupportedDatabases)[selected_database]
+
+    send_usage_message(
+        data_context=context,
+        event="cli.new_ds_choice",
+        success=True,
+        event_payload={"type": "sqlalchemy", "db": selected_database.name},
+    )
 
     datasource_name = "my_{}_db".format(selected_database.value.lower())
     if selected_database == SupportedDatabases.OTHER:
@@ -534,6 +549,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             )
 
             configuration["class_name"] = "SqlAlchemyDatasource"
+            configuration["module_name"] = "great_expectations.datasource"
             errors = DatasourceConfigSchema().validate(configuration)
             if len(errors) != 0:
                 raise ge_exceptions.GreatExpectationsError(
@@ -799,6 +815,13 @@ def _collect_redshift_credentials(default_credentials=None):
 def _add_spark_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
+    send_usage_message(
+        data_context=context,
+        event="cli.new_ds_choice",
+        success=True,
+        event_payload={"type": "spark"},
+    )
+
     if not load_library("pyspark"):
         return None
 
@@ -841,6 +864,7 @@ def _add_spark_datasource(
             }
         )
         configuration["class_name"] = "SparkDFDatasource"
+        configuration["module_name"] = "great_expectations.datasource"
         errors = DatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
             raise ge_exceptions.GreatExpectationsError(
@@ -963,7 +987,7 @@ def get_batch_kwargs(
     # if the user provided us with the batch kwargs generator name and the data asset, we have everything we need -
     # let's ask the generator to build batch kwargs for this asset - we are done.
     if batch_kwargs_generator_name is not None and data_asset_name is not None:
-        generator = datasource.get_batch_kwargs_generator(batch_kwargs_generator_name)
+        generator = data_source.get_batch_kwargs_generator(batch_kwargs_generator_name)
         batch_kwargs = generator.build_batch_kwargs(
             data_asset_name, **additional_batch_kwargs
         )

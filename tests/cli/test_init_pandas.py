@@ -138,8 +138,6 @@ def test_cli_init_on_new_project(
                         short-logo-vector.svg
                         short-logo.png
                         validation_failed_unexpected_values.gif
-                    scripts/
-                        bootstrap-table-filter-control.min.js
                     styles/
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
@@ -159,7 +157,7 @@ def test_cli_init_on_new_project(
     )
 
     # data_context.build_docs is twice (once in dry run mode) and two events are fired
-    assert mock_emit.call_count == 8
+    assert mock_emit.call_count == 10
     assert mock_emit.call_args_list[1] == mock.call(
         {"event_payload": {}, "event": "cli.init.create", "success": True}
     )
@@ -616,8 +614,6 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
                         short-logo-vector.svg
                         short-logo.png
                         validation_failed_unexpected_values.gif
-                    scripts/
-                        bootstrap-table-filter-control.min.js
                     styles/
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
