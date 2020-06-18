@@ -98,14 +98,13 @@ class DatabaseStoreBackend(StoreBackend):
         cols["value"] = value
 
         if kwargs.get("allow_update", False):
-            try:
-                self._get(key)
+            if self.has_key(key):
                 ins = (
                     self._table.update()
                     .where(getattr(self._table.columns, self.key_columns[0]) == key[0])
                     .values(**cols)
                 )
-            except TypeError:
+            else:
                 ins = self._table.insert().values(**cols)
         else:
             ins = self._table.insert().values(**cols)
@@ -117,7 +116,7 @@ class DatabaseStoreBackend(StoreBackend):
                 logger.info(f"Key {str(key)} already exists with the same value.")
             else:
                 raise ge_exceptions.StoreBackendError(
-                    f"Integrity error {str(e)} while trying to store key"
+                    f"Integrity error {str(e)} while trying to store key"  # will this ever get triggered now?
                 )
 
     def _move(self):
@@ -139,7 +138,7 @@ class DatabaseStoreBackend(StoreBackend):
         full_url = str(self.engine.url)
         engine_name = full_url.split("://")[0]
         db_name = full_url.split("/")[-1]
-        return engine_name + "://" + db_name + "/" + key[0]
+        return engine_name + "://" + db_name + "/" + str(key)
 
     def _has_key(self, key):
         sel = (
