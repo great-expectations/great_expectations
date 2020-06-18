@@ -26,6 +26,7 @@ config = {
         "airflow": ["apache-airflow[s3]>=1.9.0", "boto3>=1.7.3"],
         "gcp": ["google-cloud-storage>=1.28.0"],
         "redshift": ["psycopg2>=2.8"],
+        "s3": ["boto3>=1.14"],
     },
     "packages": find_packages(exclude=["docs*", "tests*", "examples*"]),
     "entry_points": {

@@ -7,7 +7,7 @@ LABEL maintainer="great-expectations"
 COPY . /usr/app/great_expectations_install
 
 RUN cd /usr/app/great_expectations_install && \
-    pip install .[spark,sqlalchemy,redshift] && \
+    pip install .[spark,sqlalchemy,redshift,s3] && \
     rm -rf /usr/app/great_expectations_install
 
 FROM base
