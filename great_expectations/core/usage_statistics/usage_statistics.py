@@ -251,8 +251,10 @@ def usage_statistics_enabled_method(
                 message["success"] = True
                 if handler is not None:
                     handler.emit(message)
-            except Exception:
+            # except Exception:
+            except Exception as e:
                 message["success"] = False
+                handler = get_usage_statistics_handler(args)
                 if handler:
                     handler.emit(message)
                 raise
@@ -353,6 +355,29 @@ def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name
     except Exception:
         logger.debug(
             "edit_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
+        )
+    return payload
+
+
+def add_datasource_usage_statistics(data_context, name, **kwargs):
+    try:
+        data_context_id = data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+
+    try:
+        datasource_anonymizer = (
+            data_context._usage_statistics_handler._datasource_anonymizer
+        )
+    except Exception:
+        datasource_anonymizer = DatasourceAnonymizer(data_context_id)
+
+    payload = {}
+    try:
+        payload = datasource_anonymizer.anonymize_datasource_info(name, kwargs)
+    except Exception:
+        logger.debug(
+            "add_datasource_usage_statistics: Unable to create add_datasource_usage_statistics payload field"
         )
     return payload
 

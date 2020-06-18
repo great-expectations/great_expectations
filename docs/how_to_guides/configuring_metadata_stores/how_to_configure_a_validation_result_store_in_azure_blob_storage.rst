@@ -3,16 +3,9 @@
 How to configure a Validation Result store in Azure blob storage
 ================================================================
 
-.. admonition:: Admonition from Mr. Dickens
+Unfortunately, this feature has not been implemented yet.  If you would like to help contribute to Great Expectations,  please start with our :ref:`contributing` guide and don’t be shy with questions!
 
-    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
-
-
-This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
-
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
-
-If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
+Also, please reach out to us on `slack <greatexpectations.io/slack>`_ if you would like to learn more, or have any questions.
 
 .. discourse::
     :topic_identifier: 173
