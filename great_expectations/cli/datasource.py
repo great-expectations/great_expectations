@@ -1204,30 +1204,29 @@ def _verify_mysql_dependent_modules() -> bool:
 
 
 def _verify_postgresql_dependent_modules() -> bool:
-    postgresql_success: bool = verify_library_dependent_modules(
-        python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
-        pip_library_name="psycopg2-binary",
-        module_names_to_reload=SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
-    )
-
     psycopg2_success: bool = verify_library_dependent_modules(
         python_import_name="psycopg2",
         pip_library_name="psycopg2-binary",
         module_names_to_reload=SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )
-
-    return postgresql_success and psycopg2_success
+    # noinspection SpellCheckingInspection
+    postgresql_psycopg2_success: bool = verify_library_dependent_modules(
+        python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
+        pip_library_name="psycopg2-binary",
+        module_names_to_reload=SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+    )
+    return psycopg2_success and postgresql_psycopg2_success
 
 
 def _verify_redshift_dependent_modules() -> bool:
-    if not _verify_postgresql_dependent_modules():
-        return False
-
-    return verify_library_dependent_modules(
+    # noinspection SpellCheckingInspection
+    postgresql_success: bool = _verify_postgresql_dependent_modules()
+    redshift_success: bool = verify_library_dependent_modules(
         python_import_name="sqlalchemy_redshift.dialect",
         pip_library_name="sqlalchemy-redshift",
         module_names_to_reload=SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )
+    return redshift_success or postgresql_success
 
 
 def _verify_snowflake_dependent_modules() -> bool:

@@ -5,10 +5,14 @@ import os
 import time
 from functools import wraps
 from inspect import getcallargs
+from pathlib import Path
 from types import ModuleType
-from typing import Union
+from typing import Callable, Union
+
+from pkg_resources import Distribution
 
 import black
+import importlib_metadata
 from great_expectations.core import expectationSuiteSchema
 from great_expectations.exceptions import (
     PluginClassNotFoundError,
@@ -18,21 +22,36 @@ from great_expectations.exceptions import (
 logger = logging.getLogger(__name__)
 
 
-def measure_execution_time(func) -> int:
+def measure_execution_time(func) -> Callable:
     @wraps(func)
-    def compute_delta_t(*args, **kwargs):
+    def compute_delta_t(*args, **kwargs) -> Callable:
         time_begin: int = int(round(time.time() * 1000))
         try:
             return func(*args, **kwargs)
         finally:
             time_end: int = int(round(time.time() * 1000))
             delta_t: int = time_end - time_begin
-            call_args = getcallargs(func, *args, **kwargs)
+            call_args: dict = getcallargs(func, *args, **kwargs)
             print(
                 f"Total execution time of function {func.__name__}({call_args}): {delta_t} ms."
             )
 
     return compute_delta_t
+
+
+# noinspection SpellCheckingInspection
+def get_project_distribution() -> Union[Distribution, None]:
+    ditr: Distribution
+    for distr in importlib_metadata.distributions():
+        relative_path: Path
+        try:
+            relative_path = Path(__file__).relative_to(distr.locate_file(""))
+        except ValueError:
+            pass
+        else:
+            if relative_path in distr.files:
+                return distr
+    return None
 
 
 def verify_dynamic_loading_support(module_name: str, package_name: str = None) -> None:

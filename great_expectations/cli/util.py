@@ -4,11 +4,12 @@ from types import ModuleType
 from typing import Union
 
 import pkg_resources
+from pkg_resources import Distribution, WorkingSet
 
 from great_expectations.cli.python_subprocess import (
     execute_shell_command_with_progress_polling,
 )
-from great_expectations.util import import_library_module, measure_execution_time
+from great_expectations.util import get_project_distribution, import_library_module
 
 try:
     from termcolor import colored
@@ -118,7 +119,7 @@ def is_sane_slack_webhook(url):
     return url.strip().startswith("https://hooks.slack.com/")
 
 
-SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES = [
+SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
     # 'great_expectations.datasource.batch_kwargs_generator.query_batch_kwargs_generator',
     "great_expectations.datasource.batch_kwargs_generator.table_batch_kwargs_generator",
     "great_expectations.dataset.sqlalchemy_dataset",
@@ -169,11 +170,22 @@ def library_install_load_check(
     if is_library_loadable(library_name=python_import_name):
         return None
 
+    # TODO: <Alex>Add CLICK PROMPT -- "Do you wish to continue Y/n" to fit existing flow.</Alex>
     status_code: int = execute_shell_command_with_progress_polling(
         f"pip install {pip_library_name}"
     )
 
-    pkg_resources.working_set = pkg_resources.WorkingSet._build_master()
+    # project_distribution: Distribution = get_project_distribution()
+    # if project_distribution:
+    #     project_name: str = project_distribution.metadata['Name']
+    #     version: str = project_distribution.metadata['Version']
+    #
+    # pkg_resources.working_set = pkg_resources.WorkingSet._build_master()
+
+    working_set: WorkingSet = pkg_resources.working_set
+    # noinspection SpellCheckingInspection
+    distr: Distribution = pkg_resources.get_distribution(dist=pip_library_name)
+    pkg_resources.WorkingSet.add_entry(self=working_set, entry=distr.key)
 
     library_loadable: bool = is_library_loadable(library_name=python_import_name)
 

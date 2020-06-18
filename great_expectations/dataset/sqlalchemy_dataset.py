@@ -435,7 +435,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return self.engine.dialect
 
     def attempt_allowing_relative_error(self):
-        detected_redshift = (
+        detected_redshift: bool = (
             sqlalchemy_redshift is not None
             and check_sql_engine_dialect(
                 actual_sql_engine_dialect=self.sql_engine_dialect,
@@ -443,7 +443,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             )
         )
         # noinspection PyTypeChecker
-        detected_psycopg2 = (
+        detected_psycopg2: bool = (
             sqlalchemy_psycopg2 is not None
             and check_sql_engine_dialect(
                 actual_sql_engine_dialect=self.sql_engine_dialect,
@@ -933,7 +933,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # The SqlAlchemyDataset interface essentially predates the batch_kwargs concept and so part of what's going
         # on, I think, is a mismatch between those. I think we should rename custom_sql -> "temp_table_query" or
         # similar, for example.
-        # TODO: <Alex>This code needs cleaning (e.g., the "MySQL" and generic cases are identical).</Alex>
         ###
 
         if self.sql_engine_dialect.name.lower() == "bigquery":
@@ -948,6 +947,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name == "mysql":
+            # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the generic case.
             stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
