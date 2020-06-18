@@ -112,4 +112,3 @@ If it would be useful to you, please comment with a +1 and feel free to add any 
 
 .. discourse::
     :topic_identifier: 178
-
