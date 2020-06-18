@@ -1,5 +1,3 @@
-import copy
-
 from great_expectations.data_context.util import instantiate_class_from_config
 
 

@@ -9,6 +9,16 @@
       "a" : ["1/1/2016", "2/2/2016", "3/3/2016", "4/4/2016", "5/5/2016", null, null, null, null, null],
       "b" : ["1/1/2016", "2/1/2016", "3/1/2016", "4/1/2016", "5/1/2020", null, null, null, null, null]
     },
+    "schemas": {
+      "spark": {
+        "w": "IntegerType",
+        "x": "IntegerType",
+        "y": "IntegerType",
+        "z": "IntegerType",
+        "a": "StringType",
+        "b": "StringType"
+      }
+    },
     "tests" : [{
       "title" : "Basic positive test",
       "exact_match_out" : false,

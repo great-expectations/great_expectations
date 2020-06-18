@@ -3,6 +3,7 @@ import sys
 
 import click
 import requests
+
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.util import cli_message, cli_message_list
@@ -80,6 +81,7 @@ def docs_list(directory):
 @click.option(
     "--all",
     "-a",
+    is_flag=True,
     help="With this, all sites will get their data docs cleaned out. See data_docs section in great_expectations.yml",
 )
 def clean_data_docs(directory, site_name=None, all=None):
@@ -89,7 +91,8 @@ def clean_data_docs(directory, site_name=None, all=None):
     if site_name is None and all is None:
         cli_message(
             "<red>{}</red>".format(
-                "Please specify --all y to remove all sites or specify specific site using site_name"
+                "Please specify --all to remove all sites or specify a specific site using "
+                "--site_name"
             )
         )
         sys.exit(1)
@@ -116,44 +119,26 @@ def build_docs(context, site_name=None, view=True):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 
-    cli_message("Building Data Docs...")
     if site_name is not None:
         site_names = [site_name]
     else:
         site_names = None
+    index_page_locator_infos = context.build_data_docs(
+        site_names=site_names, dry_run=True
+    )
 
-    index_page_locator_infos = context.build_data_docs(site_names=site_names)
-    msg = "The following Data Docs sites were built:\n"
+    msg = "\nThe following Data Docs sites will be built:\n\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
-        if index_page_locator_info.startswith("file"):
-            if os.path.isfile(index_page_locator_info[6:]):
-                msg += " - <cyan>{}:</cyan> ".format(site_name)
-                msg += "{}\n".format(index_page_locator_info)
-            else:
-                msg += " - <cyan>{}:</cyan> ".format(site_name)
-                msg += "{}\n".format(
-                    "Site doesn’t exist or is inaccessible at "
-                    + index_page_locator_info
-                    + ". If you"
-                    + " just built data docs,"
-                    + " please check permissions."
-                )
-        else:
-            r = requests.get(index_page_locator_info, stream=True)
-            if r == 200:
-                msg += " - <cyan>{}:</cyan> ".format(site_name)
-                msg += "{}\n".format(index_page_locator_info)
-            else:
-                msg += " - <cyan>{}:</cyan> ".format(site_name)
-                msg += "{}\n".format(
-                    "Site doesn’t exist or is inaccessible at "
-                    + index_page_locator_info
-                    + ". If you"
-                    + " just built data docs,"
-                    + " please check permissions."
-                )
+        msg += " - <cyan>{}:</cyan> ".format(site_name)
+        msg += "{}\n".format(index_page_locator_info)
 
-    msg = msg.rstrip("\n")
     cli_message(msg)
+    toolkit.confirm_proceed_or_exit()
+
+    cli_message("\nBuilding Data Docs...\n")
+    index_page_locator_infos = context.build_data_docs(site_names=site_names)
+
+    cli_message("Done building Data Docs")
+
     if view:
         context.open_data_docs(site_name=site_name, only_if_exists=True)

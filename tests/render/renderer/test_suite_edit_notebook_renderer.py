@@ -3,13 +3,14 @@ import os
 
 import nbformat
 import pytest
+from nbconvert.preprocessors import ExecutePreprocessor
+
 from great_expectations import DataContext
 from great_expectations.cli.suite import _suite_edit
 from great_expectations.core import ExpectationSuiteSchema
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
-from nbconvert.preprocessors import ExecutePreprocessor
 
 
 @pytest.fixture
@@ -375,6 +376,7 @@ def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
     critical_suite_with_citations,
 ):
     obs = SuiteEditNotebookRenderer().render(critical_suite_with_citations)
+    print(obs)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -390,30 +392,12 @@ def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-from datetime import datetime
-import great_expectations as ge
-import great_expectations.jupyter_ux
-from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
-)
-
-context = ge.data_context.DataContext()
-
-# Feel free to change the name of your suite here. Renaming this will not
-# remove the other one.
-expectation_suite_name = "critical"
-suite = context.get_expectation_suite(expectation_suite_name)
-suite.expectations = []
-
-batch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}
-batch = context.get_batch(batch_kwargs, suite)
-batch.head()""",
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -456,21 +440,7 @@ batch.head()""",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n"""\nLet\'s create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation\narguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline\nrunner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object.\nNote - any provided datetime will be assumed to be a UTC time. If no instantiation arguments are given, run_name will\nbe None and run_time will default to the current UTC datetime.\n"""\n\nrun_id = {\n  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n  "run_time": datetime.datetime.now(datetime.timezone.utc)\n}\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -500,30 +470,12 @@ def test_render_with_no_column_cells(critical_suite_with_citations):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-from datetime import datetime
-import great_expectations as ge
-import great_expectations.jupyter_ux
-from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
-)
-
-context = ge.data_context.DataContext()
-
-# Feel free to change the name of your suite here. Renaming this will not
-# remove the other one.
-expectation_suite_name = "critical"
-suite = context.get_expectation_suite(expectation_suite_name)
-suite.expectations = []
-
-batch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}
-batch = context.get_batch(batch_kwargs, suite)
-batch.head()""",
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -555,21 +507,7 @@ batch.head()""",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n"""\nLet\'s create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation\narguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline\nrunner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object.\nNote - any provided datetime will be assumed to be a UTC time. If no instantiation arguments are given, run_name will\nbe None and run_time will default to the current UTC datetime.\n"""\n\nrun_id = {\n  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n  "run_time": datetime.datetime.now(datetime.timezone.utc)\n}\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -578,7 +516,7 @@ context.open_data_docs(validation_result_identifier)""",
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
         assert obs_cell == expected_cell
-    # assert obs == expected
+    assert obs == expected
 
 
 def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank_batch_kwargs(
@@ -602,12 +540,12 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -650,21 +588,7 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n"""\nLet\'s create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation\narguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline\nrunner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object.\nNote - any provided datetime will be assumed to be a UTC time. If no instantiation arguments are given, run_name will\nbe None and run_time will default to the current UTC datetime.\n"""\n\nrun_id = {\n  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n  "run_time": datetime.datetime.now(datetime.timezone.utc)\n}\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -700,12 +624,12 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -748,21 +672,7 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n"""\nLet\'s create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation\narguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline\nrunner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object.\nNote - any provided datetime will be assumed to be a UTC time. If no instantiation arguments are given, run_name will\nbe None and run_time will default to the current UTC datetime.\n"""\n\nrun_id = {\n  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n  "run_time": datetime.datetime.now(datetime.timezone.utc)\n}\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -793,12 +703,12 @@ def test_render_with_no_batch_kwargs_and_no_citations(critical_suite_with_citati
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -841,21 +751,7 @@ def test_render_with_no_batch_kwargs_and_no_citations(critical_suite_with_citati
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n"""\nLet\'s create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation\narguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline\nrunner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object.\nNote - any provided datetime will be assumed to be a UTC time. If no instantiation arguments are given, run_name will\nbe None and run_time will default to the current UTC datetime.\n"""\n\nrun_id = {\n  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n  "run_time": datetime.datetime.now(datetime.timezone.utc)\n}\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -889,12 +785,12 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -937,21 +833,7 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n"""\nLet\'s create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation\narguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline\nrunner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object.\nNote - any provided datetime will be assumed to be a UTC time. If no instantiation arguments are given, run_name will\nbe None and run_time will default to the current UTC datetime.\n"""\n\nrun_id = {\n  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n  "run_time": datetime.datetime.now(datetime.timezone.utc)\n}\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -982,12 +864,12 @@ def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../3.csv", "datasource": "3"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../3.csv", "datasource": "3"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -1030,21 +912,7 @@ def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n"""\nLet\'s create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation\narguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline\nrunner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object.\nNote - any provided datetime will be assumed to be a UTC time. If no instantiation arguments are given, run_name will\nbe None and run_time will default to the current UTC datetime.\n"""\n\nrun_id = {\n  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n  "run_time": datetime.datetime.now(datetime.timezone.utc)\n}\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -1127,12 +995,12 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "warning"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../foo/data"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "warning"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../foo/data"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -1377,21 +1245,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n"""\nLet\'s create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation\narguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline\nrunner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object.\nNote - any provided datetime will be assumed to be a UTC time. If no instantiation arguments are given, run_name will\nbe None and run_time will default to the current UTC datetime.\n"""\n\nrun_id = {\n  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n  "run_time": datetime.datetime.now(datetime.timezone.utc)\n}\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],

@@ -152,7 +152,9 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         not_null_result = dataset.expect_column_values_to_not_be_null(column)
         if not not_null_result.success:
             unexpected_percent = float(not_null_result.result["unexpected_percent"])
-            mostly_value = max(0.001, (100.0 - unexpected_percent - 10) / 100.0)
+            mostly_value = round(
+                max(0.001, (100.0 - unexpected_percent - 10) / 100.0), 2
+            )
             dataset.expect_column_values_to_not_be_null(column, mostly=mostly_value)
 
     @classmethod
@@ -478,7 +480,9 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             dataset = _remove_table_expectations(dataset, excluded_expectations)
             dataset = _remove_column_expectations(dataset, excluded_expectations)
         if included_expectations:
-            for expectation in dataset.get_expectation_suite().expectations:
+            for expectation in dataset.get_expectation_suite(
+                discard_failed_expectations=False, suppress_logging=True,
+            ).expectations:
                 if expectation.expectation_type not in included_expectations:
                     try:
                         dataset.remove_expectation(

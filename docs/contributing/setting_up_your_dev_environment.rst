@@ -6,7 +6,7 @@ Setting up your dev environment
 ===============================
 
 Prerequisites
--------------------
+-------------
 
 In order to contribute to Great Expectations, you will need the following:
 
@@ -29,7 +29,7 @@ Fork and clone the repository
 
     * Click the green ``Clone`` button and choose the SSH or HTTPS URL depending on your setup.
     * Copy the URL and run ``git clone <url>`` in your local terminal.
-    * This will clone the ``develop`` branch of the great_expectations repo. Please use ``develop`` (not ``master``!) as the starting point for your work.
+    * This will clone the ``develop`` branch of the great_expectations repo. Please use ``develop`` (not ``main``!) as the starting point for your work.
     * Atlassian has a `nice tutorial for developing on a fork <https://www.atlassian.com/git/tutorials/git-forks-and-upstreams>`__.
 
 
@@ -116,7 +116,7 @@ Depending on which features of Great Expectations you want to work on, you may w
     * Documentation will be generated in ``docs/build/html/`` with the ``index.html`` as the index page.
 
 Run tests to confirm that everything is working
------------------------------------------
+-----------------------------------------------
 
 You can run all tests by running ``pytest`` in the great_expectations directory root. Please see :ref:`contributing_testing` for testing options and details.
 

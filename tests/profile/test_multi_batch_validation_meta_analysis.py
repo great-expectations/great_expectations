@@ -21,7 +21,7 @@
 #     context = titanic_multibatch_data_context
 #     my_ds = context.get_datasource("mydatasource")
 #     generator = my_ds.get_generator("mygenerator")
-#     all_batch_kwargs = [x for x in generator.get_iterator('titanic')]
+#     all_batch_kwargs = [x for x in generator.get_iterator(data_asset_name='titanic')]
 #     all_batch_kwargs = sorted(all_batch_kwargs, key=lambda x: x['path'])
 #     all_batch_kwargs
 #

@@ -1,4 +1,5 @@
 import logging
+import warnings
 from string import Template
 
 from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
@@ -69,7 +70,12 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
 
     """
 
-    recognized_batch_parameters = {"name", "limit", "offset", "query_parameters"}
+    recognized_batch_parameters = {
+        "data_asset_name",
+        "limit",
+        "offset",
+        "query_parameters",
+    }
 
     def __init__(self, name="default", datasource=None, assets=None):
         super().__init__(name=name, datasource=datasource)
@@ -100,7 +106,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
 
     def _get_iterator(
         self,
-        generator_asset,
+        data_asset_name,
         query_parameters=None,
         limit=None,
         offset=None,
@@ -108,8 +114,8 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
     ):
         batch_kwargs = None
         # First, we check if we have a configured asset
-        if generator_asset in self._assets:
-            asset_config = self._assets[generator_asset]
+        if data_asset_name in self._assets:
+            asset_config = self._assets[data_asset_name]
             try:
                 if query_parameters is None:
                     query_parameters = {}
@@ -122,11 +128,11 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             except KeyError:
                 raise BatchKwargsError(
                     "Unable to generate batch kwargs for asset '"
-                    + generator_asset
+                    + data_asset_name
                     + "': "
                     "missing template key",
                     {
-                        "generator_asset": generator_asset,
+                        "data_asset_name": data_asset_name,
                         "table_template": asset_config.table,
                         "schema_template": asset_config.schema,
                     },
@@ -137,22 +143,21 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
 
         # If this is not a manually configured asset, we fall back to inspection of the database
         elif self.engine is not None and self.inspector is not None:
-            split_generator_asset = generator_asset.split(".")
-            if len(split_generator_asset) == 2:
-                schema_name = split_generator_asset[0]
+            split_data_asset_name = data_asset_name.split(".")
+            if len(split_data_asset_name) == 2:
+                schema_name = split_data_asset_name[0]
                 if self.engine.dialect.name.lower() == "bigquery":
-                    table_name = generator_asset
+                    table_name = data_asset_name
                 else:
-                    table_name = split_generator_asset[1]
-            elif len(split_generator_asset) == 1:
+                    table_name = split_data_asset_name[1]
+            elif len(split_data_asset_name) == 1:
                 schema_name = self.inspector.default_schema_name
-                table_name = split_generator_asset[0]
+                table_name = split_data_asset_name[0]
             else:
                 raise ValueError(
                     "Table name must be of shape '[SCHEMA.]TABLE'. Passed: "
-                    + split_generator_asset
+                    + split_data_asset_name
                 )
-
             tables = self.inspector.get_table_names(schema=schema_name)
             try:
                 tables.extend(self.inspector.get_view_names(schema=schema_name))
@@ -242,17 +247,27 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
     def _build_batch_kwargs(self, batch_parameters):
         return next(
             self._get_iterator(
-                batch_parameters.get("name"),
+                data_asset_name=batch_parameters.get("data_asset_name"),
                 query_parameters=batch_parameters.get("query_parameters", {}),
                 limit=batch_parameters.get("limit"),
                 offset=batch_parameters.get("offset"),
             )
         )
 
-    def get_available_partition_ids(self, generator_asset):
+    # TODO: deprecate generator_asset argument
+    def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
+        assert (generator_asset and not data_asset_name) or (
+            not generator_asset and data_asset_name
+        ), "Please provide either generator_asset or data_asset_name."
+        if generator_asset:
+            warnings.warn(
+                "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
+                "Please update code accordingly.",
+                DeprecationWarning,
+            )
         raise BatchKwargsError(
             "TableBatchKwargsGenerator cannot identify partitions, however any existing table may"
-            "already be referenced by accessing a generator_asset with the name of the "
+            "already be referenced by accessing a data_asset with the name of the "
             "table or of the form SCHEMA.TABLE",
             {},
         )

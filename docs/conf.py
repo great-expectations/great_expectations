@@ -19,8 +19,6 @@
 import os
 import sys
 
-import sphinx_rtd_theme
-
 sys.path.insert(0, os.path.abspath("../"))
 
 
@@ -34,7 +32,8 @@ sys.path.insert(0, os.path.abspath("../"))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinx_rtd_theme",
+    "autoapi.extension",
+    # 'sphinx_rtd_theme',
     "sphinx.ext.autodoc",
     "sphinx.ext.todo",
     "sphinx.ext.coverage",
@@ -43,10 +42,18 @@ extensions = [
     "sphinxcontrib.contentui",
     "sphinx_gitstamp",
     "sphinx.ext.autosectionlabel",
+    "sphinxcontrib.discourse",
 ]
+
+autoapi_type = "python"
+autoapi_dirs = ["../great_expectations"]
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
+
+# discourse url connect
+discourse_url = "https://discuss.greatexpectations.io/"
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -55,7 +62,7 @@ templates_path = ["_templates"]
 source_suffix = ".rst"
 
 # The master toctree document.
-master_doc = "index"
+index_doc = "index"
 
 # General information about the project.
 project = u"great_expectations"
@@ -85,11 +92,10 @@ language = None
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = "sphinx"
+pygments_style = "paraiso-dark"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
-
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -103,12 +109,27 @@ html_theme = "sphinx_rtd_theme"
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    "logo_only": True,
+}
+
+html_static_path = [
+    "_static",
+    "_static/style.css",
+    "_static/hk-grotesk-pro/HKGroteskPro-Bold.woff2",
+    "_static/hk-grotesk-pro/HKGroteskPro-Regular.woff2",
+    "_static/hk-grotesk-pro/HKGroteskPro-SemiBold.woff2",
+    "_static/hk-grotesk-pro/HKGroteskPro-Medium.woff2",
+    "_static/header-logo.png",
+    "_static/discuss-logo.png",
+]
+html_css_files = ["style.css"]
+
+# html_logo = '../pip-logo.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
 
 
 # -- Options for Napoleon Extension --------------------------------------------
@@ -188,7 +209,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (
-        master_doc,
+        index_doc,
         "great_expectations.tex",
         u"great\\_expectations Documentation",
         u"The Great Expectations Team",
@@ -202,7 +223,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "great_expectations", u"great_expectations Documentation", [author], 1)
+    (index_doc, "great_expectations", u"great_expectations Documentation", [author], 1)
 ]
 
 
@@ -213,7 +234,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (
-        master_doc,
+        index_doc,
         "great_expectations",
         u"great_expectations Documentation",
         author,

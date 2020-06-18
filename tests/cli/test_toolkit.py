@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
 import os
 
 import mock
+import pytest
+
 from great_expectations.cli import toolkit
+from great_expectations.data_context import DataContext
+from great_expectations.exceptions import UnsupportedConfigVersionError
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -31,3 +34,8 @@ def test_launch_jupyter_notebook_env_set_in_env(mock_subprocess):
         mock_subprocess.assert_called_once_with(
             "jupyter notebook --test-args test_path", shell=True
         )
+
+
+def test_load_data_context_with_error_handling_v1_config(v10_project_directory):
+    with pytest.raises(UnsupportedConfigVersionError):
+        DataContext(context_root_dir=v10_project_directory)

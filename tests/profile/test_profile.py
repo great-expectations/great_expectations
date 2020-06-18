@@ -1,7 +1,8 @@
 import os
 
-import great_expectations.exceptions as ge_exceptions
 import pytest
+
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import PandasDatasource
 from great_expectations.profile.base import DatasetProfiler
@@ -279,6 +280,7 @@ def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
         "expectation_suite_name",
         "great_expectations.__version__",
         "run_id",
+        "validation_time",
     }
 
 

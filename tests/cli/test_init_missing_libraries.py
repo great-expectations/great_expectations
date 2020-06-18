@@ -2,6 +2,7 @@ import os
 
 import pytest
 from click.testing import CliRunner
+
 from great_expectations.cli import cli
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
@@ -31,7 +32,7 @@ def _library_not_loaded_test(
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "Which database backend are you using" in stdout
-    assert "Give your new data source a short name" in stdout
+    assert "Give your new Datasource a short name" in stdout
     assert (
         """Next, we will configure database credentials and store them in the `my_db` section
 of this config file: great_expectations/uncommitted/config_variables.yml"""
@@ -96,7 +97,7 @@ def test_cli_init_db_mysql_without_library_installed_instructs_user(
     caplog, tmp_path_factory
 ):
     _library_not_loaded_test(
-        tmp_path_factory, "Y\n2\n1\nmy_db\n", "pymysql", "pymysql", caplog
+        tmp_path_factory, "\n\n2\n1\nmy_db\n", "pymysql", "pymysql", caplog
     )
 
 
@@ -107,7 +108,7 @@ def test_cli_init_db_postgres_without_library_installed_instructs_user(
     caplog, tmp_path_factory,
 ):
     _library_not_loaded_test(
-        tmp_path_factory, "Y\n2\n2\nmy_db\n", "psycopg2", "psycopg2", caplog
+        tmp_path_factory, "\n\n2\n2\nmy_db\n", "psycopg2", "psycopg2", caplog
     )
 
 
@@ -118,7 +119,7 @@ def test_cli_init_db_redshift_without_library_installed_instructs_user(
     caplog, tmp_path_factory,
 ):
     _library_not_loaded_test(
-        tmp_path_factory, "Y\n2\n3\nmy_db\n", "psycopg2", "psycopg2", caplog
+        tmp_path_factory, "\n\n2\n3\nmy_db\n", "psycopg2", "psycopg2", caplog
     )
 
 
@@ -131,7 +132,7 @@ def test_cli_init_db_snowflake_without_library_installed_instructs_user(
 ):
     _library_not_loaded_test(
         tmp_path_factory,
-        "Y\n2\n4\nmy_db\n",
+        "\n\n2\n4\nmy_db\n",
         "snowflake-sqlalchemy",
         "snowflake",
         caplog,
@@ -150,7 +151,7 @@ def test_cli_init_spark_without_library_installed_instructs_user(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["init", "--no-view"], input="Y\n1\n2\n", catch_exceptions=False
+        cli, ["init", "--no-view"], input="\n\n1\n2\n", catch_exceptions=False
     )
     stdout = result.output
 

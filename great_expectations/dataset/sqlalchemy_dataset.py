@@ -470,7 +470,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # If it fails, we are trying to get the data using read_sql
             head_sql_str = "select * from "
             if self._table.schema and self.engine.dialect.name.lower() != "bigquery":
-                head_sql_str += self._table.schema + "."
+                head_sql_str += self._table.schema + "." + self._table.name
             elif self.engine.dialect.name.lower() == "bigquery":
                 head_sql_str += "`" + self._table.name + "`"
             else:
@@ -484,6 +484,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 )
 
             df = pd.read_sql(head_sql_str, con=self.engine)
+        except StopIteration:
+            df = pd.DataFrame(columns=self.get_table_columns())
 
         return PandasDataset(
             df,

@@ -1,7 +1,7 @@
 # This must have all the required keys and an invalid one
 this_is_a_wildly_invalid_top_level_key: "stuff"
 
-config_version: 1
+config_version: 2
 plugins_directory: "foo"
 expectations_store_name: expectations_store
 validations_store_name: "foo"
