@@ -4,7 +4,7 @@ How to add a Validation Operator
 ======================================
 
 This guide will help you add a new instance of a :ref:`Validation Operator <validation_operators_and_actions>`. Validation Operators give you the ability to validate multiple batches
-of data together, and kick off Validation Actions based on the results of validation. Additionally, each Validation Operator encodes a set of business rules around validation. When you add an instance of a Validation Operator,
+of data together. Additionally, each Validation Operator encodes a set of business rules, such as performing various actions based on the results of validation. When you add an instance of a Validation Operator,
 you can use its business rules in your project.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
@@ -59,6 +59,12 @@ The snippet below shows a portion of your ``great_expectations.yml`` configurati
 
 Additional notes
 ----------------
+
+Two Validation Operator classes are currently shipped with Great Expectations:
+
+* :py:class:`ActionListValidationOperator<great_expectations.validation_operators.validation_operators.ActionListValidationOperator>` invokes a configurable list of actions on every Validation Result validation result. Firing a Slack notification and updating Data Docs are examples of these actions.
+
+* :py:class:`WarningAndFailureExpectationSuitesValidationOperator<great_expectations.validation_operators.validation_operators.WarningAndFailureExpectationSuitesValidationOperator>` extends the class above and allows to group Expectation Suites into two groups - critical and warning.
 
 
 Additional resources
