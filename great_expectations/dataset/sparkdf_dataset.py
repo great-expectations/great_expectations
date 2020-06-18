@@ -487,53 +487,73 @@ class MetaSparkDFDataset(Dataset):
 
 class SparkDFDataset(MetaSparkDFDataset):
     """
-    This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
+This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
-    Feature Maturity:
-    -> production
+.. admonition:: Feature Maturity
+
     id: validation_engine_pyspark_self_managed
-    API Stability: stable
-    Implementation Completeness: moderate
-    Unit Test Coverage: complete
-    Integration/Infrastructure Coverage: N/A -> see relevant datasource evaluation
-    Documentation Completeness: complete
-    Bug Risk: low/moderate
-    Expectation Completeness: moderate
+    title: Validation Engine - pyspark - Self-Managed
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Production
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: Moderate
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A -> see relevant Datasource evaluation
+        documentation_completeness: Complete
+        bug_risk: Low/Moderate
+        expectation_completeness: Moderate
 
-    Feature Maturity:
-    -> beta
     id: validation_engine_databricks
-    API Stability: stable
-    Implementation Completeness: low [dbfs-specific handling]
-    Unit Test Coverage: N/A -> implementation not different
-    Integration/Infrastructure Coverage: We've tested a bit, know others have used it
-    Documentation Completeness: moderate [need docs on managing project configuration via dbfs/etc]
-    Bug Risk: low/moderate
-    Expectation Completeness: moderate
+    title: Validation Engine - Databricks
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Beta
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: Low [dbfs-specific handling]
+        unit_test_coverage: N/A -> implementation not different
+        integration_infrastructure_test_coverage: We've tested a bit, know others have used it
+        documentation_completeness: Moderate (need docs on managing project configuration via dbfs/etc.)
+        bug_risk: Low/Moderate
+        expectation_completeness: Moderate
 
-    Feature Maturity:
-    -> experimental
     id: validation_engine_emr_spark
-    API Stability: stable
-    Implementation Completeness: Low [need to provide guidance on "known good" paths, and we know there are many "knobs" to tune that we have not explored/tested]
-    Unit Test Coverage: N/A -> implementation not different
-    Integration/Infrastructure Coverage: Unknown / rumor
-    Documentation Completeness: low [must install specific/latest version but do not have docs to that effect or of known useful paths]
-    Bug Risk: low/moderate
-    Expectation Completeness: moderate
+    title: Validation Engine - EMR - Spark
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Experimental
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: Low (need to provide guidance on "known good" paths, and we know there are many "knobs" to tune that we have not explored/tested)
+        unit_test_coverage: N/A -> implementation not different
+        integration_infrastructure_test_coverage: Unknown / Rumor
+        documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
+        bug_risk: Low/Moderate
+        expectation_completeness: Moderate
 
-    Feature Maturity:
-    -> experimental
     id: validation_engine_spark_other
-    API Stability: stable
-    Implementation Completeness: "other" means we haven't even tested possibility (e.g. known glue deployment)
-    Unit Test Coverage: N/A -> implementation not different
-    Integration/Infrastructure Coverage: Unknown / rumor
-    Documentation Completeness: low [must install specific/latest version but do not have docs to that effect or of known useful paths]
-    Bug Risk: low/moderate
-    Expectation Completeness: moderate
-
-
+    title: Validation Engine - Spark - Other
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Experimental
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: "other" means we haven't even tested possibility (e.g. known glue deployment)
+        unit_test_coverage: N/A -> implementation not different
+        integration_infrastructure_test_coverage: Unknown / Rumor
+        documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
+        bug_risk: Low/Moderate
+        expectation_completeness: Moderate
     """
 
     @classmethod

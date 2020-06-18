@@ -91,249 +91,38 @@ class BaseDataContext(object):
     Together, these changes make BaseDataContext class more testable.
 
 s3
-API Stability: medium
-Implementation Completeness: Complete
-Unit Test Coverage: Complete
-Infrastructure Coverage: None
-Documentation Completeness: Minimal/Spotty
-Bug Risk: Low
-
+api_stability: medium
+implementation_completeness: Complete
+unit_test_coverage Complete
+integration_infrastructure_test_coverage: None
+documentation_completeness: Minimal/Spotty
+bug_risk: Low
 
 Feature: Filesystem
-API Stability: Medium
-Implementation Completeness: Complete
-Unit Test Coverage: Complete
-Infrastructure Coverage: Partial
-Documentation Completeness: Partial
-Bug Risk: Low (unless you’re on windows)
-
+api_stability: Medium
+implementation_completeness: Complete
+unit_test_coverage Complete
+integration_infrastructure_test_coverage: Partial
+documentation_completeness: Partial
+bug_risk: Low (unless you’re on windows)
 
 Feature: GCS
  -> experimental
-API Stability: medium [supported via native ‘gs://' syntax in pandas and spark; medium because we expect configuration to evolve]
-Implementation Completeness: Medium [works via passthrough, not via CLI]
-Unit Test Coverage: Minimal
-Infrastructure Coverage: Minimal
-Documentation Completeness: Minimal
-Bug Risk: Moderate
+api_stability: medium [supported via native ‘gs://' syntax in pandas and spark; medium because we expect configuration to evolve]
+implementation_completeness: Medium [works via passthrough, not via CLI]
+unit_test_coverage Minimal
+integration_infrastructure_test_coverage: Minimal
+documentation_completeness: Minimal
+bug_risk: Moderate
 
 Feature: azure_blob_storage
 -> to-be-named-level below experimental (“not impossible”) (“i’ve seen worse ideas”) “in roadmap”
-API Stability: N/A [Supported on (data bricks) spark via ‘wasb://' / ‘wasps://' url; requires download locally first for pandas]
-Implementation Completeness: Minimal
-Unit Test Coverage: N/A
-Infrastructure Coverage: N/A
-Documentation Completeness: Minimal
-Bug Risk: Unknown
-
-
-
-
-
-Expectation Store - Git
-Production
-API Stability - Stable
-Implementation Completeness - Complete
-Unit Test Coverage - Complete
-Integration/Infrastructure Test Coverage - N/A
-Documentation Completeness - Complete
-Bug Risk - Low
-
-
-
-Expectation Store - Filesystem
-Production
-API Stability - Stable
-Implementation Completeness - Complete
-Unit Test Coverage - Complete
-Integration/Infrastructure Test Coverage - N/A
-Documentation Completeness - Complete
-Bug Risk - Low
-
-
-
-Expectation Store - S3: 
-Beta
-API Stability - Stable
-Implementation Completeness - Complete
-Unit Test Coverage - Complete
-Integration/Infrastructure Test Coverage - Minimal
-Documentation Completeness - Complete
-Bug Risk - Low
-
-
-
-Expectation Store - GCS: 
-Beta
-API Stability - Stable
-Implementation Completeness - Complete
-Unit Test Coverage - Complete
-Integration/Infrastructure Test Coverage - Minimal
-Documentation Completeness - Partial
-Bug Risk - Low
-
-
-Expectation Store - Azure: 
-N/A
-API Stability - Stable
-Implementation Completeness - Minimal
-Unit Test Coverage - Minimal
-Integration/Infrastructure Test Coverage - Minimal
-Documentation Completeness - Minimal
-Bug Risk - Moderate
-
-
-
-Validations Store - Git
-Production
-API Stability - Stable
-Implementation Completeness - Complete
-Unit Test Coverage - Complete
-Integration/Infrastructure Test Coverage - N/A
-Documentation Completeness - Complete
-Bug Risk - Low
-
-
-
-Validations Store - Filesystem
-Production
-API Stability - Stable
-Implementation Completeness - Complete
-Unit Test Coverage - Complete
-Integration/Infrastructure Test Coverage - N/A
-Documentation Completeness - Complete
-Bug Risk - Low
-
-
-
-Validations Store - S3: 
-Beta
-API Stability - Stable
-Implementation Completeness - Complete
-Unit Test Coverage - Complete
-Integration/Infrastructure Test Coverage - Minimal
-Documentation Completeness - Complete
-Bug Risk - Low
-
-
-
-Validations Store - GCS: 
-Beta
-API Stability - Stable
-Implementation Completeness - Complete
-Unit Test Coverage - Complete
-Integration/Infrastructure Test Coverage - Minimal
-Documentation Completeness - Partial
-Bug Risk - Low
-
-
-Validations Store - Azure: 
-N/A
-API Stability - Stable
-Implementation Completeness - Minimal
-Unit Test Coverage - Minimal
-Integration/Infrastructure Test Coverage - Minimal
-Documentation Completeness - Minimal
-Bug Risk - Moderate
-
-
-
-Validations Store - Git --> REMOVE
-HTMLSiteStore - Git --> REMOVE
-
-HTMLSiteStore - Filesystem
-Production
-API Stability - Mostly Stable (profiling)
-Implementation Completeness - Complete
-Unit Test Coverage - Complete
-Integration/Infrastructure Test Coverage - N/A
-Documentation Completeness - Partial
-Bug Risk - Low
-
-
-.. feature_maturity::
-
-    id: data_docs_store_s3
-    title:
-    icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity: Beta
-    maturity_details:
-        api_stability: Mostly Stable (profiling)
-        implementation_completeness: Complete
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: Minimal
-        documentation_completeness: Complete
-        bug_risk: Moderate
-
-
-HTMLSiteStore  - GCS: 
-Beta
-API Stability - Mostly Stable (profiling)
-Implementation Completeness - Complete
-Unit Test Coverage - Complete
-Integration/Infrastructure Test Coverage - Minimal
-Documentation Completeness - Partial (needs auth)
-Bug Risk - Moderate (resource URL may have bugs)
-
-
-HTMLSiteStore  - Azure: 
-N/A
-API Stability - Mostly Stable (profiling)
-Implementation Completeness - Minimal
-Unit Test Coverage - Minimal
-Integration/Infrastructure Test Coverage - Minimal
-Documentation Completeness - Minimal
-Bug Risk - Moderate
-
-
-
-Checkpoint - Notebook:
-Experimental
-API Stability - Unstable - expect changes to batch definition; "assets to validate" is still totally untyped
-Implementation Completeness - Complete
-Unit Test Coverage - Partial "golden path"-focused tests (error checking tests need to be improved)
-Integration/Infrastructure Test Coverage - N/A
-Documentation Completeness - Complete
-Bug Risk - Low
-
-
-Checkpoint - Command Line:
-Experimental
-API Stability - Unstable - expect changes to batch definition; no checkpoint store)
-Implementation Completeness - Complete
-Unit Test Coverage - Complete
-Integration/Infrastructure Test Coverage - N/A
-Documentation Completeness - Complete
-Bug Risk - Low
-
-
-Checkpoint - Cron:
-Experimental
-API Stability - Unstable (expect changes to batch validation; no checkpoint store)
-Implementation Completeness - Complete
-Unit Test Coverage - Complete
-Integration/Infrastructure Test Coverage - N/A
-Documentation Completeness - Complete
-Bug Risk - Low
-
-
-Checkpoint - Airflow DAG:
-Note: does *not* include embedding in airflow UI
-Beta
-API Stability - Unstable
-Implementation Completeness - Partial [no operator, but probably don't need one]
-Unit Test Coverage - N/A
-Integration/Infrastructure Test Coverage - Minimal
-Documentation Completeness - Complete [pending how-to]
-Bug Risk - Low
-
-
-
-
-
+api_stability: N/A [Supported on (data bricks) spark via ‘wasb://' / ‘wasps://' url; requires download locally first for pandas]
+implementation_completeness: Minimal
+unit_test_coverage N/A
+integration_infrastructure_test_coverage: N/A
+documentation_completeness: Minimal
+bug_risk: Unknown
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2

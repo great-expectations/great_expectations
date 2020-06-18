@@ -313,31 +313,34 @@ class MetaPandasDataset(Dataset):
 
 class PandasDataset(MetaPandasDataset, pd.DataFrame):
     """
-    PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
+PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
 
-    For the full API reference, please see :func:`Dataset <great_expectations.data_asset.dataset.Dataset>`
+For the full API reference, please see :func:`Dataset <great_expectations.data_asset.dataset.Dataset>`
 
-    Notes:
-        1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
-           data frame unless the user specifies the ``discard_subset_failing_expectations = True`` \
-           property on the original data frame.
-        2. Concatenations, joins, and merges of PandaDataSets contain NO expectations (since no autoinspection
-           is performed by default).
+Notes:
+    1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
+       data frame unless the user specifies the ``discard_subset_failing_expectations = True`` \
+       property on the original data frame.
+    2. Concatenations, joins, and merges of PandaDataSets contain NO expectations (since no autoinspection
+       is performed by default).
 
+.. admonition:: `Feature Maturity <FEATURE_MATURITY_URL>`_
 
-    Feature Maturity:
-    -> production
     id: validation_engine_pandas
-    API Stability: stable
-    Implementation Completeness: complete
-    Unit Test Coverage: complete
-    Integration/Infrastructure Coverage: N/A -> see relevant datasource evaluation
-    Documentation Completeness: complete
-    Bug Risk: low
-    Expectation Completeness: complete
-
-
-
+    title: Validation Engine - Pandas
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Production
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A -> see relevant Datasource evaluation
+        documentation_completeness: Complete
+        bug_risk: Low
+        expectation_completeness: Complete
     """
 
     # this is necessary to subclass pandas in a proper way.

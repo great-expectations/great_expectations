@@ -123,9 +123,6 @@
         "id": "validations_store",
         "cases": [
           {
-            "id": "validations_store_git"
-          },
-          {
             "id": "validations_store_filesystem"
           },
           {
@@ -141,23 +138,20 @@
       },
       {
         "title": "How do you want to host and share your Data Documentation?",
-        "description": "A [Data Docs Store](https://docs.greatexpectations.io/en/latest/reference/core_concepts/data_context.html#data_docs_store) facilitates publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results",
-        "id": "data_docs_store",
+        "description": "A [HTML Site Store](https://docs.greatexpectations.io/en/latest/reference/core_concepts/data_context.html#html_site_store) facilitates publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results",
+        "id": "html_site_store",
         "cases": [
           {
-            "id": "data_docs_store_git"
+            "id": "html_site_store_filesystem"
           },
           {
-            "id": "data_docs_store_filesystem"
+            "id": "html_site_store_s3"
           },
           {
-            "id": "data_docs_store_s3"
+            "id": "html_site_store_gcs"
           },
           {
-            "id": "data_docs_store_gcs"
-          },
-          {
-            "id": "data_docs_store_azure_blob_storage"
+            "id": "html_site_store_azure_blob_storage"
           }
         ]
       },

@@ -23,6 +23,72 @@ logger = logging.getLogger(__name__)
 
 
 class HtmlSiteStore(object):
+    """
+A HtmlSiteStore facilitates publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results.
+
+.. admonition:: Feature Maturity
+
+    id: html_site_store_filesystem
+    title: HTML Site Store - Filesystem
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Production
+    maturity_details:
+        api_stability: Mostly Stable (profiling)
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A
+        documentation_completeness: Partial
+        bug_risk: Low
+
+    id: html_site_store_s3
+    title: HTML Site Store - S3
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Beta
+    maturity_details:
+        api_stability: Mostly Stable (profiling)
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Complete
+        bug_risk: Moderate
+
+    id: html_site_store_gcs
+    title: HTMLSiteStore - GCS
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Beta
+    maturity_details:
+        api_stability: Mostly Stable (profiling)
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Partial (needs auth)
+        bug_risk: Moderate (resource URL may have bugs)
+
+    id: html_site_store_azure_blob_storage
+    title: HTMLSiteStore - Azure
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: N/A
+    maturity_details:
+        api_stability: Mostly Stable (profiling)
+        implementation_completeness: Minimal
+        unit_test_coverage: Minimal
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Minimal
+        bug_risk: Moderate
+    """
+
     _key_class = SiteSectionIdentifier
 
     def __init__(self, store_backend=None, runtime_environment=None):

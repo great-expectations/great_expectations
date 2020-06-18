@@ -32,16 +32,78 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 @click.group(short_help="Checkpoint operations")
 def checkpoint():
     """
-    Checkpoint operations
+Checkpoint operations
 
-    A checkpoint is a bundle of one or more batches of data with one or more
-    Expectation Suites.
+A checkpoint is a bundle of one or more batches of data with one or more
+Expectation Suites.
 
-    A checkpoint can be as simple as one batch of data paired with one
-    Expectation Suite.
+A checkpoint can be as simple as one batch of data paired with one
+Expectation Suite.
 
-    A checkpoint can be as complex as many batches of data across different
-    datasources paired with one or more Expectation Suites each.
+A checkpoint can be as complex as many batches of data across different
+datasources paired with one or more Expectation Suites each.
+\f
+.. admonition:: Feature Maturity
+
+    id: checkpoint_notebook
+    title: Checkpoint - Notebook
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Experimental
+    maturity_details:
+        api_stability: Unstable - expect changes to batch definition; "assets to validate" is still totally untyped
+        implementation_completeness: Complete
+        unit_test_coverage: Partial "golden path"-focused tests (error checking tests need to be improved)
+        integration_infrastructure_test_coverage: N/A
+        documentation_completeness: Complete
+        bug_risk: Low
+
+    id: checkpoint_command_line
+    title: Checkpoint - Command Line
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Experimental
+    maturity_details:
+        api_stability: Unstable - expect changes to batch definition; no checkpoint store)
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A
+        documentation_completeness: Complete
+        bug_risk: Low
+
+    id: checkpoint_cron_job
+    title: Checkpoint - Cron
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Experimental
+    maturity_details:
+        api_stability: Unstable (expect changes to batch validation; no checkpoint store)
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A
+        documentation_completeness: Complete
+        bug_risk: Low
+
+    id: checkpoint_airflow_dag
+    title: Checkpoint - Airflow DAG
+    icon:
+    short_description:
+    description: Note: does *not* include embedding in airflow UI
+    how_to_guide_url:
+    maturity: Beta
+    maturity_details:
+        api_stability: Unstable
+        implementation_completeness: Partial [no operator, but probably don't need one]
+        unit_test_coverage: N/A
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Complete [pending how-to]
+        bug_risk: Low
     """
     pass
 
