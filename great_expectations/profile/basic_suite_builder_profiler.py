@@ -155,7 +155,9 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             unexpected_percent = float(not_null_result.result["unexpected_percent"])
             potential_mostly_value = (100.0 - unexpected_percent - 10) / 100.0
             safe_mostly_value = round(max(0.001, potential_mostly_value), 3)
-            dataset.expect_column_values_to_not_be_null(column, mostly=safe_mostly_value)
+            dataset.expect_column_values_to_not_be_null(
+                column, mostly=safe_mostly_value
+            )
 
     @classmethod
     def _create_expectations_for_numeric_column(cls, dataset, column):
