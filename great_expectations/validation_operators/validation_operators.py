@@ -407,9 +407,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         notify_on="all",
         result_format={"result_format": "SUMMARY"},
     ):
-        super().__init__(
-            data_context, action_list,
-        )
+        super().__init__(data_context, action_list, name)
 
         if expectation_suite_name_suffixes is None:
             expectation_suite_name_suffixes = [".failure", ".warning"]
