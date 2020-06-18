@@ -9,7 +9,6 @@ from great_expectations.datasource.batch_kwargs_generator import (
     QueryBatchKwargsGenerator,
 )
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
-from great_expectations.exceptions import BatchKwargsError
 
 
 def test_basic_operation(basic_sqlalchemy_datasource):
@@ -38,7 +37,10 @@ def test_basic_operation(basic_sqlalchemy_datasource):
 
 def test_add_query(basic_sqlalchemy_datasource):
     generator = QueryBatchKwargsGenerator(datasource=basic_sqlalchemy_datasource)
-    generator.add_query("my_asset", "select * from my_table where val > $condition")
+    generator.add_query(
+        data_asset_name="my_asset",
+        query="select * from my_table where val > $condition",
+    )
 
     batch_kwargs = generator.yield_batch_kwargs(
         "my_asset", query_parameters={"condition": 5}
@@ -54,7 +56,9 @@ def test_partition_id(basic_sqlalchemy_datasource):
         queries={"my_asset": "SELECT * FROM my_table WHERE value = $partition_id",},
     )
 
-    batch_kwargs = generator.build_batch_kwargs("my_asset", partition_id="foo")
+    batch_kwargs = generator.build_batch_kwargs(
+        data_asset_name="my_asset", partition_id="foo"
+    )
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceQueryBatchKwargs)
     assert batch_kwargs.query == "SELECT * FROM my_table WHERE value = $partition_id"
     assert batch_kwargs.query_parameters == {"partition_id": "foo"}
@@ -77,9 +81,13 @@ def test_get_available_data_asset_names_for_query_path(empty_data_context):
     assert ("dummy", "query") in sql_list["names"]
 
 
-def test_build_batch_kwargs_for_query_path(basic_sqlalchemy_datasource, data_context):
-    base_directory = data_context.root_directory
-    basic_sqlalchemy_datasource._data_context = data_context
+def test_build_batch_kwargs_for_query_path(
+    basic_sqlalchemy_datasource, data_context_parameterized_expectation_suite
+):
+    base_directory = data_context_parameterized_expectation_suite.root_directory
+    basic_sqlalchemy_datasource._data_context = (
+        data_context_parameterized_expectation_suite
+    )
     generator_name = "my_generator"
     query_str = "SELECT * FROM my_table"
 
@@ -97,7 +105,7 @@ def test_build_batch_kwargs_for_query_path(basic_sqlalchemy_datasource, data_con
     generator = QueryBatchKwargsGenerator(
         name=generator_name, datasource=basic_sqlalchemy_datasource
     )
-    batch_kwargs = generator.build_batch_kwargs(name="example")
+    batch_kwargs = generator.build_batch_kwargs(data_asset_name="example")
 
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceQueryBatchKwargs)
     assert batch_kwargs.query == query_str

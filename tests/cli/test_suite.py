@@ -63,7 +63,10 @@ def test_suite_demo_on_context_with_no_datasources(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_enter_existing_suite_name_as_arg(
-    mock_webbrowser, mock_subprocess, caplog, data_context
+    mock_webbrowser,
+    mock_subprocess,
+    caplog,
+    data_context_parameterized_expectation_suite,
 ):
     """
     We call the "suite demo" command with the name of an existing expectation
@@ -75,7 +78,7 @@ def test_suite_demo_enter_existing_suite_name_as_arg(
     - NOT open jupyter
     """
 
-    not_so_empty_data_context = data_context
+    not_so_empty_data_context = data_context_parameterized_expectation_suite
     project_root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(project_root_dir, "uncommitted"))
 
@@ -117,7 +120,11 @@ def test_suite_demo_enter_existing_suite_name_as_arg(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
-    mock_webbrowser, mock_subprocess, caplog, data_context, filesystem_csv_2
+    mock_webbrowser,
+    mock_subprocess,
+    caplog,
+    data_context_parameterized_expectation_suite,
+    filesystem_csv_2,
 ):
     """
     We call the "suite demo" command without the suite name argument
@@ -132,7 +139,7 @@ def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
     - NOT open jupyter
     - open DataDocs to the new example suite page
     """
-    not_so_empty_data_context = data_context
+    not_so_empty_data_context = data_context_parameterized_expectation_suite
     root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(root_dir, "uncommitted"))
 
@@ -159,15 +166,18 @@ def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
         in stdout
     )
     assert "Enter the path" in stdout
-    assert "Name the new expectation suite [f1.warning]" in stdout
+    assert "Name the new Expectation Suite [f1.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
     )
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
-    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+    assert "The following Data Docs sites will be built" in stdout
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here"
+        in stdout
+    )
     assert "open a notebook for you now" not in stdout
 
     expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
@@ -187,7 +197,11 @@ def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_creates_empty_suite(
-    mock_webbroser, mock_subprocess, caplog, data_context, filesystem_csv_2
+    mock_webbroser,
+    mock_subprocess,
+    caplog,
+    data_context_parameterized_expectation_suite,
+    filesystem_csv_2,
 ):
     """
     Running "suite new" should:
@@ -195,7 +209,7 @@ def test_suite_new_creates_empty_suite(
     - open jupyter
     - NOT open data docs
     """
-    project_root_dir = data_context.root_directory
+    project_root_dir = data_context_parameterized_expectation_suite.root_directory
     os.mkdir(os.path.join(project_root_dir, "uncommitted"))
     root_dir = project_root_dir
     os.chdir(root_dir)
@@ -219,7 +233,10 @@ def test_suite_new_creates_empty_suite(
     )
     assert "Generating example Expectation Suite..." not in stdout
     assert "The following Data Docs sites were built" not in stdout
-    assert "A new Expectation suite 'foo' was added to your project" in stdout
+    assert (
+        "Great Expectations will create a new Expectation Suite 'foo' and store it here"
+        in stdout
+    )
     assert (
         "Because you requested an empty suite, we'll open a notebook for you now to edit it!"
         in stdout
@@ -239,6 +256,7 @@ def test_suite_new_creates_empty_suite(
     citations[0].pop("citation_date")
     assert citations[0] == {
         "batch_kwargs": {
+            "data_asset_name": "f1",
             "datasource": "mydatasource",
             "path": csv,
             "reader_method": "read_csv",
@@ -262,7 +280,11 @@ def test_suite_new_creates_empty_suite(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_empty_with_no_jupyter(
-    mock_webbroser, mock_subprocess, caplog, data_context, filesystem_csv_2
+    mock_webbroser,
+    mock_subprocess,
+    caplog,
+    data_context_parameterized_expectation_suite,
+    filesystem_csv_2,
 ):
     """
     Running "suite new --no-jupyter" should:
@@ -270,8 +292,12 @@ def test_suite_new_empty_with_no_jupyter(
     - NOT open jupyter
     - NOT open data docs
     """
-    os.mkdir(os.path.join(data_context.root_directory, "uncommitted"))
-    root_dir = data_context.root_directory
+    os.mkdir(
+        os.path.join(
+            data_context_parameterized_expectation_suite.root_directory, "uncommitted"
+        )
+    )
+    root_dir = data_context_parameterized_expectation_suite.root_directory
     runner = CliRunner(mix_stderr=False)
     csv = os.path.join(filesystem_csv_2, "f1.csv")
     # TODO this test must be updated to remove the --empty flag in the next major release
@@ -292,7 +318,10 @@ def test_suite_new_empty_with_no_jupyter(
     )
     assert "Generating example Expectation Suite..." not in stdout
     assert "The following Data Docs sites were built" not in stdout
-    assert "A new Expectation suite 'foo' was added to your project" in stdout
+    assert (
+        "Great Expectations will create a new Expectation Suite 'foo' and store it here"
+        in stdout
+    )
     assert "open a notebook for you now" not in stdout
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo.json")
@@ -309,6 +338,7 @@ def test_suite_new_empty_with_no_jupyter(
     citations[0].pop("citation_date")
     assert citations[0] == {
         "batch_kwargs": {
+            "data_asset_name": "f1",
             "datasource": "mydatasource",
             "path": csv,
             "reader_method": "read_csv",
@@ -366,15 +396,18 @@ def test_suite_demo_one_datasource_without_generator_without_suite_name_argument
 
     assert result.exit_code == 0
     assert "Enter the path" in stdout
-    assert "Name the new expectation suite [f1.warning]" in stdout
+    assert "Name the new Expectation Suite [f1.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
     )
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here:"
+        in stdout
+    )
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
-    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+    assert "The following Data Docs sites will be built" in stdout
 
     obs_urls = context.get_docs_sites_urls()
 
@@ -443,15 +476,19 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
         in stdout
     )
 
-    assert "Name the new expectation suite [random.warning]" in stdout
+    assert "Name the new Expectation Suite [random.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
     )
+
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here:"
+        in stdout
+    )
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
-    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+    assert "The following Data Docs sites will be built" in stdout
 
     obs_urls = context.get_docs_sites_urls()
 
@@ -513,8 +550,11 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     )
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
-    assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
+    assert "The following Data Docs sites will be built" in stdout
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'foo_suite' here:"
+        in stdout
+    )
 
     obs_urls = context.get_docs_sites_urls()
 
@@ -863,7 +903,10 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert mock_subprocess.call_count == 0
     mock_subprocess.reset_mock()
     mock_webbrowser.reset_mock()
-    assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'foo_suite' here:"
+        in stdout
+    )
 
     batch_kwargs = {
         "datasource": "random",
@@ -1057,7 +1100,10 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     mock_subprocess.reset_mock()
     mock_webbrowser.reset_mock()
     assert result.exit_code == 0
-    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+    assert (
+        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here:"
+        in stdout
+    )
 
     # remove the citations from the suite
     context = DataContext(project_root_dir)
@@ -1221,7 +1267,7 @@ def test_suite_delete_with_one_suite(
     assert result.exit_code == 0
     assert "Deleted the expectation suite named: a.warning" in result.output
 
-    assert not os.path.isdir(suite_dir)
+    # assert not os.path.isdir(suite_dir)
     assert not os.path.isfile(suite_path)
 
     assert mock_emit.call_count == 2

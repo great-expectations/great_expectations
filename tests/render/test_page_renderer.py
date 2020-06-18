@@ -222,7 +222,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(
                         "expectation_suite_name": {
                             "tag": "a",
                             "attributes": {
-                                "href": "../../../expectations/default.html"
+                                "href": "../../../../expectations/default.html"
                             },
                         },
                     },
@@ -246,7 +246,13 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
         "content_block_type": "table",
         "styling": {
             "classes": ["col-12", "table-responsive", "mt-1"],
-            "body": {"classes": ["table", "table-sm"]},
+            "body": {
+                "classes": ["table", "table-sm"],
+                "styles": {
+                    "margin-bottom": "0.5rem !important",
+                    "margin-top": "0.5rem !important",
+                },
+            },
         },
         "header": {
             "content_block_type": "string_template",
@@ -258,7 +264,8 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
         },
         "table": [
             ["Great Expectations Version", "0.9.7+17.g02805059.dirty"],
-            ["Run ID", "20200322T170247.671855Z"],
+            ["Run Name", "20200322T170247.671855Z"],
+            ["Run Time", "20200322T170247.671855Z"],
         ],
     }
 
@@ -271,12 +278,18 @@ def test_ValidationResultsPageRenderer_render_validation_statistics(
     validation_statistics = ValidationResultsPageRenderer._render_validation_statistics(
         titanic_profiled_evrs_1
     ).to_json_dict()
-    # print(validation_statistics)
+    print(validation_statistics)
     expected_validation_statistics = {
         "content_block_type": "table",
         "styling": {
             "classes": ["col-6", "table-responsive", "mt-1", "p-1"],
-            "body": {"classes": ["table", "table-sm"]},
+            "body": {
+                "classes": ["table", "table-sm"],
+                "styles": {
+                    "margin-bottom": "0.5rem !important",
+                    "margin-top": "0.5rem !important",
+                },
+            },
         },
         "header": {
             "content_block_type": "string_template",
@@ -311,8 +324,13 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
     expected_batch_kwarg_table = {
         "content_block_type": "table",
         "styling": {
-            "classes": ["col-6", "table-responsive", "mt-1"],
-            "body": {"classes": ["table", "table-sm"]},
+            "body": {
+                "classes": ["table", "table-sm"],
+                "styles": {
+                    "margin-bottom": "0.5rem !important",
+                    "margin-top": "0.5rem !important",
+                },
+            }
         },
         "header": {
             "content_block_type": "string_template",

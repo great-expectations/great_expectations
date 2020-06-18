@@ -153,7 +153,9 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         not_null_result = dataset.expect_column_values_to_not_be_null(column)
         if not not_null_result.success:
             unexpected_percent = float(not_null_result.result["unexpected_percent"])
-            mostly_value = max(0.001, (100.0 - unexpected_percent - 10) / 100.0)
+            mostly_value = round(
+                max(0.001, (100.0 - unexpected_percent - 10) / 100.0), 2
+            )
             dataset.expect_column_values_to_not_be_null(column, mostly=mostly_value)
 
     @classmethod
@@ -208,6 +210,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 f"Skipping expect_column_median_to_be_between because observed value is nan: {observed_median}"
             )
 
+        allow_relative_error = dataset.attempt_allowing_relative_error()
+
         quantile_result = dataset.expect_column_quantile_values_to_be_between(
             column,
             quantile_ranges={
@@ -220,6 +224,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     [None, None],
                 ],
             },
+            allow_relative_error=allow_relative_error,
             result_format="SUMMARY",
             catch_exceptions=True,
         )
@@ -241,6 +246,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                         for v in quantile_result.result["observed_value"]["values"]
                     ],
                 },
+                allow_relative_error=allow_relative_error,
                 catch_exceptions=True,
             )
             dataset.set_config_value("interactive_evaluation", True)
@@ -475,7 +481,9 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             dataset = _remove_table_expectations(dataset, excluded_expectations)
             dataset = _remove_column_expectations(dataset, excluded_expectations)
         if included_expectations:
-            for expectation in dataset.get_expectation_suite().expectations:
+            for expectation in dataset.get_expectation_suite(
+                discard_failed_expectations=False, suppress_logging=True,
+            ).expectations:
                 if expectation.expectation_type not in included_expectations:
                     try:
                         dataset.remove_expectation(

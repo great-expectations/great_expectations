@@ -1372,6 +1372,8 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
             ]
         ],
         "header_row": ["Status", "Expectation", "Observed Value"],
+        "header_row_options": {"Status": {"sortable": True}},
+        "table_options": {"search": True, "icon-size": "sm"},
     }
 
 

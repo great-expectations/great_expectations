@@ -22,7 +22,7 @@ def in_memory_data_context_config_usage_stats_enabled():
     return DataContextConfig(
         **{
             "commented_map": {},
-            "config_version": 1,
+            "config_version": 2,
             "plugins_directory": None,
             "evaluation_parameter_store_name": "evaluation_parameter_store",
             "validations_store_name": "validations_store",

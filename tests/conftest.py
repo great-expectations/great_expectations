@@ -7,6 +7,7 @@ import shutil
 import numpy as np
 import pandas as pd
 import pytest
+from freezegun import freeze_time
 
 import great_expectations as ge
 from great_expectations.core import (
@@ -2039,6 +2040,7 @@ def empty_sqlite_db():
 
 
 @pytest.fixture
+@freeze_time("09/26/2019 13:42:41")
 def site_builder_data_context_with_html_store_titanic_random(
     tmp_path_factory, filesystem_csv_3
 ):
@@ -2135,7 +2137,29 @@ def titanic_multibatch_data_context(tmp_path_factory):
 
 
 @pytest.fixture
-def data_context(tmp_path_factory):
+def v10_project_directory(tmp_path_factory):
+    """
+    GE 0.10.x project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v10_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__, "./test_fixtures/upgrade_helper/great_expectations_v10_project/"
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, "./test_fixtures/upgrade_helper/great_expectations_v1_basic.yml"
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
+
+
+@pytest.fixture
+def data_context_parameterized_expectation_suite(tmp_path_factory):
     """
     This data_context is *manually* created to have the config we want, vs
     created with DataContext.create()
@@ -2157,6 +2181,43 @@ def data_context(tmp_path_factory):
             "expectation_suites/parameterized_expectation_suite_fixture.json",
         ),
         os.path.join(asset_config_path, "my_dag_node/default.json"),
+    )
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_pandas_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_simple_expectation_suite(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_basic.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "rendering_fixtures/expectations_suite_1.json",),
+        os.path.join(asset_config_path, "default.json"),
     )
     os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
     shutil.copy(
@@ -2261,7 +2322,6 @@ def titanic_profiled_evrs_1():
 
 @pytest.fixture
 def titanic_profiled_name_column_evrs():
-
     # This is a janky way to fetch expectations matching a specific name from an EVR suite.
     # TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
     from great_expectations.render.renderer.renderer import Renderer

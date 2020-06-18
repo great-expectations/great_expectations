@@ -1,14 +1,22 @@
 import datetime
 import json
 import logging
+import warnings
 from collections import namedtuple
 from copy import deepcopy
 
+from dateutil.parser import ParserError as DateUtilParserError
+from dateutil.parser import parse
 from IPython import get_ipython
 from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 
 from great_expectations import __version__ as ge_version
+from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.core.evaluation_parameters import (
+    find_evaluation_parameter_dependencies,
+)
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
     InvalidCacheValueError,
@@ -61,21 +69,6 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
     return None
 
 
-def parse_evaluation_parameter_urn(urn):
-    if urn.startswith("urn:great_expectations:validations:"):
-        split = urn.split(":")
-        if len(split) == 6:
-            return EvaluationParameterIdentifier(split[3], split[4], split[5])
-        elif len(split) == 5:
-            return EvaluationParameterIdentifier(split[3], split[4], None)
-        else:
-            raise ParserError(
-                "Unable to parse URN: must have 5 or 6 components to be a valid GE URN"
-            )
-
-    raise ParserError("Unrecognized evaluation parameter urn {}".format(urn))
-
-
 def convert_to_json_serializable(data):
     """
     Helper function to convert an object to one that is json serializable
@@ -105,6 +98,7 @@ def convert_to_json_serializable(data):
             ExpectationSuite,
             ExpectationValidationResult,
             ExpectationSuiteValidationResult,
+            RunIdentifier,
         ),
     ):
         return data.to_json_dict()
@@ -224,6 +218,7 @@ def ensure_json_serializable(data):
             ExpectationSuite,
             ExpectationValidationResult,
             ExpectationSuiteValidationResult,
+            RunIdentifier,
         ),
     ):
         return
@@ -308,6 +303,92 @@ def ensure_json_serializable(data):
         )
 
 
+class RunIdentifier(DataContextKey):
+    """A RunIdentifier identifies a run (collection of validations) by run_name and run_time."""
+
+    def __init__(self, run_name=None, run_time=None):
+        super(RunIdentifier, self).__init__()
+        assert run_name is None or isinstance(
+            run_name, str
+        ), "run_name must be an instance of str"
+        assert run_time is None or isinstance(run_time, (datetime.datetime, str)), (
+            "run_time must be either None or " "an instance of str or datetime"
+        )
+        self._run_name = run_name
+
+        if isinstance(run_time, str):
+            try:
+                run_time = parse(run_time)
+            except (DateUtilParserError, TypeError):
+                warnings.warn(
+                    f'Unable to parse provided run_time str ("{run_time}") to datetime. Defaulting '
+                    f"run_time to current time."
+                )
+                run_time = datetime.datetime.now(datetime.timezone.utc)
+
+        if not run_time:
+            try:
+                run_time = parse(run_name)
+            except (DateUtilParserError, TypeError):
+                run_time = None
+
+        run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
+        if not run_time.tzinfo:
+            # this takes the given time and just adds timezone (no conversion)
+            run_time = run_time.replace(tzinfo=datetime.timezone.utc)
+        else:
+            # this takes given time and converts to utc
+            run_time = run_time.astimezone(tz=datetime.timezone.utc)
+        self._run_time = run_time
+
+    @property
+    def run_name(self):
+        return self._run_name
+
+    @property
+    def run_time(self):
+        return self._run_time
+
+    def to_tuple(self):
+        return (
+            self._run_name or "__none__",
+            self._run_time.strftime("%Y%m%dT%H%M%S.%fZ"),
+        )
+
+    def to_fixed_length_tuple(self):
+        return (
+            self._run_name or "__none__",
+            self._run_time.strftime("%Y%m%dT%H%M%S.%fZ"),
+        )
+
+    def __repr__(self):
+        return json.dumps(self.to_json_dict())
+
+    def __str__(self):
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def to_json_dict(self):
+        myself = runIdentifierSchema.dump(self)
+        return myself
+
+    @classmethod
+    def from_tuple(cls, tuple_):
+        return cls(tuple_[0], tuple_[1])
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        return cls(tuple_[0], tuple_[1])
+
+
+class RunIdentifierSchema(Schema):
+    run_name = fields.Str()
+    run_time = fields.DateTime(format="iso")
+
+    @post_load
+    def make_run_identifier(self, data, **kwargs):
+        return RunIdentifier(**data)
+
+
 class ExpectationKwargs(dict):
     ignored_keys = ["result_format", "include_config", "catch_exceptions"]
 
@@ -364,6 +445,36 @@ class ExpectationKwargs(dict):
     def to_json_dict(self):
         myself = convert_to_json_serializable(self)
         return myself
+
+
+def _deduplicate_evaluation_parameter_dependencies(dependencies):
+    deduplicated = dict()
+    for suite_name, required_metrics in dependencies.items():
+        deduplicated[suite_name] = []
+        metrics = set()
+        metric_kwargs = dict()
+        for metric in required_metrics:
+            if isinstance(metric, str):
+                metrics.add(metric)
+            elif isinstance(metric, dict):
+                # There is a single metric_kwargs_id object in this construction
+                for kwargs_id, metric_list in metric["metric_kwargs_id"].items():
+                    if kwargs_id not in metric_kwargs:
+                        metric_kwargs[kwargs_id] = set()
+                    for metric_name in metric_list:
+                        metric_kwargs[kwargs_id].add(metric_name)
+        deduplicated[suite_name] = list(metrics)
+        if len(metric_kwargs) > 0:
+            deduplicated[suite_name] = deduplicated[suite_name] + [
+                {
+                    "metric_kwargs_id": {
+                        metric_kwargs: list(metrics_set)
+                        for (metric_kwargs, metrics_set) in metric_kwargs.items()
+                    }
+                }
+            ]
+
+    return deduplicated
 
 
 class ExpectationConfiguration(DictDot):
@@ -449,56 +560,46 @@ class ExpectationConfiguration(DictDot):
         return myself
 
     def get_evaluation_parameter_dependencies(self):
-        dependencies = {}
+        parsed_dependencies = dict()
         for key, value in self.kwargs.items():
             if isinstance(value, dict) and "$PARAMETER" in value:
-                if value["$PARAMETER"].startswith(
-                    "urn:great_expectations:validations:"
-                ):
-                    try:
-                        evaluation_parameter_id = parse_evaluation_parameter_urn(
-                            value["$PARAMETER"]
-                        )
-                    except ParserError:
-                        logger.warning(
-                            "Unable to parse great_expectations urn {}".format(
-                                value["$PARAMETER"]
-                            )
-                        )
-                        continue
+                param_string_dependencies = find_evaluation_parameter_dependencies(
+                    value["$PARAMETER"]
+                )
+                nested_update(parsed_dependencies, param_string_dependencies)
 
-                    if evaluation_parameter_id.metric_kwargs_id is None:
-                        nested_update(
-                            dependencies,
-                            {
-                                evaluation_parameter_id.expectation_suite_name: [
-                                    evaluation_parameter_id.metric_name
-                                ]
-                            },
-                        )
-                    else:
-                        nested_update(
-                            dependencies,
-                            {
-                                evaluation_parameter_id.expectation_suite_name: [
-                                    {
-                                        "metric_kwargs_id": {
-                                            evaluation_parameter_id.metric_kwargs_id: [
-                                                evaluation_parameter_id.metric_name
-                                            ]
-                                        }
-                                    }
-                                ]
-                            },
-                        )
-                    # if evaluation_parameter_id.expectation_suite_name not in dependencies:
-                    #     dependencies[evaluation_parameter_id.expectation_suite_name] = {"metric_kwargs_id": {}}
-                    #
-                    # if evaluation_parameter_id.metric_kwargs_id not in dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"]:
-                    #     dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"][evaluation_parameter_id.metric_kwargs_id] = []
-                    # dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"][
-                    #     evaluation_parameter_id.metric_kwargs_id].append(evaluation_parameter_id.metric_name)
+        dependencies = dict()
+        urns = parsed_dependencies.get("urns", [])
+        for string_urn in urns:
+            try:
+                urn = ge_urn.parseString(string_urn)
+            except ParserError:
+                logger.warning(
+                    "Unable to parse great_expectations urn {}".format(
+                        value["$PARAMETER"]
+                    )
+                )
+                continue
 
+            if not urn.get("metric_kwargs"):
+                nested_update(
+                    dependencies, {urn["expectation_suite_name"]: [urn["metric_name"]]},
+                )
+            else:
+                nested_update(
+                    dependencies,
+                    {
+                        urn["expectation_suite_name"]: [
+                            {
+                                "metric_kwargs_id": {
+                                    urn["metric_kwargs"]: [urn["metric_name"]]
+                                }
+                            }
+                        ]
+                    },
+                )
+
+        dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
 
 
@@ -572,7 +673,10 @@ class ExpectationSuite(object):
             self.meta["citations"] = []
         self.meta["citations"].append(
             {
-                "citation_date": citation_date or datetime.datetime.now().isoformat(),
+                "citation_date": citation_date
+                or datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                ),
                 "batch_kwargs": batch_kwargs,
                 "batch_markers": batch_markers,
                 "batch_parameters": batch_parameters,
@@ -653,6 +757,7 @@ class ExpectationSuite(object):
             t = expectation.get_evaluation_parameter_dependencies()
             nested_update(dependencies, t)
 
+        dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
 
     def get_citations(self, sort=True, require_batch_kwargs=False):
@@ -1291,3 +1396,4 @@ expectationConfigurationSchema = ExpectationConfigurationSchema()
 expectationSuiteSchema = ExpectationSuiteSchema()
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
+runIdentifierSchema = RunIdentifierSchema()

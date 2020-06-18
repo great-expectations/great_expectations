@@ -10,13 +10,13 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
 def test_validation_operator_run_interactive_golden_path(
-    caplog, data_context, filesystem_csv_2
+    caplog, data_context_simple_expectation_suite, filesystem_csv_2
 ):
     """
     Interactive mode golden path - pass an existing suite name and an existing validation
     operator name, select an existing file.
     """
-    not_so_empty_data_context = data_context
+    not_so_empty_data_context = data_context_simple_expectation_suite
     root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(root_dir, "uncommitted"))
 
@@ -32,7 +32,7 @@ def test_validation_operator_run_interactive_golden_path(
             "--name",
             "default",
             "--suite",
-            "my_dag_node.default",
+            "default",
         ],
         input=f"{csv_path}\n",
         catch_exceptions=False,
@@ -44,13 +44,13 @@ def test_validation_operator_run_interactive_golden_path(
 
 
 def test_validation_operator_run_interactive_pass_non_existing_expectation_suite(
-    caplog, data_context, filesystem_csv_2
+    caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
 ):
     """
     Interactive mode: pass an non-existing suite name and an existing validation
     operator name, select an existing file.
     """
-    not_so_empty_data_context = data_context
+    not_so_empty_data_context = data_context_parameterized_expectation_suite
     root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(root_dir, "uncommitted"))
 
@@ -78,13 +78,13 @@ def test_validation_operator_run_interactive_pass_non_existing_expectation_suite
 
 
 def test_validation_operator_run_interactive_pass_non_existing_operator_name(
-    caplog, data_context, filesystem_csv_2
+    caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
 ):
     """
     Interactive mode: pass an non-existing suite name and an existing validation
     operator name, select an existing file.
     """
-    not_so_empty_data_context = data_context
+    not_so_empty_data_context = data_context_parameterized_expectation_suite
     root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(root_dir, "uncommitted"))
 
@@ -112,13 +112,13 @@ def test_validation_operator_run_interactive_pass_non_existing_operator_name(
 
 
 def test_validation_operator_run_noninteractive_golden_path(
-    caplog, data_context, filesystem_csv_2
+    caplog, data_context_simple_expectation_suite, filesystem_csv_2
 ):
     """
     Non-nteractive mode golden path - use the --validation_config_file argument to pass the path
     to a valid validation config file
     """
-    not_so_empty_data_context = data_context
+    not_so_empty_data_context = data_context_simple_expectation_suite
     root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(root_dir, "uncommitted"))
 
@@ -133,7 +133,7 @@ def test_validation_operator_run_noninteractive_golden_path(
                     "datasource": "mydatasource",
                     "reader_method": "read_csv",
                 },
-                "expectation_suite_names": ["my_dag_node.default"],
+                "expectation_suite_names": ["default"],
             }
         ],
     }
@@ -163,13 +163,13 @@ def test_validation_operator_run_noninteractive_golden_path(
 
 
 def test_validation_operator_run_noninteractive_validation_config_file_does_not_exist(
-    caplog, data_context, filesystem_csv_2
+    caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
 ):
     """
     Non-nteractive mode. Use the --validation_config_file argument to pass the path
     to a validation config file that does not exist.
     """
-    not_so_empty_data_context = data_context
+    not_so_empty_data_context = data_context_parameterized_expectation_suite
     root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(root_dir, "uncommitted"))
 
@@ -197,14 +197,14 @@ def test_validation_operator_run_noninteractive_validation_config_file_does_not_
 
 
 def test_validation_operator_run_noninteractive_validation_config_file_does_is_misconfigured(
-    caplog, data_context, filesystem_csv_2
+    caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
 ):
     """
     Non-nteractive mode. Use the --validation_config_file argument to pass the path
     to a validation config file that is misconfigured - one of the batches does not
     have expectation_suite_names attribute
     """
-    not_so_empty_data_context = data_context
+    not_so_empty_data_context = data_context_parameterized_expectation_suite
     root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(root_dir, "uncommitted"))
 

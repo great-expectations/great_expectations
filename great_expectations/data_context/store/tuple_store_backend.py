@@ -253,6 +253,23 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 outfile.write(value)
         return filepath
 
+    def _move(self, source_key, dest_key, **kwargs):
+        source_path = os.path.join(
+            self.full_base_directory, self._convert_key_to_filepath(source_key)
+        )
+
+        dest_path = os.path.join(
+            self.full_base_directory, self._convert_key_to_filepath(dest_key)
+        )
+        dest_dir, dest_filename = os.path.split(dest_path)
+
+        if os.path.exists(source_path):
+            os.makedirs(dest_dir, exist_ok=True)
+            shutil.move(source_path, dest_path)
+            return dest_key
+
+        return False
+
     def list_keys(self, prefix=()):
         key_list = []
         for root, dirs, files in os.walk(
@@ -301,7 +318,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         filepath = os.path.join(
             self.full_base_directory, self._convert_key_to_filepath(key)
         )
-        path, filename = os.path.split(filepath)
+
         if os.path.exists(filepath):
             d_path = os.path.dirname(filepath)
             os.remove(filepath)
@@ -386,6 +403,24 @@ class TupleS3StoreBackend(TupleStoreBackend):
         else:
             result_s3.put(Body=value, ContentType=content_type)
         return s3_object_key
+
+    def _move(self, source_key, dest_key, **kwargs):
+        import boto3
+
+        s3 = boto3.resource("s3")
+
+        source_filepath = self._convert_key_to_filepath(source_key)
+        if not source_filepath.startswith(self.prefix):
+            source_filepath = os.path.join(self.prefix, source_filepath)
+        dest_filepath = self._convert_key_to_filepath(dest_key)
+        if not dest_filepath.startswith(self.prefix):
+            dest_filepath = os.path.join(self.prefix, dest_filepath)
+
+        s3.Bucket(self.bucket).copy(
+            {"Bucket": self.bucket, "Key": source_filepath}, dest_filepath
+        )
+
+        s3.Object(self.bucket, source_filepath).delete()
 
     def list_keys(self):
         key_list = []
@@ -483,14 +518,15 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def __init__(
         self,
         bucket,
-        prefix,
         project,
+        prefix="",
         filepath_template=None,
         filepath_prefix=None,
         filepath_suffix=None,
         forbidden_substrings=None,
         platform_specific_separator=False,
         fixed_length_key=False,
+        public_urls=True,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -503,6 +539,10 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         self.bucket = bucket
         self.prefix = prefix
         self.project = project
+        self._public_urls = public_urls
+
+    def _move(self, source_key, dest_key, **kwargs):
+        pass
 
     def _get(self, key):
         gcs_object_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
@@ -524,13 +564,31 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
+
         if isinstance(value, str):
+            blob.content_encoding = content_encoding
             blob.upload_from_string(
                 value.encode(content_encoding), content_type=content_type
             )
         else:
             blob.upload_from_string(value, content_type=content_type)
         return gcs_object_key
+
+    def _move(self, source_key, dest_key, **kwargs):
+        from google.cloud import storage
+
+        gcs = storage.Client(project=self.project)
+        bucket = gcs.get_bucket(self.bucket)
+
+        source_filepath = self._convert_key_to_filepath(source_key)
+        if not source_filepath.startswith(self.prefix):
+            source_filepath = os.path.join(self.prefix, source_filepath)
+        dest_filepath = self._convert_key_to_filepath(dest_key)
+        if not dest_filepath.startswith(self.prefix):
+            dest_filepath = os.path.join(self.prefix, dest_filepath)
+
+        blob = bucket.blob(source_filepath)
+        _ = bucket.rename_blob(blob, dest_filepath)
 
     def list_keys(self):
         key_list = []
@@ -553,16 +611,27 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             key = self._convert_filepath_to_key(gcs_object_key)
             if key:
                 key_list.append(key)
-
         return key_list
 
     def get_url_for_key(self, key, protocol=None):
         path = self._convert_key_to_filepath(key)
-        return "https://storage.googleapis.com/" + self.bucket + "/" + path
+        if not path.startswith(self.prefix):
+            path = os.path.join(self.prefix, path)
+        if self._public_urls:
+            base_url = "https://storage.googleapis.com/"
+        else:
+            base_url = "https://storage.cloud.google.com/"
+
+        if self.prefix:
+            path_url = "/".join((self.bucket, self.prefix, path))
+        else:
+            path_url = "/".join((self.bucket, path))
+
+        return base_url + path_url
 
     def remove_key(self, key):
         from google.cloud import storage
-        from gcloud.exceptions import NotFound
+        from google.cloud.exceptions import NotFound
 
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)

@@ -68,7 +68,7 @@ class InvalidDataContextKeyError(DataContextError):
     pass
 
 
-class UnsupportedConfigVersionError(GreatExpectationsError):
+class UnsupportedConfigVersionError(DataContextError):
     pass
 
 
@@ -119,6 +119,10 @@ class InvalidValidationResultError(GreatExpectationsError):
 
 
 class GreatExpectationsTypeError(TypeError):
+    pass
+
+
+class StoreError(DataContextError):
     pass
 
 

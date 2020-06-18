@@ -9,7 +9,6 @@ from great_expectations.data_context.util import file_relative_path
 
 
 def test_expect_file_line_regex_match_count_to_be_between():
-
     #####Invlaid File Path######
     joke_file_path = "joke.txt"
     assert not os.path.isfile(joke_file_path)
@@ -253,7 +252,6 @@ def test_expect_file_to_have_valid_table_header():
 
 
 def test_expect_file_to_be_valid_json():
-
     # Test for non-existent file
     fake_file = ge.data_asset.FileDataAsset("abc")
     with pytest.raises(IOError):

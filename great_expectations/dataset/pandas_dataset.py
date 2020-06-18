@@ -349,6 +349,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     _internal_names = pd.DataFrame._internal_names + [
         "_batch_kwargs",
         "_batch_markers",
+        "_batch_parameters",
         "_batch_id",
         "_expectation_suite",
         "_config",

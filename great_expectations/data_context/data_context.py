@@ -13,15 +13,21 @@ import warnings
 import webbrowser
 from typing import Dict, List, Optional, Union
 
+from dateutil.parser import ParserError, parse
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core import ExpectationSuite, get_metric_kwargs_id
+from great_expectations.core import (
+    ExpectationSuite,
+    RunIdentifier,
+    get_metric_kwargs_id,
+)
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
+    add_datasource_usage_statistics,
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
     usage_statistics_enabled_method,
@@ -34,6 +40,8 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
+    CURRENT_CONFIG_VERSION,
+    MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     DatasourceConfig,
@@ -363,12 +371,14 @@ Bug Risk - Low
         return True
 
     @usage_statistics_enabled_method(event_name="data_context.__init__",)
-    def __init__(self, project_config, context_root_dir=None):
+    def __init__(self, project_config, context_root_dir=None, runtime_environment=None):
         """DataContext constructor
 
         Args:
             context_root_dir: location to look for the ``great_expectations.yml`` file. If None, searches for the file \
             based on conventions for project subdirectories.
+            runtime_environment: a dictionary of config variables that
+            override both those set in config_variables.yml and the environment
 
         Returns:
             None
@@ -383,6 +393,7 @@ Bug Risk - Low
             self._context_root_directory = os.path.abspath(context_root_dir)
         else:
             self._context_root_directory = context_root_dir
+        self.runtime_environment = runtime_environment or {}
 
         # Init plugin support
         if self.plugins_directory is not None:
@@ -402,13 +413,13 @@ Bug Risk - Low
         self._init_stores(self._project_config_with_variables_substituted.stores)
 
         # Init validation operators
+        # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
+        # the way that datasources, validation operators, site builders and other plugins are built.
         self.validation_operators = {}
         for (
             validation_operator_name,
             validation_operator_config,
-        ) in (
-            self._project_config_with_variables_substituted.validation_operators.items()
-        ):
+        ) in self._project_config.validation_operators.items():
             self.add_validation_operator(
                 validation_operator_name, validation_operator_config,
             )
@@ -607,7 +618,10 @@ Bug Risk - Low
         module_name = "great_expectations.validation_operators"
         new_validation_operator = instantiate_class_from_config(
             config=config,
-            runtime_environment={"data_context": self,},
+            runtime_environment={
+                "data_context": self,
+                "name": validation_operator_name,
+            },
             config_defaults={"module_name": module_name},
         )
         if not new_validation_operator:
@@ -731,8 +745,9 @@ Bug Risk - Low
         urls_to_open = [site["site_url"] for site in data_docs_urls]
 
         for url in urls_to_open:
-            logger.debug(f"Opening Data Docs found here: {url}")
-            webbrowser.open(url)
+            if url is not None:
+                logger.debug(f"Opening Data Docs found here: {url}")
+                webbrowser.open(url)
 
     @property
     def root_directory(self):
@@ -803,7 +818,7 @@ Bug Risk - Low
             try:
                 # If the user specifies the config variable path with an environment variable, we want to substitute it
                 defined_path = substitute_config_variable(
-                    config_variables_file_path, {}
+                    config_variables_file_path, dict(os.environ)
                 )
                 if not os.path.isabs(defined_path):
                     # A BaseDataContext will not have a root directory; in that case use the current directory
@@ -823,13 +838,18 @@ Bug Risk - Low
             return {}
 
     def get_config_with_variables_substituted(self, config=None):
+
         if not config:
             config = self._project_config
 
+        substitutions = {
+            **dict(self._load_config_variables_file()),
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+
         return DataContextConfig(
-            **substitute_all_config_variables(
-                config, self._load_config_variables_file()
-            )
+            **substitute_all_config_variables(config, substitutions)
         )
 
     def save_config_variable(self, config_variable_name, value):
@@ -964,24 +984,39 @@ Bug Risk - Low
         return data_asset_names
 
     def build_batch_kwargs(
-        self, datasource, batch_kwargs_generator, name=None, partition_id=None, **kwargs
+        self,
+        datasource,
+        batch_kwargs_generator,
+        data_asset_name=None,
+        partition_id=None,
+        **kwargs,
     ):
         """Builds batch kwargs using the provided datasource, batch kwargs generator, and batch_parameters.
 
         Args:
             datasource (str): the name of the datasource for which to build batch_kwargs
             batch_kwargs_generator (str): the name of the batch kwargs generator to use to build batch_kwargs
-            name (str): an optional name batch_parameter
+            data_asset_name (str): an optional name batch_parameter
             **kwargs: additional batch_parameters
 
         Returns:
             BatchKwargs
 
         """
+        if kwargs.get("name"):
+            if data_asset_name:
+                raise ValueError(
+                    "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
+                )
+            warnings.warn(
+                "name is being deprecated as a batch_parameter. Please use data_asset_name instead.",
+                DeprecationWarning,
+            )
+            data_asset_name = kwargs.pop("name")
         datasource_obj = self.get_datasource(datasource)
         batch_kwargs = datasource_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
-            name=name,
+            data_asset_name=data_asset_name,
             partition_id=partition_id,
             **kwargs,
         )
@@ -1056,6 +1091,9 @@ Bug Risk - Low
         assets_to_validate,
         run_id=None,
         evaluation_parameters=None,
+        run_name=None,
+        run_time=None,
+        result_format={"result_format": "SUMMARY"},
         **kwargs,
     ):
         """
@@ -1067,7 +1105,7 @@ Bug Risk - Low
             assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
                 the list can be either batches, or a tuple that will allow the operator to fetch the batch:
                 (batch_kwargs, expectation_suite_name)
-            run_id: The run_id for the validation; if None, a default value will be used
+            run_name: The run_name for the validation; if None, a default value will be used
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:
@@ -1090,18 +1128,28 @@ Bug Risk - Low
                 f"No validation operator `{validation_operator_name}` was found in your project. Please verify this in your great_expectations.yml"
             )
 
-        if run_id is None:
-            run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-            logger.info("Setting run_id to: {}".format(run_id))
+        if run_id is None and run_name is None:
+            run_name = datetime.datetime.now(datetime.timezone.utc).strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            )
+            logger.info("Setting run_name to: {}".format(run_name))
         if evaluation_parameters is None:
             return validation_operator.run(
-                assets_to_validate=assets_to_validate, run_id=run_id, **kwargs
+                assets_to_validate=assets_to_validate,
+                run_id=run_id,
+                run_name=run_name,
+                run_time=run_time,
+                result_format=result_format,
+                **kwargs,
             )
         else:
             return validation_operator.run(
                 assets_to_validate=assets_to_validate,
                 run_id=run_id,
                 evaluation_parameters=evaluation_parameters,
+                run_name=run_name,
+                run_time=run_time,
+                result_format=result_format,
                 **kwargs,
             )
 
@@ -1110,6 +1158,10 @@ Bug Risk - Low
             return []
         return list(self.validation_operators.keys())
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.add_datasource",
+        args_payload_fn=add_datasource_usage_statistics,
+    )
     def add_datasource(self, name, initialize=True, **kwargs):
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
@@ -1409,6 +1461,9 @@ Bug Risk - Low
         """
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         run_id = validation_results.meta["run_id"]
+        data_asset_name = validation_results.meta.get("batch_kwargs", {}).get(
+            "data_asset_name"
+        )
 
         for expectation_suite_dependency, metrics_list in requested_metrics.items():
             if (expectation_suite_dependency != "*") and (
@@ -1434,6 +1489,7 @@ Bug Risk - Low
                         self.stores[target_store_name].set(
                             ValidationMetricIdentifier(
                                 run_id=run_id,
+                                data_asset_name=data_asset_name,
                                 expectation_suite_identifier=ExpectationSuiteIdentifier(
                                     expectation_suite_name
                                 ),
@@ -1586,7 +1642,9 @@ Bug Risk - Low
         return return_obj
 
     @usage_statistics_enabled_method(event_name="data_context.build_data_docs")
-    def build_data_docs(self, site_names=None, resource_identifiers=None):
+    def build_data_docs(
+        self, site_names=None, resource_identifiers=None, dry_run=False
+    ):
         """
         Build Data Docs for your project.
 
@@ -1603,6 +1661,11 @@ Bug Risk - Low
                             the resources in this list. This supports incremental build
                             of data docs sites (e.g., when a new validation result is created)
                             and avoids full rebuild.
+        :param dry_run: a flag, if True, the method returns a structure containing the
+                            URLs of the sites that *would* be built, but it does not build
+                            these sites. The motivation for adding this flag was to allow
+                            the CLI to display the the URLs before building and to let users
+                            confirm.
 
         Returns:
             A dictionary with the names of the updated data documentation sites as keys and the the location info
@@ -1637,13 +1700,18 @@ Bug Risk - Low
                             package_name=None,
                             class_name=complete_site_config["class_name"],
                         )
-                    index_page_resource_identifier_tuple = site_builder.build(
-                        resource_identifiers
-                    )
-                    if index_page_resource_identifier_tuple:
+                    if dry_run:
                         index_page_locator_infos[
                             site_name
-                        ] = index_page_resource_identifier_tuple[0]
+                        ] = site_builder.get_resource_url(only_if_exists=False)
+                    else:
+                        index_page_resource_identifier_tuple = site_builder.build(
+                            resource_identifiers
+                        )
+                        if index_page_resource_identifier_tuple:
+                            index_page_locator_infos[
+                                site_name
+                            ] = index_page_resource_identifier_tuple[0]
 
         else:
             logger.debug("No data_docs_config found. No site(s) built.")
@@ -1694,8 +1762,10 @@ Bug Risk - Low
         profiler=BasicDatasetProfiler,
         profiler_configuration=None,
         dry_run=False,
-        run_id="profiling",
+        run_id=None,
         additional_batch_kwargs=None,
+        run_name=None,
+        run_time=None,
     ):
         """Profile the named datasource using the named profiler.
 
@@ -1876,6 +1946,8 @@ Bug Risk - Low
                             profiler_configuration=profiler_configuration,
                             run_id=run_id,
                             additional_batch_kwargs=additional_batch_kwargs,
+                            run_name=run_name,
+                            run_time=run_time,
                         )["results"][0]
                     )
 
@@ -1928,8 +2000,10 @@ Bug Risk - Low
         expectation_suite_name=None,
         profiler=BasicDatasetProfiler,
         profiler_configuration=None,
-        run_id="profiling",
+        run_id=None,
         additional_batch_kwargs=None,
+        run_name=None,
+        run_time=None,
     ):
         """
         Profile a data asset
@@ -1940,7 +2014,7 @@ Bug Risk - Low
         :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the batch kwargs generator (generator_name arg) will choose a batch
         :param profiler: the profiler class to use
         :param profiler_configuration: Optional profiler configuration dict
-        :param run_id: optional - if set, the validation result created by the profiler will be under the provided run_id
+        :param run_name: optional - if set, the validation result created by the profiler will be under the provided run_name
         :param additional_batch_kwargs:
         :returns
             A dictionary::
@@ -1952,6 +2026,28 @@ Bug Risk - Low
 
             When success = False, the error details are under "error" key
         """
+
+        assert not (run_id and run_name) and not (
+            run_id and run_time
+        ), "Please provide either a run_id or run_name and/or run_time."
+        if isinstance(run_id, str) and not run_name:
+            warnings.warn(
+                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
+                "and run_time (both optional). Instead of providing a run_id, you may also provide"
+                "run_name and run_time separately.",
+                DeprecationWarning,
+            )
+            try:
+                run_time = parse(run_id)
+            except (ParserError, TypeError):
+                pass
+            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
+        elif isinstance(run_id, dict):
+            run_id = RunIdentifier(**run_id)
+        elif not isinstance(run_id, RunIdentifier):
+            run_name = run_name or "profiling"
+            run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
         logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
 
@@ -2097,7 +2193,7 @@ class DataContext(BaseDataContext):
     existing infrastructure and work environment.
 
     DataContexts use a datasource-based namespace, where each accessible type of data has a three-part
-    normalized *data_asset_name*, consisting of *datasource/generator/generator_asset*.
+    normalized *data_asset_name*, consisting of *datasource/generator/data_asset_name*.
 
     - The datasource actually connects to a source of materialized data and returns Great Expectations DataAssets \
       connected to a compute environment and ready for validation.
@@ -2105,7 +2201,7 @@ class DataContext(BaseDataContext):
     - The BatchKwargGenerator knows how to introspect datasources and produce identifying "batch_kwargs" that define \
       particular slices of data.
 
-    - The generator_asset is a specific name -- often a table name or other name familiar to users -- that \
+    - The data_asset_name is a specific name -- often a table name or other name familiar to users -- that \
       batch kwargs generators can slice into batches.
 
     An expectation suite is a collection of expectations ready to be applied to a batch of data. Since
@@ -2120,7 +2216,12 @@ class DataContext(BaseDataContext):
     """
 
     @classmethod
-    def create(cls, project_root_dir=None, usage_statistics_enabled=True):
+    def create(
+        cls,
+        project_root_dir=None,
+        usage_statistics_enabled=True,
+        runtime_environment=None,
+    ):
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
@@ -2129,6 +2230,8 @@ class DataContext(BaseDataContext):
 
         Args:
             project_root_dir: path to the root directory in which to create a new great_expectations directory
+            runtime_environment: a dictionary of config variables that
+            override both those set in config_variables.yml and the environment
 
         Returns:
             DataContext
@@ -2172,7 +2275,7 @@ class DataContext(BaseDataContext):
         else:
             cls.write_config_variables_template_to_disk(uncommitted_dir)
 
-        return cls(ge_dir)
+        return cls(ge_dir, runtime_environment=runtime_environment)
 
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir):
@@ -2275,7 +2378,7 @@ class DataContext(BaseDataContext):
                 destination_path = os.path.join(subdir_path, notebook_name)
                 shutil.copyfile(notebook, destination_path)
 
-    def __init__(self, context_root_dir=None):
+    def __init__(self, context_root_dir=None, runtime_environment=None):
 
         # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
@@ -2285,7 +2388,9 @@ class DataContext(BaseDataContext):
 
         project_config = self._load_project_config()
         project_config_dict = dataContextConfigSchema.dump(project_config)
-        super(DataContext, self).__init__(project_config, context_root_directory)
+        super(DataContext, self).__init__(
+            project_config, context_root_directory, runtime_environment
+        )
 
         # save project config if data_context_id auto-generated or global config values applied
         if (
@@ -2326,7 +2431,11 @@ class DataContext(BaseDataContext):
         """List checkpoints. (Experimental)"""
         # TODO mark experimental
         files = self._list_ymls_in_checkpoints_directory()
-        return [os.path.basename(f).rstrip(".yml") for f in files]
+        return [
+            os.path.basename(f)[:-4]
+            for f in files
+            if os.path.basename(f).endswith(".yml")
+        ]
 
     def get_checkpoint(self, checkpoint_name: str) -> dict:
         """Load a checkpoint. (Experimental)"""
@@ -2339,7 +2448,7 @@ class DataContext(BaseDataContext):
         try:
             with open(checkpoint_path, "r") as f:
                 checkpoint = yaml.load(f.read())
-                return self._validate_checkpoint(checkpoint)
+                return self._validate_checkpoint(checkpoint, checkpoint_name)
         except FileNotFoundError:
             raise ge_exceptions.CheckpointNotFoundError(
                 f"Could not find checkpoint `{checkpoint_name}`."
@@ -2394,6 +2503,54 @@ class DataContext(BaseDataContext):
 
         logger.debug("Using project config: {}".format(yml_path))
         return result
+
+    @classmethod
+    def get_ge_config_version(cls, context_root_dir=None):
+        yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
+        if yml_path is None:
+            return
+
+        with open(yml_path) as f:
+            config_dict = yaml.load(f)
+
+        config_version = config_dict.get("config_version")
+        return float(config_version) if config_version else None
+
+    @classmethod
+    def set_ge_config_version(
+        cls, config_version, context_root_dir=None, validate_config_version=True
+    ):
+        if not isinstance(config_version, (int, float)):
+            raise ge_exceptions.UnsupportedConfigVersionError(
+                "The argument `config_version` must be a number.",
+            )
+
+        if validate_config_version:
+            if config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+                raise ge_exceptions.UnsupportedConfigVersionError(
+                    "Invalid config version ({}).\n    The version number must be at least {}. ".format(
+                        config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
+                    ),
+                )
+            elif config_version > CURRENT_CONFIG_VERSION:
+                raise ge_exceptions.UnsupportedConfigVersionError(
+                    "Invalid config version ({}).\n    The maximum valid version is {}.".format(
+                        config_version, CURRENT_CONFIG_VERSION
+                    ),
+                )
+
+        yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
+        if yml_path is None:
+            return False
+
+        with open(yml_path) as f:
+            config_dict = yaml.load(f)
+            config_dict["config_version"] = config_version
+
+        with open(yml_path, "w") as f:
+            yaml.dump(config_dict, f)
+
+        return True
 
     @classmethod
     def find_context_yml_file(cls, search_start_dir=None):
@@ -2479,21 +2636,23 @@ class DataContext(BaseDataContext):
             logger.debug(e)
 
     @staticmethod
-    def _validate_checkpoint(checkpoint: dict) -> dict:
+    def _validate_checkpoint(checkpoint: dict, checkpoint_name: str) -> dict:
         if checkpoint is None:
             raise ge_exceptions.CheckpointError(
-                "Checkpoint has no contents. Please fix this."
+                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
             )
         if "validation_operator_name" not in checkpoint:
             checkpoint["validation_operator_name"] = "action_list_operator"
 
         if "batches" not in checkpoint:
             raise ge_exceptions.CheckpointError(
-                f"Checkpoint {checkpoint} is missing required key: `batches`"
+                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
             )
         batches = checkpoint["batches"]
         if not isinstance(batches, list):
-            raise ge_exceptions.CheckpointError(f"`batches` must be a list")
+            raise ge_exceptions.CheckpointError(
+                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
+            )
 
         for batch in batches:
             for required in ["expectation_suite_names", "batch_kwargs"]:

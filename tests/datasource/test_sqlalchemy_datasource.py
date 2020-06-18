@@ -35,7 +35,7 @@ def test_db_connection_string(tmp_path_factory, test_backends):
 
 
 def test_sqlalchemy_datasource_custom_data_asset(
-    data_context, test_db_connection_string
+    data_context_parameterized_expectation_suite, test_db_connection_string
 ):
     name = "test_sqlalchemy_datasource"
     class_name = "SqlAlchemyDatasource"
@@ -44,7 +44,7 @@ def test_sqlalchemy_datasource_custom_data_asset(
         "module_name": "custom_sqlalchemy_dataset",
         "class_name": "CustomSqlAlchemyDataset",
     }
-    data_context.add_datasource(
+    data_context_parameterized_expectation_suite.add_datasource(
         name,
         class_name=class_name,
         credentials={"connection_string": test_db_connection_string},
@@ -56,7 +56,11 @@ def test_sqlalchemy_datasource_custom_data_asset(
 
     # We should now see updated configs
     with open(
-        os.path.join(data_context.root_directory, "great_expectations.yml"), "r"
+        os.path.join(
+            data_context_parameterized_expectation_suite.root_directory,
+            "great_expectations.yml",
+        ),
+        "r",
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
@@ -70,9 +74,9 @@ def test_sqlalchemy_datasource_custom_data_asset(
     )
 
     # We should be able to get a dataset of the correct type from the datasource.
-    data_context.create_expectation_suite("table_1.boo")
-    batch = data_context.get_batch(
-        data_context.build_batch_kwargs(
+    data_context_parameterized_expectation_suite.create_expectation_suite("table_1.boo")
+    batch = data_context_parameterized_expectation_suite.get_batch(
+        data_context_parameterized_expectation_suite.build_batch_kwargs(
             "test_sqlalchemy_datasource", "default", "table_1"
         ),
         "table_1.boo",
@@ -104,7 +108,7 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string, sa):
     assert len(dataset.head(10)) == 5
 
 
-def test_create_sqlalchemy_datasource(data_context):
+def test_create_sqlalchemy_datasource(data_context_parameterized_expectation_suite):
     name = "test_sqlalchemy_datasource"
     # type_ = "sqlalchemy"
     class_name = "SqlAlchemyDatasource"
@@ -114,38 +118,45 @@ def test_create_sqlalchemy_datasource(data_context):
 
     # It should be possible to create a sqlalchemy source using these params without
     # saving substitution variables
-    data_context.add_datasource(name, class_name=class_name, **connection_kwargs)
-    data_context_config = data_context.get_config()
+    data_context_parameterized_expectation_suite.add_datasource(
+        name, class_name=class_name, **connection_kwargs
+    )
+    data_context_config = data_context_parameterized_expectation_suite.get_config()
     assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["class_name"] == class_name
 
     # We should be able to get it in this session even without saving the config
-    source = data_context.get_datasource(name)
+    source = data_context_parameterized_expectation_suite.get_datasource(name)
     assert isinstance(source, SqlAlchemyDatasource)
 
     var_name = "test_sqlalchemy_datasource"
 
-    data_context.save_config_variable(var_name, connection_kwargs["credentials"])
+    data_context_parameterized_expectation_suite.save_config_variable(
+        var_name, connection_kwargs["credentials"]
+    )
 
     # But we should be able to add a source using a substitution variable
     name = "second_source"
-    data_context.add_datasource(
+    data_context_parameterized_expectation_suite.add_datasource(
         name, class_name=class_name, credentials="${" + var_name + "}"
     )
 
-    data_context_config = data_context.get_config()
+    data_context_config = data_context_parameterized_expectation_suite.get_config()
     assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["class_name"] == class_name
     assert (
         data_context_config["datasources"][name]["credentials"] == "${" + var_name + "}"
     )
 
-    source = data_context.get_datasource(name)
+    source = data_context_parameterized_expectation_suite.get_datasource(name)
     assert isinstance(source, SqlAlchemyDatasource)
 
     # Finally, we should be able to confirm that the folder structure is as expected
     with open(
-        os.path.join(data_context.root_directory, "uncommitted/config_variables.yml"),
+        os.path.join(
+            data_context_parameterized_expectation_suite.root_directory,
+            "uncommitted/config_variables.yml",
+        ),
         "r",
     ) as credentials_file:
         substitution_variables = yaml.load(credentials_file)
@@ -161,7 +172,7 @@ def test_sqlalchemy_source_templating(sqlitedb_engine):
         batch_kwargs_generators={"foo": {"class_name": "QueryBatchKwargsGenerator"}},
     )
     generator = datasource.get_batch_kwargs_generator("foo")
-    generator.add_query("test", "select 'cat' as ${col_name};")
+    generator.add_query(data_asset_name="test", query="select 'cat' as ${col_name};")
     batch = datasource.get_batch(
         generator.build_batch_kwargs(
             "test", query_parameters={"col_name": "animal_name"}

@@ -1,4 +1,4 @@
-altair>=3.1.0
+altair>=4.0.0,<5
 black==19.10b0
 Click>=7.0
 future>=0.16
@@ -10,7 +10,7 @@ mistune>=0.8.4
 numpy>=1.14.1
 pandas>=0.22.0
 pyparsing>=2.4,<3
-python-dateutil>=2.4.2
+python-dateutil>=2.8.1
 pytz>=2015.6
 requests>=2.20
 ruamel.yaml>=0.15.24

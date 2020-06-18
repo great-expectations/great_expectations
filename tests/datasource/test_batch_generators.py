@@ -1,7 +1,5 @@
 import os
 
-import pytest
-
 from great_expectations.datasource.batch_kwargs_generator import (
     DatabricksTableBatchKwargsGenerator,
     GlobReaderBatchKwargsGenerator,
@@ -14,10 +12,12 @@ except ImportError:
     import mock
 
 
-def test_file_kwargs_generator(data_context, filesystem_csv):
+def test_file_kwargs_generator(
+    data_context_parameterized_expectation_suite, filesystem_csv
+):
     base_dir = filesystem_csv
 
-    datasource = data_context.add_datasource(
+    datasource = data_context_parameterized_expectation_suite.add_datasource(
         "default",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
@@ -39,13 +39,19 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
         ("f3", "directory"),
     }
 
-    f1_batches = [batch_kwargs["path"] for batch_kwargs in generator.get_iterator("f1")]
+    f1_batches = [
+        batch_kwargs["path"]
+        for batch_kwargs in generator.get_iterator(data_asset_name="f1")
+    ]
     assert len(f1_batches) == 1
     expected_batches = [{"path": os.path.join(base_dir, "f1.csv")}]
     for batch in expected_batches:
         assert batch["path"] in f1_batches
 
-    f3_batches = [batch_kwargs["path"] for batch_kwargs in generator.get_iterator("f3")]
+    f3_batches = [
+        batch_kwargs["path"]
+        for batch_kwargs in generator.get_iterator(data_asset_name="f3")
+    ]
     assert len(f3_batches) == 2
     expected_batches = [
         {"path": os.path.join(base_dir, "f3", "f3_20190101.csv")},
@@ -94,7 +100,7 @@ def test_glob_reader_generator(basic_pandas_datasource, tmp_path_factory):
     # Use set in test to avoid order issues
     assert set(g2_assets["names"]) == {("blargs", "path"), ("fs", "path")}
 
-    blargs_kwargs = [x["path"] for x in g2.get_iterator("blargs")]
+    blargs_kwargs = [x["path"] for x in g2.get_iterator(data_asset_name="blargs")]
     real_blargs = [
         os.path.join(basedir, "f1.blarg"),
         os.path.join(basedir, "f3.blarg"),
@@ -168,6 +174,6 @@ def test_databricks_generator(basic_sparkdf_datasource):
     # We have no tables available
     assert available_assets == {"names": []}
 
-    databricks_kwargs_iterator = generator.get_iterator("foo")
+    databricks_kwargs_iterator = generator.get_iterator(data_asset_name="foo")
     kwargs = [batch_kwargs for batch_kwargs in databricks_kwargs_iterator]
     assert "select * from" in kwargs[0]["query"].lower()

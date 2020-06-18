@@ -12,7 +12,6 @@ from great_expectations.cli.init import init
 from great_expectations.cli.project import project
 from great_expectations.cli.store import store
 from great_expectations.cli.suite import suite
-from great_expectations.cli.tap import tap
 from great_expectations.cli.validation_operator import validation_operator
 
 # TODO: consider using a specified-order supporting class for help (but wasn't working with python 2)
@@ -41,7 +40,7 @@ In particular, the CLI supports the following special commands:
 
 - great_expectations init : create a new great_expectations project
 
-- great_expectations datasource profile : profile a  datasource
+- great_expectations datasource profile : profile a datasource
 
 - great_expectations docs build : compile documentation from expectations
 """
@@ -59,7 +58,6 @@ cli.add_command(project)
 cli.add_command(suite)
 cli.add_command(validation_operator)
 cli.add_command(store)
-cli.add_command(tap)
 cli.add_command(checkpoint)
 
 

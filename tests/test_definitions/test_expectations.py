@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 
 def pytest_generate_tests(metafunc):
-
     # Load all the JSON files in the directory
     dir_path = os.path.dirname(os.path.realpath(__file__))
     expectation_dirs = [

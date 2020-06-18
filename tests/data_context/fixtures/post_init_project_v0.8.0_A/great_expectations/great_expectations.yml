@@ -71,7 +71,7 @@ data_docs_sites:
       validations:
         class_name: DefaultSiteSectionBuilder
         source_store_name: validations_store
-        run_id_filter:
+        run_name_filter:
           ne: profiling
         renderer:
           class_name: ValidationResultsPageRenderer
@@ -79,7 +79,7 @@ data_docs_sites:
       profiling:
         class_name: DefaultSiteSectionBuilder
         source_store_name: validations_store
-        run_id_filter:
+        run_name_filter:
           eq: profiling
         renderer:
           class_name: ProfilingResultsPageRenderer
