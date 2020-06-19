@@ -3,9 +3,10 @@ import json
 import os
 import shutil
 
-import great_expectations
 from click.testing import CliRunner
 from freezegun import freeze_time
+
+import great_expectations
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path

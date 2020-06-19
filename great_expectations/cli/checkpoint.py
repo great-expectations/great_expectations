@@ -2,6 +2,8 @@ import os
 import sys
 
 import click
+from ruamel.yaml import YAML
+
 from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.mark import Mark as mark
@@ -11,7 +13,6 @@ from great_expectations.core.usage_statistics.usage_statistics import send_usage
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import DataContextError
 from great_expectations.util import lint_code
-from ruamel.yaml import YAML
 
 try:
     from sqlalchemy.exc import SQLAlchemyError

@@ -1,7 +1,9 @@
 import os
 
-import great_expectations as ge
 import pytest
+from ruamel.yaml import YAML, YAMLError
+
+import great_expectations as ge
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigSchema,
@@ -11,7 +13,6 @@ from great_expectations.data_context.util import (
     substitute_config_variable,
 )
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
-from ruamel.yaml import YAML, YAMLError
 from tests.data_context.conftest import create_data_context_files
 
 yaml = YAML()

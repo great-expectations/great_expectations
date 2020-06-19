@@ -6,10 +6,11 @@ from collections import OrderedDict
 
 import pandas as pd
 import pytest
-from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from sqlalchemy.dialects.mysql import dialect as mysqlDialect
 from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
 from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
+
+from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 
 from ..conftest import build_test_backends_list
 from ..test_utils import (
