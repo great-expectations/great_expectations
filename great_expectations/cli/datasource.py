@@ -16,7 +16,7 @@ from great_expectations.cli.cli_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import (
-    SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+    CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     cli_message,
     cli_message_dict,
     verify_library_dependent_modules,
@@ -1298,7 +1298,7 @@ def _verify_mysql_dependent_modules() -> bool:
     return verify_library_dependent_modules(
         python_import_name="pymysql",
         pip_library_name="pymysql",
-        module_names_to_reload=SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )
 
 
@@ -1306,13 +1306,13 @@ def _verify_postgresql_dependent_modules() -> bool:
     psycopg2_success: bool = verify_library_dependent_modules(
         python_import_name="psycopg2",
         pip_library_name="psycopg2-binary",
-        module_names_to_reload=SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )
     # noinspection SpellCheckingInspection
     postgresql_psycopg2_success: bool = verify_library_dependent_modules(
         python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
         pip_library_name="psycopg2-binary",
-        module_names_to_reload=SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )
     return psycopg2_success and postgresql_psycopg2_success
 
@@ -1323,7 +1323,7 @@ def _verify_redshift_dependent_modules() -> bool:
     redshift_success: bool = verify_library_dependent_modules(
         python_import_name="sqlalchemy_redshift.dialect",
         pip_library_name="sqlalchemy-redshift",
-        module_names_to_reload=SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )
     return redshift_success or postgresql_success
 
@@ -1332,7 +1332,7 @@ def _verify_snowflake_dependent_modules() -> bool:
     return verify_library_dependent_modules(
         python_import_name="snowflake.sqlalchemy.snowdialect",
         pip_library_name="snowflake-sqlalchemy",
-        module_names_to_reload=SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )
 
 
@@ -1340,7 +1340,7 @@ def _verify_bigquery_dependent_modules() -> bool:
     return verify_library_dependent_modules(
         python_import_name="pybigquery.sqlalchemy_bigquery",
         pip_library_name="pybigquery",
-        module_names_to_reload=SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )
 
 
