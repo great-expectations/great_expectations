@@ -243,6 +243,12 @@ def test_substitute_env_var_in_config_variable_file(monkeypatch):
 
     monkeypatch.setenv("replace_me", "correct")
 
+    # this is how dict is created in data_context.get_config_with_variables_substituted, for env var override
+    config_variables_dict = {
+        **config_variables_dict,
+        **dict(os.environ),
+    }
+
     config = substitute_all_config_variables(config, config_variables_dict)
 
     assert( config["datasources"]["mydatasource"]["batch_kwargs_generators"] \
