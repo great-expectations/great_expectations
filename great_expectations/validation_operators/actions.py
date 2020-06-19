@@ -11,7 +11,7 @@ from .util import send_slack_notification
 logger = logging.getLogger(__name__)
 
 """
-An action is a way to take an arbitrary method and make it configurable and runnable within a data context.
+An action is a way to take an arbitrary method and make it configurable and runnable within a Data Context.
 
 The only requirement from an action is for it to have a take_action method.
 """
@@ -20,9 +20,9 @@ The only requirement from an action is for it to have a take_action method.
 class ValidationAction(object):
     """
     This is the base class for all actions that act on validation results
-    and are aware of a data context namespace structure.
+    and are aware of a Data Context namespace structure.
 
-    The data context is passed to this class in its constructor.
+    The Data Context is passed to this class in its constructor.
     """
 
     def __init__(self, data_context):
@@ -76,15 +76,19 @@ SlackNotificationAction sends a Slack notification to a given webhook.
 
 .. code-block:: yaml
 
-   - name: send_slack_notification_on_validation_result
-     action:
-       class_name: SlackNotificationAction
-       # put the actual webhook URL in the uncommitted/config_variables.yml file
-       slack_webhook: ${validation_notification_slack_webhook}
-       notify_on: all # possible values: "all", "failure", "success"
-       renderer:
-         module_name: great_expectations.render.renderer.slack_renderer
-         class_name: SlackRenderer
+    - name: send_slack_notification_on_validation_result
+    action:
+      class_name: StoreValidationResultAction
+      # put the actual webhook URL in the uncommitted/config_variables.yml file
+      slack_webhook: ${validation_notification_slack_webhook}
+      notify_on: all # possible values: "all", "failure", "success"
+      renderer:
+        # the class that implements the message to be sent
+        # this is the default implementation, but you can
+        # implement a custom one
+        module_name: great_expectations.render.renderer.slack_renderer
+        class_name: SlackRenderer
+
     """
 
     def __init__(
@@ -174,8 +178,8 @@ class StoreValidationResultAction(ValidationAction):
     ):
         """
 
-        :param data_context: data context
-        :param target_store_name: the name of the param_store in the data context which
+        :param data_context: Data Context
+        :param target_store_name: the name of the param_store in the Data Context which
                 should be used to param_store the validation result
         """
 
@@ -232,8 +236,8 @@ in the process of validating other prior expectations.
         """
 
         Args:
-            data_context: data context
-            target_store_name: the name of the store in the data context which
+            data_context: Data Context
+            target_store_name: the name of the store in the Data Context which
                 should be used to store the evaluation parameters
         """
         super(StoreEvaluationParametersAction, self).__init__(data_context)
@@ -287,7 +291,7 @@ in a metrics store.
         """
 
         Args:
-            data_context: data context
+            data_context: Data Context
             requested_metrics: dictionary of metrics to store. Dictionary should have the following structure:
 
                 expectation_suite_name:
@@ -295,7 +299,7 @@ in a metrics store.
                         - metric_kwargs_id
 
                 You may use "*" to denote that any expectation suite should match.
-            target_store_name: the name of the store in the data context which
+            target_store_name: the name of the store in the Data Context which
                 should be used to store the metrics
         """
         super(StoreMetricsAction, self).__init__(data_context)
@@ -339,7 +343,7 @@ in a metrics store.
 class UpdateDataDocsAction(ValidationAction):
     """
 UpdateDataDocsAction is a validation action that
-notifies the site builders of all the data docs sites of the data context
+notifies the site builders of all the data docs sites of the Data Context
 that a validation result should be added to the data docs.
 
 **Configuration**
@@ -363,7 +367,7 @@ list of sites to update:
 
     def __init__(self, data_context, site_names=None, target_site_names=None):
         """
-        :param data_context: data context
+        :param data_context: Data Context
         :param site_names: *optional* List of site names for building data docs
         """
         super(UpdateDataDocsAction, self).__init__(data_context)

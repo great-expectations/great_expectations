@@ -89,7 +89,7 @@ ActionListValidationOperator validates each batch in its ``run`` method's ``asse
 Then it invokes a list of configured actions on every validation result.
 
 Each action in the list must be an instance of :py:class:`ValidationAction<great_expectations.validation_operators.actions.ValidationAction>`
-class (or its descendants). See the actions included in Great Expectations and how to configure them :py:mod:`here<great_expectations.validation_operators.actions>`
+class (or its descendants). See the actions included in Great Expectations and how to configure them :py:mod:`here<great_expectations.validation_operators.actions>`. You can also implement your own actions by extending the base class.
 
 The init command includes this operator in the default configuration file.
 
@@ -141,10 +141,10 @@ This is an example of invoking an instance of a Validation Operator from Python:
     )
 
 * ``assets_to_validate`` - an iterable that specifies the data assets that the operator will validate. The members of the list can be either batches or triples that will allow the operator to fetch the batch: (data_asset_name, expectation_suite_name, batch_kwargs) using this method: :py:meth:`~great_expectations.data_context.BaseDataContext.get_batch`
-* ``run_id`` - pipeline run id of type RunIdentifier, consisting of a run_time (always assumed to be UTC time) and run_name string that is meaningful to you and will help you refer to the result of this operation later
+* ``run_id`` - pipeline run id of type RunIdentifier, consisting of a ``run_time`` (always assumed to be UTC time) and ``run_name`` string that is meaningful to you and will help you refer to the result of this operation later
 * ``validation_operator_name`` you can instances of a class that implements a Validation Operator
 
-The `run` method returns a ValidationOperatorResult object:
+The ``run`` method returns a ValidationOperatorResult object:
 
 ::
 
