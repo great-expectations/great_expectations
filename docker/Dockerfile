@@ -1,24 +1,26 @@
 ARG PYTHON_DOCKER_TAG
 
-FROM python:${PYTHON_DOCKER_TAG} as base
+FROM python:${PYTHON_DOCKER_TAG}
+
+ARG GE_EXTRA_DEPS="spark,sqlalchemy,redshift,s3"
+
+ENV PYTHONIOENCODING utf-8
+ENV LANG C.UTF-8
+ENV GE_HOME /home/great-expectations
+ENV PATH /usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${GE_HOME}/.local/bin
 
 LABEL maintainer="great-expectations"
 
-COPY . /usr/app/great_expectations_install
+RUN useradd -mU great-expectations -d ${GE_HOME}
 
-RUN cd /usr/app/great_expectations_install && \
-    pip install .[spark,sqlalchemy,redshift,s3] && \
-    rm -rf /usr/app/great_expectations_install
+USER great-expectations
 
-FROM base
+COPY --chown=great-expectations . ${GE_HOME}/great_expectations_install
 
-ENV PYTHONIOENCODING=utf-8
-ENV LANG C.UTF-8
+RUN cd ${GE_HOME}/great_expectations_install && \
+    pip install --user .[${GE_EXTRA_DEPS}] && \
+    rm -rf ${GE_HOME}/great_expectations_install
 
-RUN useradd -mU great-expectations-user
-
-USER great-expectations-user
-
-WORKDIR /usr/app/
+WORKDIR /home/great-expectations
 
 ENTRYPOINT ["great_expectations"]
