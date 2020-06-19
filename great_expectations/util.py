@@ -9,10 +9,10 @@ from pathlib import Path
 from types import ModuleType
 from typing import Callable, Union
 
-from pkg_resources import Distribution
-
 import black
 import importlib_metadata
+from pkg_resources import Distribution
+
 from great_expectations.core import expectationSuiteSchema
 from great_expectations.exceptions import (
     PluginClassNotFoundError,

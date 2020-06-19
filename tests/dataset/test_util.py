@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import sqlalchemy.dialects.sqlite as sqlite_dialect
+
 from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.dataset.util import (
     build_continuous_partition_object,
