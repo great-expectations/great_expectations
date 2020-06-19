@@ -6,23 +6,23 @@ ARG GE_EXTRA_DEPS="spark,sqlalchemy,redshift,s3"
 
 ENV PYTHONIOENCODING utf-8
 ENV LANG C.UTF-8
-ENV PATH /usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${GE_HOME}/.local/bin
-
+ENV HOME /home/great-expectations
+ENV PATH /usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${HOME}/.local/bin
 # Path where the root of the GE project will be expected
-ENV GE_HOME /home/great-expectations/great_expectations
+ENV GE_HOME ${HOME}/great_expectations
 
 LABEL maintainer="great-expectations"
 
-RUN useradd -mU great-expectations -d ${GE_HOME}
+RUN useradd -mU great-expectations -d ${HOME}
 
 USER great-expectations
 
-COPY --chown=great-expectations . ${GE_HOME}/great_expectations_install
+COPY --chown=great-expectations . ${HOME}/great_expectations_install
 
-RUN cd ${GE_HOME}/great_expectations_install && \
+RUN cd ${HOME}/great_expectations_install && \
     pip install --user .[${GE_EXTRA_DEPS}] && \
-    rm -rf ${GE_HOME}/great_expectations_install
+    rm -rf ${HOME}/great_expectations_install
 
-WORKDIR /home/great-expectations
+WORKDIR ${HOME}
 
 ENTRYPOINT ["great_expectations"]
