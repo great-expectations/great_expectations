@@ -610,7 +610,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_ha
                 "expectation_type": "expect_column_values_to_be_unique",
             },
             {
-                "kwargs": {"column": "nulls", "mostly": 0.47},
+                "kwargs": {"column": "nulls", "mostly": 0.471},
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
                 "expectation_type": "expect_column_values_to_not_be_null",
             },
@@ -911,7 +911,7 @@ def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
             },
             {
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
-                "kwargs": {"column": "nulls", "mostly": 0.47},
+                "kwargs": {"column": "nulls", "mostly": 0.471},
                 "expectation_type": "expect_column_values_to_not_be_null",
             },
         ],
@@ -1088,7 +1088,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectation
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
             },
             {
-                "kwargs": {"column": "nulls", "mostly": 0.47},
+                "kwargs": {"column": "nulls", "mostly": 0.471},
                 "expectation_type": "expect_column_values_to_not_be_null",
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
             },
@@ -1234,7 +1234,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_excluded_columns_are_fals
             {
                 "expectation_type": "expect_column_values_to_not_be_null",
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
-                "kwargs": {"column": "nulls", "mostly": 0.47},
+                "kwargs": {"column": "nulls", "mostly": 0.471},
             },
         ],
     )
