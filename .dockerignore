@@ -7,4 +7,5 @@
 !versioneer.py
 !.git/
 !great_expectations/
+!MANIFEST.in
 !Dockerfile
