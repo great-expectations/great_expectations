@@ -5,12 +5,11 @@ import uuid
 import warnings
 from datetime import datetime
 from functools import wraps
-from typing import List
+from typing import Iterable, List
 
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
@@ -632,7 +631,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return column_median
 
     def get_column_quantiles(
-        self, column: str, quantiles: tuple, allow_relative_error: bool = False
+        self, column: str, quantiles: Iterable, allow_relative_error: bool = False
     ) -> list:
         if self.sql_engine_dialect.name.lower() == "mssql":
             return self._get_column_quantiles_mssql(column=column, quantiles=quantiles)
@@ -649,7 +648,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 allow_relative_error=allow_relative_error,
             )
 
-    def _get_column_quantiles_mssql(self, column: str, quantiles: tuple) -> list:
+    def _get_column_quantiles_mssql(self, column: str, quantiles: Iterable) -> list:
         # mssql requires over(), so we add an empty over() clause
         selects: List[WithinGroup] = [
             sa.func.percentile_disc(quantile)
@@ -671,7 +670,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             logger.error(exception_message)
             raise pe
 
-    def _get_column_quantiles_bigquery(self, column: str, quantiles: tuple) -> list:
+    def _get_column_quantiles_bigquery(self, column: str, quantiles: Iterable) -> list:
         # BigQuery does not support "WITHIN", so we need a special case for it
         selects: List[WithinGroup] = [
             sa.func.percentile_disc(sa.column(column), quantile).over()
@@ -691,7 +690,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             logger.error(exception_message)
             raise pe
 
-    def _get_column_quantiles_mysql(self, column: str, quantiles: tuple) -> list:
+    def _get_column_quantiles_mysql(self, column: str, quantiles: Iterable) -> list:
         # MySQL does not support "percentile_disc", so we implement it as a compound query.
         # Please see https://stackoverflow.com/questions/19770026/calculate-percentile-value-using-mysql for reference.
         percent_rank_query: CTE = sa.select(
@@ -733,7 +732,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     # only difference is that Redshift and/or PostGreSQL sometimes do not support the aggregate function
     # "percentile_disc", but do support the approximate percentile_disc or percentile_cont function version instead.
     def _get_column_quantiles_generic_sqlalchemy(
-        self, column: str, quantiles: tuple, allow_relative_error: bool
+        self, column: str, quantiles: Iterable, allow_relative_error: bool
     ) -> list:
         selects: List[WithinGroup] = [
             sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
