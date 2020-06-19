@@ -10,8 +10,9 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.util import (
     file_relative_path,
+    substitute_all_config_variables,
     substitute_config_variable,
-    substitute_all_config_variables)
+)
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
 from tests.data_context.conftest import create_data_context_files
 
@@ -253,6 +254,3 @@ def test_substitute_env_var_in_config_variable_file(monkeypatch):
 
     assert( config["datasources"]["mydatasource"]["batch_kwargs_generators"] \
             ["mygenerator"]["reader_options"]["test_variable_sub1"] == "correct" )
-
-
-
