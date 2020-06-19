@@ -6,7 +6,6 @@ from subprocess import PIPE, CalledProcessError, CompletedProcess, Popen, run
 from typing import Union
 
 import click
-
 from great_expectations.core import logger
 
 
@@ -84,7 +83,6 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
     progress: float
     with click.progressbar(length=bar_length_100_percent, label=command) as bar:
         try:
-            # noinspection PyArgumentList
             with Popen(
                 args=["bash", "-c", command],
                 bufsize=-1,
@@ -105,7 +103,6 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
                 pass_fds=(),
                 encoding=None,
                 errors=None,
-                text=None,
             ) as proc:
                 poll_status_code: Union[int, None] = proc.poll()
                 poll_stdout: str = proc.stdout.readline()
