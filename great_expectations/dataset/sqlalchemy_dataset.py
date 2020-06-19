@@ -728,9 +728,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             raise pe
 
     # Support for computing the quantiles column for PostGreSQL and Redshift is included in the same method as that for
-    # the generic sqlalchemy compatible DBMS engine, because distinguishing between them is oftentimes impossible.  The
-    # only difference is that Redshift and/or PostGreSQL sometimes do not support the aggregate function
-    # "percentile_disc", but do support the approximate percentile_disc or percentile_cont function version instead.
+    # the generic sqlalchemy compatible DBMS engine, because users often use the postgresql driver to connect to Redshift
+    # The key functional difference is that Redshift does not support the aggregate function
+    # "percentile_disc", but does support the approximate percentile_disc or percentile_cont function version instead.```
     def _get_column_quantiles_generic_sqlalchemy(
         self, column: str, quantiles: Iterable, allow_relative_error: bool
     ) -> list:
