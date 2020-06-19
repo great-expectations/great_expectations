@@ -2,6 +2,9 @@ import logging
 import uuid
 from copy import deepcopy
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.types import DictDot
+from great_expectations.types.configurations import ClassConfigSchema
 from marshmallow import (
     INCLUDE,
     Schema,
@@ -13,10 +16,6 @@ from marshmallow import (
 )
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
-
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.types import DictDot
-from great_expectations.types.configurations import ClassConfigSchema
 
 logger = logging.getLogger(__name__)
 

@@ -4,8 +4,6 @@ import os
 
 import pandas as pd
 import pytest
-from ruamel.yaml import YAML
-
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.dataset import SparkDFDataset
@@ -13,6 +11,7 @@ from great_expectations.datasource import SparkDFDatasource
 from great_expectations.datasource.types import InMemoryBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.validator.validator import Validator
+from ruamel.yaml import YAML
 
 yaml = YAML()
 

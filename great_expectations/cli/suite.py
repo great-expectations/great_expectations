@@ -3,7 +3,6 @@ import os
 import sys
 
 import click
-
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.datasource import get_batch_kwargs

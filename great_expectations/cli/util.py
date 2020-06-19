@@ -1,11 +1,13 @@
 import importlib
 import re
+import sys
 from types import ModuleType
 from typing import Union
 
 import pkg_resources
 from pkg_resources import Distribution, WorkingSet
 
+from great_expectations.cli import toolkit
 from great_expectations.cli.python_subprocess import (
     execute_shell_command_with_progress_polling,
 )
@@ -174,7 +176,21 @@ def library_install_load_check(
     if is_library_loadable(library_name=python_import_name):
         return None
 
-    # TODO: <Alex>Add CLICK PROMPT -- "Do you wish to continue Y/n" to fit existing flow.</Alex>
+    confirm_prompt: str = f"""Great Expectations relies on the library `{python_import_name}` to connect to your data, \
+but the package `{pip_library_name}` containing this library is not installed.
+    Would you like Great Expectations to try to execute `pip install {pip_library_name}` for you?"""
+    continuation_message: str = f"""\nOK, exiting now.
+    - Please execute `pip install {pip_library_name}` before trying again."""
+    pip_install_confirmed = toolkit.confirm_proceed_or_exit(
+        confirm_prompt=confirm_prompt,
+        continuation_message=continuation_message,
+        exit_on_no=True,
+    )
+
+    if not pip_install_confirmed:
+        cli_message(continuation_message)
+        sys.exit(0)
+
     status_code: int = execute_shell_command_with_progress_polling(
         f"pip install {pip_library_name}"
     )
@@ -199,7 +215,7 @@ def library_install_load_check(
     if not library_loadable:
         cli_message(
             f"""<red>ERROR: Great Expectations relies on the library `{pip_library_name}` to connect to your data.</red>
-        - Please `pip install {pip_library_name}` before trying again."""
+        - Please execute `pip install {pip_library_name}` before trying again."""
         )
         return 1
 

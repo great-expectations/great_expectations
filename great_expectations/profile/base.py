@@ -4,7 +4,6 @@ import warnings
 from enum import Enum
 
 from dateutil.parser import ParserError, parse
-
 from great_expectations.core import RunIdentifier
 from great_expectations.exceptions import GreatExpectationsError
 

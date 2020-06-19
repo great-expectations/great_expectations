@@ -2,7 +2,6 @@ import datetime
 
 import pytest
 from freezegun import freeze_time
-
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuiteValidationResult,

@@ -4,7 +4,6 @@ import json
 
 import altair as alt
 import pandas as pd
-
 from great_expectations.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
 )

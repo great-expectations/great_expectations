@@ -5,8 +5,6 @@ import shutil
 
 import pandas as pd
 import pytest
-from ruamel.yaml import YAML
-
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.util import nested_update
@@ -19,6 +17,7 @@ from great_expectations.datasource.types.batch_kwargs import (
 )
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.validator.validator import Validator
+from ruamel.yaml import YAML
 
 yaml = YAML()
 

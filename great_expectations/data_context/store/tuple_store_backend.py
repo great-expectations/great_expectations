@@ -373,7 +373,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
         self.prefix = prefix
 
     def _get(self, key):
-        s3_object_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
+        if self.platform_specific_separator:
+            s3_object_key = os.path.join(
+                self.prefix, self._convert_key_to_filepath(key)
+            )
+        else:
+            s3_object_key = "/".join((self.prefix, self._convert_key_to_filepath(key)))
 
         import boto3
 
@@ -388,7 +393,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def _set(
         self, key, value, content_encoding="utf-8", content_type="application/json"
     ):
-        s3_object_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
+        if self.platform_specific_separator:
+            s3_object_key = os.path.join(
+                self.prefix, self._convert_key_to_filepath(key)
+            )
+        else:
+            s3_object_key = "/".join((self.prefix, self._convert_key_to_filepath(key)))
 
         import boto3
 
@@ -443,7 +453,10 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         for s3_object_info in objects:
             s3_object_key = s3_object_info["Key"]
-            s3_object_key = os.path.relpath(s3_object_key, self.prefix,)
+            if self.platform_specific_separator:
+                s3_object_key = os.path.relpath(s3_object_key, self.prefix)
+            elif s3_object_key.startswith(self.prefix + "/"):
+                s3_object_key = s3_object_key[len(self.prefix) + 1 :]
             if self.filepath_prefix and not s3_object_key.startswith(
                 self.filepath_prefix
             ):

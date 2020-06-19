@@ -1,7 +1,6 @@
 from unittest import mock
 
 import pandas as pd
-
 from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
 
 
