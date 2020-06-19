@@ -772,6 +772,13 @@ def _collect_redshift_credentials(default_credentials=None):
 def _add_spark_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
+    send_usage_message(
+        data_context=context,
+        event="cli.new_ds_choice",
+        success=True,
+        event_payload={"type": "spark"},
+    )
+
     if not _verify_pyspark_dependent_modules():
         return None
 
