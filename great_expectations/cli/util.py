@@ -185,11 +185,12 @@ but the package `{pip_library_name}` containing this library is not installed.
         confirm_prompt=confirm_prompt,
         continuation_message=continuation_message,
         exit_on_no=True,
+        exit_code=1,
     )
 
     if not pip_install_confirmed:
         cli_message(continuation_message)
-        sys.exit(0)
+        sys.exit(1)
 
     status_code: int = execute_shell_command_with_progress_polling(
         f"pip install {pip_library_name}"

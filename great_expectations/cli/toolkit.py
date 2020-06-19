@@ -6,9 +6,6 @@ import warnings
 from typing import Union
 
 import click
-from ruamel.yaml import YAML
-from ruamel.yaml.compat import StringIO
-
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
@@ -28,6 +25,8 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.datasource import Datasource
 from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
 from great_expectations.profile import BasicSuiteBuilderProfiler
+from ruamel.yaml import YAML
+from ruamel.yaml.compat import StringIO
 
 
 class MyYAML(YAML):
@@ -542,10 +541,11 @@ To learn more about the upgrade process, visit \
 
 
 def confirm_proceed_or_exit(
-    confirm_prompt="Would you like to proceed?",
-    continuation_message="Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
-    exit_on_no=True,
-):
+    confirm_prompt: str = "Would you like to proceed?",
+    continuation_message: str = "Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
+    exit_on_no: bool = True,
+    exit_code: int = 0,
+) -> Union[None, bool]:
     """
     Every CLI command that starts a potentially lengthy (>1 sec) computation
     or modifies some resources (e.g., edits the config file, adds objects
@@ -564,7 +564,7 @@ def confirm_proceed_or_exit(
     if not click.confirm(confirm_prompt_colorized, default=True):
         if exit_on_no:
             cli_message(continuation_message_colorized)
-            exit(0)
+            sys.exit(exit_code)
         else:
             return False
     return True

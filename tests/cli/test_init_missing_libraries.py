@@ -2,7 +2,6 @@ import os
 
 import pytest
 from click.testing import CliRunner
-
 from great_expectations.cli import cli
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
@@ -39,10 +38,16 @@ of this config file: great_expectations/uncommitted/config_variables.yml"""
         in stdout
     )
     assert (
-        "Great Expectations relies on the library `{}`".format(library_import_name)
+        f"""Great Expectations relies on the library `{library_import_name}` to connect to your data, \
+but the package `{library_name}` containing this library is not installed.
+    Would you like Great Expectations to try to execute `pip install {library_name}` for you?"""
         in stdout
     )
-    assert "Please `pip install {}` before trying again".format(library_name) in stdout
+    assert (
+        f"""\nOK, exiting now.
+    - Please execute `pip install {library_name}` before trying again."""
+        in stdout
+    )
 
     assert "Profiling" not in stdout
     assert "Building" not in stdout
@@ -97,7 +102,7 @@ def test_cli_init_db_mysql_without_library_installed_instructs_user(
     caplog, tmp_path_factory
 ):
     _library_not_loaded_test(
-        tmp_path_factory, "\n\n2\n1\nmy_db\n", "pymysql", "pymysql", caplog
+        tmp_path_factory, "\n\n2\n1\nmy_db\nn\n", "pymysql", "pymysql", caplog
     )
 
 
