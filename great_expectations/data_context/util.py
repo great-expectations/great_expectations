@@ -148,7 +148,7 @@ def substitute_config_variable(template_str, config_variables_dict):
         try:
             inner_match = re.search(r"\$\{(.*?)\}", config_variable_value) or re.search(
             r"\$([_a-z][_a-z0-9]*)", config_variable_value)
-        except Exception:
+        except TypeError:
             inner_match = None
 
         if inner_match:
