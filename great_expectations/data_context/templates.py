@@ -32,12 +32,10 @@ CONFIG_VARIABLES_INTRO = """
 # Environment variables take precedence over variables defined here.
 #
 # Substitution values defined here can be a simple (non-nested) value,
-# or a nested value such as a dictionary.
+# nested value such as a dictionary, or an environment variable (i.e. ${ENV_VAR})
 #
-# NOTE: Environment variables are currently *only* supported in
-# great_expectations.yml, but not in this config file!
 #
-# https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets
+# https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html
 
 """
 
