@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.batch_kwargs_generator import (
     TableBatchKwargsGenerator,

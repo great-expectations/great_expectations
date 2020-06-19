@@ -1,7 +1,6 @@
 from copy import copy, deepcopy
 
 import pytest
-
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 
 

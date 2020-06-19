@@ -4,8 +4,6 @@ import shutil
 
 import pytest
 from freezegun import freeze_time
-from ruamel.yaml import YAML
-
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -34,6 +32,7 @@ from great_expectations.exceptions import (
     DataContextError,
 )
 from great_expectations.util import gen_directory_tree_str
+from ruamel.yaml import YAML
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )

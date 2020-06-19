@@ -1,7 +1,6 @@
 import os
 
 from click.testing import CliRunner
-
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from tests.cli.test_cli import yaml

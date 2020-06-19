@@ -3,11 +3,10 @@ import random
 import re
 import unittest
 
+import great_expectations as ge
 import pandas as pd
 import pytest
 from freezegun import freeze_time
-
-import great_expectations as ge
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,

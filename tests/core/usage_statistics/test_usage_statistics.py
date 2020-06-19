@@ -5,7 +5,6 @@ from copy import deepcopy
 
 import mock
 import pytest
-
 from great_expectations.core.usage_statistics.usage_statistics import (
     run_validation_operator_usage_statistics,
 )

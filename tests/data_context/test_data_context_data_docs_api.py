@@ -1,6 +1,5 @@
 import mock
 import pytest
-
 from great_expectations.exceptions import DataContextError
 
 

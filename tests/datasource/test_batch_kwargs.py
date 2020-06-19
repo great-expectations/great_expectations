@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations.datasource.types import *
 
 try:

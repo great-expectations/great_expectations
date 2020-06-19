@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 import pytest
 from dateutil.parser import parse
-
 from great_expectations.core import (
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,

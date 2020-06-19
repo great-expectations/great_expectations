@@ -1,9 +1,8 @@
 import logging
 
-import pytest
-
 import great_expectations as ge
 import great_expectations.jupyter_ux as jux
+import pytest
 
 
 def test_styling_elements_exist():

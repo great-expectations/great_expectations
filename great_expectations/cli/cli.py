@@ -2,7 +2,6 @@
 import logging
 
 import click
-
 from great_expectations import __version__ as ge_version
 from great_expectations.cli.checkpoint import checkpoint
 from great_expectations.cli.cli_logging import _set_up_logger
