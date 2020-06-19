@@ -125,7 +125,7 @@ def is_sane_slack_webhook(url):
     return url.strip().startswith("https://hooks.slack.com/")
 
 
-SQL_ALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
+CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
     # 'great_expectations.datasource.batch_kwargs_generator.query_batch_kwargs_generator',
     "great_expectations.datasource.batch_kwargs_generator.table_batch_kwargs_generator",
     "great_expectations.dataset.sqlalchemy_dataset",
