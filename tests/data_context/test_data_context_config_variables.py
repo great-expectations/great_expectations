@@ -225,20 +225,19 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
 
 def test_substitute_env_var_in_config_variable_file(monkeypatch):
     monkeypatch.setenv("FOO", "val_of_arg_0")
-    config_variables_dict = {"arg0": "${FOO}", "arg2": {"v1": 2}, "replace_me": "wrong" }
+    config_variables_dict = {"arg0": "${FOO}", "arg2": {"v1": 2}, "replace_me": "wrong"}
     assert (
-            substitute_config_variable("abc${arg0}", config_variables_dict)
-            == "abcval_of_arg_0"
+        substitute_config_variable("abc${arg0}", config_variables_dict)
+        == "abcval_of_arg_0"
     )
     monkeypatch.delenv("FOO")
     with pytest.raises(MissingConfigVariableError):
         substitute_config_variable("abc${arg0}", config_variables_dict)
 
     with open(
-            file_relative_path(
-                __file__,
-                "../test_fixtures/great_expectations_basic_with_variables.yml",
-            )
+        file_relative_path(
+            __file__, "../test_fixtures/great_expectations_basic_with_variables.yml",
+        )
     ) as f:
         config = yaml.load(f)
 
@@ -252,5 +251,9 @@ def test_substitute_env_var_in_config_variable_file(monkeypatch):
 
     config = substitute_all_config_variables(config, config_variables_dict)
 
-    assert( config["datasources"]["mydatasource"]["batch_kwargs_generators"] \
-            ["mygenerator"]["reader_options"]["test_variable_sub1"] == "correct" )
+    assert (
+        config["datasources"]["mydatasource"]["batch_kwargs_generators"]["mygenerator"][
+            "reader_options"
+        ]["test_variable_sub1"]
+        == "correct"
+    )
