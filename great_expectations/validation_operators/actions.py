@@ -1,3 +1,9 @@
+"""
+An action is a way to take an arbitrary method and make it configurable and runnable within a Data Context.
+
+The only requirement from an action is for it to have a take_action method.
+"""
+
 import logging
 import warnings
 
@@ -9,12 +15,6 @@ from ..exceptions import ClassInstantiationError, DataContextError
 from .util import send_slack_notification
 
 logger = logging.getLogger(__name__)
-
-"""
-An action is a way to take an arbitrary method and make it configurable and runnable within a Data Context.
-
-The only requirement from an action is for it to have a take_action method.
-"""
 
 
 class ValidationAction(object):
