@@ -6,11 +6,12 @@ Changelog
 
 Develop
 -----------------
-* [ENHANCEMENT] Added 3 new usage stats events: "cli.new_ds_choice", "data_context.add_datasource", and "datasource.sqlalchemy.connect"
 * [FEATURE] Add support for expect_column_values_to_match_regex_list exception for Spark backend
-* [BUGFIX] fixed issue where calling head() on a SqlAlchemyDataset would fail if the underlying table is empty
+* [ENHANCEMENT] Added 3 new usage stats events: "cli.new_ds_choice", "data_context.add_datasource", and "datasource.sqlalchemy.connect"
 * [ENHANCEMENT] Support platform_specific_separator flag for TupleS3StoreBackend prefix
 * [ENHANCEMENT] Allow environment substitution in config_variables.yml
+* [BUGFIX] fixed issue where calling head() on a SqlAlchemyDataset would fail if the underlying table is empty
+* [BUGFIX] fixed bug in rounding of mostly argument to nullity expectations produced by the BasicSuiteBuilderProfiler
 
 0.11.4
 -----------------
