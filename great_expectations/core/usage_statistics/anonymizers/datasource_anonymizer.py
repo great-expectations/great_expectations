@@ -29,8 +29,4 @@ class DatasourceAnonymizer(Anonymizer):
             object_config=config,
         )
 
-        if anonymized_info_dict.get("parent_class") == "SqlAlchemyDatasource":
-            sqlalchemy_dialect = config["engine"]
-            anonymized_info_dict["sqlalchemy_dialect"] = sqlalchemy_dialect
-
         return anonymized_info_dict

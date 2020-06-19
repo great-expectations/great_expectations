@@ -6,7 +6,10 @@ Changelog
 
 Develop
 -----------------
+* [ENHANCEMENT] Added 3 new usage stats events: "cli.new_ds_choice", "data_context.add_datasource", and "datasource.sqlalchemy.connect"
 * [FEATURE] Add support for expect_column_values_to_match_regex_list exception for Spark backend
+* [BUGFIX] fixed issue where calling head() on a SqlAlchemyDataset would fail if the underlying table is empty
+* [ENHANCEMENT] Support platform_specific_separator flag for TupleS3StoreBackend prefix
 
 0.11.4
 -----------------
