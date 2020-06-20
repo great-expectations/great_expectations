@@ -18,6 +18,8 @@ Develop
 * [BUGFIX] fixed issue where calling head() on a SqlAlchemyDataset would fail if the underlying table is empty
 * [BUGFIX] fixed bug in rounding of mostly argument to nullity expectations produced by the BasicSuiteBuilderProfiler
 * [DOCS] New How-to guide: How to add a Validation Operator (+ updated in Validation Operator doc strings)
+* [FEATURE] Auto-install Python DB packages.  If the required packages for a DB library are not installed, GE will offer the user to install them, without exiting CLI.
+* [ENHANCEMENT] Implement "column_quantiles" for MySQL (via a compound SQLAlchemy query, since MySQL does not support "percentile_disc").
 
 0.11.4
 -----------------

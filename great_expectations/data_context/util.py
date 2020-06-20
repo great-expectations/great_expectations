@@ -1,5 +1,4 @@
 import copy
-import importlib
 import inspect
 import logging
 import os
@@ -10,26 +9,10 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigSchema,
 )
-from great_expectations.exceptions import (
-    MissingConfigVariableError,
-    PluginClassNotFoundError,
-    PluginModuleNotFoundError,
-)
-from great_expectations.util import verify_dynamic_loading_support
+from great_expectations.exceptions import MissingConfigVariableError
+from great_expectations.util import load_class, verify_dynamic_loading_support
 
 logger = logging.getLogger(__name__)
-
-
-def load_class(class_name, module_name):
-    """Dynamically load a class from strings or raise a helpful error."""
-    try:
-        loaded_module = importlib.import_module(module_name)
-        class_ = getattr(loaded_module, class_name)
-    except ModuleNotFoundError:
-        raise PluginModuleNotFoundError(module_name)
-    except AttributeError:
-        raise PluginClassNotFoundError(module_name=module_name, class_name=class_name)
-    return class_
 
 
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
