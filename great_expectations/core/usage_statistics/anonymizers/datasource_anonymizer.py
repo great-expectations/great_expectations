@@ -9,7 +9,7 @@ from great_expectations.datasource import (
 
 class DatasourceAnonymizer(Anonymizer):
     def __init__(self, salt=None):
-        super(DatasourceAnonymizer, self).__init__(salt=salt)
+        super().__init__(salt=salt)
 
         # ordered bottom up in terms of inheritance order
         self._ge_classes = [

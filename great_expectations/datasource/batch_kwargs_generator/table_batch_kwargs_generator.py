@@ -79,9 +79,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
     }
 
     def __init__(self, name="default", datasource=None, assets=None):
-        super(TableBatchKwargsGenerator, self).__init__(
-            name=name, datasource=datasource
-        )
+        super().__init__(name=name, datasource=datasource)
         if not assets:
             assets = {}
         try:

@@ -14,7 +14,7 @@ repos:
     rev: 4.3.21-2
     hooks:
       - id: isort
-        exclude: docs/.*|tests/test_sets/broken_excel_file\.xls
+        exclude: venv/.*\|docs/.*|tests/test_sets/broken_excel_file\.xls
   - repo: https://github.com/psf/black
     rev: 19.10b0
     hooks:
