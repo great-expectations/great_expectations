@@ -15,7 +15,7 @@ class ExpectationsStore(Store):
     """
 An Expectations Store provides a way to store Expectation Suites accessible to a Data Context.
 
-.. admonition:: Feature Maturity
+--ge-feature-maturity-info--
 
     id: expectations_store_git
     title: Expectation Store - Git
@@ -91,6 +91,7 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
         integration_infrastructure_test_coverage: Minimal
         documentation_completeness: Minimal
         bug_risk: Moderate
+--ge-feature-maturity-info--
     """
 
     _key_class = ExpectationSuiteIdentifier
