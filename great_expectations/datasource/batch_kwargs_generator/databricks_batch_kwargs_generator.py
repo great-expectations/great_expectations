@@ -19,9 +19,7 @@ class DatabricksTableBatchKwargsGenerator(BatchKwargsGenerator):
     """
 
     def __init__(self, name="default", datasource=None, database="default"):
-        super(DatabricksTableBatchKwargsGenerator, self).__init__(
-            name, datasource=datasource
-        )
+        super().__init__(name, datasource=datasource)
         self.database = database
         try:
             self.spark = SparkSession.builder.getOrCreate()

@@ -7,7 +7,7 @@ from great_expectations.data_asset import DataAsset
 
 class BatchAnonymizer(Anonymizer):
     def __init__(self, salt=None):
-        super(BatchAnonymizer, self).__init__(salt=salt)
+        super().__init__(salt=salt)
         self._batch_kwargs_anonymizer = BatchKwargsAnonymizer(salt=salt)
 
     def anonymize_batch_info(self, batch):

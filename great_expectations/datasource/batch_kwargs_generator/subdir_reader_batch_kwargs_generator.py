@@ -48,9 +48,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         known_extensions=None,
         reader_method=None,
     ):
-        super(SubdirReaderBatchKwargsGenerator, self).__init__(
-            name, datasource=datasource
-        )
+        super().__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = self._default_reader_options
 
