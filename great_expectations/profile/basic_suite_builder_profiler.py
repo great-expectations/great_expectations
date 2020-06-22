@@ -462,7 +462,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.UNIQUE,
                 ]:
                     # TODO we will want to finesse the number and types of
-                    #  expectations created here. The simple version is blacklisting
+                    #  expectations created here. The simple version is deny/allow list
                     #  and the more complex version is desired per column type and
                     #  cardinality. This deserves more thought on configuration.
                     dataset.expect_column_values_to_be_unique(column)
