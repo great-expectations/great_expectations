@@ -17,7 +17,9 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import re
 import sys
+from collections import namedtuple
 
 sys.path.insert(0, os.path.abspath("../"))
 
@@ -246,3 +248,167 @@ texinfo_documents = [
 
 
 autodoc_member_order = "bysource"
+
+feature_annotation_list = [
+    {
+        'id': 'expectations_store_git', 'title': 'Expectation Store - Git', 'icon': 'fdsf', 'short_description': 'fdsf',
+        'description': 'fdsf', 'how_to_guide_url': 'sdfds', 'maturity': 'Production',
+        'maturity_details': {'api_stability':
+                                 'Stable',
+                             'implementation_completeness': 'Complete',
+                             'unit_test_coverage': 'Complete',
+                             'integration_infrastructure_test_coverage': 'N/A',
+                             'documentation_completeness': 'Complete',
+                             'bug_risk': 'Low'}},
+    {
+        'id': 'expectations_store_git', 'title': 'Expectation Store - Git', 'icon': 'fdsf', 'short_description': 'fdsf',
+        'description': 'fdsf', 'how_to_guide_url': 'sdfds', 'maturity': 'Production',
+        'maturity_details': {'api_stability': 'Stable', 'implementation_completeness': 'Complete',
+                             'unit_test_coverage': 'Complete', 'integration_infrastructure_test_coverage': 'N/A',
+                             'documentation_completeness': 'Complete', 'bug_risk': 'Low'}},
+    {
+        'id': 'expectations_store_git', 'title': 'Expectation Store - Git', 'icon': 'fdsf', 'short_description': 'fdsf',
+        'description': 'fdsf', 'how_to_guide_url': 'sdfds', 'maturity': 'Production',
+        'maturity_details': {'api_stability': 'Stable', 'implementation_completeness': 'Complete',
+                             'unit_test_coverage': 'Complete', 'integration_infrastructure_test_coverage': 'N/A',
+                             'documentation_completeness': 'Complete', 'bug_risk': 'Low'}},
+    {
+        'id': 'expectations_store_git', 'title': 'Expectation Store - Git', 'icon': 'fdsf', 'short_description': 'fdsf',
+        'description': 'fdsf', 'how_to_guide_url': 'sdfds', 'maturity': 'Production',
+        'maturity_details': {'api_stability': 'Stable', 'implementation_completeness': 'Complete',
+                             'unit_test_coverage': 'Complete', 'integration_infrastructure_test_coverage': 'N/A',
+                             'documentation_completeness': 'Complete', 'bug_risk': 'Low'}}
+]
+
+
+ANNOTATION_REGEX = ""
+ANNOTATION_REGEX += "[ ]*(id:.*)[\n]"
+ANNOTATION_REGEX += "[ ]*(title:.*)[\n]"
+ANNOTATION_REGEX += "[ ]*(icon:.*)[\n]"
+ANNOTATION_REGEX += "[ ]*(short_description:.*)[\n]"
+ANNOTATION_REGEX += "[ ]*(description:.*)[\n]"
+ANNOTATION_REGEX += "[ ]*(how_to_guide_url:.*)[\n]"
+ANNOTATION_REGEX += "[ ]*(maturity:.*)[\n]"
+ANNOTATION_REGEX += "[ ]*(maturity_details:.*)[\n]"
+ANNOTATION_REGEX += "[ ]*(api_stability:.*)[\n]"
+ANNOTATION_REGEX += "[ ]*(implementation_completeness:.*)[\n]"
+ANNOTATION_REGEX += "[ ]*(unit_test_coverage:.*)[\n]"
+ANNOTATION_REGEX += "[ ]*(integration_infrastructure_test_coverage:.*)[\n]"
+ANNOTATION_REGEX += "[ ]*(documentation_completeness:.*)[\n]"
+ANNOTATION_REGEX += "[ ]*(bug_risk:.*)[\n]"
+annotation_regex_compiled = re.compile(ANNOTATION_REGEX)
+
+maturity_details_keys = ["api_stability", "implementation_completeness", "unit_test_coverage", "integration_infrastructure_test_coverage", "documentation_completeness", "bug_risk"]
+
+AnnotatedNode = namedtuple("AnnotatedNode", ["name", "path", "annotation", "type_"])
+
+
+def _parse_feature_annotation(docstring):
+    """Parse a docstring and return a feature annotation."""
+    # list_of_annotations = []
+    # id_val = ""
+    # if docstring is None:
+    #     return
+    # if isinstance(docstring, str):
+    #     for matches in re.findall(annotation_regex_compiled, docstring):
+    #         annotation_dict = dict() # create new dictionary for each match
+    #         maturity_details_dict = dict()
+    #         for matched_line in matches:
+    #             # split matched line_fields
+    #             matched_line_fields = matched_line.split(":")
+    #             this_key = matched_line_fields[0].strip()
+    #             this_val = matched_line_fields[1].strip()
+    #
+    #             if this_key == "id":
+    #                 id_val = this_val
+    #
+    #             if this_key in maturity_details_keys:
+    #                 maturity_details_dict[this_key] = this_val
+    #             elif this_key == "icon": # icon is a special cases
+    #                 if this_val is "":
+    #                     annotation_dict[this_key] = f"https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/{id_val}.png"
+    #                 else:
+    #                     annotation_dict[this_key] = this_val
+    #             else:
+    #                 annotation_dict[this_key] = this_val
+    #
+    #         annotation_dict["maturity_details"] = maturity_details_dict
+    #         if annotation_dict is not None:
+    #             list_of_annotations.append(annotation_dict)
+    # return(list_of_annotations)
+
+    return [{'id': 'expectations_store_git', 'title': 'Expectation Store - Git',
+  'icon': 'https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/expectations_store_git.png',
+  'short_description': '', 'description': '', 'how_to_guide_url': '', 'maturity': 'Production',
+  'maturity_details': {'api_stability':
+                           'Stable', 'implementation_completeness': 'Complete', 'unit_test_coverage': 'Complete',
+                       'integration_infrastructure_test_coverage': 'N/A', 'documentation_completeness': 'Complete',
+                       'bug_risk': 'Low'}},
+ {'id': 'expectations_store_filesystem', 'title': 'Expectation Store - Filesystem',
+  'icon': 'https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/expectations_store_filesystem.png',
+  'short_description': '', 'description': '', 'how_to_guide_url': '', 'maturity': 'Production',
+  'maturity_details': {'api_stability': 'Stable', 'implementation_completeness': 'Complete',
+                       'unit_test_coverage': 'Complete', 'integration_infrastructure_test_coverage': 'N/A',
+                       'documentation_completeness': 'Complete', 'bug_risk': 'Low'}},
+ {'id': 'expectations_store_s3', 'title': 'Expectation Store - S3',
+  'icon': 'https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/expectations_store_s3.png',
+  'short_description': '', 'description': '', 'how_to_guide_url': '', 'maturity': 'Beta',
+  'maturity_details': {'api_stability': 'Stable', 'implementation_completeness': 'Complete',
+                       'unit_test_coverage': 'Complete', 'integration_infrastructure_test_coverage': 'Minimal',
+                       'documentation_completeness': 'Complete', 'bug_risk': 'Low'}},
+ {'id': 'expectations_store_gcs', 'title': 'Expectation Store - GCS',
+  'icon': 'https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/expectations_store_gcs.png',
+  'short_description': '', 'description': '', 'how_to_guide_url': '', 'maturity': 'Beta',
+  'maturity_details': {'api_stability': 'Stable', 'implementation_completeness': 'Complete',
+                       'unit_test_coverage': 'Complete', 'integration_infrastructure_test_coverage': 'Minimal',
+                       'documentation_completeness': 'Partial', 'bug_risk': 'Low'}},
+ {'id': 'expectations_store_azure_blob_storage', 'title': 'Expectation Store - Azure',
+  'icon': 'https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/expectations_store_azure_blob_storage.png',
+  'short_description': '', 'description': '', 'how_to_guide_url': '', 'maturity': 'N/A',
+  'maturity_details': {'api_stability': 'Stable', 'implementation_completeness': 'Minimal',
+                       'unit_test_coverage': 'Minimal', 'integration_infrastructure_test_coverage': 'Minimal',
+                       'documentation_completeness': 'Minimal', 'bug_risk': 'Moderate'}}]
+
+
+def process_docstring(app, what, name, obj, options, lines):
+    from sphinx.ext.autodoc import between
+
+    docstring = "\n".join(lines)
+    annotation_list = _parse_feature_annotation(docstring)
+
+    process_between = between(marker="--ge-feature-maturity-info--", exclude=True)
+    process_between(app, what, name, obj, options, lines)
+
+    feature_annotation_template = """
+.. admonition:: Feature Maturity: |icon| {title}
+
+    | id: {id}
+    | title: {title}
+    | icon: {icon}
+    | short_description: {short_description}
+    | description: {description}
+    | how_to_guide_url: {how_to_guide_url}
+    | maturity: {maturity}
+    | maturity_details:
+    |   api_stability: {maturity_details[api_stability]}
+    |   implementation_completeness: {maturity_details[implementation_completeness]}
+    |   unit_test_coverage: {maturity_details[unit_test_coverage]}
+    |   integration_infrastructure_test_coverage: {maturity_details[integration_infrastructure_test_coverage]}
+    |   documentation_completeness: {maturity_details[documentation_completeness]}
+    |   bug_risk: {maturity_details[bug_risk]}\
+
+.. |icon| image:: {icon}
+          :height: 15px
+"""
+    feature_annotation_str = ""
+    for annotation in annotation_list:
+        feature_annotation_str += feature_annotation_template.format(**annotation)
+
+    lines += feature_annotation_str.splitlines()
+
+
+def setup(app):
+    from sphinx.ext.autodoc import between
+    # app.connect('autodoc-process-docstring', between(marker="--ge-feature-maturity-info--",
+    # exclude=True))
+    app.connect('autodoc-process-docstring', process_docstring)
