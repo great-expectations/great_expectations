@@ -19,7 +19,7 @@ KNOWN_EXTENSIONS = [
     ".json",
     ".csv.gz",
     ".tsv.gz",
-    ".feather"
+    ".feather",
 ]
 
 

@@ -7,7 +7,7 @@ Changelog
 
 Develop
 -----------------
-
+* [ENHANCEMENT] Add ``.feather`` file support to PandasDatasource
 
 0.11.5
 -----------------
