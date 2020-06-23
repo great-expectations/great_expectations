@@ -15,6 +15,7 @@ from .util import (
     read_parquet,
     read_pickle,
     read_table,
+    read_feather,
     validate,
 )
 
