@@ -59,7 +59,7 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 
     .. code-block:: bash
 
-        gsutil cp '<OBJECT_LOCATION>' gs://'<your_GCP_bucket_name>'/
+        gsutil cp exp1.json gs://'<your_GCP_bucket_name>'/'<your_GCP_folder_name>'
 
         Operation completed over 1 objects/58.8 KiB.
 
