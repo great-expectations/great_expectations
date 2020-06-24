@@ -2,6 +2,7 @@ import os
 from typing import Union
 
 import nbformat
+import jinja2
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
@@ -17,6 +18,9 @@ class SuiteEditNotebookRenderer(Renderer):
     - Make an easy path to edit a suite that a Profiler created.
     - Make it easy to edit a suite where only JSON exists.
     """
+    def __init__(self):
+        super().__init__()
+        self.template_env = jinja2.Environment(loader=jinja2.PackageLoader('great_expectations.render.notebook_assets', 'suite_edit'))
 
     @classmethod
     def _get_expectations_by_column(cls, expectations):
@@ -51,16 +55,7 @@ class SuiteEditNotebookRenderer(Renderer):
         return ", ".join(kwargs)
 
     def add_header(self, suite_name: str, batch_kwargs) -> None:
-        self.add_markdown_cell(
-            """# Edit Your Expectation Suite
-Use this notebook to recreate and modify your expectation suite:
-
-**Expectation Suite Name**: `{}`
-
-We'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)""".format(
-                suite_name
-            )
-        )
+        self.add_markdown_cell("HEADER.md", suite_name=suite_name)
 
         if not batch_kwargs:
             batch_kwargs = dict()
@@ -88,15 +83,7 @@ batch.head()""".format(
         )
 
     def add_footer(self) -> None:
-        self.add_markdown_cell(
-            """\
-## Save & Review Your Expectations
-
-Let's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.
-If you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).
-
-Let's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans."""
-        )
+        self.add_markdown_cell("FOOTER.md")
         # TODO this may become confusing for users depending on what they are trying
         #  to accomplish in their dev loop
         self.add_code_cell(
@@ -132,32 +119,31 @@ context.open_data_docs(validation_result_identifier)"""
         cell = nbformat.v4.new_code_cell(code)
         self._notebook["cells"].append(cell)
 
-    def add_markdown_cell(self, markdown: str) -> None:
+    def add_markdown_cell(self, markdown_file: str, **template_params) -> None:
         """
         Add the given markdown as a new markdown cell.
         """
-        cell = nbformat.v4.new_markdown_cell(markdown)
+        template = self.template_env.get_template(markdown_file)
+
+        cell = nbformat.v4.new_markdown_cell(template.render(**template_params))
         self._notebook["cells"].append(cell)
 
     def add_expectation_cells_from_suite(self, expectations):
         expectations_by_column = self._get_expectations_by_column(expectations)
-        self.add_markdown_cell("### Table Expectation(s)")
+        self.add_markdown_cell("TABLE_EXPECTATIONS_HEADER.md")
         self._add_table_level_expectations(expectations_by_column)
         # Remove the table expectations since they are dealt with
         expectations_by_column.pop("table_expectations")
-        self.add_markdown_cell("### Column Expectation(s)")
+        self.add_markdown_cell("COLUMN_EXPECTATIONS_HEADER.md")
         self._add_column_level_expectations(expectations_by_column)
 
     def _add_column_level_expectations(self, expectations_by_column):
         if not expectations_by_column:
-            self.add_markdown_cell(
-                "No column level expectations are in this suite. Feel free to "
-                "add some here. They all begin with `batch.expect_column_...`."
-            )
+            self.add_markdown_cell("COLUMN_EXPECTATIONS_NOT_FOUND.md")
             return
 
         for column, expectations in expectations_by_column.items():
-            self.add_markdown_cell("#### `{}`".format(column))
+            self.add_markdown_cell("COLUMN_EXPECTATIONS.md", column=column)
 
             for exp in expectations:
                 kwargs_string = self._build_kwargs_string(exp)
@@ -169,10 +155,7 @@ context.open_data_docs(validation_result_identifier)"""
 
     def _add_table_level_expectations(self, expectations_by_column):
         if not expectations_by_column["table_expectations"]:
-            self.add_markdown_cell(
-                "No table level expectations are in this suite. Feel free to "
-                "add some here. They all begin with `batch.expect_table_...`."
-            )
+            self.add_markdown_cell("TABLE_EXPECTATIONS_NOT_FOUND.md")
             return
 
         for exp in expectations_by_column["table_expectations"]:
@@ -233,15 +216,7 @@ context.open_data_docs(validation_result_identifier)"""
         self.write_notebook_to_disk(self._notebook, notebook_file_path)
 
     def add_authoring_intro(self):
-        self.add_markdown_cell(
-            """\
-## Create & Edit Expectations
-
-Add expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.
-
-You can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.
-Hello world"""
-        )
+        self.add_markdown_cell("AUTHORING_INTRO.md")
 
     def get_batch_kwargs(
         self, suite: ExpectationSuite, batch_kwargs: Union[dict, BatchKwargs]
