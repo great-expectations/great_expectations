@@ -59,60 +59,21 @@ class SuiteEditNotebookRenderer(Renderer):
 
         if not batch_kwargs:
             batch_kwargs = dict()
-        self.add_code_cell(
-            """\
-import datetime
-import great_expectations as ge
-import great_expectations.jupyter_ux
-from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
-
-context = ge.data_context.DataContext()
-
-# Feel free to change the name of your suite here. Renaming this will not
-# remove the other one.
-expectation_suite_name = "{}"
-suite = context.get_expectation_suite(expectation_suite_name)
-suite.expectations = []
-
-batch_kwargs = {}
-batch = context.get_batch(batch_kwargs, suite)
-batch.head()""".format(
-                suite_name, batch_kwargs
-            ),
-            lint=True,
-        )
+        self.add_code_cell("header.py", lint=True, suite_name=suite_name, batch_kwargs=batch_kwargs)
 
     def add_footer(self) -> None:
         self.add_markdown_cell("FOOTER.md")
         # TODO this may become confusing for users depending on what they are trying
         #  to accomplish in their dev loop
-        self.add_code_cell(
-            """\
-batch.save_expectation_suite(discard_failed_expectations=False)
+        self.add_code_cell("footer.py")
 
-\"""
-Let's create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation
-arguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline
-runner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object.
-Note - any provided datetime will be assumed to be a UTC time. If no instantiation arguments are given, run_name will
-be None and run_time will default to the current UTC datetime.
-\"""
-
-run_id = {
-  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here
-  "run_time": datetime.datetime.now(datetime.timezone.utc)
-}
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-validation_result_identifier = results.list_validation_result_identifiers()[0]
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)"""
-        )
-
-    def add_code_cell(self, code: str, lint: bool = False) -> None:
+    def add_code_cell(self, code_file: str, lint: bool = False, **template_params) -> None:
         """
         Add the given code as a new code cell.
         """
+        template = self.template_env.get_template(code_file)
+        code = template.render(**template_params)
+
         if lint:
             code = lint_code(code).rstrip("\n")
 
@@ -146,12 +107,13 @@ context.open_data_docs(validation_result_identifier)"""
             self.add_markdown_cell("COLUMN_EXPECTATIONS.md", column=column)
 
             for exp in expectations:
-                kwargs_string = self._build_kwargs_string(exp)
-                meta_args = self._build_meta_arguments(exp.meta)
-                code = "batch.{}({}{})".format(
-                    exp["expectation_type"], kwargs_string, meta_args
+                self.add_code_cell(
+                    "column_expectation.py",
+                    lint=True,
+                    expectation=exp,
+                    kwargs_string=self._build_kwargs_string(exp),
+                    meta_args=self._build_meta_arguments(exp.meta)
                 )
-                self.add_code_cell(code, lint=True)
 
     def _add_table_level_expectations(self, expectations_by_column):
         if not expectations_by_column["table_expectations"]:
@@ -159,9 +121,12 @@ context.open_data_docs(validation_result_identifier)"""
             return
 
         for exp in expectations_by_column["table_expectations"]:
-            kwargs_string = self._build_kwargs_string(exp)
-            code = "batch.{}({})".format(exp["expectation_type"], kwargs_string)
-            self.add_code_cell(code, lint=True)
+            self.add_code_cell(
+                "table_expectation.py",
+                lint=True,
+                expectation=exp,
+                kwargs_string=self._build_kwargs_string(exp)
+            )
 
     @staticmethod
     def _build_meta_arguments(meta):
