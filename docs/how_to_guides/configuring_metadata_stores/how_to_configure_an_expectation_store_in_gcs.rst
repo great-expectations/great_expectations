@@ -3,7 +3,7 @@
 How to configure an Expectation store in GCP
 ============================================
 
-By default, newly profiled Expectations are stored in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder.  This guide will help you configure Great Expectations to store them in a Google Cloud Platform (GCP) bucket.
+By default, newly profiled Expectations are stored in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder.  This guide will help you configure Great Expectations to store them in a Google Cloud Storage (GCS) bucket.
 
 .. admonition:: Prerequisites: This how-to guide assumes that you have already:
 
