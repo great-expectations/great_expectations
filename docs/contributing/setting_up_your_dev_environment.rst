@@ -58,6 +58,7 @@ Install python dependencies
 
     * ``pip install -r requirements-dev.txt``
     *  This will ensure that sure you have the right libraries installed in your python environment.
+    * Note that you can also substitute ``requirements-dev-min.txt`` to only install requirements required for testing all backends, and ``requirements-dev-spark.txt`` or ``requirements-dev-sqlalchemy.txt`` if you would like to add support for spark or sqlalchemy tests, respectively.
 
 
 **7. Install great_expectations from your cloned repo**

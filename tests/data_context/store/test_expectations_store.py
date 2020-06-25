@@ -31,7 +31,7 @@ def test_expectations_store():
     }
 
 
-def test_ExpectationsStore_with_DatabaseStoreBackend():
+def test_ExpectationsStore_with_DatabaseStoreBackend(sa):
     # Use sqlite so we don't require postgres for this test.
     connection_kwargs = {"drivername": "sqlite"}
 

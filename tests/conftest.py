@@ -6,10 +6,10 @@ import shutil
 
 import numpy as np
 import pandas as pd
-
-import great_expectations as ge
 import pytest
 from freezegun import freeze_time
+
+import great_expectations as ge
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -2009,7 +2009,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 
 @pytest.fixture
-def titanic_sqlite_db():
+def titanic_sqlite_db(sa):
     from sqlalchemy import create_engine
 
     titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
@@ -2037,7 +2037,7 @@ def titanic_expectation_suite():
 
 
 @pytest.fixture
-def empty_sqlite_db():
+def empty_sqlite_db(sa):
     """An empty in-memory sqlite db that always gets run."""
     try:
         from sqlalchemy import create_engine

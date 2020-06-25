@@ -6,7 +6,7 @@ from great_expectations.data_context.store import DatabaseStoreBackend
 from great_expectations.exceptions import StoreBackendError
 
 
-def test_database_store_backend_duplicate_key_violation(caplog):
+def test_database_store_backend_duplicate_key_violation(caplog, sa):
     store_backend = DatabaseStoreBackend(
         credentials={
             "drivername": "postgresql",
