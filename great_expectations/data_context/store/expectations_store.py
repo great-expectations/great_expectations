@@ -42,7 +42,7 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
     maturity_details:
         api_stability: Stable
         implementation_completeness: Complete
-        uni_test_coverage: Complete
+        unit_test_coverage: Complete
         integration_infrastructure_test_coverage: N/A
         documentation_completeness: Complete
         bug_risk: Low
@@ -57,7 +57,7 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
     maturity_details:
         api_stability: Stable
         implementation_completeness: Complete
-        uni_test_coverage: Complete
+        unit_test_coverage: Complete
         integration_infrastructure_test_coverage: Minimal
         documentation_completeness: Complete
         bug_risk: Low
@@ -72,7 +72,7 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
     maturity_details:
         api_stability: Stable
         implementation_completeness: Complete
-        uni_test_coverage: Complete
+        unit_test_coverage: Complete
         integration_infrastructure_test_coverage: Minimal
         documentation_completeness: Partial
         bug_risk: Low
@@ -87,7 +87,7 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
     maturity_details:
         api_stability: Stable
         implementation_completeness: Minimal
-        uni_test_coverage: Minimal
+        unit_test_coverage: Minimal
         integration_infrastructure_test_coverage: Minimal
         documentation_completeness: Minimal
         bug_risk: Moderate
