@@ -238,7 +238,6 @@ anonymized_batch_schema = {
                     "maxItems": 1000,
                     "items": {
                         "oneOf": [
-                            {"$ref": "#/definitions/anonymized_string"},
                             {"type": "string", "maxLength": 256},
                         ]
                     },
