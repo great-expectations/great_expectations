@@ -131,7 +131,7 @@ class SuiteEditNotebookRenderer(Renderer):
 
         if not batch_kwargs:
             batch_kwargs = dict()
-        code = self.render_with_overwrite(self.header_code, "header.py", suite_name=suite_name, batch_kwargs=batch_kwargs)
+        code = self.render_with_overwrite(self.header_code, "header.py.j2", suite_name=suite_name, batch_kwargs=batch_kwargs)
         self.add_code_cell(code, lint=True)
 
     def add_footer(self) -> None:
@@ -139,7 +139,7 @@ class SuiteEditNotebookRenderer(Renderer):
         self.add_markdown_cell(markdown)
         # TODO this may become confusing for users depending on what they are trying
         #  to accomplish in their dev loop
-        code = self.render_with_overwrite(self.footer_code, "footer.py")
+        code = self.render_with_overwrite(self.footer_code, "footer.py.j2")
         self.add_code_cell(code)
 
     def add_code_cell(self, code: str, lint: bool = False, **template_params) -> None:
@@ -183,7 +183,7 @@ class SuiteEditNotebookRenderer(Renderer):
             for exp in expectations:
                 code = self.render_with_overwrite(
                     self.column_expectation_code,
-                    "column_expectation.py",
+                    "column_expectation.py.j2",
                     expectation=exp,
                     kwargs_string=self._build_kwargs_string(exp),
                     meta_args=self._build_meta_arguments(exp.meta)
@@ -202,7 +202,7 @@ class SuiteEditNotebookRenderer(Renderer):
         for exp in expectations_by_column["table_expectations"]:
             code = self.render_with_overwrite(
                 self.table_expectation_code,
-                "table_expectation.py",
+                "table_expectation.py.j2",
                 expectation=exp,
                 kwargs_string=self._build_kwargs_string(exp),
                 meta_args=self._build_meta_arguments(exp.meta)
