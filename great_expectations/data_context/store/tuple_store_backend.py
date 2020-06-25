@@ -563,7 +563,12 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         gcs_response_object = bucket.get_blob(gcs_object_key)
-        return gcs_response_object.download_as_string().decode("utf-8")
+        if not gcs_response_object:
+            raise InvalidKeyError(
+                f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {str(key)}"
+            )
+        else:
+            return gcs_response_object.download_as_string().decode("utf-8")
 
     def _set(
         self, key, value, content_encoding="utf-8", content_type="application/json"
