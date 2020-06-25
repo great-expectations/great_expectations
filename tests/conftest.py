@@ -108,7 +108,7 @@ def build_test_backends_list(metafunc):
             # TODO: enable mysql or other backend tests to be optionally specified
             # if mysql:
             #     try:
-            #         engine = sa.create_engine('mysql://root@localhost/test_ci')
+            #         engine = sa.create_engine('mysql://root@mysql/test_ci')
             #         conn = engine.connect()
             #         test_backends += ['mysql']
             #         conn.close()
@@ -145,7 +145,11 @@ def no_usage_stats(monkeypatch):
 
 @pytest.fixture
 def sa(test_backends):
-    if "postgresql" not in test_backends and "sqlite" not in test_backends:
+    if (
+        "postgresql" not in test_backends
+        and "sqlite" not in test_backends
+        and "mysql" not in test_backends
+    ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
         import sqlalchemy as sa
@@ -1999,7 +2003,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 
 @pytest.fixture
-def titanic_sqlite_db():
+def titanic_sqlite_db(sa):
     from sqlalchemy import create_engine
 
     titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
@@ -2027,7 +2031,7 @@ def titanic_expectation_suite():
 
 
 @pytest.fixture
-def empty_sqlite_db():
+def empty_sqlite_db(sa):
     """An empty in-memory sqlite db that always gets run."""
     try:
         from sqlalchemy import create_engine
