@@ -84,3 +84,5 @@ notebooks:
             file_name: HEADER.md
             template_kwargs:
                 company_name: MyCompany
+        column_expectations_header_markdown:
+            file_name: COLUMN_EXPECTATIONS_HEADER.md

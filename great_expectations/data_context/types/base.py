@@ -271,19 +271,40 @@ class NotebookConfig(DictDot):
         class_name,
         module_name,
         custom_templates_module,
-        header_markdown,
+        header_markdown = None,
+        footer_markdown = None,
+        table_expectations_header_markdown = None,
+        column_expectations_header_markdown = None,
+        table_expectations_not_found_markdown = None,
+        column_expectations_not_found_markdown = None,
+        authoring_intro_markdown = None,
+        column_expectations_markdown = None,
     ):
         self.class_name = class_name
         self.module_name = module_name
         self.custom_templates_module = custom_templates_module
         self.header_markdown = header_markdown
+        self.footer_markdown = footer_markdown
+        self.table_expectations_header_markdown = table_expectations_header_markdown
+        self.column_expectations_header_markdown = column_expectations_header_markdown
+        self.table_expectations_not_found_markdown = table_expectations_not_found_markdown
+        self.column_expectations_not_found_markdown = column_expectations_not_found_markdown
+        self.authoring_intro_markdown = authoring_intro_markdown
+        self.column_expectations_markdown = column_expectations_markdown
 
 
 class NotebookConfigSchema(Schema):
     class_name = fields.String(missing="SuiteEditNotebookRenderer")
     module_name = fields.String(missing="great_expectations.render.renderer.suite_edit_notebook_renderer")
     custom_templates_module = fields.String()
-    header_markdown = fields.Nested(NotebookTemplateConfigSchema)
+    header_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    footer_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    table_expectations_header_markdown =fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    column_expectations_header_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    table_expectations_not_found_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    column_expectations_not_found_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    authoring_intro_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    column_expectations_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
 
     # noinspection PyUnusedLocal
     @post_load

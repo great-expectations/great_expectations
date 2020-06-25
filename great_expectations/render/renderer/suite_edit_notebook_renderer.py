@@ -8,7 +8,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import lint_code
-from great_expectations.data_context.types.base import NotebookConfig, notebookConfigSchema
+from great_expectations.data_context.types.base import NotebookTemplateConfig, notebookConfigSchema
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import SuiteEditNotebookCustomTemplateModuleNotFoundError
 
@@ -24,7 +24,14 @@ class SuiteEditNotebookRenderer(Renderer):
     def __init__(
         self,
         custom_templates_module: Optional[str] = None,
-        header_markdown: Optional[NotebookConfig] = None,
+        header_markdown: Optional[NotebookTemplateConfig] = None,
+        footer_markdown: Optional[NotebookTemplateConfig] = None,
+        table_expectations_header_markdown: Optional[NotebookTemplateConfig] = None,
+        column_expectations_header_markdown: Optional[NotebookTemplateConfig] = None,
+        table_expectations_not_found_markdown: Optional[NotebookTemplateConfig] = None,
+        column_expectations_not_found_markdown: Optional[NotebookTemplateConfig] = None,
+        authoring_intro_markdown: Optional[NotebookTemplateConfig] = None,
+        column_expectations_markdown: Optional[NotebookTemplateConfig] = None,
     ):
         super().__init__()
         custom_loader = []
@@ -45,6 +52,13 @@ class SuiteEditNotebookRenderer(Renderer):
         )
 
         self.header_markdown = header_markdown
+        self.footer_markdown = footer_markdown
+        self.table_expectations_header_markdown = table_expectations_header_markdown
+        self.column_expectations_header_markdown = column_expectations_header_markdown
+        self.table_expectations_not_found_markdown = table_expectations_not_found_markdown
+        self.column_expectations_not_found_markdown = column_expectations_not_found_markdown
+        self.authoring_intro_markdown = authoring_intro_markdown
+        self.column_expectations_markdown = column_expectations_markdown
 
 
     @staticmethod
@@ -95,20 +109,25 @@ class SuiteEditNotebookRenderer(Renderer):
 
         return ", ".join(kwargs)
 
-    def add_header(self, suite_name: str, batch_kwargs) -> None:
-        if self.header_markdown:
-            markdown = self.template_env.get_template(self.header_markdown.file_name).render(suite_name=suite_name, **self.header_markdown.template_kwargs)
+    def render_with_overwrite(self, notebook_config: Optional[NotebookTemplateConfig], default_file_name: str, **default_kwargs):
+        if notebook_config:
+            rendered = self.template_env.get_template(notebook_config.file_name).render(**default_kwargs, **notebook_config.template_kwargs)
         else:
-            markdown = self.template_env.get_template("HEADER.md").render(suite_name=suite_name)
+            rendered = self.template_env.get_template(default_file_name).render(**default_kwargs)
+        return rendered
 
-        self.add_markdown_cell_str(markdown)
+    def add_header(self, suite_name: str, batch_kwargs) -> None:
+        markdown = self.render_with_overwrite(self.header_markdown, "HEADER.md", suite_name=suite_name)
+
+        self.add_markdown_cell(markdown)
 
         if not batch_kwargs:
             batch_kwargs = dict()
         self.add_code_cell("header.py", lint=True, suite_name=suite_name, batch_kwargs=batch_kwargs)
 
     def add_footer(self) -> None:
-        self.add_markdown_cell("FOOTER.md")
+        markdown = self.render_with_overwrite(self.footer_markdown, "FOOTER.md")
+        self.add_markdown_cell(markdown)
         # TODO this may become confusing for users depending on what they are trying
         #  to accomplish in their dev loop
         self.add_code_cell("footer.py")
@@ -126,38 +145,33 @@ class SuiteEditNotebookRenderer(Renderer):
         cell = nbformat.v4.new_code_cell(code)
         self._notebook["cells"].append(cell)
 
-    def add_markdown_cell_str(self, markdown: str) -> None:
+    def add_markdown_cell(self, markdown: str) -> None:
         """
         Add the given markdown as a new markdown cell.
         """
         cell = nbformat.v4.new_markdown_cell(markdown)
         self._notebook["cells"].append(cell)
 
-    def add_markdown_cell(self, markdown_file: str, **template_params) -> None:
-        """
-        Add the given markdown as a new markdown cell.
-        """
-        template = self.template_env.get_template(markdown_file)
-
-        cell = nbformat.v4.new_markdown_cell(template.render(**template_params))
-        self._notebook["cells"].append(cell)
-
     def add_expectation_cells_from_suite(self, expectations):
         expectations_by_column = self._get_expectations_by_column(expectations)
-        self.add_markdown_cell("TABLE_EXPECTATIONS_HEADER.md")
+        markdown = self.render_with_overwrite(self.table_expectations_header_markdown, "TABLE_EXPECTATIONS_HEADER.md")
+        self.add_markdown_cell(markdown)
         self._add_table_level_expectations(expectations_by_column)
         # Remove the table expectations since they are dealt with
         expectations_by_column.pop("table_expectations")
-        self.add_markdown_cell("COLUMN_EXPECTATIONS_HEADER.md")
+        markdown = self.render_with_overwrite(self.column_expectations_header_markdown, "COLUMN_EXPECTATIONS_HEADER.md")
+        self.add_markdown_cell(markdown)
         self._add_column_level_expectations(expectations_by_column)
 
     def _add_column_level_expectations(self, expectations_by_column):
         if not expectations_by_column:
-            self.add_markdown_cell("COLUMN_EXPECTATIONS_NOT_FOUND.md")
+            markdown = self.render_with_overwrite(self.column_expectations_not_found_markdown, "COLUMN_EXPECTATIONS_NOT_FOUND.md")
+            self.add_markdown_cell(markdown)
             return
 
         for column, expectations in expectations_by_column.items():
-            self.add_markdown_cell("COLUMN_EXPECTATIONS.md", column=column)
+            markdown = self.render_with_overwrite(self.column_expectations_markdown, "COLUMN_EXPECTATIONS.md", column=column)
+            self.add_markdown_cell(markdown)
 
             for exp in expectations:
                 self.add_code_cell(
@@ -170,7 +184,8 @@ class SuiteEditNotebookRenderer(Renderer):
 
     def _add_table_level_expectations(self, expectations_by_column):
         if not expectations_by_column["table_expectations"]:
-            self.add_markdown_cell("TABLE_EXPECTATIONS_NOT_FOUND.md")
+            markdown = self.render_with_overwrite(self.table_expectations_not_found_markdown, "TABLE_EXPECTATIONS_NOT_FOUND.md")
+            self.add_markdown_cell(markdown)
             return
 
         for exp in expectations_by_column["table_expectations"]:
@@ -234,7 +249,8 @@ class SuiteEditNotebookRenderer(Renderer):
         self.write_notebook_to_disk(self._notebook, notebook_file_path)
 
     def add_authoring_intro(self):
-        self.add_markdown_cell("AUTHORING_INTRO.md")
+        markdown = self.render_with_overwrite(self.authoring_intro_markdown, "AUTHORING_INTRO.md")
+        self.add_markdown_cell(markdown)
 
     def get_batch_kwargs(
         self, suite: ExpectationSuite, batch_kwargs: Union[dict, BatchKwargs]

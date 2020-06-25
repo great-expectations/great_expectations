@@ -1405,7 +1405,7 @@ def test_notebook_execution_with_custom_notebooks(suite_with_multiple_citations,
             },
             {
                 "cell_type": "markdown",
-                "source": "### Column Expectation(s)",
+                "source": "### Column Expectation(s)\nwrite your column expectations here",
                 "metadata": {},
             },
             {"cell_type": "markdown", "source": "#### `npi`", "metadata": {}},
