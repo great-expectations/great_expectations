@@ -116,7 +116,7 @@ class DatabaseStoreBackend(StoreBackend):
                 logger.info(f"Key {str(key)} already exists with the same value.")
             else:
                 raise ge_exceptions.StoreBackendError(
-                    f"Integrity error {str(e)} while trying to store key"  # will this ever get triggered now?
+                    f"Integrity error {str(e)} while trying to store key"
                 )
 
     def _move(self):
