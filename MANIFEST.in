@@ -3,7 +3,8 @@ include LICENSE
 include great_expectations/data_context/checkpoint_template.yml
 include great_expectations/init_notebooks/*/*.ipynb
 include great_expectations/render/view/templates/*.j2
-include great_expectations/render/notebook_assets/suite_edit/*.md
+include great_expectations/render/notebook_assets/*/*.md
+include great_expectations/render/notebook_assets/*/*.j2
 graft great_expectations/render/view/static
 graft tests
 global-exclude *.py[co]
