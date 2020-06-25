@@ -2,6 +2,9 @@ import logging
 import uuid
 from copy import deepcopy
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.types import DictDot
+from great_expectations.types.configurations import ClassConfigSchema
 from marshmallow import (
     INCLUDE,
     Schema,
@@ -13,10 +16,6 @@ from marshmallow import (
 )
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
-
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.types import DictDot
-from great_expectations.types.configurations import ClassConfigSchema
 
 logger = logging.getLogger(__name__)
 
@@ -243,11 +242,7 @@ class DatasourceConfigSchema(Schema):
 
 
 class NotebookTemplateConfig(DictDot):
-    def __init__(
-        self,
-        file_name,
-        template_kwargs = None
-    ):
+    def __init__(self, file_name, template_kwargs=None):
         self.file_name = file_name
         if template_kwargs:
             self.template_kwargs = template_kwargs
@@ -257,7 +252,9 @@ class NotebookTemplateConfig(DictDot):
 
 class NotebookTemplateConfigSchema(Schema):
     file_name = fields.String()
-    template_kwargs = fields.Dict(keys=fields.Str(), values=fields.Str(), allow_none=True)
+    template_kwargs = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), allow_none=True
+    )
 
     # noinspection PyUnusedLocal
     @post_load
@@ -271,18 +268,18 @@ class NotebookConfig(DictDot):
         class_name,
         module_name,
         custom_templates_module,
-        header_markdown = None,
-        footer_markdown = None,
-        table_expectations_header_markdown = None,
-        column_expectations_header_markdown = None,
-        table_expectations_not_found_markdown = None,
-        column_expectations_not_found_markdown = None,
-        authoring_intro_markdown = None,
-        column_expectations_markdown = None,
-        header_code = None,
-        footer_code = None,
-        column_expectation_code = None,
-        table_expectation_code = None,
+        header_markdown=None,
+        footer_markdown=None,
+        table_expectations_header_markdown=None,
+        column_expectations_header_markdown=None,
+        table_expectations_not_found_markdown=None,
+        column_expectations_not_found_markdown=None,
+        authoring_intro_markdown=None,
+        column_expectations_markdown=None,
+        header_code=None,
+        footer_code=None,
+        column_expectation_code=None,
+        table_expectation_code=None,
     ):
         self.class_name = class_name
         self.module_name = module_name
@@ -292,8 +289,12 @@ class NotebookConfig(DictDot):
         self.footer_markdown = footer_markdown
         self.table_expectations_header_markdown = table_expectations_header_markdown
         self.column_expectations_header_markdown = column_expectations_header_markdown
-        self.table_expectations_not_found_markdown = table_expectations_not_found_markdown
-        self.column_expectations_not_found_markdown = column_expectations_not_found_markdown
+        self.table_expectations_not_found_markdown = (
+            table_expectations_not_found_markdown
+        )
+        self.column_expectations_not_found_markdown = (
+            column_expectations_not_found_markdown
+        )
         self.authoring_intro_markdown = authoring_intro_markdown
         self.column_expectations_markdown = column_expectations_markdown
 
@@ -302,24 +303,43 @@ class NotebookConfig(DictDot):
         self.column_expectation_code = column_expectation_code
         self.table_expectation_code = table_expectation_code
 
+
 class NotebookConfigSchema(Schema):
     class_name = fields.String(missing="SuiteEditNotebookRenderer")
-    module_name = fields.String(missing="great_expectations.render.renderer.suite_edit_notebook_renderer")
+    module_name = fields.String(
+        missing="great_expectations.render.renderer.suite_edit_notebook_renderer"
+    )
     custom_templates_module = fields.String()
 
     header_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
     footer_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    table_expectations_header_markdown =fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    column_expectations_header_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    table_expectations_not_found_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    column_expectations_not_found_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    authoring_intro_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    column_expectations_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    table_expectations_header_markdown = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
+    column_expectations_header_markdown = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
+    table_expectations_not_found_markdown = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
+    column_expectations_not_found_markdown = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
+    authoring_intro_markdown = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
+    column_expectations_markdown = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
 
     header_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
     footer_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    column_expectation_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    table_expectation_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    column_expectation_code = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
+    table_expectation_code = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
 
     # noinspection PyUnusedLocal
     @post_load
@@ -328,10 +348,7 @@ class NotebookConfigSchema(Schema):
 
 
 class NotebooksConfig(DictDot):
-    def __init__(
-        self,
-        suite_edit
-    ):
+    def __init__(self, suite_edit):
         self.suite_edit = suite_edit
 
 

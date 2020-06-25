@@ -3,15 +3,16 @@ import os
 
 import nbformat
 import pytest
-from nbconvert.preprocessors import ExecutePreprocessor
-
 from great_expectations import DataContext
 from great_expectations.cli.suite import _suite_edit
 from great_expectations.core import ExpectationSuiteSchema
+from great_expectations.exceptions import (
+    SuiteEditNotebookCustomTemplateModuleNotFoundError,
+)
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
-from great_expectations.exceptions import SuiteEditNotebookCustomTemplateModuleNotFoundError
+from nbconvert.preprocessors import ExecutePreprocessor
 
 
 @pytest.fixture
@@ -374,10 +375,11 @@ def warning_suite():
 
 
 def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
-    critical_suite_with_citations,
-    empty_data_context
+    critical_suite_with_citations, empty_data_context
 ):
-    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(critical_suite_with_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
+        critical_suite_with_citations
+    )
     print(obs)
     assert isinstance(obs, dict)
     expected = {
@@ -456,7 +458,9 @@ def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
 
 def test_render_with_no_column_cells(critical_suite_with_citations, empty_data_context):
     critical_suite_with_citations.expectations = []
-    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(critical_suite_with_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
+        critical_suite_with_citations
+    )
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -522,12 +526,13 @@ def test_render_with_no_column_cells(critical_suite_with_citations, empty_data_c
 
 
 def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank_batch_kwargs(
-    critical_suite_with_citations,
-    empty_data_context
+    critical_suite_with_citations, empty_data_context
 ):
     suite_with_no_kwargs_in_citations = critical_suite_with_citations
     suite_with_no_kwargs_in_citations.meta["citations"][0].pop("batch_kwargs")
-    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(suite_with_no_kwargs_in_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
+        suite_with_no_kwargs_in_citations
+    )
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -604,8 +609,7 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
 
 
 def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
-    critical_suite_with_citations,
-    empty_data_context
+    critical_suite_with_citations, empty_data_context
 ):
     suite_with_no_kwargs_in_citations = critical_suite_with_citations
     suite_with_no_kwargs_in_citations.meta["citations"][0].pop("batch_kwargs")
@@ -688,10 +692,14 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
     assert obs == expected
 
 
-def test_render_with_no_batch_kwargs_and_no_citations(critical_suite_with_citations, empty_data_context):
+def test_render_with_no_batch_kwargs_and_no_citations(
+    critical_suite_with_citations, empty_data_context
+):
     suite_with_no_citations = critical_suite_with_citations
     suite_with_no_citations.meta.pop("citations")
-    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(suite_with_no_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
+        suite_with_no_citations
+    )
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -768,8 +776,7 @@ def test_render_with_no_batch_kwargs_and_no_citations(critical_suite_with_citati
 
 
 def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
-    critical_suite_with_citations,
-    empty_data_context
+    critical_suite_with_citations, empty_data_context
 ):
     batch_kwargs = {"foo": "bar", "datasource": "things"}
     obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
@@ -851,10 +858,11 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
 
 
 def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
-    suite_with_multiple_citations,
-    empty_data_context
+    suite_with_multiple_citations, empty_data_context
 ):
-    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(suite_with_multiple_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
+        suite_with_multiple_citations
+    )
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -931,8 +939,7 @@ def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
 
 
 def test_batch_kwarg_path_relative_is_modified_and_found_in_a_code_cell(
-    critical_suite_with_citations,
-    empty_data_context
+    critical_suite_with_citations, empty_data_context
 ):
     obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
         critical_suite_with_citations, {"path": "foo/data"}
@@ -950,8 +957,7 @@ def test_batch_kwarg_path_relative_is_modified_and_found_in_a_code_cell(
 
 
 def test_batch_kwarg_path_relative_dot_slash_is_modified_and_found_in_a_code_cell(
-    critical_suite_with_citations,
-    empty_data_context
+    critical_suite_with_citations, empty_data_context
 ):
     obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
         critical_suite_with_citations, {"path": "./foo/data"}
@@ -969,8 +975,7 @@ def test_batch_kwarg_path_relative_dot_slash_is_modified_and_found_in_a_code_cel
 
 
 def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
-    critical_suite_with_citations,
-    empty_data_context
+    critical_suite_with_citations, empty_data_context
 ):
     obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
         critical_suite_with_citations, {"path": "/home/user/foo/data"}
@@ -988,7 +993,9 @@ def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
 
 
 def test_complex_suite(warning_suite, empty_data_context):
-    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(warning_suite, {"path": "foo/data"})
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
+        warning_suite, {"path": "foo/data"}
+    )
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -1357,19 +1364,29 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     assert suite == original_suite
 
 
-def test_notebook_execution_with_custom_notebooks_wrong_module(suite_with_multiple_citations, data_context_with_bad_notebooks):
+def test_notebook_execution_with_custom_notebooks_wrong_module(
+    suite_with_multiple_citations, data_context_with_bad_notebooks
+):
     """
     Test the error message in case of "bad" custom module is clear
     """
-    with pytest.raises(SuiteEditNotebookCustomTemplateModuleNotFoundError, match=r'invalid\.module'):
-        SuiteEditNotebookRenderer.from_data_context(data_context_with_bad_notebooks).render(suite_with_multiple_citations)
+    with pytest.raises(
+        SuiteEditNotebookCustomTemplateModuleNotFoundError, match=r"invalid\.module"
+    ):
+        SuiteEditNotebookRenderer.from_data_context(
+            data_context_with_bad_notebooks
+        ).render(suite_with_multiple_citations)
 
 
-def test_notebook_execution_with_custom_notebooks(suite_with_multiple_citations, data_context_custom_notebooks):
+def test_notebook_execution_with_custom_notebooks(
+    suite_with_multiple_citations, data_context_custom_notebooks
+):
     """
     Test the different parts of the notebooks can be modified
     """
-    obs = SuiteEditNotebookRenderer.from_data_context(data_context_custom_notebooks).render(suite_with_multiple_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(
+        data_context_custom_notebooks
+    ).render(suite_with_multiple_citations)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -1433,7 +1450,7 @@ def test_notebook_execution_with_custom_notebooks(suite_with_multiple_citations,
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\nrun_id = {\n  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n  "run_time": datetime.datetime.now(datetime.timezone.utc)\n}\nresults = context.run_validation_operator("local", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs(site_names=["site_local"])\ncontext.open_data_docs(validation_result_identifier, site_name="site_local")',
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\nrun_id = {\n    "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n    "run_time": datetime.datetime.now(datetime.timezone.utc),\n}\nresults = context.run_validation_operator(\n    "local", assets_to_validate=[batch], run_id=run_id\n)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs(site_names=["site_local"])\ncontext.open_data_docs(validation_result_identifier, site_name="site_local")',
                 "outputs": [],
             },
         ],
