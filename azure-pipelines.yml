@@ -36,7 +36,7 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install -r requirements-dev.txt
+              # pip install -r requirements-dev.txt
               isort --check-only --skip docs/
               black --check --exclude docs/ .
 
