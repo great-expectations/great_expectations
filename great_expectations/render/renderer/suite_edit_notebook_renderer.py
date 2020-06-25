@@ -32,6 +32,10 @@ class SuiteEditNotebookRenderer(Renderer):
         column_expectations_not_found_markdown: Optional[NotebookTemplateConfig] = None,
         authoring_intro_markdown: Optional[NotebookTemplateConfig] = None,
         column_expectations_markdown: Optional[NotebookTemplateConfig] = None,
+        header_code: Optional[NotebookTemplateConfig] = None,
+        footer_code: Optional[NotebookTemplateConfig] = None,
+        column_expectation_code: Optional[NotebookTemplateConfig] = None,
+        table_expectation_code: Optional[NotebookTemplateConfig] = None,
     ):
         super().__init__()
         custom_loader = []
@@ -60,6 +64,10 @@ class SuiteEditNotebookRenderer(Renderer):
         self.authoring_intro_markdown = authoring_intro_markdown
         self.column_expectations_markdown = column_expectations_markdown
 
+        self.header_code = header_code
+        self.footer_code = footer_code
+        self.column_expectation_code = column_expectation_code
+        self.table_expectation_code = table_expectation_code
 
     @staticmethod
     def from_data_context(data_context):
@@ -123,22 +131,21 @@ class SuiteEditNotebookRenderer(Renderer):
 
         if not batch_kwargs:
             batch_kwargs = dict()
-        self.add_code_cell("header.py", lint=True, suite_name=suite_name, batch_kwargs=batch_kwargs)
+        code = self.render_with_overwrite(self.header_code, "header.py", suite_name=suite_name, batch_kwargs=batch_kwargs)
+        self.add_code_cell(code, lint=True)
 
     def add_footer(self) -> None:
         markdown = self.render_with_overwrite(self.footer_markdown, "FOOTER.md")
         self.add_markdown_cell(markdown)
         # TODO this may become confusing for users depending on what they are trying
         #  to accomplish in their dev loop
-        self.add_code_cell("footer.py")
+        code = self.render_with_overwrite(self.footer_code, "footer.py")
+        self.add_code_cell(code)
 
-    def add_code_cell(self, code_file: str, lint: bool = False, **template_params) -> None:
+    def add_code_cell(self, code: str, lint: bool = False, **template_params) -> None:
         """
         Add the given code as a new code cell.
         """
-        template = self.template_env.get_template(code_file)
-        code = template.render(**template_params)
-
         if lint:
             code = lint_code(code).rstrip("\n")
 
@@ -174,12 +181,16 @@ class SuiteEditNotebookRenderer(Renderer):
             self.add_markdown_cell(markdown)
 
             for exp in expectations:
-                self.add_code_cell(
+                code = self.render_with_overwrite(
+                    self.column_expectation_code,
                     "column_expectation.py",
-                    lint=True,
                     expectation=exp,
                     kwargs_string=self._build_kwargs_string(exp),
                     meta_args=self._build_meta_arguments(exp.meta)
+                )
+                self.add_code_cell(
+                    code,
+                    lint=True,
                 )
 
     def _add_table_level_expectations(self, expectations_by_column):
@@ -189,11 +200,16 @@ class SuiteEditNotebookRenderer(Renderer):
             return
 
         for exp in expectations_by_column["table_expectations"]:
-            self.add_code_cell(
+            code = self.render_with_overwrite(
+                self.table_expectation_code,
                 "table_expectation.py",
-                lint=True,
                 expectation=exp,
-                kwargs_string=self._build_kwargs_string(exp)
+                kwargs_string=self._build_kwargs_string(exp),
+                meta_args=self._build_meta_arguments(exp.meta)
+            )
+            self.add_code_cell(
+                code,
+                lint=True
             )
 
     @staticmethod

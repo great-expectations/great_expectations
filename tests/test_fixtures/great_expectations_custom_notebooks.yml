@@ -86,3 +86,8 @@ notebooks:
                 company_name: MyCompany
         column_expectations_header_markdown:
             file_name: COLUMN_EXPECTATIONS_HEADER.md
+        footer_code:
+            file_name: footer.py
+            template_kwargs:
+                site_name: site_local
+                validation_operator_name: local

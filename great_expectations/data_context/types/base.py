@@ -279,10 +279,15 @@ class NotebookConfig(DictDot):
         column_expectations_not_found_markdown = None,
         authoring_intro_markdown = None,
         column_expectations_markdown = None,
+        header_code = None,
+        footer_code = None,
+        column_expectation_code = None,
+        table_expectation_code = None,
     ):
         self.class_name = class_name
         self.module_name = module_name
         self.custom_templates_module = custom_templates_module
+
         self.header_markdown = header_markdown
         self.footer_markdown = footer_markdown
         self.table_expectations_header_markdown = table_expectations_header_markdown
@@ -292,11 +297,16 @@ class NotebookConfig(DictDot):
         self.authoring_intro_markdown = authoring_intro_markdown
         self.column_expectations_markdown = column_expectations_markdown
 
+        self.header_code = header_code
+        self.footer_code = footer_code
+        self.column_expectation_code = column_expectation_code
+        self.table_expectation_code = table_expectation_code
 
 class NotebookConfigSchema(Schema):
     class_name = fields.String(missing="SuiteEditNotebookRenderer")
     module_name = fields.String(missing="great_expectations.render.renderer.suite_edit_notebook_renderer")
     custom_templates_module = fields.String()
+
     header_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
     footer_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
     table_expectations_header_markdown =fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
@@ -305,6 +315,11 @@ class NotebookConfigSchema(Schema):
     column_expectations_not_found_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
     authoring_intro_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
     column_expectations_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+
+    header_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    footer_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    column_expectation_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    table_expectation_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
 
     # noinspection PyUnusedLocal
     @post_load
