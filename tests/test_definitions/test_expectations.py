@@ -9,9 +9,6 @@ from collections import OrderedDict
 
 import pandas as pd
 import pytest
-from sqlalchemy.dialects.mysql import dialect as mysqlDialect
-from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
-from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
 
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 
@@ -21,6 +18,20 @@ from ..test_utils import (
     evaluate_json_test,
     get_dataset,
 )
+
+try:
+    from sqlalchemy.dialects.mysql import dialect as mysqlDialect
+except (ImportError, KeyError):
+    mysqlDialect = None
+try:
+    from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
+except (ImportError, KeyError):
+    postgresqlDialect = None
+try:
+    from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
+except (ImportError, KeyError):
+    sqliteDialect = None
+
 
 logger = logging.getLogger(__name__)
 tmp_dir = str(tempfile.mkdtemp())
@@ -102,16 +113,28 @@ def pytest_generate_tests(metafunc):
                                 # Call out supported dialects
                                 if "sqlalchemy" in test["only_for"]:
                                     generate_test = True
-                                elif "sqlite" in test["only_for"] and isinstance(
-                                    data_asset.engine.dialect, sqliteDialect
+                                elif (
+                                    "sqlite" in test["only_for"]
+                                    and sqliteDialect is not None
+                                    and isinstance(
+                                        data_asset.engine.dialect, sqliteDialect
+                                    )
                                 ):
                                     generate_test = True
-                                elif "postgresql" in test["only_for"] and isinstance(
-                                    data_asset.engine.dialect, postgresqlDialect
+                                elif (
+                                    "postgresql" in test["only_for"]
+                                    and postgresqlDialect is not None
+                                    and isinstance(
+                                        data_asset.engine.dialect, postgresqlDialect
+                                    )
                                 ):
                                     generate_test = True
-                                elif "mysql" in test["only_for"] and isinstance(
-                                    data_asset.engine.dialect, mysqlDialect
+                                elif (
+                                    "mysql" in test["only_for"]
+                                    and mysqlDialect is not None
+                                    and isinstance(
+                                        data_asset.engine.dialect, mysqlDialect
+                                    )
                                 ):
                                     generate_test = True
                             elif isinstance(data_asset, PandasDataset):
@@ -140,11 +163,13 @@ def pytest_generate_tests(metafunc):
                             )
                             or (
                                 "sqlite" in test["suppress_test_for"]
+                                and sqliteDialect is not None
                                 and isinstance(data_asset, SqlAlchemyDataset)
                                 and isinstance(data_asset.engine.dialect, sqliteDialect)
                             )
                             or (
                                 "postgresql" in test["suppress_test_for"]
+                                and postgresqlDialect is not None
                                 and isinstance(data_asset, SqlAlchemyDataset)
                                 and isinstance(
                                     data_asset.engine.dialect, postgresqlDialect
@@ -152,6 +177,7 @@ def pytest_generate_tests(metafunc):
                             )
                             or (
                                 "mysql" in test["suppress_test_for"]
+                                and mysqlDialect is not None
                                 and isinstance(data_asset, SqlAlchemyDataset)
                                 and isinstance(data_asset.engine.dialect, mysqlDialect)
                             )
