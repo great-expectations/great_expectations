@@ -6,10 +6,10 @@ import shutil
 
 import numpy as np
 import pandas as pd
-import pytest
-from freezegun import freeze_time
 
 import great_expectations as ge
+import pytest
+from freezegun import freeze_time
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -151,7 +151,11 @@ def no_usage_stats(monkeypatch):
 
 @pytest.fixture
 def sa(test_backends):
-    if "postgresql" not in test_backends and "sqlite" not in test_backends:
+    if (
+        "postgresql" not in test_backends
+        and "sqlite" not in test_backends
+        and "mysql" not in test_backends
+    ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
         import sqlalchemy as sa

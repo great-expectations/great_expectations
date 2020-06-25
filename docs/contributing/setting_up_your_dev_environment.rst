@@ -108,7 +108,6 @@ Depending on which features of Great Expectations you want to work on, you may w
 
     * To simplify setup, the repository includes a docker-compose file that can stand up a local mysqldb container. To use it, you'll need to have `docker installed <https://docs.docker.com/install/>`__.
     * Navigate to ``assets/docker/mysql`` in  your ``great_expectations`` repo and run ``docker-compose up -d``
-    * Run ``docker-compose exec mysql_db mysql -e 'create database test_ci;'`` to
     * Within the same directory, you can run ``docker-compose ps`` to verify that the container is running. You should see something like:
 
         .. code-block::
@@ -143,4 +142,3 @@ Start coding!
 -----------------------------------------
 
 At this point, you have everything you need to start coding!
-
