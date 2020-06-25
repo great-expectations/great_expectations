@@ -246,10 +246,13 @@ class NotebookTemplateConfig(DictDot):
     def __init__(
         self,
         file_name,
-        template_kwargs
+        template_kwargs = None
     ):
         self.file_name = file_name
-        self.template_kwargs = template_kwargs
+        if template_kwargs:
+            self.template_kwargs = template_kwargs
+        else:
+            self.template_kwargs = {}
 
 
 class NotebookTemplateConfigSchema(Schema):
