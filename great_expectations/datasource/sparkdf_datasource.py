@@ -108,7 +108,7 @@ class SparkDFDatasource(Datasource):
         batch_kwargs_generators = configuration_with_defaults.pop(
             "batch_kwargs_generators", None
         )
-        super(SparkDFDatasource, self).__init__(
+        super().__init__(
             name,
             data_context=data_context,
             data_asset_type=data_asset_type,
@@ -132,7 +132,7 @@ class SparkDFDatasource(Datasource):
     def process_batch_parameters(
         self, reader_method=None, reader_options=None, limit=None, dataset_options=None
     ):
-        batch_kwargs = super(SparkDFDatasource, self).process_batch_parameters(
+        batch_kwargs = super().process_batch_parameters(
             limit=limit, dataset_options=dataset_options,
         )
 
