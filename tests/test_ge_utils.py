@@ -1,9 +1,9 @@
 import os
 
-import pytest
-
 import great_expectations as ge
+import pytest
 from great_expectations.core.util import nested_update
+from great_expectations.dataset.util import check_sql_engine_dialect
 from great_expectations.util import lint_code
 
 
@@ -40,13 +40,38 @@ def test_validate_dataset(dataset, basic_expectation_suite):
                 data_asset_class=ge.dataset.SqlAlchemyDataset,
             )
 
-    elif isinstance(dataset, ge.dataset.SqlAlchemyDataset):
+    elif (
+        isinstance(dataset, ge.dataset.SqlAlchemyDataset)
+        and dataset.sql_engine_dialect.name.lower() != "mysql"
+    ):
         res = ge.validate(
             dataset,
             expectation_suite=basic_expectation_suite,
             data_asset_class=ge.dataset.SqlAlchemyDataset,
         )
         assert res.success is True
+        assert res["statistics"]["evaluated_expectations"] == 4
+        with pytest.raises(
+            ValueError,
+            match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
+        ):
+            ge.validate(
+                dataset,
+                expectation_suite=basic_expectation_suite,
+                data_asset_class=ge.dataset.PandasDataset,
+            )
+
+    elif (
+        isinstance(dataset, ge.dataset.SqlAlchemyDataset)
+        and dataset.sql_engine_dialect.name.lower() == "mysql"
+    ):
+        # mysql cannot use the infinities column
+        res = ge.validate(
+            dataset,
+            expectation_suite=basic_expectation_suite,
+            data_asset_class=ge.dataset.SqlAlchemyDataset,
+        )
+        assert res.success is False
         assert res["statistics"]["evaluated_expectations"] == 4
         with pytest.raises(
             ValueError,
