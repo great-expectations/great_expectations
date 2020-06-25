@@ -19,6 +19,7 @@ How-to guides
    /how_to_guides/creating_and_editing_expectations
    /how_to_guides/validation
    /how_to_guides/configuring_data_docs
+   /how_to_guides/configuring_generated_notebooks
    /how_to_guides/migrating_versions
    /how_to_guides/miscellaneous
    /how_to_guides/spare_parts
