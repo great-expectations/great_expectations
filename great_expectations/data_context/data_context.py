@@ -184,11 +184,14 @@ class BaseDataContext(object):
 
     def _build_store(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
-        new_store = instantiate_class_from_config(
-            config=store_config,
-            runtime_environment={"root_directory": self.root_directory,},
-            config_defaults={"module_name": module_name},
-        )
+        try:
+            new_store = instantiate_class_from_config(
+                config=store_config,
+                runtime_environment={"root_directory": self.root_directory,},
+                config_defaults={"module_name": module_name},
+            )
+        except ge_exceptions.DataContextError:
+            new_store = None
         if not new_store:
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,
