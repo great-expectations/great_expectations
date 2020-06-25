@@ -11,6 +11,7 @@ from great_expectations.core import ExpectationSuiteSchema
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
+from great_expectations.exceptions import SuiteEditNotebookCustomTemplateModuleNotFoundError
 
 
 @pytest.fixture
@@ -374,8 +375,9 @@ def warning_suite():
 
 def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
     critical_suite_with_citations,
+    empty_data_context
 ):
-    obs = SuiteEditNotebookRenderer().render(critical_suite_with_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(critical_suite_with_citations)
     print(obs)
     assert isinstance(obs, dict)
     expected = {
@@ -452,9 +454,9 @@ def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
     assert obs == expected
 
 
-def test_render_with_no_column_cells(critical_suite_with_citations):
+def test_render_with_no_column_cells(critical_suite_with_citations, empty_data_context):
     critical_suite_with_citations.expectations = []
-    obs = SuiteEditNotebookRenderer().render(critical_suite_with_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(critical_suite_with_citations)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -521,10 +523,11 @@ def test_render_with_no_column_cells(critical_suite_with_citations):
 
 def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank_batch_kwargs(
     critical_suite_with_citations,
+    empty_data_context
 ):
     suite_with_no_kwargs_in_citations = critical_suite_with_citations
     suite_with_no_kwargs_in_citations.meta["citations"][0].pop("batch_kwargs")
-    obs = SuiteEditNotebookRenderer().render(suite_with_no_kwargs_in_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(suite_with_no_kwargs_in_citations)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -602,11 +605,12 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
 
 def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
     critical_suite_with_citations,
+    empty_data_context
 ):
     suite_with_no_kwargs_in_citations = critical_suite_with_citations
     suite_with_no_kwargs_in_citations.meta["citations"][0].pop("batch_kwargs")
     batch_kwargs = {"foo": "bar", "datasource": "things"}
-    obs = SuiteEditNotebookRenderer().render(
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
         suite_with_no_kwargs_in_citations, batch_kwargs
     )
     assert isinstance(obs, dict)
@@ -684,10 +688,10 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
     assert obs == expected
 
 
-def test_render_with_no_batch_kwargs_and_no_citations(critical_suite_with_citations):
+def test_render_with_no_batch_kwargs_and_no_citations(critical_suite_with_citations, empty_data_context):
     suite_with_no_citations = critical_suite_with_citations
     suite_with_no_citations.meta.pop("citations")
-    obs = SuiteEditNotebookRenderer().render(suite_with_no_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(suite_with_no_citations)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -765,9 +769,10 @@ def test_render_with_no_batch_kwargs_and_no_citations(critical_suite_with_citati
 
 def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
     critical_suite_with_citations,
+    empty_data_context
 ):
     batch_kwargs = {"foo": "bar", "datasource": "things"}
-    obs = SuiteEditNotebookRenderer().render(
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
         critical_suite_with_citations, batch_kwargs
     )
     assert isinstance(obs, dict)
@@ -847,8 +852,9 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
 
 def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
     suite_with_multiple_citations,
+    empty_data_context
 ):
-    obs = SuiteEditNotebookRenderer().render(suite_with_multiple_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(suite_with_multiple_citations)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -926,8 +932,9 @@ def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
 
 def test_batch_kwarg_path_relative_is_modified_and_found_in_a_code_cell(
     critical_suite_with_citations,
+    empty_data_context
 ):
-    obs = SuiteEditNotebookRenderer().render(
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
         critical_suite_with_citations, {"path": "foo/data"}
     )
     assert isinstance(obs, dict)
@@ -944,8 +951,9 @@ def test_batch_kwarg_path_relative_is_modified_and_found_in_a_code_cell(
 
 def test_batch_kwarg_path_relative_dot_slash_is_modified_and_found_in_a_code_cell(
     critical_suite_with_citations,
+    empty_data_context
 ):
-    obs = SuiteEditNotebookRenderer().render(
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
         critical_suite_with_citations, {"path": "./foo/data"}
     )
     assert isinstance(obs, dict)
@@ -962,8 +970,9 @@ def test_batch_kwarg_path_relative_dot_slash_is_modified_and_found_in_a_code_cel
 
 def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
     critical_suite_with_citations,
+    empty_data_context
 ):
-    obs = SuiteEditNotebookRenderer().render(
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
         critical_suite_with_citations, {"path": "/home/user/foo/data"}
     )
     assert isinstance(obs, dict)
@@ -978,8 +987,8 @@ def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
     assert found_expected
 
 
-def test_complex_suite(warning_suite):
-    obs = SuiteEditNotebookRenderer().render(warning_suite, {"path": "foo/data"})
+def test_complex_suite(warning_suite, empty_data_context):
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(warning_suite, {"path": "foo/data"})
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -1346,3 +1355,91 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     }
     suite = context.get_expectation_suite(suite_name)
     assert suite == original_suite
+
+
+def test_notebook_execution_with_custom_notebooks_wrong_module(suite_with_multiple_citations, data_context_with_bad_notebooks):
+    """
+    Test the error message in case of "bad" custom module is clear
+    """
+    with pytest.raises(SuiteEditNotebookCustomTemplateModuleNotFoundError, match=r'invalid\.module'):
+        SuiteEditNotebookRenderer.from_data_context(data_context_with_bad_notebooks).render(suite_with_multiple_citations)
+
+
+def test_notebook_execution_with_custom_notebooks(suite_with_multiple_citations, data_context_custom_notebooks):
+    """
+    Test the different parts of the notebooks can be modified
+    """
+    obs = SuiteEditNotebookRenderer.from_data_context(data_context_custom_notebooks).render(suite_with_multiple_citations)
+    assert isinstance(obs, dict)
+    expected = {
+        "nbformat": 4,
+        "nbformat_minor": 4,
+        "metadata": {},
+        "cells": [
+            {
+                "cell_type": "markdown",
+                "source": "# Custom header for MyCompany",
+                "metadata": {},
+            },
+            {
+                "cell_type": "code",
+                "metadata": {},
+                "execution_count": None,
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../3.csv", "datasource": "3"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "outputs": [],
+            },
+            {
+                "cell_type": "markdown",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "metadata": {},
+            },
+            {
+                "cell_type": "markdown",
+                "source": "### Table Expectation(s)",
+                "metadata": {},
+            },
+            {
+                "cell_type": "markdown",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
+                "metadata": {},
+            },
+            {
+                "cell_type": "markdown",
+                "source": "### Column Expectation(s)",
+                "metadata": {},
+            },
+            {"cell_type": "markdown", "source": "#### `npi`", "metadata": {}},
+            {
+                "cell_type": "code",
+                "metadata": {},
+                "execution_count": None,
+                "source": 'batch.expect_column_values_to_not_be_null("npi")',
+                "outputs": [],
+            },
+            {"cell_type": "markdown", "source": "#### `provider_type`", "metadata": {}},
+            {
+                "cell_type": "code",
+                "metadata": {},
+                "execution_count": None,
+                "source": 'batch.expect_column_values_to_not_be_null("provider_type")',
+                "outputs": [],
+            },
+            {
+                "cell_type": "markdown",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "metadata": {},
+            },
+            {
+                "cell_type": "code",
+                "metadata": {},
+                "execution_count": None,
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n"""\nLet\'s create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation\narguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline\nrunner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object.\nNote - any provided datetime will be assumed to be a UTC time. If no instantiation arguments are given, run_name will\nbe None and run_time will default to the current UTC datetime.\n"""\n\nrun_id = {\n  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n  "run_time": datetime.datetime.now(datetime.timezone.utc)\n}\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "outputs": [],
+            },
+        ],
+    }
+    del expected["nbformat_minor"]
+    del obs["nbformat_minor"]
+    for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        assert obs_cell == expected_cell
+    assert obs == expected

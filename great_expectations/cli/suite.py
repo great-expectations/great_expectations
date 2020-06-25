@@ -175,7 +175,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
         notebook_name = "edit_{}.ipynb".format(suite.expectation_suite_name)
         notebook_path = _get_notebook_path(context, notebook_name)
-        SuiteEditNotebookRenderer().render_to_disk(suite, notebook_path, batch_kwargs)
+        SuiteEditNotebookRenderer.from_data_context(context).render_to_disk(suite, notebook_path, batch_kwargs)
 
         if not jupyter:
             cli_message(

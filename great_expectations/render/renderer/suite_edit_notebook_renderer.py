@@ -1,5 +1,5 @@
 import os
-from typing import Union
+from typing import Union, Optional, Dict
 
 import nbformat
 import jinja2
@@ -8,6 +8,9 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import lint_code
+from great_expectations.data_context.types.base import NotebookConfig, notebookConfigSchema
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.exceptions import SuiteEditNotebookCustomTemplateModuleNotFoundError
 
 
 class SuiteEditNotebookRenderer(Renderer):
@@ -18,9 +21,47 @@ class SuiteEditNotebookRenderer(Renderer):
     - Make an easy path to edit a suite that a Profiler created.
     - Make it easy to edit a suite where only JSON exists.
     """
-    def __init__(self):
+    def __init__(
+        self,
+        custom_templates_module: Optional[str] = None,
+        header_markdown: Optional[NotebookConfig] = None,
+    ):
         super().__init__()
-        self.template_env = jinja2.Environment(loader=jinja2.PackageLoader('great_expectations.render.notebook_assets', 'suite_edit'))
+        custom_loader = []
+
+        if custom_templates_module:
+            try:
+                custom_loader = [jinja2.PackageLoader(*custom_templates_module.rsplit('.', 1))]
+            except ModuleNotFoundError as e:
+                raise SuiteEditNotebookCustomTemplateModuleNotFoundError(custom_templates_module) from e
+
+        loaders = custom_loader + [
+            jinja2.PackageLoader('great_expectations.render.notebook_assets', 'suite_edit'),
+        ]
+        self.template_env = None
+
+        self.template_env = jinja2.Environment(
+            loader=jinja2.ChoiceLoader(loaders)
+        )
+
+        self.header_markdown = header_markdown
+
+
+    @staticmethod
+    def from_data_context(data_context):
+        suite_edit_notebook_config: Optional[NotebookConfig] = None
+        if data_context.notebooks and data_context.notebooks.get("suite_edit"):
+            suite_edit_notebook_config = notebookConfigSchema.load(data_context.notebooks.get("suite_edit"))
+
+        return instantiate_class_from_config(
+            config=suite_edit_notebook_config.__dict__ if suite_edit_notebook_config else {},
+            runtime_environment={},
+            config_defaults={
+                "module_name": "great_expectations.render.renderer.suite_edit_notebook_renderer",
+                "class_name": "SuiteEditNotebookRenderer"
+            },
+        )
+
 
     @classmethod
     def _get_expectations_by_column(cls, expectations):
@@ -55,7 +96,12 @@ class SuiteEditNotebookRenderer(Renderer):
         return ", ".join(kwargs)
 
     def add_header(self, suite_name: str, batch_kwargs) -> None:
-        self.add_markdown_cell("HEADER.md", suite_name=suite_name)
+        if self.header_markdown:
+            markdown = self.template_env.get_template(self.header_markdown.file_name).render(suite_name=suite_name, **self.header_markdown.template_kwargs)
+        else:
+            markdown = self.template_env.get_template("HEADER.md").render(suite_name=suite_name)
+
+        self.add_markdown_cell_str(markdown)
 
         if not batch_kwargs:
             batch_kwargs = dict()
@@ -78,6 +124,13 @@ class SuiteEditNotebookRenderer(Renderer):
             code = lint_code(code).rstrip("\n")
 
         cell = nbformat.v4.new_code_cell(code)
+        self._notebook["cells"].append(cell)
+
+    def add_markdown_cell_str(self, markdown: str) -> None:
+        """
+        Add the given markdown as a new markdown cell.
+        """
+        cell = nbformat.v4.new_markdown_cell(markdown)
         self._notebook["cells"].append(cell)
 
     def add_markdown_cell(self, markdown_file: str, **template_params) -> None:

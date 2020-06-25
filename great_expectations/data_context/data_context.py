@@ -531,6 +531,12 @@ class BaseDataContext(object):
         )
 
     @property
+    def notebooks(self):
+        return (
+            self._project_config_with_variables_substituted.notebooks
+        )
+
+    @property
     def stores(self):
         """A single holder for all Stores in this context"""
         return self._stores
