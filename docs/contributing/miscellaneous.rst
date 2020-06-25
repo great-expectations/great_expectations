@@ -11,7 +11,7 @@ Core team
 * `Eugene Mandel <https://github.com/eugmandel>`__
 * `Rob Lim <https://github.com/roblim>`__
 * `Taylor Miller <https://github.com/Aylr>`__
-* `Alex Shertinsky <https://github.com/alexsherstinsky>`__
+* `Alex Sherstinsky <https://github.com/alexsherstinsky>`__
 * `Tal Gluck <https://github.com/talagluck>`__
 * `Kyle Eaton <https://github.com/kyleaton>`__
 * `Sam Bail <https://github.com/spbail>`__
