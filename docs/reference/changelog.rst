@@ -7,6 +7,7 @@ Changelog
 
 Develop
 -----------------
+* [ENHANCEMENT] Add ``.feather`` file support to PandasDatasource
 * [FEATURE] A profiler that builds suites from JSONSchema files.
 
 0.11.5
