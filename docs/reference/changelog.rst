@@ -7,6 +7,7 @@ Changelog
 
 Develop
 -----------------
+* [ENHANCEMENT] Add ``.feather`` file support to PandasDatasource
 * [FEATURE] A profiler that builds suites from JSONSchema files.
 * [FEATURE] Add new expectation expect_table_row_count_to_equal_other_table for SqlAlchemyDataset
 

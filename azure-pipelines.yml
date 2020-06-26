@@ -21,6 +21,7 @@ resources:
     - 3306:3306
     env:
      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+     MYSQL_DATABASE: test_ci
 
 stages:
   - stage: linting
@@ -36,7 +37,7 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              # pip install -r requirements-dev.txt
+              pip install isort[requirements]==4.3.21 black==19.10b0
               isort --check-only --skip docs/
               black --check --exclude docs/ .
 
