@@ -7,7 +7,7 @@ Changelog
 
 Develop
 -----------------
-
+* [FEATURE] A profiler that builds suites from JSONSchema files.
 
 0.11.5
 -----------------
