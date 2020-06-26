@@ -1,3 +1,0 @@
-[mysqld]
-# https://stackoverflow.com/questions/36829911/how-to-resolve-order-by-clause-is-not-in-select-list-caused-mysql-5-7-with-sel
-sql_mode		=	''

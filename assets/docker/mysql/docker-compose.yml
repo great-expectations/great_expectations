@@ -3,7 +3,7 @@ services:
   mysql_db:
     image: mysql:8.0.20
     volumes:
-        - .:/etc/mysql/conf.d
+        - ./conf.d:/etc/mysql/conf.d
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
       MYSQL_DATABASE: test_ci
