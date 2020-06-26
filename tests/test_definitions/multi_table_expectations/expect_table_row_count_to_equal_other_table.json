@@ -1,0 +1,148 @@
+{
+  "expectation_type": "expect_table_row_count_to_equal_other_table",
+  "datasets": [
+    {
+      "data": [
+        {
+          "data": {
+            "c1": [
+              4,
+              5,
+              6,
+              7
+            ],
+            "c2": [
+              "a",
+              "b",
+              "c",
+              "d"
+            ],
+            "c3": [
+              null,
+              null,
+              null,
+              null
+            ],
+            "c4": [
+              4.0,
+              3.0,
+              3.5,
+              1.2
+            ]
+          },
+          "dataset_name": "expect_table_row_count_to_equal_other_table_data_1",
+          "schemas": {
+            "spark": {
+              "c1": "IntegerType",
+              "c2": "StringType",
+              "c3": "StringType",
+              "c4": "FloatType"
+            }
+          }
+        },
+        {
+          "data": {
+            "c1": [
+              4,
+              5,
+              6,
+              7
+            ],
+            "c2": [
+              "a",
+              "b",
+              "c",
+              "d"
+            ],
+            "c3": [
+              null,
+              null,
+              null,
+              null
+            ],
+            "c4": [
+              4.0,
+              3.0,
+              3.5,
+              1.2
+            ]
+          },
+          "dataset_name": "expect_table_row_count_to_equal_other_table_data_2",
+          "schemas": {
+            "spark": {
+              "c1": "IntegerType",
+              "c2": "StringType",
+              "c3": "StringType",
+              "c4": "FloatType"
+            }
+          }
+        },
+        {
+          "data": {
+            "c1": [
+              4,
+              5,
+              6
+            ],
+            "c2": [
+              "a",
+              "b",
+              "c"
+            ],
+            "c3": [
+              null,
+              null,
+              null
+            ],
+            "c4": [
+              4.0,
+              3.0,
+              3.5
+            ]
+          },
+          "dataset_name": "expect_table_row_count_to_equal_other_table_data_3",
+          "schemas": {
+            "spark": {
+              "c1": "IntegerType",
+              "c2": "StringType",
+              "c3": "StringType",
+              "c4": "FloatType"
+            }
+          }
+        }
+      ],
+      "tests": [
+        {
+          "title": "basic_positive",
+          "only_for": ["sqlalchemy"],
+          "exact_match_out": false,
+          "in": {
+            "other_table_name": "expect_table_row_count_to_equal_other_table_data_2"
+          },
+          "out": {
+            "success": true,
+            "observed_value": {
+              "self": 4,
+              "other": 4
+            }
+          }
+        },
+        {
+          "title": "basic_negative",
+          "only_for": ["sqlalchemy"],
+          "exact_match_out": false,
+          "in": {
+            "other_table_name": "expect_table_row_count_to_equal_other_table_data_3"
+          },
+          "out": {
+            "success": false,
+            "observed_value": {
+              "self": 4,
+              "other": 3
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

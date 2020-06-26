@@ -65,6 +65,9 @@ def pytest_addoption(parser):
         help="If set, suppress tests against postgresql",
     )
     parser.addoption(
+        "--mysql", action="store_true", help="If set, test against mysql",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
         help="If set, run aws integration tests",
@@ -105,15 +108,18 @@ def build_test_backends_list(metafunc):
                     "'postgresql://postgres@localhost/test_ci'"
                 )
             test_backends += ["postgresql"]
-            # TODO: enable mysql or other backend tests to be optionally specified
-            # if mysql:
-            #     try:
-            #         engine = sa.create_engine('mysql://root@mysql/test_ci')
-            #         conn = engine.connect()
-            #         test_backends += ['mysql']
-            #         conn.close()
-            #     except (ImportError, sa.exc.SQLAlchemyError):
-            #         warnings.warn("No mysql context available for testing.")
+        mysql = metafunc.config.getoption("--mysql")
+        if mysql:
+            try:
+                engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError):
+                raise ImportError(
+                    "mysql tests are requested, but unable to connect to the mysql database at "
+                    "'mysql+pymysql://root@localhost/test_ci'"
+                )
+            test_backends += ["mysql"]
     return test_backends
 
 
@@ -1835,7 +1841,7 @@ def dataset_sample_data(test_backend):
             "naturals": "NUMERIC",
         },
         "sqlite": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
-        "mysql": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
+        "mysql": {"nulls": "FLOAT", "naturals": "FLOAT"},
         "spark": {
             "infinities": "FloatType",
             "nulls": "FloatType",

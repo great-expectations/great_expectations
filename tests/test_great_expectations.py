@@ -1032,6 +1032,15 @@ class TestIO(unittest.TestCase):
         assert isinstance(df, PandasDataset)
 
     def test_read_feather(self):
+        pandas_version = re.match(r"(\d+)\.(\d+)\..+", pd.__version__)
+        if pandas_version is None:
+            raise ValueError("Unrecognized pandas version!")
+        else:
+            pandas_major_version = int(pandas_version.group(1))
+            pandas_minor_version = int(pandas_version.group(2))
+            if pandas_major_version == 0 and pandas_minor_version < 25:
+                pytest.skip("Skipping because of old pandas version.")
+
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_feather(script_path + "/test_sets/Titanic.feather")
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
