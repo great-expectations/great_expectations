@@ -134,7 +134,13 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
 
 
 def get_dataset(
-    dataset_type, data, schemas=None, profiler=ColumnsExistProfiler, caching=True
+    dataset_type,
+    data,
+    schemas=None,
+    profiler=ColumnsExistProfiler,
+    caching=True,
+    table_name=None,
+    sqlite_db_path=None,
 ):
     """Utility to create datasets for json-formatted tests.
     """
@@ -168,7 +174,10 @@ def get_dataset(
     elif dataset_type == "sqlite":
         from sqlalchemy import create_engine
 
-        engine = create_engine("sqlite://")
+        if sqlite_db_path is not None:
+            engine = create_engine(f"sqlite:////{sqlite_db_path}")
+        else:
+            engine = create_engine("sqlite://")
         conn = engine.connect()
         # Add the data to the database as a new table
 
@@ -189,14 +198,21 @@ def get_dataset(
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
-        tablename = "test_data_" + "".join(
-            [random.choice(string.ascii_letters + string.digits) for n in range(8)]
+        if table_name is None:
+            table_name = "test_data_" + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+        df.to_sql(
+            name=table_name,
+            con=conn,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
         )
-        df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            tablename, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=conn, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "postgresql":
@@ -225,20 +241,27 @@ def get_dataset(
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
-        tablename = "test_data_" + "".join(
-            [random.choice(string.ascii_letters + string.digits) for n in range(8)]
+        if table_name is None:
+            table_name = "test_data_" + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+        df.to_sql(
+            name=table_name,
+            con=conn,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
         )
-        df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            tablename, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=conn, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "mysql":
         from sqlalchemy import create_engine
 
-        engine = create_engine("mysql://root@mysql/test_ci")
+        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
         conn = engine.connect()
 
         sql_dtypes = {}
@@ -258,14 +281,21 @@ def get_dataset(
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
-        tablename = "test_data_" + "".join(
-            [random.choice(string.ascii_letters + string.digits) for n in range(8)]
+        if table_name is None:
+            table_name = "test_data_" + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+        df.to_sql(
+            name=table_name,
+            con=conn,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
         )
-        df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            tablename, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=conn, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "SparkDFDataset":
@@ -431,6 +461,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_pair_values_A_to_be_greater_than_B",
             "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
+            # "expect_table_row_count_to_equal_other_table",
         ]
     if context == "SparkDFDataset":
         return expectation_type in [
@@ -479,6 +510,11 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_pair_values_A_to_be_greater_than_B",
             "expect_column_pair_values_to_be_in_set",
             # "expect_multicolumn_values_to_be_unique",
+            "expect_table_row_count_to_equal_other_table",
+        ]
+    if context == "PandasDataset":
+        return expectation_type in [
+            "expect_table_row_count_to_equal_other_table",
         ]
     return False
 
@@ -531,6 +567,10 @@ def evaluate_json_test(data_asset, expectation_type, test):
     else:
         result = getattr(data_asset, expectation_type)(**test["in"])
 
+    check_json_test_result(test=test, result=result, data_asset=data_asset)
+
+
+def check_json_test_result(test, result, data_asset=None):
     # Check results
     if test["exact_match_out"] is True:
         assert expectationValidationResultSchema.load(test["out"]) == result

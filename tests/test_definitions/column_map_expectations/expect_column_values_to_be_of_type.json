@@ -341,8 +341,8 @@
           "datetime_tz": "DATETIME"
         },
         "mysql": {
-          "timestamp": "DATETIME",
-          "timestamp_tz": "DATETIME"
+          "datetime": "DATETIME",
+          "datetime_tz": "DATETIME"
         }
       },
       "tests": [
