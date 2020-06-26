@@ -238,7 +238,7 @@ def get_dataset(
     elif dataset_type == "mysql":
         from sqlalchemy import create_engine
 
-        engine = create_engine("mysql://root@localhost/test_ci")
+        engine = create_engine("mysql://root@mysql/test_ci")
         conn = engine.connect()
 
         sql_dtypes = {}

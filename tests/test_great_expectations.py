@@ -842,7 +842,8 @@ def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dic
     my_df.set_default_expectation_argument("result_format", "COMPLETE")
 
     with pytest.raises(InvalidCacheValueError):
-        my_df.validate(catch_exceptions=False)
+        with pytest.warns(Warning, match=r"No great_expectations version found"):
+            my_df.validate(catch_exceptions=False)
 
 
 @freeze_time("11/05/1955")
@@ -894,6 +895,7 @@ def test_validate_catch_non_existent_expectation():
             )
         ],
     )
+
     results = df.validate(expectation_suite=validation_config_non_existent_expectation)
 
     assert (
