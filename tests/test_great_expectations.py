@@ -865,8 +865,7 @@ def test_validate_with_invalid_result(validate_result_dict):
         )
     my_df.set_default_expectation_argument("result_format", "COMPLETE")
 
-    with pytest.warns(Warning, match=r"No great_expectations version found"):
-        results = my_df.validate()  # catch_exceptions=True is default
+    results = my_df.validate()  # catch_exceptions=True is default
 
     with open(
         file_relative_path(
