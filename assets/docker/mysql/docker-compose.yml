@@ -1,7 +1,7 @@
 version: '3.2'
 services:
   mysql_db:
-    image: mysql:5.7
+    image: mysql:8.0.20
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
       MYSQL_DATABASE: test_ci
