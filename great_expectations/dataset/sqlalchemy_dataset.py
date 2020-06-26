@@ -701,9 +701,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         percent_rank_query: CTE = sa.select(
             [
                 sa.column(column),
-                sa.cast(sa.func.percent_rank()
-                .over(order_by=sa.column(column).desc()), sa.dialects.mysql.DECIMAL(18, 15))
-                .label("p"),
+                sa.cast(
+                    sa.func.percent_rank().over(order_by=sa.column(column).desc()),
+                    sa.dialects.mysql.DECIMAL(18, 15),
+                ).label("p"),
             ]
         ).order_by(sa.column("p").desc()).select_from(self._table).cte("t")
 
@@ -711,7 +712,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         for idx, quantile in enumerate(reversed(quantiles)):
             quantile_column: Label = sa.func.first_value(sa.column(column)).over(
                 order_by=sa.case(
-                    [(percent_rank_query.c.p <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)), percent_rank_query.c.p)],
+                    [
+                        (
+                            percent_rank_query.c.p
+                            <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
+                            percent_rank_query.c.p,
+                        )
+                    ],
                     else_=None,
                 ).desc()
             ).label(f"q_{idx}")

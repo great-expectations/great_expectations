@@ -6,7 +6,7 @@ from great_expectations.data_context.store import DatabaseStoreBackend
 from great_expectations.exceptions import StoreBackendError
 
 
-def test_database_store_backend_get_url_for_key(caplog):
+def test_database_store_backend_get_url_for_key(caplog, sa):
     store_backend = DatabaseStoreBackend(
         credentials={
             "drivername": "postgresql",

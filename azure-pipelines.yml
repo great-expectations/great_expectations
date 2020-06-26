@@ -16,7 +16,7 @@ resources:
       POSTGRES_DB: "test_ci"
       POSTGRES_HOST_AUTH_METHOD: "trust"
   - container: mysql
-    image: mysql:5.7
+    image: mysql:8.0.20
     ports:
     - 3306:3306
     env:
@@ -145,6 +145,8 @@ stages:
             displayName: 'Install pandas - $(pandas.version)'
 
           - script: |
+              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+              mysql --host=127.0.0.1 --port=3306 --user=root < mysql_setup_script.sql
               pip install -r requirements.txt
               pip install $(GE_pytest_pip_opts)
               # Consider fragmenting *all* integration tests into separate folder and run
