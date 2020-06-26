@@ -16,14 +16,14 @@ resources:
       POSTGRES_DB: "test_ci"
       POSTGRES_HOST_AUTH_METHOD: "trust"
   - container: mysql
-    image: mysql:5.7
+    image: mysql:8.0.20
     ports:
     - 3306:3306
     env:
      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
      MYSQL_DATABASE: test_ci
     volumes:
-    - assets/docker/mysql/conf.d:/etc/mysql/conf.d
+    - $(Agent.BuildDirectory)/assets/docker/mysql/conf.d:/etc/mysql/conf.d
 
 stages:
   - stage: linting
