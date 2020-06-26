@@ -7,9 +7,22 @@ Changelog
 
 Develop
 -----------------
-* [ENHANCEMENT] Add ``.feather`` file support to PandasDatasource
-* [FEATURE] A profiler that builds suites from JSONSchema files.
+
+0.11.6
+-----------------
+* [FEATURE] Auto-install Python DB packages.  If the required packages for a DB library are not installed, GE will offer the user to install them, without exiting CLI
 * [FEATURE] Add new expectation expect_table_row_count_to_equal_other_table for SqlAlchemyDataset
+* [FEATURE] A profiler that builds suites from JSONSchema files
+* [ENHANCEMENT] Add ``.feather`` file support to PandasDatasource
+* [ENHANCEMENT] Use ``colorama init`` to support terminal color on Windows
+* [ENHANCEMENT] Update how_to_trigger_slack_notifications_as_a_validation_action.rst
+* [ENHANCEMENT] Added note for config_version in great_expectations.yml
+* [ENHANCEMENT] Implement "column_quantiles" for MySQL (via a compound SQLAlchemy query, since MySQL does not support "percentile_disc")
+* [BUGFIX] "data_asset.validate" events with "data_asset_name" key in the batch kwargs were failing schema validation
+* [BUGFIX] database_store_backend does not support storing Expectations in DB
+* [BUGFIX] instantiation of ExpectationSuite always adds GE version metadata to prevent datadocs from crashing
+* [BUGFIX] Fix all tests having to do with missing data source libraries
+* [DOCS] will/docs/how_to/Store Expectations on Google Cloud Store
 
 0.11.5
 -----------------
@@ -20,8 +33,6 @@ Develop
 * [BUGFIX] fixed issue where calling head() on a SqlAlchemyDataset would fail if the underlying table is empty
 * [BUGFIX] fixed bug in rounding of mostly argument to nullity expectations produced by the BasicSuiteBuilderProfiler
 * [DOCS] New How-to guide: How to add a Validation Operator (+ updated in Validation Operator doc strings)
-* [FEATURE] Auto-install Python DB packages.  If the required packages for a DB library are not installed, GE will offer the user to install them, without exiting CLI.
-* [ENHANCEMENT] Implement "column_quantiles" for MySQL (via a compound SQLAlchemy query, since MySQL does not support "percentile_disc").
 
 0.11.4
 -----------------
