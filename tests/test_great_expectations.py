@@ -1031,6 +1031,12 @@ class TestIO(unittest.TestCase):
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    def test_read_feather(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_feather(script_path + "/test_sets/Titanic.feather")
+        assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
+        assert isinstance(df, PandasDataset)
+
     def test_read_parquet(self):
         """
         This test is unusual, because on travis (but only on travis), we have observed problems importing pyarrow,
