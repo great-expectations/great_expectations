@@ -35,7 +35,7 @@ def test_expectations_store():
     }
 
 
-def test_ExpectationsStore_with_DatabaseStoreBackend_postgres(caplog):
+def test_ExpectationsStore_with_DatabaseStoreBackend_postgres(caplog, sa):
     connection_kwargs = {
         "drivername": "postgresql",
         "username": "postgres",

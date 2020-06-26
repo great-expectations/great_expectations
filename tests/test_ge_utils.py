@@ -11,11 +11,15 @@ def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
     with pytest.raises(
         ValueError, match=r"The validate util method only supports dataset validations"
     ):
-        ge.validate(
-            file_data_asset,
-            empty_expectation_suite,
-            data_asset_class=ge.data_asset.FileDataAsset,
-        )
+        with pytest.warns(
+            Warning,
+            match="No great_expectations version found in configuration object.",
+        ):
+            ge.validate(
+                file_data_asset,
+                empty_expectation_suite,
+                data_asset_class=ge.data_asset.FileDataAsset,
+            )
 
 
 def test_validate_dataset(dataset, basic_expectation_suite):
@@ -83,11 +87,14 @@ def test_validate_using_data_context(
         data_context_parameterized_expectation_suite._evaluation_parameter_dependencies_compiled
         is False
     )
-    res = ge.validate(
-        dataset,
-        expectation_suite_name="my_dag_node.default",
-        data_context=data_context_parameterized_expectation_suite,
-    )
+    with pytest.warns(
+        Warning, match=r"This configuration object was built using version"
+    ):
+        res = ge.validate(
+            dataset,
+            expectation_suite_name="my_dag_node.default",
+            data_context=data_context_parameterized_expectation_suite,
+        )
 
     # Since the handling of evaluation parameters is no longer happening without an action,
     # the context should still be not compiles after validation.
@@ -105,11 +112,14 @@ def test_validate_using_data_context_path(
     dataset, data_context_parameterized_expectation_suite
 ):
     data_context_path = data_context_parameterized_expectation_suite.root_directory
-    res = ge.validate(
-        dataset,
-        expectation_suite_name="my_dag_node.default",
-        data_context=data_context_path,
-    )
+    with pytest.warns(
+        Warning, match=r"This configuration object was built using version"
+    ):
+        res = ge.validate(
+            dataset,
+            expectation_suite_name="my_dag_node.default",
+            data_context=data_context_path,
+        )
 
     # We should have now found the right suite with expectations to evaluate
     assert res.success is False

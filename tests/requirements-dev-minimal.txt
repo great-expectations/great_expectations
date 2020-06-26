@@ -1,0 +1,12 @@
+# -- Cloud storage
+boto3>=1.9
+freezegun>=0.3.15
+google-cloud-storage>=1.28.0
+mock>=3.0.5
+moto>=1.3.7
+# -- File Format Tests
+pyarrow>=0.12.0
+# Required for all tests
+pytest>=5.3.5
+pytest-cov>=2.8.1
+xlrd>=1.1.0

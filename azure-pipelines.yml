@@ -1,0 +1,169 @@
+# Python package
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+trigger:
+- master
+
+resources:
+  containers:
+  - container: postgres
+    image: postgres:11
+    ports:
+    - 5432:5432
+    env:
+      POSTGRES_DB: "test_ci"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+  - container: mysql
+    image: mysql:5.7
+    ports:
+    - 3306:3306
+    env:
+     MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+     MYSQL_DATABASE: test_ci
+
+stages:
+  - stage: linting
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: lint
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: 3.7
+            displayName: 'Use Python 3.7'
+
+          - script: |
+              pip install isort[requirements]==4.3.21 black==19.10b0
+              isort --check-only --skip docs/
+              black --check --exclude docs/ .
+
+  - stage: required_tests
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    dependsOn: []
+
+    jobs:
+      - job: pandas_versions
+        variables:
+          GE_pytest_pip_opts: '-r tests/requirements-dev-minimal.txt'
+          GE_pytest_opts: '--no-sqlalchemy --no-spark'
+        strategy:
+          matrix:
+            Python36-Pandas023:
+              python.version: '3.6'
+              pandas.version: '0.23.4'
+            Python37-Pandas025:
+              python.version: '3.7'
+              pandas.version: '0.25.3'
+            Python38-PandasLatest:
+              python.version: '3.8'
+              pandas.version: 'latest'
+
+        # TODO: refactor steps into a task
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - bash: pip install pandas
+            condition: eq(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas latest'
+
+          - bash: pip install pandas==$(pandas.version)
+            condition: ne(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas - $(pandas.version)'
+
+          - script: |
+              pip install -r requirements.txt
+              pip install $(GE_pytest_pip_opts)
+              # Consider fragmenting *all* integration tests into separate folder and run
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+            displayName: 'pytest'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+      - job: full_suite_test
+        services:
+          postgres: postgres
+          mysql: mysql
+
+        variables:
+          GE_pytest_pip_opts: '-r tests/requirements-dev-minimal.txt -r tests/requirements-dev-sqlalchemy.txt -r tests/requirements-dev-spark.txt'
+          GE_pytest_opts: ''
+
+        strategy:
+          matrix:
+            Python36:
+              python.version: '3.6'
+              pandas.version: 'latest'
+            Python37:
+              python.version: '3.7'
+              pandas.version: 'latest'
+
+        # TODO: refactor steps into a task
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - bash: pip install pandas
+            condition: eq(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas latest'
+
+          - bash: pip install pandas==$(pandas.version)
+            condition: ne(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas - $(pandas.version)'
+
+          - script: |
+              pip install -r requirements.txt
+              pip install $(GE_pytest_pip_opts)
+              # Consider fragmenting *all* integration tests into separate folder and run
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+            displayName: 'pytest'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+  # - stage: experimental_tests

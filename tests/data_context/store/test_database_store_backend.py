@@ -29,7 +29,7 @@ def test_database_store_backend_get_url_for_key(caplog):
     assert "postgresql://test_ci/not_here" == store_backend.get_url_for_key(key)
 
 
-def test_database_store_backend_duplicate_key_violation(caplog):
+def test_database_store_backend_duplicate_key_violation(caplog, sa):
     store_backend = DatabaseStoreBackend(
         credentials={
             "drivername": "postgresql",
