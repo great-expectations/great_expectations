@@ -6,11 +6,11 @@ import subprocess
 import time
 import uuid
 
-import boto3
 import botocore
-import pytest
 import requests
 
+import boto3
+import pytest
 from great_expectations.data_context.util import file_relative_path
 
 USAGE_STATISTICS_QA_URL = (
@@ -143,11 +143,11 @@ def test_send_malformed_data(valid_usage_statistics_message):
 
 
 @pytest.mark.aws_integration
-def test_usage_statistics_transmission(aws_session):
+def test_usage_statistics_receipt(aws_session):
     client = aws_session.client("logs", region_name="us-east-1")
     usage_stats_url_env = dict(**os.environ)
     usage_stats_url_env["GE_USAGE_STATISTICS_URL"] = USAGE_STATISTICS_QA_URL
-    data_context_id = str(uuid.uuid4())
+    data_context_id = ("00000000-0000-0000-1000-000000000000",)
     p = subprocess.Popen(
         [
             "python",

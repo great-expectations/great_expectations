@@ -5,7 +5,6 @@ from copy import deepcopy
 
 import mock
 import pytest
-
 from great_expectations.core.usage_statistics.usage_statistics import (
     run_validation_operator_usage_statistics,
 )
@@ -50,6 +49,30 @@ def in_memory_data_context_config_usage_stats_enabled():
             },
         }
     )
+
+
+def test_comprehensive_list_of_messages():
+    """Ensure that we have a comprehensive set of tests for known messages, by
+    forcing a manual update to this list when a message is added or removed, and
+    reminding the developer to add or remove the associate test."""
+    valid_message_list = [
+        1
+    ]  # REPLACE WITH DYNAMICALLY-LOADED LIST OF VALID MESSAGES FROM OUR SCHEMA
+    # NOTE: If you are changing the expected valid message list below, you need
+    # to also update one or more tests below!
+    assert valid_message_list == []
+
+
+def test_init_message():
+    pass
+
+
+def test_XXX_message():
+    pass
+
+
+def test_YYY_message():
+    pass
 
 
 def test_consistent_name_anonymization(
