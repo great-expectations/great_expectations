@@ -34,7 +34,7 @@ code
         pip install -r requirements-dev.txt
         pre-commit install --install-hooks
 
-  - To manually run the linter in your environment, for example if you have already committed files that are rejected by the linting test, you can run tests manually:
+  - If you have already committed files but are seeing errors during the continuous integration tests, you can run tests manually:
 
     .. code-block:: bash
 

@@ -1,3 +1,7 @@
+# A lot of Great Expectations' codebase and tests are tied to specific databases, cloud providers, etc.
+# In this file, comments on each row indicate which tests that package is used for.
+# To run tests for smaller subsets of infrastructure, please look at other requirements-dev-*.txt files.
+
 altair>=4.0.0,<5  # package
 black==19.10b0  # package
 black==19.10b0  # lint
