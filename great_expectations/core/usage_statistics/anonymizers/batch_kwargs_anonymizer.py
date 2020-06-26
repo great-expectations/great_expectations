@@ -3,7 +3,7 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 
 class BatchKwargsAnonymizer(Anonymizer):
     def __init__(self, salt=None):
-        super(BatchKwargsAnonymizer, self).__init__(salt=salt)
+        super().__init__(salt=salt)
 
         self._ge_batch_kwarg_keys = [
             "datasource",
@@ -22,6 +22,7 @@ class BatchKwargsAnonymizer(Anonymizer):
             "offset",
             "snowflake_transient_table",
             "bigquery_temp_table",
+            "data_asset_name",
         ]
 
     def anonymize_batch_kwargs(self, batch_kwargs):

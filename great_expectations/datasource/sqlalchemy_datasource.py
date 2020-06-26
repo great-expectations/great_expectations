@@ -106,7 +106,7 @@ class SqlAlchemyDatasource(Datasource):
         batch_kwargs_generators = configuration_with_defaults.pop(
             "batch_kwargs_generators", None
         )
-        super(SqlAlchemyDatasource, self).__init__(
+        super().__init__(
             name,
             data_context=data_context,
             data_asset_type=data_asset_type,
@@ -283,7 +283,7 @@ class SqlAlchemyDatasource(Datasource):
     def process_batch_parameters(
         self, query_parameters=None, limit=None, dataset_options=None
     ):
-        batch_kwargs = super(SqlAlchemyDatasource, self).process_batch_parameters(
+        batch_kwargs = super().process_batch_parameters(
             limit=limit, dataset_options=dataset_options,
         )
         nested_update(batch_kwargs, {"query_parameters": query_parameters})

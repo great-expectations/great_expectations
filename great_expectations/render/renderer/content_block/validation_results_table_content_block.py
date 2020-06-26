@@ -259,9 +259,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return "--"
 
         observed_partition_object = evr.result["details"]["observed_partition"]
-        observed_distribution = super(
-            ValidationResultsTableContentBlockRenderer, cls
-        )._get_kl_divergence_chart(observed_partition_object)
+        observed_distribution = super()._get_kl_divergence_chart(
+            observed_partition_object
+        )
 
         observed_value = (
             num_to_str(evr.result.get("observed_value"))
@@ -378,9 +378,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _process_content_block(cls, content_block, has_failed_evr):
-        super(ValidationResultsTableContentBlockRenderer, cls)._process_content_block(
-            content_block, has_failed_evr
-        )
+        super()._process_content_block(content_block, has_failed_evr)
         content_block.header_row = ["Status", "Expectation", "Observed Value"]
         content_block.header_row_options = {"Status": {"sortable": True}}
 

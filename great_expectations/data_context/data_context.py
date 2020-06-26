@@ -184,11 +184,14 @@ class BaseDataContext(object):
 
     def _build_store(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
-        new_store = instantiate_class_from_config(
-            config=store_config,
-            runtime_environment={"root_directory": self.root_directory,},
-            config_defaults={"module_name": module_name},
-        )
+        try:
+            new_store = instantiate_class_from_config(
+                config=store_config,
+                runtime_environment={"root_directory": self.root_directory,},
+                config_defaults={"module_name": module_name},
+            )
+        except ge_exceptions.DataContextError:
+            new_store = None
         if not new_store:
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,
@@ -2143,9 +2146,7 @@ class DataContext(BaseDataContext):
 
         project_config = self._load_project_config()
         project_config_dict = dataContextConfigSchema.dump(project_config)
-        super(DataContext, self).__init__(
-            project_config, context_root_directory, runtime_environment
-        )
+        super().__init__(project_config, context_root_directory, runtime_environment)
 
         # save project config if data_context_id auto-generated or global config values applied
         if (
@@ -2225,14 +2226,14 @@ class DataContext(BaseDataContext):
     def add_store(self, store_name, store_config):
         logger.debug("Starting DataContext.add_store for store %s" % store_name)
 
-        new_store = super(DataContext, self).add_store(store_name, store_config)
+        new_store = super().add_store(store_name, store_config)
         self._save_project_config()
         return new_store
 
     def add_datasource(self, name, **kwargs):
         logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
 
-        new_datasource = super(DataContext, self).add_datasource(name, **kwargs)
+        new_datasource = super().add_datasource(name, **kwargs)
         self._save_project_config()
 
         return new_datasource
@@ -2426,7 +2427,7 @@ class ExplorerDataContext(DataContext):
             to include ipython notebook widgets.
         """
 
-        super(ExplorerDataContext, self).__init__(context_root_dir)
+        super().__init__(context_root_dir)
 
         self._expectation_explorer = expectation_explorer
         if expectation_explorer:
