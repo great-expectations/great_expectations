@@ -267,6 +267,21 @@ def test_expectation_suite_deepcopy(baseline_suite):
     assert baseline_suite.expectations[0].meta["notes"] == "This is an expectation."
 
 
+def test_suite_without_metadata_includes_ge_version_metadata_if_none_is_provided():
+    suite = ExpectationSuite("foo")
+    assert "great_expectations.__version__" in suite.meta.keys()
+
+
+def test_suite_does_not_overwrite_existing_version_metadata():
+    suite = ExpectationSuite("foo", meta={"great_expectations.__version__": "0.0.0"})
+    assert "great_expectations.__version__" in suite.meta.keys()
+    assert suite.meta["great_expectations.__version__"] == "0.0.0"
+
+
+def test_suite_with_metadata_includes_ge_version_metadata(baseline_suite):
+    assert "great_expectations.__version__" in baseline_suite.meta.keys()
+
+
 def test_add_citation(baseline_suite):
     assert (
         "citations" not in baseline_suite.meta
