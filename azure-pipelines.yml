@@ -23,7 +23,7 @@ resources:
      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
      MYSQL_DATABASE: test_ci
     volumes:
-    - $(Agent.BuildDirectory)/assets/docker/mysql/conf.d:/etc/mysql/conf.d
+    - ./assets/docker/mysql/conf.d:/etc/mysql/conf.d
 
 stages:
   - stage: linting
