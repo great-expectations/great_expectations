@@ -98,10 +98,6 @@ Steps
     Run a :ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>` to store results in the new Validations store on S3 then visualize the results by re-building :ref:`Data Docs <tutorials__getting_started__set_up_data_docs>`.
 
 
-Additional resources
---------------------
-
-
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
 
 .. discourse::
