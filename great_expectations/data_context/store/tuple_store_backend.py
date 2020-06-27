@@ -373,7 +373,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
         self.prefix = prefix
 
     def _get(self, key):
-        s3_object_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
+        if self.platform_specific_separator:
+            s3_object_key = os.path.join(
+                self.prefix, self._convert_key_to_filepath(key)
+            )
+        else:
+            s3_object_key = "/".join((self.prefix, self._convert_key_to_filepath(key)))
 
         import boto3
 
@@ -388,7 +393,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def _set(
         self, key, value, content_encoding="utf-8", content_type="application/json"
     ):
-        s3_object_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
+        if self.platform_specific_separator:
+            s3_object_key = os.path.join(
+                self.prefix, self._convert_key_to_filepath(key)
+            )
+        else:
+            s3_object_key = "/".join((self.prefix, self._convert_key_to_filepath(key)))
 
         import boto3
 
@@ -443,7 +453,10 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         for s3_object_info in objects:
             s3_object_key = s3_object_info["Key"]
-            s3_object_key = os.path.relpath(s3_object_key, self.prefix,)
+            if self.platform_specific_separator:
+                s3_object_key = os.path.relpath(s3_object_key, self.prefix)
+            elif s3_object_key.startswith(self.prefix + "/"):
+                s3_object_key = s3_object_key[len(self.prefix) + 1 :]
             if self.filepath_prefix and not s3_object_key.startswith(
                 self.filepath_prefix
             ):
@@ -518,14 +531,15 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def __init__(
         self,
         bucket,
-        prefix,
         project,
+        prefix="",
         filepath_template=None,
         filepath_prefix=None,
         filepath_suffix=None,
         forbidden_substrings=None,
         platform_specific_separator=False,
         fixed_length_key=False,
+        public_urls=True,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -538,6 +552,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         self.bucket = bucket
         self.prefix = prefix
         self.project = project
+        self._public_urls = public_urls
 
     def _move(self, source_key, dest_key, **kwargs):
         pass
@@ -586,7 +601,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             dest_filepath = os.path.join(self.prefix, dest_filepath)
 
         blob = bucket.blob(source_filepath)
-        new_blob = bucket.rename_blob(blob, dest_filepath)
+        _ = bucket.rename_blob(blob, dest_filepath)
 
     def list_keys(self):
         key_list = []
@@ -615,7 +630,17 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         path = self._convert_key_to_filepath(key)
         if not path.startswith(self.prefix):
             path = os.path.join(self.prefix, path)
-        return "https://storage.googleapis.com/" + self.bucket + "/" + path
+        if self._public_urls:
+            base_url = "https://storage.googleapis.com/"
+        else:
+            base_url = "https://storage.cloud.google.com/"
+
+        if self.prefix:
+            path_url = "/".join((self.bucket, self.prefix, path))
+        else:
+            path_url = "/".join((self.bucket, path))
+
+        return base_url + path_url
 
     def remove_key(self, key):
         from google.cloud import storage

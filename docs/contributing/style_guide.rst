@@ -24,7 +24,22 @@ code
 * **Experimental methods should log an experimental warning when called**: "Warning: some_method is experimental. Methods, APIs, and core behavior may change in the future."
 * **Experimental classes should log an experimental warning when initialized**: "Warning: great_expectations.some_module.SomeClass is experimental. Methods, APIs, and core behavior may change in the future."
 * **Docstrings are highly recommended**. We use the Sphinx's `Napoleon extension <http://www.sphinx-doc.org/en/master/ext/napoleon.html>`__ to build documentation from Google-style docstrings.
-* **Lint your code**. Our CI system will check using ``black`` and ``isort``. We have a git pre-commit configuration in the repo, so you can just run ``pre-commit install`` to automatically run your changes through the linting process before submitting.
+* **Lint your code**. Our CI system will check using ``black`` and ``isort``.
+  - Linting with ``isort`` *MUST* occur from a virtual environment that has all required packages installed, and pre-commit uses the virtual environment from which it was installed, whether or not that environment is active when making the commit. So, **before running ``pre-commit install`` ensure you have activated a virtual environment that has all development requirements installed**.
+
+    .. code-block:: bash
+
+        pre-commit uninstall
+        # ACTIVATE ENV, e.g.: conda activate pre_commit_env OR source pre_commit_env/bin/activate
+        pip install -r requirements-dev.txt
+        pre-commit install --install-hooks
+
+  - If you have already committed files but are seeing errors during the continuous integration tests, you can run tests manually:
+
+    .. code-block:: bash
+
+        black .
+        isort --atomic -rc .
 
 **Expectations**
 
@@ -84,11 +99,24 @@ Within the table of contents, each section has specific role to play. Broadly sp
 
 * **Class names are written in upper camel case, and always linked on first reference.** Good: "ValidationOperator." Bad: "validationOperator", "validation operator". If a word is both a core concept and a class name, prefer the core concept unless the text refers specifically to the class.
 
-**File names and RST refs**
+**File names, RST refs, and links**
 
 * **File names should parallel titles, so that URLs and titles are similar.** For example: the page titled ``Initialize a project`` has this filename: ``initialize_a_project.rst``, which produces this URL: ``initialize_a_project.html``
 * **Use snake case for file names**.
 * **Refs are ``_{filename}`` or ``_{folder_name}__{filename}``.** Ex: ``_getting_started__initialize_a_project``
+
+* **Links to docs in the API Reference section**
+
+    * Link to a module: :mod:`great_expectations.data_context.data_context`
+    * Abbreviated link to a module: :mod:`~great_expectations.data_context.data_context`
+    * Link to a class: :py:class:`great_expectations.data_context.data_context.BaseDataContext`
+    * Abbreviated link to a class: :py:class:`~great_expectations.data_context.data_context.BaseDataContext`
+    * Link to a method in a class: :py:meth:`great_expectations.data_context.data_context.BaseDataContext.validate_config`
+    * Abbreviated link to a method in a class: :py:meth:`~great_expectations.data_context.data_context.BaseDataContext.validate_config`
+    * Link to an attribute in a class: :py:attr:`great_expectations.data_context.data_context.BaseDataContext.GE_DIR`
+    * Abbreviated link to an attribute in a class: :py:attr:`~great_expectations.data_context.data_context.BaseDataContext.GE_DIR`
+    * Link to a function in a module: :py:attr:`great_expectations.jupyter_ux.display_column_evrs_as_section`
+    * Abbreviated to a function in a module: :py:attr:`~great_expectations.jupyter_ux.display_column_evrs_as_section`
 
 **Code formatting**
 

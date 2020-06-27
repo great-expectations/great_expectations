@@ -553,19 +553,20 @@ class DefaultSiteIndexBuilder(object):
             index_links_dict[section_name + "_links"] = []
 
         if run_id:
-            path_components = (
-                ["validations"]
-                + expectation_suite_name.split(".")
-                + list(run_id.to_tuple())
-                + [batch_identifier]
+            filepath = (
+                os.path.join(
+                    "validations",
+                    *expectation_suite_name.split("."),
+                    *run_id.to_tuple(),
+                    batch_identifier,
+                )
+                + ".html"
             )
-            # py2 doesn't support
-            # filepath = os.path.join("validations", batch_identifier, *expectation_suite_name.split("."), run_id)
-            filepath = os.path.join(*path_components)
-            filepath += ".html"
         else:
-            filepath = os.path.join("expectations", *expectation_suite_name.split("."))
-            filepath += ".html"
+            filepath = (
+                os.path.join("expectations", *expectation_suite_name.split("."))
+                + ".html"
+            )
 
         expectation_suite_filepath = os.path.join(
             "expectations", *expectation_suite_name.split(".")
@@ -641,7 +642,7 @@ class DefaultSiteIndexBuilder(object):
         )
         see_glossary = CallToActionButton(
             "See More Kinds of Expectations",
-            "http://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html",
+            "https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html",
         )
         validation_playground = CallToActionButton(
             "How to Validate Data",

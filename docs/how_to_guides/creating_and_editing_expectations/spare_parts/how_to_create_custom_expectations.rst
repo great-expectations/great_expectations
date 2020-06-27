@@ -41,21 +41,11 @@ strictly required. If you want to confuse yourself with bad names, the package w
 
 For example, in Pandas:
 
-`@MetaPandasDataset.column_map_expectation` decorates a custom function, wrapping it with all the business logic
-required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required
-arguments like `mostly` and `result_format`. Your custom function can focus exclusively on the business logic of
-passing or failing the expectation.
 
-To work with these decorators, your custom function must accept two arguments: `self` and `column`. When your function
-is called, `column` will contain all the non-null values in the given column. Your function must return a series of
-boolean values in the same order, with the same index.
 
-`@MetaPandasDataset.column_aggregate_expectation` accepts `self` and `column`. It must return a dictionary containing
-a boolean `success` value, and a nested dictionary called `result` which contains an `observed_value` argument.
 
-Setting the _data_asset_type is not strictly necessary, but doing so allows GE to recognize that you have added
-expectations rather than simply added support for the same expectation suite on a different
-backend/compute environment.
+
+
 
 .. code-block:: python
 
@@ -319,21 +309,10 @@ A similar implementation for SqlAlchemy would also import the base decorator:
                 }
             }
 
-Rapid Prototyping
-========================================
 
-For rapid prototyping, the following syntax allows quick iteration on the logic for expectations.
 
-.. code-block:: bash
 
-    >> DataAsset.test_expectation_function(my_func)
 
-    >> Dataset.test_column_map_expectation_function(my_map_func, column='my_column')
-
-    >> Dataset.test_column_aggregate_expectation_function(my_agg_func, column='my_column')
-
-These functions will return output just like regular expectations. However, they will NOT save a copy of the
-expectation to the current expectation suite.
 
 **************************************************
 Using custom expectations

@@ -112,9 +112,10 @@ def test_get_available_data_asset_names_with_one_datasource_without_a_generator_
 
 
 def test_get_available_data_asset_names_with_multiple_datasources_with_and_without_generators(
-    empty_data_context,
+    empty_data_context, sa
 ):
     """Test datasources with and without generators."""
+    # requires sqlalchemy because it instantiates sqlalchemydatasource
     context = empty_data_context
     connection_kwargs = {"credentials": {"drivername": "sqlite"}}
 
@@ -530,8 +531,6 @@ data_docs/
                 short-logo-vector.svg
                 short-logo.png
                 validation_failed_unexpected_values.gif
-            scripts/
-                bootstrap-table-filter-control.min.js
             styles/
                 data_docs_custom_styles_template.css
                 data_docs_default_styles.css

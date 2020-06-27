@@ -14,7 +14,7 @@ from great_expectations.data_context.store import (
 
 class StoreAnonymizer(Anonymizer):
     def __init__(self, salt=None):
-        super(StoreAnonymizer, self).__init__(salt=salt)
+        super().__init__(salt=salt)
         # ordered bottom up in terms of inheritance order
         self._ge_classes = [
             ValidationsStore,

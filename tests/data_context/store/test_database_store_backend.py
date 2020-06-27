@@ -6,7 +6,30 @@ from great_expectations.data_context.store import DatabaseStoreBackend
 from great_expectations.exceptions import StoreBackendError
 
 
-def test_database_store_backend_duplicate_key_violation(caplog):
+def test_database_store_backend_get_url_for_key(caplog, sa):
+    store_backend = DatabaseStoreBackend(
+        credentials={
+            "drivername": "postgresql",
+            "username": "postgres",
+            "password": "",
+            "host": "localhost",
+            "port": "5432",
+            "database": "test_ci",
+        },
+        table_name="test_database_store_backend_url_key",
+        key_columns=["k1"],
+    )
+
+    # existing key
+    key = "1"
+    assert "postgresql://test_ci/1" == store_backend.get_url_for_key(key)
+
+    # non-existing key : should still work
+    key = "not_here"
+    assert "postgresql://test_ci/not_here" == store_backend.get_url_for_key(key)
+
+
+def test_database_store_backend_duplicate_key_violation(caplog, sa):
     store_backend = DatabaseStoreBackend(
         credentials={
             "drivername": "postgresql",
