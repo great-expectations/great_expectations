@@ -45,7 +45,7 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 
 
     .. warning::
-    If you are also storing :ref:`Validations in GCS, <how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_gcs>` please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
+        If you are also storing :ref:`Validations in GCS, <how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_gcs>` please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
 
     .. code-block:: yaml
 
