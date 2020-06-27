@@ -66,7 +66,7 @@ jobs:
       dist: trusty
       python: 3.6
       env:
-        - GE_PYTEST_OPTS="--mysql"
+        - GE_PYTEST_OPTS=""
     #  - stage: test
     #    dist: xenial
     #    env: PANDAS=0.25.3
