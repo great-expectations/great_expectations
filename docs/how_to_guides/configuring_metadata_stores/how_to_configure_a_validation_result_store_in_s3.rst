@@ -16,6 +16,8 @@ Steps
 
 1. **Configure** `boto3 <https://github.com/boto/boto3>`_ **to connect to the Amazon S3 bucket where Validation results will be stored.**
 
+    Instructions on how to set up `boto3 <https://github.com/boto/boto3>`_ with AWS can be found at boto3's `documentation site <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_.
+
 2. **Identify your Data Context Validations Store**
 
     Look for the following section in your Data Context's ``great_expectations.yml`` file:
@@ -37,11 +39,10 @@ Steps
 3. **Update your configuration file to include a new store for Validation results on S3.**
 
     In the example below, the new store's name is set to ``validations_S3_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder in your S3 bucket where Validation results will be located.
-    
-.. warning::
 
-    If you are also storing :ref:`Expectations in S3, <how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_amazon_s3>` please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
 
+    .. warning::
+        If you are also storing :ref:`Expectations in S3, <how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_amazon_s3>` please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
 
     .. code-block:: yaml
 
@@ -69,7 +70,7 @@ Steps
 
 
 
-5. **Confirm that the new Validations store has been added by running ``great_expectations store list``.**
+5. **Confirm that the new Validations store has been added by running** ``great_expectations store list`` **.**
 
     Notice the output contains two Validations Stores: the original ``validations_store`` on the local filesystem and the ``validations_S3_store`` we just configured.  This is ok, since Great Expectations will look for Validation results on the S3 bucket as long as we set the ``validations_store_name`` variable to ``validations_S3_store``.
 
@@ -100,7 +101,6 @@ Steps
 Additional resources
 --------------------
 
-- Instructions on how to set up `boto3 <https://github.com/boto/boto3>`_ with AWS can be found at boto3's `documentation site <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_.
 
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
 
