@@ -18,6 +18,8 @@ Steps
 
 1. **Configure** `boto3 <https://github.com/boto/boto3>`_ **to connect to the Amazon S3 bucket where Expectations will be stored.**
 
+    Instructions on how to set up `boto3 <https://github.com/boto/boto3>`_ with AWS can be found at boto3's `documentation site <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_.
+
 2. **Identify your Data Context Expectations Store**
 
     In your ``great_expectations.yml`` , look for the following lines.  The configuration tells Great Expectations to look for Expectations in a store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
@@ -40,8 +42,7 @@ Steps
 
     In our case, the name is set to ``expectations_S3_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder where Expectation files will be located.
 
-.. warning::
-
+    .. warning::
     If you are also storing :ref:`Validations in S3, <how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_s3>` please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
 
     .. code-block:: yaml
@@ -102,11 +103,6 @@ Steps
         2 Expectation Suites found:
          - exp1
          - exp2
-
-Additional resources
---------------------
-
-- Instructions on how to set up `boto3 <https://github.com/boto/boto3>`_ with AWS can be found at boto3's `documentation site <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_.
 
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
 
