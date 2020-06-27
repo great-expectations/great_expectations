@@ -515,7 +515,7 @@
         "meta": {},
         "kwargs": {
           "column": "Age",
-          "mostly": 0.47578065498857575,
+          "mostly": 0.476,
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_values_to_not_be_null"

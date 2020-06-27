@@ -1,7 +1,7 @@
-.. _how_to_guides__creating_batches__how_to_load_a_pandas_dataframe_in_memory_as_a_batch:
+.. _how_to_guides__creating_batches__how_to_load_a_pandas_dataframe_as_a_batch:
 
-How to load a Pandas dataframe in memory as a batch
-===================================================
+How to load a Pandas dataframe as a Batch
+=========================================
 
 .. admonition:: Admonition from Mr. Dickens
 

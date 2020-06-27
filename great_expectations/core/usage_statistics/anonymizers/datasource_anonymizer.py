@@ -9,7 +9,7 @@ from great_expectations.datasource import (
 
 class DatasourceAnonymizer(Anonymizer):
     def __init__(self, salt=None):
-        super(DatasourceAnonymizer, self).__init__(salt=salt)
+        super().__init__(salt=salt)
 
         # ordered bottom up in terms of inheritance order
         self._ge_classes = [
@@ -28,9 +28,5 @@ class DatasourceAnonymizer(Anonymizer):
             ge_classes=self._ge_classes,
             object_config=config,
         )
-
-        if anonymized_info_dict.get("parent_class") == "SqlAlchemyDatasource":
-            sqlalchemy_dialect = config["engine"]
-            anonymized_info_dict["sqlalchemy_dialect"] = sqlalchemy_dialect
 
         return anonymized_info_dict

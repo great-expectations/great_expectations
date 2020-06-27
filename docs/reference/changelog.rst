@@ -4,13 +4,52 @@
 Changelog
 #########
 
-develop
+
+Develop
+-----------------
+
+0.11.6
+-----------------
+* [FEATURE] Auto-install Python DB packages.  If the required packages for a DB library are not installed, GE will offer the user to install them, without exiting CLI
+* [FEATURE] Add new expectation expect_table_row_count_to_equal_other_table for SqlAlchemyDataset
+* [FEATURE] A profiler that builds suites from JSONSchema files
+* [ENHANCEMENT] Add ``.feather`` file support to PandasDatasource
+* [ENHANCEMENT] Use ``colorama init`` to support terminal color on Windows
+* [ENHANCEMENT] Update how_to_trigger_slack_notifications_as_a_validation_action.rst
+* [ENHANCEMENT] Added note for config_version in great_expectations.yml
+* [ENHANCEMENT] Implement "column_quantiles" for MySQL (via a compound SQLAlchemy query, since MySQL does not support "percentile_disc")
+* [BUGFIX] "data_asset.validate" events with "data_asset_name" key in the batch kwargs were failing schema validation
+* [BUGFIX] database_store_backend does not support storing Expectations in DB
+* [BUGFIX] instantiation of ExpectationSuite always adds GE version metadata to prevent datadocs from crashing
+* [BUGFIX] Fix all tests having to do with missing data source libraries
+* [DOCS] will/docs/how_to/Store Expectations on Google Cloud Store
+
+0.11.5
+-----------------
+* [FEATURE] Add support for expect_column_values_to_match_regex_list exception for Spark backend
+* [ENHANCEMENT] Added 3 new usage stats events: "cli.new_ds_choice", "data_context.add_datasource", and "datasource.sqlalchemy.connect"
+* [ENHANCEMENT] Support platform_specific_separator flag for TupleS3StoreBackend prefix
+* [ENHANCEMENT] Allow environment substitution in config_variables.yml
+* [BUGFIX] fixed issue where calling head() on a SqlAlchemyDataset would fail if the underlying table is empty
+* [BUGFIX] fixed bug in rounding of mostly argument to nullity expectations produced by the BasicSuiteBuilderProfiler
+* [DOCS] New How-to guide: How to add a Validation Operator (+ updated in Validation Operator doc strings)
+
+0.11.4
+-----------------
+* [BUGIFX] Fixed an error that crashed the CLI when called in an environment with neither SQLAlchemy nor google.auth installed
+
+0.11.3
 -----------------
 * [ENHANCEMENT] Removed the misleading scary "Site doesn't exist or is inaccessible" message that the CLI displayed before building Data Docs for the first time.
 * [ENHANCEMENT] Catch sqlalchemy.exc.ArgumentError and google.auth.exceptions.GoogleAuthError in SqlAlchemyDatasource __init__ and re-raise them as DatasourceInitializationError - this allows the CLI to execute its retry logic when users provide a malformed SQLAlchemy URL or attempt to connect to a BigQuery project without having proper authentication.
 * [BUGFIX] Fixed issue where the URL of the Glossary of Expectations article in the auto-generated suite edit notebook was wrong (out of date) (#1557).
 * [BUGFIX] Use renderer_type to set paths in jinja templates instead of utm_medium since utm_medium is optional
 * [ENHANCEMENT] Bring in custom_views_directory in DefaultJinjaView to enable custom jinja templates stored in plugins dir
+* [BUGFIX] fixed glossary links in walkthrough modal, README, CTA button, scaffold notebook
+* [BUGFIX] Improved TupleGCSStoreBackend configurability (#1398 #1399)
+* [BUGFIX] Data Docs: switch bootstrap-table-filter-control.min.js to CDN
+* [ENHANCEMENT] BasicSuiteBuilderProfiler now rounds mostly values for readability
+* [DOCS] Add AutoAPI as the primary source for API Reference docs.
 
 0.11.2
 -----------------

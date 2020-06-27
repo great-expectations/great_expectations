@@ -101,7 +101,7 @@ def test_missing_engine_error(sa):
     assert "Engine or connection_string must be provided." in str(err.value)
 
 
-def test_only_connection_string(titanic_sqlite_db):
+def test_only_connection_string(titanic_sqlite_db, sa):
     conn_string = titanic_sqlite_db.url
     SqlAlchemyDataset("titanic", connection_string=conn_string)
 
