@@ -5,9 +5,6 @@ Changelog
 #########
 
 
-Develop
------------------
-
 0.11.6
 -----------------
 * [FEATURE] Auto-install Python DB packages.  If the required packages for a DB library are not installed, GE will offer the user to install them, without exiting CLI

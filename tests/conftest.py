@@ -113,6 +113,7 @@ def build_test_backends_list(metafunc):
             try:
                 engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
                 conn = engine.connect()
+                _ = conn.execute("SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));")
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):
                 raise ImportError(
