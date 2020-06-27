@@ -5,9 +5,14 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import PandasDatasource
-from great_expectations.profile.base import DatasetProfiler
+from great_expectations.profile.base import DatasetProfiler, Profiler
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.profile.columns_exist import ColumnsExistProfiler
+
+
+def test_base_class_not_instantiable_due_to_abstract_methods():
+    with pytest.raises(TypeError):
+        Profiler()
 
 
 def test_DataSetProfiler_methods():
