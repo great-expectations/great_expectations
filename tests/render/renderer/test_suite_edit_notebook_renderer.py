@@ -3,6 +3,8 @@ import os
 
 import nbformat
 import pytest
+from nbconvert.preprocessors import ExecutePreprocessor
+
 from great_expectations import DataContext
 from great_expectations.cli.suite import _suite_edit
 from great_expectations.core import ExpectationSuiteSchema
@@ -12,7 +14,6 @@ from great_expectations.exceptions import (
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
-from nbconvert.preprocessors import ExecutePreprocessor
 
 
 @pytest.fixture
