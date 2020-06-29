@@ -94,12 +94,12 @@ class SuiteEditNotebookRenderer(Renderer):
         return instantiate_class_from_config(
             config=suite_edit_notebook_config.__dict__
             if suite_edit_notebook_config
-            else {},
-            runtime_environment={},
-            config_defaults={
+            else {
                 "module_name": "great_expectations.render.renderer.suite_edit_notebook_renderer",
                 "class_name": "SuiteEditNotebookRenderer",
             },
+            runtime_environment={},
+            config_defaults={},
         )
 
     @classmethod
