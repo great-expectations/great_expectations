@@ -474,9 +474,26 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def get_crosstab(
         self,
         column_A,
-        column_B
+        column_B,
+        bins_A=None,
+        bins_B=None,
+        n_bins_A=None,
+        n_bins_B=None,
     ):
-        return pd.crosstab(self[column_A], columns=self[column_B])
+        series_A = self.get_digitized_values(self[column_A], bins_A, n_bins_A)
+        series_B = self.get_digitized_values(self[column_B], bins_B, n_bins_B)
+        return pd.crosstab(series_A, columns=series_B)
+
+    def get_digitized_values(series, bins, n_bins):
+        if bins is None and n_bins is None:
+            return series
+
+        if bins is None and n_bins is not None:
+            bins = np.histogram_bin_edges(series)
+            # Make sure max of series is included in rightmost bin
+            bins[-1] = np.nextafter(bins[-1], bins[-1] + 1)
+
+        return np.digitize(series, bins=bins)
 
     ### Expectation methods ###
 

@@ -4299,6 +4299,10 @@ class Dataset(MetaDataset):
         self,
         column_A,
         column_B,
+        bins_A,
+        bins_B,
+        n_bins_A,
+        n_bins_B,
         max_V=0.05,
         ignore_missings=None,
         result_format=None,
@@ -4340,7 +4344,7 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
-        crosstab = self.get_crosstab(column_A, column_B)
+        crosstab = self.get_crosstab(column_A, column_B, bins_A, bins_B, n_bins_A, n_bins_B)
         chi2_result = stats.chi2_contingency(crosstab)
         # See e.g. https://en.wikipedia.org/wiki/Cram%C3%A9r%27s_V
         cramers_V = np.sqrt(chi2_result[0] / self.get_row_count() / min(crosstab.shape))
