@@ -51,10 +51,10 @@ to configure the datasource to load and return DataAssets of the custom type.
     id: datasource_s3
     title: Datasource - S3
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
     maturity_details:
         api_stability: medium
         implementation_completeness: Complete
@@ -66,28 +66,28 @@ to configure the datasource to load and return DataAssets of the custom type.
     id: datasource_filesystem
     title: Datasource - Filesystem
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
     maturity_details:
         api_stability: Medium
         implementation_completeness: Complete
         unit_test_coverage: Complete
         integration_infrastructure_test_coverage: Partial
         documentation_completeness: Partial
-        bug_risk: Low (unless you’re on windows)
+        bug_risk: Low (unless you’re on Windows)
 
     id: datasource_gcs
     title: Datasource - GCS
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: Experimental
     maturity_details:
-        api_stability: medium [supported via native ‘gs://' syntax in pandas and spark; medium because we expect configuration to evolve]
-        implementation_completeness: Medium [works via passthrough, not via CLI]
+        api_stability: Medium (supported via native ‘gs://' syntax in Pandas and Ppark; medium because we expect configuration to evolve)
+        implementation_completeness: Medium (works via passthrough, not via CLI)
         unit_test_coverage: Minimal
         integration_infrastructure_test_coverage: Minimal
         documentation_completeness: Minimal
@@ -96,12 +96,12 @@ to configure the datasource to load and return DataAssets of the custom type.
     id: datasource_azure_blob_storage
     title: Datasource - Azure Blob Storage
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: In Roadmap (Sub-Experimental - "Not Impossible")
     maturity_details:
-        api_stability: N/A [Supported on (data bricks) spark via ‘wasb://' / ‘wasps://' url; requires download locally first for pandas]
+        api_stability: N/A (Supported on Databricks Spark via ‘wasb://' / ‘wasps://' url; requires local download first for Pandas)
         implementation_completeness: Minimal
         unit_test_coverage: N/A
         integration_infrastructure_test_coverage: N/A

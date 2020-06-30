@@ -51,114 +51,114 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
     id: datasource_postgresql
     title: Datasource - PostgreSQL
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: Production
     maturity_details:
         api_stability: High
         implementation_completeness: Complete
         unit_test_coverage: Complete
         integration_infrastructure_test_coverage: Complete
-        documentation_completeness: Medium [doesn’t have “specific” how-to, but we say ‘easy to use’ overall]
+        documentation_completeness: Medium (doesn’t have a specific how-to, but easy to use overall)
         bug_risk: Low
-        expectation_completeness: Moderate+ (all sqlalchemy works)
+        expectation_completeness: Moderate
 
     id: datasource_bigquery
     title: Datasource - BigQuery
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity: TODO
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
     maturity_details:
-        api_stability: Unstable
-        implementation_completeness: TODO
-        unit_test_coverage: Partial
-        integration_infrastructure_test_coverage: Minimal (optional)
-        documentation_completeness: Partial
-        bug_risk: High
-        expectation_completeness: TODO
+        api_stability: Unstable (table generator inability to work with triple-dotted, temp table usability, init flow calls setup "other")
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: Partial (no test coverage for temp table creation)
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Partial (how-to does not cover all cases)
+        bug_risk: High (we *know* of several bugs, including inability to list tables, SQLAlchemy URL incomplete)
+        expectation_completeness: Moderate
 
     id: datasource_redshift
     title: Datasource - Amazon Redshift
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity: TODO
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
     maturity_details:
-        api_stability: Moderate
+        api_stability: Moderate (unresolved driver recommendation; potential metadata/introspection method special handling for performance)
         implementation_completeness: Complete
         unit_test_coverage: Minimal
-        integration_infrastructure_test_coverage: Minimal
+        integration_infrastructure_test_coverage: Minimal (none automated)
         documentation_completeness: Moderate
-        bug_risk: Moderate
-        expectation_completeness: Moderate+ (all sqlalchemy works)
+        bug_risk: Moderate (SQLAlchemy driver may be difficult to find, and we do not have a clear recommendation for the correct driver)
+        expectation_completeness: Moderate
 
     id: datasource_snowflake
     title: Datasource - Snowflake
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity: TODO
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
     maturity_details:
-        api_stability: TODO
-        implementation_completeness: TODO
-        unit_test_coverage: TODO
-        integration_infrastructure_test_coverage: TODO
-        documentation_completeness: TODO
-        bug_risk: TODO
-        expectation_completeness: TODO
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness: TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+        expectation_completeness: TODO:FEATURE_MATURITY
 
     id: datasource_mssql
     title: Datasource - Microsoft SQL Server
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: Experimental
     maturity_details:
         api_stability: High
         implementation_completeness: Moderate
-        unit_test_coverage: Minimal [None]
-        integration_infrastructure_test_coverage: Minimal [None]
+        unit_test_coverage: Minimal (none)
+        integration_infrastructure_test_coverage: Minimal (none)
         documentation_completeness: Minimal
         bug_risk: High
-        expectation_completeness: Low [some required queries do not generate properly, such as related to nullity]
+        expectation_completeness: Low (some required queries do not generate properly, such as related to nullity)
 
     id: datasource_mysql
     title: Datasource - MySQL
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: Experimental
     maturity_details:
-        api_stability: Low [no consideration for temp tables]
-        implementation_completeness: Low [no consideration for temp tables]
-        unit_test_coverage: Minimal [None]
-        integration_infrastructure_test_coverage: Minimal [None]
-        documentation_completeness:  Minimal [None]
-        bug_risk: [Unknown]
-        expectation_completeness: [Unknown]
+        api_stability: Low (no consideration for temp tables)
+        implementation_completeness: Low (no consideration for temp tables)
+        unit_test_coverage: Minimal (none)
+        integration_infrastructure_test_coverage: Minimal (none)
+        documentation_completeness:  Minimal (none)
+        bug_risk: Unknown
+        expectation_completeness: Unknown
 
     id: datasource_mariadb
     title: Datasource - MariaDB
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: Experimental
     maturity_details:
-        api_stability: Low [no consideration for temp tables]
-        implementation_completeness: Low [no consideration for temp tables]
-        unit_test_coverage: Minimal [None]
-        integration_infrastructure_test_coverage: Minimal [None]
-        documentation_completeness:  Minimal [None]
-        bug_risk: [Unknown]
-        expectation_completeness: [Unknown]
+        api_stability: Low (no consideration for temp tables)
+        implementation_completeness: Low (no consideration for temp tables)
+        unit_test_coverage: Minimal (none)
+        integration_infrastructure_test_coverage: Minimal (none)
+        documentation_completeness:  Minimal (none)
+        bug_risk: Unknown
+        expectation_completeness: Unknown
     """
 
     recognized_batch_parameters = {"query_parameters", "limit", "dataset_options"}

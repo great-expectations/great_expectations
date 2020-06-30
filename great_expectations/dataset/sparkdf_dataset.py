@@ -494,9 +494,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     id: validation_engine_pyspark_self_managed
     title: Validation Engine - pyspark - Self-Managed
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: Production
     maturity_details:
         api_stability: Stable
@@ -510,15 +510,15 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     id: validation_engine_databricks
     title: Validation Engine - Databricks
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: Beta
     maturity_details:
         api_stability: Stable
-        implementation_completeness: Low [dbfs-specific handling]
+        implementation_completeness: Low (dbfs-specific handling)
         unit_test_coverage: N/A -> implementation not different
-        integration_infrastructure_test_coverage: We've tested a bit, know others have used it
+        integration_infrastructure_test_coverage: Minimal (we've tested a bit, know others have used it)
         documentation_completeness: Moderate (need docs on managing project configuration via dbfs/etc.)
         bug_risk: Low/Moderate
         expectation_completeness: Moderate
@@ -526,15 +526,15 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     id: validation_engine_emr_spark
     title: Validation Engine - EMR - Spark
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: Experimental
     maturity_details:
         api_stability: Stable
         implementation_completeness: Low (need to provide guidance on "known good" paths, and we know there are many "knobs" to tune that we have not explored/tested)
         unit_test_coverage: N/A -> implementation not different
-        integration_infrastructure_test_coverage: Unknown / Rumor
+        integration_infrastructure_test_coverage: Unknown
         documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
         bug_risk: Low/Moderate
         expectation_completeness: Moderate
@@ -542,15 +542,15 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     id: validation_engine_spark_other
     title: Validation Engine - Spark - Other
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: Experimental
     maturity_details:
         api_stability: Stable
-        implementation_completeness: "other" means we haven't even tested possibility (e.g. known glue deployment)
+        implementation_completeness: Other (we haven't tested possibility, known glue deployment)
         unit_test_coverage: N/A -> implementation not different
-        integration_infrastructure_test_coverage: Unknown / Rumor
+        integration_infrastructure_test_coverage: Unknown
         documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
         bug_risk: Low/Moderate
         expectation_completeness: Moderate
