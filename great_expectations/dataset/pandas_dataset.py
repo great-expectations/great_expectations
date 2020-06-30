@@ -324,7 +324,7 @@ Notes:
     2. Concatenations, joins, and merges of PandaDataSets contain NO expectations (since no autoinspection
        is performed by default).
 
-.. admonition:: `Feature Maturity <FEATURE_MATURITY_URL>`_
+--ge-feature-maturity-info--
 
     id: validation_engine_pandas
     title: Validation Engine - Pandas
@@ -341,6 +341,8 @@ Notes:
         documentation_completeness: Complete
         bug_risk: Low
         expectation_completeness: Complete
+
+--ge-feature-maturity-info--
     """
 
     # this is necessary to subclass pandas in a proper way.

@@ -42,8 +42,8 @@ Expectation Suite.
 
 A checkpoint can be as complex as many batches of data across different
 datasources paired with one or more Expectation Suites each.
-\f
-.. admonition:: Feature Maturity
+
+--ge-feature-maturity-info--
 
     id: checkpoint_notebook
     title: Checkpoint - Notebook
@@ -104,6 +104,8 @@ datasources paired with one or more Expectation Suites each.
         integration_infrastructure_test_coverage: Minimal
         documentation_completeness: Complete [pending how-to]
         bug_risk: Low
+
+--ge-feature-maturity-info--
     """
     pass
 

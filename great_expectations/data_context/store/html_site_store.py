@@ -26,7 +26,7 @@ class HtmlSiteStore(object):
     """
 A HtmlSiteStore facilitates publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results.
 
-.. admonition:: Feature Maturity
+--ge-feature-maturity-info--
 
     id: html_site_store_filesystem
     title: HTML Site Store - Filesystem
@@ -87,6 +87,8 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
         integration_infrastructure_test_coverage: Minimal
         documentation_completeness: Minimal
         bug_risk: Moderate
+
+--ge-feature-maturity-info--
     """
 
     _key_class = SiteSectionIdentifier

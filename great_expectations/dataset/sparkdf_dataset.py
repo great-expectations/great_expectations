@@ -489,7 +489,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     """
 This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
-.. admonition:: Feature Maturity
+--ge-feature-maturity-info--
 
     id: validation_engine_pyspark_self_managed
     title: Validation Engine - pyspark - Self-Managed
@@ -554,6 +554,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
         bug_risk: Low/Moderate
         expectation_completeness: Moderate
+
+--ge-feature-maturity-info--
     """
 
     @classmethod

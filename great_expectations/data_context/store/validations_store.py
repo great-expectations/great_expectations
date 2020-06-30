@@ -15,7 +15,7 @@ class ValidationsStore(Store):
     """
 A ValidationsStore manages Validation Results to ensure they are accessible via a Data Context for review and rendering into Data Docs.
 
-.. admonition:: Feature Maturity
+--ge-feature-maturity-info--
 
     id: validations_store_filesystem
     title: Validations Store - Filesystem
@@ -76,7 +76,10 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
         integration_infrastructure_test_coverage: Minimal
         documentation_completeness: Minimal
         bug_risk: Moderate
+
+--ge-feature-maturity-info--
     """
+
     _key_class = ValidationResultIdentifier
 
     def __init__(self, store_backend=None, runtime_environment=None):
