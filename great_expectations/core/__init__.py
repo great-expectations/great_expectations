@@ -423,7 +423,7 @@ class ExpectationKwargs(dict):
                 "catch_exceptions must be a boolean value"
             )
 
-        super(ExpectationKwargs, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         ensure_json_serializable(self)
 
     def isEquivalentTo(self, other):
@@ -657,6 +657,8 @@ class ExpectationSuite(object):
         self.data_asset_type = data_asset_type
         if meta is None:
             meta = {"great_expectations.__version__": ge_version}
+        if not "great_expectations.__version__" in meta.keys():
+            meta["great_expectations.__version__"] = ge_version
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta

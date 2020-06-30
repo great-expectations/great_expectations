@@ -259,9 +259,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return "--"
 
         observed_partition_object = evr.result["details"]["observed_partition"]
-        observed_distribution = super(
-            ValidationResultsTableContentBlockRenderer, cls
-        )._get_kl_divergence_chart(observed_partition_object)
+        observed_distribution = super()._get_kl_divergence_chart(
+            observed_partition_object
+        )
 
         observed_value = (
             num_to_str(evr.result.get("observed_value"))
@@ -327,6 +327,28 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         )
 
     @classmethod
+    def _get_expect_table_row_count_to_equal_other_table_observed_value(cls, evr):
+        if not evr.result.get("observed_value"):
+            return "--"
+
+        self_table_row_count = num_to_str(evr.result["observed_value"]["self"])
+        other_table_row_count = num_to_str(evr.result["observed_value"]["other"])
+
+        return RenderedStringTemplateContent(
+            **{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Row Count: $self_table_row_count<br>Other Table Row Count: $other_table_row_count",
+                    "params": {
+                        "self_table_row_count": self_table_row_count,
+                        "other_table_row_count": other_table_row_count,
+                    },
+                    "styling": {"classes": ["mb-2"]},
+                },
+            }
+        )
+
+    @classmethod
     def _get_observed_value(cls, evr):
         result = evr.result
         if result is None:
@@ -338,6 +360,10 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return cls._get_kl_divergence_observed_value(evr)
         elif expectation_type == "expect_column_quantile_values_to_be_between":
             return cls._get_quantile_values_observed_value(evr)
+        elif expectation_type == "expect_table_row_count_to_equal_other_table":
+            return cls._get_expect_table_row_count_to_equal_other_table_observed_value(
+                evr
+            )
 
         if result.get("observed_value"):
             observed_value = result.get("observed_value")
@@ -355,6 +381,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 )
             except KeyError:
                 return "unknown % null"
+            except TypeError:
+                return "NaN% null"
         elif expectation_type == "expect_column_values_to_not_be_null":
             try:
                 null_percent = result["unexpected_percent"]
@@ -364,6 +392,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 )
             except KeyError:
                 return "unknown % not null"
+            except TypeError:
+                return "NaN% not null"
         elif result.get("unexpected_percent") is not None:
             return (
                 num_to_str(result.get("unexpected_percent"), precision=5)
@@ -374,9 +404,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _process_content_block(cls, content_block, has_failed_evr):
-        super(ValidationResultsTableContentBlockRenderer, cls)._process_content_block(
-            content_block, has_failed_evr
-        )
+        super()._process_content_block(content_block, has_failed_evr)
         content_block.header_row = ["Status", "Expectation", "Observed Value"]
         content_block.header_row_options = {"Status": {"sortable": True}}
 

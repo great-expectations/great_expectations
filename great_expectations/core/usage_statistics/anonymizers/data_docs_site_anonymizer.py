@@ -9,7 +9,7 @@ from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymiz
 
 class DataDocsSiteAnonymizer(Anonymizer):
     def __init__(self, salt=None):
-        super(DataDocsSiteAnonymizer, self).__init__(salt=salt)
+        super().__init__(salt=salt)
         self._site_builder_anonymizer = SiteBuilderAnonymizer(salt=salt)
         self._store_backend_anonymizer = StoreBackendAnonymizer(salt=salt)
 

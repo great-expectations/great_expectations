@@ -16,6 +16,8 @@ try:
     from sqlalchemy.sql.elements import WithinGroup
 except ImportError:
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
+    DefaultDialect = None
+    WithinGroup = None
 
 
 def is_valid_partition_object(partition_object):
@@ -580,7 +582,7 @@ def get_approximate_percentile_disc_sql(selects: List, sql_engine_dialect: Any) 
             "approximate "
             + str(
                 stmt.compile(
-                    dialect=sql_engine_dialect, compile_kwargs={"literal_binds": True},
+                    dialect=sql_engine_dialect, compile_kwargs={"literal_binds": True}
                 )
             )
             for stmt in selects
@@ -592,6 +594,7 @@ def check_sql_engine_dialect(
     actual_sql_engine_dialect: Any, candidate_sql_engine_dialect: Any,
 ) -> bool:
     try:
+        # noinspection PyTypeChecker
         return isinstance(actual_sql_engine_dialect, candidate_sql_engine_dialect)
     except (AttributeError, TypeError):
         return False
