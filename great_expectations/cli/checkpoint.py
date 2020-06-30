@@ -48,14 +48,14 @@ datasources paired with one or more Expectation Suites each.
     id: checkpoint_notebook
     title: Checkpoint - Notebook
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: Experimental
     maturity_details:
-        api_stability: Unstable - expect changes to batch definition; "assets to validate" is still totally untyped
+        api_stability: Unstable (expect changes to batch definition; "assets to validate" is still totally untyped)
         implementation_completeness: Complete
-        unit_test_coverage: Partial "golden path"-focused tests (error checking tests need to be improved)
+        unit_test_coverage: Partial ("golden path"-focused tests; error checking tests need to be improved)
         integration_infrastructure_test_coverage: N/A
         documentation_completeness: Complete
         bug_risk: Low
@@ -63,12 +63,12 @@ datasources paired with one or more Expectation Suites each.
     id: checkpoint_command_line
     title: Checkpoint - Command Line
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: Experimental
     maturity_details:
-        api_stability: Unstable - expect changes to batch definition; no checkpoint store)
+        api_stability: Unstable (expect changes to batch definition; no checkpoint store)
         implementation_completeness: Complete
         unit_test_coverage: Complete
         integration_infrastructure_test_coverage: N/A
@@ -78,9 +78,9 @@ datasources paired with one or more Expectation Suites each.
     id: checkpoint_cron_job
     title: Checkpoint - Cron
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: Experimental
     maturity_details:
         api_stability: Unstable (expect changes to batch validation; no checkpoint store)
@@ -93,17 +93,92 @@ datasources paired with one or more Expectation Suites each.
     id: checkpoint_airflow_dag
     title: Checkpoint - Airflow DAG
     icon:
-    short_description:
-    description: Note: does *not* include embedding in airflow UI
-    how_to_guide_url:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY (does *not* include embedding in airflow UI)
+    how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: Beta
     maturity_details:
         api_stability: Unstable
-        implementation_completeness: Partial [no operator, but probably don't need one]
+        implementation_completeness: Partial (no operator, but probably don't need one)
         unit_test_coverage: N/A
         integration_infrastructure_test_coverage: Minimal
-        documentation_completeness: Complete [pending how-to]
+        documentation_completeness: Complete (pending how-to)
         bug_risk: Low
+
+    id: checkpoint_kedro
+    title: Checkpoint - Kedro
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: checkpoint_prefect
+    title: Checkpoint - Prefect
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: checkpoint_dbt_internal
+    title: Checkpoint - DBT Internal
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: checkpoint_dbt_adjacent
+    title: Checkpoint - DBT Adjacent
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: checkpoint_other
+    title: Checkpoint - Other
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
 
 --ge-feature-maturity-info--
     """

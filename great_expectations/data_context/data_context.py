@@ -89,6 +89,234 @@ class BaseDataContext(object):
         into DataContext class.
 
     Together, these changes make BaseDataContext class more testable.
+
+--ge-feature-maturity-info--
+
+    id: os_linux
+    title: OS - Linux
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: os_macos
+    title: OS - MacOS
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: os_windows
+    title: OS - Windows
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+------------------------------------------------------------
+    id: worfklow_create_edit_expectations_cli_scaffold
+    title:
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: worfklow_create_edit_expectations_cli_new
+    title:
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: worfklow_create_edit_expectations_json
+    title:
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+------------------------------------------------------------
+    id: workflow_validation_action_review_in_notebook
+    title:
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: workflow_validation_action_adjust_expectations
+    title:
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: workflow_validation_action_fix_data_problems
+    title:
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: workflow_validation_action_send_slack_notification
+    title:
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: workflow_validation_action_save_results_snippets
+    title:
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: workflow_validation_action_quarantine_failed_results
+    title:
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+------------------------------------------------------------
+    id: other_configure_expectations_and_val_ops_to_handle_warnings_and_errors
+    title:
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: other_create_custom_renderers
+    title:
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: other_add_custom_styling_to_data_docs
+    title:
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+--ge-feature-maturity-info--
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2

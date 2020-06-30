@@ -68,7 +68,99 @@ class BatchKwargsGenerator(object):
              default:
                 class_name: QueryBatchKwargsGenerator
 
+--ge-feature-maturity-info--
 
+    id: batch_kwargs_generator_manual
+    title: Batch Kwargs Generator - Manual
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: batch_kwargs_generator_s3
+    title: Batch Kwargs Generator - S3
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: batch_kwargs_generator_glob_reader
+    title: Batch Kwargs Generator - Glob Reader
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: batch_kwargs_generator_table
+    title: Batch Kwargs Generator - Table
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: batch_kwargs_generator_query
+    title: Batch Kwargs Generator - Query
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+    id: batch_kwargs_generator_subdir_reader
+    title: Batch Kwargs Generator - Subdir Reader
+    icon:
+    short_description: TODO:FEATURE_MATURITY
+    description: TODO:FEATURE_MATURITY
+    how_to_guide_url: TODO:FEATURE_MATURITY
+    maturity: TODO:FEATURE_MATURITY
+    maturity_details:
+        api_stability: TODO:FEATURE_MATURITY
+        implementation_completeness: TODO:FEATURE_MATURITY
+        unit_test_coverage: TODO:FEATURE_MATURITY
+        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
+        documentation_completeness:  TODO:FEATURE_MATURITY
+        bug_risk: TODO:FEATURE_MATURITY
+
+--ge-feature-maturity-info--
     """
 
     _batch_kwargs_type = BatchKwargs
