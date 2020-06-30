@@ -43,12 +43,122 @@ if sqlalchemy != None:
 
 class SqlAlchemyDatasource(Datasource):
     """
-    A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using the following rules:
-      - if the batch_kwargs include a table key, the datasource will provide a dataset object connected
-        to that table
-      - if the batch_kwargs include a query key, the datasource will create a temporary table using that
-        that query. The query can be parameterized according to the standard python Template engine, which
-        uses $parameter, with additional kwargs passed to the get_batch method.
+A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using the following rules:
+    - if the batch_kwargs include a table key, the datasource will provide a dataset object connected to that table
+    - if the batch_kwargs include a query key, the datasource will create a temporary table usingthat query. The query can be parameterized according to the standard python Template engine, which uses $parameter, with additional kwargs passed to the get_batch method.
+
+--ge-feature-maturity-info--
+    id: datasource_postgresql
+    title: Datasource - PostgreSQL
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Production
+    maturity_details:
+        api_stability: High
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: Complete
+        documentation_completeness: Medium [doesn’t have “specific” how-to, but we say ‘easy to use’ overall]
+        bug_risk: Low
+        expectation_completeness: Moderate+ (all sqlalchemy works)
+
+    id: datasource_bigquery
+    title: Datasource - BigQuery
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: TODO
+    maturity_details:
+        api_stability: Unstable
+        implementation_completeness: TODO
+        unit_test_coverage: Partial
+        integration_infrastructure_test_coverage: Minimal (optional)
+        documentation_completeness: Partial
+        bug_risk: High
+        expectation_completeness: TODO
+
+    id: datasource_redshift
+    title: Datasource - Amazon Redshift
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: TODO
+    maturity_details:
+        api_stability: Moderate
+        implementation_completeness: Complete
+        unit_test_coverage: Minimal
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Moderate
+        bug_risk: Moderate
+        expectation_completeness: Moderate+ (all sqlalchemy works)
+
+    id: datasource_snowflake
+    title: Datasource - Snowflake
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: TODO
+    maturity_details:
+        api_stability: TODO
+        implementation_completeness: TODO
+        unit_test_coverage: TODO
+        integration_infrastructure_test_coverage: TODO
+        documentation_completeness: TODO
+        bug_risk: TODO
+        expectation_completeness: TODO
+
+    id: datasource_mssql
+    title: Datasource - Microsoft SQL Server
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Experimental
+    maturity_details:
+        api_stability: High
+        implementation_completeness: Moderate
+        unit_test_coverage: Minimal [None]
+        integration_infrastructure_test_coverage: Minimal [None]
+        documentation_completeness: Minimal
+        bug_risk: High
+        expectation_completeness: Low [some required queries do not generate properly, such as related to nullity]
+
+    id: datasource_mysql
+    title: Datasource - MySQL
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Experimental
+    maturity_details:
+        api_stability: Low [no consideration for temp tables]
+        implementation_completeness: Low [no consideration for temp tables]
+        unit_test_coverage: Minimal [None]
+        integration_infrastructure_test_coverage: Minimal [None]
+        documentation_completeness:  Minimal [None]
+        bug_risk: [Unknown]
+        expectation_completeness: [Unknown]
+
+    id: datasource_mariadb
+    title: Datasource - MariaDB
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Experimental
+    maturity_details:
+        api_stability: Low [no consideration for temp tables]
+        implementation_completeness: Low [no consideration for temp tables]
+        unit_test_coverage: Minimal [None]
+        integration_infrastructure_test_coverage: Minimal [None]
+        documentation_completeness:  Minimal [None]
+        bug_risk: [Unknown]
+        expectation_completeness: [Unknown]
     """
 
     recognized_batch_parameters = {"query_parameters", "limit", "dataset_options"}

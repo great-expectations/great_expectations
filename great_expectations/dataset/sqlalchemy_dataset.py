@@ -294,95 +294,26 @@ class MetaSqlAlchemyDataset(Dataset):
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     """
-Feature: postgresql
--> production
-API Stability: High
-Implementation Completeness: Complete
-Unit Test Coverage: Complete
-Infrastructure Coverage: Complete
-Documentation Completeness: Medium [doesn’t have “specific” how-to, but we say ‘easy to use’ overall]
-Bug Risk: Low
-Expectation Completeness: Moderate+ (all sqlalchemy works)
 
-Bigquery
-	• API Stability: Unstable
-		○ Table generator inability to work with triple-dotted
-		○ Temp table usability
-		○ Init flow calls setup "other"
-	• Implementation Completeness
-	• Unit test: Partial
-		○ No test coverage for temp table creation, e.g.
-	• Infrastructure: Minimal (optional)
-	• Documentation: Partial
-		○ How-to does not cover all cases
-	• Bug frequency: Expected
-		○ We *know* of several bugs, including inability to list tables
-		○ Sqlalchemy URL incomplete
-Bug Frequency -> Bug Risk == H/M/L (footnote?)
-Thorough -> Complete
-Bug Frequency: "Expected" == "Expected and/or Known"
-Infrastructure test "Optional" == "minimal"
+--ge-feature-maturity-info--
 
-Feature: redshift
-->
-API Stability: Moderate [unresolved driver recommendation; potential metadata/introspection method special handling for performance]
-Implementation Completeness: Complete
-Unit Test Coverage: Minimal
-Infrastructure Coverage: Minimal [None (not automated)]
-Documentation Completeness: moderate
-Bug Risk: Moderate [sqlalchemy driver may be difficult to find, and we do not have a clear recommendation for the correct driver]
-Expectation Completeness: Moderate+ (all sqlalchemy works)
+    id: validation_engine_sqlalchemy
+    title: Validation Engine - SQLAlchemy
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: TODO
+    maturity_details:
+        api_stability: High
+        implementation_completeness: Moderate [temp table handling / permissions not universal]
+        unit_test_coverage: High
+        integration_infrastructure_test_coverage: N/A
+        documentation_completeness:  Minimal [None]
+        bug_risk: Low
 
-
-Feature: snowflake
-->
-API Stability:
-Implementation Completeness:
-Unit Test Coverage:
-Infrastructure Coverage:
-Documentation Completeness:
-Bug Risk:
-Expectation Completeness:
-
-Feature: mssql
--> Experimental
-API Stability: High
-Implementation Completeness: Moderate
-Unit Test Coverage: Minimal [None]
-Infrastructure Coverage: Minimal [None]
-Documentation Completeness: Minimal
-Bug Risk: High
-Expectation Completeness: Low [some required queries do not generate properly, such as related to nullity]
-
-Feature: mysql
--> experimental
-API Stability: Low [no consideration for temp tables]
-Implementation Completeness: Low [no consideration for temp tables]
-Unit Test Coverage: Minimal [None]
-Infrastructure Coverage: Minimal [None]
-Documentation Completeness:  Minimal [None]
-Bug Risk: [Unknown]
-Expectation Completeness: [Unknown]
-
-Feature: mariadb
--> experimental
-API Stability: Low [no consideration for temp tables]
-Implementation Completeness: Low [no consideration for temp tables]
-Unit Test Coverage: Minimal [None]
-Infrastructure Coverage: Minimal [None]
-Documentation Completeness:  Minimal [None]
-Bug Risk: [Unknown]
-Expectation Completeness: [Unknown]
-
-
-Feature: validation_engine_sqlalchemy
-API Stability: High
-Implementation Completeness: Moderate [temp table handling / permissions not universal]
-Unit Test Coverage: High
-Infrastructure Coverage: N/A
-Documentation Completeness:  Minimal [None]
-Bug Risk: Low
-    """
+--ge-feature-maturity-info--
+"""
 
     @classmethod
     def from_dataset(cls, dataset=None):
