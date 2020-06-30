@@ -20,7 +20,7 @@
             "id": "datasource_azure_blob_storage"
           },
           {
-            "id": "datasource_postgreql"
+            "id": "datasource_postgresql"
           },
           {
             "id": "datasource_bigquery"
@@ -54,10 +54,10 @@
             "id": "batch_kwargs_generator_manual"
           },
           {
-            "id": "batch_kwargs_s3"
+            "id": "batch_kwargs_generator_s3"
           },
           {
-            "id": "batch_kwargs_glob_reader"
+            "id": "batch_kwargs_generator_glob_reader"
           },
           {
             "id": "batch_kwargs_generator_table"
