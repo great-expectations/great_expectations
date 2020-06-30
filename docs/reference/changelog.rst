@@ -7,6 +7,7 @@ Changelog
 
 Develop
 -----------------
+* [BUGFIX] ProfilerTypeMapping uses lists instead of sets to prevent serialization errors when saving suites created by JsonSchemaProfiler
 
 0.11.6
 -----------------
