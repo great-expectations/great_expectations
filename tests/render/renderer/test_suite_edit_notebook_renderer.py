@@ -1336,7 +1336,7 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
         nbformat.write(nb, f)
 
     # Assertions about output
-    context = DataContext(root_dir)
+    context = DataContext(context_root_dir=root_dir)
     obs_validation_result = context.get_validation_result("warning")
     assert obs_validation_result.statistics == {
         "evaluated_expectations": 3,
