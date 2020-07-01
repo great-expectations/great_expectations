@@ -137,12 +137,12 @@ class BaseDataContext(object):
         documentation_completeness: Complete
         bug_risk: Moderate
 ------------------------------------------------------------
-    id: worfklow_create_edit_expectations_cli_scaffold
-    title:
+    id: workflow_create_edit_expectations_cli_scaffold
+    title: Create and Edit Expectations - suite scaffold
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Creating a new Expectation Suite using suite scaffold
+    description: Creating Expectation Suites through an interactive development loop using suite scaffold
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_suite_scaffold.html
     maturity: Experimental (expect exciting changes to Profiler capability)
     maturity_details:
         api_stability: N/A
@@ -152,13 +152,28 @@ class BaseDataContext(object):
         documentation_completeness: Complete
         bug_risk: Low
 
-    id: worfklow_create_edit_expectations_cli_edit
-    title:
+    id: workflow_create_edit_expectations_cli_edit
+    title: Create and Edit Expectations - CLI
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Creating a new Expectation Suite using the CLI
+    description: Creating a Expectation Suite great_expectations suite new command
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_the_cli.html
     maturity: Experimental (expect exciting changes to Profiler and Suite Renderer capability)
+    maturity_details:
+        api_stability: N/A
+        implementation_completeness: N/A
+        unit_test_coverage: N/A
+        integration_infrastructure_test_coverage: Partial
+        documentation_completeness: Complete
+        bug_risk: Low
+
+    id: workflow_create_edit_expectations_json_schema
+    title: Create and Edit Expectations - Json schema
+    icon:
+    short_description: Creating a new Expectation Suite from a json schema file
+    description: Creating a new Expectation Suite using JsonSchemaProfiler function and json schema file
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_suite_from_a_json_schema_file.html
+    maturity: Experimental (expect exciting changes to Profiler capability)
     maturity_details:
         api_stability: N/A
         implementation_completeness: N/A

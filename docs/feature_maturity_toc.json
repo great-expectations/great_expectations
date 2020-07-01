@@ -210,13 +210,13 @@
         "id": "workflow_create_edit_expectations",
         "cases": [
           {
-            "id": "worfklow_create_edit_expectations_cli_scaffold"
+            "id": "workflow_create_edit_expectations_cli_scaffold"
           },
           {
-            "id": "worfklow_create_edit_expectations_cli_edit"
+            "id": "workflow_create_edit_expectations_cli_edit"
           },
           {
-            "id": "worfklow_create_edit_expectations_json"
+            "id": "workflow_create_edit_expectations_json_schema"
           }
         ]
       }
