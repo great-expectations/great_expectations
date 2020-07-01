@@ -75,7 +75,7 @@ after scaffolding gets you close to what you want.**
 
 This is highly configurable depending on your goals. You can include or exclude
 columns, and include or exclude expectation types (when applicable). [The
-Expectation Glossary](http://docs.greatexpectations.io/en/latest/expectation_glossary.html)
+Expectation Glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=scaffold_expectations)
 contains a list of possible expectations.""",
                 "metadata": {},
             },

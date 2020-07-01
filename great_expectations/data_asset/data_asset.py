@@ -70,7 +70,7 @@ class DataAsset(object):
                 "Autoinspect_func is no longer supported; use a profiler instead (migration is easy!).",
                 category=DeprecationWarning,
             )
-        super(DataAsset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._config = {"interactive_evaluation": interactive_evaluation}
         self._initialize_expectations(
             expectation_suite=expectation_suite,
@@ -853,7 +853,7 @@ class DataAsset(object):
                 )
                 try:
                     run_time = parse(run_id)
-                except ParserError:
+                except (ParserError, TypeError):
                     pass
                 run_id = RunIdentifier(run_name=run_id, run_time=run_time)
             elif isinstance(run_id, dict):

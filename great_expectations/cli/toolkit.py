@@ -11,13 +11,16 @@ from ruamel.yaml.compat import StringIO
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.docs import build_docs
-from great_expectations.cli.util import cli_message
+from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
+from great_expectations.cli.util import cli_colorize_string, cli_message
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.types.base import MINIMUM_SUPPORTED_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -390,16 +393,39 @@ def select_datasource(context: DataContext, datasource_name: str = None) -> Data
     return data_source
 
 
-def load_data_context_with_error_handling(directory: str) -> DataContext:
+def load_data_context_with_error_handling(
+    directory: str, from_cli_upgrade_command: bool = False
+) -> DataContext:
     """Return a DataContext with good error handling and exit codes."""
     # TODO consolidate all the myriad CLI tests into this
     try:
         context = DataContext(directory)
         return context
+    except ge_exceptions.UnsupportedConfigVersionError as err:
+        directory = directory or DataContext.find_context_root_dir()
+        ge_config_version = DataContext.get_ge_config_version(
+            context_root_dir=directory
+        )
+        upgrade_helper_class = (
+            GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
+            if ge_config_version
+            else None
+        )
+        if (
+            upgrade_helper_class
+            and ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION
+        ):
+            upgrade_project(
+                context_root_dir=directory,
+                ge_config_version=ge_config_version,
+                from_cli_upgrade_command=from_cli_upgrade_command,
+            )
+        else:
+            cli_message("<red>{}</red>".format(err.message))
+            sys.exit(1)
     except (
         ge_exceptions.ConfigNotFoundError,
         ge_exceptions.InvalidConfigError,
-        ge_exceptions.UnsupportedConfigVersionError,
     ) as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)
@@ -409,11 +435,121 @@ def load_data_context_with_error_handling(directory: str) -> DataContext:
     except ge_exceptions.PluginClassNotFoundError as err:
         cli_message(err.cli_colored_message)
         sys.exit(1)
+    except ge_exceptions.InvalidConfigurationYamlError as err:
+        cli_message(f"<red>{str(err)}</red>")
+        sys.exit(1)
+
+
+def upgrade_project(
+    context_root_dir, ge_config_version, from_cli_upgrade_command=False
+):
+    continuation_message = (
+        "\nOk, exiting now. To upgrade at a later time, use the following command: "
+        "<cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade "
+        "process, visit "
+        "<cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
+        "</cyan>.\n"
+    )
+    if from_cli_upgrade_command:
+        message = (
+            f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
+            f"the version "
+            f"number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}.</red>"
+        )
+    else:
+        message = (
+            f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
+            f"the version "
+            f"number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}.\nIn order to proceed, "
+            f"your project must be upgraded.</red>"
+        )
+
+    cli_message(message)
+    upgrade_prompt = (
+        "\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
+    )
+    confirm_proceed_or_exit(
+        confirm_prompt=upgrade_prompt, continuation_message=continuation_message
+    )
+    cli_message(SECTION_SEPARATOR)
+
+    # use loop in case multiple upgrades need to take place
+    while ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+        upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
+        if not upgrade_helper_class:
+            break
+        target_ge_config_version = int(ge_config_version) + 1
+        # set version temporarily to MINIMUM_SUPPORTED_CONFIG_VERSION to get functional DataContext
+        DataContext.set_ge_config_version(
+            config_version=MINIMUM_SUPPORTED_CONFIG_VERSION,
+            context_root_dir=context_root_dir,
+        )
+        upgrade_helper = upgrade_helper_class(context_root_dir=context_root_dir)
+        upgrade_overview, confirmation_required = upgrade_helper.get_upgrade_overview()
+
+        if confirmation_required:
+            upgrade_confirmed = confirm_proceed_or_exit(
+                confirm_prompt=upgrade_overview,
+                continuation_message=continuation_message,
+                exit_on_no=False,
+            )
+        else:
+            upgrade_confirmed = True
+
+        if upgrade_confirmed:
+            cli_message("\nUpgrading project...")
+            cli_message(SECTION_SEPARATOR)
+            # run upgrade and get report of what was done, if version number should be incremented
+            upgrade_report, increment_version = upgrade_helper.upgrade_project()
+            # display report to user
+            cli_message(upgrade_report)
+            # set config version to target version
+            if increment_version:
+                DataContext.set_ge_config_version(
+                    target_ge_config_version,
+                    context_root_dir,
+                    validate_config_version=False,
+                )
+                ge_config_version += 1
+            else:
+                # restore version number to current number
+                DataContext.set_ge_config_version(
+                    ge_config_version, context_root_dir, validate_config_version=False
+                )
+                break
+        else:
+            # restore version number to current number
+            DataContext.set_ge_config_version(
+                ge_config_version, context_root_dir, validate_config_version=False
+            )
+            cli_message(continuation_message)
+            sys.exit(0)
+
+    cli_message(SECTION_SEPARATOR)
+    upgrade_success_message = "<green>Upgrade complete. Exiting...</green>\n"
+    upgrade_incomplete_message = f"""\
+<red>The Upgrade Helper was unable to perform a complete project upgrade. Next steps:</red>
+
+    - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above
+    - When complete, increment the config_version key in your <cyan>great_expectations.yml</cyan> to <cyan>{
+    ge_config_version + 1}</cyan>\n
+To learn more about the upgrade process, visit \
+<cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>
+"""
+
+    if ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+        cli_message(upgrade_incomplete_message)
+    else:
+        cli_message(upgrade_success_message)
+    sys.exit(0)
 
 
 def confirm_proceed_or_exit(
-    continuation_message="Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
-):
+    confirm_prompt: str = "Would you like to proceed?",
+    continuation_message: str = "Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
+    exit_on_no: bool = True,
+    exit_code: int = 0,
+) -> Union[None, bool]:
     """
     Every CLI command that starts a potentially lengthy (>1 sec) computation
     or modifies some resources (e.g., edits the config file, adds objects
@@ -423,7 +559,16 @@ def confirm_proceed_or_exit(
 
     The goal of this standardization is for the users to expect consistency -
     if you saw one command, you know what to expect from all others.
+
+    If the user does not confirm, the program should exit. The purpose of the exit_on_no parameter is to provide
+    the option to perform cleanup actions before exiting outside of the function.
     """
-    if not click.confirm("Would you like to proceed?", default=True):
-        cli_message(continuation_message)
-        exit(0)
+    confirm_prompt_colorized = cli_colorize_string(confirm_prompt)
+    continuation_message_colorized = cli_colorize_string(continuation_message)
+    if not click.confirm(confirm_prompt_colorized, default=True):
+        if exit_on_no:
+            cli_message(continuation_message_colorized)
+            sys.exit(exit_code)
+        else:
+            return False
+    return True

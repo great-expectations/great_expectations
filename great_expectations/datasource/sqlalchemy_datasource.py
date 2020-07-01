@@ -23,6 +23,24 @@ except ImportError:
     logger.debug("Unable to import sqlalchemy.")
 
 
+if sqlalchemy != None:
+    try:
+        import google.auth
+
+        datasource_initialization_exceptions = (
+            sqlalchemy.exc.OperationalError,
+            sqlalchemy.exc.DatabaseError,
+            sqlalchemy.exc.ArgumentError,
+            google.auth.exceptions.GoogleAuthError,
+        )
+    except ImportError:
+        datasource_initialization_exceptions = (
+            sqlalchemy.exc.OperationalError,
+            sqlalchemy.exc.DatabaseError,
+            sqlalchemy.exc.ArgumentError,
+        )
+
+
 class SqlAlchemyDatasource(Datasource):
     """
     A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using the following rules:
@@ -88,7 +106,7 @@ class SqlAlchemyDatasource(Datasource):
         batch_kwargs_generators = configuration_with_defaults.pop(
             "batch_kwargs_generators", None
         )
-        super(SqlAlchemyDatasource, self).__init__(
+        super().__init__(
             name,
             data_context=data_context,
             data_asset_type=data_asset_type,
@@ -124,10 +142,26 @@ class SqlAlchemyDatasource(Datasource):
                 self.engine = create_engine(options)
                 self.engine.connect()
 
-        except (
-            sqlalchemy.exc.OperationalError,
-            sqlalchemy.exc.DatabaseError,
-        ) as sqlalchemy_error:
+            # since we switched to lazy loading of Datasources when we initialise a DataContext,
+            # the dialect of SQLAlchemy Datasources cannot be obtained reliably when we send
+            # "data_context.__init__" events.
+            # This event fills in the SQLAlchemy dialect.
+            if data_context is not None and getattr(
+                data_context, "_usage_statistics_handler", None
+            ):
+                handler = data_context._usage_statistics_handler
+                handler.send_usage_message(
+                    event="datasource.sqlalchemy.connect",
+                    event_payload={
+                        "anonymized_name": handler._datasource_anonymizer.anonymize(
+                            self.name
+                        ),
+                        "sqlalchemy_dialect": self.engine.name,
+                    },
+                    success=True,
+                )
+
+        except datasource_initialization_exceptions as sqlalchemy_error:
             raise DatasourceInitializationError(self._name, str(sqlalchemy_error))
 
         self._build_generators()
@@ -249,7 +283,7 @@ class SqlAlchemyDatasource(Datasource):
     def process_batch_parameters(
         self, query_parameters=None, limit=None, dataset_options=None
     ):
-        batch_kwargs = super(SqlAlchemyDatasource, self).process_batch_parameters(
+        batch_kwargs = super().process_batch_parameters(
             limit=limit, dataset_options=dataset_options,
         )
         nested_update(batch_kwargs, {"query_parameters": query_parameters})

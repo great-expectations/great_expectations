@@ -357,7 +357,7 @@ def test_spark_config(test_backends):
     assert ("spark.executor.memory", "128m") in conf
 
 
-def test_pandas_datasource_processes_dataset_options(
+def test_spark_datasource_processes_dataset_options(
     test_folder_connection_path, test_backends
 ):
     if "SparkDFDataset" not in test_backends:
@@ -371,7 +371,9 @@ def test_pandas_datasource_processes_dataset_options(
             }
         },
     )
-    batch_kwargs = datasource.build_batch_kwargs("subdir_reader", name="test")
+    batch_kwargs = datasource.build_batch_kwargs(
+        "subdir_reader", data_asset_name="test"
+    )
     batch_kwargs["dataset_options"] = {"caching": False, "persist": False}
     batch = datasource.get_batch(batch_kwargs)
     validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))

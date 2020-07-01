@@ -5,6 +5,7 @@ import warnings
 from collections import namedtuple
 from copy import deepcopy
 
+from dateutil.parser import ParserError as DateUtilParserError
 from dateutil.parser import parse
 from IPython import get_ipython
 from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
@@ -318,12 +319,18 @@ class RunIdentifier(DataContextKey):
         if isinstance(run_time, str):
             try:
                 run_time = parse(run_time)
-            except ParserError:
+            except (DateUtilParserError, TypeError):
                 warnings.warn(
                     f'Unable to parse provided run_time str ("{run_time}") to datetime. Defaulting '
                     f"run_time to current time."
                 )
                 run_time = datetime.datetime.now(datetime.timezone.utc)
+
+        if not run_time:
+            try:
+                run_time = parse(run_name)
+            except (DateUtilParserError, TypeError):
+                run_time = None
 
         run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
         if not run_time.tzinfo:
@@ -416,7 +423,7 @@ class ExpectationKwargs(dict):
                 "catch_exceptions must be a boolean value"
             )
 
-        super(ExpectationKwargs, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         ensure_json_serializable(self)
 
     def isEquivalentTo(self, other):
@@ -650,6 +657,8 @@ class ExpectationSuite(object):
         self.data_asset_type = data_asset_type
         if meta is None:
             meta = {"great_expectations.__version__": ge_version}
+        if not "great_expectations.__version__" in meta.keys():
+            meta["great_expectations.__version__"] = ge_version
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta

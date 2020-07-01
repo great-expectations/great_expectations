@@ -34,9 +34,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
     def __init__(
         self, name="default", datasource=None, query_store_backend=None, queries=None
     ):
-        super(QueryBatchKwargsGenerator, self).__init__(
-            name=name, datasource=datasource
-        )
+        super().__init__(name=name, datasource=datasource)
         root_directory = None
         if query_store_backend is None:
             # We will choose a Tuple store if there is a configured DataContext with a root_directory,

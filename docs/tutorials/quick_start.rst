@@ -12,7 +12,11 @@ Off we go! Install Great Expectations:
 
     pip install great_expectations
 
-From the root of the directory where you want to deploy Great Expectations:
+You can quickly try out Great Expectations using this guide: :ref:`how_to_guides__creating_and_editing_expectations__how_to_quickly_explore_data_using_expectations_in_a_notebook`.
+
+    .. figure:: ../images/interactive_mostly.gif
+
+To unlock more of the power of Great Expectations, you'll also need to configure a Data Context. From the root of the directory where you want to deploy Great Expectations:
 
 .. code-block:: bash
 

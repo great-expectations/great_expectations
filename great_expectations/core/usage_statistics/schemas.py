@@ -236,12 +236,7 @@ anonymized_batch_schema = {
                 "anonymized_batch_kwarg_keys": {
                     "type": "array",
                     "maxItems": 1000,
-                    "items": {
-                        "oneOf": [
-                            {"$ref": "#/definitions/anonymized_string"},
-                            {"type": "string", "maxLength": 256},
-                        ]
-                    },
+                    "items": {"oneOf": [{"type": "string", "maxLength": 256},]},
                 },
                 "anonymized_expectation_suite_name": {
                     "$ref": "#/definitions/anonymized_string"
@@ -292,6 +287,28 @@ save_or_edit_expectation_suite_payload_schema = {
     "additionalProperties": False,
 }
 
+cli_new_ds_choice_payload = {
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "type": {"type": "string", "maxLength": 256},
+        "db": {"type": "string", "maxLength": 256},
+    },
+    "required": ["type"],
+    "additionalProperties": False,
+}
+
+datasource_sqlalchemy_connect_payload = {
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "anonymized_name": {"type": "string", "maxLength": 256},
+        "sqlalchemy_dialect": {"type": "string", "maxLength": 256},
+    },
+    "required": ["anonymized_name"],
+    "additionalProperties": False,
+}
+
 usage_statistics_record_schema = {
     "$schema": "http://json-schema.org/schema#",
     "definitions": {
@@ -308,6 +325,8 @@ usage_statistics_record_schema = {
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
+        "cli_new_ds_choice_payload": cli_new_ds_choice_payload,
+        "datasource_sqlalchemy_connect_payload": datasource_sqlalchemy_connect_payload,
     },
     "type": "object",
     "properties": {
@@ -352,6 +371,29 @@ usage_statistics_record_schema = {
             "properties": {
                 "event": {"enum": ["data_asset.validate"],},
                 "event_payload": {"$ref": "#/definitions/anonymized_batch"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {"enum": ["cli.new_ds_choice"],},
+                "event_payload": {"$ref": "#/definitions/cli_new_ds_choice_payload"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {"enum": ["data_context.add_datasource"],},
+                "event_payload": {"$ref": "#/definitions/anonymized_datasource"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {"enum": ["datasource.sqlalchemy.connect"],},
+                "event_payload": {
+                    "$ref": "#/definitions/datasource_sqlalchemy_connect_payload"
+                },
             },
         },
         {

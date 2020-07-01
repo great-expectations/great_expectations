@@ -16,6 +16,7 @@ from typing import Dict, List, Optional, Union
 from dateutil.parser import ParserError, parse
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import (
@@ -27,6 +28,7 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
+    add_datasource_usage_statistics,
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
     usage_statistics_enabled_method,
@@ -39,6 +41,8 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
+    CURRENT_CONFIG_VERSION,
+    MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     DatasourceConfig,
@@ -181,11 +185,14 @@ class BaseDataContext(object):
 
     def _build_store(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
-        new_store = instantiate_class_from_config(
-            config=store_config,
-            runtime_environment={"root_directory": self.root_directory,},
-            config_defaults={"module_name": module_name},
-        )
+        try:
+            new_store = instantiate_class_from_config(
+                config=store_config,
+                runtime_environment={"root_directory": self.root_directory,},
+                config_defaults={"module_name": module_name},
+            )
+        except ge_exceptions.DataContextError:
+            new_store = None
         if not new_store:
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,
@@ -736,24 +743,39 @@ class BaseDataContext(object):
         return data_asset_names
 
     def build_batch_kwargs(
-        self, datasource, batch_kwargs_generator, name=None, partition_id=None, **kwargs
+        self,
+        datasource,
+        batch_kwargs_generator,
+        data_asset_name=None,
+        partition_id=None,
+        **kwargs,
     ):
         """Builds batch kwargs using the provided datasource, batch kwargs generator, and batch_parameters.
 
         Args:
             datasource (str): the name of the datasource for which to build batch_kwargs
             batch_kwargs_generator (str): the name of the batch kwargs generator to use to build batch_kwargs
-            name (str): an optional name batch_parameter
+            data_asset_name (str): an optional name batch_parameter
             **kwargs: additional batch_parameters
 
         Returns:
             BatchKwargs
 
         """
+        if kwargs.get("name"):
+            if data_asset_name:
+                raise ValueError(
+                    "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
+                )
+            warnings.warn(
+                "name is being deprecated as a batch_parameter. Please use data_asset_name instead.",
+                DeprecationWarning,
+            )
+            data_asset_name = kwargs.pop("name")
         datasource_obj = self.get_datasource(datasource)
         batch_kwargs = datasource_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
-            name=name,
+            data_asset_name=data_asset_name,
             partition_id=partition_id,
             **kwargs,
         )
@@ -830,6 +852,7 @@ class BaseDataContext(object):
         evaluation_parameters=None,
         run_name=None,
         run_time=None,
+        result_format={"result_format": "SUMMARY"},
         **kwargs,
     ):
         """
@@ -875,6 +898,7 @@ class BaseDataContext(object):
                 run_id=run_id,
                 run_name=run_name,
                 run_time=run_time,
+                result_format=result_format,
                 **kwargs,
             )
         else:
@@ -884,6 +908,7 @@ class BaseDataContext(object):
                 evaluation_parameters=evaluation_parameters,
                 run_name=run_name,
                 run_time=run_time,
+                result_format=result_format,
                 **kwargs,
             )
 
@@ -892,6 +917,10 @@ class BaseDataContext(object):
             return []
         return list(self.validation_operators.keys())
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.add_datasource",
+        args_payload_fn=add_datasource_usage_statistics,
+    )
     def add_datasource(self, name, initialize=True, **kwargs):
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
@@ -1391,7 +1420,7 @@ class BaseDataContext(object):
                             the resources in this list. This supports incremental build
                             of data docs sites (e.g., when a new validation result is created)
                             and avoids full rebuild.
-        :param dry_run: a flag, if True, the method returna the structure containing the
+        :param dry_run: a flag, if True, the method returns a structure containing the
                             URLs of the sites that *would* be built, but it does not build
                             these sites. The motivation for adding this flag was to allow
                             the CLI to display the the URLs before building and to let users
@@ -1770,7 +1799,7 @@ class BaseDataContext(object):
             )
             try:
                 run_time = parse(run_id)
-            except ParserError:
+            except (ParserError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):
@@ -2118,9 +2147,7 @@ class DataContext(BaseDataContext):
 
         project_config = self._load_project_config()
         project_config_dict = dataContextConfigSchema.dump(project_config)
-        super(DataContext, self).__init__(
-            project_config, context_root_directory, runtime_environment
-        )
+        super().__init__(project_config, context_root_directory, runtime_environment)
 
         # save project config if data_context_id auto-generated or global config values applied
         if (
@@ -2148,6 +2175,10 @@ class DataContext(BaseDataContext):
                     err
                 )
             )
+        except DuplicateKeyError:
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Error: duplicate key found in project YAML file."
+            )
         except IOError:
             raise ge_exceptions.ConfigNotFoundError()
 
@@ -2161,7 +2192,11 @@ class DataContext(BaseDataContext):
         """List checkpoints. (Experimental)"""
         # TODO mark experimental
         files = self._list_ymls_in_checkpoints_directory()
-        return [os.path.basename(f).rstrip(".yml") for f in files]
+        return [
+            os.path.basename(f)[:-4]
+            for f in files
+            if os.path.basename(f).endswith(".yml")
+        ]
 
     def get_checkpoint(self, checkpoint_name: str) -> dict:
         """Load a checkpoint. (Experimental)"""
@@ -2196,14 +2231,14 @@ class DataContext(BaseDataContext):
     def add_store(self, store_name, store_config):
         logger.debug("Starting DataContext.add_store for store %s" % store_name)
 
-        new_store = super(DataContext, self).add_store(store_name, store_config)
+        new_store = super().add_store(store_name, store_config)
         self._save_project_config()
         return new_store
 
     def add_datasource(self, name, **kwargs):
         logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
 
-        new_datasource = super(DataContext, self).add_datasource(name, **kwargs)
+        new_datasource = super().add_datasource(name, **kwargs)
         self._save_project_config()
 
         return new_datasource
@@ -2229,6 +2264,54 @@ class DataContext(BaseDataContext):
 
         logger.debug("Using project config: {}".format(yml_path))
         return result
+
+    @classmethod
+    def get_ge_config_version(cls, context_root_dir=None):
+        yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
+        if yml_path is None:
+            return
+
+        with open(yml_path) as f:
+            config_dict = yaml.load(f)
+
+        config_version = config_dict.get("config_version")
+        return float(config_version) if config_version else None
+
+    @classmethod
+    def set_ge_config_version(
+        cls, config_version, context_root_dir=None, validate_config_version=True
+    ):
+        if not isinstance(config_version, (int, float)):
+            raise ge_exceptions.UnsupportedConfigVersionError(
+                "The argument `config_version` must be a number.",
+            )
+
+        if validate_config_version:
+            if config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+                raise ge_exceptions.UnsupportedConfigVersionError(
+                    "Invalid config version ({}).\n    The version number must be at least {}. ".format(
+                        config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
+                    ),
+                )
+            elif config_version > CURRENT_CONFIG_VERSION:
+                raise ge_exceptions.UnsupportedConfigVersionError(
+                    "Invalid config version ({}).\n    The maximum valid version is {}.".format(
+                        config_version, CURRENT_CONFIG_VERSION
+                    ),
+                )
+
+        yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
+        if yml_path is None:
+            return False
+
+        with open(yml_path) as f:
+            config_dict = yaml.load(f)
+            config_dict["config_version"] = config_version
+
+        with open(yml_path, "w") as f:
+            yaml.dump(config_dict, f)
+
+        return True
 
     @classmethod
     def find_context_yml_file(cls, search_start_dir=None):
@@ -2349,7 +2432,7 @@ class ExplorerDataContext(DataContext):
             to include ipython notebook widgets.
         """
 
-        super(ExplorerDataContext, self).__init__(context_root_dir)
+        super().__init__(context_root_dir)
 
         self._expectation_explorer = expectation_explorer
         if expectation_explorer:
