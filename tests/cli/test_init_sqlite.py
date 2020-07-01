@@ -5,11 +5,12 @@ import shutil
 import pytest
 from click.testing import CliRunner
 from freezegun import freeze_time
+from sqlalchemy import create_engine
+
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
-from sqlalchemy import create_engine
 from tests.cli.test_cli import yaml
 from tests.cli.test_datasource_sqlite import _add_datasource_and_credentials_to_context
 from tests.cli.test_init_pandas import _delete_and_recreate_dir
@@ -22,16 +23,14 @@ except ImportError:
 
 
 @pytest.fixture
-def titanic_sqlite_db_file(tmp_path_factory):
-    from sqlalchemy import create_engine
-
+def titanic_sqlite_db_file(sa, tmp_path_factory):
     temp_dir = str(tmp_path_factory.mktemp("foo_path"))
     fixture_db_path = file_relative_path(__file__, "../test_sets/titanic.db")
 
     db_path = os.path.join(temp_dir, "titanic.db")
     shutil.copy(fixture_db_path, db_path)
 
-    engine = create_engine("sqlite:///{}".format(db_path))
+    engine = sa.create_engine("sqlite:///{}".format(db_path))
     assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
     return db_path
 
@@ -39,14 +38,14 @@ def titanic_sqlite_db_file(tmp_path_factory):
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @freeze_time("09/26/2019 13:42:41")
 def test_cli_init_on_new_project(
-    mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file
+    mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file, sa
 ):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     ge_dir = os.path.join(project_dir, "great_expectations")
 
     database_path = os.path.join(project_dir, "titanic.db")
     shutil.copy(titanic_sqlite_db_file, database_path)
-    engine = create_engine("sqlite:///{}".format(database_path))
+    engine = sa.create_engine("sqlite:///{}".format(database_path))
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -183,14 +182,14 @@ great_expectations/
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_new_project_extra_whitespace_in_url(
-    mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file
+    mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file, sa
 ):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     ge_dir = os.path.join(project_dir, "great_expectations")
 
     database_path = os.path.join(project_dir, "titanic.db")
     shutil.copy(titanic_sqlite_db_file, database_path)
-    engine = create_engine("sqlite:///{}".format(database_path))
+    engine = sa.create_engine("sqlite:///{}".format(database_path))
     engine_url_with_added_whitespace = "    " + str(engine.url) + "  "
 
     runner = CliRunner(mix_stderr=False)
@@ -266,7 +265,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
-    mock_webbrowser, caplog, initialized_sqlite_project, titanic_sqlite_db_file,
+    mock_webbrowser, caplog, initialized_sqlite_project, titanic_sqlite_db_file, sa
 ):
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
@@ -359,12 +358,12 @@ def _load_config_file(config_path):
 @pytest.fixture
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def initialized_sqlite_project(
-    mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file
+    mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file, sa
 ):
     """This is an initialized project through the CLI."""
     project_dir = str(tmp_path_factory.mktemp("my_rad_project"))
 
-    engine = create_engine("sqlite:///{}".format(titanic_sqlite_db_file))
+    engine = sa.create_engine("sqlite:///{}".format(titanic_sqlite_db_file))
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(

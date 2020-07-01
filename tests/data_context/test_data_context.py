@@ -4,6 +4,8 @@ import shutil
 
 import pytest
 from freezegun import freeze_time
+from ruamel.yaml import YAML
+
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -32,7 +34,6 @@ from great_expectations.exceptions import (
     DataContextError,
 )
 from great_expectations.util import gen_directory_tree_str
-from ruamel.yaml import YAML
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -111,9 +112,10 @@ def test_get_available_data_asset_names_with_one_datasource_without_a_generator_
 
 
 def test_get_available_data_asset_names_with_multiple_datasources_with_and_without_generators(
-    empty_data_context,
+    empty_data_context, sa
 ):
     """Test datasources with and without generators."""
+    # requires sqlalchemy because it instantiates sqlalchemydatasource
     context = empty_data_context
     connection_kwargs = {"credentials": {"drivername": "sqlite"}}
 

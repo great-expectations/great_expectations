@@ -583,7 +583,7 @@ def _collect_postgres_credentials(default_credentials=None):
     if default_credentials is None:
         default_credentials = {}
 
-    credentials = {"drivername": "postgres"}
+    credentials = {"drivername": "postgresql"}
 
     credentials["host"] = click.prompt(
         "What is the host for the postgres connection?",

@@ -45,7 +45,13 @@ Steps
                   module_name: great_expectations.render.renderer.slack_renderer
                   class_name: SlackRenderer
 
-3. Run Validation checkpoint to receive Slack notification on the success or failure of validation suite.  If successful, you should receive a Slack message that looks like this:
+3. Run your ``action_list_operator``, to validate a batch of data and receive Slack notification on the success or failure of validation suite.  
+
+  .. code-block:: python
+  
+      context.run_validation_operator('action_list_operator', assets_to_validate=batch, run_name="slack_test")
+
+  If successful, you should receive a Slack message that looks like this:
 
     .. image:: ../../images/slack_notification_example.png
 

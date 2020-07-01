@@ -9,10 +9,10 @@ from pathlib import Path
 from types import ModuleType
 from typing import Callable, Union
 
-from pkg_resources import Distribution
-
 import black
 import importlib_metadata
+from pkg_resources import Distribution
+
 from great_expectations.core import expectationSuiteSchema
 from great_expectations.exceptions import (
     PluginClassNotFoundError,
@@ -330,6 +330,50 @@ def read_table(
     import pandas as pd
 
     df = pd.read_table(filename, *args, **kwargs)
+    if dataset_class is not None:
+        return _convert_to_dataset_class(
+            df=df,
+            dataset_class=dataset_class,
+            expectation_suite=expectation_suite,
+            profiler=profiler,
+        )
+    else:
+        return _load_and_convert_to_dataset_class(
+            df=df,
+            class_name=class_name,
+            module_name=module_name,
+            expectation_suite=expectation_suite,
+            profiler=profiler,
+        )
+
+
+def read_feather(
+    filename,
+    class_name="PandasDataset",
+    module_name="great_expectations.dataset",
+    dataset_class=None,
+    expectation_suite=None,
+    profiler=None,
+    *args,
+    **kwargs,
+):
+    """Read a file using Pandas read_feather and return a great_expectations dataset.
+
+    Args:
+        filename (string): path to file to read
+        class_name (str): class to which to convert resulting Pandas df
+        module_name (str): dataset module from which to try to dynamically load the relevant module
+        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
+            if not specified, try to load the class named via the class_name and module_name parameters
+        expectation_suite (string): path to great_expectations expectation suite file
+        profiler (Profiler class): profiler to use when creating the dataset (default is None)
+
+    Returns:
+        great_expectations dataset
+    """
+    import pandas as pd
+
+    df = pd.read_feather(filename, *args, **kwargs)
     if dataset_class is not None:
         return _convert_to_dataset_class(
             df=df,
