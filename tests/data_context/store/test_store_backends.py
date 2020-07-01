@@ -118,7 +118,6 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
         filepath_template="my_file_{0}",
     )
 
-    # OPPORTUNITY: potentially standardize error instead of allowing each StoreBackend to raise its own error types --> now handled by a more-general InvalidKeyError
     with pytest.raises(InvalidKeyError):
         my_store.get(("AAA",))
 
