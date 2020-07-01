@@ -31,9 +31,9 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
     id: html_site_store_filesystem
     title: HTML Site Store - Filesystem
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: DataDocs on Filesystem
+    description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on the Filesystem
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.html
     maturity: Production
     maturity_details:
         api_stability: Mostly Stable (profiling)
@@ -46,9 +46,9 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
     id: html_site_store_s3
     title: HTML Site Store - S3
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: DataDocs on S3
+    description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on S3
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_s3.html
     maturity: Beta
     maturity_details:
         api_stability: Mostly Stable (profiling)
@@ -61,9 +61,9 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
     id: html_site_store_gcs
     title: HTMLSiteStore - GCS
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: DataDocs on GCS
+    description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on GCS
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.html
     maturity: Beta
     maturity_details:
         api_stability: Mostly Stable (profiling)
@@ -76,9 +76,9 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
     id: html_site_store_azure_blob_storage
     title: HTMLSiteStore - Azure
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: DataDocs on Azure Blob Storage
+    description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on Azure Blob Storage
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.html
     maturity: N/A
     maturity_details:
         api_stability: Mostly Stable (profiling)
