@@ -2,6 +2,7 @@ altair>=4.0.0,<5
 black==19.10b0
 Click>=7.0
 future>=0.16
+importlib_metadata>=1.6.1
 ipywidgets>=7.4.2
 jinja2>=2.10
 jsonschema>=2.5.1

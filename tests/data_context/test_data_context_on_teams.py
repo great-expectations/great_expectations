@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations import DataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidConfigError
@@ -13,7 +12,7 @@ def test_incomplete_uncommitted():
     """
     with pytest.raises(InvalidConfigError) as exc:
         _ = DataContext(
-            file_relative_path(
+            context_root_dir=file_relative_path(
                 __file__,
                 "./fixtures/contexts/incomplete_uncommitted/great_expectations",
             )

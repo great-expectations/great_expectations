@@ -1,9 +1,8 @@
 import os
 import shutil
 
-import pytest
-
 import great_expectations as ge
+import pytest
 from great_expectations.data_context.util import file_relative_path
 
 
@@ -21,7 +20,7 @@ def data_context_without_config_variables_filepath_configured(tmp_path_factory):
         config_variables_fixture_filename=None,
     )
 
-    return ge.data_context.DataContext(context_path)
+    return ge.data_context.DataContext(context_root_dir=context_path)
 
 
 @pytest.fixture()
@@ -38,7 +37,7 @@ def data_context_with_variables_in_config(tmp_path_factory):
         config_variables_fixture_filename="config_variables.yml",
     )
 
-    return ge.data_context.DataContext(context_path)
+    return ge.data_context.DataContext(context_root_dir=context_path)
 
 
 @pytest.fixture()
@@ -55,7 +54,7 @@ def data_context_with_variables_in_config_exhaustive(tmp_path_factory):
         config_variables_fixture_filename="config_variables_exhaustive.yml",
     )
 
-    return ge.data_context.DataContext(context_path)
+    return ge.data_context.DataContext(context_root_dir=context_path)
 
 
 def create_data_context_files(

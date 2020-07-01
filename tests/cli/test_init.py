@@ -4,10 +4,12 @@ from unittest import mock
 
 import pytest
 from click.testing import CliRunner
-
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
+from great_expectations.data_context.templates import (
+    INSTANCE_ID,
+    get_project_config_yml,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
@@ -55,7 +57,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
 
     assert "Great Expectations is now set up." in stdout
 
-    context = DataContext(os.path.join(root_dir, DataContext.GE_DIR))
+    context = DataContext(context_root_dir=os.path.join(root_dir, DataContext.GE_DIR))
     uncommitted_dir = os.path.join(context.root_directory, "uncommitted")
     shutil.rmtree(uncommitted_dir)
     assert not os.path.isdir(uncommitted_dir)
@@ -82,8 +84,11 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     assert os.path.isdir(uncommitted_dir)
     config_var_path = os.path.join(uncommitted_dir, "config_variables.yml")
     assert os.path.isfile(config_var_path)
+    config_variables_yml: str = get_project_config_yml(
+        j2_template_name="config_variables_template.j2", instance_id=INSTANCE_ID
+    )
     with open(config_var_path, "r") as f:
-        assert f.read() == CONFIG_VARIABLES_TEMPLATE
+        assert f.read() == config_variables_yml
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 

@@ -13,11 +13,8 @@ import warnings
 import webbrowser
 from typing import Dict, List, Optional, Union
 
-from dateutil.parser import ParserError, parse
-from marshmallow import ValidationError
-from ruamel.yaml import YAML, YAMLError
-
 import great_expectations.exceptions as ge_exceptions
+from dateutil.parser import ParserError, parse
 from great_expectations.core import (
     ExpectationSuite,
     RunIdentifier,
@@ -35,9 +32,8 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.templates import (
-    CONFIG_VARIABLES_TEMPLATE,
-    PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
-    PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
+    INSTANCE_ID,
+    get_project_config_yml,
 )
 from great_expectations.data_context.types.base import (
     CURRENT_CONFIG_VERSION,
@@ -66,6 +62,8 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import Validator
+from marshmallow import ValidationError
+from ruamel.yaml import YAML, YAMLError
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -636,8 +634,11 @@ class BaseDataContext(object):
                     config_variables_filepath=config_variables_filepath
                 )
             )
+            config_variables_yml: str = get_project_config_yml(
+                j2_template_name="config_variables_template.j2", instance_id=INSTANCE_ID
+            )
             with open(config_variables_filepath, "w") as template:
-                template.write(CONFIG_VARIABLES_TEMPLATE)
+                template.write(config_variables_yml)
 
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
@@ -1974,6 +1975,16 @@ class DataContext(BaseDataContext):
     def create(
         cls,
         project_root_dir=None,
+        json_s3_bucket=None,
+        expectations_suites_store_prefix=f"{BaseDataContext.GE_DIR}/JSON/ExpectationSuites",
+        validations_store_prefix=f"{BaseDataContext.GE_DIR}JSON/Validations",
+        site_name="s3_site",
+        html_docs_s3_bucket=None,
+        data_docs_prefix=f"{BaseDataContext.GE_DIR}/HTML",
+        show_how_to_buttons=True,
+        show_cta_footer=True,
+        slack_webhook=None,
+        slack_notify_on="all",
         usage_statistics_enabled=True,
         runtime_environment=None,
     ):
@@ -1991,46 +2002,70 @@ class DataContext(BaseDataContext):
         Returns:
             DataContext
         """
+        project_config: Union[DataContextConfig, None] = None
+        ge_dir: Union[str, None] = None
 
-        if not os.path.isdir(project_root_dir):
-            raise ge_exceptions.DataContextError(
-                "The project_root_dir must be an existing directory in which "
-                "to initialize a new DataContext"
+        if project_root_dir is None:
+            spark_df_in_memory_project_yml: str = get_project_config_yml(
+                j2_template_name="spark_df_in_memory_project_template.j2",
+                json_s3_bucket=json_s3_bucket,
+                expectations_suites_store_prefix=expectations_suites_store_prefix,
+                validations_store_prefix=validations_store_prefix,
+                site_name=site_name,
+                html_docs_s3_bucket=html_docs_s3_bucket,
+                data_docs_prefix=data_docs_prefix,
+                show_how_to_buttons=show_how_to_buttons,
+                show_cta_footer=show_cta_footer,
+                slack_webhook=slack_webhook,
+                slack_notify_on=slack_notify_on,
+                usage_statistics_enabled=usage_statistics_enabled,
             )
-
-        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
-        os.makedirs(ge_dir, exist_ok=True)
-        cls.scaffold_directories(ge_dir)
-
-        if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
-            message = """Warning. An existing `{}` was found here: {}.
-    - No action was taken.""".format(
-                cls.GE_YML, ge_dir
-            )
-            warnings.warn(message)
+            dict_from_yaml: dict = yaml.load(spark_df_in_memory_project_yml)
+            project_config = DataContextConfig.from_commented_map(dict_from_yaml)
         else:
-            cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
+            if not os.path.isdir(project_root_dir):
+                raise ge_exceptions.DataContextError(
+                    "The project_root_dir must be an existing directory in which "
+                    "to initialize a new DataContext"
+                )
 
-        if os.path.isfile(os.path.join(ge_dir, "notebooks")):
-            message = """Warning. An existing `notebooks` directory was found here: {}.
-    - No action was taken.""".format(
-                ge_dir
-            )
-            warnings.warn(message)
-        else:
-            cls.scaffold_notebooks(ge_dir)
+            ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
+            os.makedirs(ge_dir, exist_ok=True)
+            cls.scaffold_directories(ge_dir)
 
-        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
-        if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
-            message = """Warning. An existing `config_variables.yml` was found here: {}.
-    - No action was taken.""".format(
-                uncommitted_dir
-            )
-            warnings.warn(message)
-        else:
-            cls.write_config_variables_template_to_disk(uncommitted_dir)
+            if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
+                message = """Warning. An existing `{}` was found here: {}.
+        - No action was taken.""".format(
+                    cls.GE_YML, ge_dir
+                )
+                warnings.warn(message)
+            else:
+                cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
 
-        return cls(ge_dir, runtime_environment=runtime_environment)
+            if os.path.isfile(os.path.join(ge_dir, "notebooks")):
+                message = """Warning. An existing `notebooks` directory was found here: {}.
+        - No action was taken.""".format(
+                    ge_dir
+                )
+                warnings.warn(message)
+            else:
+                cls.scaffold_notebooks(ge_dir)
+
+            uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
+            if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
+                message = """Warning. An existing `config_variables.yml` was found here: {}.
+        - No action was taken.""".format(
+                    uncommitted_dir
+                )
+                warnings.warn(message)
+            else:
+                cls.write_config_variables_template_to_disk(uncommitted_dir)
+
+        return cls(
+            project_config=project_config,
+            context_root_dir=ge_dir,
+            runtime_environment=runtime_environment,
+        )
 
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir):
@@ -2058,17 +2093,21 @@ class DataContext(BaseDataContext):
     def write_config_variables_template_to_disk(cls, uncommitted_dir):
         os.makedirs(uncommitted_dir, exist_ok=True)
         config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
+        config_variables_yml: str = get_project_config_yml(
+            j2_template_name="config_variables_template.j2", instance_id=INSTANCE_ID
+        )
         with open(config_var_file, "w") as template:
-            template.write(CONFIG_VARIABLES_TEMPLATE)
+            template.write(config_variables_yml)
 
     @classmethod
     def write_project_template_to_disk(cls, ge_dir, usage_statistics_enabled=True):
         file_path = os.path.join(ge_dir, cls.GE_YML)
+        project_yml: str = get_project_config_yml(
+            j2_template_name="filesystem_backed_config_project_template.j2",
+            usage_statistics_enabled=usage_statistics_enabled,
+        )
         with open(file_path, "w") as template:
-            if usage_statistics_enabled:
-                template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
-            else:
-                template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED)
+            template.write(project_yml)
 
     @classmethod
     def scaffold_directories(cls, base_dir):
@@ -2133,18 +2172,31 @@ class DataContext(BaseDataContext):
                 destination_path = os.path.join(subdir_path, notebook_name)
                 shutil.copyfile(notebook, destination_path)
 
-    def __init__(self, context_root_dir=None, runtime_environment=None):
+    def __init__(
+        self, project_config=None, context_root_dir=None, runtime_environment=None
+    ):
 
         # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
             context_root_dir = self.find_context_root_dir()
-        context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
-        self._context_root_directory = context_root_directory
+        self._context_root_directory = os.path.abspath(
+            os.path.expanduser(context_root_dir)
+        )
+        if project_config is None:
+            project_config = self._load_project_config()
 
-        project_config = self._load_project_config()
         project_config_dict = dataContextConfigSchema.dump(project_config)
-        super().__init__(project_config, context_root_directory, runtime_environment)
 
+        super().__init__(
+            project_config=project_config,
+            context_root_dir=self._context_root_directory,
+            runtime_environment=runtime_environment,
+        )
+
+        if (
+            self.root_directory is None
+        ):  # <Alex>[ALEX] This will change when UUID is stored per datasource.</Alex>
+            return
         # save project config if data_context_id auto-generated or global config values applied
         if (
             project_config.anonymous_usage_statistics.explicit_id is False
@@ -2380,7 +2432,7 @@ class DataContext(BaseDataContext):
     @classmethod
     def _attempt_context_instantiation(cls, ge_dir):
         try:
-            context = DataContext(ge_dir)
+            context = DataContext(context_root_dir=ge_dir)
             return context
         except (
             ge_exceptions.DataContextError,
@@ -2424,7 +2476,7 @@ class ExplorerDataContext(DataContext):
             to include ipython notebook widgets.
         """
 
-        super().__init__(context_root_dir)
+        super().__init__(context_root_dir=context_root_dir)
 
         self._expectation_explorer = expectation_explorer
         if expectation_explorer:

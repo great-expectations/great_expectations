@@ -3,7 +3,6 @@ import json
 import sys
 
 import click
-
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
@@ -40,7 +39,7 @@ def validation_operator():
 def validation_operator_list(directory):
     """List known Validation Operators."""
     try:
-        context = DataContext(directory)
+        context = DataContext(context_root_dir=directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         return
@@ -133,7 +132,7 @@ def validation_operator_run(name, run_name, validation_config_file, suite, direc
     """
 
     try:
-        context = DataContext(directory)
+        context = DataContext(context_root_dir=directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("Failed to process <red>{}</red>".format(err.message))
         sys.exit(1)

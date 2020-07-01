@@ -9,10 +9,10 @@ from pathlib import Path
 from types import ModuleType
 from typing import Callable, Union
 
-import black
-import importlib_metadata
 from pkg_resources import Distribution
 
+import black
+import importlib_metadata
 from great_expectations.core import expectationSuiteSchema
 from great_expectations.exceptions import (
     PluginClassNotFoundError,
@@ -518,7 +518,7 @@ def validate(
         if isinstance(data_context, str):
             from great_expectations.data_context import DataContext
 
-            data_context = DataContext(data_context)
+            data_context = DataContext(context_root_dir=data_context)
         expectation_suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
         )

@@ -28,7 +28,7 @@ import sys
 from great_expectations import DataContext
 
 # checkpoint configuration
-context = DataContext("{1}")
+context = DataContext(context_root_dir="{1}")
 checkpoint = context.get_checkpoint("{0}")
 
 # load batches of data

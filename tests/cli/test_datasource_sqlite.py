@@ -2,7 +2,6 @@ import os
 from collections import OrderedDict
 
 from click.testing import CliRunner
-
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from tests.cli.test_cli import yaml
@@ -16,7 +15,7 @@ from tests.cli.utils import (
 def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -158,7 +157,7 @@ def test_cli_datasorce_new_connection_string(
     empty_data_context, empty_sqlite_db, caplog
 ):
     project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     assert context.list_datasources() == []
 
     runner = CliRunner(mix_stderr=False)
@@ -202,7 +201,7 @@ def test_cli_datasource_profile_answering_no(
     We are verifying  that it does that and respects user's "no".
     """
     project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     datasource_name = "wow_a_datasource"
     context = _add_datasource_and_credentials_to_context(
         context, datasource_name, titanic_sqlite_db
@@ -234,7 +233,7 @@ def test_cli_datasource_profile_on_empty_database(
     any assets.
     """
     project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     datasource_name = "wow_a_datasource"
     context = _add_datasource_and_credentials_to_context(
         context, datasource_name, empty_sqlite_db
@@ -261,7 +260,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     empty_data_context, titanic_sqlite_db, caplog
 ):
     project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     datasource_name = "wow_a_datasource"
     context = _add_datasource_and_credentials_to_context(
         context, datasource_name, titanic_sqlite_db
@@ -286,7 +285,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert result.exit_code == 0
     assert "Profiling '{}'".format(datasource_name) in stdout
 
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     assert len(context.list_datasources()) == 1
 
     expectations_store = context.stores["expectations_store"]
@@ -329,7 +328,7 @@ def test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg(
     The logic of processing this argument is testing in tests/profile.
     """
     project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     datasource_name = "wow_a_datasource"
     context = _add_datasource__with_two_generators_and_credentials_to_context(
         context, datasource_name, titanic_sqlite_db
@@ -357,7 +356,7 @@ def test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg(
     assert result.exit_code == 0
     assert "Profiling '{}'".format(datasource_name) in stdout
 
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     assert len(context.list_datasources()) == 1
 
     expectations_store = context.stores["expectations_store"]
@@ -377,7 +376,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
     empty_data_context, titanic_sqlite_db, caplog
 ):
     project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     datasource_name = "wow_a_datasource"
     context = _add_datasource_and_credentials_to_context(
         context, datasource_name, titanic_sqlite_db
@@ -396,7 +395,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert "The following Data Docs sites will be built:\n" in stdout
     assert "local_site:" in stdout
 
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     assert len(context.list_datasources()) == 1
 
     expectations_store = context.stores["expectations_store"]
@@ -434,7 +433,7 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     must match the limit passed by the user.
     """
     project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     datasource_name = "wow_a_datasource"
     context = _add_datasource_and_credentials_to_context(
         context, datasource_name, titanic_sqlite_db
@@ -464,7 +463,7 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     assert "The following Data Docs sites will be built:\n" in stdout
     assert "local_site:" in stdout
 
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     assert len(context.list_datasources()) == 1
 
     expectations_store = context.stores["expectations_store"]
@@ -504,7 +503,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     empty_data_context, titanic_sqlite_db, caplog
 ):
     project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     datasource_name = "wow_a_datasource"
     context = _add_datasource_and_credentials_to_context(
         context, datasource_name, titanic_sqlite_db
@@ -532,7 +531,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     assert "The following Data Docs sites will be built:\n" in stdout
     assert "local_site:" in stdout
 
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     assert len(context.list_datasources()) == 1
 
     expectations_store = context.stores["expectations_store"]
@@ -564,7 +563,7 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
     empty_data_context, titanic_sqlite_db, caplog
 ):
     project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     datasource_name = "wow_a_datasource"
     context = _add_datasource_and_credentials_to_context(
         context, datasource_name, titanic_sqlite_db
@@ -594,7 +593,7 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
     assert "Choose how to proceed" in stdout
     assert "Skipping profiling for now." in stdout
 
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     assert len(context.list_datasources()) == 1
 
     expectations_store = context.stores["expectations_store"]

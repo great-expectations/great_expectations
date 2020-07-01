@@ -6,7 +6,7 @@ from great_expectations.cli.datasource import get_batch_kwargs
 
 def test_get_batch_kwargs_for_specific_dataasset(empty_data_context, filesystem_csv):
     project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     base_directory = str(filesystem_csv)
 
     context.add_datasource(

@@ -4,12 +4,11 @@ import locale
 import os
 import shutil
 
+import great_expectations as ge
 import numpy as np
 import pandas as pd
 import pytest
 from freezegun import freeze_time
-
-import great_expectations as ge
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -1908,7 +1907,7 @@ def postgresql_engine(test_backend):
 @pytest.fixture
 def empty_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
-    context = ge.data_context.DataContext.create(project_path)
+    context = ge.data_context.DataContext.create(project_root_dir=project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
@@ -1947,7 +1946,7 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     # Reenable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
-    context = ge.data_context.DataContext.create(project_path)
+    context = ge.data_context.DataContext.create(project_root_dir=project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
@@ -1972,7 +1971,7 @@ def titanic_data_context(tmp_path_factory):
     shutil.copy(
         titanic_csv_path, str(os.path.join(context_path, "../data/Titanic.csv"))
     )
-    return ge.data_context.DataContext(context_path)
+    return ge.data_context.DataContext(context_root_dir=context_path)
 
 
 @pytest.fixture
@@ -1995,7 +1994,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     shutil.copy(
         titanic_csv_path, str(os.path.join(context_path, "../data/Titanic.csv"))
     )
-    return ge.data_context.DataContext(context_path)
+    return ge.data_context.DataContext(context_root_dir=context_path)
 
 
 @pytest.fixture
@@ -2064,7 +2063,7 @@ def site_builder_data_context_with_html_store_titanic_random(
         os.path.join(filesystem_csv_3, "f2.csv"),
         str(os.path.join(project_dir, "data/random/f2.csv")),
     )
-    ge.data_context.DataContext.create(project_dir)
+    ge.data_context.DataContext.create(project_root_dir=project_dir)
     shutil.copy(
         file_relative_path(
             __file__, "./test_fixtures/great_expectations_site_builder.yml"
@@ -2133,7 +2132,7 @@ def titanic_multibatch_data_context(tmp_path_factory):
         file_relative_path(__file__, "./test_sets/Titanic.csv"),
         str(os.path.join(context_path, "../data/titanic/Titanic_1912.csv")),
     )
-    return ge.data_context.DataContext(context_path)
+    return ge.data_context.DataContext(context_root_dir=context_path)
 
 
 @pytest.fixture
@@ -2195,7 +2194,7 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )
-    return ge.data_context.DataContext(context_path)
+    return ge.data_context.DataContext(context_root_dir=context_path)
 
 
 @pytest.fixture
@@ -2232,7 +2231,7 @@ def data_context_simple_expectation_suite(tmp_path_factory):
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )
-    return ge.data_context.DataContext(context_path)
+    return ge.data_context.DataContext(context_root_dir=context_path)
 
 
 @pytest.fixture()

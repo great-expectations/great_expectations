@@ -4,7 +4,6 @@ import os
 
 import mock
 from click.testing import CliRunner
-
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.core import ExpectationSuite
@@ -82,7 +81,7 @@ def test_suite_demo_enter_existing_suite_name_as_arg(
     project_root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(project_root_dir, "uncommitted"))
 
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     existing_suite_name = "my_dag_node.default"
     assert context.list_expectation_suite_names() == [existing_suite_name]
 
@@ -147,7 +146,7 @@ def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
     csv_path = os.path.join(filesystem_csv_2, "f1.csv")
 
     existing_suite_name = "my_dag_node.default"
-    context = DataContext(root_dir)
+    context = DataContext(context_root_dir=root_dir)
     assert context.list_expectation_suite_names() == [existing_suite_name]
 
     result = runner.invoke(
@@ -248,7 +247,7 @@ def test_suite_new_creates_empty_suite(
     expected_notebook = os.path.join(root_dir, "uncommitted", "edit_foo.ipynb")
     assert os.path.isfile(expected_notebook)
 
-    context = DataContext(root_dir)
+    context = DataContext(context_root_dir=root_dir)
     assert "foo" in context.list_expectation_suite_names()
     suite = context.get_expectation_suite("foo")
     assert suite.expectations == []
@@ -330,7 +329,7 @@ def test_suite_new_empty_with_no_jupyter(
     expected_notebook = os.path.join(root_dir, "uncommitted", "edit_foo.ipynb")
     assert os.path.isfile(expected_notebook)
 
-    context = DataContext(root_dir)
+    context = DataContext(context_root_dir=root_dir)
     assert "foo" in context.list_expectation_suite_names()
     suite = context.get_expectation_suite("foo")
     assert suite.expectations == []
@@ -383,7 +382,7 @@ def test_suite_demo_one_datasource_without_generator_without_suite_name_argument
 
     context = empty_data_context
     root_dir = context.root_directory
-    context = DataContext(root_dir)
+    context = DataContext(context_root_dir=root_dir)
     runner = CliRunner(mix_stderr=False)
     csv_path = os.path.join(filesystem_csv_2, "f1.csv")
     result = runner.invoke(
@@ -452,7 +451,7 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     """
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
     os.chdir(root_dir)
-    context = DataContext(root_dir)
+    context = DataContext(context_root_dir=root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
@@ -531,7 +530,7 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     """
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
     os.chdir(root_dir)
-    context = DataContext(root_dir)
+    context = DataContext(context_root_dir=root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
@@ -601,7 +600,7 @@ def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
     - NOT open jupyter
     """
     project_dir = empty_data_context.root_directory
-    context = DataContext(project_dir)
+    context = DataContext(context_root_dir=project_dir)
     context.create_expectation_suite("foo")
 
     runner = CliRunner(mix_stderr=False)
@@ -633,7 +632,7 @@ def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_erro
     """
     project_dir = empty_data_context.root_directory
 
-    context = DataContext(project_dir)
+    context = DataContext(context_root_dir=project_dir)
     context.create_expectation_suite("foo")
     context.add_datasource("source", class_name="PandasDatasource")
 
@@ -697,7 +696,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     - NOT open jupyter
     """
     project_dir = empty_data_context.root_directory
-    context = DataContext(project_dir)
+    context = DataContext(context_root_dir=project_dir)
     context.create_expectation_suite("foo")
     assert context.list_expectation_suites()[0].expectation_suite_name == "foo"
 
@@ -760,7 +759,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     mock_subprocess.reset_mock()
 
     # remove the citations from the suite
-    context = DataContext(root_dir)
+    context = DataContext(context_root_dir=root_dir)
     suite = context.get_expectation_suite("foo_suite")
     assert isinstance(suite, ExpectationSuite)
     suite.meta.pop("citations")
@@ -831,7 +830,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     mock_subprocess.reset_mock()
     mock_webbrowser.reset_mock()
     assert result.exit_code == 0
-    context = DataContext(root_dir)
+    context = DataContext(context_root_dir=root_dir)
     suite = context.get_expectation_suite("foo_suite")
     assert isinstance(suite, ExpectationSuite)
 
@@ -974,7 +973,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
     - NOT open jupyter
     '"""
     project_dir = titanic_data_context.root_directory
-    context = DataContext(project_dir)
+    context = DataContext(context_root_dir=project_dir)
     context.create_expectation_suite("foo")
 
     runner = CliRunner(mix_stderr=False)
@@ -1021,7 +1020,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
     - open jupyter
     """
     project_dir = titanic_data_context.root_directory
-    context = DataContext(project_dir)
+    context = DataContext(context_root_dir=project_dir)
     context.create_expectation_suite("foo")
 
     runner = CliRunner(mix_stderr=False)
@@ -1106,7 +1105,7 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     )
 
     # remove the citations from the suite
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
     suite = context.get_expectation_suite("my_new_suite")
     suite.meta.pop("citations")
     context.save_expectation_suite(suite)
@@ -1154,7 +1153,7 @@ def test_suite_list_with_zero_suites(caplog, empty_data_context):
 
 def test_suite_list_with_one_suite(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
-    context = DataContext(project_dir)
+    context = DataContext(context_root_dir=project_dir)
     context.create_expectation_suite("a.warning")
     runner = CliRunner(mix_stderr=False)
 
@@ -1169,7 +1168,7 @@ def test_suite_list_with_one_suite(caplog, empty_data_context):
 
 def test_suite_list_with_multiple_suites(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
-    context = DataContext(project_dir)
+    context = DataContext(context_root_dir=project_dir)
     context.create_expectation_suite("a.warning")
     context.create_expectation_suite("b.warning")
     context.create_expectation_suite("c.warning")
@@ -1251,7 +1250,7 @@ def test_suite_delete_with_one_suite(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
     project_dir = empty_data_context_stats_enabled.root_directory
-    context = DataContext(project_dir)
+    context = DataContext(context_root_dir=project_dir)
     suite = context.create_expectation_suite("a.warning")
     context.save_expectation_suite(suite)
     mock_emit.reset_mock()

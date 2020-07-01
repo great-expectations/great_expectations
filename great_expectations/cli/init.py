@@ -2,7 +2,6 @@ import os
 import sys
 
 import click
-
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
@@ -80,8 +79,8 @@ def init(target_directory, view, usage_stats):
             sys.exit(1)
 
         try:
-            context = DataContext.create(
-                target_directory, usage_statistics_enabled=usage_stats
+            _ = DataContext.create(
+                project_root_dir=target_directory, usage_statistics_enabled=usage_stats
             )
             cli_message(ONBOARDING_COMPLETE)
             # TODO if this is correct, ensure this is covered by a test
@@ -99,7 +98,7 @@ def init(target_directory, view, usage_stats):
 
         try:
             context = DataContext.create(
-                target_directory, usage_statistics_enabled=usage_stats
+                project_root_dir=target_directory, usage_statistics_enabled=usage_stats
             )
             send_usage_message(
                 data_context=context, event="cli.init.create", success=True
@@ -110,7 +109,7 @@ def init(target_directory, view, usage_stats):
 
     try:
         # if expectations exist, offer to build docs
-        context = DataContext(ge_dir)
+        context = DataContext(context_root_dir=ge_dir)
         if context.list_expectation_suites():
             if click.confirm(BUILD_DOCS_PROMPT, default=True):
                 build_docs(context, view=view)

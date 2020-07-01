@@ -21,7 +21,7 @@ import sys
 from great_expectations import DataContext
 
 # checkpoint configuration
-context = DataContext("{1}")
+context = DataContext(context_root_dir="{1}")
 suite = context.get_expectation_suite("{2}")
 # You can modify your BatchKwargs to select different data
 batch_kwargs = {3}
