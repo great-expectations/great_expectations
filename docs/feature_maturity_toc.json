@@ -41,7 +41,7 @@
             "id": "datasource_mariadb"
           },
           {
-            "id": "datasource_hdfs"
+            "id": "datasource_hdfs_spark"
           }
         ]
       },
@@ -179,13 +179,7 @@
             "id": "checkpoint_prefect"
           },
           {
-            "id": "checkpoint_dbt_internal"
-          },
-          {
-            "id": "checkpoint_dbt_adjacent"
-          },
-          {
-            "id": "checkpoint_other"
+            "id": "checkpoint_dbt"
           }
         ]
       },
@@ -219,51 +213,10 @@
             "id": "worfklow_create_edit_expectations_cli_scaffold"
           },
           {
-            "id": "worfklow_create_edit_expectations_cli_new"
+            "id": "worfklow_create_edit_expectations_cli_edit"
           },
           {
             "id": "worfklow_create_edit_expectations_json"
-          }
-        ]
-      },
-      {
-        "title": "What would you want to do after validating data?",
-        "description": "The maturity of documentation and end-to-end support for workflows is reflected in these assessments.",
-        "id": "workflow_validation_action",
-        "cases": [
-          {
-            "id": "workflow_validation_action_review_in_notebook"
-          },
-          {
-            "id": "workflow_validation_action_adjust_expectations"
-          },
-          {
-            "id": "workflow_validation_action_fix_data_problems"
-          },
-          {
-            "id": "workflow_validation_action_send_slack_notification"
-          },
-          {
-            "id": "workflow_validation_action_save_results_snippets"
-          },
-          {
-            "id": "workflow_validation_action_quarantine_failed_results"
-          }
-        ]
-      },
-      {
-        "title": "Other",
-        "description": "The maturity of documentation and end-to-end support for workflows is reflected in these assessments.",
-        "id": "other",
-        "cases": [
-          {
-            "id": "other_configure_expectations_and_val_ops_to_handle_warnings_and_errors"
-          },
-          {
-            "id": "other_create_custom_renderers"
-          },
-          {
-            "id": "other_add_custom_styling_to_data_docs"
           }
         ]
       }

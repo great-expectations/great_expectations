@@ -76,14 +76,14 @@ class BatchKwargsGenerator(object):
     short_description: TODO:FEATURE_MATURITY
     description: TODO:FEATURE_MATURITY
     how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    maturity: Beta
     maturity_details:
-        api_stability: TODO:FEATURE_MATURITY
-        implementation_completeness: TODO:FEATURE_MATURITY
-        unit_test_coverage: TODO:FEATURE_MATURITY
-        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
-        documentation_completeness:  TODO:FEATURE_MATURITY
-        bug_risk: TODO:FEATURE_MATURITY
+        api_stability: Mostly Stable (key generator functionality will remain but batch API changes still possible)
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A
+        documentation_completeness: Minimal
+        bug_risk: Moderate
 
     id: batch_kwargs_generator_s3
     title: Batch Kwargs Generator - S3
@@ -91,14 +91,14 @@ class BatchKwargsGenerator(object):
     short_description: TODO:FEATURE_MATURITY
     description: TODO:FEATURE_MATURITY
     how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    maturity: Beta
     maturity_details:
-        api_stability: TODO:FEATURE_MATURITY
-        implementation_completeness: TODO:FEATURE_MATURITY
-        unit_test_coverage: TODO:FEATURE_MATURITY
-        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
-        documentation_completeness:  TODO:FEATURE_MATURITY
-        bug_risk: TODO:FEATURE_MATURITY
+        api_stability: Mostly Stable (expect changes in partitioning)
+        implementation_completeness: Partial
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: Complete
+        documentation_completeness: Minimal
+        bug_risk: Moderate
 
     id: batch_kwargs_generator_glob_reader
     title: Batch Kwargs Generator - Glob Reader
@@ -106,14 +106,14 @@ class BatchKwargsGenerator(object):
     short_description: TODO:FEATURE_MATURITY
     description: TODO:FEATURE_MATURITY
     how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    maturity: Beta
     maturity_details:
-        api_stability: TODO:FEATURE_MATURITY
-        implementation_completeness: TODO:FEATURE_MATURITY
-        unit_test_coverage: TODO:FEATURE_MATURITY
-        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
-        documentation_completeness:  TODO:FEATURE_MATURITY
-        bug_risk: TODO:FEATURE_MATURITY
+        api_stability: Mostly Stable (expect changes in partitioning)
+        implementation_completeness: Partial
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A
+        documentation_completeness: Minimal
+        bug_risk: Moderate
 
     id: batch_kwargs_generator_table
     title: Batch Kwargs Generator - Table
@@ -121,14 +121,14 @@ class BatchKwargsGenerator(object):
     short_description: TODO:FEATURE_MATURITY
     description: TODO:FEATURE_MATURITY
     how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    maturity: Beta
     maturity_details:
-        api_stability: TODO:FEATURE_MATURITY
-        implementation_completeness: TODO:FEATURE_MATURITY
-        unit_test_coverage: TODO:FEATURE_MATURITY
-        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
-        documentation_completeness:  TODO:FEATURE_MATURITY
-        bug_risk: TODO:FEATURE_MATURITY
+        api_stability: Unstable (no existing native support for "partitioning")
+        implementation_completeness: Minimal
+        unit_test_coverage: Partial
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Partial
+        bug_risk: Low
 
     id: batch_kwargs_generator_query
     title: Batch Kwargs Generator - Query
@@ -136,14 +136,14 @@ class BatchKwargsGenerator(object):
     short_description: TODO:FEATURE_MATURITY
     description: TODO:FEATURE_MATURITY
     how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    maturity: Beta
     maturity_details:
-        api_stability: TODO:FEATURE_MATURITY
-        implementation_completeness: TODO:FEATURE_MATURITY
-        unit_test_coverage: TODO:FEATURE_MATURITY
-        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
-        documentation_completeness:  TODO:FEATURE_MATURITY
-        bug_risk: TODO:FEATURE_MATURITY
+        api_stability: Unstable (expect changes in query template configuration and query storage)
+        implementation_completeness: Complete
+        unit_test_coverage: Partial
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Partial
+        bug_risk: Moderate
 
     id: batch_kwargs_generator_subdir_reader
     title: Batch Kwargs Generator - Subdir Reader
@@ -151,14 +151,14 @@ class BatchKwargsGenerator(object):
     short_description: TODO:FEATURE_MATURITY
     description: TODO:FEATURE_MATURITY
     how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    maturity: Beta
     maturity_details:
-        api_stability: TODO:FEATURE_MATURITY
-        implementation_completeness: TODO:FEATURE_MATURITY
-        unit_test_coverage: TODO:FEATURE_MATURITY
-        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
-        documentation_completeness:  TODO:FEATURE_MATURITY
-        bug_risk: TODO:FEATURE_MATURITY
+        api_stability: Mostly Stable (new configuration options likely)
+        implementation_completeness: Partial
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A
+        documentation_completeness: Minimal
+        bug_risk: Low
 
 --ge-feature-maturity-info--
     """

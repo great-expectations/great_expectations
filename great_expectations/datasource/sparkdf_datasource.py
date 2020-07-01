@@ -31,6 +31,25 @@ class SparkDFDatasource(Datasource):
         - PathBatchKwargs ("path" or "s3" keys)
         - InMemoryBatchKwargs ("dataset" key)
         - QueryBatchKwargs ("query" key)
+
+--ge-feature-maturity-info--
+
+    id: datasource_hdfs_spark
+        title: Datasource - HDFS
+        icon:
+        short_description: TODO:FEATURE_MATURITY
+        description: TODO:FEATURE_MATURITY
+        how_to_guide_url: TODO:FEATURE_MATURITY
+        maturity: Experimental
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Unknown
+            unit_test_coverage: Minimal (none)
+            integration_infrastructure_test_coverage: Minimal (none)
+            documentation_completeness:  Minimal (none)
+            bug_risk: Unknown
+
+--ge-feature-maturity-info--
     """
 
     recognized_batch_parameters = {

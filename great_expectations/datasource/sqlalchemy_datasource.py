@@ -159,21 +159,6 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
         documentation_completeness:  Minimal (none)
         bug_risk: Unknown
         expectation_completeness: Unknown
-
-    id: datasource_hdfs
-    title: Datasource - HDFS
-    icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
-    maturity_details:
-        api_stability: TODO:FEATURE_MATURITY
-        implementation_completeness: TODO:FEATURE_MATURITY
-        unit_test_coverage: TODO:FEATURE_MATURITY
-        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
-        documentation_completeness:  TODO:FEATURE_MATURITY
-        bug_risk: TODO:FEATURE_MATURITY
     """
 
     recognized_batch_parameters = {"query_parameters", "limit", "dataset_options"}

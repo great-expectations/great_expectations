@@ -107,7 +107,6 @@ to configure the datasource to load and return DataAssets of the custom type.
         integration_infrastructure_test_coverage: N/A
         documentation_completeness: Minimal
         bug_risk: Unknown
-
 --ge-feature-maturity-info--
     """
 

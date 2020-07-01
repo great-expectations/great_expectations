@@ -111,14 +111,14 @@ datasources paired with one or more Expectation Suites each.
     short_description: TODO:FEATURE_MATURITY
     description: TODO:FEATURE_MATURITY
     how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    maturity: Experimental
     maturity_details:
-        api_stability: TODO:FEATURE_MATURITY
-        implementation_completeness: TODO:FEATURE_MATURITY
-        unit_test_coverage: TODO:FEATURE_MATURITY
-        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
-        documentation_completeness:  TODO:FEATURE_MATURITY
-        bug_risk: TODO:FEATURE_MATURITY
+        api_stability: Unknown (implemented by Kedro team)
+        implementation_completeness: Unknown
+        unit_test_coverage: Unknown
+        integration_infrastructure_test_coverage: Unknown
+        documentation_completeness:  Minimal (none)
+        bug_risk: Unknown
 
     id: checkpoint_prefect
     title: Checkpoint - Prefect
@@ -126,59 +126,29 @@ datasources paired with one or more Expectation Suites each.
     short_description: TODO:FEATURE_MATURITY
     description: TODO:FEATURE_MATURITY
     how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    maturity: Experimental
     maturity_details:
-        api_stability: TODO:FEATURE_MATURITY
-        implementation_completeness: TODO:FEATURE_MATURITY
-        unit_test_coverage: TODO:FEATURE_MATURITY
-        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
-        documentation_completeness:  TODO:FEATURE_MATURITY
-        bug_risk: TODO:FEATURE_MATURITY
+        api_stability: Unknown (implemented by Prefect team)
+        implementation_completeness: Unknown
+        unit_test_coverage: Unknown
+        integration_infrastructure_test_coverage: Unknown
+        documentation_completeness: Minimal (none)
+        bug_risk: Unknown
 
-    id: checkpoint_dbt_internal
-    title: Checkpoint - DBT Internal
+    id: checkpoint_dbt
+    title: Checkpoint - DBT
     icon:
     short_description: TODO:FEATURE_MATURITY
     description: TODO:FEATURE_MATURITY
     how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    maturity: Beta
     maturity_details:
-        api_stability: TODO:FEATURE_MATURITY
-        implementation_completeness: TODO:FEATURE_MATURITY
-        unit_test_coverage: TODO:FEATURE_MATURITY
-        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
-        documentation_completeness:  TODO:FEATURE_MATURITY
-        bug_risk: TODO:FEATURE_MATURITY
-
-    id: checkpoint_dbt_adjacent
-    title: Checkpoint - DBT Adjacent
-    icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
-    maturity_details:
-        api_stability: TODO:FEATURE_MATURITY
-        implementation_completeness: TODO:FEATURE_MATURITY
-        unit_test_coverage: TODO:FEATURE_MATURITY
-        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
-        documentation_completeness:  TODO:FEATURE_MATURITY
-        bug_risk: TODO:FEATURE_MATURITY
-
-    id: checkpoint_other
-    title: Checkpoint - Other
-    icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
-    maturity_details:
-        api_stability: TODO:FEATURE_MATURITY
-        implementation_completeness: TODO:FEATURE_MATURITY
-        unit_test_coverage: TODO:FEATURE_MATURITY
-        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
-        documentation_completeness:  TODO:FEATURE_MATURITY
-        bug_risk: TODO:FEATURE_MATURITY
+        api_stability: Mostly Stable (SQLAlchemy)
+        implementation_completeness: Minimal
+        unit_test_coverage: Minimal (none)
+        integration_infrastructure_test_coverage: Minimal (none)
+        documentation_completeness: Minimal (none)
+        bug_risk: Low
 
 --ge-feature-maturity-info--
     """
