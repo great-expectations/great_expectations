@@ -22,7 +22,7 @@ class MetaFileDataAsset(DataAsset):
     """
 
     def __init__(self, *args, **kwargs):
-        super(MetaFileDataAsset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @classmethod
     def file_lines_map_expectation(cls, func):
@@ -166,7 +166,7 @@ class FileDataAsset(MetaFileDataAsset):
     _data_asset_type = "FileDataAsset"
 
     def __init__(self, file_path=None, *args, **kwargs):
-        super(FileDataAsset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._path = file_path
 
     @MetaFileDataAsset.file_lines_map_expectation

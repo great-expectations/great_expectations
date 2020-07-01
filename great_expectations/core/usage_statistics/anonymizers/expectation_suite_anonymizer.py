@@ -8,7 +8,7 @@ GE_EXPECTATION_TYPES = [
 
 class ExpectationSuiteAnonymizer(Anonymizer):
     def __init__(self, salt=None):
-        super(ExpectationSuiteAnonymizer, self).__init__(salt=salt)
+        super().__init__(salt=salt)
         self._ge_expectation_types = GE_EXPECTATION_TYPES
 
     def anonymize_expectation_suite_info(self, expectation_suite):

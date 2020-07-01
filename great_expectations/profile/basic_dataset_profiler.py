@@ -4,6 +4,7 @@ from great_expectations.profile.base import (
     DatasetProfiler,
     ProfilerCardinality,
     ProfilerDataType,
+    ProfilerTypeMapping,
 )
 
 try:
@@ -19,50 +20,15 @@ class BasicDatasetProfilerBase(DatasetProfiler):
     that is used by the dataset profiler classes that extend this class.
     """
 
-    # Future support possibility: JSON (RECORD)
-    # Future support possibility: BINARY (BYTES)
-    INT_TYPE_NAMES = {
-        "INTEGER",
-        "int",
-        "INT",
-        "TINYINT",
-        "BYTEINT",
-        "SMALLINT",
-        "BIGINT",
-        "IntegerType",
-        "LongType",
-        "DECIMAL",
-    }
-    FLOAT_TYPE_NAMES = {
-        "FLOAT",
-        "FLOAT4",
-        "FLOAT8",
-        "DOUBLE_PRECISION",
-        "NUMERIC",
-        "FloatType",
-        "DoubleType",
-        "float",
-    }
-    STRING_TYPE_NAMES = {
-        "CHAR",
-        "VARCHAR",
-        "TEXT",
-        "STRING",
-        "StringType",
-        "string",
-        "str",
-    }
-    BOOLEAN_TYPE_NAMES = {"BOOLEAN", "BOOL", "bool", "BooleanType"}
-    DATETIME_TYPE_NAMES = {
-        "DATETIME",
-        "DATE",
-        "TIME",
-        "TIMESTAMP",
-        "DateType",
-        "TimestampType",
-        "datetime64",
-        "Timestamp",
-    }
+    # Deprecation Warning. If you are reading this code you are likely building
+    # your own profiler. We are moving toward a profiler toolkit to simplify
+    # building custom profilers. These mappings now exist in ProfilerTypeMapping
+    # and will be deprecated in the future.
+    INT_TYPE_NAMES = ProfilerTypeMapping.INT_TYPE_NAMES
+    FLOAT_TYPE_NAMES = ProfilerTypeMapping.FLOAT_TYPE_NAMES
+    STRING_TYPE_NAMES = ProfilerTypeMapping.STRING_TYPE_NAMES
+    BOOLEAN_TYPE_NAMES = ProfilerTypeMapping.BOOLEAN_TYPE_NAMES
+    DATETIME_TYPE_NAMES = ProfilerTypeMapping.DATETIME_TYPE_NAMES
 
     @classmethod
     def _get_column_type(cls, df, column):
@@ -71,27 +37,27 @@ class BasicDatasetProfilerBase(DatasetProfiler):
         df.set_config_value("interactive_evaluation", True)
         try:
             if df.expect_column_values_to_be_in_type_list(
-                column, type_list=sorted(list(cls.INT_TYPE_NAMES))
+                column, type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
             ).success:
                 type_ = ProfilerDataType.INT
 
             elif df.expect_column_values_to_be_in_type_list(
-                column, type_list=sorted(list(cls.FLOAT_TYPE_NAMES))
+                column, type_list=sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES))
             ).success:
                 type_ = ProfilerDataType.FLOAT
 
             elif df.expect_column_values_to_be_in_type_list(
-                column, type_list=sorted(list(cls.STRING_TYPE_NAMES))
+                column, type_list=sorted(list(ProfilerTypeMapping.STRING_TYPE_NAMES))
             ).success:
                 type_ = ProfilerDataType.STRING
 
             elif df.expect_column_values_to_be_in_type_list(
-                column, type_list=sorted(list(cls.BOOLEAN_TYPE_NAMES))
+                column, type_list=sorted(list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES))
             ).success:
                 type_ = ProfilerDataType.BOOLEAN
 
             elif df.expect_column_values_to_be_in_type_list(
-                column, type_list=sorted(list(cls.DATETIME_TYPE_NAMES))
+                column, type_list=sorted(list(ProfilerTypeMapping.DATETIME_TYPE_NAMES))
             ).success:
                 type_ = ProfilerDataType.DATETIME
 
