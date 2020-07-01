@@ -1,11 +1,13 @@
+import abc
 import logging
 import time
 import warnings
 from enum import Enum
+from typing import Any
 
 from dateutil.parser import ParserError, parse
 
-from great_expectations.core import RunIdentifier
+from great_expectations.core import ExpectationSuite, RunIdentifier
 from great_expectations.exceptions import GreatExpectationsError
 
 from ..data_asset import DataAsset
@@ -15,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class ProfilerDataType(Enum):
+    """Useful data types for building profilers."""
+
     INT = "int"
     FLOAT = "float"
     STRING = "string"
@@ -24,6 +28,8 @@ class ProfilerDataType(Enum):
 
 
 class ProfilerCardinality(Enum):
+    """Useful cardinality categories for building profilers."""
+
     NONE = "none"
     ONE = "one"
     TWO = "two"
@@ -32,6 +38,87 @@ class ProfilerCardinality(Enum):
     MANY = "many"
     VERY_MANY = "very many"
     UNIQUE = "unique"
+
+
+class ProfilerTypeMapping:
+    """Useful backend type mapping for building profilers."""
+
+    # Future support possibility: JSON (RECORD)
+    # Future support possibility: BINARY (BYTES)
+    INT_TYPE_NAMES = [
+        "INTEGER",
+        "integer",
+        "int",
+        "INT",
+        "TINYINT",
+        "BYTEINT",
+        "SMALLINT",
+        "BIGINT",
+        "IntegerType",
+        "LongType",
+        "DECIMAL",
+    ]
+    FLOAT_TYPE_NAMES = [
+        "FLOAT",
+        "FLOAT4",
+        "FLOAT8",
+        "DOUBLE_PRECISION",
+        "NUMERIC",
+        "FloatType",
+        "DoubleType",
+        "float",
+        "number",
+    ]
+    STRING_TYPE_NAMES = [
+        "CHAR",
+        "VARCHAR",
+        "TEXT",
+        "STRING",
+        "StringType",
+        "string",
+        "str",
+    ]
+    BOOLEAN_TYPE_NAMES = ["BOOLEAN", "boolean", "BOOL", "bool", "BooleanType"]
+    DATETIME_TYPE_NAMES = {
+        "DATETIME",
+        "DATE",
+        "TIME",
+        "TIMESTAMP",
+        "DateType",
+        "TimestampType",
+        "datetime64",
+        "Timestamp",
+    }
+
+
+class Profiler(object, metaclass=abc.ABCMeta):
+    """
+    Profilers creates suites from various sources of truth.
+
+    These sources of truth can be data or non-data sources such as DDLs.
+
+    When implementing a Profiler ensure that you:
+    - Implement a . _profile() method
+    - Optionally implement .validate() method that verifies you are running on the right
+     kind of object. You should raise an appropriate Exception if the object is not valid.
+    """
+
+    def __init__(self, configuration: dict = None):
+        self.configuration = configuration
+
+    def validate(self, item_to_validate: Any) -> None:
+        pass
+
+    def profile(self, item_to_profile: Any, suite_name: str = None) -> ExpectationSuite:
+        self.validate(item_to_profile)
+        expectation_suite = self._profile(item_to_profile, suite_name=suite_name)
+        return expectation_suite
+
+    @abc.abstractmethod
+    def _profile(
+        self, item_to_profile: Any, suite_name: str = None
+    ) -> ExpectationSuite:
+        pass
 
 
 class DataAssetProfiler(object):
@@ -100,7 +187,7 @@ class DatasetProfiler(DataAssetProfiler):
             )
             try:
                 run_time = parse(run_id)
-            except ParserError:
+            except (ParserError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):

@@ -112,9 +112,10 @@ def test_get_available_data_asset_names_with_one_datasource_without_a_generator_
 
 
 def test_get_available_data_asset_names_with_multiple_datasources_with_and_without_generators(
-    empty_data_context,
+    empty_data_context, sa
 ):
     """Test datasources with and without generators."""
+    # requires sqlalchemy because it instantiates sqlalchemydatasource
     context = empty_data_context
     connection_kwargs = {"credentials": {"drivername": "sqlite"}}
 
@@ -530,8 +531,6 @@ data_docs/
                 short-logo-vector.svg
                 short-logo.png
                 validation_failed_unexpected_values.gif
-            scripts/
-                bootstrap-table-filter-control.min.js
             styles/
                 data_docs_custom_styles_template.css
                 data_docs_default_styles.css
@@ -1135,23 +1134,29 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
 
 def test_build_batch_kwargs(titanic_multibatch_data_context):
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", name="titanic", partition_id="Titanic_1912"
+        "mydatasource",
+        "mygenerator",
+        data_asset_name="titanic",
+        partition_id="Titanic_1912",
     )
     assert os.path.relpath("./data/titanic/Titanic_1912.csv") in batch_kwargs["path"]
 
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", name="titanic", partition_id="Titanic_1911"
+        "mydatasource",
+        "mygenerator",
+        data_asset_name="titanic",
+        partition_id="Titanic_1911",
     )
     assert os.path.relpath("./data/titanic/Titanic_1911.csv") in batch_kwargs["path"]
 
     paths = []
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", name="titanic"
+        "mydatasource", "mygenerator", data_asset_name="titanic"
     )
     paths.append(os.path.basename(batch_kwargs["path"]))
 
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", name="titanic"
+        "mydatasource", "mygenerator", data_asset_name="titanic"
     )
     paths.append(os.path.basename(batch_kwargs["path"]))
 

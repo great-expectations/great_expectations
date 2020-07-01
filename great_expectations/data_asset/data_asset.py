@@ -22,10 +22,8 @@ from great_expectations.core import (
     RunIdentifier,
     expectationSuiteSchema,
 )
+from great_expectations.core.evaluation_parameters import build_evaluation_parameters
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.data_asset.evaluation_parameters import (
-    build_evaluation_parameters,
-)
 from great_expectations.data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
@@ -72,7 +70,7 @@ class DataAsset(object):
                 "Autoinspect_func is no longer supported; use a profiler instead (migration is easy!).",
                 category=DeprecationWarning,
             )
-        super(DataAsset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._config = {"interactive_evaluation": interactive_evaluation}
         self._initialize_expectations(
             expectation_suite=expectation_suite,
@@ -604,6 +602,7 @@ class DataAsset(object):
         discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False,
+        suppress_logging=False,
     ):
         """Returns _expectation_config as a JSON object, and perform some cleaning along the way.
 
@@ -616,6 +615,10 @@ class DataAsset(object):
                 In returned expectation objects, suppress the `include_config` parameter. Defaults to `True`.
             discard_catch_exceptions_kwargs (boolean): \
                 In returned expectation objects, suppress the `catch_exceptions` parameter.  Defaults to `True`.
+            suppress_warnings (boolean): \
+                If true, do not include warnings in logging information about the operation.
+            suppress_logging (boolean): \
+                If true, do not create a log entry (useful when using get_expectation_suite programmatically)
 
         Returns:
             An expectation suite.
@@ -693,7 +696,8 @@ class DataAsset(object):
             settings_message += " settings filtered."
 
         expectation_suite.expectations = expectations
-        logger.info(message + settings_message)
+        if not suppress_logging:
+            logger.info(message + settings_message)
         return expectation_suite
 
     def save_expectation_suite(
@@ -849,7 +853,7 @@ class DataAsset(object):
                 )
                 try:
                     run_time = parse(run_id)
-                except ParserError:
+                except (ParserError, TypeError):
                     pass
                 run_id = RunIdentifier(run_name=run_id, run_time=run_time)
             elif isinstance(run_id, dict):

@@ -267,7 +267,7 @@ as ``s3`` or ``gcs``, edit the stores section of the DataContext configuration o
       validations_store:
         class_name: ValidationsStore
         store_backend:
-          class_name: TupleS3Backend
+          class_name: TupleS3StoreBackend
           bucket: my_bucket
           prefix: my_prefix
 

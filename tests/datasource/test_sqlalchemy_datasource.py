@@ -108,7 +108,7 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string, sa):
     assert len(dataset.head(10)) == 5
 
 
-def test_create_sqlalchemy_datasource(data_context_parameterized_expectation_suite):
+def test_create_sqlalchemy_datasource(data_context_parameterized_expectation_suite, sa):
     name = "test_sqlalchemy_datasource"
     # type_ = "sqlalchemy"
     class_name = "SqlAlchemyDatasource"

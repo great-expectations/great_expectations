@@ -46,7 +46,7 @@ If you intend to develop within the Great Expectations (e.g. to contribute back 
 Download example data
 ---------------------
 
-For this tutorial, we will use a simplified version of the National Provider Identifier (NPI) database. It's a public dataset released by the `Centers of Medicare and Medicaid Services <https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/DataDissemination>`_, intended as a master list of health care providers in the United States. NPI data is famously messy---a great place to see the value of data testing and documentation in action.
+For this tutorial, we will use a simplified version of the National Provider Identifier (NPI) database. It's a public dataset released by the `Centers of Medicare and Medicaid Services <https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/DataDissemination>`_, intended as an authoritative list of health care providers in the United States. NPI data is famously messy---a great place to see the value of data testing and documentation in action.
 
 To avoid confusion during the tutorial, we recommend you set up the following directory structure before you download the data:
 

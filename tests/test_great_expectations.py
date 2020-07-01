@@ -842,7 +842,8 @@ def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dic
     my_df.set_default_expectation_argument("result_format", "COMPLETE")
 
     with pytest.raises(InvalidCacheValueError):
-        my_df.validate(catch_exceptions=False)
+        with pytest.warns(Warning, match=r"No great_expectations version found"):
+            my_df.validate(catch_exceptions=False)
 
 
 @freeze_time("11/05/1955")
@@ -894,6 +895,7 @@ def test_validate_catch_non_existent_expectation():
             )
         ],
     )
+
     results = df.validate(expectation_suite=validation_config_non_existent_expectation)
 
     assert (
@@ -1026,6 +1028,21 @@ class TestIO(unittest.TestCase):
     def test_read_table(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_table(script_path + "/test_sets/Titanic.csv", sep=",")
+        assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
+        assert isinstance(df, PandasDataset)
+
+    def test_read_feather(self):
+        pandas_version = re.match(r"(\d+)\.(\d+)\..+", pd.__version__)
+        if pandas_version is None:
+            raise ValueError("Unrecognized pandas version!")
+        else:
+            pandas_major_version = int(pandas_version.group(1))
+            pandas_minor_version = int(pandas_version.group(2))
+            if pandas_major_version == 0 and pandas_minor_version < 25:
+                pytest.skip("Skipping because of old pandas version.")
+
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_feather(script_path + "/test_sets/Titanic.feather")
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 

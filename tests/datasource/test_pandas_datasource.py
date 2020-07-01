@@ -373,7 +373,9 @@ def test_pandas_datasource_processes_dataset_options(test_folder_connection_path
             }
         },
     )
-    batch_kwargs = datasource.build_batch_kwargs("subdir_reader", name="test")
+    batch_kwargs = datasource.build_batch_kwargs(
+        "subdir_reader", data_asset_name="test"
+    )
     batch_kwargs["dataset_options"] = {"caching": False}
     batch = datasource.get_batch(batch_kwargs)
     validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))

@@ -36,7 +36,7 @@ class MetaPandasDataset(Dataset):
     """
 
     def __init__(self, *args, **kwargs):
-        super(MetaPandasDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @classmethod
     def column_map_expectation(cls, func):
@@ -335,6 +335,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     _internal_names = pd.DataFrame._internal_names + [
         "_batch_kwargs",
         "_batch_markers",
+        "_batch_parameters",
         "_batch_id",
         "_expectation_suite",
         "_config",
@@ -363,11 +364,11 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             )
             if self.discard_subset_failing_expectations:
                 self.discard_failing_expectations()
-        super(PandasDataset, self).__finalize__(other, method, **kwargs)
+        super().__finalize__(other, method, **kwargs)
         return self
 
     def __init__(self, *args, **kwargs):
-        super(PandasDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
         )

@@ -64,15 +64,24 @@ class UsageStatisticsHandler(object):
         self._data_docs_sites_anonymizer = DataDocsSiteAnonymizer(data_context_id)
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
-        self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
-        self._sigint_handler = signal.signal(signal.SIGINT, self._teardown)
+        try:
+            self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
+        except ValueError:
+            # if we are not the main thread, we don't get to ask for signal handling.
+            self._sigterm_handler = None
+        try:
+            self._sigint_handler = signal.signal(signal.SIGINT, self._teardown)
+        except ValueError:
+            # if we are not the main thread, we don't get to ask for signal handling.
+            self._sigint_handler = None
+
         atexit.register(self._close_worker)
 
     def _teardown(self, signum: int, frame):
         self._close_worker()
-        if signum == signal.SIGTERM:
+        if signum == signal.SIGTERM and self._sigterm_handler:
             self._sigterm_handler(signum, frame)
-        if signum == signal.SIGINT:
+        if signum == signal.SIGINT and self._sigint_handler:
             self._sigint_handler(signum, frame)
 
     def _close_worker(self):
@@ -251,8 +260,10 @@ def usage_statistics_enabled_method(
                 message["success"] = True
                 if handler is not None:
                     handler.emit(message)
-            except Exception:
+            # except Exception:
+            except Exception as e:
                 message["success"] = False
+                handler = get_usage_statistics_handler(args)
                 if handler:
                     handler.emit(message)
                 raise
@@ -353,6 +364,29 @@ def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name
     except Exception:
         logger.debug(
             "edit_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
+        )
+    return payload
+
+
+def add_datasource_usage_statistics(data_context, name, **kwargs):
+    try:
+        data_context_id = data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+
+    try:
+        datasource_anonymizer = (
+            data_context._usage_statistics_handler._datasource_anonymizer
+        )
+    except Exception:
+        datasource_anonymizer = DatasourceAnonymizer(data_context_id)
+
+    payload = {}
+    try:
+        payload = datasource_anonymizer.anonymize_datasource_info(name, kwargs)
+    except Exception:
+        logger.debug(
+            "add_datasource_usage_statistics: Unable to create add_datasource_usage_statistics payload field"
         )
     return payload
 

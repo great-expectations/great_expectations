@@ -35,7 +35,8 @@ You will most likely be prompted to install a new template. Rest assured that
 your original yaml file will be archived automatically for you. Even so, it's
 in your source control system already, right? ;-)
 
-.. _Upgrading to 0.11.x:
+.. _upgrading_to_0.11:
+
 *************************
 Upgrading to 0.11.x
 *************************
@@ -71,36 +72,18 @@ Migrating Your 0.10.x Project
 ==============================
 
 Before performing any of the following migration steps, please make sure you have appropriate backups of your project.
-In the future, there will be a CLI tool to help automate all or most of this process (affected
-stores with database backends will still have to be migrated manually). The CLI tool will make use of a new class called
-UpgradeHelperV11. In the meantime, you may use the following code snippet in a Jupyter notebook or Python script to
-help automate the process::
 
-  import great_expectations as ge
-  from great_expectations.cli.upgrade_helpers import UpgradeHelperV11
+Great Expectations has a CLI Upgrade Helper that helps automate all or most of the migration process (affected
+stores with database backends will still have to be migrated manually). The CLI tool makes use of a new class called
+UpgradeHelperV11. For reference, the UpgradeHelperV11 class is located at ``great_expectations.cli.upgrade_helpers.upgrade_helper_v11``.
 
-  context_root_dir = "/Users/user/projects/great_expectations" # enter the path to your GE project here
-  context = ge.data_context.DataContext(
-      context_root_dir=context_root_dir
-  )
+To use the CLI Upgrade Helper, enter the following command: ``great_expectations project upgrade``
 
-  # instantiate the upgrade helper
-  upgrade_helper = UpgradeHelperV11(data_context=context)
-  # upgrade_helper = UpgradeHelperV11(context_root_dir=context_root_dir)  # another way
+The Upgrade Helper will check your project and guide you through the upgrade process.
 
-  # generate a prompt summarizing what the upgrade helper will do and what steps, if any, need to be performed manually
-  # you should review this summary before proceeding with the automated process
-  upgrade_prompt = upgrade_helper.get_upgrade_prompt()
-  print(upgrade_prompt)
-
-  # if you were satisfied with the above summary, trigger the automated process
-  # when complete, the upgrade helper outputs a log of what was done, what was skipped, and exception messages of
-  # any exceptions that occurred
-  upgrade_logs = upgrade_helper.upgrade_project()
-
-For reference, the UpgradeHelperV11 class is located at ``great_expectations.cli.upgrade_helpers.upgrade_helper_v11``.
-
-.. note:: The migration steps are written in the order they should be completed.
+.. note:: The following instructions detail the steps required to upgrade your project manually. The migration steps
+  are written in the order they should be completed. They are also provided in the event that the Upgrade Helper is unable
+  to complete a fully automated upgrade and some user intervention is required.
 
 0. Code That Uses Great Expectations
 -------------------------------------
