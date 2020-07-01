@@ -36,7 +36,7 @@ Steps
 
     Once you choose a data asset, the CLI will open up a jupyter notebook.
         
-        You can also run this command without opening the notebook by using the ` --no-jupyter` flag and then starting up jupyter separately:
+    You can also run this command without opening the notebook by using the `` --no-jupyter`` flag and then starting up jupyter separately:
         
      .. code-block:: bash
         suite scaffold npi_distributions --no-jupyter
@@ -81,7 +81,7 @@ Steps
         scaffold_config = {
             "included_columns": included_columns,
             # "excluded_columns": [],
-            "included_expectations": ['expect_column_values_to_not_be_null'],
+            # "included_expectations": [],
             # "excluded_expectations": [],
         }
 
