@@ -40,7 +40,7 @@ class ParserError(GreatExpectationsError):
     pass
 
 
-class InvalidConfigurationYamlError(GreatExpectationsError):
+class InvalidConfigurationYamlError(DataContextError):
     pass
 
 

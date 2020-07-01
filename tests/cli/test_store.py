@@ -14,10 +14,16 @@ def test_store_list_with_zero_stores(caplog, empty_data_context):
     context._save_project_config()
     runner = CliRunner(mix_stderr=False)
 
-    with pytest.raises(InvalidConfigurationYamlError):
-        runner.invoke(
-            cli, "store list -d {}".format(project_dir), catch_exceptions=False,
-        )
+    result = runner.invoke(
+        cli, "store list -d {}".format(project_dir), catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+    assert (
+        "Your configuration file is not a valid yml file likely due to a yml syntax error"
+        in result.output.strip()
+    )
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_store_list_with_one_store(caplog, empty_data_context):
