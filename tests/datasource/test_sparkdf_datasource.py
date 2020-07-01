@@ -342,11 +342,13 @@ def test_spark_config(test_backends):
     # Without specifying any spark_config values we get defaults
     assert ("spark.app.name", "pyspark-shell") in conf
 
+    source.spark.sparkContext.stop()
+
     source = SparkDFDatasource(
         spark_config={
             "spark.app.name": "great_expectations",
             "spark.sql.catalogImplementation": "hive",
-            "spark.executor.memory": "128m",
+            "spark.executor.memory": "450m",
         }
     )
 
@@ -354,7 +356,7 @@ def test_spark_config(test_backends):
     conf = source.spark.sparkContext.getConf().getAll()
     assert ("spark.app.name", "great_expectations") in conf
     assert ("spark.sql.catalogImplementation", "hive") in conf
-    assert ("spark.executor.memory", "128m") in conf
+    assert ("spark.executor.memory", "450m") in conf
 
 
 def test_spark_datasource_processes_dataset_options(

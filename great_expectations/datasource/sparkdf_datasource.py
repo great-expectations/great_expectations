@@ -1,6 +1,7 @@
 import datetime
 import logging
 import uuid
+from typing import Union
 
 from great_expectations.datasource.types import BatchMarkers
 from great_expectations.types import ClassConfig
@@ -118,6 +119,11 @@ class SparkDFDatasource(Datasource):
 
         try:
             builder = SparkSession.builder
+            app_name: Union[str, None] = configuration_with_defaults[
+                "spark_config"
+            ].pop("spark.app.name", None)
+            if app_name:
+                builder.appName(app_name)
             for k, v in configuration_with_defaults["spark_config"].items():
                 builder.config(k, v)
             self.spark = builder.getOrCreate()
