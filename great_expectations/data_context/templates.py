@@ -169,8 +169,8 @@ validation_operators:
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction
-    {% if slack_webhook %}
-        {% include 'notify_slack_action_template.j2' %}
+    {%- if slack_webhook %}
+        {% include 'notify_slack_action_template.j2' -%}
     {% endif %}
 plugins_directory:
 datasources:

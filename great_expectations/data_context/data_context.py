@@ -593,7 +593,7 @@ class BaseDataContext(object):
                 defined_path = substitute_config_variable(
                     config_variables_file_path, dict(os.environ)
                 )
-                if not os.path.isabs(defined_path):
+                if not os.path.isabs(defined_path) and self.root_directory is not None:
                     # A BaseDataContext will not have a root directory; in that case use the current directory
                     # for any non-absolute path
                     root_directory = self.root_directory or os.curdir()
@@ -2242,6 +2242,8 @@ class DataContext(BaseDataContext):
 
         # save project config if data_context_id auto-generated or global config values applied
         project_config_dict = dataContextConfigSchema.dump(project_config)
+        # <Alex>ALEX</Alex>
+        # print(yaml.dump(project_config_dict, sys.stdout))
         if (
             project_config.anonymous_usage_statistics.explicit_id is False
             or project_config_dict != dataContextConfigSchema.dump(self._project_config)
