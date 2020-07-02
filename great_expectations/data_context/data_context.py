@@ -2031,7 +2031,14 @@ class DataContext(BaseDataContext):
         bound_args: BoundArguments = sig.bind(**params)
         call_args: OrderedDict = bound_args.arguments
 
+        is_in_memory_config: bool = False
+
         aws_detected: bool = is_aws_detected(**dict(call_args))
+        if aws_detected:
+            print("AWS_DETECTED")
+            is_in_memory_config = True
+        else:
+            print("AWS_NOT_DETECTED")
 
         project_config: Union[DataContextConfig, None] = None
         ge_dir: Union[str, None] = None
@@ -2093,6 +2100,7 @@ class DataContext(BaseDataContext):
                 cls.write_config_variables_template_to_disk(uncommitted_dir)
 
         return cls(
+            is_in_memory_config=is_in_memory_config,
             project_config=project_config,
             context_root_dir=ge_dir,
             runtime_environment=runtime_environment,
@@ -2204,16 +2212,22 @@ class DataContext(BaseDataContext):
                 shutil.copyfile(notebook, destination_path)
 
     def __init__(
-        self, project_config=None, context_root_dir=None, runtime_environment=None
+        self,
+        is_in_memory_config: bool = False,
+        project_config=None,
+        context_root_dir=None,
+        runtime_environment=None,
     ):
-
-        # Determine the "context root directory" - this is the parent of "great_expectations" dir
-        if context_root_dir is None:
-            context_root_dir = self.find_context_root_dir()
-        self._context_root_directory = os.path.abspath(
-            os.path.expanduser(context_root_dir)
-        )
-        if project_config is None:
+        if is_in_memory_config:
+            self._context_root_directory = None
+        else:
+            if project_config is None:
+                # Determine the "context root directory" - this is the parent of "great_expectations" dir
+                if context_root_dir is None:
+                    context_root_dir = self.find_context_root_dir()
+                self._context_root_directory = os.path.abspath(
+                    os.path.expanduser(context_root_dir)
+                )
             project_config = self._load_project_config()
 
         project_config_dict = dataContextConfigSchema.dump(project_config)

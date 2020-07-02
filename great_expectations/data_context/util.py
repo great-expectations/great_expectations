@@ -201,10 +201,10 @@ def file_relative_path(dunderfile, relative_path):
 
 def is_aws_detected(**kwargs) -> bool:
     return (
-        kwargs["json_s3_bucket"]
-        and kwargs["expectations_suites_store_prefix"]
-        and kwargs["validations_store_prefix"]
-        and kwargs["site_name "]
-        and kwargs["html_docs_s3_bucket "]
-        and kwargs["data_docs_prefix "]
+        kwargs["json_s3_bucket"] is not None
+        and kwargs["expectations_suites_store_prefix"] is not None
+        and kwargs["validations_store_prefix"] is not None
+        and kwargs["site_name"] is not None
+        and kwargs["html_docs_s3_bucket"] is not None
+        and kwargs["data_docs_prefix"] is not None
     )
