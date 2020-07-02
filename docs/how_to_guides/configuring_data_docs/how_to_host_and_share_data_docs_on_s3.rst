@@ -57,7 +57,9 @@ Steps
         ]
       }
 
-3. Run the following CLI command to apply the policy:
+3. **Apply the policy**
+
+  Run the following CLI command to apply the policy:
 
   .. code-block:: bash
   
