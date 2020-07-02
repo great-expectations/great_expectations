@@ -7,6 +7,7 @@ Changelog
 
 Develop
 -----------------
+* [ENHANCEMENT] Fixed some typos/grammar and a broken link in the suite_scaffold_notebook_renderer
 
 0.11.7
 -----------------
