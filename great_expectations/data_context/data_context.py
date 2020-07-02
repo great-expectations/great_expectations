@@ -2222,27 +2222,23 @@ class DataContext(BaseDataContext):
         context_root_dir=None,
         runtime_environment=None,
     ):
-        context_root_directory: Union[str, None]
-
         if is_in_memory_config:
-            context_root_directory = None
+            self._context_root_directory = None
         else:
             # Determine the "context root directory" - this is the parent of "great_expectations" dir
             if context_root_dir is None:
                 context_root_dir = self.find_context_root_dir()
-            context_root_directory = os.path.abspath(
+            self._context_root_directory = os.path.abspath(
                 os.path.expanduser(context_root_dir)
             )
             if project_config is None:
                 project_config = self._load_project_config()
 
-        self._context_root_directory = context_root_directory
-
         project_config_dict = dataContextConfigSchema.dump(project_config)
 
         super().__init__(
             project_config=project_config,
-            context_root_dir=context_root_directory,
+            context_root_dir=self.root_directory,
             runtime_environment=runtime_environment,
         )
 
