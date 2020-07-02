@@ -13,7 +13,7 @@ This guide will explain how to host and share Data Docs on AWS S3.
 Steps
 -----
 
-1. **Configure an S3 bucket**
+1. **Configure an S3 bucket.**
 
   You can configure an S3 bucket using the AWS CLI. Make sure you modify the bucket name and region for your situation.
 
@@ -29,11 +29,11 @@ Steps
   The example policy below **enforces IP-based access** - modify the bucket name and IP addresses for your situation. After you have customized the example policy to suit your situation, save it to a file called ``ip-policy.json`` in your local directory.
 
   .. admonition:: Important
-  
+
       Your policy should provide access only to appropriate users. Data Docs sites can include critical information about raw data and should generally **not** be publicly accessible.
 
   .. code-block:: json
-  
+
       {
         "Version": "2012-10-17",
         "Statement": [{
@@ -57,17 +57,17 @@ Steps
         ]
       }
 
-3. **Apply the policy**
+3. **Apply the policy.**
 
   Run the following CLI command to apply the policy:
 
   .. code-block:: bash
-  
+
       > aws s3api put-bucket-policy --bucket data-docs.my_org --policy file://ip-policy.json
 
 4. **Add a new S3 site to the data_docs_sites section of your great_expectations.yml**
 
-  Add a new S3 site to the ``data_docs_sites`` section of your ``great_expectations.yml`` - you may also replace the default ``local_site``. 
+  You may also replace the default ``local_site`` if you would only like to maintain a single S3 Data Docs site.
 
   .. code-block:: yaml
 
@@ -89,20 +89,22 @@ Steps
           class_name: DefaultSiteIndexBuilder
           show_cta_footer: true
 
-5. Test that your configuration is correct by building the site using the following CLI command: ``great_expectations docs build --site-name s3_site``. If successful, the CLI will open your newly built S3 Data Docs site and provide the URL, which you can share as desired. Note that the URL will only be viewable by users with IP addresses appearing in the above policy. 
+5. **Test that your configuration is correct by building the site.**
+
+  Use the following CLI command: ``great_expectations docs build --site-name s3_site``. If successful, the CLI will open your newly built S3 Data Docs site and provide the URL, which you can share as desired. Note that the URL will only be viewable by users with IP addresses appearing in the above policy.
 
   .. code-block:: bash
-  
+
     > great_expectations docs build --site-name s3_site
-    
+
     The following Data Docs sites will be built:
-    
+
      - s3_site: https://s3.amazonaws.com/data-docs.my_org/index.html
-    
+
     Would you like to proceed? [Y/n]: Y
-    
+
     Building Data Docs...
-    
+
     Done building Data Docs
 
 Additional notes
@@ -121,7 +123,7 @@ Additional resources
 - `AWS Website Hosting <https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteHosting.html>`_
 - `AWS Static Site Access Permissions <https://docs.aws.amazon.com/en_pv/AmazonS3/latest/dev/WebsiteAccessPermissionsReqd.html>`_
 - `AWS Website configuration <https://docs.aws.amazon.com/AmazonS3/latest/dev/HowDoIWebsiteConfiguration.html>`_
-- :ref:`Core concepts: Data Docs <data_docs>` 
+- :ref:`Core concepts: Data Docs <data_docs>`
 
 Comments
 --------
