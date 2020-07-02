@@ -152,7 +152,7 @@ NOTIFY_SLACK_ACTION_TEMPLATE: str = """
             class_name: SlackRenderer
 """
 
-SPARK_DF_IN_MEMORY_PROJECT_TEMPLATE: str = """
+AWS_SPARK_DF_IN_MEMORY_PROJECT_TEMPLATE: str = """
 {% include 'project_version_help_comment_template.j2' %}
 evaluation_parameter_store_name: evaluation_parameter_store
 validations_store_name: s3_validations_store
@@ -227,7 +227,7 @@ J2_ENV: Environment = Environment(
             "project_optional_config_comment_template.j2": PROJECT_OPTIONAL_CONFIG_COMMENT_TEMPLATE,
             "anonymized_usage_statistics_template.j2": ANONYMIZED_USAGE_STATISTICS_TEMPLATE,
             "notify_slack_action_template.j2": NOTIFY_SLACK_ACTION_TEMPLATE,
-            "spark_df_in_memory_project_template.j2": SPARK_DF_IN_MEMORY_PROJECT_TEMPLATE,
+            "aws_spark_df_in_memory_project_template.j2": AWS_SPARK_DF_IN_MEMORY_PROJECT_TEMPLATE,
             "filesystem_backed_config_project_template.j2": FILESYSTEM_BACKED_CONFIG_PROJECT_TEMPLATE,
         }
     )

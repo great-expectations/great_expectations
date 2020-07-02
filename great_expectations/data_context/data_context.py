@@ -18,7 +18,6 @@ from inspect import (
     Signature,
     currentframe,
     getargvalues,
-    getclosurevars,
     signature,
 )
 from types import FrameType
@@ -77,7 +76,10 @@ from great_expectations.datasource import Datasource
 from great_expectations.datasource.types import DatasourceTypes, SupportedDatabases
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.util import get_callable, verify_dynamic_loading_support
+from great_expectations.util import (
+    get_currently_executing_function,
+    verify_dynamic_loading_support,
+)
 from great_expectations.validator.validator import Validator
 
 try:
@@ -2022,7 +2024,7 @@ class DataContext(BaseDataContext):
         Returns:
             DataContext
         """
-        cur_func: Callable = get_callable()
+        cur_func: Callable = get_currently_executing_function()
         cf: FrameType = currentframe()
         # noinspection SpellCheckingInspection
         argvs: ArgInfo = getargvalues(cf)
@@ -2033,33 +2035,35 @@ class DataContext(BaseDataContext):
 
         is_in_memory_config: bool = False
 
-        aws_detected: bool = is_aws_detected(**dict(call_args))
-        if aws_detected:
-            print("AWS_DETECTED")
-            is_in_memory_config = True
-        else:
-            print("AWS_NOT_DETECTED")
-
         project_config: Union[DataContextConfig, None] = None
         ge_dir: Union[str, None] = None
 
         if project_root_dir is None:
-            spark_df_in_memory_project_yml: str = get_project_config_yml(
-                j2_template_name="spark_df_in_memory_project_template.j2",
-                json_s3_bucket=json_s3_bucket,
-                expectations_suites_store_prefix=expectations_suites_store_prefix,
-                validations_store_prefix=validations_store_prefix,
-                site_name=site_name,
-                html_docs_s3_bucket=html_docs_s3_bucket,
-                data_docs_prefix=data_docs_prefix,
-                show_how_to_buttons=show_how_to_buttons,
-                show_cta_footer=show_cta_footer,
-                slack_webhook=slack_webhook,
-                slack_notify_on=slack_notify_on,
-                usage_statistics_enabled=usage_statistics_enabled,
-            )
-            dict_from_yaml: dict = yaml.load(spark_df_in_memory_project_yml)
-            project_config = DataContextConfig.from_commented_map(dict_from_yaml)
+            aws_detected: bool = is_aws_detected(**dict(call_args))
+            if aws_detected:
+                print("AWS_DETECTED")
+                in_memory_project_yml: str = get_project_config_yml(
+                    j2_template_name="aws_spark_df_in_memory_project_template.j2",
+                    json_s3_bucket=json_s3_bucket,
+                    expectations_suites_store_prefix=expectations_suites_store_prefix,
+                    validations_store_prefix=validations_store_prefix,
+                    site_name=site_name,
+                    html_docs_s3_bucket=html_docs_s3_bucket,
+                    data_docs_prefix=data_docs_prefix,
+                    show_how_to_buttons=show_how_to_buttons,
+                    show_cta_footer=show_cta_footer,
+                    slack_webhook=slack_webhook,
+                    slack_notify_on=slack_notify_on,
+                    usage_statistics_enabled=usage_statistics_enabled,
+                )
+                dict_from_yaml: dict = yaml.load(in_memory_project_yml)
+                project_config = DataContextConfig.from_commented_map(dict_from_yaml)
+                is_in_memory_config = True
+            elif 1 == 2:
+                pass
+            else:
+                print("AWS_NOT_DETECTED")
+
         else:
             if not os.path.isdir(project_root_dir):
                 raise ge_exceptions.DataContextError(
@@ -2238,15 +2242,16 @@ class DataContext(BaseDataContext):
             runtime_environment=runtime_environment,
         )
 
-        if (
-            self.root_directory is None
-        ):  # <Alex>[ALEX] This will change when UUID is stored per datasource.</Alex>
-            return
         # save project config if data_context_id auto-generated or global config values applied
         if (
             project_config.anonymous_usage_statistics.explicit_id is False
             or project_config_dict != dataContextConfigSchema.dump(self._project_config)
         ):
+            print(
+                "[ALEX_DEBUG] data_context_id DOES NOT EXIST<Alex>[ALEX] This will change when UUID is stored per datasource OR ENTIRE CONFIG YML IS STORED IN CLOUD.</Alex>"
+            )
+            if self.root_directory is None:
+                return
             self._save_project_config()
 
     def _load_project_config(self):

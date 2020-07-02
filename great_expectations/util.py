@@ -57,7 +57,8 @@ def get_project_distribution() -> Union[Distribution, None]:
     return None
 
 
-def get_callable() -> Callable:
+# Returns the object reference to the currently running function (i.e., the immediate function under execution).
+def get_currently_executing_function() -> Callable:
     cf: FrameType = currentframe()
     fb: FrameType = cf.f_back
     fc: CodeType = fb.f_code
