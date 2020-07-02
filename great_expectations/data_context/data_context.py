@@ -2247,9 +2247,7 @@ class DataContext(BaseDataContext):
             project_config.anonymous_usage_statistics.explicit_id is False
             or project_config_dict != dataContextConfigSchema.dump(self._project_config)
         ):
-            print(
-                "[ALEX_DEBUG] data_context_id DOES NOT EXIST<Alex>[ALEX] This will change when UUID is stored per datasource OR ENTIRE CONFIG YML IS STORED IN CLOUD.</Alex>"
-            )
+            # "[ALEX_DEBUG] data_context_id DOES NOT EXIST<Alex>[ALEX] This will change when UUID is stored per datasource OR ENTIRE CONFIG YML IS STORED IN CLOUD.</Alex>"
             if self.root_directory is None:
                 return
             self._save_project_config()
