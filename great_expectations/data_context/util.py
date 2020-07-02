@@ -197,3 +197,14 @@ def file_relative_path(dunderfile, relative_path):
     H/T https://github.com/dagster-io/dagster/blob/8a250e9619a49e8bff8e9aa7435df89c2d2ea039/python_modules/dagster/dagster/utils/__init__.py#L34
     """
     return os.path.join(os.path.dirname(dunderfile), relative_path)
+
+
+def is_aws_detected(**kwargs) -> bool:
+    return (
+        kwargs["json_s3_bucket"]
+        and kwargs["expectations_suites_store_prefix"]
+        and kwargs["validations_store_prefix"]
+        and kwargs["site_name "]
+        and kwargs["html_docs_s3_bucket "]
+        and kwargs["data_docs_prefix "]
+    )

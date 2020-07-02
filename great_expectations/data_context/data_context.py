@@ -11,7 +11,18 @@ import sys
 import uuid
 import warnings
 import webbrowser
-from typing import Dict, List, Optional, Union
+from collections import OrderedDict
+from inspect import (
+    ArgInfo,
+    BoundArguments,
+    Signature,
+    currentframe,
+    getargvalues,
+    getclosurevars,
+    signature,
+)
+from types import FrameType
+from typing import Callable, Dict, List, Optional, Union
 
 from dateutil.parser import ParserError, parse
 from marshmallow import ValidationError
@@ -56,15 +67,17 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
+    is_aws_detected,
     load_class,
     substitute_all_config_variables,
     substitute_config_variable,
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource
+from great_expectations.datasource.types import DatasourceTypes, SupportedDatabases
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.util import verify_dynamic_loading_support
+from great_expectations.util import get_callable, verify_dynamic_loading_support
 from great_expectations.validator.validator import Validator
 
 try:
@@ -1981,6 +1994,7 @@ class DataContext(BaseDataContext):
     def create(
         cls,
         project_root_dir=None,
+        data_source_type=DatasourceTypes.SPARK,
         json_s3_bucket=None,
         expectations_suites_store_prefix=f"{BaseDataContext.GE_DIR}/JSON/ExpectationSuites",
         validations_store_prefix=f"{BaseDataContext.GE_DIR}JSON/Validations",
@@ -2008,6 +2022,17 @@ class DataContext(BaseDataContext):
         Returns:
             DataContext
         """
+        cur_func: Callable = get_callable()
+        cf: FrameType = currentframe()
+        # noinspection SpellCheckingInspection
+        argvs: ArgInfo = getargvalues(cf)
+        sig: Signature = signature(cur_func)
+        params: list = {k: argvs.locals[k] for k in sig.parameters.keys()}
+        bound_args: BoundArguments = sig.bind(**params)
+        call_args: OrderedDict = bound_args.arguments
+
+        aws_detected: bool = is_aws_detected(**dict(call_args))
+
         project_config: Union[DataContextConfig, None] = None
         ge_dir: Union[str, None] = None
 

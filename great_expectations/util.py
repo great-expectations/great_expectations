@@ -3,10 +3,12 @@ import json
 import logging
 import os
 import time
+from collections import OrderedDict
 from functools import wraps
-from inspect import getcallargs
+from gc import get_referrers
+from inspect import BoundArguments, currentframe, getclosurevars, signature
 from pathlib import Path
-from types import ModuleType
+from types import CodeType, FrameType, ModuleType
 from typing import Callable, Union
 
 import black
@@ -31,9 +33,10 @@ def measure_execution_time(func) -> Callable:
         finally:
             time_end: int = int(round(time.time() * 1000))
             delta_t: int = time_end - time_begin
-            call_args: dict = getcallargs(func, *args, **kwargs)
+            bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
+            call_args: OrderedDict = bound_args.arguments
             print(
-                f"Total execution time of function {func.__name__}({call_args}): {delta_t} ms."
+                f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
             )
 
     return compute_delta_t
@@ -52,6 +55,19 @@ def get_project_distribution() -> Union[Distribution, None]:
             if relative_path in distr.files:
                 return distr
     return None
+
+
+def get_callable() -> Callable:
+    cf: FrameType = currentframe()
+    fb: FrameType = cf.f_back
+    fc: CodeType = fb.f_code
+    func_obj: Callable = [
+        referer
+        for referer in get_referrers(fc)
+        if getattr(referer, "__code__", None) is fc
+        and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
+    ][0]
+    return func_obj
 
 
 def verify_dynamic_loading_support(module_name: str, package_name: str = None) -> None:

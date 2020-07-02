@@ -1,4 +1,3 @@
-import enum
 import json
 import logging
 import os
@@ -35,6 +34,7 @@ from great_expectations.datasource.batch_kwargs_generator import (
 from great_expectations.datasource.batch_kwargs_generator.table_batch_kwargs_generator import (
     TableBatchKwargsGenerator,
 )
+from great_expectations.datasource.types import DatasourceTypes, SupportedDatabases
 from great_expectations.exceptions import (
     BatchKwargsError,
     DatasourceInitializationError,
@@ -44,24 +44,7 @@ from great_expectations.validator.validator import Validator
 logger = logging.getLogger(__name__)
 
 
-class DatasourceTypes(enum.Enum):
-    PANDAS = "pandas"
-    SQL = "sql"
-    SPARK = "spark"
-    # TODO DBT = "dbt"
-
-
 MANUAL_GENERATOR_CLASSES = ManualBatchKwargsGenerator
-
-
-class SupportedDatabases(enum.Enum):
-    MYSQL = "MySQL"
-    POSTGRES = "Postgres"
-    REDSHIFT = "Redshift"
-    SNOWFLAKE = "Snowflake"
-    BIGQUERY = "BigQuery"
-    OTHER = "other - Do you have a working SQLAlchemy connection string?"
-    # TODO MSSQL
 
 
 @click.group()
