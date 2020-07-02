@@ -13,7 +13,9 @@ This guide will explain how to host and share Data Docs on AWS S3.
 Steps
 -----
 
-1. Configure an S3 bucket using the AWS CLI. Make sure you modify the bucket name and region for your situation.
+1. **Configure an S3 bucket**
+
+  You can configure an S3 bucket using the AWS CLI. Make sure you modify the bucket name and region for your situation.
 
   .. code-block:: bash
 
