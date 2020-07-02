@@ -194,7 +194,7 @@ def test_profile_enum_with_bad_input_raises_schema_error(enum_types_schema):
         profiler.profile(enum_types_schema, "enums")
 
 
-def test_profile_simple_schema(simple_schema):
+def test_profile_simple_schema(empty_data_context, simple_schema):
     profiler = JsonSchemaProfiler()
     obs = profiler.profile(simple_schema, "simple_suite")
     assert isinstance(obs, ExpectationSuite)
@@ -227,9 +227,11 @@ def test_profile_simple_schema(simple_schema):
             "meta": {},
         },
     ]
+    context = empty_data_context
+    context.save_expectation_suite(obs)
 
 
-def test_profile_boolean_schema(boolean_types_schema):
+def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
     profiler = JsonSchemaProfiler()
     obs = profiler.profile(boolean_types_schema, "bools")
     assert isinstance(obs, ExpectationSuite)
@@ -254,9 +256,11 @@ def test_profile_boolean_schema(boolean_types_schema):
             "expectation_type": "expect_column_values_to_be_in_set",
         },
     ]
+    context = empty_data_context
+    context.save_expectation_suite(obs)
 
 
-def test_profile_enum_schema(enum_types_schema):
+def test_profile_enum_schema(empty_data_context, enum_types_schema):
     profiler = JsonSchemaProfiler()
     obs = profiler.profile(enum_types_schema, "enums")
     assert isinstance(obs, ExpectationSuite)
@@ -276,9 +280,11 @@ def test_profile_enum_schema(enum_types_schema):
             },
         },
     ]
+    context = empty_data_context
+    context.save_expectation_suite(obs)
 
 
-def test_profile_string_lengths_schema(string_lengths_schema):
+def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema):
     profiler = JsonSchemaProfiler()
     obs = profiler.profile(string_lengths_schema, "lengths")
     assert isinstance(obs, ExpectationSuite)
@@ -370,14 +376,15 @@ def test_profile_string_lengths_schema(string_lengths_schema):
             "meta": {},
         },
     ]
+    context = empty_data_context
+    context.save_expectation_suite(obs)
 
 
-def test_profile_integer_ranges_schema(integer_ranges_schema):
+def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema):
     profiler = JsonSchemaProfiler()
     obs = profiler.profile(integer_ranges_schema, "integer_ranges")
     assert isinstance(obs, ExpectationSuite)
     assert obs.expectation_suite_name == "integer_ranges"
-
     assert [e.to_json_dict() for e in obs.expectations] == [
         {
             "meta": {},
@@ -533,14 +540,15 @@ def test_profile_integer_ranges_schema(integer_ranges_schema):
             "meta": {},
         },
     ]
+    context = empty_data_context
+    context.save_expectation_suite(obs)
 
 
-def test_profile_number_ranges_schema(number_ranges_schema):
+def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
     profiler = JsonSchemaProfiler()
     obs = profiler.profile(number_ranges_schema, "number_ranges")
     assert isinstance(obs, ExpectationSuite)
     assert obs.expectation_suite_name == "number_ranges"
-
     assert [e.to_json_dict() for e in obs.expectations] == [
         {
             "meta": {},
@@ -696,9 +704,13 @@ def test_profile_number_ranges_schema(number_ranges_schema):
             "meta": {},
         },
     ]
+    context = empty_data_context
+    context.save_expectation_suite(obs)
 
 
-def test_has_profile_create_expectations_from_complex_schema(complex_flat_schema):
+def test_has_profile_create_expectations_from_complex_schema(
+    empty_data_context, complex_flat_schema
+):
     profiler = JsonSchemaProfiler()
     obs = profiler.profile(complex_flat_schema, "complex")
     assert isinstance(obs, ExpectationSuite)
@@ -806,3 +818,5 @@ def test_has_profile_create_expectations_from_complex_schema(complex_flat_schema
             "meta": {},
         },
     ]
+    context = empty_data_context
+    context.save_expectation_suite(obs)
