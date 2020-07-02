@@ -58,7 +58,7 @@ class RenderedComponentContent(RenderedContent):
         self.styling = styling
 
     def to_json_dict(self):
-        d = super(RenderedComponentContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["content_block_type"] = self.content_block_type
         if len(self.styling) > 0:
             d["styling"] = self.styling
@@ -74,15 +74,13 @@ class RenderedHeaderContent(RenderedComponentContent):
         styling=None,
         content_block_type="header",
     ):
-        super(RenderedHeaderContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.header_row = header_row
         self.subheader = subheader
 
     def to_json_dict(self):
-        d = super(RenderedHeaderContent, self).to_json_dict()
+        d = super().to_json_dict()
         if isinstance(self.header, RenderedContent):
             d["header"] = self.header.to_json_dict()
         else:
@@ -106,15 +104,13 @@ class RenderedGraphContent(RenderedComponentContent):
         styling=None,
         content_block_type="graph",
     ):
-        super(RenderedGraphContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.graph = graph
         self.header = header
         self.subheader = subheader
 
     def to_json_dict(self):
-        d = super(RenderedGraphContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["graph"] = self.graph
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
@@ -141,9 +137,7 @@ class RenderedTableContent(RenderedComponentContent):
         table_options=None,
         header_row_options=None,
     ):
-        super(RenderedTableContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.subheader = subheader
         self.table = table
@@ -152,7 +146,7 @@ class RenderedTableContent(RenderedComponentContent):
         self.header_row_options = header_row_options
 
     def to_json_dict(self):
-        d = super(RenderedTableContent, self).to_json_dict()
+        d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
                 d["header"] = self.header.to_json_dict()
@@ -258,13 +252,11 @@ class RenderedContentBlockContainer(RenderedComponentContent):
     def __init__(
         self, content_blocks, styling=None, content_block_type="content_block_container"
     ):
-        super(RenderedContentBlockContainer, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.content_blocks = content_blocks
 
     def to_json_dict(self):
-        d = super(RenderedContentBlockContainer, self).to_json_dict()
+        d = super().to_json_dict()
         d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
             self.content_blocks
         )
@@ -273,13 +265,11 @@ class RenderedContentBlockContainer(RenderedComponentContent):
 
 class RenderedMarkdownContent(RenderedComponentContent):
     def __init__(self, markdown, styling=None, content_block_type="markdown"):
-        super(RenderedMarkdownContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.markdown = markdown
 
     def to_json_dict(self):
-        d = super(RenderedMarkdownContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["markdown"] = self.markdown
         return d
 
@@ -288,13 +278,11 @@ class RenderedStringTemplateContent(RenderedComponentContent):
     def __init__(
         self, string_template, styling=None, content_block_type="string_template"
     ):
-        super(RenderedStringTemplateContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.string_template = string_template
 
     def to_json_dict(self):
-        d = super(RenderedStringTemplateContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["string_template"] = self.string_template
         return d
 
@@ -308,15 +296,13 @@ class RenderedBulletListContent(RenderedComponentContent):
         styling=None,
         content_block_type="bullet_list",
     ):
-        super(RenderedBulletListContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.subheader = subheader
         self.bullet_list = bullet_list
 
     def to_json_dict(self):
-        d = super(RenderedBulletListContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["bullet_list"] = RenderedContent.rendered_content_list_to_json(
             self.bullet_list
         )
@@ -342,15 +328,13 @@ class ValueListContent(RenderedComponentContent):
         styling=None,
         content_block_type="value_list",
     ):
-        super(ValueListContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.subheader = subheader
         self.value_list = value_list
 
     def to_json_dict(self):
-        d = super(ValueListContent, self).to_json_dict()
+        d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
                 d["header"] = self.header.to_json_dict()
@@ -369,15 +353,13 @@ class TextContent(RenderedComponentContent):
     def __init__(
         self, text, header=None, subheader=None, styling=None, content_block_type="text"
     ):
-        super(TextContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.text = text
         self.header = header
         self.subheader = subheader
 
     def to_json_dict(self):
-        d = super(TextContent, self).to_json_dict()
+        d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
                 d["header"] = self.header.to_json_dict()
@@ -404,9 +386,7 @@ class CollapseContent(RenderedComponentContent):
         content_block_type="collapse",
         inline_link=False,
     ):
-        super(CollapseContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.collapse_toggle_link = collapse_toggle_link
         self.header = header
         self.subheader = subheader
@@ -414,7 +394,7 @@ class CollapseContent(RenderedComponentContent):
         self.inline_link = inline_link
 
     def to_json_dict(self):
-        d = super(CollapseContent, self).to_json_dict()
+        d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
                 d["header"] = self.header.to_json_dict()
@@ -468,7 +448,7 @@ class RenderedDocumentContent(RenderedContent):
         self.batch_kwargs = batch_kwargs
 
     def to_json_dict(self):
-        d = super(RenderedDocumentContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["sections"] = RenderedContent.rendered_content_list_to_json(self.sections)
         d["data_asset_name"] = self.data_asset_name
         d["full_data_asset_identifier"] = self.full_data_asset_identifier
@@ -497,7 +477,7 @@ class RenderedSectionContent(RenderedContent):
         self.section_name = section_name
 
     def to_json_dict(self):
-        d = super(RenderedSectionContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
             self.content_blocks
         )

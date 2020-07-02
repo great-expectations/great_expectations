@@ -149,7 +149,7 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_connection_string_non_working_db_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging(
-    mock_webbrowser, caplog, tmp_path_factory,
+    mock_webbrowser, caplog, tmp_path_factory, sa
 ):
     root_dir = tmp_path_factory.mktemp("bad_con_string_test")
     root_dir = str(root_dir)

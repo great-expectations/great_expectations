@@ -10,6 +10,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.util import (
     file_relative_path,
+    substitute_all_config_variables,
     substitute_config_variable,
 )
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
@@ -220,3 +221,39 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
         == config_variables_dict["arg2"]
     )
     assert exc.value.missing_config_variable == "arg1"
+
+
+def test_substitute_env_var_in_config_variable_file(monkeypatch):
+    monkeypatch.setenv("FOO", "val_of_arg_0")
+    config_variables_dict = {"arg0": "${FOO}", "arg2": {"v1": 2}, "replace_me": "wrong"}
+    assert (
+        substitute_config_variable("abc${arg0}", config_variables_dict)
+        == "abcval_of_arg_0"
+    )
+    monkeypatch.delenv("FOO")
+    with pytest.raises(MissingConfigVariableError):
+        substitute_config_variable("abc${arg0}", config_variables_dict)
+
+    with open(
+        file_relative_path(
+            __file__, "../test_fixtures/great_expectations_basic_with_variables.yml",
+        )
+    ) as f:
+        config = yaml.load(f)
+
+    monkeypatch.setenv("replace_me", "correct")
+
+    # this is how dict is created in data_context.get_config_with_variables_substituted, for env var override
+    config_variables_dict = {
+        **config_variables_dict,
+        **dict(os.environ),
+    }
+
+    config = substitute_all_config_variables(config, config_variables_dict)
+
+    assert (
+        config["datasources"]["mydatasource"]["batch_kwargs_generators"]["mygenerator"][
+            "reader_options"
+        ]["test_variable_sub1"]
+        == "correct"
+    )
