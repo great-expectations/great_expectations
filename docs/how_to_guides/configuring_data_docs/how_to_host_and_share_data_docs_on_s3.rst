@@ -24,7 +24,9 @@ Steps
         "Location": "/data-docs.my_org"
     }
 
-2. Configure your bucket policy to enable appropriate access. The example policy below **enforces IP-based access** - modify the bucket name and IP addresses for your situation. After you have customized the example policy to suit your situation, save it to a file called `ip-policy.json` in your local directory.
+2. **Configure your bucket policy to enable appropriate access.**
+
+  The example policy below **enforces IP-based access** - modify the bucket name and IP addresses for your situation. After you have customized the example policy to suit your situation, save it to a file called ``ip-policy.json`` in your local directory.
 
   .. admonition:: Important
   
