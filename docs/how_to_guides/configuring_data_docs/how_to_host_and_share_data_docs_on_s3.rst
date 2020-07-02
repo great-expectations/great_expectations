@@ -65,7 +65,9 @@ Steps
   
       > aws s3api put-bucket-policy --bucket data-docs.my_org --policy file://ip-policy.json
 
-4. Add a new S3 site to the ``data_docs_sites`` section of your ``great_expectations.yml`` - you may also replace the default ``local_site``. 
+4. **Add a new S3 site to the data_docs_sites section of your great_expectations.yml**
+
+  Add a new S3 site to the ``data_docs_sites`` section of your ``great_expectations.yml`` - you may also replace the default ``local_site``. 
 
   .. code-block:: yaml
 
