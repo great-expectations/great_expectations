@@ -2234,8 +2234,6 @@ class DataContext(BaseDataContext):
             if project_config is None:
                 project_config = self._load_project_config()
 
-        project_config_dict = dataContextConfigSchema.dump(project_config)
-
         super().__init__(
             project_config=project_config,
             context_root_dir=self.root_directory,
@@ -2243,6 +2241,7 @@ class DataContext(BaseDataContext):
         )
 
         # save project config if data_context_id auto-generated or global config values applied
+        project_config_dict = dataContextConfigSchema.dump(project_config)
         if (
             project_config.anonymous_usage_statistics.explicit_id is False
             or project_config_dict != dataContextConfigSchema.dump(self._project_config)
