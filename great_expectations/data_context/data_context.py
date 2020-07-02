@@ -2222,7 +2222,8 @@ class DataContext(BaseDataContext):
         context_root_dir=None,
         runtime_environment=None,
     ):
-        context_root_directory: Union[str, None] = None
+        context_root_directory: Union[str, None]
+
         if is_in_memory_config:
             context_root_directory = None
         else:
