@@ -112,9 +112,10 @@ def test_get_available_data_asset_names_with_one_datasource_without_a_generator_
 
 
 def test_get_available_data_asset_names_with_multiple_datasources_with_and_without_generators(
-    empty_data_context,
+    empty_data_context, sa
 ):
     """Test datasources with and without generators."""
+    # requires sqlalchemy because it instantiates sqlalchemydatasource
     context = empty_data_context
     connection_kwargs = {"credentials": {"drivername": "sqlite"}}
 

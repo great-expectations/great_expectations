@@ -4,11 +4,45 @@
 Changelog
 #########
 
+
 Develop
 -----------------
-* [ENHANCEMENT] Added 3 new usage stats events: "cli.new_ds_choice", "data_context.add_datasource", and "datasource.sqlalchemy.connect"
+
+0.11.7
+-----------------
+* [ENHANCEMENT] Improve CLI error handling.
+* [ENHANCEMENT] Do not register signal handlers if not running in main thread
+* [ENHANCEMENT] store_backend (S3 and GCS) now throws InvalidKeyError if file does not exist at expected location
+* [BUGFIX] ProfilerTypeMapping uses lists instead of sets to prevent serialization errors when saving suites created by JsonSchemaProfiler
+* [DOCS] Update suite scaffold how-to
+* [DOCS] Docs/how to define expectations that span multiple tables
+* [DOCS] how to metadata stores validation on s3
+
+0.11.6
+-----------------
+* [FEATURE] Auto-install Python DB packages.  If the required packages for a DB library are not installed, GE will offer the user to install them, without exiting CLI
+* [FEATURE] Add new expectation expect_table_row_count_to_equal_other_table for SqlAlchemyDataset
+* [FEATURE] A profiler that builds suites from JSONSchema files
+* [ENHANCEMENT] Add ``.feather`` file support to PandasDatasource
+* [ENHANCEMENT] Use ``colorama init`` to support terminal color on Windows
+* [ENHANCEMENT] Update how_to_trigger_slack_notifications_as_a_validation_action.rst
+* [ENHANCEMENT] Added note for config_version in great_expectations.yml
+* [ENHANCEMENT] Implement "column_quantiles" for MySQL (via a compound SQLAlchemy query, since MySQL does not support "percentile_disc")
+* [BUGFIX] "data_asset.validate" events with "data_asset_name" key in the batch kwargs were failing schema validation
+* [BUGFIX] database_store_backend does not support storing Expectations in DB
+* [BUGFIX] instantiation of ExpectationSuite always adds GE version metadata to prevent datadocs from crashing
+* [BUGFIX] Fix all tests having to do with missing data source libraries
+* [DOCS] will/docs/how_to/Store Expectations on Google Cloud Store
+
+0.11.5
+-----------------
 * [FEATURE] Add support for expect_column_values_to_match_regex_list exception for Spark backend
+* [ENHANCEMENT] Added 3 new usage stats events: "cli.new_ds_choice", "data_context.add_datasource", and "datasource.sqlalchemy.connect"
+* [ENHANCEMENT] Support platform_specific_separator flag for TupleS3StoreBackend prefix
+* [ENHANCEMENT] Allow environment substitution in config_variables.yml
 * [BUGFIX] fixed issue where calling head() on a SqlAlchemyDataset would fail if the underlying table is empty
+* [BUGFIX] fixed bug in rounding of mostly argument to nullity expectations produced by the BasicSuiteBuilderProfiler
+* [DOCS] New How-to guide: How to add a Validation Operator (+ updated in Validation Operator doc strings)
 
 0.11.4
 -----------------

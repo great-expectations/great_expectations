@@ -40,7 +40,7 @@ class ParserError(GreatExpectationsError):
     pass
 
 
-class InvalidConfigurationYamlError(GreatExpectationsError):
+class InvalidConfigurationYamlError(DataContextError):
     pass
 
 
@@ -123,6 +123,10 @@ class GreatExpectationsTypeError(TypeError):
 
 
 class StoreError(DataContextError):
+    pass
+
+
+class InvalidKeyError(StoreError):
     pass
 
 
