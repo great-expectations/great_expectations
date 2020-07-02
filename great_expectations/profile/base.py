@@ -45,7 +45,7 @@ class ProfilerTypeMapping:
 
     # Future support possibility: JSON (RECORD)
     # Future support possibility: BINARY (BYTES)
-    INT_TYPE_NAMES = {
+    INT_TYPE_NAMES = [
         "INTEGER",
         "integer",
         "int",
@@ -57,8 +57,8 @@ class ProfilerTypeMapping:
         "IntegerType",
         "LongType",
         "DECIMAL",
-    }
-    FLOAT_TYPE_NAMES = {
+    ]
+    FLOAT_TYPE_NAMES = [
         "FLOAT",
         "FLOAT4",
         "FLOAT8",
@@ -68,8 +68,8 @@ class ProfilerTypeMapping:
         "DoubleType",
         "float",
         "number",
-    }
-    STRING_TYPE_NAMES = {
+    ]
+    STRING_TYPE_NAMES = [
         "CHAR",
         "VARCHAR",
         "TEXT",
@@ -77,8 +77,8 @@ class ProfilerTypeMapping:
         "StringType",
         "string",
         "str",
-    }
-    BOOLEAN_TYPE_NAMES = {"BOOLEAN", "boolean", "BOOL", "bool", "BooleanType"}
+    ]
+    BOOLEAN_TYPE_NAMES = ["BOOLEAN", "boolean", "BOOL", "bool", "BooleanType"]
     DATETIME_TYPE_NAMES = {
         "DATETIME",
         "DATE",
