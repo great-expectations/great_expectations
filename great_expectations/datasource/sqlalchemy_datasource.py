@@ -137,9 +137,13 @@ class SqlAlchemyDatasource(Datasource):
 
             # Otherwise, connect using remaining kwargs
             else:
-                options, drivername = self._get_sqlalchemy_connection_options(**kwargs)
+                (
+                    options,
+                    create_engine_kwargs,
+                    drivername,
+                ) = self._get_sqlalchemy_connection_options(**kwargs)
                 self.drivername = drivername
-                self.engine = create_engine(options)
+                self.engine = create_engine(options, **create_engine_kwargs)
                 self.engine.connect()
 
             # since we switched to lazy loading of Datasources when we initialise a DataContext,
@@ -173,6 +177,10 @@ class SqlAlchemyDatasource(Datasource):
         else:
             credentials = {}
 
+        create_engine_kwargs = {}
+
+        create_engine_kwargs["connect_args"] = credentials.pop("connect_args")
+
         # if a connection string or url was provided in the profile, use that
         if "connection_string" in credentials:
             options = credentials["connection_string"]
@@ -188,7 +196,7 @@ class SqlAlchemyDatasource(Datasource):
                     "schema on the user connecting to your database."
                 )
             options = sqlalchemy.engine.url.URL(drivername, **credentials)
-        return options, drivername
+        return options, create_engine_kwargs, drivername
 
     def get_batch(self, batch_kwargs, batch_parameters=None):
         # We need to build a batch_id to be used in the dataframe
