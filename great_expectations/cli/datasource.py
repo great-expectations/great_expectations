@@ -623,8 +623,9 @@ def _collect_snowflake_credentials(default_credentials=None):
         """What authentication method would you like to use?
     1. User and Password
     2. Single sign-on (SSO)
+    3. Key pair authentication
 """,
-        type=click.Choice(["1", "2"]),
+        type=click.Choice(["1", "2", "3"]),
         show_choices=False,
     )
 
@@ -675,6 +676,8 @@ def _collect_snowflake_credentials(default_credentials=None):
         credentials = {**credentials, **_collect_snowflake_credentials_user_password()}
     elif auth_method == "2":
         credentials = {**credentials, **_collect_snowflake_credentials_sso()}
+    elif auth_method == "3":
+        credentials = {**credentials, **_collect_snowflake_credentials_key_pair()}
     return credentials
 
 
@@ -698,6 +701,22 @@ def _collect_snowflake_credentials_sso():
     credentials["connect_args"]["authenticator"] = click.prompt(
         "Valid okta URL or 'externalbrowser' used to connect through SSO",
         default="externalbrowser",
+        show_default=False,
+    )
+
+    return credentials
+
+
+def _collect_snowflake_credentials_key_pair():
+    credentials = {}
+
+    credentials["private_key_path"] = click.prompt(
+        "Path to the private key used for authentication", show_default=False,
+    )
+
+    credentials["private_key_passphrase"] = click.prompt(
+        "Passphrase for the private key used for authentication (optional -- leave blank for none)",
+        default="",
         show_default=False,
     )
 

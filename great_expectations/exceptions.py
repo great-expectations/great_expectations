@@ -263,5 +263,9 @@ class DatasourceInitializationError(GreatExpectationsError):
         super().__init__(self.message)
 
 
+class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
+    pass
+
+
 class InvalidConfigValueTypeError(DataContextError):
     pass
