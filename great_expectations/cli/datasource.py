@@ -622,7 +622,7 @@ def _collect_snowflake_credentials(default_credentials=None):
     auth_method = click.prompt(
         """What authentication method would you like to use?
     1. User and Password
-    2. External browser (SSO)
+    2. Single sign-on (SSO)
 """,
         type=click.Choice(["1", "2"]),
         show_choices=False,
