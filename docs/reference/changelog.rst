@@ -8,6 +8,7 @@ Changelog
 Develop
 -----------------
 * [ENHANCEMENT] Fixed some typos/grammar and a broken link in the suite_scaffold_notebook_renderer
+* [FEATURE] Add new exception: expect_sum_of_columns_to_be_equal (pandas)
 
 0.11.7
 -----------------
