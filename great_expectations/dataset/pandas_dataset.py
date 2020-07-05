@@ -1786,3 +1786,16 @@ Notes:
         threshold = len(column_list.columns)
         # Do not dropna here, since we have separately dealt with na in decorator
         return column_list.nunique(dropna=False, axis=1) >= threshold
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_sum_of_columns_to_be_equal(
+        self,
+        column_list,
+        sum_total,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        return column_list.sum(axis=1) == sum_total

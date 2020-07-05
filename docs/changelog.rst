@@ -33,6 +33,7 @@ Develop
 * [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 * [DOCS] Add information about issue tags to contributing docs
 * [DEPRECATION] Deprecate demo suite behavior in `suite new`
+* [FEATURE] Add new exception: expect_sum_of_columns_to_be_equal (pandas)
 
 0.11.9
 -----------------

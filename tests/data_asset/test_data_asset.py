@@ -135,6 +135,7 @@ def test_valid_expectation_types(dataset, pandas_dataset):
         "expect_column_values_to_not_match_regex",
         "expect_column_values_to_not_match_regex_list",
         "expect_multicolumn_values_to_be_unique",
+        "expect_sum_of_columns_to_be_equal",
         "expect_table_column_count_to_be_between",
         "expect_table_column_count_to_equal",
         "expect_table_columns_to_match_ordered_list",
