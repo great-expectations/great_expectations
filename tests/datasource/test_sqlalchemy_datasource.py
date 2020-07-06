@@ -103,7 +103,8 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string, sa):
     batch_kwargs = datasource.build_batch_kwargs("default", "main.table_1")
     batch = datasource.get_batch(batch_kwargs=batch_kwargs)
     assert isinstance(batch, Batch)
-    assert isinstance(batch.data, SqlAlchemyBatchReference)
+    batch_data = batch.data
+    assert isinstance(batch_data, SqlAlchemyBatchReference)
     dataset = SqlAlchemyDataset(**batch.data.get_init_kwargs())
     assert len(dataset.head(10)) == 5
 
