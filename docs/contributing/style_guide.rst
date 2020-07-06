@@ -107,7 +107,7 @@ Within the table of contents, each section has specific role to play. Broadly sp
 
 * **Links to docs in the API Reference section**
 
-    * Link to a module: :mod:`great_expectations.data_context.data_context`
+    * Link to a module: ``:mod:`great_expectations.data_context.data_context``` :mod:`great_expectations.data_context.data_context`
     * Abbreviated link to a module: :mod:`~great_expectations.data_context.data_context`
     * Link to a class: :py:class:`great_expectations.data_context.data_context.BaseDataContext`
     * Abbreviated link to a class: :py:class:`~great_expectations.data_context.data_context.BaseDataContext`
