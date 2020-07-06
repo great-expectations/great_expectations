@@ -64,15 +64,24 @@ class UsageStatisticsHandler(object):
         self._data_docs_sites_anonymizer = DataDocsSiteAnonymizer(data_context_id)
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
-        self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
-        self._sigint_handler = signal.signal(signal.SIGINT, self._teardown)
+        try:
+            self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
+        except ValueError:
+            # if we are not the main thread, we don't get to ask for signal handling.
+            self._sigterm_handler = None
+        try:
+            self._sigint_handler = signal.signal(signal.SIGINT, self._teardown)
+        except ValueError:
+            # if we are not the main thread, we don't get to ask for signal handling.
+            self._sigint_handler = None
+
         atexit.register(self._close_worker)
 
     def _teardown(self, signum: int, frame):
         self._close_worker()
-        if signum == signal.SIGTERM:
+        if signum == signal.SIGTERM and self._sigterm_handler:
             self._sigterm_handler(signum, frame)
-        if signum == signal.SIGINT:
+        if signum == signal.SIGINT and self._sigint_handler:
             self._sigint_handler(signum, frame)
 
     def _close_worker(self):
