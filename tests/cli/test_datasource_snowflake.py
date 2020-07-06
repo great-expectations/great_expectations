@@ -25,7 +25,7 @@ def test_snowflake_user_password_credentials_exit(empty_data_context):
     )
 
     stdout = result.output.strip()
-    assert "Ok, exiting now" in stdout
+    assert "ok, exiting now" in stdout.lower()
 
 
 @patch("click.prompt")
