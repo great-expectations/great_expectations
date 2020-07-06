@@ -183,7 +183,9 @@ class SqlAlchemyDatasource(Datasource):
 
         create_engine_kwargs = {}
 
-        create_engine_kwargs["connect_args"] = credentials.pop("connect_args", None)
+        connect_args = credentials.pop("connect_args", None)
+        if connect_args:
+            create_engine_kwargs["connect_args"] = connect_args
 
         # if a connection string or url was provided in the profile, use that
         if "connection_string" in credentials:
