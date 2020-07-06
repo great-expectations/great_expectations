@@ -5,10 +5,10 @@ import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
+import great_expectations.dataset.sqlalchemy_dataset
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.dataset import SqlAlchemyDataset
-from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.validator.validator import Validator
 
@@ -104,7 +104,10 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string, sa):
     batch = datasource.get_batch(batch_kwargs=batch_kwargs)
     assert isinstance(batch, Batch)
     batch_data = batch.data
-    assert isinstance(batch_data, SqlAlchemyBatchReference)
+    assert isinstance(
+        batch_data,
+        great_expectations.dataset.sqlalchemy_dataset.SqlAlchemyBatchReference,
+    )
     dataset = SqlAlchemyDataset(**batch.data.get_init_kwargs())
     assert len(dataset.head(10)) == 5
 
