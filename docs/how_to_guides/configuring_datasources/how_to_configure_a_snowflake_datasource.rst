@@ -6,6 +6,12 @@ How to configure a Snowflake Datasource
 
 This guide shows how to connect to a Snowflake Datasource.
 
+Great Expectations supports 3 different authentication mechanisms for Snowflake:
+
+    * User / password
+    * Single sign-on (SSO)
+    * Key pair
+
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
   - :ref:`Set up a working deployment of Great Expectations <getting_started>`
@@ -14,7 +20,7 @@ This guide shows how to connect to a Snowflake Datasource.
 Steps
 -----
 
-To add a Snowflake datasource, do this:
+To add a Snowflake datasource, for all authentication mechanisms:
 
 #. **Install the required modules**
 
@@ -22,7 +28,7 @@ To add a Snowflake datasource, do this:
 
     .. code-block:: bash
 
-        pip install sqlalchemy 
+        pip install sqlalchemy
 
         pip install snowflake-connector-python
 
@@ -67,9 +73,19 @@ To add a Snowflake datasource, do this:
         Give your new Datasource a short name.
          [my_snowflake_db]:
 
-#. **Provide credentials**
+#. **Choose an authentication mechanism**
 
-    Next, you will be asked to supply the credentials for your Snowflake instance:
+    .. code-block:: bash
+
+        What authentication method would you like to use?
+
+        1. User and Password
+        2. Single sign-on (SSO)
+        3. Key pair authentication
+
+#. **Enter connection information**
+
+    Next, you will be asked for information common to all authentication mechanisms.
 
     .. code-block:: bash
 
@@ -77,12 +93,38 @@ To add a Snowflake datasource, do this:
         of this config file: great_expectations/uncommitted/config_variables.yml:
 
         What is the user login name for the snowflake connection? []: myusername
-        What is the password for the snowflake connection?:
-        What is the account name for the snowflake connection (include region -- ex 'ABCD.us-east-1')? [xyz12345.us-east-1]:
+        What is the account name for the snowflake connection (include region -- ex 'ABCD.us-east-1')? []: xyz12345.us-east-1
         What is database name for the snowflake connection? (optional -- leave blank for none) []: MY_DATABASE
         What is schema name for the snowflake connection? (optional -- leave blank for none) []: MY_SCHEMA
         What is warehouse name for the snowflake connection? (optional -- leave blank for none) []: MY_COMPUTE_WH
         What is role name for the snowflake connection? (optional -- leave blank for none) []: MY_ROLE
+
+#. **For "User and Password": provide password**
+
+    Next, you will be asked to supply the password for your Snowflake instance:
+
+    .. code-block:: bash
+
+        What is the password for the snowflake connection?:
+
+    Great Expectations will store these secrets privately on your machine. They will not be committed to git.
+
+#. **For "Single sign-on (SSO)": provide SSO information**
+
+    Next, you will be asked to enter single sign-on information:
+
+    .. code-block:: bash
+
+        Valid okta URL or 'externalbrowser' used to connect through SSO: externalbrowser
+
+#. **For "Key pair authentication": provide key pair information**
+
+    Next, you will be asked to enter key pair authentication information:
+
+    .. code-block:: bash
+
+        Path to the private key used for authentication: ~/.ssh/my_snowflake.p8
+        Passphrase for the private key used for authentication (optional -- leave blank for none): mypass
 
     Great Expectations will store these secrets privately on your machine. They will not be committed to git.
 
@@ -93,6 +135,13 @@ To add a Snowflake datasource, do this:
     .. code-block:: bash
 
         Attempting to connect to your database. This may take a moment...
+
+    For SSO, you will additionally see a "browser tab" open, follow the authentication process and close the tab once
+    the following message is displayed:
+
+    .. code-block:: bash
+
+        Your identity was confirmed and propagated to Snowflake PythonConnector. You can close this window now and go back where you started from.
 
     If all goes well, it will be followed by the message:
 
@@ -148,12 +197,54 @@ Additional Notes
     Should you need to modify your connection string, you can manually edit the ``great_expectations/uncommitted/config_variables.yml`` file.
 
 #.
-    You can edit the  ``great_expectations/uncommitted/config_variables.yml``file to accomplish the connection configuration without using the CLI.  The entry would have the following format:
+    You can edit the  ``great_expectations/uncommitted/config_variables.yml`` file to accomplish the connection configuration without using the CLI.  The entry would have the following format:
 
-    .. code-block:: yaml
+    **For "User and password authentication":**
 
-        my_snowflake_db:
-            url: "snowflake://<user_login_name>:<password>@<account_name>/<database_name>/<schema_name>?warehouse=<warehouse_name>&role=<role_name>"
+        .. code-block:: yaml
+
+            my_snowflake_db:
+                url: "snowflake://<user_login_name>:<password>@<account_name>/<database_name>/<schema_name>?warehouse=<warehouse_name>&role=<role_name>"
+
+    **For "Single sign-on authentication":**
+
+        .. code-block:: yaml
+
+            my_snowflake_db:
+                url: "snowflake://<myuser%40mydomain.com>:<password>@<account_name>/<database_name>/<schema_name>?authenticator=<externalbrowser or valid URL encoded okta url>&warehouse=<warehouse_name>&role=<role_name>"
+
+    **For "Key pair authentication":**
+
+        Snowflake requires the private key to be passed as "unencrypted rsa private key in DER format as bytes object",
+        this makes it hard to create a URL manually.
+
+        Instead, you could write the configuration that is generated by the CLI:
+
+        .. code-block:: yaml
+
+            my_snowflake_db:
+                drivername: snowflake
+                username: <user_login_name>
+                host: <account_name>
+                database: <database_name>
+                query:
+                    schema: <schema_name>
+                    warehouse: <warehouse_name>
+                    role: <role_name>
+                private_key_path: </path/to/key.p8>
+                private_key_passphrase: <pass_phrase or ''>
+
+#.
+    For Snowflake SSO authentication, by default, one browser tab will be opened per connection.
+    You can enable token caching at the account level to re-use tokens and minimize the number of browser tabs opened.
+
+    To do so, run the following SQL on Snowflake:
+
+    .. code-block:: sql
+
+        alter account set allow_id_token = true;
+
+    And make sure the version of your ``snowflake-connector-python`` library is ``>=2.2.8``
 
 --------
 Comments
