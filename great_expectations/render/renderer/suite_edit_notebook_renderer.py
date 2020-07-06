@@ -76,7 +76,13 @@ context = ge.data_context.DataContext()
 # Feel free to change the name of your suite here. Renaming this will not
 # remove the other one.
 expectation_suite_name = "{}"
-suite = context.get_expectation_suite(expectation_suite_name)
+
+expectation_suites = context.list_expectation_suites()
+expectation_suite_names = [_.expectation_suite_name for _ in expectation_suites]
+if expectation_suite_name not in expectation_suite_names:
+    context.create_expectation_suite(expectation_suite_name)
+    suite = context.get_expectation_suite(expectation_suite_name)
+
 suite.expectations = []
 
 batch_kwargs = {}
