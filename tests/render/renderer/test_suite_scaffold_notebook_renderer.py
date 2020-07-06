@@ -33,7 +33,7 @@ This process helps you avoid writing lots of boilerplate when authoring suites b
 
 **Expectation Suite Name**: `my_suite`
 
-We'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)""",
+We'd love it if you'd **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)!""",
                 "metadata": {},
             },
             {
@@ -47,7 +47,7 @@ We'd love it if you **reach out to us on** the [**Great Expectations Slack Chann
             },
             {
                 "cell_type": "markdown",
-                "source": """## Select the columns you want to scaffold expectations on
+                "source": """## Select the columns on which you would like to scaffold expectations
 
 Great Expectations will choose which expectations might make sense for a column based on the **data type** and **cardinality** of the data in each selected column.
 
@@ -69,8 +69,8 @@ use a jupyter keyboard shortcut to toggle each line: **Linux/Windows**:
 
 The suites generated here are **not meant to be production suites** - they are **scaffolds to build upon**.
 
-**To get to a production grade suite, will definitely want to [edit this
-suite](http://docs.greatexpectations.io/en/latest/command_line.html#great-expectations-suite-edit)
+**To get to a production grade suite, you will definitely want to [edit this
+suite](https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html)
 after scaffolding gets you close to what you want.**
 
 This is highly configurable depending on your goals. You can include or exclude
@@ -83,24 +83,24 @@ contains a list of possible expectations.""",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": '# Wipe the suite clean to prevent unwanted expectations on the batch\nsuite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)\nbatch = context.get_batch(batch_kwargs, suite)\n\nscaffold_config = {\n    "included_columns": included_columns,\n    # "excluded_columns": [],\n    # "included_expectations": [],\n    # "excluded_expectations": [],\n}\nsuite, evr = BasicSuiteBuilderProfiler().profile(batch, profiler_configuration=scaffold_config)',
+                "source": '# Wipe the suite clean to prevent unwanted expectations in the batch\nsuite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)\nbatch = context.get_batch(batch_kwargs, suite)\n\n# In the scaffold_config, included or excluded expectation names should be strings.\nscaffold_config = {\n    "included_columns": included_columns,\n    # "excluded_columns": [],\n    # "included_expectations": [],\n    # "excluded_expectations": [],\n}\nsuite, evr = BasicSuiteBuilderProfiler().profile(batch, profiler_configuration=scaffold_config)',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & review the scaffolded Expectation Suite\n\nLet's save the scaffolded expectation suite as a JSON file in the\n`great_expectations/expectations` directory of your project and rebuild the Data\n Docs site to make reviewing the scaffolded suite easy.",
+                "source": "## Save & review the scaffolded Expectation Suite\n\nLet's save the scaffolded expectation suite as a JSON file in the\n`great_expectations/expectations` directory of your project and rebuild the Data\n Docs site to make it easy to review the scaffolded suite.",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\n"""\nLet\'s create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation\narguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline\nrunner, e.g. Airflow run id). The run_time can be either a dateutil parsable string or a datetime object.\nNote - any provided datetime will be assumed to be a UTC time. If no instantiation arguments are given, run_name will\nbe None and run_time will default to the current UTC datetime.\n"""\n\nrun_id = {\n  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n  "run_time": datetime.datetime.now(datetime.timezone.utc)\n}\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\n"""\nLet\'s create a run_id. The run_id must be of type RunIdentifier, with optional run_name and run_time instantiation\narguments (or a dictionary with these keys). The run_name can be any string (this could come from your pipeline\nrunner, e.g. an Airflow run ID). The run_time can be either a dateutil parsable string or a datetime object.\nNote - any provided datetime will be assumed to be in UTC time. If no instantiation arguments are given, run_name will\nbe None and run_time will default to the current UTC datetime.\n"""\n\nrun_id = {\n  "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n  "run_time": datetime.datetime.now(datetime.timezone.utc)\n}\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Next steps\nAfter you are happy with this scaffolded Expectation Suite in Data Docs you\nshould edit this suite to make finer grained adjustments to the expectations.\nThis is be done by running `great_expectations suite edit my_suite`.",
+                "source": "## Next steps\nAfter you review this scaffolded Expectation Suite in Data Docs you\nshould edit this suite to make finer grained adjustments to the expectations.\nThis can be done by running `great_expectations suite edit my_suite`.",
                 "metadata": {},
             },
         ],
