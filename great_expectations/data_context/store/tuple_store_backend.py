@@ -7,7 +7,7 @@ import shutil
 from abc import ABCMeta
 
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.exceptions import StoreBackendError
+from great_expectations.exceptions import InvalidKeyError, StoreBackendError
 
 logger = logging.getLogger(__name__)
 
@@ -164,7 +164,6 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         else:
             filepath = os.path.normpath(filepath)
             new_key = tuple(filepath.split(os.sep))
-
         return new_key
 
     def verify_that_key_to_filepath_operation_is_reversible(self):
@@ -231,11 +230,19 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         os.makedirs(str(os.path.dirname(self.full_base_directory)), exist_ok=True)
 
     def _get(self, key):
+        contents = ""
         filepath = os.path.join(
             self.full_base_directory, self._convert_key_to_filepath(key)
         )
-        with open(filepath) as infile:
-            return infile.read()
+        try:
+            with open(filepath) as infile:
+                contents = infile.read()
+        except FileNotFoundError:
+            raise InvalidKeyError(
+                f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {str(filepath)}"
+            )
+
+        return contents
 
     def _set(self, key, value, **kwargs):
         if not isinstance(key, tuple):
@@ -383,7 +390,14 @@ class TupleS3StoreBackend(TupleStoreBackend):
         import boto3
 
         s3 = boto3.client("s3")
-        s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
+
+        try:
+            s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
+        except s3.exceptions.NoSuchKey:
+            raise InvalidKeyError(
+                f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {str(s3_object_key)}"
+            )
+
         return (
             s3_response_object["Body"]
             .read()
@@ -565,7 +579,12 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         gcs_response_object = bucket.get_blob(gcs_object_key)
-        return gcs_response_object.download_as_string().decode("utf-8")
+        if not gcs_response_object:
+            raise InvalidKeyError(
+                f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {str(key)}"
+            )
+        else:
+            return gcs_response_object.download_as_string().decode("utf-8")
 
     def _set(
         self, key, value, content_encoding="utf-8", content_type="application/json"

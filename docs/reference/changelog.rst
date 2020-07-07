@@ -7,7 +7,17 @@ Changelog
 
 Develop
 -----------------
+* [ENHANCEMENT] Fixed some typos/grammar and a broken link in the suite_scaffold_notebook_renderer
+
+0.11.7
+-----------------
+* [ENHANCEMENT] Improve CLI error handling.
+* [ENHANCEMENT] Do not register signal handlers if not running in main thread
+* [ENHANCEMENT] store_backend (S3 and GCS) now throws InvalidKeyError if file does not exist at expected location
 * [BUGFIX] ProfilerTypeMapping uses lists instead of sets to prevent serialization errors when saving suites created by JsonSchemaProfiler
+* [DOCS] Update suite scaffold how-to
+* [DOCS] Docs/how to define expectations that span multiple tables
+* [DOCS] how to metadata stores validation on s3
 
 0.11.6
 -----------------
