@@ -32,9 +32,9 @@ using Jinja templating for dynamic rendering.
 Additionally, the class that generates the notebooks can be overwritten.
 
 
-----------------------
-Overwritting the class
-----------------------
+---------------------
+Overwriting the class
+---------------------
 
 **In `great_expectations.yml` add**
 
