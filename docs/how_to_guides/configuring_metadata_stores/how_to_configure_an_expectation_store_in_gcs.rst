@@ -74,7 +74,7 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 
 5. **Confirm that the new Expectations store has been added by running** ``great_expectations store list``.
 
-    Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``expectations_GCS_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in GCS as long as we set the ``expectations_name`` variable to ``expectations_GCS_store``, and the config for ``expectations_store`` can be removed if you would like.
+    Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``expectations_GCS_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in GCS as long as we set the ``expectations_store_name`` variable to ``expectations_GCS_store``, and the config for ``expectations_store`` can be removed if you would like.
 
     .. code-block:: bash
 

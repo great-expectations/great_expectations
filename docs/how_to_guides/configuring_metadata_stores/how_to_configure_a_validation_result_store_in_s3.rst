@@ -8,6 +8,7 @@ By default, Validation results are stored in the ``uncommitted/validations/`` di
 
     - Configured a :ref:`Data Context <tutorials__getting_started__initialize_a_data_context>`.
     - Configured an :ref:`Expectation Suite <tutorials__getting_started__create_your_first_expectations>`.
+    - Configured a :ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>`.
     - Installed `boto3 <https://github.com/boto/boto3>`_ in your local environment.
     - Identified the S3 bucket and prefix where Validation results will be stored.
 
