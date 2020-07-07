@@ -21,6 +21,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset.pandas_dataset import PandasDataset
+from great_expectations.datasource.util import get_or_create_spark_session
 
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
 
@@ -166,10 +167,11 @@ def sa(test_backends):
 @pytest.fixture
 def spark_session(test_backends):
     if "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
-    from pyspark.sql import SparkSession
+        pytest.skip(
+            "No Spark backend selected.  Since Spark has not been enabled, this test must be skipped."
+        )
 
-    return SparkSession.builder.getOrCreate()
+    return get_or_create_spark_session()
 
 
 @pytest.fixture

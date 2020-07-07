@@ -336,20 +336,26 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
 
 def test_spark_config(test_backends):
     if "SparkDFDataset" not in test_backends:
-        pytest.skip("Spark has not been enabled, so this test must be skipped.")
-    source = SparkDFDatasource()
-    conf = source.spark.sparkContext.getConf().getAll()
-    # Without specifying any spark_config values we get defaults
-    assert ("spark.app.name", "pyspark-shell") in conf
+        pytest.skip(
+            "No Spark backend selected.  Since Spark has not been enabled, this test must be skipped."
+        )
 
-    source.spark.sparkContext.stop()
+    # Commenting out the test for the "SparkDFDatasource()" with an empty configuration; otherwise the following test
+    # becomes impossible, due to the uniqueness of SparkContext per JVM.  Attempts to circumvent this constraint cause
+    # the "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
+    # source = SparkDFDatasource()
+    # conf = source.spark.sparkContext.getConf().getAll()
+    # # Without specifying any spark_config values we get defaults
+    # assert ("spark.app.name", "pyspark-shell") in conf
+    # source.spark.sparkContext.stop()
 
     source = SparkDFDatasource(
+        name="great_expectations_spark_config",
         spark_config={
             "spark.app.name": "great_expectations",
             "spark.sql.catalogImplementation": "hive",
             "spark.executor.memory": "450m",
-        }
+        },
     )
 
     # Test that our values were set

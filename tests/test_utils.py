@@ -16,6 +16,7 @@ from great_expectations.core import (
     ExpectationValidationResultSchema,
 )
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
+from great_expectations.datasource.util import get_or_create_spark_session
 from great_expectations.profile import ColumnsExistProfiler
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
@@ -315,7 +316,8 @@ def get_dataset(
             "NullType": sparktypes.NullType,
         }
 
-        spark = SparkSession.builder.getOrCreate()
+        spark = get_or_create_spark_session()
+
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
