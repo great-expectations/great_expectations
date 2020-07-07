@@ -47,7 +47,7 @@ Overwriting the class
 
 
 ----------------------
-Overwritting a section
+Overwriting a section
 ----------------------
 
 **For markdown**
