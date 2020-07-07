@@ -16,6 +16,7 @@ from typing import Dict, List, Optional, Union
 from dateutil.parser import ParserError, parse
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import (
@@ -2177,6 +2178,10 @@ class DataContext(BaseDataContext):
                 "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
                     err
                 )
+            )
+        except DuplicateKeyError:
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Error: duplicate key found in project YAML file."
             )
         except IOError:
             raise ge_exceptions.ConfigNotFoundError()

@@ -371,7 +371,6 @@ class DefaultSiteSectionBuilder(object):
             )[: self.validation_results_limit]
 
         for resource_key in source_store_keys:
-
             # if no resource_identifiers are passed, the section
             # builder will build
             # a page for every keys in its source store.
@@ -383,12 +382,11 @@ class DefaultSiteSectionBuilder(object):
             if self.run_name_filter:
                 if not self._resource_key_passes_run_name_filter(resource_key):
                     continue
-
             try:
                 resource = self.source_store.get(resource_key)
-            except FileNotFoundError:
+            except exceptions.InvalidKeyError:
                 logger.warning(
-                    f"File {resource_key.to_fixed_length_tuple()} could not be found. Skipping."
+                    f"Object with Key: {str(resource_key)} could not be retrieved. Skipping..."
                 )
                 continue
 

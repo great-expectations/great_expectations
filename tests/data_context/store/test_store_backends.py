@@ -1,4 +1,5 @@
 import os
+from unittest.mock import patch
 
 import boto3
 import pytest
@@ -11,7 +12,7 @@ from great_expectations.data_context.store import (
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
 )
-from great_expectations.exceptions import StoreBackendError, StoreError
+from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.util import gen_directory_tree_str
 
 
@@ -117,8 +118,7 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
         filepath_template="my_file_{0}",
     )
 
-    # OPPORTUNITY: potentially standardize error instead of allowing each StoreBackend to raise its own error types
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(InvalidKeyError):
         my_store.get(("AAA",))
 
     my_store.set(("AAA",), "aaa")
@@ -138,7 +138,7 @@ test_TupleFilesystemStoreBackend__dir0/
 """
     )
     my_store.remove_key(("BBB",))
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(InvalidKeyError):
         assert my_store.get(("BBB",)) == ""
 
 
@@ -230,9 +230,8 @@ def test_TupleS3StoreBackend_with_prefix():
     ) == "https://s3.amazonaws.com/%s/%s/my_file_BBB" % (bucket, prefix)
 
     my_store.remove_key(("BBB",))
-    with pytest.raises(ClientError) as exc:
+    with pytest.raises(InvalidKeyError):
         my_store.get(("BBB",))
-    assert exc.value.response["Error"]["Code"] == "NoSuchKey"
 
 
 @mock_s3
@@ -292,13 +291,16 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
 
 
 def test_TupleGCSStoreBackend():
-    pytest.importorskip("google-cloud-storage")
+    # pytest.importorskip("google-cloud-storage")
     """
     What does this test test and why?
 
     Since no package like moto exists for GCP services, we mock the GCS client
     and assert that the store backend makes the right calls for set, get, and list.
+
+    TODO : One option may be to have a GCS Store in Docker, which can be use to "actually" run these tests.
     """
+
     bucket = "leakybucket"
     prefix = "this_is_a_test_prefix"
     project = "dummy-project"
@@ -323,7 +325,7 @@ def test_TupleGCSStoreBackend():
         mock_client.get_bucket.assert_called_once_with("leakybucket")
         mock_bucket.blob.assert_called_once_with("this_is_a_test_prefix/my_file_AAA")
         mock_blob.upload_from_string.assert_called_once_with(
-            b"aaa", content_encoding="utf-8", content_type="text/html"
+            b"aaa", content_type="text/html"
         )
 
     with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
@@ -369,7 +371,7 @@ def test_TupleGCSStoreBackend():
             "leakybucket", prefix="this_is_a_test_prefix"
         )
 
-        my_store.remove_key("leakybucket", prefix="this_is_a_test_prefix")
+        my_store.remove_key("leakybucket")
 
         from google.cloud.exceptions import NotFound
 
@@ -377,3 +379,8 @@ def test_TupleGCSStoreBackend():
             mock_client.get_bucket.assert_called_once_with("leakybucket")
         except NotFound:
             pass
+
+    with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
+        mock_gcs_client.side_effect = InvalidKeyError("Hi I am an InvalidKeyError")
+        with pytest.raises(InvalidKeyError):
+            my_store.get(("non_existent_key",))
