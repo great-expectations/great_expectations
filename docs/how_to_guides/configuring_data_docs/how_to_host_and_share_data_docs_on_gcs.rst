@@ -68,16 +68,8 @@ By default, Data Docs are stored in HTML format in the ``data_docs/local_site/``
                 site_index_builder:
                     class_name: DefaultSiteIndexBuilder
 
-4. **Copy existing Data Docs site files to the GCS bucket**. (This step is optional).
 
-    One way to copy Data Docs into GCS is by using the ``gsutil cp`` command, which is part of the Google Cloud SDK. The following example will copy your ``local_site`` from it's default location in a local folder to the GCS bucket using the ``-r`` option to copy the entire directory tree.   Information on other options, like the Cloud Storage browser in the Google Cloud Console, can be found in the `Documentation for Google Cloud <https://cloud.google.com/storage/docs/uploading-objects>`_.
-
-    .. code-block:: bash
-
-        gsutil cp -r uncommitted/data_docs/local_site/ gs://'<your_GCS_bucket_name>'/'<your_GCS_folder_name>'
-
-
-5. **Confirm that the new Data Docs site has been added by running** ``great_expectations docs list``.
+4. **Confirm that the new Data Docs site has been added by running** ``great_expectations docs list``.
 
     Notice the output contains two Data Docs sites: the original ``local_site`` on the local filesystem and the ``gcs_site`` we just configured.  Data docs will be built in both places. To remove either site, simply remove the configuration from ``great_expectations.yml``. You can build the site with  ``great_expectations docs build --site-name gcs_site``.
 
