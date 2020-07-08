@@ -48,9 +48,9 @@ datasources paired with one or more Expectation Suites each.
     id: checkpoint_notebook
     title: Checkpoint - Notebook
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Run a configured checkpoint from a notebook.
+    description: Run a configured checkpoint from a notebook.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html
     maturity: Experimental
     maturity_details:
         api_stability: Unstable (expect changes to batch definition; "assets to validate" is still totally untyped)

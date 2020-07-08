@@ -51,10 +51,10 @@ to configure the datasource to load and return DataAssets of the custom type.
     id: datasource_s3
     title: Datasource - S3
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    short_description: S3
+    description: Support for connecting to Amazon Web Services S3 as an external datasource.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_pandas_s3_datasource.html
+    maturity: Production
     maturity_details:
         api_stability: medium
         implementation_completeness: Complete
@@ -66,27 +66,27 @@ to configure the datasource to load and return DataAssets of the custom type.
     id: datasource_filesystem
     title: Datasource - Filesystem
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    short_description: File-based datsource
+    description: Support for using a mounted filesystem as an external datasource.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_pandas_filesystem_datasource.html
+    maturity: Production
     maturity_details:
         api_stability: Medium
         implementation_completeness: Complete
         unit_test_coverage: Complete
         integration_infrastructure_test_coverage: Partial
         documentation_completeness: Partial
-        bug_risk: Low (unless you’re on Windows)
+        bug_risk: Low (Moderate for Windows users because of path issues)
 
     id: datasource_gcs
     title: Datasource - GCS
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: GCS
+    description: Support for Google Cloud Storage as an external datasource
+    how_to_guide_url:
     maturity: Experimental
     maturity_details:
-        api_stability: Medium (supported via native ‘gs://' syntax in Pandas and Ppark; medium because we expect configuration to evolve)
+        api_stability: Medium (supported via native ‘gs://' syntax in Pandas and Pyspark; medium because we expect configuration to evolve)
         implementation_completeness: Medium (works via passthrough, not via CLI)
         unit_test_coverage: Minimal
         integration_infrastructure_test_coverage: Minimal
@@ -96,9 +96,9 @@ to configure the datasource to load and return DataAssets of the custom type.
     id: datasource_azure_blob_storage
     title: Datasource - Azure Blob Storage
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Azure Blob Storage
+    description: Support for Microsoft Azure Blob Storage as an external datasource
+    how_to_guide_url:
     maturity: In Roadmap (Sub-Experimental - "Not Impossible")
     maturity_details:
         api_stability: N/A (Supported on Databricks Spark via ‘wasb://' / ‘wasps://' url; requires local download first for Pandas)

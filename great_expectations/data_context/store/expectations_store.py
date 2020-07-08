@@ -20,9 +20,9 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
     id: expectations_store_git
     title: Expectation Store - Git
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: Store Expectations in Git
+    description: Use a git repository to store expectation suites.
+    how_to_guide_url:  https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.html#additional-notes
     maturity: Production
     maturity_details:
         api_stability: Stable
@@ -35,9 +35,9 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
     id: expectations_store_filesystem
     title: Expectation Store - Filesystem
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: Filesystem-based Expectations Store
+    description: Filesystem-based Expectations Store
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.html
     maturity: Production
     maturity_details:
         api_stability: Stable
@@ -50,9 +50,9 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
     id: expectations_store_s3
     title: Expectation Store - S3
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: S3
+    description: Use an Amazon Web Services S3 bucket to store expectations.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3.html
     maturity: Beta
     maturity_details:
         api_stability: Stable
@@ -65,9 +65,9 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
     id: expectations_store_gcs
     title: Expectation Store - GCS
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: Cloud Storage
+    description: Use a Google Cloud Platform Cloud Storage bucket to store expectations.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.html
     maturity: Beta
     maturity_details:
         api_stability: Stable
@@ -80,9 +80,9 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
     id: expectations_store_azure_blob_storage
     title: Expectation Store - Azure
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: Azure Blob Storage
+    description:  Use Microsoft Azure Blob Storage to store expectations.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.html
     maturity: N/A
     maturity_details:
         api_stability: Stable

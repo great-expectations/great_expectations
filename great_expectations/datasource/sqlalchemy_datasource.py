@@ -51,8 +51,8 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
     id: datasource_postgresql
     title: Datasource - PostgreSQL
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
+    short_description: Postgres
+    description: Support for using the open source PostgresQL database as an external datasource and execution engine.
     how_to_guide_url: TODO:FEATURE_MATURITY
     maturity: Production
     maturity_details:
@@ -73,7 +73,7 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
     maturity: TODO:FEATURE_MATURITY
     maturity_details:
         api_stability: Unstable (table generator inability to work with triple-dotted, temp table usability, init flow calls setup "other")
-        implementation_completeness: TODO:FEATURE_MATURITY
+        implementation_completeness: Moderate
         unit_test_coverage: Partial (no test coverage for temp table creation)
         integration_infrastructure_test_coverage: Minimal
         documentation_completeness: Partial (how-to does not cover all cases)
