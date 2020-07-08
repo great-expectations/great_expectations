@@ -63,9 +63,9 @@ datasources paired with one or more Expectation Suites each.
     id: checkpoint_command_line
     title: Checkpoint - Command Line
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Run a configured checkpoint from a command line.
+    description: Run a configured checkpoint from a command line in a Terminal shell.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
     maturity: Experimental
     maturity_details:
         api_stability: Unstable (expect changes to batch definition; no checkpoint store)
@@ -78,9 +78,9 @@ datasources paired with one or more Expectation Suites each.
     id: checkpoint_cron_job
     title: Checkpoint - Cron
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Deploy a configured checkpoint as a scheduled task with cron.
+    description: Use the Unix crontab command to edit the cron file and add a line that will run checkpoint as a scheduled task.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_deploy_a_scheduled_checkpoint_with_cron.html
     maturity: Experimental
     maturity_details:
         api_stability: Unstable (expect changes to batch validation; no checkpoint store)
@@ -93,9 +93,9 @@ datasources paired with one or more Expectation Suites each.
     id: checkpoint_airflow_dag
     title: Checkpoint - Airflow DAG
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY (does *not* include embedding in airflow UI)
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Run a configured checkpoint in Apache Airflow
+    description: Running a configured checkpoint in Apache Airflow enables the triggering of data validation using an Expectation Suite directly within an Airflow DAG.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_run_a_checkpoint_in_airflow.html
     maturity: Beta
     maturity_details:
         api_stability: Unstable
@@ -108,9 +108,9 @@ datasources paired with one or more Expectation Suites each.
     id: checkpoint_kedro
     title: Checkpoint - Kedro
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: 
+    description: 
+    how_to_guide_url: 
     maturity: Experimental
     maturity_details:
         api_stability: Unknown (implemented by Kedro team)
@@ -123,9 +123,9 @@ datasources paired with one or more Expectation Suites each.
     id: checkpoint_prefect
     title: Checkpoint - Prefect
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: 
+    description: 
+    how_to_guide_url: 
     maturity: Experimental
     maturity_details:
         api_stability: Unknown (implemented by Prefect team)
@@ -138,9 +138,9 @@ datasources paired with one or more Expectation Suites each.
     id: checkpoint_dbt
     title: Checkpoint - DBT
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: 
+    description: 
+    how_to_guide_url: 
     maturity: Beta
     maturity_details:
         api_stability: Mostly Stable (SQLAlchemy)
