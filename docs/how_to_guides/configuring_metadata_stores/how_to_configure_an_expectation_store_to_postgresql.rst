@@ -3,7 +3,7 @@
 How to configure an Expectation store to PostgreSQL
 ===================================================
 
-By default, newly profiled Expectations are stored in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder.  This guide will help you configure Great Expectations to store them in a PostgreSQL databaseß.
+By default, newly profiled Expectations are stored in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder.  This guide will help you configure Great Expectations to store them in a PostgreSQL database.
 
 .. admonition:: Prerequisites: This how-to guide assumes that you have already:
 
@@ -60,7 +60,7 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 
 4. **Confirm that the new Expectations store has been added by running** ``great_expectations store list``
 
-    Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``expectations_postgres_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in PostgreSQL as long as we set the ``expectations_store_name`` variable to ``expectations_postgres_store``, which we did in the previous step.
+    Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``expectations_postgres_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in PostgreSQL as long as we set the ``expectations_store_name`` variable to ``expectations_postgres_store``, which we did in the previous step.  The config for ``expectations_store`` can be removed if you would like.
 
     .. code-block:: bash
 
