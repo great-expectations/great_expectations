@@ -73,9 +73,9 @@ class BatchKwargsGenerator(object):
     id: batch_kwargs_generator_manual
     title: Batch Kwargs Generator - Manual
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Manually configure how files on a filesystem are presented as batches of data
+    description: Manually configure how files on a filesystem are presented as batches of data
+    how_to_guide_url:
     maturity: Beta
     maturity_details:
         api_stability: Mostly Stable (key generator functionality will remain but batch API changes still possible)
@@ -88,9 +88,9 @@ class BatchKwargsGenerator(object):
     id: batch_kwargs_generator_s3
     title: Batch Kwargs Generator - S3
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Present files on S3 as batches of data
+    description: Present files on S3 as batches of data for profiling and validation
+    how_to_guide_url:
     maturity: Beta
     maturity_details:
         api_stability: Mostly Stable (expect changes in partitioning)
@@ -103,9 +103,9 @@ class BatchKwargsGenerator(object):
     id: batch_kwargs_generator_glob_reader
     title: Batch Kwargs Generator - Glob Reader
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: A configurable way to present files in a directory as batches of data
+    description: A configurable way to present files in a directory as batches of data
+    how_to_guide_url:
     maturity: Beta
     maturity_details:
         api_stability: Mostly Stable (expect changes in partitioning)
@@ -118,9 +118,9 @@ class BatchKwargsGenerator(object):
     id: batch_kwargs_generator_table
     title: Batch Kwargs Generator - Table
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Present database tables as batches of data
+    description: Present database tables as batches of data for validation and profiling
+    how_to_guide_url:
     maturity: Beta
     maturity_details:
         api_stability: Unstable (no existing native support for "partitioning")
@@ -133,9 +133,9 @@ class BatchKwargsGenerator(object):
     id: batch_kwargs_generator_query
     title: Batch Kwargs Generator - Query
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Present the result sets of SQL queries as batches of data
+    description: Present the result sets of SQL queries as batches of data for validation and profiling
+    how_to_guide_url:
     maturity: Beta
     maturity_details:
         api_stability: Unstable (expect changes in query template configuration and query storage)
@@ -148,9 +148,9 @@ class BatchKwargsGenerator(object):
     id: batch_kwargs_generator_subdir_reader
     title: Batch Kwargs Generator - Subdir Reader
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Present the files in a directory as batches of data
+    description: Present the files in a directory as batches of data for profiling and validation.
+    how_to_guide_url:
     maturity: Beta
     maturity_details:
         api_stability: Mostly Stable (new configuration options likely)

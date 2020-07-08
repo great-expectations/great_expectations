@@ -300,10 +300,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     id: validation_engine_sqlalchemy
     title: Validation Engine - SQLAlchemy
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    short_description: Use SQLAlchemy to validate data in a database
+    description: Use SQLAlchemy to validate data in a database
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_database_table_or_a_query_result_as_a_batch.html
+    maturity: Production
     maturity_details:
         api_stability: High
         implementation_completeness: Moderate (temp table handling/permissions not universal)

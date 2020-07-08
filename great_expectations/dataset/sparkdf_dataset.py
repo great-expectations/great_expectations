@@ -494,9 +494,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     id: validation_engine_pyspark_self_managed
     title: Validation Engine - pyspark - Self-Managed
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Use Spark DataFrame to validate data
+    description: Use Spark DataFrame to validate data
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
     maturity: Production
     maturity_details:
         api_stability: Stable
@@ -510,9 +510,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     id: validation_engine_databricks
     title: Validation Engine - Databricks
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Use Spark DataFrame in a Databricks cluster to validate data
+    description: Use Spark DataFrame in a Databricks cluster to validate data
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
     maturity: Beta
     maturity_details:
         api_stability: Stable
@@ -526,9 +526,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     id: validation_engine_emr_spark
     title: Validation Engine - EMR - Spark
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Use Spark DataFrame in an EMR cluster to validate data
+    description: Use Spark DataFrame in an EMR cluster to validate data
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
     maturity: Experimental
     maturity_details:
         api_stability: Stable
@@ -542,9 +542,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     id: validation_engine_spark_other
     title: Validation Engine - Spark - Other
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Use Spark DataFrame to validate data
+    description: Use Spark DataFrame to validate data
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
     maturity: Experimental
     maturity_details:
         api_stability: Stable
