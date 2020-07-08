@@ -96,7 +96,6 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
     Behind the scenes, Great Expectations will create a new table in your database called ``ge_validations_store``, and populate the fields with information from the Validation results.
 
 
-
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
 
 .. discourse::
