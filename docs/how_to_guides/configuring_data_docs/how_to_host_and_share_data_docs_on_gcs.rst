@@ -3,18 +3,17 @@
 How to host and share Data Docs on GCS
 ======================================
 
-By default, Data Docs are stored in HTML format in the ``data_docs/local_site/`` subdirectory of your ``great_expectations/uncommitted/`` folder.  This guide will help you configure Great Expectations to store them in a Google Cloud Storage (GCS) bucket so that they can be easily shared with your team.
+By default, Data Docs are stored in HTML format in the ``data_docs/local_site/`` subdirectory of your ``great_expectations/uncommitted/`` folder.  This guide will help you configure Great Expectations to store them in a Google Cloud Storage (GCS) bucket so that they can be easily shared with your team. Since Data Docs may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system, and care should be taken with GCS bucket access control. 
 
 .. admonition:: Prerequisites: This how-to guide assumes that you have already:
 
     - Configured a :ref:`Data Context <tutorials__getting_started__initialize_a_data_context>`.
-    - Configured an :ref:`Expectations Suite <tutorials__getting_started__create_your_first_expectations>`.
     - Configured a Google Cloud Platform (GCP) `service account <https://cloud.google.com/iam/docs/service-accounts>`_ with credentials that can access the appropriate GCP resources, which include Storage Objects.
-    - Identified the GCP project, GCS bucket, and prefix where Expectations will be stored.
+    - Identified the GCP project, GCS bucket, and prefix where Data Docs will be stored.
 
 1. **Configure your GCP credentials**
 
-    Check that your environment is configured with the appropriate authentication credentials needed to connect to the GCS bucket where Expectations will be stored.
+    Check that your environment is configured with the appropriate authentication credentials needed to connect to the GCS bucket where Data Docs will be stored.
 
     The Google Cloud Platform documentation describes how to verify your `authentication for the Google Cloud API <https://cloud.google.com/docs/authentication/getting-started>`_, which includes:
 
@@ -40,7 +39,7 @@ By default, Data Docs are stored in HTML format in the ``data_docs/local_site/``
 
 3. **Update your configuration file to include a new Data Doc site on GCS**
 
-    In our case, the name is set to ``gcs_site``, but it can be any name you like. We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleGCSStoreBackend``, ``project`` will be set to your GCP project, ``bucket`` will be set to the address of your GCS bucket, and ``prefix`` will be set to the folder on GCS where Expectation files will be located.
+    In our case, the name is set to ``gcs_site``, but it can be any name you like. We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleGCSStoreBackend``, ``project`` will be set to your GCP project, ``bucket`` will be set to the address of your GCS bucket, and ``prefix`` will be set to the folder on GCS where Data Docs files will be located.
 
 
     .. warning::
