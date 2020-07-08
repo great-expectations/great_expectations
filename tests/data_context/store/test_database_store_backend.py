@@ -21,11 +21,11 @@ def test_database_store_backend_get_url_for_key(caplog, sa):
     )
 
     # existing key
-    key = "1"
+    key = ("1",)
     assert "postgresql://test_ci/1" == store_backend.get_url_for_key(key)
 
     # non-existing key : should still work
-    key = "not_here"
+    key = ("not_here",)
     assert "postgresql://test_ci/not_here" == store_backend.get_url_for_key(key)
 
 

@@ -138,7 +138,7 @@ class DatabaseStoreBackend(StoreBackend):
         full_url = str(self.engine.url)
         engine_name = full_url.split("://")[0]
         db_name = full_url.split("/")[-1]
-        return engine_name + "://" + db_name + "/" + str(key)
+        return engine_name + "://" + db_name + "/" + str(key[0])
 
     def _has_key(self, key):
         sel = (
