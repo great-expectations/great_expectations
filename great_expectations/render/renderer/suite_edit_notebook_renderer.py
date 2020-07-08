@@ -124,7 +124,7 @@ class SuiteEditNotebookRenderer(Renderer):
         for k, v in expectation["kwargs"].items():
             if k == "column":
                 # make the column a positional argument
-                kwargs.insert(0, "'{}'".format(v))
+                kwargs.insert(0, "{}='{}'".format(k, v))
 
             elif isinstance(v, str):
                 # Put strings in quotes
