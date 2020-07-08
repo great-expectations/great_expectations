@@ -46,7 +46,7 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
 
 
     .. warning::
-        If you are also storing :ref:`Expectations in GCS, <how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_gcs>` please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
+        If you are also storing :ref:`Expectations in GCS <how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_gcs>` or :ref:`DataDocs in GCS <how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_gcs>`, please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
 
     .. code-block:: yaml
 

@@ -43,7 +43,7 @@ Steps
 
 
     .. warning::
-        If you are also storing :ref:`Expectations in S3, <how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_amazon_s3>` please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
+        If you are also storing :ref:`Expectations in S3 <how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_amazon_s3>`, or :ref:`DataDocs in S3 <how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_s3>`, please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
 
     .. code-block:: yaml
 

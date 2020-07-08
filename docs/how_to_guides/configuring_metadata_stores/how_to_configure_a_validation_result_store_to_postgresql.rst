@@ -46,11 +46,11 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
 
 3. **Update your configuration file to include a new store for Validations on PostgreSQL**
 
-    In our case, the name is set to ``expectations_postgres_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``DatabaseStoreBackend``, and ``credentials`` will be set to ``${db_creds}``, which references the corresponding key in the ``config_variables.yml`` file.
+    In our case, the name is set to ``validations_postgres_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``DatabaseStoreBackend``, and ``credentials`` will be set to ``${db_creds}``, which references the corresponding key in the ``config_variables.yml`` file.
 
     .. code-block:: yaml
 
-        expectations_store_name: validations_postgres_store
+        validations_store_name: validations_postgres_store
 
         stores:
             validations_postgres_store:
