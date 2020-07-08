@@ -7,6 +7,8 @@ Changelog
 
 Develop
 -----------------
+* [ENHANCEMENT] Fixed some typos/grammar and a broken link in the suite_scaffold_notebook_renderer
+* [FEATURE] Customizable "Suite Edit" generated notebooks
 
 0.11.7
 -----------------
