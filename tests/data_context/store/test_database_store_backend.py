@@ -61,6 +61,6 @@ def test_database_store_backend_duplicate_key_violation(caplog, sa):
     assert "already exists with the same value" in caplog.messages[0]
 
     with pytest.raises(StoreBackendError) as exc:
-        store_backend.set(key, "world")
+        store_backend.set(key, "world", allow_update=False)
 
     assert "Integrity error" in str(exc.value)
