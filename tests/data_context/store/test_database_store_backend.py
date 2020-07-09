@@ -54,7 +54,9 @@ def test_database_store_backend_duplicate_key_violation(caplog, sa):
     assert len(caplog.messages) == 0
     caplog.set_level(logging.INFO, "great_expectations")
 
-    store_backend.set(key, "hello", allow_update=False) # the only place we are testing this flag
+    store_backend.set(
+        key, "hello", allow_update=False
+    )  # the only place we are testing this flag
     assert len(caplog.messages) == 1
     assert "already exists with the same value" in caplog.messages[0]
 
