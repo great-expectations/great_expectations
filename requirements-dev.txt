@@ -25,6 +25,7 @@ psycopg2-binary>=2.7.6  # sqlalchemy_tests
 pyarrow>=0.12.0  # all_tests
 pybigquery>=0.4.15  # sqlalchemy_tests
 PyMySQL>=0.9.3,<0.10  # sqlalchemy_tests
+pyodbc>=4.0.30  # sqlalchemy_tests
 pyparsing>=2.4,<3  # package
 pyspark>=2.3.2,<3.0.0  # spark
 pytest>=5.3.5  # all_tests

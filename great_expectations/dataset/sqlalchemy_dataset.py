@@ -184,7 +184,7 @@ class MetaSqlAlchemyDataset(Dataset):
             elif len(ignore_values_conditions) == 1:
                 ignore_values_condition = ignore_values_conditions[0]
             else:
-                ignore_values_condition = sa.literal(False)
+                ignore_values_condition = sa.literal(False) == sa.literal(True)
 
             count_query = sa.select(
                 [
