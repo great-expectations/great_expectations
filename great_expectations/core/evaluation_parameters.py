@@ -190,14 +190,17 @@ def build_evaluation_parameters(
                 ]
                 del expectation_args[key]["$PARAMETER." + value["$PARAMETER"]]
 
-            parameter_value = parse_evaluation_parameter(
-                value["$PARAMETER"],
-                evaluation_parameters=evaluation_parameters,
-                data_context=data_context,
-            )
-            evaluation_args[key] = parameter_value
-            # Once we've substituted, we also track that we did so
-            substituted_parameters[key] = parameter_value
+            # If not, try to parse the evaluation parameter and substitute, which will raise
+            # an exception if we do not have a value
+            else:
+                parameter_value = parse_evaluation_parameter(
+                    value["$PARAMETER"],
+                    evaluation_parameters=evaluation_parameters,
+                    data_context=data_context,
+                )
+                evaluation_args[key] = parameter_value
+                # Once we've substituted, we also track that we did so
+                substituted_parameters[key] = parameter_value
 
     return evaluation_args, substituted_parameters
 
@@ -311,7 +314,10 @@ def parse_evaluation_parameter(
                 raise EvaluationParameterError(
                     "No value found for $PARAMETER " + str(L[0])
                 )
-        except ParseException:
+        except ParseException as e:
+            logger.debug(
+                f"Parse exception while parsing evaluation parameter: {str(e)}"
+            )
             raise EvaluationParameterError("No value found for $PARAMETER " + str(L[0]))
         except AttributeError:
             logger.warning("Unable to get store for store-type valuation parameter.")
