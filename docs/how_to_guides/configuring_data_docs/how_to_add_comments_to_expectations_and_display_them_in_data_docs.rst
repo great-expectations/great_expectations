@@ -31,6 +31,12 @@ Steps
             meta={"notes": "Example notes about this expectation."}
         )
 
+    Leads to the following representation in the Data Docs (click on the speech bubble to view the comment).
+
+    .. image:: table_level_no_format.png
+        :width: 600
+        :alt: Expectation with simple comment, no formatting.
+
 #. Add styling to your comments (optional).
 
     To add styling to your comments, you can add a format tag. Here are a few examples.
@@ -49,6 +55,10 @@ Steps
             }
         )
 
+    .. image:: single_line_markdown_red.png
+        :width: 600
+        :alt: Expectation with a single line of markdown comment is rendered in red with markdown formatting.
+
     Multiple lines can be rendered by using a list for `content`, these lines are rendered in black text with any Markdown formatting applied.
 
     .. code-block:: python
@@ -66,6 +76,10 @@ Steps
             }
         )
 
+    .. image:: multiple_line_markdown.png
+        :width: 600
+        :alt: Multiple lines of markdown rendered with formatting.
+
     You can also change the format to "string" and single or multiple lines will be formatted similar to the above, but the Markdown formatting will not be applied.
 
     .. code-block:: python
@@ -82,6 +96,10 @@ Steps
                 }
             }
         )
+
+    .. image:: multiple_line_string.png
+        :width: 600
+        :alt: Multiple lines of string rendered without formatting.
     
 
 
