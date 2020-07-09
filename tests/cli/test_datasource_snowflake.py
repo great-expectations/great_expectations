@@ -128,6 +128,17 @@ def test_snowflake_key_pair_credentials(mock_prompt, basic_sqlalchemy_datasource
     )
     credentials["private_key_path"] = database_key_path_no_pass
     credentials["private_key_passphrase"] = ""
-    basic_sqlalchemy_datasource._get_sqlalchemy_key_pair_auth_url(
+    (
+        sqlalchemy_uri,
+        create_engine_kwargs,
+    ) = basic_sqlalchemy_datasource._get_sqlalchemy_key_pair_auth_url(
         "snowflake", deepcopy(credentials)
     )
+
+    assert (
+        str(sqlalchemy_uri)
+        == "snowflake://user@ABCD.us-east-1/default_db?role=public&schema=default_schema&warehouse=xsmall"
+    )
+    assert create_engine_kwargs.get("connect_args", {}).get(
+        "private_key", ""
+    )  # check that the private_key is not empty
