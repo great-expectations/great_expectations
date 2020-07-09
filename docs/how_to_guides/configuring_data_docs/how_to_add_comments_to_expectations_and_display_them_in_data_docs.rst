@@ -3,7 +3,7 @@
 How to add comments to Expectations and display them in Data Docs
 =================================================================
 
-This guide will help you add descriptive comments (or notes, here used interchangeably) to Expectations and display those comments in Data Docs. In these comments you can add some clarification or motivation to the expectation definition, to help you communicate more clearly with your team about specific expectations.
+This guide will help you add descriptive comments (or notes, here used interchangeably) to Expectations and display those comments in Data Docs. In these comments you can add some clarification or motivation to the expectation definition to help you communicate more clearly with your team about specific expectations. Markdown is supported in these comments.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -30,6 +30,59 @@ Steps
             max_value=1000000, min_value=1,
             meta={"notes": "Example notes about this expectation."}
         )
+
+#. Add styling to your comments (optional).
+
+    To add styling to your comments, you can add a format tag. Here are a few examples.
+
+    A single line of markdown is rendered in red, with any Markdown formatting applied.
+
+    .. code-block:: python
+
+        batch.expect_column_values_to_not_be_null(
+            column="column_name",
+            meta={
+                "notes": {
+                    "format": "markdown",
+                    "content": "Example notes about this expectation. **Markdown** `Supported`."
+                }
+            }
+        )
+
+    Multiple lines can be rendered by using a list for `content`, these lines are rendered in black text with any Markdown formatting applied.
+
+    .. code-block:: python
+
+        batch.expect_column_values_to_not_be_null(
+            column="column_name",
+            meta={
+                "notes": {
+                    "format": "markdown",
+                    "content": [
+                        "Example notes about this expectation. **Markdown** `Supported`.",
+                        "Second example note **with** *Markdown*",
+                    ]
+                }
+            }
+        )
+
+    You can also change the format to "string" and single or multiple lines will be formatted similar to the above, but the Markdown formatting will not be applied.
+
+    .. code-block:: python
+
+        batch.expect_column_values_to_not_be_null(
+            column="column_name",
+            meta={
+                "notes": {
+                    "format": "string",
+                    "content": [
+                        "Example notes about this expectation. **Markdown** `Supported`.",
+                        "Second example note **with** *Markdown*",
+                    ]
+                }
+            }
+        )
+    
 
 
 #. Review your comments in the Expectation Suite overview of your Data Docs.
