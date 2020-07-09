@@ -7,6 +7,7 @@ Changelog
 
 Develop
 -----------------
+* [ENHANCEMENT] Add support and docs for loading evaluation parameter from SQL database
 * [ENHANCEMENT] Fixed some typos/grammar and a broken link in the suite_scaffold_notebook_renderer
 * [FEATURE] Customizable "Suite Edit" generated notebooks
 
