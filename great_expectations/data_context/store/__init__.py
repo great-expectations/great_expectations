@@ -4,6 +4,7 @@ from .database_store_backend import DatabaseStoreBackend
 from .expectations_store import ExpectationsStore
 from .html_site_store import HtmlSiteStore
 from .metric_store import EvaluationParameterStore, MetricStore
+from .query_store import SqlAlchemyQueryStore
 from .store import Store
 from .store_backend import InMemoryStoreBackend, StoreBackend
 from .tuple_store_backend import (
