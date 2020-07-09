@@ -45,7 +45,7 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 
 
     .. warning::
-        If you are also storing :ref:`Validations in GCS, <how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_gcs>` please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
+        If you are also storing :ref:`Validations in GCS <how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_gcs>` or :ref:`DataDocs in GCS <how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_gcs>`, please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
 
     .. code-block:: yaml
 
@@ -74,7 +74,7 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 
 5. **Confirm that the new Expectations store has been added by running** ``great_expectations store list``.
 
-    Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``expectations_GCS_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in GCS as long as we set the ``expectations_name`` variable to ``expectations_GCS_store``, and the config for ``expectations_store`` can be removed if you would like.
+    Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``expectations_GCS_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in GCS as long as we set the ``expectations_store_name`` variable to ``expectations_GCS_store``, and the config for ``expectations_store`` can be removed if you would like.
 
     .. code-block:: bash
 
