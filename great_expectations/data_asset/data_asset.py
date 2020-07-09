@@ -220,16 +220,24 @@ class DataAsset(object):
                 expectation_args = copy.deepcopy(all_args)
 
                 if self._expectation_suite.evaluation_parameters:
-                    evaluation_args = build_evaluation_parameters(
+                    (
+                        evaluation_args,
+                        substituted_parameters,
+                    ) = build_evaluation_parameters(
                         expectation_args,
                         self._expectation_suite.evaluation_parameters,
                         self._config.get("interactive_evaluation", True),
+                        self._data_context,
                     )
                 else:
-                    evaluation_args = build_evaluation_parameters(
+                    (
+                        evaluation_args,
+                        substituted_parameters,
+                    ) = build_evaluation_parameters(
                         expectation_args,
                         None,
                         self._config.get("interactive_evaluation", True),
+                        self._data_context,
                     )
 
                 # Construct the expectation_config object
@@ -291,6 +299,11 @@ class DataAsset(object):
                         "exception_message": exception_message,
                         "exception_traceback": exception_traceback,
                     }
+
+                if len(substituted_parameters) > 0:
+                    if meta is None:
+                        meta = dict()
+                    meta["substituted_parameters"] = substituted_parameters
 
                 # Add meta to return object
                 if meta is not None:
@@ -987,10 +1000,14 @@ class DataAsset(object):
                         expectation.kwargs.update({"result_format": result_format})
 
                     # A missing parameter will raise an EvaluationParameterError
-                    evaluation_args = build_evaluation_parameters(
+                    (
+                        evaluation_args,
+                        substituted_parameters,
+                    ) = build_evaluation_parameters(
                         expectation.kwargs,
                         runtime_evaluation_parameters,
                         self._config.get("interactive_evaluation", True),
+                        self._data_context,
                     )
 
                     result = expectation_method(

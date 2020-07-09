@@ -172,6 +172,7 @@ def build_evaluation_parameters(
     exploratory work.
     """
     evaluation_args = copy.deepcopy(expectation_args)
+    substituted_parameters = dict()
 
     # Iterate over arguments, and replace $PARAMETER-defined args with their
     # specified parameters.
@@ -189,21 +190,19 @@ def build_evaluation_parameters(
                 ]
                 del expectation_args[key]["$PARAMETER." + value["$PARAMETER"]]
 
-            elif evaluation_parameters is not None:
-                # parse_evaluation_parameter will raise EvaluationParameterError if we cannot find a suitable value
-                evaluation_args[key] = parse_evaluation_parameter(
+            # If not, try to parse the evaluation parameter and substitute, which will raise
+            # an exception if we do not have a value
+            else:
+                parameter_value = parse_evaluation_parameter(
                     value["$PARAMETER"],
                     evaluation_parameters=evaluation_parameters,
                     data_context=data_context,
                 )
+                evaluation_args[key] = parameter_value
+                # Once we've substituted, we also track that we did so
+                substituted_parameters[key] = parameter_value
 
-            else:
-                # If we haven't been able to continue already, we failed to find a parameter
-                raise EvaluationParameterError(
-                    "No value found for $PARAMETER " + value["$PARAMETER"]
-                )
-
-    return evaluation_args
+    return evaluation_args, substituted_parameters
 
 
 expr = EvaluationParameterParser()
@@ -315,7 +314,10 @@ def parse_evaluation_parameter(
                 raise EvaluationParameterError(
                     "No value found for $PARAMETER " + str(L[0])
                 )
-        except ParseException:
+        except ParseException as e:
+            logger.debug(
+                f"Parse exception while parsing evaluation parameter: {str(e)}"
+            )
             raise EvaluationParameterError("No value found for $PARAMETER " + str(L[0]))
         except AttributeError:
             logger.warning("Unable to get store for store-type valuation parameter.")
