@@ -19,4 +19,4 @@ def test_basic_query(basic_sqlalchemy_query_store):
         basic_sqlalchemy_query_store.get("q2") == "SELECT count(*) FROM ${table_name};"
     )
     res = basic_sqlalchemy_query_store.get_query_result("q2", {"table_name": "titanic"})
-    assert res[0] == (1313,)
+    assert res[0] == 1313
