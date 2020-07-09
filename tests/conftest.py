@@ -2210,6 +2210,71 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
 
 
 @pytest.fixture
+def data_context_with_bad_notebooks(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    custom_notebook_assets_dir = "notebook_assets"
+
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_basic_with_bad_notebooks.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(asset_config_path, "my_dag_node/default.json"),
+    )
+
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    shutil.copytree(
+        os.path.join(fixture_dir, custom_notebook_assets_dir),
+        str(os.path.join(context_path, "plugins", custom_notebook_assets_dir)),
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_custom_notebooks(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_custom_notebooks.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(asset_config_path, "my_dag_node/default.json"),
+    )
+
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
 def data_context_simple_expectation_suite(tmp_path_factory):
     """
     This data_context is *manually* created to have the config we want, vs
