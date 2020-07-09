@@ -405,7 +405,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
         )
 
     def _set(
-        self, key, value, content_encoding="utf-8", content_type="application/json", **kwargs
+        self,
+        key,
+        value,
+        content_encoding="utf-8",
+        content_type="application/json",
+        **kwargs
     ):
         if self.platform_specific_separator:
             s3_object_key = os.path.join(
@@ -587,7 +592,12 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             return gcs_response_object.download_as_string().decode("utf-8")
 
     def _set(
-        self, key, value, content_encoding="utf-8", content_type="application/json", **kwargs
+        self,
+        key,
+        value,
+        content_encoding="utf-8",
+        content_type="application/json",
+        **kwargs
     ):
         gcs_object_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
 
