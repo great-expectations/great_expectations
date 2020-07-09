@@ -14,6 +14,14 @@ from great_expectations.cli.store import store
 from great_expectations.cli.suite import suite
 from great_expectations.cli.validation_operator import validation_operator
 
+try:
+    from colorama import init as init_colorama
+
+    init_colorama()
+except ImportError:
+    pass
+
+
 # TODO: consider using a specified-order supporting class for help (but wasn't working with python 2)
 
 

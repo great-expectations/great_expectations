@@ -541,9 +541,7 @@ The value of "success" is True if no critical expectation suites ("failure") fai
         notify_on="all",
         result_format={"result_format": "SUMMARY"},
     ):
-        super(WarningAndFailureExpectationSuitesValidationOperator, self).__init__(
-            data_context, action_list, name
-        )
+        super().__init__(data_context, action_list, name)
 
         if expectation_suite_name_suffixes is None:
             expectation_suite_name_suffixes = [".failure", ".warning"]

@@ -211,7 +211,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 f"Skipping expect_column_median_to_be_between because observed value is nan: {observed_median}"
             )
 
-        allow_relative_error = dataset.attempt_allowing_relative_error()
+        allow_relative_error: bool = dataset.attempt_allowing_relative_error()
 
         quantile_result = dataset.expect_column_quantile_values_to_be_between(
             column,
@@ -462,7 +462,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.UNIQUE,
                 ]:
                     # TODO we will want to finesse the number and types of
-                    #  expectations created here. The simple version is blacklisting
+                    #  expectations created here. The simple version is deny/allow list
                     #  and the more complex version is desired per column type and
                     #  cardinality. This deserves more thought on configuration.
                     dataset.expect_column_values_to_be_unique(column)
