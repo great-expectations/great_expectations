@@ -138,7 +138,7 @@
       },
       {
         "title": "How do you want to host and share your Data Documentation?",
-        "description": "A [HTML Site Store](https://docs.greatexpectations.io/en/latest/reference/core_concepts/data_context.html#html_site_store) facilitates publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results",
+        "description": "A [HTML Site Store](https://docs.greatexpectations.io/en/latest/reference/core_concepts/data_context.html) facilitates publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results",
         "id": "html_site_store",
         "cases": [
           {
@@ -157,7 +157,7 @@
       },
       {
         "title": "How do you want to trigger validation?",
-        "description": "A [Checkpoint](https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoint.html) makes it possible to easily integrate a validation step into your workflow.",
+        "description": "A [Checkpoint](https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html) makes it possible to easily integrate a validation step into your workflow.",
         "id": "checkpoint",
         "cases": [
           {
@@ -196,27 +196,6 @@
           },
           {
             "id": "os_windows"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "section_title": "Workflow",
-    "section_features": [
-      {
-        "title": "How do you want to create and edit Expectations?",
-        "description": "The maturity of documentation and end-to-end support for workflows is reflected in these assessments.",
-        "id": "workflow_create_edit_expectations",
-        "cases": [
-          {
-            "id": "workflow_create_edit_expectations_cli_scaffold"
-          },
-          {
-            "id": "workflow_create_edit_expectations_cli_edit"
-          },
-          {
-            "id": "workflow_create_edit_expectations_json_schema"
           }
         ]
       }

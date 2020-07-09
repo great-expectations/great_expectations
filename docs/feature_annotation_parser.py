@@ -9,22 +9,24 @@ from typing import Dict, Iterator, List, Mapping, Optional, Set, Tuple, Union
 logger = logging.getLogger(__name__)
 
 ANNOTATION_REGEX = ""
-ANNOTATION_REGEX += "[ ]*(id:.*)[\n]"
-ANNOTATION_REGEX += "[ ]*(title:.*)[\n]"
-ANNOTATION_REGEX += "[ ]*(icon:.*)[\n]"
-ANNOTATION_REGEX += "[ ]*(short_description:.*)[\n]"
-ANNOTATION_REGEX += "[ ]*(description:.*)[\n]"
-ANNOTATION_REGEX += "[ ]*(how_to_guide_url:.*)[\n]"
-ANNOTATION_REGEX += "[ ]*(maturity:.*)[\n]"
-ANNOTATION_REGEX += "[ ]*(maturity_details:.*)[\n]"
-ANNOTATION_REGEX += "[ ]*(api_stability:.*)[\n]"
-ANNOTATION_REGEX += "[ ]*(implementation_completeness:.*)[\n]"
-ANNOTATION_REGEX += "[ ]*(unit_test_coverage:.*)[\n]"
-ANNOTATION_REGEX += "[ ]*(integration_infrastructure_test_coverage:.*)[\n]"
-ANNOTATION_REGEX += "[ ]*(documentation_completeness:.*)[\n]"
-ANNOTATION_REGEX += "[ ]*(bug_risk:.*)[\n]"
-ANNOTATION_REGEX += "([ ]*(expectation_completeness:.*)[\n])?"
+ANNOTATION_REGEX += "[\s]*(id:.*)[\n]"
+ANNOTATION_REGEX += "[\s]*(title:.*)[\n]"
+ANNOTATION_REGEX += "[\s]*(icon:.*)[\n]"
+ANNOTATION_REGEX += "[\s]*(short_description:.*)[\n]"
+ANNOTATION_REGEX += "[\s]*(description:.*)[\n]"
+ANNOTATION_REGEX += "[\s]*(how_to_guide_url:.*)[\n]"
+ANNOTATION_REGEX += "[\s]*(maturity:.*)[\n]"
+ANNOTATION_REGEX += "[\s]*(maturity_details:.*)[\n]"
+ANNOTATION_REGEX += "[\s]*(api_stability:.*)[\n]"
+ANNOTATION_REGEX += "[\s]*(implementation_completeness:.*)[\n]"
+ANNOTATION_REGEX += "[\s]*(unit_test_coverage:.*)[\n]"
+ANNOTATION_REGEX += "[\s]*(integration_infrastructure_test_coverage:.*)[\n]"
+ANNOTATION_REGEX += "[\s]*(documentation_completeness:.*)[\n]"
+ANNOTATION_REGEX += "[\s]*(bug_risk:.*)[\n]"
+ANNOTATION_REGEX += "([\s]*(expectation_completeness:.*)[\n])?"
 annotation_regex_compiled = re.compile(ANNOTATION_REGEX)
+
+
 
 maturity_details_keys = [
     "api_stability",
@@ -55,8 +57,7 @@ def parse_feature_annotation(docstring: Union[str, List[str], None]):
                 # split matched line_fields
                 matched_line_fields = matched_line.split(":")
                 this_key = matched_line_fields[0].strip()
-                this_val = "" if "TODO" in matched_line_fields[1].strip() else matched_line_fields[1].strip()
-
+                this_val = "" if "TODO" in (":".join(matched_line_fields[1:]).strip()) else (":".join(matched_line_fields[1:]).strip())
                 if this_key == "id":
                     id_val = this_val
 
