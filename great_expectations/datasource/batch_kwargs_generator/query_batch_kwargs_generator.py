@@ -67,9 +67,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
     def __init__(
         self, name="default", datasource=None, query_store_backend=None, queries=None
     ):
-        super().__init__(
-            name=name, datasource=datasource
-        )
+        super().__init__(name=name, datasource=datasource)
         if (
             datasource
             and datasource.data_context
