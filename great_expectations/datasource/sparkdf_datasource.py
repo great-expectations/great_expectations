@@ -37,9 +37,9 @@ class SparkDFDatasource(Datasource):
     id: datasource_hdfs_spark
         title: Datasource - HDFS
         icon:
-        short_description: TODO:FEATURE_MATURITY
-        description: TODO:FEATURE_MATURITY
-        how_to_guide_url: TODO:FEATURE_MATURITY
+        short_description: HDFS
+        description: Use HDFS as an external datasource in conjunction with Spark.
+        how_to_guide_url:
         maturity: Experimental
         maturity_details:
             api_stability: Stable

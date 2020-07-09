@@ -22,7 +22,7 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
     icon:
     short_description: Store Expectations in Git
     description: Use a git repository to store expectation suites.
-    how_to_guide_url:  https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.html#additional-notes
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.html#additional-notes
     maturity: Production
     maturity_details:
         api_stability: Stable

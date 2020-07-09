@@ -20,9 +20,9 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
     id: validations_store_filesystem
     title: Validations Store - Filesystem
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: Filesystem
+    description: Use a locally-mounted filesystem to store validation results.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem.html
     maturity: Production
     maturity_details:
         api_stability: Stable
@@ -35,9 +35,9 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
     id: validations_store_s3
     title: Validations Store - S3
     icon:
-    short_description:
-    description:
-    how_to_guide_url:
+    short_description: S3
+    description: Use an Amazon Web Services S3 bucket to store validation results.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_s3.html
     maturity: Beta
     maturity_details:
         api_stability: Stable
@@ -51,8 +51,8 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
     title: Validations Store - GCS
     icon:
     short_description:
-    description:
-    how_to_guide_url:
+    description: # What it does\nStore validation results in a Google Cloud Storage bucket. You may optionally specify a key to use.\n\nSee the GCS Store backend [module docs](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_context/store/tuple_store_backend/index.html#great_expectations.data_context.store.tuple_store_backend.TupleGCSStoreBackend) for more information."
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.html
     maturity: Beta
     maturity_details:
         api_stability: Stable
@@ -65,8 +65,8 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
     id: validations_store_azure_blob_storage
     title: Validations Store - Azure
     icon:
-    short_description:
-    description:
+    short_description: Azure Blob Storage
+    description: Use Microsoft Azure Blob Storage to store validation results.
     how_to_guide_url:
     maturity: N/A
     maturity_details:

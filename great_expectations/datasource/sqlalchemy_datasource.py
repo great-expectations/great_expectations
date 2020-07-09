@@ -53,24 +53,24 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
     icon:
     short_description: Postgres
     description: Support for using the open source PostgresQL database as an external datasource and execution engine.
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    how_to_guide_url:
     maturity: Production
     maturity_details:
         api_stability: High
         implementation_completeness: Complete
         unit_test_coverage: Complete
         integration_infrastructure_test_coverage: Complete
-        documentation_completeness: Medium (doesn’t have a specific how-to, but easy to use overall)
+        documentation_completeness: Medium (does not have a specific how-to, but easy to use overall)
         bug_risk: Low
         expectation_completeness: Moderate
 
     id: datasource_bigquery
     title: Datasource - BigQuery
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    short_description: BigQuery
+    description: Use Google BigQuery as an execution engine and external datasource to validate data.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_bigquery_datasource.html
+    maturity: Beta
     maturity_details:
         api_stability: Unstable (table generator inability to work with triple-dotted, temp table usability, init flow calls setup "other")
         implementation_completeness: Moderate
@@ -83,41 +83,41 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
     id: datasource_redshift
     title: Datasource - Amazon Redshift
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    short_description: Redshift
+    description: Use Amazon Redshift as an execution engine and external datasource to validate data.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_redshift_datasource.html
+    maturity: Beta
     maturity_details:
-        api_stability: Moderate (unresolved driver recommendation; potential metadata/introspection method special handling for performance)
+        api_stability: Moderate (potential metadata/introspection method special handling for performance)
         implementation_completeness: Complete
         unit_test_coverage: Minimal
         integration_infrastructure_test_coverage: Minimal (none automated)
         documentation_completeness: Moderate
-        bug_risk: Moderate (SQLAlchemy driver may be difficult to find, and we do not have a clear recommendation for the correct driver)
+        bug_risk: Moderate
         expectation_completeness: Moderate
 
     id: datasource_snowflake
     title: Datasource - Snowflake
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
-    maturity: TODO:FEATURE_MATURITY
+    short_description: Snowflake
+    description: Use Snowflake Computing as an execution engine and external datasource to validate data.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_snowflake_datasource.html
+    maturity: Production
     maturity_details:
-        api_stability: TODO:FEATURE_MATURITY
-        implementation_completeness: TODO:FEATURE_MATURITY
-        unit_test_coverage: TODO:FEATURE_MATURITY
-        integration_infrastructure_test_coverage: TODO:FEATURE_MATURITY
-        documentation_completeness: TODO:FEATURE_MATURITY
-        bug_risk: TODO:FEATURE_MATURITY
-        expectation_completeness: TODO:FEATURE_MATURITY
+        api_stability: High
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: Minimal (manual only)
+        documentation_completeness: Complete
+        bug_risk: Low
+        expectation_completeness: Complete
 
     id: datasource_mssql
     title: Datasource - Microsoft SQL Server
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: Microsoft SQL Server
+    description: Use Microsoft SQL Server as an execution engine and external datasource to validate data.
+    how_to_guide_url:
     maturity: Experimental
     maturity_details:
         api_stability: High
@@ -131,9 +131,9 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
     id: datasource_mysql
     title: Datasource - MySQL
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: MySQL
+    description: Use MySQL as an execution engine and external datasource to validate data.
+    how_to_guide_url:
     maturity: Experimental
     maturity_details:
         api_stability: Low (no consideration for temp tables)
@@ -147,9 +147,9 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
     id: datasource_mariadb
     title: Datasource - MariaDB
     icon:
-    short_description: TODO:FEATURE_MATURITY
-    description: TODO:FEATURE_MATURITY
-    how_to_guide_url: TODO:FEATURE_MATURITY
+    short_description: MariaDB
+    description: Use MariaDB as an execution engine and external datasource to validate data.
+    how_to_guide_url:
     maturity: Experimental
     maturity_details:
         api_stability: Low (no consideration for temp tables)
