@@ -12,6 +12,8 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
     - Configured a :ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>`.
     - Configured a `PostgreSQL <https://www.postgresql.org/>`_ database with appropriate credentials.
 
+Steps
+-----
 
 1. **Configure the** ``config_variables.yml`` **file with your database credentials**
 
@@ -97,6 +99,8 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
 
 
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+
+Also, please reach out to us on `Slack <greatexpectations.io/slack>`_ if you would like to learn more, or have any questions.
 
 .. discourse::
     :topic_identifier: 177

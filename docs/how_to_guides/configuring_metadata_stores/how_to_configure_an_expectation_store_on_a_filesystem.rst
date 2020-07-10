@@ -15,16 +15,20 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 Steps
 -----
 
-1. First create a new folder where you would like to store your Expectations, and move your existing Expectation files over to the new location. In our case, the name of the Expectations file is ``npi_expectations`` and the path to our new storage location is ``/shared_expectations``.
+1. **Configure a new folder on your filesystem where Expectations will be stored.**
+
+    Create a new folder where you would like to store your Expectations, and move your existing Expectation files over to the new location. In our case, the name of the Expectations file is ``npi_expectations`` and the path to our new storage location is ``/shared_expectations``.
 
     .. code-block:: bash
 
-        # in the great_expectations folder
+        # in the great_expectations/ folder
         mkdir shared_expectations
         mv expectations/npi_expectations.json shared_expectations/
 
 
-2. Next open the ``great_expectations.yml`` file and look for the following lines.
+2. **Identify your Data Context Expectations Store**
+
+    In your ``great_expectations.yml`` , look for the following lines.  The configuration tells Great Expectations to look for Expectations in a store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
 
     .. code-block:: yaml
 
@@ -38,12 +42,9 @@ Steps
                     base_directory: expectations/
 
 
-    The configuration file tells Great Expectations to look for Expectations in a Store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
+3. **Update your configuration file to include a new store for Expectations results on your filesystem**
 
-3. Update your configuration following the example below. This example would change the Store name to ``shared_expectations_filesystem_store`` with the ``base_directory`` set to ``shared_expectations/``.
-
-    Paths are relative to the directory where ``great_expectations.yml`` is stored.
-
+    In the example below, Expectations Store is being set to ``shared_expectations_filesystem_store`` with the ``base_directory`` set to ``shared_expectations/``.
 
     .. code-block:: yaml
 
@@ -58,13 +59,21 @@ Steps
 
 
 
-4. Confirm that the location has been updated by running ``great_expectations store list``.
+4. **Confirm that the location has been updated by running** ``great_expectations store list``.
+
+    Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``shared_expectations_filesystem_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in the ``shared_expectations/`` folder as long as we set the ``expectations_store_name`` variable to ``shared_expectations_filesystem_store``.  The config for ``expectations_store`` can be removed if you would like.
 
     .. code-block:: bash
 
         great_expectations store list
 
-        3 Stores found:
+        2 Stores found:
+
+        - name: expectations_store
+        class_name: ExpectationsStore
+        store_backend:
+            class_name: TupleFilesystemStoreBackend
+            base_directory: expectations/
 
         - name: shared_expectations_filesystem_store
         class_name: ExpectationsStore
@@ -73,7 +82,7 @@ Steps
             base_directory: shared_expectations/
 
 
-5. Confirm that Expectations can be read from the new storage location by running ``great_expectations suite list``.
+5. **Confirm that Expectations can be read from the new storage location by running** ``great_expectations suite list``.
 
     .. code-block:: bash
 
@@ -121,7 +130,7 @@ Additional Notes
              }
 
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on `Slack <greatexpectations.io/slack>`_ if you would like to learn more, or have any questions.
 
 .. discourse::
     :topic_identifier: 182
