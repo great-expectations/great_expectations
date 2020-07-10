@@ -12,7 +12,6 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
     - Installed `boto3 <https://github.com/boto/boto3>`_ in your local environment.
     - Identified the S3 bucket and prefix where Expectations will be stored.
 
-
 Steps
 -----
 
@@ -104,7 +103,7 @@ Steps
          - exp1
          - exp2
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on `Slack <greatexpectations.io/slack>`_ if you would like to learn more, or have any questions.
 
 .. discourse::
     :topic_identifier: 178
