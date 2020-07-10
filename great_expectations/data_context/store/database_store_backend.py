@@ -93,11 +93,11 @@ class DatabaseStoreBackend(StoreBackend):
             logger.debug("Error fetching value: " + str(e))
             raise ge_exceptions.StoreError("Unable to fetch value for key: " + str(key))
 
-    def _set(self, key, value, **kwargs):
+    def _set(self, key, value, allow_update=True):
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
         cols["value"] = value
 
-        if kwargs.get("allow_update", False):
+        if allow_update:
             if self.has_key(key):
                 ins = (
                     self._table.update()
