@@ -417,15 +417,21 @@ class TupleS3StoreBackend(TupleStoreBackend):
         import boto3
 
         s3 = boto3.resource("s3")
-        result_s3 = s3.Object(self.bucket, s3_object_key)
-        if isinstance(value, str):
-            result_s3.put(
-                Body=value.encode(content_encoding),
-                ContentEncoding=content_encoding,
-                ContentType=content_type,
-            )
-        else:
-            result_s3.put(Body=value, ContentType=content_type)
+
+        try:
+            result_s3 = s3.Object(self.bucket, s3_object_key)
+            if isinstance(value, str):
+                result_s3.put(
+                    Body=value.encode(content_encoding),
+                    ContentEncoding=content_encoding,
+                    ContentType=content_type,
+                )
+            else:
+                result_s3.put(Body=value, ContentType=content_type)
+        except s3.exceptions.ClientError as e:
+            logger.debug(str(e))
+            raise StoreBackendError("Unable to set object in s3.")
+
         return s3_object_key
 
     def _move(self, source_key, dest_key, **kwargs):

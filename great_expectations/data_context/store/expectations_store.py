@@ -48,12 +48,6 @@ class ExpectationsStore(Store):
             store_backend=store_backend, runtime_environment=runtime_environment
         )
 
-    def set(self, key, value):
-        self._validate_key(key)
-        return self._store_backend.set(
-            self.key_to_tuple(key), self.serialize(key, value), allow_update=True
-        )
-
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
 
