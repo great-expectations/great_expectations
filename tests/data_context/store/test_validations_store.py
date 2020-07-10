@@ -198,7 +198,7 @@ test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir0/
     )
 
 
-def test_ValidationsStore_with_DatabaseStoreBackend():
+def test_ValidationsStore_with_DatabaseStoreBackend(sa):
     # Use sqlite so we don't require postgres for this test.
     connection_kwargs = {"drivername": "sqlite"}
 

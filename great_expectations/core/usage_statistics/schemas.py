@@ -236,12 +236,7 @@ anonymized_batch_schema = {
                 "anonymized_batch_kwarg_keys": {
                     "type": "array",
                     "maxItems": 1000,
-                    "items": {
-                        "oneOf": [
-                            {"$ref": "#/definitions/anonymized_string"},
-                            {"type": "string", "maxLength": 256},
-                        ]
-                    },
+                    "items": {"oneOf": [{"type": "string", "maxLength": 256},]},
                 },
                 "anonymized_expectation_suite_name": {
                     "$ref": "#/definitions/anonymized_string"

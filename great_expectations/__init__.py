@@ -11,6 +11,7 @@ from .util import (
     measure_execution_time,
     read_csv,
     read_excel,
+    read_feather,
     read_json,
     read_parquet,
     read_pickle,

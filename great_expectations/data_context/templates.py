@@ -11,6 +11,8 @@ PROJECT_HELP_COMMENT = """
 #   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#configuration
 #   - Join our slack channel: http://greatexpectations.io/slack
 
+# config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
+# It is auto-generated and usually does not need to be changed.
 config_version: 2
 
 # Datasources tell Great Expectations where your data lives and how to get it.

@@ -16,6 +16,7 @@ from typing import Dict, List, Optional, Union
 from dateutil.parser import ParserError, parse
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import (
@@ -278,11 +279,14 @@ class BaseDataContext(object):
 
     def _build_store(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
-        new_store = instantiate_class_from_config(
-            config=store_config,
-            runtime_environment={"root_directory": self.root_directory,},
-            config_defaults={"module_name": module_name},
-        )
+        try:
+            new_store = instantiate_class_from_config(
+                config=store_config,
+                runtime_environment={"root_directory": self.root_directory,},
+                config_defaults={"module_name": module_name},
+            )
+        except ge_exceptions.DataContextError:
+            new_store = None
         if not new_store:
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,
@@ -620,6 +624,10 @@ class BaseDataContext(object):
         return (
             self._project_config_with_variables_substituted.anonymous_usage_statistics
         )
+
+    @property
+    def notebooks(self):
+        return self._project_config_with_variables_substituted.notebooks
 
     @property
     def stores(self):
@@ -2264,6 +2272,10 @@ class DataContext(BaseDataContext):
                 "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
                     err
                 )
+            )
+        except DuplicateKeyError:
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Error: duplicate key found in project YAML file."
             )
         except IOError:
             raise ge_exceptions.ConfigNotFoundError()

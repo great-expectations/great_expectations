@@ -1,6 +1,9 @@
+import logging
 from abc import ABCMeta, abstractmethod
 
-from great_expectations.exceptions import StoreError
+from great_expectations.exceptions import StoreBackendError, StoreError
+
+logger = logging.getLogger(__name__)
 
 
 class StoreBackend(object, metaclass=ABCMeta):
@@ -23,16 +26,20 @@ class StoreBackend(object, metaclass=ABCMeta):
     def fixed_length_key(self):
         return self._fixed_length_key
 
-    def get(self, key):
+    def get(self, key, **kwargs):
         self._validate_key(key)
-        value = self._get(key)
+        value = self._get(key, **kwargs)
         return value
 
     def set(self, key, value, **kwargs):
         self._validate_key(key)
         self._validate_value(value)
         # Allow the implementing setter to return something (e.g. a path used for its key)
-        return self._set(key, value, **kwargs)
+        try:
+            return self._set(key, value, **kwargs)
+        except ValueError as e:
+            logger.debug(str(e))
+            raise StoreBackendError("ValueError while calling _set on store backend.")
 
     def move(self, source_key, dest_key, **kwargs):
         self._validate_key(source_key)
