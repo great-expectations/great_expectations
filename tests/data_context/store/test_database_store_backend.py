@@ -47,13 +47,20 @@ def test_database_store_backend_duplicate_key_violation(caplog, sa):
     store_backend.set(key, "hello")
     assert "hello" == store_backend.get(key)
 
+    # default behavior doesn't throw an error because the key is updated
+    store_backend.set(key, "hello")
+    assert "hello" == store_backend.get(key)
+
     assert len(caplog.messages) == 0
     caplog.set_level(logging.INFO, "great_expectations")
-    store_backend.set(key, "hello")
+
+    store_backend.set(
+        key, "hello", allow_update=False
+    )  # the only place we are testing this flag
     assert len(caplog.messages) == 1
     assert "already exists with the same value" in caplog.messages[0]
 
     with pytest.raises(StoreBackendError) as exc:
-        store_backend.set(key, "world")
+        store_backend.set(key, "world", allow_update=False)
 
     assert "Integrity error" in str(exc.value)
