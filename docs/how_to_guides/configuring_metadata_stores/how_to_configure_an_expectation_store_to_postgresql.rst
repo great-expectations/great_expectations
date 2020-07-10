@@ -11,6 +11,9 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
     - Configured an :ref:`Expectations Suite <tutorials__getting_started__create_your_first_expectations>`.
     - Configured a `PostgreSQL <https://www.postgresql.org/>`_ database with appropriate credentials.
 
+Steps
+-----
+
 1. **Configure the** ``config_variables.yml`` **file with your database credentials**
 
     We recommend that database credentials be stored in the  ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control.  The following lines add database credentials under the key ``db_creds``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found `here. <https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html>`_
@@ -121,7 +124,7 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
          - exp1
 
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on `Slack <greatexpectations.io/slack>`_ if you would like to learn more, or have any questions.
 
 .. discourse::
     :topic_identifier: 183

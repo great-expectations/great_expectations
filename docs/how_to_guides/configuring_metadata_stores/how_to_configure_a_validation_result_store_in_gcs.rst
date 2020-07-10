@@ -13,6 +13,9 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
     - Configured a Google Cloud Platform (GCP) `service account <https://cloud.google.com/iam/docs/service-accounts>`_ with credentials that can access the appropriate GCP resources, which include Storage Objects.
     - Identified the GCP project, GCS bucket, and prefix where Validations will be stored.
 
+Steps
+-----
+
 1. **Configure your GCP credentials**
 
     Check that your environment is configured with the appropriate authentication credentials needed to connect to the GCS bucket where Validations will be stored.
@@ -26,7 +29,6 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
 2. **Identify your Data Context Validations Store**
 
     In your ``great_expectations.yml``, look for the following lines.  The configuration tells Great Expectations to look for Validations in a store called ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
-
 
     .. code-block:: yaml
 
@@ -63,7 +65,7 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
 
 4. **Copy existing Validation results to the GCS bucket**. (This step is optional).
 
-    One way to copy Validations into GCS is by using the ``gsutil cp`` command, which is part of the Google Cloud SDK. In the example below, two Validation results, ``Validation1`` and ``Validation2`` are copied to the GCS bucket.   Information on other options, like the Cloud Storage browser in the Google Cloud Console, can be found in the `Documentation for Google Cloud <https://cloud.google.com/storage/docs/uploading-objects>`_.
+    One way to copy Validations into GCS is by using the ``gsutil cp`` command, which is part of the Google Cloud SDK. In the example below, two Validation results, ``Validation1`` and ``Validation2`` are copied to the GCS bucket.   Information on other ways to copy Validation results, like the Cloud Storage browser in the Google Cloud Console, can be found in the `Documentation for Google Cloud <https://cloud.google.com/storage/docs/uploading-objects>`_.
 
     .. code-block:: bash
 
@@ -103,7 +105,7 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
     Run a :ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>` to store results in the new Validations store on GCS then visualize the results by re-building :ref:`Data Docs <tutorials__getting_started__set_up_data_docs>`.
 
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on `Slack <greatexpectations.io/slack>`_ if you would like to learn more, or have any questions.
 
 .. discourse::
     :topic_identifier: 174
