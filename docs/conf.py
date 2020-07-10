@@ -22,9 +22,8 @@ import sys
 import uuid
 from collections import namedtuple
 
+from feature_annotation_parser import parse_feature_annotation
 from sphinx.ext.autodoc import between
-
-from docs.feature_annotation_parser import parse_feature_annotation
 
 sys.path.insert(0, os.path.abspath("../"))
 
