@@ -27,7 +27,6 @@ ANNOTATION_REGEX += "([\s]*(expectation_completeness:.*)[\n])?"
 annotation_regex_compiled = re.compile(ANNOTATION_REGEX)
 
 
-
 maturity_details_keys = [
     "api_stability",
     "implementation_completeness",
@@ -35,7 +34,7 @@ maturity_details_keys = [
     "integration_infrastructure_test_coverage",
     "documentation_completeness",
     "bug_risk",
-    "expectation_completeness"
+    "expectation_completeness",
 ]
 
 AnnotatedNode = namedtuple("AnnotatedNode", ["name", "path", "annotation", "type_"])
@@ -57,7 +56,11 @@ def parse_feature_annotation(docstring: Union[str, List[str], None]):
                 # split matched line_fields
                 matched_line_fields = matched_line.split(":")
                 this_key = matched_line_fields[0].strip()
-                this_val = "" if "TODO" in (":".join(matched_line_fields[1:]).strip()) else (":".join(matched_line_fields[1:]).strip())
+                this_val = (
+                    ""
+                    if "TODO" in (":".join(matched_line_fields[1:]).strip())
+                    else (":".join(matched_line_fields[1:]).strip())
+                )
                 if this_key == "id":
                     id_val = this_val
 

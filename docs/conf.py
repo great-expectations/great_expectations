@@ -306,12 +306,15 @@ def process_docstring(app, what, name, obj, options, lines):
         annotation["description"] = description
 
         if annotation["maturity_details"].get("expectation_completeness"):
-            feature_annotation_admonition += (feature_annotation_template + expectation_completeness_template +
-                                              icon_template).format(**annotation)
+            feature_annotation_admonition += (
+                feature_annotation_template
+                + expectation_completeness_template
+                + icon_template
+            ).format(**annotation)
         else:
-            feature_annotation_admonition += (feature_annotation_template + icon_template).format(
-                **annotation
-            )
+            feature_annotation_admonition += (
+                feature_annotation_template + icon_template
+            ).format(**annotation)
 
     lines += feature_annotation_admonition.splitlines()
 
