@@ -22,7 +22,6 @@ import sys
 import uuid
 from collections import namedtuple
 
-from feature_annotation_parser import parse_feature_annotation
 from sphinx.ext.autodoc import between
 
 sys.path.insert(0, os.path.abspath("../"))
@@ -255,6 +254,9 @@ autodoc_member_order = "bysource"
 
 
 def process_docstring(app, what, name, obj, options, lines):
+
+    from docs.feature_annotation_parser import parse_feature_annotation
+
     docstring = "\n".join(lines)
     annotation_list = parse_feature_annotation(docstring)
 
