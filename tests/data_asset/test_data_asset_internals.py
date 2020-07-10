@@ -273,24 +273,24 @@ def test_meta_version_warning():
     asset = ge.data_asset.DataAsset()
 
     with pytest.warns(UserWarning) as w:
-        out = asset.validate(
-            expectation_suite=ExpectationSuite(
-                expectations=[], expectation_suite_name="test", meta={}
-            )
-        )
+        suite = ExpectationSuite(expectations=[], expectation_suite_name="test")
+        # mangle the metadata
+        suite.meta = {"foo": "bar"}
+        out = asset.validate(expectation_suite=suite)
     assert (
         w[0].message.args[0]
         == "WARNING: No great_expectations version found in configuration object."
     )
 
     with pytest.warns(UserWarning) as w:
-        out = asset.validate(
-            expectation_suite=ExpectationSuite(
-                expectations=[],
-                expectation_suite_name="test",
-                meta={"great_expectations.__version__": "0.0.0"},
-            )
+        suite = ExpectationSuite(
+            expectations=[],
+            expectation_suite_name="test",
+            meta={"great_expectations.__version__": "0.0.0"},
         )
+        # mangle the metadata
+        suite.meta = {"great_expectations.__version__": "0.0.0"}
+        out = asset.validate(expectation_suite=suite)
     assert (
         w[0].message.args[0]
         == "WARNING: This configuration object was built using version 0.0.0 of great_expectations, but is currently "

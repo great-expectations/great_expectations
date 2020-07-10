@@ -212,7 +212,10 @@ great_expectations/
 
 
 @freeze_time("09/26/2019 13:42:41")
-def test_project_upgrade_with_manual_steps(v10_project_directory, caplog):
+def test_project_upgrade_with_manual_steps(
+    v10_project_directory, caplog, sa, postgresql_engine
+):
+    # This test requires sqlalchemy because it includes database backends configured
     # test project upgrade that requires manual steps
 
     # copy v2 yml

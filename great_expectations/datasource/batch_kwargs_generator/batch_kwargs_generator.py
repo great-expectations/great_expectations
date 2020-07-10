@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class BatchKwargsGenerator(object):
-    """
+    r"""
     BatchKwargsGenerators produce identifying information, called "batch_kwargs" that datasources
     can use to get individual batches of data. They add flexibility in how to obtain data
     such as with time-based partitioning, downsampling, or other techniques appropriate
@@ -252,11 +252,10 @@ class BatchKwargsGenerator(object):
             return self._data_asset_iterators[data_asset_name][0]
 
     def build_batch_kwargs(self, data_asset_name=None, partition_id=None, **kwargs):
-        assert (
-            (kwargs.get("name") and not data_asset_name)
-            or (not kwargs.get("name") and data_asset_name),
-            "Please provide either name or data_asset_name.",
-        )
+        if (not kwargs.get("name") and not data_asset_name) or (
+            kwargs.get("name") and data_asset_name
+        ):
+            raise ValueError("Please provide either name or data_asset_name.")
         if kwargs.get("name"):
             warnings.warn(
                 "The 'name' argument will be deprecated and renamed to 'data_asset_name'. "
@@ -294,7 +293,7 @@ class BatchKwargsGenerator(object):
         raise NotImplementedError
 
     # TODO: deprecate generator_asset argument
-    def yield_batch_kwargs(self, generator_asset=None, data_asset_name=None, **kwargs):
+    def yield_batch_kwargs(self, data_asset_name=None, generator_asset=None, **kwargs):
         assert (generator_asset and not data_asset_name) or (
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."

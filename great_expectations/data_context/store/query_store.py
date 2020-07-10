@@ -3,7 +3,7 @@ from string import Template
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.data_context_key import StringKey
-from great_expectations.data_context.store import Store
+from great_expectations.data_context.store.store import Store
 
 try:
     import sqlalchemy
@@ -90,4 +90,7 @@ class SqlAlchemyQueryStore(Store):
         query = self._store_backend.get(self._convert_key(key).to_tuple())
         query = Template(query).safe_substitute(query_parameters)
         res = self.engine.execute(query).fetchall()
+        # NOTE: 20200617 - JPC: this approach is probably overly opinionated, but we can
+        # adjust based on specific user requests
+        res = [val for row in res for val in row]
         return res

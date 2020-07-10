@@ -261,6 +261,8 @@ class PandasDatasource(Datasource):
             return {"reader_method": "read_json"}
         elif path.endswith(".pkl"):
             return {"reader_method": "read_pickle"}
+        elif path.endswith(".feather"):
+            return {"reader_method": "read_feather"}
         elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
             return {
                 "reader_method": "read_csv",

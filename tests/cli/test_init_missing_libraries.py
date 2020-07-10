@@ -4,6 +4,10 @@ import pytest
 from click.testing import CliRunner
 
 from great_expectations.cli import cli
+from great_expectations.cli.python_subprocess import (
+    execute_shell_command_with_progress_polling,
+)
+from great_expectations.cli.util import library_install_load_check
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
@@ -97,6 +101,41 @@ great_expectations/
 
 
 @pytest.mark.skipif(
+    is_library_installed("sqlalchemy"), reason="requires sqlalchemy to NOT be installed"
+)
+def test_init_install_sqlalchemy(caplog, tmp_path_factory):
+    """WARNING: THIS TEST IS AWFUL AND WE HATE IT."""
+    # This test is as much about changing the entire test environment with side effects as it is about actually testing
+    # the observed behavior.
+    library_import_name = "sqlalchemy"
+    library_name = "sqlalchemy"
+
+    cli_input = "\n\n2\nn\n"
+
+    basedir = tmp_path_factory.mktemp("test_cli_init_diff")
+    basedir = str(basedir)
+    os.chdir(basedir)
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli, ["init", "--no-view"], input=cli_input, catch_exceptions=False
+    )
+    stdout = result.output
+
+    assert "Always know what to expect from your data" in stdout
+    assert "What data would you like Great Expectations to connect to" in stdout
+    assert (
+        f"""Great Expectations relies on the library `{library_import_name}` to connect to your data, \
+but the package `{library_name}` containing this library is not installed.
+    Would you like Great Expectations to try to execute `pip install {library_name}` for you?"""
+        in stdout
+    )
+
+    # NOW, IN AN EVIL KNOWN ONLY TO SLEEPLESS PROGRAMMERS, WE USE OUR UTILITY TO INSTALL SQLALCHEMY
+    _ = execute_shell_command_with_progress_polling("pip install sqlalchemy")
+
+
+@pytest.mark.skipif(
     is_library_installed("pymysql"), reason="requires pymysql to NOT be installed"
 )
 def test_cli_init_db_mysql_without_library_installed_instructs_user(
@@ -114,7 +153,7 @@ def test_cli_init_db_postgres_without_library_installed_instructs_user(
     caplog, tmp_path_factory,
 ):
     _library_not_loaded_test(
-        tmp_path_factory, "\n\n2\n2\nmy_db\n", "psycopg2", "psycopg2", caplog
+        tmp_path_factory, "\n\n2\n2\nmy_db\nn\n", "psycopg2-binary", "psycopg2", caplog
     )
 
 
@@ -125,12 +164,12 @@ def test_cli_init_db_redshift_without_library_installed_instructs_user(
     caplog, tmp_path_factory,
 ):
     _library_not_loaded_test(
-        tmp_path_factory, "\n\n2\n3\nmy_db\n", "psycopg2", "psycopg2", caplog
+        tmp_path_factory, "\n\n2\n3\nmy_db\nn\n", "psycopg2-binary", "psycopg2", caplog
     )
 
 
 @pytest.mark.skipif(
-    is_library_installed("snowflake"),
+    is_library_installed("snowflake.sqlalchemy"),
     reason="requires snowflake-sqlalchemy to NOT be installed",
 )
 def test_cli_init_db_snowflake_without_library_installed_instructs_user(
@@ -138,9 +177,9 @@ def test_cli_init_db_snowflake_without_library_installed_instructs_user(
 ):
     _library_not_loaded_test(
         tmp_path_factory,
-        "\n\n2\n4\nmy_db\n",
+        "\n\n2\n4\nmy_db\nn\n",
         "snowflake-sqlalchemy",
-        "snowflake",
+        "snowflake.sqlalchemy.snowdialect",
         caplog,
     )
 
@@ -157,15 +196,26 @@ def test_cli_init_spark_without_library_installed_instructs_user(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["init", "--no-view"], input="\n\n1\n2\n", catch_exceptions=False
+        cli, ["init", "--no-view"], input="\n\n1\n2\nn\n", catch_exceptions=False
     )
     stdout = result.output
 
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "What are you processing your files with" in stdout
-    assert "Great Expectations relies on the library `pyspark`" in stdout
-    assert "Please `pip install pyspark` before trying again" in stdout
+    assert (
+        f"""Great Expectations relies on the library `pyspark` to connect to your data, \
+but the package `pyspark` containing this library is not installed.
+    Would you like Great Expectations to try to execute `pip install pyspark` for you?"""
+        in stdout
+    )
+    assert (
+        f"""\nOK, exiting now.
+    - Please execute `pip install pyspark` before trying again."""
+        in stdout
+    )
+    # assert "Great Expectations relies on the library `pyspark`" in stdout
+    # assert "Please `pip install pyspark` before trying again" in stdout
 
     assert "Profiling" not in stdout
     assert "Building" not in stdout

@@ -435,6 +435,9 @@ def load_data_context_with_error_handling(
     except ge_exceptions.PluginClassNotFoundError as err:
         cli_message(err.cli_colored_message)
         sys.exit(1)
+    except ge_exceptions.InvalidConfigurationYamlError as err:
+        cli_message(f"<red>{str(err)}</red>")
+        sys.exit(1)
 
 
 def upgrade_project(
