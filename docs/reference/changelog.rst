@@ -7,9 +7,12 @@ Changelog
 
 Develop
 -----------------
-
-* [ENHANCEMENT] Fixed some typos/grammar and a broken link in the suite_scaffold_notebook_renderer
 * [FEATURE] Customizable "Suite Edit" generated notebooks
+* [ENHANCEMENT] Add support and docs for loading evaluation parameter from SQL database
+* [ENHANCEMENT] Fixed some typos/grammar and a broken link in the suite_scaffold_notebook_renderer
+* [ENHANCEMENT] allow updates to DatabaseStoreBackend keys by default, requiring `allow_update=False` to disallow
+* [BUGFIX] Fix issue where allow_updates was set for StoreBackend that did not support it
+* [BUGFIX] Fix issue where GlobReaderBatchKwargsGenerator failed with relative base_directory
 * [MAINTENANCE] Install GitHub Dependabot
 
 0.11.7
