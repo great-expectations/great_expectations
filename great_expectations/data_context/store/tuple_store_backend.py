@@ -361,6 +361,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         self,
         bucket,
         prefix="",
+        boto3_options=None,
         filepath_template=None,
         filepath_prefix=None,
         filepath_suffix=None,
@@ -378,6 +379,33 @@ class TupleS3StoreBackend(TupleStoreBackend):
         )
         self.bucket = bucket
         self.prefix = prefix
+        self._boto3_options = boto3_options
+
+    @property
+    def boto3_options(self):
+        from botocore.client import Config
+
+        boto3_options = self._boto3_options if self._boto3_options else {}
+
+        result = {}
+
+        if boto3_options.get("signature_version"):
+            signature_version = boto3_options.pop("signature_version")
+            result["config"] = Config(signature_version=signature_version)
+
+        result.update(boto3_options)
+
+        return result
+
+    def _create_client(self):
+        import boto3
+
+        return boto3.client("s3", **self.boto3_options)
+
+    def _create_resource(self):
+        import boto3
+
+        return boto3.resource("s3", **self.boto3_options)
 
     def _get(self, key):
         if self.platform_specific_separator:
@@ -387,9 +415,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         else:
             s3_object_key = "/".join((self.prefix, self._convert_key_to_filepath(key)))
 
-        import boto3
-
-        s3 = boto3.client("s3")
+        s3 = self._create_client()
 
         try:
             s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
@@ -414,9 +440,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         else:
             s3_object_key = "/".join((self.prefix, self._convert_key_to_filepath(key)))
 
-        import boto3
-
-        s3 = boto3.resource("s3")
+        s3 = self._create_resource()
 
         try:
             result_s3 = s3.Object(self.bucket, s3_object_key)
@@ -435,9 +459,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return s3_object_key
 
     def _move(self, source_key, dest_key, **kwargs):
-        import boto3
-
-        s3 = boto3.resource("s3")
+        s3 = self._create_resource()
 
         source_filepath = self._convert_key_to_filepath(source_key)
         if not source_filepath.startswith(self.prefix):
@@ -455,9 +477,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def list_keys(self):
         key_list = []
 
-        import boto3
-
-        s3 = boto3.client("s3")
+        s3 = self._create_client()
 
         s3_objects = s3.list_objects(Bucket=self.bucket, Prefix=self.prefix)
         if "Contents" in s3_objects:
@@ -492,25 +512,26 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return key_list
 
     def get_url_for_key(self, key, protocol=None):
-        import boto3
-
-        location = boto3.client("s3").get_bucket_location(Bucket=self.bucket)[
+        location = self._create_client().get_bucket_location(Bucket=self.bucket)[
             "LocationConstraint"
         ]
-        if location is None:
-            location = "s3"
+
+        if self.boto3_options.get("endpoint_url"):
+            location = self.boto3_options.get("endpoint_url")
+        elif location is None:
+            location = "https://s3.amazonaws.com"
         else:
-            location = "s3-" + location
+            location = "https://s3-" + location + ".amazonaws.com"
         s3_key = self._convert_key_to_filepath(key)
+
         if not self.prefix:
-            return f"https://{location}.amazonaws.com/{self.bucket}/{s3_key}"
-        return f"https://{location}.amazonaws.com/{self.bucket}/{self.prefix}/{s3_key}"
+            return f"{location}/{self.bucket}/{s3_key}"
+        return f"{location}/{self.bucket}/{self.prefix}/{s3_key}"
 
     def remove_key(self, key):
-        import boto3
         from botocore.exceptions import ClientError
 
-        s3 = boto3.resource("s3")
+        s3 = self._create_resource()
         s3_key = self._convert_key_to_filepath(key)
         if s3_key:
             try:

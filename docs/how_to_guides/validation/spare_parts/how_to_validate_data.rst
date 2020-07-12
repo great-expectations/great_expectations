@@ -270,6 +270,7 @@ as ``s3`` or ``gcs``, edit the stores section of the DataContext configuration o
           class_name: TupleS3StoreBackend
           bucket: my_bucket
           prefix: my_prefix
+          boto3_options: {}
 
 Removing the store_validation_result action from the ``action_list_operator`` configuration will disable automatically storing ``validation_result`` objects.
 

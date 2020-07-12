@@ -108,9 +108,9 @@ datasources paired with one or more Expectation Suites each.
     id: checkpoint_kedro
     title: Checkpoint - Kedro
     icon:
-    short_description: 
-    description: 
-    how_to_guide_url: 
+    short_description:
+    description:
+    how_to_guide_url:
     maturity: Experimental
     maturity_details:
         api_stability: Unknown (implemented by Kedro team)
@@ -123,9 +123,9 @@ datasources paired with one or more Expectation Suites each.
     id: checkpoint_prefect
     title: Checkpoint - Prefect
     icon:
-    short_description: 
-    description: 
-    how_to_guide_url: 
+    short_description:
+    description:
+    how_to_guide_url:
     maturity: Experimental
     maturity_details:
         api_stability: Unknown (implemented by Prefect team)
@@ -138,9 +138,9 @@ datasources paired with one or more Expectation Suites each.
     id: checkpoint_dbt
     title: Checkpoint - DBT
     icon:
-    short_description: 
-    description: 
-    how_to_guide_url: 
+    short_description:
+    description:
+    how_to_guide_url:
     maturity: Beta
     maturity_details:
         api_stability: Mostly Stable (SQLAlchemy)

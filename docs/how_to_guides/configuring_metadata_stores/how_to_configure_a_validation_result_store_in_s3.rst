@@ -56,6 +56,7 @@ Steps
                     class_name: TupleS3StoreBackend
                     bucket: '<your_s3_bucket_name>'
                     prefix: '<your_s3_bucket_folder_name>'
+                    boto3_options: {}
 
 
 4. **Copy existing Validation results to the S3 bucket**. (This step is optional).
@@ -91,6 +92,7 @@ Steps
             class_name: TupleS3StoreBackend
             bucket: '<your_s3_bucket_name>'
             prefix: '<your_s3_bucket_folder_name>'
+            boto3_options: {}
 
 
 

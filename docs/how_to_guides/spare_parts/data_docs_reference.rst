@@ -116,6 +116,7 @@ will automatically save the resulting site to that bucket.
     class_name: TupleS3StoreBackend
     bucket: data-docs.my_org.org
     prefix:
+    boto3_options: {}
 
 See the tutorial on :ref:`publishing data docs to S3 <publishing_data_docs_to_s3>` for more information.
 
