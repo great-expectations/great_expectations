@@ -43,7 +43,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                   my_first_asset:
                     prefix: my_first_asset/
                     regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
-                    directory_assets: True
+                    directory_assets: True # if True, the contents of the directory will be treated as one batch. Notice that this option does not work with Pandas, since Pandas does not support loading multiple files from and S3 bucket into a data frame.
                   access_logs:
                     prefix: access_logs
                     regex_filter: access_logs/2019.*\.csv.gz
