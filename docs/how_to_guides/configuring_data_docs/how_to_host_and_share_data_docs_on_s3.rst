@@ -105,6 +105,9 @@ Steps
     
     Done building Data Docs
 
+Note you may want to use the `-y/--yes/--assume-yes` flag which skips the confirmation dialog.
+This can be useful for non-interactive environments.
+
 Additional notes
 ----------------
 
