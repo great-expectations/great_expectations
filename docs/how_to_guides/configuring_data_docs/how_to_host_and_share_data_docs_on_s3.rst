@@ -115,6 +115,9 @@ index.html file or a custom error file:
 
   > aws s3 website s3://data-docs.my_org/ --index-document index.html
 
+
+If you wish to host a Data Docs site in a "subfolder" of an S3 bucket, add the ``prefix`` property to the configuration snippet in step 4, immediately after the ``bucket`` property.
+
 Additional resources
 --------------------
 
