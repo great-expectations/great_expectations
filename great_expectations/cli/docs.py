@@ -34,14 +34,15 @@ def docs():
     default=True,
 )
 @click.option(
-    "--prompt/--no-prompt",
-    help="By default request confirmation to build docs unless you specify --no-prompt flag to skip dialog",
+    "--assume-yes/--yes",
+    "-y",
+    help="By default request confirmation to build docs unless you specify -y/--yes/--assume-yes flag to skip dialog",
     default=False,
 )
-def docs_build(directory, site_name, view=True, prompt=True):
+def docs_build(directory, site_name, view=True, assume_yes=False):
     """ Build Data Docs for a project."""
     context = toolkit.load_data_context_with_error_handling(directory)
-    build_docs(context, site_name=site_name, view=view, prompt=prompt)
+    build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
     send_usage_message(data_context=context, event="cli.docs.build", success=True)
 
 
@@ -120,7 +121,7 @@ def _build_intro_string(docs_sites_strings):
     return list_intro_string
 
 
-def build_docs(context, site_name=None, view=True, prompt=True):
+def build_docs(context, site_name=None, view=True, assume_yes=False):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 
@@ -138,7 +139,7 @@ def build_docs(context, site_name=None, view=True, prompt=True):
         msg += "{}\n".format(index_page_locator_info)
 
     cli_message(msg)
-    if prompt:
+    if not assume_yes:
         toolkit.confirm_proceed_or_exit()
 
     cli_message("\nBuilding Data Docs...\n")

@@ -94,7 +94,7 @@ def test_docs_build_no_view(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_docs_build_no_prompt(
+def test_docs_build_assume_yes(
     caplog, site_builder_data_context_with_html_store_titanic_random
 ):
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
@@ -102,7 +102,7 @@ def test_docs_build_no_prompt(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["docs", "build", "--no-view", "--no-prompt", "-d", root_dir],
+        ["docs", "build", "--no-view", "--assume-yes", "-d", root_dir],
         catch_exceptions=False,
     )
     stdout = result.stdout
