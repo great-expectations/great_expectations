@@ -11,8 +11,10 @@ Develop
 * [ENHANCEMENT] Add support and docs for loading evaluation parameter from SQL database
 * [ENHANCEMENT] Fixed some typos/grammar and a broken link in the suite_scaffold_notebook_renderer
 * [ENHANCEMENT] allow updates to DatabaseStoreBackend keys by default, requiring `allow_update=False` to disallow
+* [ENHANCEMENT] Improve support for prefixes declared in TupleS3StoreBackend that include reserved characters
 * [BUGFIX] Fix issue where allow_updates was set for StoreBackend that did not support it
 * [BUGFIX] Fix issue where GlobReaderBatchKwargsGenerator failed with relative base_directory
+* [BUGFIX] Adding explicit requirement for "importlib-metadata" (needed for Python versions prior to Python 3.8).
 * [MAINTENANCE] Install GitHub Dependabot
 * [BUGFIX] Fix missing importlib for python 3.8 #1651
 
