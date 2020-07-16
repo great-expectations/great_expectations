@@ -14,6 +14,7 @@ Develop
 * [ENHANCEMENT] Improve support for prefixes declared in TupleS3StoreBackend that include reserved characters
 * [BUGFIX] Fix issue where allow_updates was set for StoreBackend that did not support it
 * [BUGFIX] Fix issue where GlobReaderBatchKwargsGenerator failed with relative base_directory
+* [BUGFIX] Adding explicit requirement for "importlib-metadata" (needed for Python versions prior to Python 3.8).
 * [MAINTENANCE] Install GitHub Dependabot
 
 0.11.7
