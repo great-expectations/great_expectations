@@ -16,6 +16,7 @@ Changelog
 * [BUGFIX] Fix issue where GlobReaderBatchKwargsGenerator failed with relative base_directory
 * [BUGFIX] Adding explicit requirement for "importlib-metadata" (needed for Python versions prior to Python 3.8).
 * [MAINTENANCE] Install GitHub Dependabot
+* [BUGFIX] Fix missing importlib for python 3.8 #1651
 
 0.11.7
 -----------------
