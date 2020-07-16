@@ -493,8 +493,13 @@ class TupleS3StoreBackend(TupleStoreBackend):
             s3_object_key = s3_object_info["Key"]
             if self.platform_specific_separator:
                 s3_object_key = os.path.relpath(s3_object_key, self.prefix)
-            elif s3_object_key.startswith(self.prefix + "/"):
-                s3_object_key = s3_object_key[len(self.prefix) + 1 :]
+            else:
+                if self.prefix is None:
+                    if s3_object_key.startswith("/"):
+                        s3_object_key = s3_object_key[1:]
+                else:
+                    if s3_object_key.startswith(self.prefix + "/"):
+                        s3_object_key = s3_object_key[len(self.prefix) + 1 :]
             if self.filepath_prefix and not s3_object_key.startswith(
                 self.filepath_prefix
             ):
@@ -530,9 +535,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         s3 = boto3.resource("s3")
         s3_object_key = self._build_s3_object_key(key)
-        s3.Object(
-            boto3.client("s3").get_bucket_location(Bucket=self.bucket), s3_object_key
-        ).delete()
+        s3.Object(self.bucket, s3_object_key).delete()
         if s3_object_key:
             try:
                 #
