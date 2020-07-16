@@ -13,6 +13,7 @@ Develop
 * [ENHANCEMENT] allow updates to DatabaseStoreBackend keys by default, requiring `allow_update=False` to disallow
 * [BUGFIX] Fix issue where allow_updates was set for StoreBackend that did not support it
 * [BUGFIX] Fix issue where GlobReaderBatchKwargsGenerator failed with relative base_directory
+* [BUGFIX] Adding explicit requirement for "importlib-metadata" (needed for Python versions prior to Python 3.8).
 * [MAINTENANCE] Install GitHub Dependabot
 
 0.11.7
