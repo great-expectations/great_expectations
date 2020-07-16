@@ -5,7 +5,7 @@ Changelog
 #########
 
 
-Develop
+0.11.8
 -----------------
 * [FEATURE] Customizable "Suite Edit" generated notebooks
 * [ENHANCEMENT] Add support and docs for loading evaluation parameter from SQL database
