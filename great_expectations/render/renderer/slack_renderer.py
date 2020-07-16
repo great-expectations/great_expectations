@@ -8,7 +8,10 @@ class SlackRenderer(Renderer):
     def __init__(self):
         super().__init__()
 
-    def render(self, validation_result=None):
+    def render(self, validation_result=None, docs_link=None):
+
+        # print('raw')
+        # print(validation_result)
         # Defaults
         timestamp = datetime.datetime.strftime(
             datetime.datetime.now(datetime.timezone.utc), "%x %X %Z"
@@ -58,12 +61,32 @@ class SlackRenderer(Renderer):
                 expectation_suite_name,
                 run_id,
                 batch_id,
+                docs_link,
                 timestamp,
                 check_details_text,
             )
+            print("hi modu")
+            print(validation_result.meta)
             query["blocks"][0]["text"]["text"] = summary_text
             # this abbreviated root level "text" will show up in the notification and not the message
             query["text"] = "{}: {}".format(expectation_suite_name, status)
+
+            if "data_docs_link" in validation_result.meta:
+                print(validation_result.meta["data_docs_link"])
+                print("HI HI")
+                report_element = {
+                    "type": "actions",
+                    "elements": [
+                        {
+                            "type": "button",
+                            "text": {"type": "plain_text", "text": "hihi"},
+                            "url": "file://Users/work/Development/GE_Local/great_expectations/uncommitted/data_docs/local_site/index.html",
+                        }
+                    ],
+                }
+                query["blocks"].append(report_element)
+
+            #  "value": "{}".format(validation_result.meta["data_docs_link"])
 
             if "result_reference" in validation_result.meta:
                 report_element = {
