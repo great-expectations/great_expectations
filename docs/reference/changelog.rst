@@ -14,6 +14,7 @@ Develop
 * [BUGFIX] Fix issue where allow_updates was set for StoreBackend that did not support it
 * [BUGFIX] Fix issue where GlobReaderBatchKwargsGenerator failed with relative base_directory
 * [MAINTENANCE] Install GitHub Dependabot
+* [BUGFIX] Fix missing importlib for python 3.8 #1651
 
 0.11.7
 -----------------
