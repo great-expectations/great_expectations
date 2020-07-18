@@ -57,7 +57,6 @@ class SlackRenderer(Renderer):
                 expectation_suite_name,
                 run_id,
                 batch_id,
-                docs_link,
                 timestamp,
                 check_details_text,
             )
