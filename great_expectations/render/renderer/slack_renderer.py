@@ -8,11 +8,7 @@ class SlackRenderer(Renderer):
     def __init__(self):
         super().__init__()
 
-    def render(self, validation_result=None, docs_link=None):
-
-        # print('raw')
-        # print(validation_result)
-        # Defaults
+    def render(self, validation_result=None):
         timestamp = datetime.datetime.strftime(
             datetime.datetime.now(datetime.timezone.utc), "%x %X %Z"
         )
