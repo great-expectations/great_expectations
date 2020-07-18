@@ -145,7 +145,6 @@ SlackNotificationAction sends a Slack notification to a given webhook.
 
         # also get link to DataDocs site
         docs_link = self.data_context.get_docs_sites_urls()[0]["site_url"]
-        docs_link = "file:///Users/work/Development/GE_Local/great_expectations/uncommitted/data_docs/local_site/index.html"
         validation_result_suite.meta["data_docs_link"] = docs_link
         if (
             self.notify_on == "all"
