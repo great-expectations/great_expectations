@@ -96,7 +96,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 
         5. **Set up Google App Engine firewall for your app to control access.**
 
-          Visit the following page to learn more about creating firewall rules: `Creating firewall rules <https://cloud.google.com/appengine/docs/standard/python3/creating-firewalls>`_
+          Visit the following page for instructions on creating firewall rules: `Creating firewall rules <https://cloud.google.com/appengine/docs/standard/python3/creating-firewalls>`_
 
         6. **Add a new GCS site to the data_docs_sites section of your great_expectations.yml.**
 
