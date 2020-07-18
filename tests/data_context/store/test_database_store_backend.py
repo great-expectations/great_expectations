@@ -21,11 +21,11 @@ def test_database_store_backend_get_url_for_key(caplog, sa):
     )
 
     # existing key
-    key = "1"
+    key = ("1",)
     assert "postgresql://test_ci/1" == store_backend.get_url_for_key(key)
 
     # non-existing key : should still work
-    key = "not_here"
+    key = ("not_here",)
     assert "postgresql://test_ci/not_here" == store_backend.get_url_for_key(key)
 
 
@@ -47,13 +47,20 @@ def test_database_store_backend_duplicate_key_violation(caplog, sa):
     store_backend.set(key, "hello")
     assert "hello" == store_backend.get(key)
 
+    # default behavior doesn't throw an error because the key is updated
+    store_backend.set(key, "hello")
+    assert "hello" == store_backend.get(key)
+
     assert len(caplog.messages) == 0
     caplog.set_level(logging.INFO, "great_expectations")
-    store_backend.set(key, "hello")
+
+    store_backend.set(
+        key, "hello", allow_update=False
+    )  # the only place we are testing this flag
     assert len(caplog.messages) == 1
     assert "already exists with the same value" in caplog.messages[0]
 
     with pytest.raises(StoreBackendError) as exc:
-        store_backend.set(key, "world")
+        store_backend.set(key, "world", allow_update=False)
 
     assert "Integrity error" in str(exc.value)

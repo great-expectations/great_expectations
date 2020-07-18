@@ -107,16 +107,16 @@ Within the table of contents, each section has specific role to play. Broadly sp
 
 * **Links to docs in the API Reference section**
 
-    * Link to a module: :mod:`great_expectations.data_context.data_context`
-    * Abbreviated link to a module: :mod:`~great_expectations.data_context.data_context`
-    * Link to a class: :py:class:`great_expectations.data_context.data_context.BaseDataContext`
-    * Abbreviated link to a class: :py:class:`~great_expectations.data_context.data_context.BaseDataContext`
-    * Link to a method in a class: :py:meth:`great_expectations.data_context.data_context.BaseDataContext.validate_config`
-    * Abbreviated link to a method in a class: :py:meth:`~great_expectations.data_context.data_context.BaseDataContext.validate_config`
-    * Link to an attribute in a class: :py:attr:`great_expectations.data_context.data_context.BaseDataContext.GE_DIR`
-    * Abbreviated link to an attribute in a class: :py:attr:`~great_expectations.data_context.data_context.BaseDataContext.GE_DIR`
-    * Link to a function in a module: :py:attr:`great_expectations.jupyter_ux.display_column_evrs_as_section`
-    * Abbreviated to a function in a module: :py:attr:`~great_expectations.jupyter_ux.display_column_evrs_as_section`
+    * Link to a module: ``:mod:`great_expectations.data_context.data_context``` :mod:`great_expectations.data_context.data_context`
+    * Abbreviated link to a module: ``:mod:`~great_expectations.data_context.data_context``` :mod:`~great_expectations.data_context.data_context`
+    * Link to a class: ``:py:class:`great_expectations.data_context.data_context.BaseDataContext``` :py:class:`great_expectations.data_context.data_context.BaseDataContext`
+    * Abbreviated link to a class: ``:py:class:`~great_expectations.data_context.data_context.BaseDataContext``` :py:class:`~great_expectations.data_context.data_context.BaseDataContext`
+    * Link to a method in a class: ``:py:meth:`great_expectations.data_context.data_context.BaseDataContext.validate_config``` :py:meth:`great_expectations.data_context.data_context.BaseDataContext.validate_config`
+    * Abbreviated link to a method in a class: ``:py:meth:`~great_expectations.data_context.data_context.BaseDataContext.validate_config``` :py:meth:`~great_expectations.data_context.data_context.BaseDataContext.validate_config`
+    * Link to an attribute in a class: ``:py:attr:`great_expectations.data_context.data_context.BaseDataContext.GE_DIR``` :py:attr:`great_expectations.data_context.data_context.BaseDataContext.GE_DIR`
+    * Abbreviated link to an attribute in a class: ``:py:attr:`~great_expectations.data_context.data_context.BaseDataContext.GE_DIR``` :py:attr:`~great_expectations.data_context.data_context.BaseDataContext.GE_DIR`
+    * Link to a function in a module: ``:py:attr:`great_expectations.jupyter_ux.display_column_evrs_as_section``` :py:attr:`great_expectations.jupyter_ux.display_column_evrs_as_section`
+    * Abbreviated to a function in a module: ``:py:attr:`~great_expectations.jupyter_ux.display_column_evrs_as_section``` :py:attr:`~great_expectations.jupyter_ux.display_column_evrs_as_section`
 
 **Code formatting**
 

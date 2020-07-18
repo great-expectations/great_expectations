@@ -62,7 +62,7 @@ Steps
   Run the following CLI command to apply the policy:
 
   .. code-block:: bash
-
+  
       > aws s3api put-bucket-policy --bucket data-docs.my_org --policy file://ip-policy.json
 
 4. **Add a new S3 site to the data_docs_sites section of your great_expectations.yml**
@@ -116,6 +116,9 @@ index.html file or a custom error file:
 .. code-block:: bash
 
   > aws s3 website s3://data-docs.my_org/ --index-document index.html
+
+
+If you wish to host a Data Docs site in a "subfolder" of an S3 bucket, add the ``prefix`` property to the configuration snippet in step 4, immediately after the ``bucket`` property.
 
 Additional resources
 --------------------

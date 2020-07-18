@@ -63,6 +63,58 @@ def test_glob_reader_path_partitioning(mocked_glob_kwargs):
     assert len(kwargs[0].keys()) == 2
 
 
+def test_glob_reader_generator_relative_path(basic_pandas_datasource):
+    glob_generator = GlobReaderBatchKwargsGenerator(
+        "test_generator",
+        datasource=basic_pandas_datasource,
+        base_directory="../data/project/",
+        reader_options={"sep": "|", "quoting": 3},
+        reader_method="read_csv",
+        asset_globs={
+            "asset1": {
+                "glob": "asset1/*__my_data.csv",
+                "partition_regex": r"^.*(20\d\d\d\d\d\d)__my_data\.csv$",
+                "match_group_id": 1,  # This is optional
+            },
+            "asset2": {
+                "glob": "asset2/*__my_data.csv",
+                "partition_regex": r"^.*(20\d\d\d\d\d\d)__my_data\.csv$",
+            },
+            "asset3": {"glob": "asset3/my_data.parquet", "reader_method": "parquet"},
+            "no_partition_asset1": {"glob": "no_partition_asset1/*.csv"},
+            "no_partition_asset2": {"glob": "my_data.csv"},
+        },
+    )
+
+    with mock.patch("glob.glob") as mock_glob, mock.patch("os.path.isdir") as is_dir:
+        mock_glob_match = [
+            "/data/project/asset1/20190101__my_data.csv",
+            "/data/project/asset1/20190102__my_data.csv",
+            "/data/project/asset1/20190103__my_data.csv",
+            "/data/project/asset1/20190104__my_data.csv",
+            "/data/project/asset1/20190105__my_data.csv",
+            "/data/project/asset2/20190101__my_data.csv",
+            "/data/project/asset2/20190102__my_data.csv",
+            "/data/project/asset2/20190103__my_data.csv",
+            "/data/project/asset2/20190104__my_data.csv",
+            "/data/project/asset2/20190105__my_data.csv",
+            "/data/project/no_partition_asset1/this_is_a_batch_of_data.csv",
+            "/data/project/no_partition_asset1/this_is_another_batch_of_data.csv",
+            "/data/project/my_data.csv",
+        ]
+        mock_glob.return_value = mock_glob_match
+        is_dir.return_value = True
+        names = glob_generator.get_available_data_asset_names()
+        # Use set in test to avoid order issues
+        assert set(names["names"]) == {
+            ("asset1", "path"),
+            ("asset2", "path"),
+            ("asset3", "path"),
+            ("no_partition_asset1", "path"),
+            ("no_partition_asset2", "path"),
+        }
+
+
 def test_glob_reader_generator_partitioning(basic_pandas_datasource):
     glob_generator = GlobReaderBatchKwargsGenerator(
         "test_generator",
