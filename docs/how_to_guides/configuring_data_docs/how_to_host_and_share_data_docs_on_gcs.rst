@@ -143,7 +143,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 
         8. **Test that everything was configured properly by launching your App Engine app.**
 
-          Use the following CLI command: ``gcloud app browse``. If successful, the gcloud CLI will provide the URL to your app and launch it in a new browser window. The page displayed should be the index page of your Data Docs site.
+          Issue the following CLI command: ``gcloud app browse``. If successful, the gcloud CLI will provide the URL to your app and launch it in a new browser window. The page displayed should be the index page of your Data Docs site.
 
         **Additional resources**
 
