@@ -480,20 +480,52 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         n_bins_A=None,
         n_bins_B=None,
     ):
+        """Get crosstab of column_A and column_B, binning values if necessary"""
         series_A = self.get_digitized_values(self[column_A], bins_A, n_bins_A)
         series_B = self.get_digitized_values(self[column_B], bins_B, n_bins_B)
         return pd.crosstab(series_A, columns=series_B)
 
-    def get_digitized_values(series, bins, n_bins):
-        if bins is None and n_bins is None:
-            return series
+    def get_binned_values(series, bins, n_bins):
+        """
+        Get binned values of series. 
 
-        if bins is None and n_bins is not None:
-            bins = np.histogram_bin_edges(series)
+        Args:
+            Series (pd.Series): Input series
+            bins (list):
+                Bins for the series. List of numeric if series is numeric or list of list
+                of series values else.
+            n_bins (int): Number of bins. Ignored if bins is not None.
+        """
+        if n_bins is None:
+            n_bins = 10
+
+        if series.dtype in ["int", "float"]:
+            if n_bins is None:
+                np.histogram_bin_edges(series, bins="auto")
+            else:
+                bins = np.histogram_bin_edges(series, bins=n_bins)
+
             # Make sure max of series is included in rightmost bin
             bins[-1] = np.nextafter(bins[-1], bins[-1] + 1)
 
-        return np.digitize(series, bins=bins)
+            return np.digitize(series, bins=bins)
+
+        else:
+            if n_bins is None:
+                n_bins = 10
+
+            if bins is None:
+                value_counts = series.value_counts(sort=True)
+                if len(value_counts) < n_bins + 1:
+                    return series
+                else:
+                    other_values = value_counts.index[n_bins:]
+                    replace = {value: "other" for value in other_values}
+            else:
+                replace = dict()
+                for x in bins:
+                    replace.update({value: ", ".join(x) for value in x})
+            return series.replace(to_replace=replace)
 
     ### Expectation methods ###
 

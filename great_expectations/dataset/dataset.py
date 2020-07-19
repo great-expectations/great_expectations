@@ -4303,7 +4303,7 @@ class Dataset(MetaDataset):
         bins_B,
         n_bins_A,
         n_bins_B,
-        max_V=0.05,
+        threshold=0.05,
         ignore_missings=None,
         result_format=None,
         include_config=True,
@@ -4316,9 +4316,13 @@ class Dataset(MetaDataset):
         Args:
             column_A (str): The first column name
             column_B (str): The second column name
-            max_V (float): Maximum allowed value of cramers V for expectation to pass.
+            threshold (float): Maximum allowed value of cramers V for expectation to pass.
 
         Keyword Args:
+            bins_A (list of float): Bins for column_A if numeric.
+            bins_B (list of float): Bins for column_B if numeric.
+            n_bins_A (int): Number of bins for column_A if numeric. Ignored if bins_A is not None.
+            n_bins_B (int): Number of bins for column_B if numeric. Ignored if bins_B is not None.
             ignore_missings (bool): \
                 If True, ignore columns where either column has missing. If False, treat missing values as
                 another category (only for methods ...).
@@ -4349,7 +4353,7 @@ class Dataset(MetaDataset):
         # See e.g. https://en.wikipedia.org/wiki/Cram%C3%A9r%27s_V
         cramers_V = np.sqrt(chi2_result[0] / self.get_row_count() / min(crosstab.shape))
         return_obj = {
-                "success": cramers_V <= max_V,
+                "success": cramers_V <= threshold,
                 "result": {
                     "observed_value": cramers_V,
                     "unexpected_list": crosstab,
