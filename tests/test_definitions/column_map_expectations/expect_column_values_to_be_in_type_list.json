@@ -322,7 +322,8 @@
           },
           "only_for": [
             "sqlalchemy"
-          ]
+          ],
+          "suppress_test_for": ["mssql"]
         },
         {
           "title": "positive_test_boolean_values",
