@@ -487,7 +487,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     def get_binned_values(series, bins, n_bins):
         """
-        Get binned values of series. 
+        Get binned values of series.
 
         Args:
             Series (pd.Series): Input series

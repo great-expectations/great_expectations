@@ -8,6 +8,8 @@ from typing import Any, List, Union
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+from scipy import stats
+
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
@@ -16,7 +18,6 @@ from great_expectations.dataset.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
 )
-from scipy import stats
 
 
 class MetaDataset(DataAsset):
@@ -93,7 +94,10 @@ class MetaDataset(DataAsset):
             if kwargs.get("column"):
                 nonnull_count = self.get_column_nonnull_count(kwargs.get("column"))
             elif kwargs.get("column_A") and kwargs.get("column_B"):
-                nonnull_count = (self[kwargs.get("column_A")].notnull() & self[kwargs.get("column_B")].notnull()).sum()
+                nonnull_count = (
+                    self[kwargs.get("column_A")].notnull()
+                    & self[kwargs.get("column_B")].notnull()
+                ).sum()
             else:
                 raise ValueError(
                     "The column_aggregate_expectation wrapper requires either column or "
@@ -144,6 +148,7 @@ class MetaDataset(DataAsset):
             )
 
         return inner_wrapper
+
 
 # noinspection PyIncorrectDocstring
 class Dataset(MetaDataset):
@@ -4308,7 +4313,7 @@ class Dataset(MetaDataset):
         result_format=None,
         include_config=True,
         catch_exceptions=None,
-        meta=None
+        meta=None,
     ):
         """
         Expect the values in column_A to be independent of those in column_B.
@@ -4348,21 +4353,20 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
-        crosstab = self.get_crosstab(column_A, column_B, bins_A, bins_B, n_bins_A, n_bins_B)
+        crosstab = self.get_crosstab(
+            column_A, column_B, bins_A, bins_B, n_bins_A, n_bins_B
+        )
         chi2_result = stats.chi2_contingency(crosstab)
         # See e.g. https://en.wikipedia.org/wiki/Cram%C3%A9r%27s_V
         cramers_V = np.sqrt(chi2_result[0] / self.get_row_count() / min(crosstab.shape))
         return_obj = {
-                "success": cramers_V <= threshold,
-                "result": {
-                    "observed_value": cramers_V,
-                    "unexpected_list": crosstab,
-                    "details": {
-                        "crosstab": crosstab
-                    }
-                },
-
-            }
+            "success": cramers_V <= threshold,
+            "result": {
+                "observed_value": cramers_V,
+                "unexpected_list": crosstab,
+                "details": {"crosstab": crosstab},
+            },
+        }
         return return_obj
 
     ###
