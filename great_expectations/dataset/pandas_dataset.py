@@ -481,11 +481,11 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         n_bins_B=None,
     ):
         """Get crosstab of column_A and column_B, binning values if necessary"""
-        series_A = self.get_digitized_values(self[column_A], bins_A, n_bins_A)
-        series_B = self.get_digitized_values(self[column_B], bins_B, n_bins_B)
+        series_A = self.get_binned_values(self[column_A], bins_A, n_bins_A)
+        series_B = self.get_binned_values(self[column_B], bins_B, n_bins_B)
         return pd.crosstab(series_A, columns=series_B)
 
-    def get_binned_values(series, bins, n_bins):
+    def get_binned_values(self, series, bins, n_bins):
         """
         Get binned values of series.
 
