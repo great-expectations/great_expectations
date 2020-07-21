@@ -1,7 +1,6 @@
 """Test usage statistics transmission client-side."""
-import requests
-
 import pytest
+import requests
 
 USAGE_STATISTICS_QA_URL = (
     "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
@@ -134,6 +133,89 @@ valid_usage_statistics_messages = {
             "event_payload": {},
         }
     ],
+    "cli.init.create": [
+        {
+            "event": "cli.init.create",
+            "event_payload": {},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:06:47.697Z",
+            "data_context_id": "df1f151d-ebb3-4a2f-81d7-14a17453cf28",
+            "data_context_instance_id": "f73d1e68-3897-4bf7-bc6e-8533f27ce337",
+            "ge_version": "0.11.5.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        }
+    ],
+    "cli.new_ds_choice": [
+        {
+            "event": "cli.new_ds_choice",
+            "event_payload": {"type": "pandas"},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:08.963Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.5.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        }
+    ],
+    "data_context.open_data_docs": [
+        {
+            "event_payload": {},
+            "event": "data_context.open_data_docs",
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:28.070Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.5.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        }
+    ],
+    "data_context.build_data_docs": [
+        {
+            "event_payload": {},
+            "event": "data_context.build_data_docs",
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:24.349Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.5.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        }
+    ],
+    "data_context.save.expectation.suite": [
+        {
+            "event_payload": {
+                "anonymized_expectation_suite_name": "4b6bf73298fcc2db6da929a8f18173f7"
+            },
+            "event": "data_context.save_expectation_suite",
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:23.570Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.5.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        }
+    ],
+    "data_context.add_datasource": [
+        {
+            "event_payload": {
+                "anonymized_name": "c9633f65c36d1ba9fbaa9009c1404cfa",
+                "parent_class": "PandasDatasource",
+            },
+            "event": "data_context.add_datasource",
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:16.030Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.5.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        }
+    ],
     # TWEAK TO BE LIKE ABOVE
     # "cli.store.list",
     # "cli.project.check_config",
@@ -141,13 +223,10 @@ valid_usage_statistics_messages = {
     # "cli.validation_operator.list",
     # "cli.tap.new",
     # "cli.docs.list",
-    # "cli.docs.build",
+    # "cli.docs.build", --> has this been changed to data_context.build_data_docs? #TODO check if this is the case
     # "cli.datasource.profile",
     # "cli.datasource.list",
-    # "cli.datasource.new",
-    # "data_context.open_data_docs",
-    # "data_context.build_data_docs",
-    # "cli.init.create",
+    # "cli.datasource.new" --> has this been changed to cli.new_ds_choice? #TODO check if this is the case
 }
 
 test_messages = []
