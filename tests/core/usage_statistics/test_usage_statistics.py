@@ -180,7 +180,7 @@ def test_data_context_add_datasource_message():
     )
 
 
-def test_add_datasource_usage_statistics_message(
+def test_add_datasource_usage_statistics(
     in_memory_data_context_config_usage_stats_enabled, monkeypatch
 ):
     monkeypatch.delenv(
