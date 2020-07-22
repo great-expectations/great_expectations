@@ -16,8 +16,7 @@ The guide demonstrates the recommended path for instantiating a Data Context wit
 Steps
 -----
 
-The snippet below shows a YAML configuration of a Data Context and Python code that uses this configuration to instantiate
-a Data Context. Copy this snippet into a cell in your EMR Spark notebook.
+The snippet below shows Python code that instantiates and configures a Data Context. Copy this snippet into a cell in your EMR Spark notebook.
 
 Follow the steps below to update the configuration with values that are specific for your environment.
 
