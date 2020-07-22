@@ -175,6 +175,7 @@ Follow the steps below to update the configuration with values that are specific
 #. **Install Great Expectations on your EMR Spark cluster.**
 
    Copy this code snippet into a cell in your EMR Spark notebook and run it:
+
    .. code-block:: python
 
       sc.install_pypi_package("great_expectations")
