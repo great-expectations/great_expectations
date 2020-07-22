@@ -21,6 +21,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset.pandas_dataset import PandasDataset
+from great_expectations.util import import_library_module
 
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
 
@@ -89,10 +90,11 @@ def build_test_backends_list(metafunc):
     no_sqlalchemy = metafunc.config.getoption("--no-sqlalchemy")
     if not no_sqlalchemy:
         test_backends += ["sqlite"]
-        import sqlalchemy as sa
+
+        sa = import_library_module(module_name="sqlalchemy")
 
         no_postgresql = metafunc.config.getoption("--no-postgresql")
-        if not no_postgresql:
+        if not (sa is None or no_postgresql):
             ###
             # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
             # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
@@ -112,7 +114,7 @@ def build_test_backends_list(metafunc):
                 )
             test_backends += ["postgresql"]
         mysql = metafunc.config.getoption("--mysql")
-        if mysql:
+        if sa and mysql:
             try:
                 engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
                 conn = engine.connect()
@@ -124,7 +126,7 @@ def build_test_backends_list(metafunc):
                 )
             test_backends += ["mysql"]
         mssql = metafunc.config.getoption("--mssql")
-        if mssql:
+        if sa and mssql:
             try:
                 engine = sa.create_engine(
                     "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",

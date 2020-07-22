@@ -99,7 +99,8 @@ great_expectations/
 
 
 @pytest.mark.skipif(
-    is_library_loadable("sqlalchemy"), reason="requires sqlalchemy to NOT be installed"
+    is_library_loadable(library_name="sqlalchemy"),
+    reason="requires sqlalchemy to NOT be installed",
 )
 def test_init_install_sqlalchemy(caplog, tmp_path_factory):
     """WARNING: THIS TEST IS AWFUL AND WE HATE IT."""
@@ -134,7 +135,8 @@ but the package `{library_name}` containing this library is not installed.
 
 
 @pytest.mark.skipif(
-    is_library_loadable("pymysql"), reason="requires pymysql to NOT be installed"
+    is_library_loadable(library_name="pymysql"),
+    reason="requires pymysql to NOT be installed",
 )
 def test_cli_init_db_mysql_without_library_installed_instructs_user(
     caplog, tmp_path_factory
@@ -145,7 +147,8 @@ def test_cli_init_db_mysql_without_library_installed_instructs_user(
 
 
 @pytest.mark.skipif(
-    is_library_loadable("pyodbc"), reason="requires pyodbc to NOT be installed"
+    is_library_loadable(library_name="pyodbc"),
+    reason="requires pyodbc to NOT be installed",
 )
 def test_cli_init_db_mssql_without_library_installed_instructs_user(
     caplog, tmp_path_factory
@@ -158,7 +161,8 @@ def test_cli_init_db_mssql_without_library_installed_instructs_user(
 
 
 @pytest.mark.skipif(
-    is_library_loadable("psycopg2"), reason="requires psycopg2 to NOT be installed"
+    is_library_loadable(library_name="psycopg2"),
+    reason="requires psycopg2 to NOT be installed",
 )
 def test_cli_init_db_postgres_without_library_installed_instructs_user(
     caplog, tmp_path_factory,
@@ -169,7 +173,8 @@ def test_cli_init_db_postgres_without_library_installed_instructs_user(
 
 
 @pytest.mark.skipif(
-    is_library_loadable("psycopg2"), reason="requires psycopg2 to NOT be installed"
+    is_library_loadable(library_name="psycopg2"),
+    reason="requires psycopg2 to NOT be installed",
 )
 def test_cli_init_db_redshift_without_library_installed_instructs_user(
     caplog, tmp_path_factory,
@@ -180,7 +185,7 @@ def test_cli_init_db_redshift_without_library_installed_instructs_user(
 
 
 @pytest.mark.skipif(
-    is_library_loadable("snowflake.sqlalchemy"),
+    is_library_loadable(library_name="snowflake.sqlalchemy"),
     reason="requires snowflake-sqlalchemy to NOT be installed",
 )
 def test_cli_init_db_snowflake_without_library_installed_instructs_user(
@@ -196,7 +201,8 @@ def test_cli_init_db_snowflake_without_library_installed_instructs_user(
 
 
 @pytest.mark.skipif(
-    is_library_loadable("pyspark"), reason="requires pyspark to NOT be installed"
+    is_library_loadable(library_name="pyspark"),
+    reason="requires pyspark to NOT be installed",
 )
 def test_cli_init_spark_without_library_installed_instructs_user(
     caplog, tmp_path_factory

@@ -44,6 +44,8 @@ except ImportError:
     reflection = None
     BinaryExpression = None
     literal = None
+    Select = None
+    CTE = None
     custom_op = None
     Label = None
     WithinGroup = None

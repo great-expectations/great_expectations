@@ -336,7 +336,7 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
 
 
 @pytest.mark.skipif(
-    is_library_loadable("pyspark"),
+    is_library_loadable(library_name="pyspark"),
     reason="Spark 3.0.0 creates one JVM per session, makikng configuration immutable.  A future PR handles this better.",
 )
 def test_spark_config(test_backends):
