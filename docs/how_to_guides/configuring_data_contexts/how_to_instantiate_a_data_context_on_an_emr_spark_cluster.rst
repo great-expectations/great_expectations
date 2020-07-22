@@ -42,21 +42,8 @@ Follow the steps below to update the configuration with values that are specific
 
 
    ge_config_str = """
-   # Welcome to Great Expectations! Always know what to expect from your data.
-   #
-   # Here you can define datasources, batch kwargs generators, integrations and
-   # more. This file is intended to be committed to your repo. For help with
-   # configuration please:
-   #   - Read our docs: https://docs.greatexpectations.io/en/latest/how_to_guides/spare_parts/data_context_reference.html#configuration
-   #   - Join our slack channel: http://greatexpectations.io/slack
-
-   # config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
-   # It is auto-generated and usually does not need to be changed.
    config_version: 2.0
 
-   # Datasources tell Great Expectations where your data lives and how to get it.
-   # You can use the CLI command `great_expectations datasource new` to help you
-   # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource_reference.html
    datasources:
      crimes-in-boston__dir:
        data_asset_type:
@@ -67,18 +54,10 @@ Follow the steps below to update the configuration with values that are specific
        batch_kwargs_generators:
    config_variables_file_path: # leave this empty
 
-   # The plugins_directory will be added to your python path for custom modules
-   # used to override and extend Great Expectations.
    plugins_directory: # leave this empty
 
-   # Validation Operators are customizable workflows that bundle the validation of
-   # one or more expectation suites and subsequent actions. The example below
-   # stores validations and send a slack notification. To read more about
-   # customizing and extending these, read: https://docs.greatexpectations.io/en/latest/reference/core_concepts/validation_operators_and_actions.html
    validation_operators:
      action_list_operator:
-       # To learn how to configure sending Slack notifications during evaluation
-       # (and other customizations), read: https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/validation_operators/index.html#great_expectations.validation_operators.ActionListValidationOperator
        class_name: ActionListValidationOperator
        action_list:
        - name: store_validation_result
@@ -90,42 +69,21 @@ Follow the steps below to update the configuration with values that are specific
        - name: update_data_docs
          action:
            class_name: UpdateDataDocsAction
-         # - name: send_slack_notification_on_validation_result
-         #   action:
-         #     class_name: SlackNotificationAction
-         #     # put the actual webhook URL in the uncommitted/config_variables.yml file
-         #     slack_webhook: ${validation_notification_slack_webhook}
-         #     notify_on: all # possible values: "all", "failure", "success"
-         #     renderer:
-         #       module_name: great_expectations.render.renderer.slack_renderer
-         #       class_name: SlackRenderer
 
    stores:
-   # Stores are configurable places to store things like Expectations, Validations
-   # Data Docs, and more. These are for advanced users only - most users can simply
-   # leave this section alone.
-   #
-   # Three stores are required: expectations, validations, and
-   # evaluation_parameters, and must exist with a valid store entry. Additional
-   # stores can be configured for uses such as data_docs, validation_operators, etc.
-
      expectations_S3_store:
        class_name: ExpectationsStore
        store_backend:
          class_name: TupleS3StoreBackend
          bucket: TODO: paste the bucket name here
          prefix: TODO: paste the prefix here
-
      validations_S3_store:
        class_name: ValidationsStore
        store_backend:
          class_name: TupleS3StoreBackend
          bucket: TODO: paste the bucket name here
          prefix: TODO: paste the prefix here
-
      evaluation_parameter_store:
-       # Evaluation Parameters enable dynamic expectations. Read more here:
-       # https://docs.greatexpectations.io/en/latest/reference/core_concepts/evaluation_parameters.html
        class_name: EvaluationParameterStore
 
    expectations_store_name: expectations_S3_store
@@ -133,10 +91,6 @@ Follow the steps below to update the configuration with values that are specific
    evaluation_parameter_store_name: evaluation_parameter_store
 
    data_docs_sites:
-     # Data Docs make it simple to visualize data quality in your project. These
-     # include Expectations, Validations & Profiles. The are built for all
-     # Datasources from JSON artifacts in the local repo including validations &
-     # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/data_docs.html
      s3_site:  # this is a user-selected name - you may select your own
        class_name: SiteBuilder
        store_backend:
