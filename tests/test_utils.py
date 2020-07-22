@@ -4,6 +4,8 @@ import os
 import random
 import string
 from functools import wraps
+from types import ModuleType
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -24,6 +26,11 @@ expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
 
 try:
+    from sqlalchemy import create_engine
+except ImportError:
+    create_engine = None
+
+try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
 
     SQLITE_TYPES = {
@@ -38,6 +45,7 @@ try:
         "TIMESTAMP": sqlitetypes.TIMESTAMP,
     }
 except ImportError:
+    sqlitetypes = None
     SQLITE_TYPES = {}
 
 try:
@@ -56,6 +64,7 @@ try:
         "NUMERIC": postgresqltypes.NUMERIC,
     }
 except ImportError:
+    postgresqltypes = None
     POSTGRESQL_TYPES = {}
 
 try:
@@ -74,11 +83,11 @@ try:
         "BOOLEAN": mysqltypes.BOOLEAN,
     }
 except ImportError:
+    mysqltypes = None
     MYSQL_TYPES = {}
 
 try:
     import sqlalchemy.dialects.mssql as mssqltypes
-    from sqlalchemy import null
 
     MSSQL_TYPES = {
         "BIGINT": mssqltypes.BIGINT,
@@ -112,6 +121,7 @@ try:
         "VARCHAR": mssqltypes.VARCHAR,
     }
 except ImportError:
+    mssqltypes = None
     MSSQL_TYPES = {}
 
 
@@ -212,7 +222,8 @@ def get_dataset(
         return PandasDataset(df, profiler=profiler, caching=caching)
 
     elif dataset_type == "sqlite":
-        from sqlalchemy import create_engine
+        if not create_engine:
+            return None
 
         if sqlite_db_path is not None:
             engine = create_engine(f"sqlite:////{sqlite_db_path}")
@@ -274,7 +285,8 @@ def get_dataset(
         )
 
     elif dataset_type == "postgresql":
-        from sqlalchemy import create_engine
+        if not create_engine:
+            return None
 
         # Create a new database
         engine = create_engine("postgresql://postgres@localhost/test_ci")
@@ -335,7 +347,8 @@ def get_dataset(
         )
 
     elif dataset_type == "mysql":
-        from sqlalchemy import create_engine
+        if not create_engine:
+            return None
 
         engine = create_engine("mysql+pymysql://root@localhost/test_ci")
         conn = engine.connect()
@@ -393,7 +406,8 @@ def get_dataset(
         )
 
     elif dataset_type == "mssql":
-        from sqlalchemy import create_engine
+        if not create_engine:
+            return None
 
         engine = create_engine(
             "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",

@@ -3,6 +3,8 @@ import json
 import locale
 import os
 import shutil
+from types import ModuleType
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -91,7 +93,7 @@ def build_test_backends_list(metafunc):
     if not no_sqlalchemy:
         test_backends += ["sqlite"]
 
-        sa = import_library_module(module_name="sqlalchemy")
+        sa: Union[ModuleType, None] = import_library_module(module_name="sqlalchemy")
 
         no_postgresql = metafunc.config.getoption("--no-postgresql")
         if not (sa is None or no_postgresql):
