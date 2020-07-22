@@ -1,5 +1,4 @@
 import copy
-import importlib
 import locale
 import os
 import random
@@ -16,6 +15,9 @@ from great_expectations.core import (
     ExpectationValidationResultSchema,
 )
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
+from great_expectations.dataset.util import (
+    get_sql_dialect_floating_point_infinity_value,
+)
 from great_expectations.profile import ColumnsExistProfiler
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
@@ -73,6 +75,44 @@ try:
     }
 except ImportError:
     MYSQL_TYPES = {}
+
+try:
+    import sqlalchemy.dialects.mssql as mssqltypes
+    from sqlalchemy import null
+
+    MSSQL_TYPES = {
+        "BIGINT": mssqltypes.BIGINT,
+        "BINARY": mssqltypes.BINARY,
+        "BIT": mssqltypes.BIT,
+        "CHAR": mssqltypes.CHAR,
+        "DATE": mssqltypes.DATE,
+        "DATETIME": mssqltypes.DATETIME,
+        "DATETIME2": mssqltypes.DATETIME2,
+        "DATETIMEOFFSET": mssqltypes.DATETIMEOFFSET,
+        "DECIMAL": mssqltypes.DECIMAL,
+        "FLOAT": mssqltypes.FLOAT,
+        "IMAGE": mssqltypes.IMAGE,
+        "INTEGER": mssqltypes.INTEGER,
+        "MONEY": mssqltypes.MONEY,
+        "NCHAR": mssqltypes.NCHAR,
+        "NTEXT": mssqltypes.NTEXT,
+        "NUMERIC": mssqltypes.NUMERIC,
+        "NVARCHAR": mssqltypes.NVARCHAR,
+        "REAL": mssqltypes.REAL,
+        "SMALLDATETIME": mssqltypes.SMALLDATETIME,
+        "SMALLINT": mssqltypes.SMALLINT,
+        "SMALLMONEY": mssqltypes.SMALLMONEY,
+        "SQL_VARIANT": mssqltypes.SQL_VARIANT,
+        "TEXT": mssqltypes.TEXT,
+        "TIME": mssqltypes.TIME,
+        "TIMESTAMP": mssqltypes.TIMESTAMP,
+        "TINYINT": mssqltypes.TINYINT,
+        "UNIQUEIDENTIFIER": mssqltypes.UNIQUEIDENTIFIER,
+        "VARBINARY": mssqltypes.VARBINARY,
+        "VARCHAR": mssqltypes.VARCHAR,
+    }
+except ImportError:
+    MSSQL_TYPES = {}
 
 
 def modify_locale(func):
@@ -195,6 +235,24 @@ def get_dataset(
                     df[col] = pd.to_numeric(df[col], downcast="signed")
                 elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
@@ -238,6 +296,24 @@ def get_dataset(
                     df[col] = pd.to_numeric(df[col], downcast="signed")
                 elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
@@ -278,6 +354,90 @@ def get_dataset(
                     df[col] = pd.to_numeric(df[col], downcast="signed")
                 elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+
+        if table_name is None:
+            table_name = "test_data_" + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+        df.to_sql(
+            name=table_name,
+            con=conn,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+        )
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(
+            table_name, engine=conn, profiler=profiler, caching=caching
+        )
+
+    elif dataset_type == "mssql":
+        from sqlalchemy import create_engine
+
+        engine = create_engine(
+            "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+            # echo=True,
+        )
+
+        # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
+        # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
+        # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
+
+        conn = engine.connect()
+
+        sql_dtypes = {}
+        if (
+            schemas
+            and dataset_type in schemas
+            and isinstance(engine.dialect, mssqltypes.dialect)
+        ):
+            schema = schemas[dataset_type]
+            sql_dtypes = {col: MSSQL_TYPES[dtype] for (col, dtype) in schema.items()}
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast="signed")
+                elif type_ in ["FLOAT"]:
+                    df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
@@ -407,14 +567,14 @@ def get_dataset(
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
     if context in ["sqlite"]:
         return getter in ["get_column_modes", "get_column_stdev"]
-    if context in ["postgresql", "mysql"]:
+    if context in ["postgresql", "mysql", "mssql"]:
         return getter in ["get_column_modes"]
     if context == "SparkDFDataset":
         return getter in []
 
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql"]:
+    if context in ["sqlite", "postgresql", "mysql", "mssql"]:
         return expectation_type in [
             # "expect_column_to_exist",
             # "expect_table_row_count_to_be_between",
@@ -704,17 +864,6 @@ def check_json_test_result(test, result, data_asset=None):
                 raise ValueError(
                     "Invalid test specification: unknown key " + key + " in 'out'"
                 )
-
-
-def is_library_installed(library_name):
-    """
-    Tests if a library is installed.
-    """
-    try:
-        importlib.import_module(library_name)
-        return True
-    except ModuleNotFoundError:
-        return False
 
 
 def safe_remove(path):

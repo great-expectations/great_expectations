@@ -6,7 +6,8 @@ import pandas as pd
 import pytest
 
 from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
-from tests.test_utils import get_dataset, is_library_installed
+from great_expectations.util import is_library_loadable
+from tests.test_utils import get_dataset
 
 
 @pytest.fixture
@@ -300,7 +301,7 @@ def test_result_format_warning(sa, unexpected_count_df):
 
 
 @pytest.mark.skipif(
-    is_library_installed("sqlalchemy_redshift"),
+    is_library_loadable("sqlalchemy_redshift"),
     reason="sqlalchemy_redshift must not be installed",
 )
 def test_dataset_attempt_allowing_relative_error_when_redshift_library_not_installed(

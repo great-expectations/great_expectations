@@ -5,9 +5,8 @@ import uuid
 import warnings
 from datetime import datetime
 from functools import wraps
-from typing import Iterable, List
+from typing import Iterable, List, Union
 
-import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
@@ -16,6 +15,7 @@ from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     check_sql_engine_dialect,
     get_approximate_percentile_disc_sql,
+    get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.util import import_library_module
 
@@ -148,10 +148,12 @@ class MetaSqlAlchemyDataset(Dataset):
             else:
                 unexpected_count_limit = result_format["partial_unexpected_count"]
 
-            expected_condition = func(self, column, *args, **kwargs)
+            expected_condition: sa.sql.elements.BinaryExpression = func(
+                self, column, *args, **kwargs
+            )
 
             # Added to prepare for when an ignore_values argument is added to the expectation
-            ignore_values = [None]
+            ignore_values: list = [None]
             if func.__name__ in [
                 "expect_column_values_to_not_be_null",
                 "expect_column_values_to_be_null",
@@ -164,7 +166,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 # we will instruct the result formatting method to skip this step.
                 result_format["partial_unexpected_count"] = 0
 
-            ignore_values_conditions = []
+            ignore_values_conditions: List[sa.sql.elements.BinaryExpression] = []
             if (
                 len(ignore_values) > 0
                 and None not in ignore_values
@@ -179,37 +181,29 @@ class MetaSqlAlchemyDataset(Dataset):
             if None in ignore_values:
                 ignore_values_conditions += [sa.column(column).is_(None)]
 
+            ignore_values_condition: sa.sql.elements.BinaryExpression
             if len(ignore_values_conditions) > 1:
                 ignore_values_condition = sa.or_(*ignore_values_conditions)
             elif len(ignore_values_conditions) == 1:
                 ignore_values_condition = ignore_values_conditions[0]
             else:
-                ignore_values_condition = sa.literal(False) == sa.literal(True)
+                ignore_values_condition = sa.sql.elements.BinaryExpression(
+                    sa.literal(False), sa.literal(True), custom_op("=")
+                )
 
-            count_query = sa.select(
-                [
-                    sa.func.count().label("element_count"),
-                    sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
-                        "null_count"
-                    ),
-                    sa.func.sum(
-                        sa.case(
-                            [
-                                (
-                                    sa.and_(
-                                        sa.not_(expected_condition),
-                                        sa.not_(ignore_values_condition),
-                                    ),
-                                    1,
-                                )
-                            ],
-                            else_=0,
-                        )
-                    ).label("unexpected_count"),
-                ]
-            ).select_from(self._table)
+            count_query: sa.sql.selectable.Select
+            if self.sql_engine_dialect.name.lower() == "mssql":
+                count_query = self._get_count_query_mssql(
+                    expected_condition=expected_condition,
+                    ignore_values_condition=ignore_values_condition,
+                )
+            else:
+                count_query = self._get_count_query_generic_sqlalchemy(
+                    expected_condition=expected_condition,
+                    ignore_values_condition=ignore_values_condition,
+                )
 
-            count_results = dict(self.engine.execute(count_query).fetchone())
+            count_results: dict = dict(self.engine.execute(count_query).fetchone())
 
             # Handle case of empty table gracefully:
             if (
@@ -237,7 +231,9 @@ class MetaSqlAlchemyDataset(Dataset):
                 .limit(unexpected_count_limit)
             )
 
-            nonnull_count = count_results["element_count"] - count_results["null_count"]
+            nonnull_count: int = count_results["element_count"] - count_results[
+                "null_count"
+            ]
 
             if "output_strftime_format" in kwargs:
                 output_strftime_format = kwargs["output_strftime_format"]
@@ -290,6 +286,87 @@ class MetaSqlAlchemyDataset(Dataset):
         inner_wrapper.__doc__ = func.__doc__
 
         return inner_wrapper
+
+    def _get_count_query_mssql(
+        self,
+        expected_condition: sa.sql.elements.BinaryExpression,
+        ignore_values_condition: sa.sql.elements.BinaryExpression,
+    ) -> sa.sql.selectable.Select:
+        temp_table_name: str = "ge_tmp_" + str(uuid.uuid4())[:8]
+        # mssql expects all temporary table names to have a prefix '#'
+        if self.sql_engine_dialect.name.lower() == "mssql":
+            temp_table_name = f"#{temp_table_name}"
+
+        with self.engine.begin():
+            metadata: sa.MetaData = sa.MetaData(self.engine)
+            temp_table_obj: sa.Table = sa.Table(
+                temp_table_name,
+                metadata,
+                sa.Column("condition", sa.Integer, primary_key=False, nullable=False),
+            )
+            temp_table_obj.create(self.engine, checkfirst=True)
+
+            count_case_statement: List[sa.sql.elements.Label] = [
+                sa.case(
+                    [
+                        (
+                            sa.and_(
+                                sa.not_(expected_condition),
+                                sa.not_(ignore_values_condition),
+                            ),
+                            1,
+                        )
+                    ],
+                    else_=0,
+                ).label("condition")
+            ]
+            inner_case_query: sa.sql.dml.Insert = temp_table_obj.insert().from_select(
+                count_case_statement,
+                sa.select(count_case_statement).select_from(self._table),
+            )
+            self.engine.execute(inner_case_query)
+
+        count_query: sa.sql.selectable.Select = sa.select(
+            [
+                sa.func.count().label("element_count"),
+                sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
+                    "null_count"
+                ),
+                sa.func.sum(sa.text("TempTable.condition"),).label("unexpected_count"),
+            ]
+        ).select_from(self._table).select_from(
+            sa.text(f"[{temp_table_name}] AS TempTable")
+        )
+
+        return count_query
+
+    def _get_count_query_generic_sqlalchemy(
+        self,
+        expected_condition: sa.sql.elements.BinaryExpression,
+        ignore_values_condition: sa.sql.elements.BinaryExpression,
+    ) -> sa.sql.selectable.Select:
+        return sa.select(
+            [
+                sa.func.count().label("element_count"),
+                sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
+                    "null_count"
+                ),
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (
+                                sa.and_(
+                                    sa.not_(expected_condition),
+                                    sa.not_(ignore_values_condition),
+                                ),
+                                1,
+                            )
+                        ],
+                        else_=0,
+                    )
+                ).label("unexpected_count"),
+            ]
+        ).select_from(self._table)
 
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
@@ -793,18 +870,20 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 )
 
     def get_column_stdev(self, column):
-        if self.sql_engine_dialect.name.lower() != "mssql":
+        if self.sql_engine_dialect.name.lower() == "mssql":
+            # Note: "stdev_samp" is not a recognized built-in function name (but "stdev" does exist for "mssql").
+            # This function is used to compute statistical standard deviation from sample data (per the reference in
+            # https://sqlserverrider.wordpress.com/2013/03/06/standard-deviation-functions-stdev-and-stdevp-sql-server).
+            res = self.engine.execute(
+                sa.select([sa.func.stdev(sa.column(column))])
+                .select_from(self._table)
+                .where(sa.column(column) is not None)
+            ).fetchone()
+        else:
             res = self.engine.execute(
                 sa.select([sa.func.stddev_samp(sa.column(column))])
                 .select_from(self._table)
-                .where(sa.column(column) != None)
-            ).fetchone()
-        else:
-            # stdev_samp is not a recognized built-in function name but stdevp does exist for mssql!
-            res = self.engine.execute(
-                sa.select([sa.func.stdevp(sa.column(column))])
-                .select_from(self._table)
-                .where(sa.column(column) != None)
+                .where(sa.column(column) is not None)
             ).fetchone()
         return float(res[0])
 
@@ -820,7 +899,17 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         bins = list(bins)
 
         # If we have an infinte lower bound, don't express that in sql
-        if (bins[0] == -np.inf) or (bins[0] == -float("inf")):
+        if (
+            bins[0]
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=True
+            )
+        ) or (
+            bins[0]
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=True
+            )
+        ):
             case_conditions.append(
                 sa.func.sum(
                     sa.case([(sa.column(column) < bins[idx + 1], 1)], else_=0)
@@ -846,7 +935,17 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 ).label("bin_" + str(idx))
             )
 
-        if (bins[-1] == np.inf) or (bins[-1] == float("inf")):
+        if (
+            bins[-1]
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=False
+            )
+        ) or (
+            bins[-1]
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=False
+            )
+        ):
             case_conditions.append(
                 sa.func.sum(
                     sa.case([(bins[-2] <= sa.column(column), 1)], else_=0)
@@ -886,6 +985,66 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             raise ValueError("Must specify either min or max value")
         if min_val is not None and max_val is not None and min_val > max_val:
             raise ValueError("Min value must be <= to max value")
+
+        if (
+            min_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=True
+            )
+        ) or (
+            min_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=True
+            )
+        ):
+            min_val = get_sql_dialect_floating_point_infinity_value(
+                schema=self.sql_engine_dialect.name.lower(), negative=True
+            )
+
+        if (
+            min_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=False
+            )
+        ) or (
+            min_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=False
+            )
+        ):
+            min_val = get_sql_dialect_floating_point_infinity_value(
+                schema=self.sql_engine_dialect.name.lower(), negative=False
+            )
+
+        if (
+            max_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=True
+            )
+        ) or (
+            max_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=True
+            )
+        ):
+            max_val = get_sql_dialect_floating_point_infinity_value(
+                schema=self.sql_engine_dialect.name.lower(), negative=True
+            )
+
+        if (
+            max_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=False
+            )
+        ) or (
+            max_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=False
+            )
+        ):
+            max_val = get_sql_dialect_floating_point_infinity_value(
+                schema=self.sql_engine_dialect.name.lower(), negative=False
+            )
 
         min_condition = None
         max_condition = None
@@ -1447,8 +1606,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             TypeError,
         ):  # TypeError can occur if the driver was not installed and so is None
             pass
+
         try:
-            # Mysql
+            # MySQL
             if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
                 if positive:
                     return BinaryExpression(
@@ -1458,6 +1618,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     return BinaryExpression(
                         sa.column(column), literal(regex), custom_op("NOT REGEXP")
                     )
+        except AttributeError:
+            pass
+
+        try:
+            # MS SQL Server
+            if isinstance(self.sql_engine_dialect, sa.dialects.mssql.dialect):
+                if positive:
+                    return sa.column(column).like(literal(regex))
+                else:
+                    return sa.not_(sa.column(column).like(literal(regex)))
         except AttributeError:
             pass
 
