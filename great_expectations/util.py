@@ -10,7 +10,6 @@ from types import ModuleType
 from typing import Callable, Union
 
 import black
-import importlib_metadata
 from pkg_resources import Distribution
 
 from great_expectations.core import expectationSuiteSchema
@@ -18,6 +17,14 @@ from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
+
+try:
+    # This library moved in python 3.8
+    import importlib.metadata as importlib_metadata
+except ModuleNotFoundError:
+    # Fallback for python < 3.8
+    import importlib_metadata
+
 
 logger = logging.getLogger(__name__)
 

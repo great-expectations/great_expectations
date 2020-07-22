@@ -370,6 +370,28 @@ class MetaSqlAlchemyDataset(Dataset):
 
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
+    """
+
+--ge-feature-maturity-info--
+
+    id: validation_engine_sqlalchemy
+    title: Validation Engine - SQLAlchemy
+    icon:
+    short_description: Use SQLAlchemy to validate data in a database
+    description: Use SQLAlchemy to validate data in a database
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_database_table_or_a_query_result_as_a_batch.html
+    maturity: Production
+    maturity_details:
+        api_stability: High
+        implementation_completeness: Moderate (temp table handling/permissions not universal)
+        unit_test_coverage: High
+        integration_infrastructure_test_coverage: N/A
+        documentation_completeness:  Minimal (none)
+        bug_risk: Low
+
+--ge-feature-maturity-info--
+"""
+
     @classmethod
     def from_dataset(cls, dataset=None):
         if isinstance(dataset, SqlAlchemyDataset):

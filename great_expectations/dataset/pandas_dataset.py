@@ -314,16 +314,36 @@ class MetaPandasDataset(Dataset):
 
 class PandasDataset(MetaPandasDataset, pd.DataFrame):
     """
-    PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
+PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
 
-    For the full API reference, please see :func:`Dataset <great_expectations.data_asset.dataset.Dataset>`
+For the full API reference, please see :func:`Dataset <great_expectations.data_asset.dataset.Dataset>`
 
-    Notes:
-        1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
-           data frame unless the user specifies the ``discard_subset_failing_expectations = True`` \
-           property on the original data frame.
-        2. Concatenations, joins, and merges of PandaDataSets contain NO expectations (since no autoinspection
-           is performed by default).
+Notes:
+    1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
+       data frame unless the user specifies the ``discard_subset_failing_expectations = True`` \
+       property on the original data frame.
+    2. Concatenations, joins, and merges of PandaDataSets contain NO expectations (since no autoinspection
+       is performed by default).
+
+--ge-feature-maturity-info--
+
+    id: validation_engine_pandas
+    title: Validation Engine - Pandas
+    icon:
+    short_description: Use Pandas DataFrame to validate data
+    description: Use Pandas DataFrame to validate data
+    how_to_guide_url:
+    maturity: Production
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A -> see relevant Datasource evaluation
+        documentation_completeness: Complete
+        bug_risk: Low
+        expectation_completeness: Complete
+
+--ge-feature-maturity-info--
     """
 
     # this is necessary to subclass pandas in a proper way.

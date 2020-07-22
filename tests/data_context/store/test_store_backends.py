@@ -216,7 +216,7 @@ def test_TupleS3StoreBackend_with_prefix():
     assert set(
         [
             s3_object_info["Key"]
-            for s3_object_info in boto3.client("s3").list_objects(
+            for s3_object_info in boto3.client("s3").list_objects_v2(
                 Bucket=bucket, Prefix=prefix
             )["Contents"]
         ]
@@ -232,6 +232,190 @@ def test_TupleS3StoreBackend_with_prefix():
     my_store.remove_key(("BBB",))
     with pytest.raises(InvalidKeyError):
         my_store.get(("BBB",))
+
+
+@mock_s3
+def test_tuple_s3_store_backend_slash_conditions():
+    bucket = "my_bucket"
+    prefix = None
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    client = boto3.client("s3")
+
+    my_store = TupleS3StoreBackend(
+        bucket=bucket,
+        prefix=prefix,
+        platform_specific_separator=False,
+        filepath_prefix="foo__",
+        filepath_suffix="__bar.json",
+    )
+    my_store.set(("my_suite",), '{"foo": "bar"}')
+    expected_s3_keys = ["foo__/my_suite__bar.json"]
+    assert [
+        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
+    ] == expected_s3_keys
+    assert (
+        my_store.get_url_for_key(("my_suite",))
+        == "https://s3.amazonaws.com/my_bucket/foo__/my_suite__bar.json"
+    )
+
+    client.delete_objects(
+        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
+    )
+    assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
+    my_store = TupleS3StoreBackend(
+        bucket=bucket, prefix=prefix, platform_specific_separator=False,
+    )
+    my_store.set(("my_suite",), '{"foo": "bar"}')
+    expected_s3_keys = ["my_suite"]
+    assert [
+        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
+    ] == expected_s3_keys
+    assert (
+        my_store.get_url_for_key(("my_suite",))
+        == "https://s3.amazonaws.com/my_bucket/my_suite"
+    )
+
+    client.delete_objects(
+        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
+    )
+    assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
+    my_store = TupleS3StoreBackend(
+        bucket=bucket, prefix=prefix, platform_specific_separator=True,
+    )
+    my_store.set(("my_suite",), '{"foo": "bar"}')
+    expected_s3_keys = ["my_suite"]
+    assert [
+        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
+    ] == expected_s3_keys
+    assert (
+        my_store.get_url_for_key(("my_suite",))
+        == "https://s3.amazonaws.com/my_bucket/my_suite"
+    )
+
+    client.delete_objects(
+        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
+    )
+    assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
+    prefix = "/foo/"
+    my_store = TupleS3StoreBackend(
+        bucket=bucket, prefix=prefix, platform_specific_separator=True
+    )
+    my_store.set(("my_suite",), '{"foo": "bar"}')
+    expected_s3_keys = ["foo/my_suite"]
+    assert [
+        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
+    ] == expected_s3_keys
+    assert (
+        my_store.get_url_for_key(("my_suite",))
+        == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
+    )
+
+    client.delete_objects(
+        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
+    )
+    assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
+    prefix = "foo"
+    my_store = TupleS3StoreBackend(
+        bucket=bucket, prefix=prefix, platform_specific_separator=True
+    )
+    my_store.set(("my_suite",), '{"foo": "bar"}')
+    expected_s3_keys = ["foo/my_suite"]
+    assert [
+        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
+    ] == expected_s3_keys
+    assert (
+        my_store.get_url_for_key(("my_suite",))
+        == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
+    )
+
+    client.delete_objects(
+        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
+    )
+    assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
+    my_store = TupleS3StoreBackend(
+        bucket=bucket, prefix=prefix, platform_specific_separator=False
+    )
+    my_store.set(("my_suite",), '{"foo": "bar"}')
+    expected_s3_keys = ["foo/my_suite"]
+    assert [
+        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
+    ] == expected_s3_keys
+    assert (
+        my_store.get_url_for_key(("my_suite",))
+        == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
+    )
+
+    client.delete_objects(
+        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
+    )
+    assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
+    prefix = "foo/"
+    my_store = TupleS3StoreBackend(
+        bucket=bucket, prefix=prefix, platform_specific_separator=True
+    )
+    my_store.set(("my_suite",), '{"foo": "bar"}')
+    expected_s3_keys = ["foo/my_suite"]
+    assert [
+        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
+    ] == expected_s3_keys
+    assert (
+        my_store.get_url_for_key(("my_suite",))
+        == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
+    )
+
+    client.delete_objects(
+        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
+    )
+    assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
+    my_store = TupleS3StoreBackend(
+        bucket=bucket, prefix=prefix, platform_specific_separator=False
+    )
+    my_store.set(("my_suite",), '{"foo": "bar"}')
+    expected_s3_keys = ["foo/my_suite"]
+    assert [
+        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
+    ] == expected_s3_keys
+    assert (
+        my_store.get_url_for_key(("my_suite",))
+        == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
+    )
+
+    client.delete_objects(
+        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
+    )
+    assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
+    prefix = "/foo"
+    my_store = TupleS3StoreBackend(
+        bucket=bucket, prefix=prefix, platform_specific_separator=True
+    )
+    my_store.set(("my_suite",), '{"foo": "bar"}')
+    expected_s3_keys = ["foo/my_suite"]
+    assert [
+        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
+    ] == expected_s3_keys
+    assert (
+        my_store.get_url_for_key(("my_suite",))
+        == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
+    )
+
+    client.delete_objects(
+        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
+    )
+    assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
+    my_store = TupleS3StoreBackend(
+        bucket=bucket, prefix=prefix, platform_specific_separator=False
+    )
+    my_store.set(("my_suite",), '{"foo": "bar"}')
+    expected_s3_keys = ["foo/my_suite"]
+    assert [
+        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
+    ] == expected_s3_keys
+    assert (
+        my_store.get_url_for_key(("my_suite",))
+        == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
+    )
 
 
 @mock_s3
@@ -274,7 +458,7 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
     assert set(
         [
             s3_object_info["Key"]
-            for s3_object_info in boto3.client("s3").list_objects(
+            for s3_object_info in boto3.client("s3").list_objects_v2(
                 Bucket=bucket, Prefix=prefix
             )["Contents"]
         ]

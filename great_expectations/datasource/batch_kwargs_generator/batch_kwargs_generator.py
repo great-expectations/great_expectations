@@ -68,7 +68,99 @@ class BatchKwargsGenerator(object):
              default:
                 class_name: QueryBatchKwargsGenerator
 
+--ge-feature-maturity-info--
 
+    id: batch_kwargs_generator_manual
+    title: Batch Kwargs Generator - Manual
+    icon:
+    short_description: Manually configure how files on a filesystem are presented as batches of data
+    description: Manually configure how files on a filesystem are presented as batches of data
+    how_to_guide_url:
+    maturity: Beta
+    maturity_details:
+        api_stability: Mostly Stable (key generator functionality will remain but batch API changes still possible)
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A
+        documentation_completeness: Minimal
+        bug_risk: Moderate
+
+    id: batch_kwargs_generator_s3
+    title: Batch Kwargs Generator - S3
+    icon:
+    short_description: Present files on S3 as batches of data
+    description: Present files on S3 as batches of data for profiling and validation
+    how_to_guide_url:
+    maturity: Beta
+    maturity_details:
+        api_stability: Mostly Stable (expect changes in partitioning)
+        implementation_completeness: Partial
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: Complete
+        documentation_completeness: Minimal
+        bug_risk: Moderate
+
+    id: batch_kwargs_generator_glob_reader
+    title: Batch Kwargs Generator - Glob Reader
+    icon:
+    short_description: A configurable way to present files in a directory as batches of data
+    description: A configurable way to present files in a directory as batches of data
+    how_to_guide_url:
+    maturity: Beta
+    maturity_details:
+        api_stability: Mostly Stable (expect changes in partitioning)
+        implementation_completeness: Partial
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A
+        documentation_completeness: Minimal
+        bug_risk: Moderate
+
+    id: batch_kwargs_generator_table
+    title: Batch Kwargs Generator - Table
+    icon:
+    short_description: Present database tables as batches of data
+    description: Present database tables as batches of data for validation and profiling
+    how_to_guide_url:
+    maturity: Beta
+    maturity_details:
+        api_stability: Unstable (no existing native support for "partitioning")
+        implementation_completeness: Minimal
+        unit_test_coverage: Partial
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Partial
+        bug_risk: Low
+
+    id: batch_kwargs_generator_query
+    title: Batch Kwargs Generator - Query
+    icon:
+    short_description: Present the result sets of SQL queries as batches of data
+    description: Present the result sets of SQL queries as batches of data for validation and profiling
+    how_to_guide_url:
+    maturity: Beta
+    maturity_details:
+        api_stability: Unstable (expect changes in query template configuration and query storage)
+        implementation_completeness: Complete
+        unit_test_coverage: Partial
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Partial
+        bug_risk: Moderate
+
+    id: batch_kwargs_generator_subdir_reader
+    title: Batch Kwargs Generator - Subdir Reader
+    icon:
+    short_description: Present the files in a directory as batches of data
+    description: Present the files in a directory as batches of data for profiling and validation.
+    how_to_guide_url:
+    maturity: Beta
+    maturity_details:
+        api_stability: Mostly Stable (new configuration options likely)
+        implementation_completeness: Partial
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A
+        documentation_completeness: Minimal
+        bug_risk: Low
+
+--ge-feature-maturity-info--
     """
 
     _batch_kwargs_type = BatchKwargs

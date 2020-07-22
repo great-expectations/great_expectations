@@ -12,6 +12,9 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
     - Configured a Google Cloud Platform (GCP) `service account <https://cloud.google.com/iam/docs/service-accounts>`_ with credentials that can access the appropriate GCP resources, which include Storage Objects.
     - Identified the GCP project, GCS bucket, and prefix where Expectations will be stored.
 
+Steps
+-----
+
 1. **Configure your GCP credentials**
 
     Check that your environment is configured with the appropriate authentication credentials needed to connect to the GCS bucket where Expectations will be stored.
@@ -62,7 +65,7 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 
 4. **Copy existing Expectation JSON files to the GCS bucket**. (This step is optional).
 
-    One way to copy Expectations into GCS is by using the ``gsutil cp`` command, which is part of the Google Cloud SDK. The following example will copy one Expectation, ``exp1`` from a local folder to the GCS bucket.   Information on other options, like the Cloud Storage browser in the Google Cloud Console, can be found in the `Documentation for Google Cloud <https://cloud.google.com/storage/docs/uploading-objects>`_.
+    One way to copy Expectations into GCS is by using the ``gsutil cp`` command, which is part of the Google Cloud SDK. The following example will copy one Expectation, ``exp1`` from a local folder to the GCS bucket.   Information on other ways to copy Expectation JSON files, like the Cloud Storage browser in the Google Cloud Console, can be found in the `Documentation for Google Cloud <https://cloud.google.com/storage/docs/uploading-objects>`_.
 
     .. code-block:: bash
 
@@ -107,8 +110,9 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
          - exp1
 
 
-Additional resources
---------------------
+
+If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on `Slack <greatexpectations.io/slack>`_ if you would like to learn more, or have any questions.
+
 
 .. discourse::
     :topic_identifier: 180

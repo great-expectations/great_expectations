@@ -3,16 +3,260 @@
 How to host and share Data Docs on GCS
 ======================================
 
-.. admonition:: Admonition from Mr. Dickens
+This guide will explain how to host and share Data Docs on Google Cloud Storage. It has two sections depending on how you would like to restrict access to your Data Docs site. We recommend using IP-based access, which is achieved by deploying a simple Google App Engine app.
 
-    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
+.. content-tabs::
 
+    .. tab-container:: tab0
+        :title: IP-Based Access
 
-This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
+        .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+            - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+            - `Set up a Google Cloud project <https://cloud.google.com/resource-manager/docs/creating-managing-projects>`_
+            - `Installed and initialized the Google Cloud SDK (in order to use the gcloud CLI) <https://cloud.google.com/sdk/docs/quickstarts>`_
+            - `Set up the gsutil command line tool <https://cloud.google.com/storage/docs/gsutil_install>`_
+            - Have permissions to: list and create buckets, deploy Google App Engine apps, add app firewall rules
 
-If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
+        **Steps**
+
+        1. **Create a Google Cloud Storage bucket using gsutil.**
+
+          Make sure you modify the project name, bucket name, and region for your situation.
+
+          .. code-block:: bash
+
+            > gsutil mb -p my_org_project -l US-EAST1 -b on gs://my_org_data_docs/
+            Creating gs://my_org_data_docs/...
+
+        2. **Create a directory for your Google App Engine app and add the following files.**
+
+          | We recommend placing it in your project directory, for example ``great_expectations/team_gcs_app``.
+
+          .. code-block:: yaml
+            :linenos:
+            :caption: app.yaml (**make sure to use your own bucket name**)
+
+            runtime: python37
+            env_variables:
+                CLOUD_STORAGE_BUCKET: my_org_data_docs
+
+          .. code-block::
+            :linenos:
+            :caption: requirements.txt
+
+            flask>=1.1.0
+            google-cloud-storage
+
+          .. code-block:: python
+            :linenos:
+            :caption: main.py
+
+            import logging
+            import os
+            from flask import Flask, request
+            from google.cloud import storage
+            app = Flask(__name__)
+            # Configure this environment variable via app.yaml
+            CLOUD_STORAGE_BUCKET = os.environ['CLOUD_STORAGE_BUCKET']
+            @app.route('/', defaults={'path': 'index.html'})
+            @app.route('/<path:path>')
+            def index(path):
+                gcs = storage.Client()
+                bucket = gcs.get_bucket(CLOUD_STORAGE_BUCKET)
+                try:
+                    blob = bucket.get_blob(path)
+                    content = blob.download_as_string()
+                    if blob.content_encoding:
+                        resource = content.decode(blob.content_encoding)
+                    else:
+                        resource = content
+                except Exception as e:
+                    logging.exception("couldn't get blob")
+                    resource = "<p></p>"
+                return resource
+            @app.errorhandler(500)
+            def server_error(e):
+                logging.exception('An error occurred during a request.')
+                return """
+                An internal error occurred: <pre>{}</pre>
+                See logs for full stacktrace.
+                """.format(e), 500
+
+        3. **If you haven't done so already, authenticate the gcloud CLI and set the project.**
+
+          .. code-block:: bash
+            :caption: Insert the appropriate project name.
+
+            > gcloud auth login && gcloud config set project <<project_name>>
+
+        4. **Deploy your Google App Engine app.**
+
+          Issue the following CLI command from within the app directory created above: ``gcloud app deploy``.
+
+        5. **Set up Google App Engine firewall for your app to control access.**
+
+          Visit the following page for instructions on creating firewall rules: `Creating firewall rules <https://cloud.google.com/appengine/docs/standard/python3/creating-firewalls>`_
+
+        6. **Add a new GCS site to the data_docs_sites section of your great_expectations.yml.**
+
+          You may also replace the default ``local_site`` if you would only like to maintain a single GCS Data Docs site.
+
+          .. code-block:: yaml
+            :linenos:
+
+            data_docs_sites:
+              local_site:
+                class_name: SiteBuilder
+                show_how_to_buttons: true
+                store_backend:
+                  class_name: TupleFilesystemStoreBackend
+                  base_directory: uncommitted/data_docs/local_site/
+                site_index_builder:
+                  class_name: DefaultSiteIndexBuilder
+              gs_site:  # this is a user-selected name - you may select your own
+                class_name: SiteBuilder
+                store_backend:
+                  class_name: TupleGCSStoreBackend
+                  project: my_org_project  # UPDATE the project name with your own
+                  bucket: my_org_data_docs  # UPDATE the bucket name here to match the bucket you configured above
+                site_index_builder:
+                  class_name: DefaultSiteIndexBuilder
+
+        7. **Build the GCS Data Docs site.**
+
+          Use the following CLI command: ``great_expectations docs build --site-name gs_site``. If successful, the CLI will provide the object URL of the index page. Since the bucket is not public, this URL will be inaccessible. Rather, you will access the Data Docs site using the App Engine app configured above.
+
+          .. code-block:: bash
+
+            > great_expectations docs build --site-name gs_site
+
+            The following Data Docs sites will be built:
+
+             - gs_site: https://storage.googleapis.com/my_org_data_docs/index.html
+
+            Would you like to proceed? [Y/n]: Y
+
+            Building Data Docs...
+
+            Done building Data Docs
+
+        8. **Test that everything was configured properly by launching your App Engine app.**
+
+          Issue the following CLI command: ``gcloud app browse``. If successful, the gcloud CLI will provide the URL to your app and launch it in a new browser window. The page displayed should be the index page of your Data Docs site.
+
+        **Additional resources**
+
+        - `Google App Engine <https://cloud.google.com/appengine/docs/standard/python3>`_
+        - `Controlling App Access with Firewalls <https://cloud.google.com/appengine/docs/standard/python3/creating-firewalls>`_
+        - :ref:`Core concepts: Data Docs <data_docs>`
+
+    .. tab-container:: tab1
+        :title: Cloud-IAM-Based Access
+
+        .. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+            - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+            - `Set up a Google Cloud project <https://cloud.google.com/resource-manager/docs/creating-managing-projects>`_
+            - `Set up the gsutil command line tool <https://cloud.google.com/storage/docs/gsutil_install>`_
+            - Have permissions to: list and create buckets, get and set bucket IAM policies
+
+        **Steps**
+
+        1. **Create a Google Cloud Storage bucket using gsutil.**
+
+          Make sure you modify the project name, bucket name, and region for your situation.
+
+          .. code-block:: bash
+
+            > gsutil mb -p my_org_project -l US-EAST1 -b on gs://my_org_data_docs/
+            Creating gs://my_org_data_docs/...
+
+        2. **Save the bucket's current Cloud IAM policy.**
+
+          .. code-block:: bash
+
+             gsutil iam get gs://my_org_data_docs/ > gcs-bucket-policy.json
+
+        3. **Edit the ``gcs-bucket-policy.json`` file.**
+
+          Add a new binding with the role ``roles/storage.objectViewer``. Under the ``members`` key, list the members you would like to grant access to the bucket, using the form ``[MEMBER_TYPE]:[MEMBER_NAME]``.
+
+          .. code-block:: json
+            :linenos:
+
+            {
+              "bindings": [
+                ...previously configured bindings
+                {
+                  "role": "roles/storage.objectViewer",
+                  "members": [
+                    "user:my_colleague@my_org.com",
+                    "domain:my_org.com"
+                  ]
+                }
+              ],
+              "etag": "CAI="
+            }
+
+        4. **Use gsutil to set the modified Cloud IAM policy on the bucket.**
+
+          .. code-block:: bash
+
+            gsutil iam set gcs-bucket-policy.json gs://my_org_data_docs/
+
+        5. **Add a new GCS site to the data_docs_sites section of your great_expectations.yml.**
+
+          You may also replace the default ``local_site`` if you would only like to maintain a single GCS Data Docs site.
+
+          .. code-block:: yaml
+            :linenos:
+
+            data_docs_sites:
+              local_site:
+                class_name: SiteBuilder
+                show_how_to_buttons: true
+                store_backend:
+                  class_name: TupleFilesystemStoreBackend
+                  base_directory: uncommitted/data_docs/local_site/
+                site_index_builder:
+                  class_name: DefaultSiteIndexBuilder
+              gs_site:  # this is a user-selected name - you may select your own
+                class_name: SiteBuilder
+                store_backend:
+                  class_name: TupleGCSStoreBackend
+                  project: my_org_project  # UPDATE the project name with your own
+                  bucket: my_org_data_docs  # UPDATE the bucket name here to match the bucket you configured above
+                site_index_builder:
+                  class_name: DefaultSiteIndexBuilder
+
+        6. **Test that your configuration is correct by building the site.**
+
+          Use the following CLI command: ``great_expectations docs build --site-name gs_site``. If successful, the CLI will open your newly built GCS Data Docs site and provide the URL, which you can share as desired. Note that the URL will only be viewable by users you added to the above Cloud IAM policy.
+
+          .. code-block:: bash
+
+            > great_expectations docs build --site-name gs_site
+
+            The following Data Docs sites will be built:
+
+             - gs_site: https://storage.googleapis.com/my_org_data_docs/index.html
+
+            Would you like to proceed? [Y/n]: Y
+
+            Building Data Docs...
+
+            Done building Data Docs
+
+        **Additional resources**
+
+        - `Overview of access control <https://cloud.google.com/storage/docs/access-control>`_
+        - `Using Cloud IAM permissions <https://cloud.google.com/storage/docs/access-control/using-iam-permissions>`_
+        - `Concepts related to identity (member types) <https://cloud.google.com/iam/docs/overview#concepts_related_identity>`_
+        - :ref:`Core concepts: Data Docs <data_docs>`
+
+Comments
+--------
 
 .. discourse::
    :topic_identifier: 232
