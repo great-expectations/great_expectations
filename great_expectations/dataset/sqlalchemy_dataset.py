@@ -29,8 +29,8 @@ try:
     from sqlalchemy.dialects import registry
     from sqlalchemy.engine import reflection
     from sqlalchemy.sql.expression import BinaryExpression, literal
-    from sqlalchemy.sql.operators import custom_op
     from sqlalchemy.sql.selectable import Select, CTE
+    from sqlalchemy.sql.operators import custom_op
     from sqlalchemy.sql.elements import Label, WithinGroup
     from sqlalchemy.engine.result import RowProxy
     from sqlalchemy.engine.default import DefaultDialect
@@ -39,8 +39,17 @@ except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
-    DefaultDialect = None
+    sa = None
+    registry = None
+    reflection = None
+    BinaryExpression = None
+    literal = None
+    custom_op = None
+    Label = None
     WithinGroup = None
+    RowProxy = None
+    DefaultDialect = None
+    ProgrammingError = None
 
 try:
     import psycopg2
@@ -148,9 +157,7 @@ class MetaSqlAlchemyDataset(Dataset):
             else:
                 unexpected_count_limit = result_format["partial_unexpected_count"]
 
-            expected_condition: sa.sql.elements.BinaryExpression = func(
-                self, column, *args, **kwargs
-            )
+            expected_condition: BinaryExpression = func(self, column, *args, **kwargs)
 
             # Added to prepare for when an ignore_values argument is added to the expectation
             ignore_values: list = [None]
@@ -166,7 +173,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 # we will instruct the result formatting method to skip this step.
                 result_format["partial_unexpected_count"] = 0
 
-            ignore_values_conditions: List[sa.sql.elements.BinaryExpression] = []
+            ignore_values_conditions: List[BinaryExpression] = []
             if (
                 len(ignore_values) > 0
                 and None not in ignore_values
@@ -181,17 +188,17 @@ class MetaSqlAlchemyDataset(Dataset):
             if None in ignore_values:
                 ignore_values_conditions += [sa.column(column).is_(None)]
 
-            ignore_values_condition: sa.sql.elements.BinaryExpression
+            ignore_values_condition: BinaryExpression
             if len(ignore_values_conditions) > 1:
                 ignore_values_condition = sa.or_(*ignore_values_conditions)
             elif len(ignore_values_conditions) == 1:
                 ignore_values_condition = ignore_values_conditions[0]
             else:
-                ignore_values_condition = sa.sql.elements.BinaryExpression(
+                ignore_values_condition = BinaryExpression(
                     sa.literal(False), sa.literal(True), custom_op("=")
                 )
 
-            count_query: sa.sql.selectable.Select
+            count_query: Select
             if self.sql_engine_dialect.name.lower() == "mssql":
                 count_query = self._get_count_query_mssql(
                     expected_condition=expected_condition,
@@ -289,9 +296,9 @@ class MetaSqlAlchemyDataset(Dataset):
 
     def _get_count_query_mssql(
         self,
-        expected_condition: sa.sql.elements.BinaryExpression,
-        ignore_values_condition: sa.sql.elements.BinaryExpression,
-    ) -> sa.sql.selectable.Select:
+        expected_condition: BinaryExpression,
+        ignore_values_condition: BinaryExpression,
+    ) -> Select:
         temp_table_name: str = "ge_tmp_" + str(uuid.uuid4())[:8]
         # mssql expects all temporary table names to have a prefix '#'
         if self.sql_engine_dialect.name.lower() == "mssql":
@@ -326,7 +333,7 @@ class MetaSqlAlchemyDataset(Dataset):
             )
             self.engine.execute(inner_case_query)
 
-        count_query: sa.sql.selectable.Select = sa.select(
+        count_query: Select = sa.select(
             [
                 sa.func.count().label("element_count"),
                 sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
@@ -342,9 +349,9 @@ class MetaSqlAlchemyDataset(Dataset):
 
     def _get_count_query_generic_sqlalchemy(
         self,
-        expected_condition: sa.sql.elements.BinaryExpression,
-        ignore_values_condition: sa.sql.elements.BinaryExpression,
-    ) -> sa.sql.selectable.Select:
+        expected_condition: BinaryExpression,
+        ignore_values_condition: BinaryExpression,
+    ) -> Select:
         return sa.select(
             [
                 sa.func.count().label("element_count"),
