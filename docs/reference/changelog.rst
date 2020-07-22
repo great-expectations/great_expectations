@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) -- thanks @Dandandan
 
 
 0.11.8
