@@ -108,6 +108,10 @@ jobs:
         - brew update
         - brew services start postgresql
         - brew services
+        - brew install unixodbc
+        - brew tap microsoft/mssql-release https://github.com/Microsoft/homebrew-mssql-release
+        - brew update
+        - brew install msodbcsql mssql-tools
         # TODO This seems to fail when running outside a debugging mode build so allow it to pass
         - /usr/local/opt/postgres/bin/createuser --superuser postgres --host=127.0.0.1 || echo 'no postgres for you'
       install:
