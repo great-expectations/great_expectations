@@ -114,11 +114,11 @@ Follow the steps below to update the configuration with values that are specific
 
 #. **Configure an Expectation store in Amazon S3.**
 
-   Replace the "REPLACE ME" on line 26 of the code snippet. Follow this :ref:`how-to guide<how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_amazon_s3>`.
+   Replace the "REPLACE ME" on lines 26-27 of the code snippet. Follow this :ref:`how-to guide<how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_amazon_s3>`.
 
 #. **Configure an Validation Result store in Amazon S3.**
 
-   Replace the "REPLACE ME" on line 34 of the code snippet. Follow this :ref:`how-to guide<how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_s3>`.
+   Replace the "REPLACE ME" on lines 34-35 of the code snippet. Follow this :ref:`how-to guide<how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_s3>`.
 
 #. **Configure an Data Docs website in Amazon S3.**
 
