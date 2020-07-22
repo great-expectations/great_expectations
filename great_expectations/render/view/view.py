@@ -458,6 +458,7 @@ class DefaultMarkdownView(DefaultJinjaView):
             r"\${2,}", lambda m: m.group(0) * 2, template.get("template", "")
         )
 
+        # Bold all parameters:
         base_param_template_string = "**$content**"
 
         # Make sure template["params"] is a dict
@@ -482,7 +483,6 @@ class DefaultMarkdownView(DefaultJinjaView):
         template["template"] = template.get("template", "").replace(
             "$PARAMETER", "$$PARAMETER"
         )
-        # TODO: insert **** bold before and after parameters
 
         return pTemplate(template.get("template")).safe_substitute(template.get("params", {}))
 
