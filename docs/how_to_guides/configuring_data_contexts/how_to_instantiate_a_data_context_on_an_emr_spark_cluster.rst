@@ -5,20 +5,13 @@ How to instantiate a Data Context on an EMR Spark cluster
 
 This guide will help you instantiate a Data Context on an EMR Spark cluster.
 
-The default method for creating and configuring DataContexts is the Great Expectations :ref:`command line interface (CLI) <command_line>`.  It creates the directory structure of the project on your filesystem and its configuration file.
 
-
-A filesystem to keep the configuration file and a shell for running the CLI that creates it are not readily available
-in the EMR Spark environment.
-
-
-To accommodate for this difference, this guide will show how to configure and instantiate a Data Context
-directly in an EMR Spark notebook.
+The guide demonstrates the recommended path for instantiating a Data Context without a full configuration directory and without using the Great Expectations :ref:`command line interface (CLI) <command_line>`.
 
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - No prerequisites
+    - :ref:`Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration<getting_started>`.
 
 Steps
 -----
