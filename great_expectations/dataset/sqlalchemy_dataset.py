@@ -5,7 +5,7 @@ import uuid
 import warnings
 from datetime import datetime
 from functools import wraps
-from typing import Iterable, List, Union
+from typing import Iterable, List
 
 import pandas as pd
 from dateutil.parser import parse
