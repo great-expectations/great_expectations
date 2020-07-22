@@ -129,11 +129,11 @@ class DefaultJinjaView(object):
     def render_content_block(
         self, jinja_context, content_block, index=None, content_block_id=None
     ):
-        if type(content_block) is str:
+        if isinstance(content_block, str):
             return content_block
         elif content_block is None:
             return ""
-        elif type(content_block) is list:
+        elif isinstance(content_block, list):
             # If the content_block item here is actually a list of content blocks then we want to recursively render
             rendered_block = ""
             for idx, content_block_el in enumerate(content_block):
@@ -434,3 +434,101 @@ class DefaultJinjaComponentView(DefaultJinjaView):
         assert isinstance(
             document["content_block"], dict
         )  # For now low-level views take dicts
+
+
+# TODO: the methods in DefaultMarkdownView can be made more DRY as they are very similar to DefaultJinjaView methods
+class DefaultMarkdownView(DefaultJinjaView):
+    """
+    Convert a document to markdown format.
+    """
+
+    def _validate_document(self, document):
+        assert isinstance(document, RenderedDocumentContent)
+
+    _template = "markdown_page.j2"
+
+    def render_string_template(self, template):
+
+        if not isinstance(template, (dict, OrderedDict)):
+            return template
+
+        # if there are any groupings of two or more $, we need to double the groupings to account
+        # for template string substitution escaping
+        template["template"] = re.sub(
+            r"\${2,}", lambda m: m.group(0) * 2, template.get("template", "")
+        )
+
+        base_param_template_string = "**$content**"
+
+        # Make sure template["params"] is a dict
+        template["params"] = template.get("params", {})
+
+        if "markdown_status_icon" in template["params"]:
+            return template["params"]["markdown_status_icon"]
+
+        for parameter in template["params"].keys():
+            if parameter == "html_success_icon":
+                template["params"][parameter] = ""
+                continue
+
+            template["params"][parameter] = pTemplate(
+                base_param_template_string
+            ).safe_substitute(
+                {
+                    "content": template["params"][parameter],
+                }
+            )
+
+        template["template"] = template.get("template", "").replace(
+            "$PARAMETER", "$$PARAMETER"
+        )
+        # TODO: insert **** bold before and after parameters
+
+        return pTemplate(template.get("template")).safe_substitute(template.get("params", {}))
+
+
+    @contextfilter
+    def render_content_block(
+        self, jinja_context, content_block, index=None, content_block_id=None
+    ):
+        if isinstance(content_block, str):
+            return content_block
+        elif content_block is None:
+            return ""
+        elif isinstance(content_block, list):
+            # If the content_block item here is actually a list of content blocks then we want to recursively render
+            rendered_block = ""
+            for idx, content_block_el in enumerate(content_block):
+                if (
+                    isinstance(content_block_el, RenderedComponentContent)
+                    or isinstance(content_block_el, dict)
+                    and "content_block_type" in content_block_el
+                ):
+                    new_content_block_id = None
+                    if content_block_id:
+                        new_content_block_id = content_block_id + "-" + str(idx)
+                    rendered_block += self.render_content_block(
+                        jinja_context,
+                        content_block_el,
+                        idx,
+                        content_block_id=new_content_block_id,
+                    )
+                else:
+                    rendered_block += str(content_block_el)
+            return rendered_block
+        elif not isinstance(content_block, dict):
+            return content_block
+        content_block_type = content_block.get("content_block_type")
+        template = self._get_template(template=f"markdown_{content_block_type}.j2")
+        if content_block_id:
+            return template.render(
+                jinja_context,
+                content_block=content_block,
+                index=index,
+                content_block_id=content_block_id,
+            )
+        else:
+            return template.render(
+                jinja_context, content_block=content_block, index=index
+            )
+

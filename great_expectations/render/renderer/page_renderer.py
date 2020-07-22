@@ -182,11 +182,13 @@ class ValidationResultsPageRenderer(Renderer):
             os.path.join(*expectation_suite_path_components) + ".html"
         )
         if success:
-            success = '<i class="fas fa-check-circle text-success" aria-hidden="true"></i> Succeeded'
+            success = 'Succeeded'
+            html_success_icon = '<i class="fas fa-check-circle text-success" aria-hidden="true"></i>'
         else:
             success = (
-                '<i class="fas fa-times text-danger" aria-hidden="true"></i> Failed'
+                'Failed'
             )
+            html_success_icon = '<i class="fas fa-times text-danger" aria-hidden="true"></i>'
         return RenderedHeaderContent(
             **{
                 "content_block_type": "header",
@@ -204,12 +206,13 @@ class ValidationResultsPageRenderer(Renderer):
                     **{
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": "${suite_title} ${expectation_suite_name}\n${status_title} ${success}",
+                            "template": "${suite_title} ${expectation_suite_name}\n${status_title} ${html_success_icon} ${success}",
                             "params": {
                                 "suite_title": "Expectation Suite:",
                                 "status_title": "Status:",
                                 "expectation_suite_name": expectation_suite_name,
                                 "success": success,
+                                "html_success_icon": html_success_icon,
                             },
                             "styling": {
                                 "params": {
