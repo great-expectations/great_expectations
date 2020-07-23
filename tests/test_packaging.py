@@ -48,4 +48,4 @@ def test_requirements_files():
         | requirements_dev_min
         | requirements_dev_sqlalchemy
         | requirements_dev_spark
-    ) == {"pre-commit>=2.3.0", "requirements-parser>=0.2.0", "isort==4.3.21"}
+    ) == {"pre-commit>=2.3.0", "isort==4.3.21"}
