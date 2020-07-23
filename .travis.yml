@@ -25,11 +25,11 @@ services:
   - postgresql
   - mysql
 install:
-  - pip install --only-binary=numpy,scipy numpy scipy
-  - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
-  - pip install --requirement requirements-dev.txt
-  - pip install --editable .
-  - pip install pytest-slack
+  - pip install --no-cache-dir --only-binary=numpy,scipy numpy scipy
+  - if [ -z "$PANDAS" ]; then pip install --no-cache-dir pandas; else pip install --no-cache-dir pandas==$PANDAS; fi
+  - pip install --no-cache-dir --requirement requirements-dev.txt
+  - pip install --no-cache-dir --editable .
+  - pip install --no-cache-dir pytest-slack
 before_script:
   - psql -c 'create database test_ci;' -U postgres
   - mysql -e 'CREATE DATABASE IF NOT EXISTS test_ci;'
@@ -46,7 +46,7 @@ jobs:
     - stage: test
       dist: xenial
       install:
-        - pip install --requirement requirements-dev.txt
+        - pip install --no-cache-dir --requirement requirements-dev.txt
       script:
         - isort --check-only --skip docs/
         - black --check --exclude docs/ .
@@ -85,11 +85,11 @@ jobs:
         - python --version
       #      - choco install postgresql10 --params '/Password:' --paramsglobal
       install:
-        - pip install numpy scipy
-        - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
-        - pip install --upgrade pytest
-        - pip install --requirement requirements-dev.txt
-        - pip install pytest-slack
+        - pip install --no-cache-dir numpy scipy
+        - if [ -z "$PANDAS" ]; then pip install --no-cache-dir pandas; else pip install --no-cache-dir pandas==$PANDAS; fi
+        - pip install --no-cache-dir --upgrade pytest
+        - pip install --no-cache-dir --requirement requirements-dev.txt
+        - pip install --no-cache-dir pytest-slack
       before_script:
         - python --version
       #    - psql -c 'create database test_ci;' -U postgres
@@ -115,11 +115,11 @@ jobs:
         # TODO This seems to fail when running outside a debugging mode build so allow it to pass
         - /usr/local/opt/postgres/bin/createuser --superuser postgres --host=127.0.0.1 || echo 'no postgres for you'
       install:
-        - pip3 install numpy scipy
-        - if [ -z "$PANDAS" ]; then pip3 install pandas; else pip3 install pandas==$PANDAS; fi
-        - pip3 install --upgrade pytest
-        - pip3 install --requirement requirements-dev.txt
-        - pip3 install pytest-slack
+        - pip3 install --no-cache-dir numpy scipy
+        - if [ -z "$PANDAS" ]; then pip3 install --no-cache-dir pandas; else pip3 install --no-cache-dir pandas==$PANDAS; fi
+        - pip3 install --no-cache-dir --upgrade pytest
+        - pip3 install --no-cache-dir --requirement requirements-dev.txt
+        - pip3 install --no-cache-dir pytest-slack
       before_script:
         - python3 --version
         # TODO enable postgres for mac builds (see above todo)
