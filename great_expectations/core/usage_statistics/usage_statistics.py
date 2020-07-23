@@ -244,6 +244,10 @@ def usage_statistics_enabled_method(
 
         @wraps(func)
         def usage_statistics_wrapped_method(*args, **kwargs):
+            # if a function like `build_data_docs()` is being called as a `dry_run`
+            # then we dont want to emit usage_statistics. We just return the function without sending a usage_stats message
+            if "dry_run" in kwargs and kwargs["dry_run"]:
+                return func(*args, **kwargs)
             # Set event_payload now so it can be updated below
             event_payload = {}
             message = {"event_payload": event_payload, "event": event_name}
