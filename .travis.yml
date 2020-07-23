@@ -45,6 +45,11 @@ jobs:
   include:
     - stage: test
       dist: xenial
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install unixodbc-dev
+        - sudo apt-get install python-pip
+        - sudo apt-get install python-pyodbc
       install:
         - pip install --no-cache-dir --requirement requirements-dev.txt
       script:
