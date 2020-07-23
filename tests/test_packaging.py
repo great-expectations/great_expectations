@@ -1,4 +1,4 @@
-import os
+import requirements as rp
 
 from great_expectations.data_context.util import file_relative_path
 
@@ -8,53 +8,33 @@ def test_requirements_files():
 
     with open(file_relative_path(__file__, "../requirements.txt")) as req:
         requirements = set(
-            [
-                line.rstrip().split(" ")[0]
-                for line in req.readlines()
-                if line != os.linesep and not line.startswith("#")
-            ]
+            [f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)]
         )
 
     with open(file_relative_path(__file__, "../requirements-dev.txt")) as req:
         requirements_dev = set(
-            [
-                line.rstrip().split(" ")[0]
-                for line in req.readlines()
-                if line != os.linesep and not line.startswith("#")
-            ]
+            [f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)]
         )
 
     with open(
         file_relative_path(__file__, "../tests/requirements-dev-minimal.txt")
     ) as req:
         requirements_dev_min = set(
-            [
-                line.rstrip().split(" ")[0]
-                for line in req.readlines()
-                if line != os.linesep and not line.startswith("#")
-            ]
+            [f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)]
         )
 
     with open(
         file_relative_path(__file__, "../tests/requirements-dev-sqlalchemy.txt")
     ) as req:
         requirements_dev_sqlalchemy = set(
-            [
-                line.rstrip().split(" ")[0]
-                for line in req.readlines()
-                if line != os.linesep and not line.startswith("#")
-            ]
+            [f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)]
         )
 
     with open(
         file_relative_path(__file__, "../tests/requirements-dev-spark.txt")
     ) as req:
         requirements_dev_spark = set(
-            [
-                line.rstrip().split(" ")[0]
-                for line in req.readlines()
-                if line != os.linesep and not line.startswith("#")
-            ]
+            [f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)]
         )
 
     assert requirements <= requirements_dev
@@ -68,4 +48,4 @@ def test_requirements_files():
         | requirements_dev_min
         | requirements_dev_sqlalchemy
         | requirements_dev_spark
-    ) == {"pre-commit>=2.3.0", "isort[requirements]==4.3.21"}
+    ) == {"pre-commit>=2.3.0", "requirements-parser>=0.2.0", "isort==4.3.21"}

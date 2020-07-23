@@ -16,4 +16,5 @@ pyarrow>=0.12.0  # all_tests
 pyspark>=2.3.2,<3.0.0  # spark
 pytest>=5.3.5  # all_tests
 pytest-cov>=2.8.1  # all_tests
+requirements-parser>=0.2.0  # all_tests
 xlrd>=1.1.0  # all_tests
