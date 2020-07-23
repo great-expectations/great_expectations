@@ -16,36 +16,58 @@ def test_requirements_files():
             [f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)]
         )
 
-    with open(
-        file_relative_path(__file__, "../tests/requirements-dev-minimal.txt")
-    ) as req:
-        requirements_dev_min = set(
+    with open(file_relative_path(__file__, "../requirements-dev-util.txt")) as req:
+        requirements_dev_util = set(
+            [f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)]
+        )
+
+    with open(file_relative_path(__file__, "../requirements-dev-spark.txt")) as req:
+        requirements_dev_spark = set(
             [f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)]
         )
 
     with open(
-        file_relative_path(__file__, "../tests/requirements-dev-sqlalchemy.txt")
+        file_relative_path(__file__, "../requirements-dev-sqlalchemy.txt")
     ) as req:
         requirements_dev_sqlalchemy = set(
             [f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)]
         )
 
-    with open(
-        file_relative_path(__file__, "../tests/requirements-dev-spark.txt")
-    ) as req:
-        requirements_dev_spark = set(
+    with open(file_relative_path(__file__, "../requirements-dev-test.txt")) as req:
+        requirements_dev_test = set(
+            [f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)]
+        )
+
+    with open(file_relative_path(__file__, "../requirements-dev-build.txt")) as req:
+        requirements_dev_build = set(
             [f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)]
         )
 
     assert requirements <= requirements_dev
 
-    assert requirements_dev_min.intersection(requirements_dev_sqlalchemy) == set()
-    assert requirements_dev_min.intersection(requirements_dev_spark) == set()
-    assert requirements_dev_spark.intersection(requirements_dev_sqlalchemy) == set()
+    assert requirements_dev_util.intersection(requirements_dev_spark) == set()
+    assert requirements_dev_util.intersection(requirements_dev_sqlalchemy) == set()
+    assert requirements_dev_util.intersection(requirements_dev_test) == set()
+    assert requirements_dev_util.intersection(requirements_dev_build) == set()
 
-    assert requirements_dev - (
-        requirements
-        | requirements_dev_min
-        | requirements_dev_sqlalchemy
-        | requirements_dev_spark
-    ) == {"pre-commit>=2.3.0", "isort==4.3.21"}
+    assert requirements_dev_spark.intersection(requirements_dev_sqlalchemy) == set()
+    assert requirements_dev_spark.intersection(requirements_dev_test) == set()
+    assert requirements_dev_spark.intersection(requirements_dev_build) == set()
+
+    assert requirements_dev_sqlalchemy.intersection(requirements_dev_test) == set()
+    assert requirements_dev_sqlalchemy.intersection(requirements_dev_build) == set()
+
+    assert requirements_dev_test.intersection(requirements_dev_build) == set()
+
+    assert (
+        requirements_dev
+        - (
+            requirements
+            | requirements_dev_util
+            | requirements_dev_sqlalchemy
+            | requirements_dev_spark
+            | requirements_dev_test
+            | requirements_dev_build
+        )
+        == set()
+    )

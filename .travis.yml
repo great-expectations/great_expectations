@@ -43,16 +43,16 @@ jobs:
   allow_failures:
     - if: os = windows OR os = osx
   include:
-    - stage: test
-      dist: xenial
-      before_install:
-        - sudo apt-get update
-        - sudo apt-get install build-essential libssl-dev libffi-dev g++ python3-dev unixodbc-dev python-pip python-pyodbc
-      install:
-        - pip install --no-cache-dir --requirement requirements-dev.txt
-      script:
-        - isort --check-only --skip docs/
-        - black --check --exclude docs/ .
+#    - stage: test
+#      dist: xenial
+#      before_install:
+#        - sudo apt-get update
+#        - sudo apt-get install build-essential libssl-dev libffi-dev g++ python3-dev unixodbc-dev python-pip python-pyodbc
+#      install:
+#        - pip install --no-cache-dir --requirement requirements-dev.txt
+#      script:
+#        - isort --check-only --skip docs/
+#        - black --check --exclude docs/ .
     - stage: test
       dist: trusty
       python: 3.6
@@ -70,13 +70,13 @@ jobs:
       python: 3.6
       env:
         - GE_PYTEST_OPTS=""
-    #  - stage: test
-    #    dist: xenial
-    #    env: PANDAS=0.25.3
-    #    python: 3.7
-    #  - stage: test
-    #    dist: bionic
-    #    python: 3.8
+#      - stage: test
+#        dist: xenial
+#        env: PANDAS=0.25.3
+#        python: 3.7
+#      - stage: test
+#        dist: bionic
+#        python: 3.8
     - stage: experimental
       os: windows
       name: "Python 3.6.7 on Windows"
