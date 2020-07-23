@@ -47,9 +47,7 @@ jobs:
       dist: xenial
       before_install:
         - sudo apt-get update
-        - sudo apt-get install unixodbc-dev
-        - sudo apt-get install python-pip
-        - sudo apt-get install python-pyodbc
+        - sudo apt-get install build-essential libssl-dev libffi-dev python3-dev python3.6-dev python3.7-dev python3.8-dev unixodbc-dev python-pip python-pyodbc
       install:
         - pip install --no-cache-dir --requirement requirements-dev.txt
       script:
