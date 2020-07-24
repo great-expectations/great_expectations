@@ -315,10 +315,8 @@ class MetaSqlAlchemyDataset(Dataset):
         expected_condition: BinaryExpression,
         ignore_values_condition: BinaryExpression,
     ) -> Select:
-        temp_table_name: str = "ge_tmp_" + str(uuid.uuid4())[:8]
         # mssql expects all temporary table names to have a prefix '#'
-        if self.sql_engine_dialect.name.lower() == "mssql":
-            temp_table_name = f"tempdb..#{temp_table_name}"
+        temp_table_name: str = f"#ge_tmp_{str(uuid.uuid4())[:8]}"
 
         with self.engine.begin():
             metadata: sa.MetaData = sa.MetaData(self.engine)
@@ -326,6 +324,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 temp_table_name,
                 metadata,
                 sa.Column("condition", sa.Integer, primary_key=False, nullable=False),
+                schema="tempdb.dbo",
             )
             temp_table_obj.create(self.engine, checkfirst=True)
 
@@ -437,10 +436,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
             schema = None
-            table_name = "ge_tmp_" + str(uuid.uuid4())[:8]
+            table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
             # mssql expects all temporary table names to have a prefix '#'
             if engine.dialect.name.lower() == "mssql":
-                table_name = "#" + table_name
+                table_name = f"#{table_name}"
             generated_table_name = table_name
         else:
             generated_table_name = None
@@ -1205,7 +1204,7 @@ JOIN
 ON
     cols.user_type_id = ty.user_type_id
 WHERE
-    object_id = OBJECT_ID('tempdb..{self._table}')
+    object_id = OBJECT_ID('tempdb.dbo.{self._table}')
                 """
             )
             col_info_tuples_list = self.engine.execute(col_info_query).fetchall()
