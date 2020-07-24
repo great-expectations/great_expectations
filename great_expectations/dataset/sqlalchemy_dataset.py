@@ -98,6 +98,19 @@ except ImportError:
     pybigquery = None
 
 
+try:
+    # SQLAlchemy does not export the "INT" type for the MS SQL Server dialect; however "INT" is supported by the engine.
+    # Since SQLAlchemy exports the "INTEGER" type for the MS SQL Server dialect, alias "INT" to the "INTEGER" type.
+    import sqlalchemy.dialects.mssql as mssqltypes
+
+    try:
+        getattr(mssqltypes, "INT")
+    except AttributeError:
+        mssqltypes.INT = mssqltypes.INTEGER
+except ImportError:
+    pass
+
+
 class SqlAlchemyBatchReference(object):
     def __init__(self, engine, table_name=None, schema=None, query=None):
         self._engine = engine
@@ -304,7 +317,7 @@ class MetaSqlAlchemyDataset(Dataset):
         temp_table_name: str = "ge_tmp_" + str(uuid.uuid4())[:8]
         # mssql expects all temporary table names to have a prefix '#'
         if self.sql_engine_dialect.name.lower() == "mssql":
-            temp_table_name = f"#{temp_table_name}"
+            temp_table_name = f"tempdb..#{temp_table_name}"
 
         with self.engine.begin():
             metadata: sa.MetaData = sa.MetaData(self.engine)
@@ -1183,16 +1196,26 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             type_module = self._get_dialect_type_module()
             # Get column names and types from the database
             # StackOverflow to the rescue: https://stackoverflow.com/a/38634368
-            col_info = self.engine.execute(
-                "SELECT cols.NAME,ty.NAME FROM tempdb.sys.columns cols JOIN sys.types ty ON cols.user_type_id = ty.user_type_id WHERE object_id = OBJECT_ID('tempdb..{}')".format(
-                    self._table
-                )
+            col_info_query: str = f"""
+SELECT
+    cols.NAME, ty.NAME
+FROM
+    tempdb.sys.columns AS cols
+JOIN
+    sys.types AS ty
+ON
+    cols.user_type_id = ty.user_type_id
+WHERE
+    object_id = OBJECT_ID('tempdb..{self._table}')
+            """
+            col_info_tuples_list = self.engine.execute(
+                sa.text(col_info_query)
             ).fetchall()
-            col_dict = [
+            col_info_dict = [
                 {"name": col_name, "type": getattr(type_module, col_type.upper())()}
-                for col_name, col_type in col_info
+                for col_name, col_type in col_info_tuples_list
             ]
-        return col_dict
+        return col_info_dict
 
     ###
     ###
