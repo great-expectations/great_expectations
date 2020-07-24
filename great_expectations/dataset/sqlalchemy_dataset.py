@@ -5,7 +5,7 @@ import uuid
 import warnings
 from datetime import datetime
 from functools import wraps
-from typing import Iterable, List
+from typing import Dict, Iterable, List
 
 import pandas as pd
 from dateutil.parser import parse
@@ -31,7 +31,7 @@ try:
     from sqlalchemy.sql.expression import BinaryExpression, literal
     from sqlalchemy.sql.selectable import Select, CTE
     from sqlalchemy.sql.operators import custom_op
-    from sqlalchemy.sql.elements import Label, WithinGroup
+    from sqlalchemy.sql.elements import Label, WithinGroup, TextClause
     from sqlalchemy.engine.result import RowProxy
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.exc import ProgrammingError
@@ -49,6 +49,7 @@ except ImportError:
     custom_op = None
     Label = None
     WithinGroup = None
+    TextClause = None
     RowProxy = None
     DefaultDialect = None
     ProgrammingError = None
@@ -886,7 +887,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 sql_approx: str = get_approximate_percentile_disc_sql(
                     selects=selects, sql_engine_dialect=self.sql_engine_dialect
                 )
-                selects_approx: List[WithinGroup] = [sa.text(sql_approx)]
+                selects_approx: List[TextClause] = [sa.text(sql_approx)]
                 quantiles_query_approx: Select = sa.select(selects_approx).select_from(
                     self._table
                 )
@@ -1188,15 +1189,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
-        if self.sql_engine_dialect.name.lower() != "mssql":
-            sql = sa.select([sa.text("*")]).select_from(self._table).limit(1)
-            col_names = self.engine.execute(sql).keys()
-            col_dict = [{"name": col_name} for col_name in col_names]
-        else:
+        col_info_dict_list: List[Dict]
+        if self.sql_engine_dialect.name.lower() == "mssql":
             type_module = self._get_dialect_type_module()
             # Get column names and types from the database
             # StackOverflow to the rescue: https://stackoverflow.com/a/38634368
-            col_info_query: str = f"""
+            col_info_query: TextClause = sa.text(
+                f"""
 SELECT
     cols.NAME, ty.NAME
 FROM
@@ -1207,15 +1206,18 @@ ON
     cols.user_type_id = ty.user_type_id
 WHERE
     object_id = OBJECT_ID('tempdb..{self._table}')
-            """
-            col_info_tuples_list = self.engine.execute(
-                sa.text(col_info_query)
-            ).fetchall()
-            col_info_dict = [
+                """
+            )
+            col_info_tuples_list = self.engine.execute(col_info_query).fetchall()
+            col_info_dict_list = [
                 {"name": col_name, "type": getattr(type_module, col_type.upper())()}
                 for col_name, col_type in col_info_tuples_list
             ]
-        return col_info_dict
+        else:
+            query: Select = sa.select([sa.text("*")]).select_from(self._table).limit(1)
+            col_names: list = self.engine.execute(query).keys()
+            col_info_dict_list = [{"name": col_name} for col_name in col_names]
+        return col_info_dict_list
 
     ###
     ###
