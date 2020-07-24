@@ -7,6 +7,8 @@ Changelog
 Develop
 -----------------
 * [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) -- thanks @Dandandan
+* [BUGFIX] Handle case when unexpected_count list element is str
+* [DOCS] New how-to guide: How to instantiate a Data Context on an EMR Spark cluster
 
 
 0.11.8
