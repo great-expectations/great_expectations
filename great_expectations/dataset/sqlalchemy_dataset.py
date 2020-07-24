@@ -324,7 +324,6 @@ class MetaSqlAlchemyDataset(Dataset):
                 temp_table_name,
                 metadata,
                 sa.Column("condition", sa.Integer, primary_key=False, nullable=False),
-                schema="tempdb.dbo",
             )
             temp_table_obj.create(self.engine, checkfirst=True)
 
@@ -1204,7 +1203,7 @@ JOIN
 ON
     cols.user_type_id = ty.user_type_id
 WHERE
-    object_id = OBJECT_ID('tempdb.dbo.{self._table}')
+    object_id = OBJECT_ID('tempdb..{self._table}')
                 """
             )
             col_info_tuples_list = self.engine.execute(col_info_query).fetchall()
