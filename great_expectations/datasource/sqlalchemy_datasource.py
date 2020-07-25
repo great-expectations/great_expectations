@@ -1,6 +1,7 @@
 import datetime
 import logging
 from string import Template
+from urllib.parse import urlparse
 
 from great_expectations.core.batch import Batch
 from great_expectations.core.util import nested_update
@@ -22,14 +23,142 @@ except ImportError:
     logger.debug("Unable to import sqlalchemy.")
 
 
+if sqlalchemy != None:
+    try:
+        import google.auth
+
+        datasource_initialization_exceptions = (
+            sqlalchemy.exc.OperationalError,
+            sqlalchemy.exc.DatabaseError,
+            sqlalchemy.exc.ArgumentError,
+            google.auth.exceptions.GoogleAuthError,
+        )
+    except ImportError:
+        datasource_initialization_exceptions = (
+            sqlalchemy.exc.OperationalError,
+            sqlalchemy.exc.DatabaseError,
+            sqlalchemy.exc.ArgumentError,
+        )
+
+
 class SqlAlchemyDatasource(Datasource):
     """
-    A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using the following rules:
-      - if the batch_kwargs include a table key, the datasource will provide a dataset object connected
-        to that table
-      - if the batch_kwargs include a query key, the datasource will create a temporary table using that
-        that query. The query can be parameterized according to the standard python Template engine, which
-        uses $parameter, with additional kwargs passed to the get_batch method.
+A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using the following rules:
+    - if the batch_kwargs include a table key, the datasource will provide a dataset object connected to that table
+    - if the batch_kwargs include a query key, the datasource will create a temporary table usingthat query. The query can be parameterized according to the standard python Template engine, which uses $parameter, with additional kwargs passed to the get_batch method.
+
+--ge-feature-maturity-info--
+    id: datasource_postgresql
+    title: Datasource - PostgreSQL
+    icon:
+    short_description: Postgres
+    description: Support for using the open source PostgresQL database as an external datasource and execution engine.
+    how_to_guide_url:
+    maturity: Production
+    maturity_details:
+        api_stability: High
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: Complete
+        documentation_completeness: Medium (does not have a specific how-to, but easy to use overall)
+        bug_risk: Low
+        expectation_completeness: Moderate
+
+    id: datasource_bigquery
+    title: Datasource - BigQuery
+    icon:
+    short_description: BigQuery
+    description: Use Google BigQuery as an execution engine and external datasource to validate data.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_bigquery_datasource.html
+    maturity: Beta
+    maturity_details:
+        api_stability: Unstable (table generator inability to work with triple-dotted, temp table usability, init flow calls setup "other")
+        implementation_completeness: Moderate
+        unit_test_coverage: Partial (no test coverage for temp table creation)
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Partial (how-to does not cover all cases)
+        bug_risk: High (we *know* of several bugs, including inability to list tables, SQLAlchemy URL incomplete)
+        expectation_completeness: Moderate
+
+    id: datasource_redshift
+    title: Datasource - Amazon Redshift
+    icon:
+    short_description: Redshift
+    description: Use Amazon Redshift as an execution engine and external datasource to validate data.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_redshift_datasource.html
+    maturity: Beta
+    maturity_details:
+        api_stability: Moderate (potential metadata/introspection method special handling for performance)
+        implementation_completeness: Complete
+        unit_test_coverage: Minimal
+        integration_infrastructure_test_coverage: Minimal (none automated)
+        documentation_completeness: Moderate
+        bug_risk: Moderate
+        expectation_completeness: Moderate
+
+    id: datasource_snowflake
+    title: Datasource - Snowflake
+    icon:
+    short_description: Snowflake
+    description: Use Snowflake Computing as an execution engine and external datasource to validate data.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_snowflake_datasource.html
+    maturity: Production
+    maturity_details:
+        api_stability: High
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: Minimal (manual only)
+        documentation_completeness: Complete
+        bug_risk: Low
+        expectation_completeness: Complete
+
+    id: datasource_mssql
+    title: Datasource - Microsoft SQL Server
+    icon:
+    short_description: Microsoft SQL Server
+    description: Use Microsoft SQL Server as an execution engine and external datasource to validate data.
+    how_to_guide_url:
+    maturity: Experimental
+    maturity_details:
+        api_stability: High
+        implementation_completeness: Moderate
+        unit_test_coverage: Minimal (none)
+        integration_infrastructure_test_coverage: Minimal (none)
+        documentation_completeness: Minimal
+        bug_risk: High
+        expectation_completeness: Low (some required queries do not generate properly, such as related to nullity)
+
+    id: datasource_mysql
+    title: Datasource - MySQL
+    icon:
+    short_description: MySQL
+    description: Use MySQL as an execution engine and external datasource to validate data.
+    how_to_guide_url:
+    maturity: Experimental
+    maturity_details:
+        api_stability: Low (no consideration for temp tables)
+        implementation_completeness: Low (no consideration for temp tables)
+        unit_test_coverage: Minimal (none)
+        integration_infrastructure_test_coverage: Minimal (none)
+        documentation_completeness:  Minimal (none)
+        bug_risk: Unknown
+        expectation_completeness: Unknown
+
+    id: datasource_mariadb
+    title: Datasource - MariaDB
+    icon:
+    short_description: MariaDB
+    description: Use MariaDB as an execution engine and external datasource to validate data.
+    how_to_guide_url:
+    maturity: Experimental
+    maturity_details:
+        api_stability: Low (no consideration for temp tables)
+        implementation_completeness: Low (no consideration for temp tables)
+        unit_test_coverage: Minimal (none)
+        integration_infrastructure_test_coverage: Minimal (none)
+        documentation_completeness:  Minimal (none)
+        bug_risk: Unknown
+        expectation_completeness: Unknown
     """
 
     recognized_batch_parameters = {"query_parameters", "limit", "dataset_options"}
@@ -87,7 +216,7 @@ class SqlAlchemyDatasource(Datasource):
         batch_kwargs_generators = configuration_with_defaults.pop(
             "batch_kwargs_generators", None
         )
-        super(SqlAlchemyDatasource, self).__init__(
+        super().__init__(
             name,
             data_context=data_context,
             data_asset_type=data_asset_type,
@@ -112,9 +241,7 @@ class SqlAlchemyDatasource(Datasource):
                 self.engine.connect()
             elif "url" in credentials:
                 url = credentials.pop("url")
-                # TODO perhaps we could carefully regex out the driver from the
-                #  url. It would need to be cautious to avoid leaking secrets.
-                self.drivername = "other"
+                self.drivername = urlparse(url).scheme
                 self.engine = create_engine(url, **kwargs)
                 self.engine.connect()
 
@@ -125,10 +252,26 @@ class SqlAlchemyDatasource(Datasource):
                 self.engine = create_engine(options)
                 self.engine.connect()
 
-        except (
-            sqlalchemy.exc.OperationalError,
-            sqlalchemy.exc.DatabaseError,
-        ) as sqlalchemy_error:
+            # since we switched to lazy loading of Datasources when we initialise a DataContext,
+            # the dialect of SQLAlchemy Datasources cannot be obtained reliably when we send
+            # "data_context.__init__" events.
+            # This event fills in the SQLAlchemy dialect.
+            if data_context is not None and getattr(
+                data_context, "_usage_statistics_handler", None
+            ):
+                handler = data_context._usage_statistics_handler
+                handler.send_usage_message(
+                    event="datasource.sqlalchemy.connect",
+                    event_payload={
+                        "anonymized_name": handler._datasource_anonymizer.anonymize(
+                            self.name
+                        ),
+                        "sqlalchemy_dialect": self.engine.name,
+                    },
+                    success=True,
+                )
+
+        except datasource_initialization_exceptions as sqlalchemy_error:
             raise DatasourceInitializationError(self._name, str(sqlalchemy_error))
 
         self._build_generators()
@@ -160,7 +303,11 @@ class SqlAlchemyDatasource(Datasource):
     def get_batch(self, batch_kwargs, batch_parameters=None):
         # We need to build a batch_id to be used in the dataframe
         batch_markers = BatchMarkers(
-            {"ge_load_time": datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")}
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
         )
 
         if "bigquery_temp_table" in batch_kwargs:
@@ -246,7 +393,7 @@ class SqlAlchemyDatasource(Datasource):
     def process_batch_parameters(
         self, query_parameters=None, limit=None, dataset_options=None
     ):
-        batch_kwargs = super(SqlAlchemyDatasource, self).process_batch_parameters(
+        batch_kwargs = super().process_batch_parameters(
             limit=limit, dataset_options=dataset_options,
         )
         nested_update(batch_kwargs, {"query_parameters": query_parameters})

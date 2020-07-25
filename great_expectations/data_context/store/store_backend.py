@@ -1,4 +1,9 @@
+import logging
 from abc import ABCMeta, abstractmethod
+
+from great_expectations.exceptions import StoreBackendError, StoreError
+
+logger = logging.getLogger(__name__)
 
 
 class StoreBackend(object, metaclass=ABCMeta):
@@ -21,23 +26,32 @@ class StoreBackend(object, metaclass=ABCMeta):
     def fixed_length_key(self):
         return self._fixed_length_key
 
-    def get(self, key):
+    def get(self, key, **kwargs):
         self._validate_key(key)
-        value = self._get(key)
+        value = self._get(key, **kwargs)
         return value
 
     def set(self, key, value, **kwargs):
         self._validate_key(key)
         self._validate_value(value)
         # Allow the implementing setter to return something (e.g. a path used for its key)
-        return self._set(key, value, **kwargs)
+        try:
+            return self._set(key, value, **kwargs)
+        except ValueError as e:
+            logger.debug(str(e))
+            raise StoreBackendError("ValueError while calling _set on store backend.")
+
+    def move(self, source_key, dest_key, **kwargs):
+        self._validate_key(source_key)
+        self._validate_key(dest_key)
+        return self._move(source_key, dest_key, **kwargs)
 
     def has_key(self, key):
         self._validate_key(key)
         return self._has_key(key)
 
     def get_url_for_key(self, key, protocol=None):
-        raise NotImplementedError(
+        raise StoreError(
             "Store backend of type {0:s} does not have an implementation of get_url_for_key".format(
                 type(self).__name__
             )
@@ -68,6 +82,10 @@ class StoreBackend(object, metaclass=ABCMeta):
 
     @abstractmethod
     def _set(self, key, value, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _move(self, source_key, dest_key, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
@@ -103,6 +121,10 @@ class InMemoryStoreBackend(StoreBackend):
 
     def _set(self, key, value, **kwargs):
         self._store[key] = value
+
+    def _move(self, source_key, dest_key, **kwargs):
+        self._store[dest_key] = self._store[source_key]
+        self._store.pop(source_key)
 
     def list_keys(self, prefix=()):
         return [key for key in self._store.keys() if key[: len(prefix)] == prefix]

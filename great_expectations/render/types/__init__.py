@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from great_expectations.render.exceptions import InvalidRenderedContentError
 
 
@@ -12,16 +14,40 @@ class RenderedContent(object):
         return self.to_json_dict() == other.to_json_dict()
 
     @classmethod
-    def rendered_content_list_to_json(cls, list_):
+    def rendered_content_list_to_json(cls, list_, check_dicts=False):
         result_list = []
         for item in list_:
             if isinstance(item, RenderedContent):
                 result_list.append(item.to_json_dict())
             elif isinstance(item, list):
-                result_list.append(RenderedContent.rendered_content_list_to_json(item))
+                result_list.append(
+                    RenderedContent.rendered_content_list_to_json(
+                        item, check_dicts=check_dicts
+                    )
+                )
+            elif check_dicts and isinstance(item, dict):
+                result_list.append(cls.rendered_content_dict_to_json(item))
             else:
                 result_list.append(item)
         return result_list
+
+    @classmethod
+    def rendered_content_dict_to_json(cls, dict_, check_list_dicts=True):
+        json_dict = deepcopy(dict_)
+        for key, val in json_dict.items():
+            if not isinstance(val, (RenderedContent, list, dict)):
+                continue
+            elif isinstance(val, RenderedContent):
+                json_dict[key] = val.to_json_dict()
+            elif isinstance(val, list):
+                json_dict[key] = cls.rendered_content_list_to_json(
+                    val, check_list_dicts
+                )
+            elif isinstance(val, dict):
+                json_dict[key] = cls.rendered_content_dict_to_json(
+                    val, check_list_dicts
+                )
+        return json_dict
 
 
 class RenderedComponentContent(RenderedContent):
@@ -32,7 +58,7 @@ class RenderedComponentContent(RenderedContent):
         self.styling = styling
 
     def to_json_dict(self):
-        d = super(RenderedComponentContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["content_block_type"] = self.content_block_type
         if len(self.styling) > 0:
             d["styling"] = self.styling
@@ -48,15 +74,13 @@ class RenderedHeaderContent(RenderedComponentContent):
         styling=None,
         content_block_type="header",
     ):
-        super(RenderedHeaderContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.header_row = header_row
         self.subheader = subheader
 
     def to_json_dict(self):
-        d = super(RenderedHeaderContent, self).to_json_dict()
+        d = super().to_json_dict()
         if isinstance(self.header, RenderedContent):
             d["header"] = self.header.to_json_dict()
         else:
@@ -80,15 +104,13 @@ class RenderedGraphContent(RenderedComponentContent):
         styling=None,
         content_block_type="graph",
     ):
-        super(RenderedGraphContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.graph = graph
         self.header = header
         self.subheader = subheader
 
     def to_json_dict(self):
-        d = super(RenderedGraphContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["graph"] = self.graph
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
@@ -112,17 +134,19 @@ class RenderedTableContent(RenderedComponentContent):
         header_row=None,
         styling=None,
         content_block_type="table",
+        table_options=None,
+        header_row_options=None,
     ):
-        super(RenderedTableContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.subheader = subheader
         self.table = table
+        self.table_options = table_options
         self.header_row = header_row
+        self.header_row_options = header_row_options
 
     def to_json_dict(self):
-        d = super(RenderedTableContent, self).to_json_dict()
+        d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
                 d["header"] = self.header.to_json_dict()
@@ -138,6 +162,89 @@ class RenderedTableContent(RenderedComponentContent):
             d["header_row"] = RenderedContent.rendered_content_list_to_json(
                 self.header_row
             )
+        if self.header_row_options is not None:
+            d["header_row_options"] = self.header_row_options
+        if self.table_options is not None:
+            d["table_options"] = self.table_options
+        return d
+
+
+class RenderedTabsContent(RenderedComponentContent):
+    def __init__(
+        self, tabs, header=None, subheader=None, styling=None, content_block_type="tabs"
+    ):
+        super(RenderedTabsContent, self).__init__(
+            content_block_type=content_block_type, styling=styling
+        )
+        self.tabs = tabs
+        self.header = header
+        self.subheader = subheader
+
+    def to_json_dict(self):
+        d = super(RenderedTabsContent, self).to_json_dict()
+        d["tabs"] = RenderedContent.rendered_content_list_to_json(
+            self.tabs, check_dicts=True
+        )
+        if self.header is not None:
+            if isinstance(self.header, RenderedContent):
+                d["header"] = self.header.to_json_dict()
+            else:
+                d["header"] = self.header
+        if self.subheader is not None:
+            if isinstance(self.subheader, RenderedContent):
+                d["subheader"] = self.subheader.to_json_dict()
+            else:
+                d["subheader"] = self.subheader
+        return d
+
+
+class RenderedBootstrapTableContent(RenderedComponentContent):
+    def __init__(
+        self,
+        table_data,
+        table_columns,
+        title_row=None,
+        table_options=None,
+        header=None,
+        subheader=None,
+        styling=None,
+        content_block_type="bootstrap_table",
+    ):
+        super(RenderedBootstrapTableContent, self).__init__(
+            content_block_type=content_block_type, styling=styling
+        )
+        self.table_data = table_data
+        self.table_columns = table_columns
+        self.title_row = title_row
+        self.table_options = table_options
+        self.header = header
+        self.subheader = subheader
+
+    def to_json_dict(self):
+        d = super(RenderedBootstrapTableContent, self).to_json_dict()
+        d["table_data"] = RenderedContent.rendered_content_list_to_json(
+            self.table_data, check_dicts=True
+        )
+        d["table_columns"] = RenderedContent.rendered_content_list_to_json(
+            self.table_columns, check_dicts=True
+        )
+        if self.table_options is not None:
+            d["table_options"] = self.table_options
+        if self.title_row is not None:
+            if isinstance(self.title_row, RenderedContent):
+                d["title_row"] = self.title_row.to_json_dict()
+            else:
+                d["title_row"] = self.title_row
+        if self.header is not None:
+            if isinstance(self.header, RenderedContent):
+                d["header"] = self.header.to_json_dict()
+            else:
+                d["header"] = self.header
+        if self.subheader is not None:
+            if isinstance(self.subheader, RenderedContent):
+                d["subheader"] = self.subheader.to_json_dict()
+            else:
+                d["subheader"] = self.subheader
         return d
 
 
@@ -145,13 +252,11 @@ class RenderedContentBlockContainer(RenderedComponentContent):
     def __init__(
         self, content_blocks, styling=None, content_block_type="content_block_container"
     ):
-        super(RenderedContentBlockContainer, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.content_blocks = content_blocks
 
     def to_json_dict(self):
-        d = super(RenderedContentBlockContainer, self).to_json_dict()
+        d = super().to_json_dict()
         d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
             self.content_blocks
         )
@@ -160,13 +265,11 @@ class RenderedContentBlockContainer(RenderedComponentContent):
 
 class RenderedMarkdownContent(RenderedComponentContent):
     def __init__(self, markdown, styling=None, content_block_type="markdown"):
-        super(RenderedMarkdownContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.markdown = markdown
 
     def to_json_dict(self):
-        d = super(RenderedMarkdownContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["markdown"] = self.markdown
         return d
 
@@ -175,13 +278,11 @@ class RenderedStringTemplateContent(RenderedComponentContent):
     def __init__(
         self, string_template, styling=None, content_block_type="string_template"
     ):
-        super(RenderedStringTemplateContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.string_template = string_template
 
     def to_json_dict(self):
-        d = super(RenderedStringTemplateContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["string_template"] = self.string_template
         return d
 
@@ -195,15 +296,13 @@ class RenderedBulletListContent(RenderedComponentContent):
         styling=None,
         content_block_type="bullet_list",
     ):
-        super(RenderedBulletListContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.subheader = subheader
         self.bullet_list = bullet_list
 
     def to_json_dict(self):
-        d = super(RenderedBulletListContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["bullet_list"] = RenderedContent.rendered_content_list_to_json(
             self.bullet_list
         )
@@ -229,15 +328,13 @@ class ValueListContent(RenderedComponentContent):
         styling=None,
         content_block_type="value_list",
     ):
-        super(ValueListContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.subheader = subheader
         self.value_list = value_list
 
     def to_json_dict(self):
-        d = super(ValueListContent, self).to_json_dict()
+        d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
                 d["header"] = self.header.to_json_dict()
@@ -256,15 +353,13 @@ class TextContent(RenderedComponentContent):
     def __init__(
         self, text, header=None, subheader=None, styling=None, content_block_type="text"
     ):
-        super(TextContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.text = text
         self.header = header
         self.subheader = subheader
 
     def to_json_dict(self):
-        d = super(TextContent, self).to_json_dict()
+        d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
                 d["header"] = self.header.to_json_dict()
@@ -291,9 +386,7 @@ class CollapseContent(RenderedComponentContent):
         content_block_type="collapse",
         inline_link=False,
     ):
-        super(CollapseContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.collapse_toggle_link = collapse_toggle_link
         self.header = header
         self.subheader = subheader
@@ -301,7 +394,7 @@ class CollapseContent(RenderedComponentContent):
         self.inline_link = inline_link
 
     def to_json_dict(self):
-        d = super(CollapseContent, self).to_json_dict()
+        d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
                 d["header"] = self.header.to_json_dict()
@@ -355,7 +448,7 @@ class RenderedDocumentContent(RenderedContent):
         self.batch_kwargs = batch_kwargs
 
     def to_json_dict(self):
-        d = super(RenderedDocumentContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["sections"] = RenderedContent.rendered_content_list_to_json(self.sections)
         d["data_asset_name"] = self.data_asset_name
         d["full_data_asset_identifier"] = self.full_data_asset_identifier
@@ -384,7 +477,7 @@ class RenderedSectionContent(RenderedContent):
         self.section_name = section_name
 
     def to_json_dict(self):
-        d = super(RenderedSectionContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
             self.content_blocks
         )

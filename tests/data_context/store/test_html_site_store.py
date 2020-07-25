@@ -1,5 +1,11 @@
+import datetime
+
 import boto3
 import pytest
+from freezegun import freeze_time
+from marshmallow import ValidationError
+from moto import mock_s3
+
 from great_expectations.data_context.store import HtmlSiteStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -7,14 +13,11 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
     validationResultIdentifierSchema,
 )
-from great_expectations.exceptions import MissingTopLevelConfigKeyError
 from great_expectations.util import gen_directory_tree_str
-from marshmallow import ValidationError
-from moto import mock_s3
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
-
     path = str(
         tmp_path_factory.mktemp(
             "test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir"
@@ -38,7 +41,14 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
     ns_1 = SiteSectionIdentifier(
         site_section_name="validations",
         resource_identifier=ValidationResultIdentifier.from_tuple(
-            ("a", "b", "c", "quarantine", "prod-100")
+            (
+                "a",
+                "b",
+                "c",
+                "quarantine",
+                datetime.datetime.now(datetime.timezone.utc),
+                "prod-100",
+            )
         ),
     )
     my_store.set(ns_1, "aaa")
@@ -47,7 +57,14 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
     ns_2 = SiteSectionIdentifier(
         site_section_name="validations",
         resource_identifier=ValidationResultIdentifier.from_tuple(
-            ("a", "b", "c", "quarantine", "prod-20")
+            (
+                "a",
+                "b",
+                "c",
+                "quarantine",
+                datetime.datetime.now(datetime.timezone.utc),
+                "prod-20",
+            )
         ),
     )
     my_store.set(ns_2, "bbb")
@@ -71,12 +88,14 @@ test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir0/
                 b/
                     c/
                         quarantine/
-                            prod-100.html
-                            prod-20.html
+                            20190926T134241.000000Z/
+                                prod-100.html
+                                prod-20.html
 """
     )
 
 
+@freeze_time("09/26/2019 13:42:41")
 @mock_s3
 def test_HtmlSiteStore_S3_backend():
     bucket = "test_validation_store_bucket"
@@ -130,14 +149,14 @@ def test_HtmlSiteStore_S3_backend():
     assert set(
         [
             s3_object_info["Key"]
-            for s3_object_info in boto3.client("s3").list_objects(
+            for s3_object_info in boto3.client("s3").list_objects_v2(
                 Bucket=bucket, Prefix=prefix
             )["Contents"]
         ]
     ) == {
         "test/prefix/index.html",
         "test/prefix/expectations/asset/quarantine.html",
-        "test/prefix/validations/asset/quarantine/20191007T151224.1234Z_prod_100/1234.html",
+        "test/prefix/validations/asset/quarantine/20191007T151224.1234Z_prod_100/20190926T134241.000000Z/1234.html",
     }
 
     index_content = (

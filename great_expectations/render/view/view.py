@@ -8,12 +8,6 @@ from string import Template as pTemplate
 from uuid import uuid4
 
 import mistune
-from great_expectations import __version__ as ge_version
-from great_expectations.render.types import (
-    RenderedComponentContent,
-    RenderedContent,
-    RenderedDocumentContent,
-)
 from jinja2 import (
     ChoiceLoader,
     Environment,
@@ -21,6 +15,13 @@ from jinja2 import (
     PackageLoader,
     contextfilter,
     select_autoescape,
+)
+
+from great_expectations import __version__ as ge_version
+from great_expectations.render.types import (
+    RenderedComponentContent,
+    RenderedContent,
+    RenderedDocumentContent,
 )
 
 
@@ -46,16 +47,17 @@ class DefaultJinjaView(object):
     * Font Awesome 5.10.1
     * Bootstrap 4.3.1
     * jQuery 3.2.1
-    * Vega 5.3.5
-    * Vega-Lite 3.2.1
-    * Vega-Embed 4.0.0
+    * Vega 5
+    * Vega-Lite 4
+    * Vega-Embed 6
 
     """
 
     _template = NoOpTemplate
 
-    def __init__(self, custom_styles_directory=None):
+    def __init__(self, custom_styles_directory=None, custom_views_directory=None):
         self.custom_styles_directory = custom_styles_directory
+        self.custom_views_directory = custom_views_directory
 
     def render(self, document, template=None, **kwargs):
         self._validate_document(document)
@@ -79,6 +81,8 @@ class DefaultJinjaView(object):
 
         if self.custom_styles_directory:
             loaders.append(FileSystemLoader(self.custom_styles_directory))
+        if self.custom_views_directory:
+            loaders.append(FileSystemLoader(self.custom_views_directory))
 
         env = Environment(
             loader=ChoiceLoader(loaders),
@@ -96,11 +100,15 @@ class DefaultJinjaView(object):
             "get_html_escaped_json_string_from_dict"
         ] = self.get_html_escaped_json_string_from_dict
         env.filters["generate_html_element_uuid"] = self.generate_html_element_uuid
+        env.filters[
+            "attributes_dict_to_html_string"
+        ] = self.attributes_dict_to_html_string
+        env.filters["render_bootstrap_table_data"] = self.render_bootstrap_table_data
         env.globals["ge_version"] = ge_version
         env.filters["add_data_context_id_to_url"] = self.add_data_context_id_to_url
 
         template = env.get_template(template)
-        template.globals["now"] = datetime.datetime.utcnow
+        template.globals["now"] = lambda: datetime.datetime.now(datetime.timezone.utc)
 
         return template
 
@@ -108,7 +116,9 @@ class DefaultJinjaView(object):
     def add_data_context_id_to_url(self, jinja_context, url, add_datetime=True):
         data_context_id = jinja_context.get("data_context_id")
         if add_datetime:
-            datetime_iso_string = datetime.datetime.now().isoformat()
+            datetime_iso_string = datetime.datetime.now(datetime.timezone.utc).strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            )
             url += "?d=" + datetime_iso_string
         if data_context_id:
             url = url + "&dataContextId=" if add_datetime else url + "?dataContextId="
@@ -120,7 +130,7 @@ class DefaultJinjaView(object):
         self, jinja_context, content_block, index=None, content_block_id=None
     ):
         if type(content_block) is str:
-            return "<span>{content_block}</span>".format(content_block=content_block)
+            return content_block
         elif content_block is None:
             return ""
         elif type(content_block) is list:
@@ -132,8 +142,14 @@ class DefaultJinjaView(object):
                     or isinstance(content_block_el, dict)
                     and "content_block_type" in content_block_el
                 ):
+                    new_content_block_id = None
+                    if content_block_id:
+                        new_content_block_id = content_block_id + "-" + str(idx)
                     rendered_block += self.render_content_block(
-                        jinja_context, content_block_el, idx
+                        jinja_context,
+                        content_block_el,
+                        idx,
+                        content_block_id=new_content_block_id,
                     )
                 else:
                     rendered_block += "<span>" + str(content_block_el) + "</span>"
@@ -158,8 +174,32 @@ class DefaultJinjaView(object):
                 jinja_context, content_block=content_block, index=index
             )
 
+    def render_dict_values(self, context, dict_, index=None, content_block_id=None):
+        for key, val in dict_.items():
+            if key.startswith("_"):
+                continue
+            dict_[key] = self.render_content_block(
+                context, val, index, content_block_id
+            )
+
+    @contextfilter
+    def render_bootstrap_table_data(
+        self, context, table_data, index=None, content_block_id=None
+    ):
+        for table_data_dict in table_data:
+            self.render_dict_values(context, table_data_dict, index, content_block_id)
+        return table_data
+
     def get_html_escaped_json_string_from_dict(self, source_dict):
         return json.dumps(source_dict).replace('"', '\\"').replace('"', "&quot;")
+
+    def attributes_dict_to_html_string(self, attributes_dict, prefix=""):
+        attributes_string = ""
+        if prefix:
+            prefix += "-"
+        for attribute, value in attributes_dict.items():
+            attributes_string += f'{prefix}{attribute}="{value}" '
+        return attributes_string
 
     def render_styling(self, styling):
 
@@ -259,6 +299,9 @@ class DefaultJinjaView(object):
         )
 
         tag = template.get("tag", "span")
+        template["template"] = template.get("template", "").replace(
+            "$PARAMETER", "$$PARAMETER"
+        )
         template["template"] = template.get("template", "").replace("\n", "<br>")
 
         if "tooltip" in template:

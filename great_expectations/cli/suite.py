@@ -3,18 +3,15 @@ import os
 import sys
 
 import click
+
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message, cli_message_list
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
     send_usage_message,
-)
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
 )
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
@@ -171,12 +168,16 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                 ) = get_batch_kwargs(
                     context,
                     datasource_name=data_source.name,
+                    batch_kwargs_generator_name=None,
+                    data_asset_name=None,
                     additional_batch_kwargs=additional_batch_kwargs,
                 )
 
         notebook_name = "edit_{}.ipynb".format(suite.expectation_suite_name)
         notebook_path = _get_notebook_path(context, notebook_name)
-        SuiteEditNotebookRenderer().render_to_disk(suite, notebook_path, batch_kwargs)
+        SuiteEditNotebookRenderer.from_data_context(context).render_to_disk(
+            suite, notebook_path, batch_kwargs
+        )
 
         if not jupyter:
             cli_message(
@@ -300,29 +301,25 @@ def _suite_new(
 
     datasource_name = None
     generator_name = None
-    generator_asset = None
+    data_asset_name = None
 
     try:
         if batch_kwargs is not None:
             batch_kwargs = json.loads(batch_kwargs)
 
-        success, suite_name = toolkit.create_expectation_suite(
+        success, suite_name, profiling_results = toolkit.create_expectation_suite(
             context,
             datasource_name=datasource_name,
             batch_kwargs_generator_name=generator_name,
-            generator_asset=generator_asset,
+            data_asset_name=data_asset_name,
             batch_kwargs=batch_kwargs,
             expectation_suite_name=suite,
             additional_batch_kwargs={"limit": 1000},
             empty_suite=empty,
+            show_intro_message=False,
             open_docs=view,
         )
         if success:
-            cli_message(
-                "A new Expectation suite '{}' was added to your project".format(
-                    suite_name
-                )
-            )
             if empty:
                 if jupyter:
                     cli_message(

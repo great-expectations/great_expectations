@@ -1,11 +1,12 @@
 import os
 
 import nbformat
+from nbconvert.preprocessors import ExecutePreprocessor
+
 from great_expectations import DataContext
 from great_expectations.render.renderer.suite_scaffold_notebook_renderer import (
     SuiteScaffoldNotebookRenderer,
 )
-from nbconvert.preprocessors import ExecutePreprocessor
 
 
 def test_render_snapshot_test(titanic_data_context):
@@ -27,26 +28,26 @@ def test_render_snapshot_test(titanic_data_context):
         "cells": [
             {
                 "cell_type": "markdown",
-                "source": """# Scaffold a new Expectation Suite (BETA)
+                "source": """# Scaffold a new Expectation Suite (Experimental)
 This process helps you avoid writing lots of boilerplate when authoring suites by allowing you to select columns you care about and letting a profiler write some candidate expectations for you to adjust.
 
 **Expectation Suite Name**: `my_suite`
 
-We'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)""",
+We'd love it if you'd **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)!""",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.profile import BasicSuiteBuilderProfiler\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "my_suite"\nsuite = context.create_expectation_suite(\n    expectation_suite_name, overwrite_existing=True\n)\n\nbatch_kwargs = {\n    "path": "'
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.profile import BasicSuiteBuilderProfiler\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "my_suite"\nsuite = context.create_expectation_suite(\n    expectation_suite_name, overwrite_existing=True\n)\n\nbatch_kwargs = {\n    "path": "'
                 + csv_path
-                + '",\n    "datasource": "mydatasource",\n}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                + '",\n    "datasource": "mydatasource",\n    "data_asset_name": "Titanic",\n}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": """## Select the columns you want to scaffold expectations on
+                "source": """## Select the columns on which you would like to scaffold expectations
 
 Great Expectations will choose which expectations might make sense for a column based on the **data type** and **cardinality** of the data in each selected column.
 
@@ -68,13 +69,13 @@ use a jupyter keyboard shortcut to toggle each line: **Linux/Windows**:
 
 The suites generated here are **not meant to be production suites** - they are **scaffolds to build upon**.
 
-**To get to a production grade suite, will definitely want to [edit this
-suite](http://docs.greatexpectations.io/en/latest/command_line.html#great-expectations-suite-edit)
+**To get to a production grade suite, you will definitely want to [edit this
+suite](https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html)
 after scaffolding gets you close to what you want.**
 
 This is highly configurable depending on your goals. You can include or exclude
 columns, and include or exclude expectation types (when applicable). [The
-Expectation Glossary](http://docs.greatexpectations.io/en/latest/expectation_glossary.html)
+Expectation Glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=scaffold_expectations)
 contains a list of possible expectations.""",
                 "metadata": {},
             },
@@ -82,24 +83,24 @@ contains a list of possible expectations.""",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": '# Wipe the suite clean to prevent unwanted expectations on the batch\nsuite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)\nbatch = context.get_batch(batch_kwargs, suite)\n\nscaffold_config = {\n    "included_columns": included_columns,\n    # "excluded_columns": [],\n    # "included_expectations": [],\n    # "excluded_expectations": [],\n}\nsuite, evr = BasicSuiteBuilderProfiler().profile(batch, profiler_configuration=scaffold_config)',
+                "source": '# Wipe the suite clean to prevent unwanted expectations in the batch\nsuite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)\nbatch = context.get_batch(batch_kwargs, suite)\n\n# In the scaffold_config, included or excluded expectation names should be strings.\nscaffold_config = {\n    "included_columns": included_columns,\n    # "excluded_columns": [],\n    # "included_expectations": [],\n    # "excluded_expectations": [],\n}\nsuite, evr = BasicSuiteBuilderProfiler().profile(batch, profiler_configuration=scaffold_config)',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & review the scaffolded Expectation Suite\n\nLet's save the scaffolded expectation suite as a JSON file in the\n`great_expectations/expectations` directory of your project and rebuild the Data\n Docs site to make reviewing the scaffolded suite easy.",
+                "source": "## Save & review the scaffolded Expectation Suite\n\nLet's save the scaffolded expectation suite as a JSON file in the\n`great_expectations/expectations` directory of your project and rebuild the Data\n Docs site to make it easy to review the scaffolded suite.",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\n# Let\'s make a simple sortable timestamp. Note this could come from your pipeline runner.\nrun_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nexpectation_suite_identifier = list(results["details"].keys())[0]\nvalidation_result_identifier = ValidationResultIdentifier(\n    expectation_suite_identifier=expectation_suite_identifier,\n    batch_identifier=batch.batch_kwargs.to_id(),\n    run_id=run_id\n)\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Next steps\nAfter you are happy with this scaffolded Expectation Suite in Data Docs you\nshould edit this suite to make finer grained adjustments to the expectations.\nThis is be done by running `great_expectations suite edit my_suite`.",
+                "source": "## Next steps\nAfter you review this scaffolded Expectation Suite in Data Docs you\nshould edit this suite to make finer grained adjustments to the expectations.\nThis can be done by running `great_expectations suite edit my_suite`.",
                 "metadata": {},
             },
         ],

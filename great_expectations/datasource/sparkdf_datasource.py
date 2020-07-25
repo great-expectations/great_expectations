@@ -31,6 +31,25 @@ class SparkDFDatasource(Datasource):
         - PathBatchKwargs ("path" or "s3" keys)
         - InMemoryBatchKwargs ("dataset" key)
         - QueryBatchKwargs ("query" key)
+
+--ge-feature-maturity-info--
+
+    id: datasource_hdfs_spark
+        title: Datasource - HDFS
+        icon:
+        short_description: HDFS
+        description: Use HDFS as an external datasource in conjunction with Spark.
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Unknown
+            unit_test_coverage: Minimal (none)
+            integration_infrastructure_test_coverage: Minimal (none)
+            documentation_completeness:  Minimal (none)
+            bug_risk: Unknown
+
+--ge-feature-maturity-info--
     """
 
     recognized_batch_parameters = {
@@ -108,7 +127,7 @@ class SparkDFDatasource(Datasource):
         batch_kwargs_generators = configuration_with_defaults.pop(
             "batch_kwargs_generators", None
         )
-        super(SparkDFDatasource, self).__init__(
+        super().__init__(
             name,
             data_context=data_context,
             data_asset_type=data_asset_type,
@@ -132,7 +151,7 @@ class SparkDFDatasource(Datasource):
     def process_batch_parameters(
         self, reader_method=None, reader_options=None, limit=None, dataset_options=None
     ):
-        batch_kwargs = super(SparkDFDatasource, self).process_batch_parameters(
+        batch_kwargs = super().process_batch_parameters(
             limit=limit, dataset_options=dataset_options,
         )
 
@@ -158,7 +177,11 @@ class SparkDFDatasource(Datasource):
 
         # We need to build batch_markers to be used with the DataFrame
         batch_markers = BatchMarkers(
-            {"ge_load_time": datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")}
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
         )
 
         if "path" in batch_kwargs or "s3" in batch_kwargs:

@@ -355,7 +355,7 @@ class Dataset(MetaDataset):
             **kwargs       : Keyword arguments to be passed the the function
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
         Notes:
             This function is a thin layer to allow quick testing of new expectation functions, without having to \
@@ -377,7 +377,7 @@ class Dataset(MetaDataset):
             **kwargs       : Keyword arguments to be passed the the function
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
         Notes:
             This function is a thin layer to allow quick testing of new expectation functions, without having to \
@@ -435,7 +435,7 @@ class Dataset(MetaDataset):
                 For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -486,7 +486,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -557,7 +557,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -638,7 +638,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -698,7 +698,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -779,7 +779,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -846,7 +846,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -894,7 +894,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -944,7 +944,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1009,7 +1009,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1071,7 +1071,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1154,7 +1154,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1229,7 +1229,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1300,7 +1300,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1367,7 +1367,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1429,7 +1429,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1493,7 +1493,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1555,7 +1555,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1610,7 +1610,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1668,7 +1668,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1730,7 +1730,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1787,7 +1787,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1846,7 +1846,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1892,7 +1892,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1938,7 +1938,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -1989,7 +1989,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -2063,7 +2063,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -2169,7 +2169,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -2270,7 +2270,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -2360,7 +2360,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -2435,7 +2435,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -2546,7 +2546,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -2690,7 +2690,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -2790,7 +2790,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -2884,7 +2884,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -2976,7 +2976,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -3082,7 +3082,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -3157,7 +3157,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -3264,7 +3264,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -3401,7 +3401,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -3538,7 +3538,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -3669,7 +3669,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -3776,7 +3776,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -4251,7 +4251,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -4302,7 +4302,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -4347,7 +4347,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
@@ -4394,7 +4394,7 @@ class Dataset(MetaDataset):
                 modification. For more detail, see :ref:`meta`.
 
         Returns:
-            A JSON-serializable expectation result object.
+            An ExpectationSuiteValidationResult
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.

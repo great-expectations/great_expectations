@@ -1,6 +1,6 @@
 branches:
   only:
-    - master
+    - main
     - develop
     - "/^\\d.*/"
 language: python
@@ -16,13 +16,14 @@ env:
 stages:
   - name: test
   - name: deploy
-    if: branch = master AND type != pull_request
+    if: branch = main AND type != pull_request
   - name: experimental
-    if: branch != master
+    if: branch != main
 addons:
   postgresql: '9.4'
 services:
   - postgresql
+  - mysql
 install:
   - pip install --only-binary=numpy,scipy numpy scipy
   - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
@@ -31,6 +32,7 @@ install:
   - pip install pytest-slack
 before_script:
   - psql -c 'create database test_ci;' -U postgres
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS test_ci;'
 script:
   - pytest $GE_PYTEST_OPTS --cov=great_expectations --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL --slack_channel=notifications-great_expectations tests/
 after_success:
@@ -44,9 +46,9 @@ jobs:
     - stage: test
       dist: xenial
       install:
-        - pip install black==19.10b0
+        - pip install -r requirements-dev.txt
       script:
-        # NOTE: we could also consider isort, but its sort order depends on installed libraries or else libraries must be explicitly declared individually in its configuration
+        - isort --check-only --skip docs/
         - black --check --exclude docs/ .
     - stage: test
       dist: trusty
@@ -63,6 +65,8 @@ jobs:
     - stage: test
       dist: trusty
       python: 3.6
+      env:
+        - GE_PYTEST_OPTS=""
     #  - stage: test
     #    dist: xenial
     #    env: PANDAS=0.25.3
@@ -124,12 +128,12 @@ jobs:
     - stage: deploy
       python: 3.6
       script:
-        - git tag --annotate 0.10.12 -m "0.10.12" || echo "tag exists, skipping"
+        - git tag --annotate 0.11.8 -m "0.11.8" || echo "tag exists, skipping"
       deploy:
         provider: pypi
         edge: true
         on:
-          branch: master
+          branch: main
         distributions: sdist bdist_wheel
         skip_existing: true
         username: __token__

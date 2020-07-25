@@ -3,9 +3,13 @@ import os
 import shutil
 
 import pytest
+from freezegun import freeze_time
+from ruamel.yaml import YAML
+
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
+    RunIdentifier,
     expectationSuiteSchema,
 )
 from great_expectations.data_context import (
@@ -30,7 +34,6 @@ from great_expectations.exceptions import (
     DataContextError,
 )
 from great_expectations.util import gen_directory_tree_str
-from ruamel.yaml import YAML
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -109,9 +112,10 @@ def test_get_available_data_asset_names_with_one_datasource_without_a_generator_
 
 
 def test_get_available_data_asset_names_with_multiple_datasources_with_and_without_generators(
-    empty_data_context,
+    empty_data_context, sa
 ):
     """Test datasources with and without generators."""
+    # requires sqlalchemy because it instantiates sqlalchemydatasource
     context = empty_data_context
     connection_kwargs = {"credentials": {"drivername": "sqlite"}}
 
@@ -142,20 +146,22 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
     }
 
 
-def test_list_expectation_suite_keys(data_context):
-    assert data_context.list_expectation_suites() == [
+def test_list_expectation_suite_keys(data_context_parameterized_expectation_suite):
+    assert data_context_parameterized_expectation_suite.list_expectation_suites() == [
         ExpectationSuiteIdentifier(expectation_suite_name="my_dag_node.default")
     ]
 
 
-def test_get_existing_expectation_suite(data_context):
-    expectation_suite = data_context.get_expectation_suite("my_dag_node.default")
+def test_get_existing_expectation_suite(data_context_parameterized_expectation_suite):
+    expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
+        "my_dag_node.default"
+    )
     assert expectation_suite.expectation_suite_name == "my_dag_node.default"
     assert len(expectation_suite.expectations) == 2
 
 
-def test_get_new_expectation_suite(data_context):
-    expectation_suite = data_context.create_expectation_suite(
+def test_get_new_expectation_suite(data_context_parameterized_expectation_suite):
+    expectation_suite = data_context_parameterized_expectation_suite.create_expectation_suite(
         "this_data_asset_does_not_exist.default"
     )
     assert (
@@ -165,8 +171,8 @@ def test_get_new_expectation_suite(data_context):
     assert len(expectation_suite.expectations) == 0
 
 
-def test_save_expectation_suite(data_context):
-    expectation_suite = data_context.create_expectation_suite(
+def test_save_expectation_suite(data_context_parameterized_expectation_suite):
+    expectation_suite = data_context_parameterized_expectation_suite.create_expectation_suite(
         "this_data_asset_config_does_not_exist.default"
     )
     expectation_suite.expectations.append(
@@ -174,34 +180,44 @@ def test_save_expectation_suite(data_context):
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )
     )
-    data_context.save_expectation_suite(expectation_suite)
-    expectation_suite_saved = data_context.get_expectation_suite(
+    data_context_parameterized_expectation_suite.save_expectation_suite(
+        expectation_suite
+    )
+    expectation_suite_saved = data_context_parameterized_expectation_suite.get_expectation_suite(
         "this_data_asset_config_does_not_exist.default"
     )
     assert expectation_suite.expectations == expectation_suite_saved.expectations
 
 
-def test_compile_evaluation_parameter_dependencies(data_context):
-    assert data_context._evaluation_parameter_dependencies == {}
-    data_context._compile_evaluation_parameter_dependencies()
-    assert data_context._evaluation_parameter_dependencies == {
-        "source_diabetes_data.default": [
-            {
-                "metric_kwargs_id": {
-                    "column=patient_nbr": [
-                        "expect_column_unique_value_count_to_be_between.result.observed_value"
-                    ]
+def test_compile_evaluation_parameter_dependencies(
+    data_context_parameterized_expectation_suite,
+):
+    assert (
+        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
+        == {}
+    )
+    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
+    assert (
+        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
+        == {
+            "source_diabetes_data.default": [
+                {
+                    "metric_kwargs_id": {
+                        "column=patient_nbr": [
+                            "expect_column_unique_value_count_to_be_between.result.observed_value"
+                        ]
+                    }
                 }
-            }
-        ],
-        "source_patient_data.default": [
-            "expect_table_row_count_to_equal.result.observed_value"
-        ],
-    }
+            ],
+            "source_patient_data.default": [
+                "expect_table_row_count_to_equal.result.observed_value"
+            ],
+        }
+    )
 
 
-def test_list_datasources(data_context):
-    datasources = data_context.list_datasources()
+def test_list_datasources(data_context_parameterized_expectation_suite):
+    datasources = data_context_parameterized_expectation_suite.list_datasources()
 
     assert datasources == [
         {
@@ -219,13 +235,13 @@ def test_list_datasources(data_context):
         }
     ]
 
-    data_context.add_datasource(
+    data_context_parameterized_expectation_suite.add_datasource(
         "second_pandas_source",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
     )
 
-    datasources = data_context.list_datasources()
+    datasources = data_context_parameterized_expectation_suite.list_datasources()
 
     assert datasources == [
         {
@@ -253,20 +269,24 @@ def test_list_datasources(data_context):
     ]
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_data_context_get_validation_result(titanic_data_context):
     """
     Test that validation results can be correctly fetched from the configured results store
     """
-    profiling_results = titanic_data_context.profile_datasource("mydatasource")
+    run_id = RunIdentifier(run_name="profiling")
+    profiling_results = titanic_data_context.profile_datasource(
+        "mydatasource", run_id=run_id
+    )
 
     all_validation_result = titanic_data_context.get_validation_result(
-        "mydatasource.mygenerator.Titanic.BasicDatasetProfiler", run_id="profiling"
+        "mydatasource.mygenerator.Titanic.BasicDatasetProfiler", run_id=run_id
     )
     assert len(all_validation_result.results) == 51
 
     failed_validation_result = titanic_data_context.get_validation_result(
         "mydatasource.mygenerator.Titanic.BasicDatasetProfiler",
-        run_id="profiling",
+        run_id=run_id,
         failed_only=True,
     )
     assert len(failed_validation_result.results) == 8
@@ -320,6 +340,7 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
         _ = titanic_data_context.profile_datasource("fakey_mc_fake")
 
 
+@freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
 def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):
 
@@ -394,10 +415,12 @@ project_path/
         {
             "path": os.path.join(project_dir, "data/titanic/Titanic.csv"),
             "datasource": "titanic",
+            "data_asset_name": "Titanic",
         }
     ).to_id()
 
     tree_str = gen_directory_tree_str(project_dir)
+    # print(tree_str)
     assert (
         tree_str
         == """project_path/
@@ -438,7 +461,8 @@ project_path/
                         Titanic/
                             BasicDatasetProfiler/
                                 profiling/
-                                    {}.json
+                                    20190926T134241.000000Z/
+                                        {}.json
 """.format(
             titanic_profiled_batch_id
         )
@@ -451,6 +475,7 @@ project_path/
         {
             "path": os.path.join(project_dir, "data/random/f1.csv"),
             "datasource": "random",
+            "data_asset_name": "f1",
         }
     ).to_id()
 
@@ -458,6 +483,7 @@ project_path/
         {
             "path": os.path.join(project_dir, "data/random/f2.csv"),
             "datasource": "random",
+            "data_asset_name": "f2",
         }
     ).to_id()
 
@@ -465,6 +491,7 @@ project_path/
         project_dir, "great_expectations/uncommitted/data_docs"
     )
     observed = gen_directory_tree_str(data_docs_dir)
+    print(observed)
     assert (
         observed
         == """\
@@ -513,17 +540,20 @@ data_docs/
                     f1/
                         BasicDatasetProfiler/
                             profiling/
-                                {0:s}.html
+                                20190926T134241.000000Z/
+                                    {0:s}.html
                     f2/
                         BasicDatasetProfiler/
                             profiling/
-                                {1:s}.html
+                                20190926T134241.000000Z/
+                                    {1:s}.html
             titanic/
                 subdir_reader/
                     Titanic/
                         BasicDatasetProfiler/
                             profiling/
-                                {2:s}.html
+                                20190926T134241.000000Z/
+                                    {2:s}.html
 """.format(
             f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id
         )
@@ -562,7 +592,7 @@ def basic_data_context_config():
     return DataContextConfig(
         **{
             "commented_map": {},
-            "config_version": 1,
+            "config_version": 2,
             "plugins_directory": "plugins/",
             "evaluation_parameter_store_name": "evaluation_parameter_store",
             "validations_store_name": "does_not_have_to_be_real",
@@ -670,11 +700,15 @@ def test_load_data_context_from_environment_variables(tmp_path_factory):
         os.chdir(curdir)
 
 
-def test_data_context_updates_expectation_suite_names(data_context):
+def test_data_context_updates_expectation_suite_names(
+    data_context_parameterized_expectation_suite,
+):
     # A data context should update the data_asset_name and expectation_suite_name of expectation suites
     # that it creates when it saves them.
 
-    expectation_suites = data_context.list_expectation_suites()
+    expectation_suites = (
+        data_context_parameterized_expectation_suite.list_expectation_suites()
+    )
 
     # We should have a single expectation suite defined
     assert len(expectation_suites) == 1
@@ -683,7 +717,9 @@ def test_data_context_updates_expectation_suite_names(data_context):
 
     # We'll get that expectation suite and then update its name and re-save, then verify that everything
     # has been properly updated
-    expectation_suite = data_context.get_expectation_suite(expectation_suite_name)
+    expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
+        expectation_suite_name
+    )
 
     # Note we codify here the current behavior of having a string data_asset_name though typed ExpectationSuite objects
     # will enable changing that
@@ -698,21 +734,23 @@ def test_data_context_updates_expectation_suite_names(data_context):
 
     expectation_suite.expectation_suite_name = "a_new_suite_name"
 
-    data_context.save_expectation_suite(
+    data_context_parameterized_expectation_suite.save_expectation_suite(
         expectation_suite=expectation_suite, expectation_suite_name="a_new_suite_name"
     )
 
-    fetched_expectation_suite = data_context.get_expectation_suite("a_new_suite_name")
+    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
+        "a_new_suite_name"
+    )
 
     assert fetched_expectation_suite.expectation_suite_name == "a_new_suite_name"
 
     #   2. Using a different name that should be overwritten
-    data_context.save_expectation_suite(
+    data_context_parameterized_expectation_suite.save_expectation_suite(
         expectation_suite=expectation_suite,
         expectation_suite_name="a_new_new_suite_name",
     )
 
-    fetched_expectation_suite = data_context.get_expectation_suite(
+    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
         "a_new_new_suite_name"
     )
 
@@ -721,7 +759,9 @@ def test_data_context_updates_expectation_suite_names(data_context):
     # Check that the saved name difference is actually persisted on disk
     with open(
         os.path.join(
-            data_context.root_directory, "expectations", "a_new_new_suite_name.json"
+            data_context_parameterized_expectation_suite.root_directory,
+            "expectations",
+            "a_new_new_suite_name.json",
         ),
         "r",
     ) as suite_file:
@@ -730,9 +770,13 @@ def test_data_context_updates_expectation_suite_names(data_context):
 
     #   3. Using the new name but having the context draw that from the suite
     expectation_suite.expectation_suite_name = "a_third_suite_name"
-    data_context.save_expectation_suite(expectation_suite=expectation_suite)
+    data_context_parameterized_expectation_suite.save_expectation_suite(
+        expectation_suite=expectation_suite
+    )
 
-    fetched_expectation_suite = data_context.get_expectation_suite("a_third_suite_name")
+    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
+        "a_third_suite_name"
+    )
     assert fetched_expectation_suite.expectation_suite_name == "a_third_suite_name"
 
 
@@ -1090,23 +1134,29 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
 
 def test_build_batch_kwargs(titanic_multibatch_data_context):
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", name="titanic", partition_id="Titanic_1912"
+        "mydatasource",
+        "mygenerator",
+        data_asset_name="titanic",
+        partition_id="Titanic_1912",
     )
     assert os.path.relpath("./data/titanic/Titanic_1912.csv") in batch_kwargs["path"]
 
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", name="titanic", partition_id="Titanic_1911"
+        "mydatasource",
+        "mygenerator",
+        data_asset_name="titanic",
+        partition_id="Titanic_1911",
     )
     assert os.path.relpath("./data/titanic/Titanic_1911.csv") in batch_kwargs["path"]
 
     paths = []
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", name="titanic"
+        "mydatasource", "mygenerator", data_asset_name="titanic"
     )
     paths.append(os.path.basename(batch_kwargs["path"]))
 
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", name="titanic"
+        "mydatasource", "mygenerator", data_asset_name="titanic"
     )
     paths.append(os.path.basename(batch_kwargs["path"]))
 

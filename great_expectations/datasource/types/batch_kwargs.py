@@ -13,7 +13,7 @@ class BatchMarkers(BatchKwargs):
     process, such as the timestamp at which a query was executed."""
 
     def __init__(self, *args, **kwargs):
-        super(BatchMarkers, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if "ge_load_time" not in self:
             raise InvalidBatchIdError("BatchMarkers requires a ge_load_time")
 
@@ -54,7 +54,7 @@ class SqlAlchemyDatasourceBatchKwargs(BatchKwargs, metaclass=ABCMeta):
 
 class PathBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs):
-        super(PathBatchKwargs, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if "path" not in self:
             raise InvalidBatchKwargsError("PathBatchKwargs requires a path element")
 
@@ -69,7 +69,7 @@ class PathBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs)
 
 class S3BatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs):
-        super(S3BatchKwargs, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if "s3" not in self:
             raise InvalidBatchKwargsError("S3BatchKwargs requires a path element")
 
@@ -84,7 +84,7 @@ class S3BatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
 
 class InMemoryBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs):
-        super(InMemoryBatchKwargs, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if "dataset" not in self:
             raise InvalidBatchKwargsError(
                 "InMemoryBatchKwargs requires a 'dataset' element"
@@ -97,7 +97,7 @@ class InMemoryBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwa
 
 class PandasDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
     def __init__(self, *args, **kwargs):
-        super(PandasDatasourceInMemoryBatchKwargs, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         import pandas as pd
 
         if not isinstance(self["dataset"], pd.DataFrame):
@@ -108,7 +108,7 @@ class PandasDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
 
 class SparkDFDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
     def __init__(self, *args, **kwargs):
-        super(SparkDFDatasourceInMemoryBatchKwargs, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         try:
             import pyspark
         except ImportError:
@@ -123,7 +123,7 @@ class SparkDFDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
 
 class SqlAlchemyDatasourceTableBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs):
-        super(SqlAlchemyDatasourceTableBatchKwargs, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if "table" not in self:
             raise InvalidBatchKwargsError(
                 "SqlAlchemyDatasourceTableBatchKwargs requires a 'table' element"
@@ -136,7 +136,7 @@ class SqlAlchemyDatasourceTableBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
 
 class SqlAlchemyDatasourceQueryBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs):
-        super(SqlAlchemyDatasourceQueryBatchKwargs, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if "query" not in self:
             raise InvalidBatchKwargsError(
                 "SqlAlchemyDatasourceQueryBatchKwargs requires a 'query' element"
@@ -153,7 +153,7 @@ class SqlAlchemyDatasourceQueryBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
 
 class SparkDFDatasourceQueryBatchKwargs(SparkDFDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs):
-        super(SparkDFDatasourceQueryBatchKwargs, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if "query" not in self:
             raise InvalidBatchKwargsError(
                 "SparkDFDatasourceQueryBatchKwargs requires a 'query' element"

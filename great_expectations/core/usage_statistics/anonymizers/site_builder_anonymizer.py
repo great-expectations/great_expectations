@@ -8,7 +8,7 @@ from great_expectations.render.renderer.site_builder import (
 
 class SiteBuilderAnonymizer(Anonymizer):
     def __init__(self, salt=None):
-        super(SiteBuilderAnonymizer, self).__init__(salt=salt)
+        super().__init__(salt=salt)
         self._ge_classes = [
             SiteBuilder,
             DefaultSiteSectionBuilder,

@@ -7,7 +7,7 @@ import shutil
 from abc import ABCMeta
 
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.exceptions import StoreBackendError
+from great_expectations.exceptions import InvalidKeyError, StoreBackendError
 
 logger = logging.getLogger(__name__)
 
@@ -164,7 +164,6 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         else:
             filepath = os.path.normpath(filepath)
             new_key = tuple(filepath.split(os.sep))
-
         return new_key
 
     def verify_that_key_to_filepath_operation_is_reversible(self):
@@ -231,11 +230,19 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         os.makedirs(str(os.path.dirname(self.full_base_directory)), exist_ok=True)
 
     def _get(self, key):
+        contents = ""
         filepath = os.path.join(
             self.full_base_directory, self._convert_key_to_filepath(key)
         )
-        with open(filepath) as infile:
-            return infile.read()
+        try:
+            with open(filepath) as infile:
+                contents = infile.read()
+        except FileNotFoundError:
+            raise InvalidKeyError(
+                f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {str(filepath)}"
+            )
+
+        return contents
 
     def _set(self, key, value, **kwargs):
         if not isinstance(key, tuple):
@@ -252,6 +259,23 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             else:
                 outfile.write(value)
         return filepath
+
+    def _move(self, source_key, dest_key, **kwargs):
+        source_path = os.path.join(
+            self.full_base_directory, self._convert_key_to_filepath(source_key)
+        )
+
+        dest_path = os.path.join(
+            self.full_base_directory, self._convert_key_to_filepath(dest_key)
+        )
+        dest_dir, dest_filename = os.path.split(dest_path)
+
+        if os.path.exists(source_path):
+            os.makedirs(dest_dir, exist_ok=True)
+            shutil.move(source_path, dest_path)
+            return dest_key
+
+        return False
 
     def list_keys(self, prefix=()):
         key_list = []
@@ -301,7 +325,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         filepath = os.path.join(
             self.full_base_directory, self._convert_key_to_filepath(key)
         )
-        path, filename = os.path.split(filepath)
+
         if os.path.exists(filepath):
             d_path = os.path.dirname(filepath)
             os.remove(filepath)
@@ -336,7 +360,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def __init__(
         self,
         bucket,
-        prefix="",
+        prefix=None,
         filepath_template=None,
         filepath_prefix=None,
         filepath_suffix=None,
@@ -353,15 +377,46 @@ class TupleS3StoreBackend(TupleStoreBackend):
             fixed_length_key=fixed_length_key,
         )
         self.bucket = bucket
+        if prefix:
+            if self.platform_specific_separator:
+                prefix = prefix.strip(os.sep)
+
+            # we *always* strip "/" from the prefix based on the norms of s3
+            # whether the rest of the key is built with platform-specific separators or not
+            prefix = prefix.strip("/")
         self.prefix = prefix
 
-    def _get(self, key):
-        s3_object_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
+    def _build_s3_object_key(self, key):
+        if self.platform_specific_separator:
+            if self.prefix:
+                s3_object_key = os.path.join(
+                    self.prefix, self._convert_key_to_filepath(key)
+                )
+            else:
+                s3_object_key = self._convert_key_to_filepath(key)
+        else:
+            if self.prefix:
+                s3_object_key = "/".join(
+                    (self.prefix, self._convert_key_to_filepath(key))
+                )
+            else:
+                s3_object_key = self._convert_key_to_filepath(key)
+        return s3_object_key
 
+    def _get(self, key):
         import boto3
 
         s3 = boto3.client("s3")
-        s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
+
+        s3_object_key = self._build_s3_object_key(key)
+
+        try:
+            s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
+        except s3.exceptions.NoSuchKey:
+            raise InvalidKeyError(
+                f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {str(s3_object_key)}"
+            )
+
         return (
             s3_response_object["Body"]
             .read()
@@ -371,21 +426,45 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def _set(
         self, key, value, content_encoding="utf-8", content_type="application/json"
     ):
-        s3_object_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
-
         import boto3
 
         s3 = boto3.resource("s3")
-        result_s3 = s3.Object(self.bucket, s3_object_key)
-        if isinstance(value, str):
-            result_s3.put(
-                Body=value.encode(content_encoding),
-                ContentEncoding=content_encoding,
-                ContentType=content_type,
-            )
-        else:
-            result_s3.put(Body=value, ContentType=content_type)
+
+        s3_object_key = self._build_s3_object_key(key)
+
+        try:
+            result_s3 = s3.Object(self.bucket, s3_object_key)
+            if isinstance(value, str):
+                result_s3.put(
+                    Body=value.encode(content_encoding),
+                    ContentEncoding=content_encoding,
+                    ContentType=content_type,
+                )
+            else:
+                result_s3.put(Body=value, ContentType=content_type)
+        except s3.exceptions.ClientError as e:
+            logger.debug(str(e))
+            raise StoreBackendError("Unable to set object in s3.")
+
         return s3_object_key
+
+    def _move(self, source_key, dest_key, **kwargs):
+        import boto3
+
+        s3 = boto3.resource("s3")
+
+        source_filepath = self._convert_key_to_filepath(source_key)
+        if not source_filepath.startswith(self.prefix):
+            source_filepath = os.path.join(self.prefix, source_filepath)
+        dest_filepath = self._convert_key_to_filepath(dest_key)
+        if not dest_filepath.startswith(self.prefix):
+            dest_filepath = os.path.join(self.prefix, dest_filepath)
+
+        s3.Bucket(self.bucket).copy(
+            {"Bucket": self.bucket, "Key": source_filepath}, dest_filepath
+        )
+
+        s3.Object(self.bucket, source_filepath).delete()
 
     def list_keys(self):
         key_list = []
@@ -394,7 +473,11 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         s3 = boto3.client("s3")
 
-        s3_objects = s3.list_objects(Bucket=self.bucket, Prefix=self.prefix)
+        if self.prefix:
+            s3_objects = s3.list_objects_v2(Bucket=self.bucket, Prefix=self.prefix)
+        else:
+            s3_objects = s3.list_objects_v2(Bucket=self.bucket)
+
         if "Contents" in s3_objects:
             objects = s3_objects["Contents"]
         elif "CommonPrefixes" in s3_objects:
@@ -408,7 +491,15 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         for s3_object_info in objects:
             s3_object_key = s3_object_info["Key"]
-            s3_object_key = os.path.relpath(s3_object_key, self.prefix,)
+            if self.platform_specific_separator:
+                s3_object_key = os.path.relpath(s3_object_key, self.prefix)
+            else:
+                if self.prefix is None:
+                    if s3_object_key.startswith("/"):
+                        s3_object_key = s3_object_key[1:]
+                else:
+                    if s3_object_key.startswith(self.prefix + "/"):
+                        s3_object_key = s3_object_key[len(self.prefix) + 1 :]
             if self.filepath_prefix and not s3_object_key.startswith(
                 self.filepath_prefix
             ):
@@ -443,11 +534,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
         from botocore.exceptions import ClientError
 
         s3 = boto3.resource("s3")
-        s3_key = self._convert_key_to_filepath(key)
-        if s3_key:
+        s3_object_key = self._build_s3_object_key(key)
+        s3.Object(self.bucket, s3_object_key).delete()
+        if s3_object_key:
             try:
-                # s3.Object(boto3.client('s3').get_bucket_location(Bucket=self.bucket), s3_key).delete()
-                objects_to_delete = s3.meta.client.list_objects(
+                #
+                objects_to_delete = s3.meta.client.list_objects_v2(
                     Bucket=self.bucket, Prefix=self.prefix
                 )
 
@@ -483,14 +575,15 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def __init__(
         self,
         bucket,
-        prefix,
         project,
+        prefix="",
         filepath_template=None,
         filepath_prefix=None,
         filepath_suffix=None,
         forbidden_substrings=None,
         platform_specific_separator=False,
         fixed_length_key=False,
+        public_urls=True,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -503,6 +596,10 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         self.bucket = bucket
         self.prefix = prefix
         self.project = project
+        self._public_urls = public_urls
+
+    def _move(self, source_key, dest_key, **kwargs):
+        pass
 
     def _get(self, key):
         gcs_object_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
@@ -512,7 +609,12 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         gcs_response_object = bucket.get_blob(gcs_object_key)
-        return gcs_response_object.download_as_string().decode("utf-8")
+        if not gcs_response_object:
+            raise InvalidKeyError(
+                f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {str(key)}"
+            )
+        else:
+            return gcs_response_object.download_as_string().decode("utf-8")
 
     def _set(
         self, key, value, content_encoding="utf-8", content_type="application/json"
@@ -526,12 +628,29 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         blob = bucket.blob(gcs_object_key)
 
         if isinstance(value, str):
+            blob.content_encoding = content_encoding
             blob.upload_from_string(
                 value.encode(content_encoding), content_type=content_type
             )
         else:
             blob.upload_from_string(value, content_type=content_type)
         return gcs_object_key
+
+    def _move(self, source_key, dest_key, **kwargs):
+        from google.cloud import storage
+
+        gcs = storage.Client(project=self.project)
+        bucket = gcs.get_bucket(self.bucket)
+
+        source_filepath = self._convert_key_to_filepath(source_key)
+        if not source_filepath.startswith(self.prefix):
+            source_filepath = os.path.join(self.prefix, source_filepath)
+        dest_filepath = self._convert_key_to_filepath(dest_key)
+        if not dest_filepath.startswith(self.prefix):
+            dest_filepath = os.path.join(self.prefix, dest_filepath)
+
+        blob = bucket.blob(source_filepath)
+        _ = bucket.rename_blob(blob, dest_filepath)
 
     def list_keys(self):
         key_list = []
@@ -558,11 +677,23 @@ class TupleGCSStoreBackend(TupleStoreBackend):
 
     def get_url_for_key(self, key, protocol=None):
         path = self._convert_key_to_filepath(key)
-        return "https://storage.googleapis.com/" + self.bucket + "/" + path
+        if not path.startswith(self.prefix):
+            path = os.path.join(self.prefix, path)
+        if self._public_urls:
+            base_url = "https://storage.googleapis.com/"
+        else:
+            base_url = "https://storage.cloud.google.com/"
+
+        if self.prefix:
+            path_url = "/".join((self.bucket, self.prefix, path))
+        else:
+            path_url = "/".join((self.bucket, path))
+
+        return base_url + path_url
 
     def remove_key(self, key):
         from google.cloud import storage
-        from gcloud.exceptions import NotFound
+        from google.cloud.exceptions import NotFound
 
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)

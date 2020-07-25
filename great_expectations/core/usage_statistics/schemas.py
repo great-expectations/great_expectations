@@ -43,7 +43,8 @@ anonymized_class_info_schema = {
                 "parent_class": {"type": "string", "maxLength": 256},
                 "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
             },
-            "additionalProperties": True,  # we don't want this to be true, but this is required to allow show_cta_footer
+            "additionalProperties": True,
+            # we don't want this to be true, but this is required to allow show_cta_footer
             "required": ["parent_class",],
         }
     ],
@@ -235,12 +236,7 @@ anonymized_batch_schema = {
                 "anonymized_batch_kwarg_keys": {
                     "type": "array",
                     "maxItems": 1000,
-                    "items": {
-                        "oneOf": [
-                            {"$ref": "#/definitions/anonymized_string"},
-                            {"type": "string", "maxLength": 256},
-                        ]
-                    },
+                    "items": {"oneOf": [{"type": "string", "maxLength": 256},]},
                 },
                 "anonymized_expectation_suite_name": {
                     "$ref": "#/definitions/anonymized_string"
@@ -291,6 +287,28 @@ save_or_edit_expectation_suite_payload_schema = {
     "additionalProperties": False,
 }
 
+cli_new_ds_choice_payload = {
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "type": {"type": "string", "maxLength": 256},
+        "db": {"type": "string", "maxLength": 256},
+    },
+    "required": ["type"],
+    "additionalProperties": False,
+}
+
+datasource_sqlalchemy_connect_payload = {
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "anonymized_name": {"type": "string", "maxLength": 256},
+        "sqlalchemy_dialect": {"type": "string", "maxLength": 256},
+    },
+    "required": ["anonymized_name"],
+    "additionalProperties": False,
+}
+
 usage_statistics_record_schema = {
     "$schema": "http://json-schema.org/schema#",
     "definitions": {
@@ -307,6 +325,8 @@ usage_statistics_record_schema = {
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
+        "cli_new_ds_choice_payload": cli_new_ds_choice_payload,
+        "datasource_sqlalchemy_connect_payload": datasource_sqlalchemy_connect_payload,
     },
     "type": "object",
     "properties": {
@@ -315,6 +335,7 @@ usage_statistics_record_schema = {
         "data_context_id": {"type": "string", "format": "uuid"},
         "data_context_instance_id": {"type": "string", "format": "uuid"},
         "ge_version": {"type": "string", "maxLength": 32},
+        "x-forwarded-for": {"type": "string"},
         "success": {"type": ["boolean", "null"]},
     },
     "oneOf": [
@@ -355,6 +376,29 @@ usage_statistics_record_schema = {
         {
             "type": "object",
             "properties": {
+                "event": {"enum": ["cli.new_ds_choice"],},
+                "event_payload": {"$ref": "#/definitions/cli_new_ds_choice_payload"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {"enum": ["data_context.add_datasource"],},
+                "event_payload": {"$ref": "#/definitions/anonymized_datasource"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {"enum": ["datasource.sqlalchemy.connect"],},
+                "event_payload": {
+                    "$ref": "#/definitions/datasource_sqlalchemy_connect_payload"
+                },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
                 "event": {
                     "enum": [
                         "cli.suite.list",
@@ -389,3 +433,9 @@ usage_statistics_record_schema = {
         "event_payload",
     ],
 }
+
+if __name__ == "__main__":
+    import json
+
+    with open("usage_statistics_record_schema.json", "w") as outfile:
+        json.dump(usage_statistics_record_schema, outfile, indent=2)

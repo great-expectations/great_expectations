@@ -16,6 +16,12 @@ class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
         self.messages = validation_error.messages
 
 
+class SuiteEditNotebookCustomTemplateModuleNotFoundError(ModuleNotFoundError):
+    def __init__(self, custom_module):
+        message = f"The custom module '{custom_module}' could not be found"
+        super().__init__(message)
+
+
 class DataContextError(GreatExpectationsError):
     pass
 
@@ -40,7 +46,7 @@ class ParserError(GreatExpectationsError):
     pass
 
 
-class InvalidConfigurationYamlError(GreatExpectationsError):
+class InvalidConfigurationYamlError(DataContextError):
     pass
 
 
@@ -68,7 +74,7 @@ class InvalidDataContextKeyError(DataContextError):
     pass
 
 
-class UnsupportedConfigVersionError(GreatExpectationsError):
+class UnsupportedConfigVersionError(DataContextError):
     pass
 
 
@@ -119,6 +125,14 @@ class InvalidValidationResultError(GreatExpectationsError):
 
 
 class GreatExpectationsTypeError(TypeError):
+    pass
+
+
+class StoreError(DataContextError):
+    pass
+
+
+class InvalidKeyError(StoreError):
     pass
 
 

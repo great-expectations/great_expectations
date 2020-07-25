@@ -1,14 +1,17 @@
 import copy
 import inspect
+import json
 import logging
+from collections import OrderedDict
 from datetime import datetime
 from functools import reduce, wraps
 from typing import List
-from collections import OrderedDict
 
+import jsonschema
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 
@@ -50,7 +53,7 @@ class MetaSparkDFDataset(Dataset):
     """
 
     def __init__(self, *args, **kwargs):
-        super(MetaSparkDFDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @classmethod
     def column_map_expectation(cls, func):
@@ -485,7 +488,75 @@ class MetaSparkDFDataset(Dataset):
 
 class SparkDFDataset(MetaSparkDFDataset):
     """
-    This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
+This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
+
+--ge-feature-maturity-info--
+
+    id: validation_engine_pyspark_self_managed
+    title: Validation Engine - pyspark - Self-Managed
+    icon:
+    short_description: Use Spark DataFrame to validate data
+    description: Use Spark DataFrame to validate data
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+    maturity: Production
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: Moderate
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A -> see relevant Datasource evaluation
+        documentation_completeness: Complete
+        bug_risk: Low/Moderate
+        expectation_completeness: Moderate
+
+    id: validation_engine_databricks
+    title: Validation Engine - Databricks
+    icon:
+    short_description: Use Spark DataFrame in a Databricks cluster to validate data
+    description: Use Spark DataFrame in a Databricks cluster to validate data
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+    maturity: Beta
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: Low (dbfs-specific handling)
+        unit_test_coverage: N/A -> implementation not different
+        integration_infrastructure_test_coverage: Minimal (we've tested a bit, know others have used it)
+        documentation_completeness: Moderate (need docs on managing project configuration via dbfs/etc.)
+        bug_risk: Low/Moderate
+        expectation_completeness: Moderate
+
+    id: validation_engine_emr_spark
+    title: Validation Engine - EMR - Spark
+    icon:
+    short_description: Use Spark DataFrame in an EMR cluster to validate data
+    description: Use Spark DataFrame in an EMR cluster to validate data
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+    maturity: Experimental
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: Low (need to provide guidance on "known good" paths, and we know there are many "knobs" to tune that we have not explored/tested)
+        unit_test_coverage: N/A -> implementation not different
+        integration_infrastructure_test_coverage: Unknown
+        documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
+        bug_risk: Low/Moderate
+        expectation_completeness: Moderate
+
+    id: validation_engine_spark_other
+    title: Validation Engine - Spark - Other
+    icon:
+    short_description: Use Spark DataFrame to validate data
+    description: Use Spark DataFrame to validate data
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+    maturity: Experimental
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: Other (we haven't tested possibility, known glue deployment)
+        unit_test_coverage: N/A -> implementation not different
+        integration_infrastructure_test_coverage: Unknown
+        documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
+        bug_risk: Low/Moderate
+        expectation_completeness: Moderate
+
+--ge-feature-maturity-info--
     """
 
     @classmethod
@@ -501,7 +572,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         self._persist = kwargs.pop("persist", True)
         if self._persist:
             self.spark_df.persist()
-        super(SparkDFDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def head(self, n=5):
         """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
@@ -994,6 +1065,36 @@ class SparkDFDataset(MetaSparkDFDataset):
         return column.withColumn("__success", column[0].isNull())
 
     @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_match_json_schema(
+        self,
+        column,
+        json_schema,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        def matches_json_schema(val):
+            try:
+                val_json = json.loads(val)
+                jsonschema.validate(val_json, json_schema)
+                # jsonschema.validate raises an error if validation fails.
+                # So if we make it this far, we know that the validation succeeded.
+                return True
+            except jsonschema.ValidationError:
+                return False
+            except jsonschema.SchemaError:
+                raise
+            except:
+                raise
+
+        matches_json_schema_udf = udf(matches_json_schema, sparktypes.StringType())
+
+        return column.withColumn("__success", matches_json_schema_udf(column[0]))
+
+    @DocInherit
     @DataAsset.expectation(["column", "type_", "mostly"])
     def expect_column_values_to_be_of_type(
         self,
@@ -1098,6 +1199,29 @@ class SparkDFDataset(MetaSparkDFDataset):
         meta=None,
     ):
         return column.withColumn("__success", ~column[0].rlike(regex))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_match_regex_list(
+        self,
+        column,
+        regex_list,
+        match_on="any",
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        if match_on == "any":
+            return column.withColumn("__success", column[0].rlike("|".join(regex_list)))
+        elif match_on == "all":
+            formatted_regex_list = ["(?={})".format(regex) for regex in regex_list]
+            return column.withColumn(
+                "__success", column[0].rlike("".join(formatted_regex_list))
+            )
+        else:
+            raise ValueError("match_on must be either 'any' or 'all'")
 
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation

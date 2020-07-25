@@ -4,10 +4,12 @@ import locale
 import os
 import shutil
 
-import great_expectations as ge
 import numpy as np
 import pandas as pd
 import pytest
+from freezegun import freeze_time
+
+import great_expectations as ge
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -63,6 +65,9 @@ def pytest_addoption(parser):
         help="If set, suppress tests against postgresql",
     )
     parser.addoption(
+        "--mysql", action="store_true", help="If set, test against mysql",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
         help="If set, run aws integration tests",
@@ -103,15 +108,18 @@ def build_test_backends_list(metafunc):
                     "'postgresql://postgres@localhost/test_ci'"
                 )
             test_backends += ["postgresql"]
-            # TODO: enable mysql or other backend tests to be optionally specified
-            # if mysql:
-            #     try:
-            #         engine = sa.create_engine('mysql://root@localhost/test_ci')
-            #         conn = engine.connect()
-            #         test_backends += ['mysql']
-            #         conn.close()
-            #     except (ImportError, sa.exc.SQLAlchemyError):
-            #         warnings.warn("No mysql context available for testing.")
+        mysql = metafunc.config.getoption("--mysql")
+        if mysql:
+            try:
+                engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError):
+                raise ImportError(
+                    "mysql tests are requested, but unable to connect to the mysql database at "
+                    "'mysql+pymysql://root@localhost/test_ci'"
+                )
+            test_backends += ["mysql"]
     return test_backends
 
 
@@ -143,7 +151,11 @@ def no_usage_stats(monkeypatch):
 
 @pytest.fixture
 def sa(test_backends):
-    if "postgresql" not in test_backends and "sqlite" not in test_backends:
+    if (
+        "postgresql" not in test_backends
+        and "sqlite" not in test_backends
+        and "mysql" not in test_backends
+    ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
         import sqlalchemy as sa
@@ -1829,7 +1841,7 @@ def dataset_sample_data(test_backend):
             "naturals": "NUMERIC",
         },
         "sqlite": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
-        "mysql": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
+        "mysql": {"nulls": "FLOAT", "naturals": "FLOAT"},
         "spark": {
             "infinities": "FloatType",
             "nulls": "FloatType",
@@ -1997,7 +2009,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 
 @pytest.fixture
-def titanic_sqlite_db():
+def titanic_sqlite_db(sa):
     from sqlalchemy import create_engine
 
     titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
@@ -2025,7 +2037,7 @@ def titanic_expectation_suite():
 
 
 @pytest.fixture
-def empty_sqlite_db():
+def empty_sqlite_db(sa):
     """An empty in-memory sqlite db that always gets run."""
     try:
         from sqlalchemy import create_engine
@@ -2038,6 +2050,7 @@ def empty_sqlite_db():
 
 
 @pytest.fixture
+@freeze_time("09/26/2019 13:42:41")
 def site_builder_data_context_with_html_store_titanic_random(
     tmp_path_factory, filesystem_csv_3
 ):
@@ -2134,7 +2147,29 @@ def titanic_multibatch_data_context(tmp_path_factory):
 
 
 @pytest.fixture
-def data_context(tmp_path_factory):
+def v10_project_directory(tmp_path_factory):
+    """
+    GE 0.10.x project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v10_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__, "./test_fixtures/upgrade_helper/great_expectations_v10_project/"
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, "./test_fixtures/upgrade_helper/great_expectations_v1_basic.yml"
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
+
+
+@pytest.fixture
+def data_context_parameterized_expectation_suite(tmp_path_factory):
     """
     This data_context is *manually* created to have the config we want, vs
     created with DataContext.create()
@@ -2156,6 +2191,108 @@ def data_context(tmp_path_factory):
             "expectation_suites/parameterized_expectation_suite_fixture.json",
         ),
         os.path.join(asset_config_path, "my_dag_node/default.json"),
+    )
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_pandas_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_with_bad_notebooks(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    custom_notebook_assets_dir = "notebook_assets"
+
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_basic_with_bad_notebooks.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(asset_config_path, "my_dag_node/default.json"),
+    )
+
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    shutil.copytree(
+        os.path.join(fixture_dir, custom_notebook_assets_dir),
+        str(os.path.join(context_path, "plugins", custom_notebook_assets_dir)),
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_custom_notebooks(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_custom_notebooks.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(asset_config_path, "my_dag_node/default.json"),
+    )
+
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_simple_expectation_suite(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_basic.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "rendering_fixtures/expectations_suite_1.json",),
+        os.path.join(asset_config_path, "default.json"),
     )
     os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
     shutil.copy(
@@ -2260,7 +2397,6 @@ def titanic_profiled_evrs_1():
 
 @pytest.fixture
 def titanic_profiled_name_column_evrs():
-
     # This is a janky way to fetch expectations matching a specific name from an EVR suite.
     # TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
     from great_expectations.render.renderer.renderer import Renderer

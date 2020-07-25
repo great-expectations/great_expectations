@@ -4,6 +4,7 @@ import json
 
 import altair as alt
 import pandas as pd
+
 from great_expectations.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
 )
@@ -459,6 +460,26 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(expectation.kwargs, ["value"])
         template_str = "Must have exactly $value rows."
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    @classmethod
+    def expect_table_row_count_to_equal_other_table(
+        cls, expectation, styling=None, include_column_name=True
+    ):
+        params = substitute_none_for_missing(expectation.kwargs, ["other_table_name"])
+        template_str = "Row count must equal the row count of table $other_table_name."
 
         return [
             RenderedStringTemplateContent(

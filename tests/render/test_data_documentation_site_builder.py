@@ -1,10 +1,11 @@
-import json
 import os
 import shutil
 
 import pytest
 from freezegun import freeze_time
+
 from great_expectations import DataContext
+from great_expectations.core import RunIdentifier
 from great_expectations.data_context.store import ExpectationsStore, ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -88,6 +89,7 @@ def assert_how_to_buttons(
                         assert how_to_element not in page
 
 
+@freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
 def test_configuration_driven_site_builder(
     site_builder_data_context_with_html_store_titanic_random,
@@ -127,12 +129,12 @@ def test_configuration_driven_site_builder(
 
     # creating another validation result using the profiler's suite (no need to use a new expectation suite
     # for this test). having two validation results - one with run id "profiling" - allows us to test
-    # the logic of run_id_filter that helps filtering validation results to be included in
+    # the logic of run_name_filter that helps filtering validation results to be included in
     # the profiling and the validation sections.
     batch_kwargs = context.build_batch_kwargs(
         datasource=datasource_name,
         batch_kwargs_generator=generator_name,
-        name=data_asset_name,
+        data_asset_name=data_asset_name,
     )
 
     expectation_suite_name = "{}.{}.{}.{}".format(
@@ -142,7 +144,7 @@ def test_configuration_driven_site_builder(
     batch = context.get_batch(
         batch_kwargs=batch_kwargs, expectation_suite_name=expectation_suite_name,
     )
-    run_id = "test_run_id_12345"
+    run_id = RunIdentifier(run_name="test_run_id_12345")
     context.run_validation_operator(
         assets_to_validate=[batch],
         run_id=run_id,
@@ -258,26 +260,21 @@ def test_configuration_driven_site_builder(
         ].full_base_directory,
         "validations",
         expectation_suite_path_component,
-        run_id,
+        run_id.run_name,
+        run_id.run_time.strftime("%Y%m%dT%H%M%S.%fZ"),
         batch.batch_id + ".html",
     )
 
     ts_last_mod_0 = os.path.getmtime(validation_result_page_path)
 
-    run_id = "test_run_id_12346"
+    run_id = RunIdentifier(run_name="test_run_id_12346")
     operator_result = context.run_validation_operator(
         assets_to_validate=[batch],
         run_id=run_id,
         validation_operator_name="validate_and_store",
     )
 
-    validation_result_id = ValidationResultIdentifier(
-        expectation_suite_identifier=[key for key in operator_result["details"].keys()][
-            0
-        ],
-        run_id=run_id,
-        batch_identifier=batch.batch_id,
-    )
+    validation_result_id = operator_result.list_validation_result_identifiers()[0]
     res = site_builder.build(resource_identifiers=[validation_result_id])
 
     index_links_dict = res[1]
@@ -303,7 +300,8 @@ def test_configuration_driven_site_builder(
         ].full_base_directory,
         "validations",
         expectation_suite_path_component,
-        run_id,
+        run_id.run_name,
+        run_id.run_time.strftime("%Y%m%dT%H%M%S.%fZ"),
         batch.batch_id + ".html",
     )
 
@@ -394,7 +392,7 @@ def test_configuration_driven_site_builder_without_how_to_buttons(
 
     # creating another validation result using the profiler's suite (no need to use a new expectation suite
     # for this test). having two validation results - one with run id "profiling" - allows us to test
-    # the logic of run_id_filter that helps filtering validation results to be included in
+    # the logic of run_name_filter that helps filtering validation results to be included in
     # the profiling and the validation sections.
     batch_kwargs = context.build_batch_kwargs(
         datasource=datasource_name,
@@ -443,7 +441,7 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
     project_dir = os.path.join(base_dir, "project_path")
     os.mkdir(project_dir)
 
-    # fixture config swaps site section builder source stores and specifies custom run_id_filters
+    # fixture config swaps site section builder source stores and specifies custom run_name_filters
     shutil.copy(
         file_relative_path(
             __file__, "../test_fixtures/great_expectations_custom_local_site_config.yml"
@@ -470,13 +468,13 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
 
     validations_site_section_builder = site_section_builders["validations"]
     assert isinstance(validations_site_section_builder.source_store, ExpectationsStore)
-    assert validations_site_section_builder.run_id_filter == {
+    assert validations_site_section_builder.run_name_filter == {
         "ne": "custom_validations_filter"
     }
 
     profiling_site_section_builder = site_section_builders["profiling"]
     assert isinstance(validations_site_section_builder.source_store, ExpectationsStore)
-    assert profiling_site_section_builder.run_id_filter == {
+    assert profiling_site_section_builder.run_name_filter == {
         "eq": "custom_profiling_filter"
     }
 
@@ -518,7 +516,7 @@ def test_site_builder_usage_statistics_enabled(
         [index_page_path] + expectation_suite_pages + profiling_results_pages
     )
 
-    expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=2019-09-24T23:18:36&dataContextId=f43d4897-385f-4366-82b0-1a8eda2bf79c"
+    expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=20190924T231836.000000Z&dataContextId=f43d4897-385f-4366-82b0-1a8eda2bf79c"
 
     for page_path in page_paths_to_check:
         with open(page_path[7:]) as f:
@@ -568,7 +566,7 @@ def test_site_builder_usage_statistics_disabled(
         [index_page_path] + expectation_suite_pages + profiling_results_pages
     )
 
-    expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=2019-09-24T23:18:36"
+    expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=20190924T231836.000000Z"
 
     for page_path in page_paths_to_check:
         with open(page_path[7:]) as f:

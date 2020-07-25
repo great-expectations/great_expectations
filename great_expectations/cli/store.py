@@ -1,4 +1,5 @@
 import click
+
 from great_expectations.cli import toolkit
 from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message

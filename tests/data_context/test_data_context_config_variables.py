@@ -1,10 +1,26 @@
 import os
 
 import pytest
+from ruamel.yaml import YAML, YAMLError
+
 import great_expectations as ge
-from great_expectations.data_context.util import substitute_config_variable
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    DataContextConfigSchema,
+)
+from great_expectations.data_context.util import (
+    file_relative_path,
+    substitute_all_config_variables,
+    substitute_config_variable,
+)
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
 from tests.data_context.conftest import create_data_context_files
+
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
+
+dataContextConfigSchema = DataContextConfigSchema()
 
 
 def test_config_variables_on_context_without_config_variables_filepath_configured(
@@ -98,6 +114,43 @@ def test_setting_config_variables_is_visible_immediately(
         del os.environ["replace_me_2"]
 
 
+def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
+    # this test uses a great_expectations.yml with almost all values replaced
+    # with substitution variables
+
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+
+    create_data_context_files(
+        context_path,
+        asset_config_path,
+        ge_config_fixture_filename="great_expectations_basic_with_exhaustive_variables.yml",
+        config_variables_fixture_filename="config_variables_exhaustive.yml",
+    )
+
+    # load ge config fixture for expected
+    path_to_yml = (
+        "../test_fixtures/great_expectations_basic_with_exhaustive_variables.yml"
+    )
+    path_to_yml = file_relative_path(__file__, path_to_yml)
+    with open(path_to_yml) as data:
+        config_dict = yaml.load(data)
+    expected_config = DataContextConfig.from_commented_map(config_dict)
+    expected_config_dict = dataContextConfigSchema.dump(expected_config)
+    expected_config_dict.pop("anonymous_usage_statistics")
+
+    # instantiate data_context twice to go through cycle of loading config from file then saving
+    context = ge.data_context.DataContext(context_path)
+    context._save_project_config()
+    context_config_dict = dataContextConfigSchema.dump(
+        ge.data_context.DataContext(context_path)._project_config
+    )
+    context_config_dict.pop("anonymous_usage_statistics")
+
+    assert context_config_dict == expected_config_dict
+
+
 def test_runtime_environment_are_used_preferentially(tmp_path_factory):
     value_from_environment = "from_environment"
     os.environ["replace_me"] = value_from_environment
@@ -108,7 +161,12 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
-    create_data_context_files(context_path, asset_config_path, True)
+    create_data_context_files(
+        context_path,
+        asset_config_path,
+        ge_config_fixture_filename="great_expectations_basic_with_variables.yml",
+        config_variables_fixture_filename="config_variables.yml",
+    )
 
     data_context = ge.data_context.DataContext(
         context_path, runtime_environment=runtime_environment
@@ -163,3 +221,39 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
         == config_variables_dict["arg2"]
     )
     assert exc.value.missing_config_variable == "arg1"
+
+
+def test_substitute_env_var_in_config_variable_file(monkeypatch):
+    monkeypatch.setenv("FOO", "val_of_arg_0")
+    config_variables_dict = {"arg0": "${FOO}", "arg2": {"v1": 2}, "replace_me": "wrong"}
+    assert (
+        substitute_config_variable("abc${arg0}", config_variables_dict)
+        == "abcval_of_arg_0"
+    )
+    monkeypatch.delenv("FOO")
+    with pytest.raises(MissingConfigVariableError):
+        substitute_config_variable("abc${arg0}", config_variables_dict)
+
+    with open(
+        file_relative_path(
+            __file__, "../test_fixtures/great_expectations_basic_with_variables.yml",
+        )
+    ) as f:
+        config = yaml.load(f)
+
+    monkeypatch.setenv("replace_me", "correct")
+
+    # this is how dict is created in data_context.get_config_with_variables_substituted, for env var override
+    config_variables_dict = {
+        **config_variables_dict,
+        **dict(os.environ),
+    }
+
+    config = substitute_all_config_variables(config, config_variables_dict)
+
+    assert (
+        config["datasources"]["mydatasource"]["batch_kwargs_generators"]["mygenerator"][
+            "reader_options"
+        ]["test_variable_sub1"]
+        == "correct"
+    )

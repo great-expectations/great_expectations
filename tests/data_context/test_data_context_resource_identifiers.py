@@ -1,4 +1,6 @@
 import pytest
+from freezegun import freeze_time
+
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -20,6 +22,7 @@ def test_expectation_suite_identifier_to_tuple():
     assert "must be a string, not int" in str(exc.value)
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
     validation_result_identifier = ValidationResultIdentifier(
         expectation_suite_identifier, "my_run_id", "my_batch_identifier"
@@ -30,11 +33,13 @@ def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
         "suite",
         "name",
         "my_run_id",
+        "20190926T134241.000000Z",
         "my_batch_identifier",
     )
     assert validation_result_identifier.to_fixed_length_tuple() == (
         "my.expectation.suite.name",
         "my_run_id",
+        "20190926T134241.000000Z",
         "my_batch_identifier",
     )
 
@@ -47,11 +52,13 @@ def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
         "suite",
         "name",
         "__none__",
+        "20190926T134241.000000Z",
         "my_batch_identifier",
     )
     assert validation_result_identifier_no_run_id.to_fixed_length_tuple() == (
         "my.expectation.suite.name",
         "__none__",
+        "20190926T134241.000000Z",
         "my_batch_identifier",
     )
 
@@ -64,11 +71,13 @@ def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
         "suite",
         "name",
         "my_run_id",
+        "20190926T134241.000000Z",
         "__none__",
     )
     assert validation_result_identifier_no_batch_identifier.to_fixed_length_tuple() == (
         "my.expectation.suite.name",
         "my_run_id",
+        "20190926T134241.000000Z",
         "__none__",
     )
 
@@ -81,10 +90,12 @@ def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
         "suite",
         "name",
         "__none__",
+        "20190926T134241.000000Z",
         "__none__",
     )
     assert validation_result_identifier_no_run_id_no_batch_identifier.to_fixed_length_tuple() == (
         "my.expectation.suite.name",
         "__none__",
+        "20190926T134241.000000Z",
         "__none__",
     )

@@ -3,13 +3,17 @@ import os
 
 import nbformat
 import pytest
+from nbconvert.preprocessors import ExecutePreprocessor
+
 from great_expectations import DataContext
 from great_expectations.cli.suite import _suite_edit
 from great_expectations.core import ExpectationSuiteSchema
+from great_expectations.exceptions import (
+    SuiteEditNotebookCustomTemplateModuleNotFoundError,
+)
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
-from nbconvert.preprocessors import ExecutePreprocessor
 
 
 @pytest.fixture
@@ -372,9 +376,12 @@ def warning_suite():
 
 
 def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
-    critical_suite_with_citations,
+    critical_suite_with_citations, empty_data_context
 ):
-    obs = SuiteEditNotebookRenderer().render(critical_suite_with_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
+        critical_suite_with_citations
+    )
+    print(obs)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -390,30 +397,12 @@ def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-from datetime import datetime
-import great_expectations as ge
-import great_expectations.jupyter_ux
-from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
-)
-
-context = ge.data_context.DataContext()
-
-# Feel free to change the name of your suite here. Renaming this will not
-# remove the other one.
-expectation_suite_name = "critical"
-suite = context.get_expectation_suite(expectation_suite_name)
-suite.expectations = []
-
-batch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}
-batch = context.get_batch(batch_kwargs, suite)
-batch.head()""",
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -436,7 +425,7 @@ batch.head()""",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null(\n    "npi",\n    meta={\n        "question": True,\n        "Notes": "There are empty strings that should probably be nulls",\n    },\n)',
+                "source": 'batch.expect_column_values_to_not_be_null(\n    column="npi",\n    meta={\n        "question": True,\n        "Notes": "There are empty strings that should probably be nulls",\n    },\n)',
                 "outputs": [],
             },
             {"cell_type": "markdown", "source": "#### `provider_type`", "metadata": {}},
@@ -444,7 +433,7 @@ batch.head()""",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("provider_type")',
+                "source": 'batch.expect_column_values_to_not_be_null(column="provider_type")',
                 "outputs": [],
             },
             {
@@ -456,21 +445,7 @@ batch.head()""",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -482,9 +457,11 @@ context.open_data_docs(validation_result_identifier)""",
     assert obs == expected
 
 
-def test_render_with_no_column_cells(critical_suite_with_citations):
+def test_render_with_no_column_cells(critical_suite_with_citations, empty_data_context):
     critical_suite_with_citations.expectations = []
-    obs = SuiteEditNotebookRenderer().render(critical_suite_with_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
+        critical_suite_with_citations
+    )
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -500,30 +477,12 @@ def test_render_with_no_column_cells(critical_suite_with_citations):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-from datetime import datetime
-import great_expectations as ge
-import great_expectations.jupyter_ux
-from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
-)
-
-context = ge.data_context.DataContext()
-
-# Feel free to change the name of your suite here. Renaming this will not
-# remove the other one.
-expectation_suite_name = "critical"
-suite = context.get_expectation_suite(expectation_suite_name)
-suite.expectations = []
-
-batch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}
-batch = context.get_batch(batch_kwargs, suite)
-batch.head()""",
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -555,21 +514,7 @@ batch.head()""",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -578,15 +523,17 @@ context.open_data_docs(validation_result_identifier)""",
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
         assert obs_cell == expected_cell
-    # assert obs == expected
+    assert obs == expected
 
 
 def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank_batch_kwargs(
-    critical_suite_with_citations,
+    critical_suite_with_citations, empty_data_context
 ):
     suite_with_no_kwargs_in_citations = critical_suite_with_citations
     suite_with_no_kwargs_in_citations.meta["citations"][0].pop("batch_kwargs")
-    obs = SuiteEditNotebookRenderer().render(suite_with_no_kwargs_in_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
+        suite_with_no_kwargs_in_citations
+    )
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -602,12 +549,12 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -630,7 +577,7 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null(\n    "npi",\n    meta={\n        "question": True,\n        "Notes": "There are empty strings that should probably be nulls",\n    },\n)',
+                "source": 'batch.expect_column_values_to_not_be_null(\n    column="npi",\n    meta={\n        "question": True,\n        "Notes": "There are empty strings that should probably be nulls",\n    },\n)',
                 "outputs": [],
             },
             {"cell_type": "markdown", "source": "#### `provider_type`", "metadata": {}},
@@ -638,7 +585,7 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("provider_type")',
+                "source": 'batch.expect_column_values_to_not_be_null(column="provider_type")',
                 "outputs": [],
             },
             {
@@ -650,21 +597,7 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -677,12 +610,12 @@ context.open_data_docs(validation_result_identifier)""",
 
 
 def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
-    critical_suite_with_citations,
+    critical_suite_with_citations, empty_data_context
 ):
     suite_with_no_kwargs_in_citations = critical_suite_with_citations
     suite_with_no_kwargs_in_citations.meta["citations"][0].pop("batch_kwargs")
     batch_kwargs = {"foo": "bar", "datasource": "things"}
-    obs = SuiteEditNotebookRenderer().render(
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
         suite_with_no_kwargs_in_citations, batch_kwargs
     )
     assert isinstance(obs, dict)
@@ -700,12 +633,12 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -728,7 +661,7 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null(\n    "npi",\n    meta={\n        "question": True,\n        "Notes": "There are empty strings that should probably be nulls",\n    },\n)',
+                "source": 'batch.expect_column_values_to_not_be_null(\n    column="npi",\n    meta={\n        "question": True,\n        "Notes": "There are empty strings that should probably be nulls",\n    },\n)',
                 "outputs": [],
             },
             {"cell_type": "markdown", "source": "#### `provider_type`", "metadata": {}},
@@ -736,7 +669,7 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("provider_type")',
+                "source": 'batch.expect_column_values_to_not_be_null(column="provider_type")',
                 "outputs": [],
             },
             {
@@ -748,21 +681,7 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -774,10 +693,14 @@ context.open_data_docs(validation_result_identifier)""",
     assert obs == expected
 
 
-def test_render_with_no_batch_kwargs_and_no_citations(critical_suite_with_citations):
+def test_render_with_no_batch_kwargs_and_no_citations(
+    critical_suite_with_citations, empty_data_context
+):
     suite_with_no_citations = critical_suite_with_citations
     suite_with_no_citations.meta.pop("citations")
-    obs = SuiteEditNotebookRenderer().render(suite_with_no_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
+        suite_with_no_citations
+    )
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -793,12 +716,12 @@ def test_render_with_no_batch_kwargs_and_no_citations(critical_suite_with_citati
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -821,7 +744,7 @@ def test_render_with_no_batch_kwargs_and_no_citations(critical_suite_with_citati
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null(\n    "npi",\n    meta={\n        "question": True,\n        "Notes": "There are empty strings that should probably be nulls",\n    },\n)',
+                "source": 'batch.expect_column_values_to_not_be_null(\n    column="npi",\n    meta={\n        "question": True,\n        "Notes": "There are empty strings that should probably be nulls",\n    },\n)',
                 "outputs": [],
             },
             {"cell_type": "markdown", "source": "#### `provider_type`", "metadata": {}},
@@ -829,7 +752,7 @@ def test_render_with_no_batch_kwargs_and_no_citations(critical_suite_with_citati
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("provider_type")',
+                "source": 'batch.expect_column_values_to_not_be_null(column="provider_type")',
                 "outputs": [],
             },
             {
@@ -841,21 +764,7 @@ def test_render_with_no_batch_kwargs_and_no_citations(critical_suite_with_citati
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -868,10 +777,10 @@ context.open_data_docs(validation_result_identifier)""",
 
 
 def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
-    critical_suite_with_citations,
+    critical_suite_with_citations, empty_data_context
 ):
     batch_kwargs = {"foo": "bar", "datasource": "things"}
-    obs = SuiteEditNotebookRenderer().render(
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
         critical_suite_with_citations, batch_kwargs
     )
     assert isinstance(obs, dict)
@@ -889,12 +798,12 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -917,7 +826,7 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null(\n    "npi",\n    meta={\n        "question": True,\n        "Notes": "There are empty strings that should probably be nulls",\n    },\n)',
+                "source": 'batch.expect_column_values_to_not_be_null(\n    column="npi",\n    meta={\n        "question": True,\n        "Notes": "There are empty strings that should probably be nulls",\n    },\n)',
                 "outputs": [],
             },
             {"cell_type": "markdown", "source": "#### `provider_type`", "metadata": {}},
@@ -925,7 +834,7 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("provider_type")',
+                "source": 'batch.expect_column_values_to_not_be_null(column="provider_type")',
                 "outputs": [],
             },
             {
@@ -937,21 +846,7 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -964,9 +859,11 @@ context.open_data_docs(validation_result_identifier)""",
 
 
 def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
-    suite_with_multiple_citations,
+    suite_with_multiple_citations, empty_data_context
 ):
-    obs = SuiteEditNotebookRenderer().render(suite_with_multiple_citations)
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
+        suite_with_multiple_citations
+    )
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -982,12 +879,12 @@ def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../3.csv", "datasource": "3"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../3.csv", "datasource": "3"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -1010,7 +907,7 @@ def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("npi")',
+                "source": 'batch.expect_column_values_to_not_be_null(column="npi")',
                 "outputs": [],
             },
             {"cell_type": "markdown", "source": "#### `provider_type`", "metadata": {}},
@@ -1018,7 +915,7 @@ def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("provider_type")',
+                "source": 'batch.expect_column_values_to_not_be_null(column="provider_type")',
                 "outputs": [],
             },
             {
@@ -1030,21 +927,7 @@ def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -1057,9 +940,9 @@ context.open_data_docs(validation_result_identifier)""",
 
 
 def test_batch_kwarg_path_relative_is_modified_and_found_in_a_code_cell(
-    critical_suite_with_citations,
+    critical_suite_with_citations, empty_data_context
 ):
-    obs = SuiteEditNotebookRenderer().render(
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
         critical_suite_with_citations, {"path": "foo/data"}
     )
     assert isinstance(obs, dict)
@@ -1075,9 +958,9 @@ def test_batch_kwarg_path_relative_is_modified_and_found_in_a_code_cell(
 
 
 def test_batch_kwarg_path_relative_dot_slash_is_modified_and_found_in_a_code_cell(
-    critical_suite_with_citations,
+    critical_suite_with_citations, empty_data_context
 ):
-    obs = SuiteEditNotebookRenderer().render(
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
         critical_suite_with_citations, {"path": "./foo/data"}
     )
     assert isinstance(obs, dict)
@@ -1093,9 +976,9 @@ def test_batch_kwarg_path_relative_dot_slash_is_modified_and_found_in_a_code_cel
 
 
 def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
-    critical_suite_with_citations,
+    critical_suite_with_citations, empty_data_context
 ):
-    obs = SuiteEditNotebookRenderer().render(
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
         critical_suite_with_citations, {"path": "/home/user/foo/data"}
     )
     assert isinstance(obs, dict)
@@ -1110,8 +993,10 @@ def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
     assert found_expected
 
 
-def test_complex_suite(warning_suite):
-    obs = SuiteEditNotebookRenderer().render(warning_suite, {"path": "foo/data"})
+def test_complex_suite(warning_suite, empty_data_context):
+    obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
+        warning_suite, {"path": "foo/data"}
+    )
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -1127,12 +1012,12 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "warning"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../foo/data"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "warning"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../foo/data"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -1164,7 +1049,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("npi")',
+                "source": 'batch.expect_column_values_to_not_be_null(column="npi")',
                 "outputs": [],
             },
             {"cell_type": "markdown", "source": "#### `provider_type`", "metadata": {}},
@@ -1172,7 +1057,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("provider_type")',
+                "source": 'batch.expect_column_values_to_not_be_null(column="provider_type")',
                 "outputs": [],
             },
             {
@@ -1184,7 +1069,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("nppes_provider_last_org_name")',
+                "source": 'batch.expect_column_values_to_not_be_null(column="nppes_provider_last_org_name")',
                 "outputs": [],
             },
             {
@@ -1196,7 +1081,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_be_in_set(\n    "nppes_provider_gender", value_set=["M", "F", ""]\n)',
+                "source": 'batch.expect_column_values_to_be_in_set(\n    column="nppes_provider_gender", value_set=["M", "F", ""]\n)',
                 "outputs": [],
             },
             {
@@ -1208,21 +1093,21 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("nppes_entity_code")',
+                "source": 'batch.expect_column_values_to_not_be_null(column="nppes_entity_code")',
                 "outputs": [],
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_be_in_set("nppes_entity_code", value_set=["I", "O"])',
+                "source": 'batch.expect_column_values_to_be_in_set(\n    column="nppes_entity_code", value_set=["I", "O"]\n)',
                 "outputs": [],
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_kl_divergence_to_be_less_than(\n    "nppes_entity_code",\n    partition_object={\n        "values": ["I", "O"],\n        "weights": [0.9431769750233306, 0.056823024976669335],\n    },\n    threshold=0.1,\n)',
+                "source": 'batch.expect_column_kl_divergence_to_be_less_than(\n    column="nppes_entity_code",\n    partition_object={\n        "values": ["I", "O"],\n        "weights": [0.9431769750233306, 0.056823024976669335],\n    },\n    threshold=0.1,\n)',
                 "outputs": [],
             },
             {
@@ -1234,7 +1119,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_be_in_set(\n    "nppes_provider_state",\n    value_set=[\n        "AL",\n        "AK",\n        "AZ",\n        "AR",\n        "CA",\n        "CO",\n        "CT",\n        "DE",\n        "FL",\n        "GA",\n        "HI",\n        "ID",\n        "IL",\n        "IN",\n        "IA",\n        "KS",\n        "KY",\n        "LA",\n        "ME",\n        "MD",\n        "MA",\n        "MI",\n        "MN",\n        "MS",\n        "MO",\n        "MT",\n        "NE",\n        "NV",\n        "NH",\n        "NJ",\n        "NM",\n        "NY",\n        "NC",\n        "ND",\n        "OH",\n        "OK",\n        "OR",\n        "PA",\n        "RI",\n        "SC",\n        "SD",\n        "TN",\n        "TX",\n        "UT",\n        "VT",\n        "VA",\n        "WA",\n        "WV",\n        "WI",\n        "WY",\n        "DC",\n        "PR",\n        "AE",\n        "VI",\n    ],\n    mostly=0.999,\n)',
+                "source": 'batch.expect_column_values_to_be_in_set(\n    column="nppes_provider_state",\n    value_set=[\n        "AL",\n        "AK",\n        "AZ",\n        "AR",\n        "CA",\n        "CO",\n        "CT",\n        "DE",\n        "FL",\n        "GA",\n        "HI",\n        "ID",\n        "IL",\n        "IN",\n        "IA",\n        "KS",\n        "KY",\n        "LA",\n        "ME",\n        "MD",\n        "MA",\n        "MI",\n        "MN",\n        "MS",\n        "MO",\n        "MT",\n        "NE",\n        "NV",\n        "NH",\n        "NJ",\n        "NM",\n        "NY",\n        "NC",\n        "ND",\n        "OH",\n        "OK",\n        "OR",\n        "PA",\n        "RI",\n        "SC",\n        "SD",\n        "TN",\n        "TX",\n        "UT",\n        "VT",\n        "VA",\n        "WA",\n        "WV",\n        "WI",\n        "WY",\n        "DC",\n        "PR",\n        "AE",\n        "VI",\n    ],\n    mostly=0.999,\n)',
                 "outputs": [],
             },
             {
@@ -1246,14 +1131,14 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("medicare_participation_indicator")',
+                "source": 'batch.expect_column_values_to_not_be_null(column="medicare_participation_indicator")',
                 "outputs": [],
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_be_in_set(\n    "medicare_participation_indicator", value_set=["Y", "N"]\n)',
+                "source": 'batch.expect_column_values_to_be_in_set(\n    column="medicare_participation_indicator", value_set=["Y", "N"]\n)',
                 "outputs": [],
             },
             {
@@ -1265,14 +1150,14 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("number_of_hcpcs")',
+                "source": 'batch.expect_column_values_to_not_be_null(column="number_of_hcpcs")',
                 "outputs": [],
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_be_between(\n    "number_of_hcpcs", min_value=0, max_value=500, mostly=0.999\n)',
+                "source": 'batch.expect_column_values_to_be_between(\n    column="number_of_hcpcs", min_value=0, max_value=500, mostly=0.999\n)',
                 "outputs": [],
             },
             {
@@ -1284,14 +1169,14 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("total_unique_benes")',
+                "source": 'batch.expect_column_values_to_not_be_null(column="total_unique_benes")',
                 "outputs": [],
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_be_between(\n    "total_unique_benes", min_value=0, max_value=2000, mostly=0.95\n)',
+                "source": 'batch.expect_column_values_to_be_between(\n    column="total_unique_benes", min_value=0, max_value=2000, mostly=0.95\n)',
                 "outputs": [],
             },
             {
@@ -1303,14 +1188,14 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_be_null("med_suppress_indicator", mostly=0.85)',
+                "source": 'batch.expect_column_values_to_be_null(column="med_suppress_indicator", mostly=0.85)',
                 "outputs": [],
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_be_in_set("med_suppress_indicator", value_set=["#", "*"])',
+                "source": 'batch.expect_column_values_to_be_in_set(\n    column="med_suppress_indicator", value_set=["#", "*"]\n)',
                 "outputs": [],
             },
             {
@@ -1322,14 +1207,14 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_be_between(\n    "beneficiary_average_age", min_value=40, max_value=90, mostly=0.995\n)',
+                "source": 'batch.expect_column_values_to_be_between(\n    column="beneficiary_average_age", min_value=40, max_value=90, mostly=0.995\n)',
                 "outputs": [],
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_kl_divergence_to_be_less_than(\n    "beneficiary_average_age",\n    partition_object={\n        "bins": [8, 16.5, 25, 33.5, 42, 50.5, 59, 67.5, 76, 84.5, 93],\n        "weights": [\n            0.00025259576594384474,\n            0.00013318685840675451,\n            0.0009653750909344757,\n            0.0012363414580378728,\n            0.01081660996274442,\n            0.030813927854975127,\n            0.13495227317818748,\n            0.6919590041664524,\n            0.1244213260634741,\n            0.004449359600843578,\n        ],\n    },\n    threshold=0.9,\n)',
+                "source": 'batch.expect_column_kl_divergence_to_be_less_than(\n    column="beneficiary_average_age",\n    partition_object={\n        "bins": [8, 16.5, 25, 33.5, 42, 50.5, 59, 67.5, 76, 84.5, 93],\n        "weights": [\n            0.00025259576594384474,\n            0.00013318685840675451,\n            0.0009653750909344757,\n            0.0012363414580378728,\n            0.01081660996274442,\n            0.030813927854975127,\n            0.13495227317818748,\n            0.6919590041664524,\n            0.1244213260634741,\n            0.004449359600843578,\n        ],\n    },\n    threshold=0.9,\n)',
                 "outputs": [],
             },
             {
@@ -1341,7 +1226,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_be_between(\n    "total_submitted_chrg_amt", min_value=2000, max_value=5000000, mostly=0.98\n)',
+                "source": 'batch.expect_column_values_to_be_between(\n    column="total_submitted_chrg_amt", min_value=2000, max_value=5000000, mostly=0.98\n)',
                 "outputs": [],
             },
             {
@@ -1353,7 +1238,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null("nppes_provider_first_name", mostly=0.9)',
+                "source": 'batch.expect_column_values_to_not_be_null(\n    column="nppes_provider_first_name", mostly=0.9\n)',
                 "outputs": [],
             },
             {
@@ -1365,7 +1250,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.expect_column_values_to_match_regex(\n    "nppes_provider_zip", regex="^\\d*$", mostly=0.999\n)',
+                "source": 'batch.expect_column_values_to_match_regex(\n    column="nppes_provider_zip", regex="^\\d*$", mostly=0.999\n)',
                 "outputs": [],
             },
             {
@@ -1377,21 +1262,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """\
-batch.save_expectation_suite(discard_failed_expectations=False)
-
-# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
-expectation_suite_identifier = list(results["details"].keys())[0]
-validation_result_identifier = ValidationResultIdentifier(
-    expectation_suite_identifier=expectation_suite_identifier,
-    batch_identifier=batch.batch_kwargs.to_id(),
-    run_id=run_id
-)
-context.build_data_docs()
-context.open_data_docs(validation_result_identifier)""",
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -1492,3 +1363,101 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     }
     suite = context.get_expectation_suite(suite_name)
     assert suite == original_suite
+
+
+def test_notebook_execution_with_custom_notebooks_wrong_module(
+    suite_with_multiple_citations, data_context_with_bad_notebooks
+):
+    """
+    Test the error message in case of "bad" custom module is clear
+    """
+    with pytest.raises(
+        SuiteEditNotebookCustomTemplateModuleNotFoundError, match=r"invalid\.module"
+    ):
+        SuiteEditNotebookRenderer.from_data_context(
+            data_context_with_bad_notebooks
+        ).render(suite_with_multiple_citations)
+
+
+def test_notebook_execution_with_custom_notebooks(
+    suite_with_multiple_citations, data_context_custom_notebooks
+):
+    """
+    Test the different parts of the notebooks can be modified
+    """
+    obs = SuiteEditNotebookRenderer.from_data_context(
+        data_context_custom_notebooks
+    ).render(suite_with_multiple_citations)
+    assert isinstance(obs, dict)
+    expected = {
+        "nbformat": 4,
+        "nbformat_minor": 4,
+        "metadata": {},
+        "cells": [
+            {
+                "cell_type": "markdown",
+                "source": "# Custom header for MyCompany",
+                "metadata": {},
+            },
+            {
+                "cell_type": "code",
+                "metadata": {},
+                "execution_count": None,
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../3.csv", "datasource": "3"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "outputs": [],
+            },
+            {
+                "cell_type": "markdown",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "metadata": {},
+            },
+            {
+                "cell_type": "markdown",
+                "source": "### Table Expectation(s)",
+                "metadata": {},
+            },
+            {
+                "cell_type": "markdown",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
+                "metadata": {},
+            },
+            {
+                "cell_type": "markdown",
+                "source": "### Column Expectation(s)\nwrite your column expectations here",
+                "metadata": {},
+            },
+            {"cell_type": "markdown", "source": "#### `npi`", "metadata": {}},
+            {
+                "cell_type": "code",
+                "metadata": {},
+                "execution_count": None,
+                "source": 'batch.expect_column_values_to_not_be_null(column="npi")',
+                "outputs": [],
+            },
+            {"cell_type": "markdown", "source": "#### `provider_type`", "metadata": {}},
+            {
+                "cell_type": "code",
+                "metadata": {},
+                "execution_count": None,
+                "source": 'batch.expect_column_values_to_not_be_null(column="provider_type")',
+                "outputs": [],
+            },
+            {
+                "cell_type": "markdown",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "metadata": {},
+            },
+            {
+                "cell_type": "code",
+                "metadata": {},
+                "execution_count": None,
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\nrun_id = {\n    "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n    "run_time": datetime.datetime.now(datetime.timezone.utc),\n}\nresults = context.run_validation_operator(\n    "local", assets_to_validate=[batch], run_id=run_id\n)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs(site_names=["site_local"])\ncontext.open_data_docs(validation_result_identifier, site_name="site_local")',
+                "outputs": [],
+            },
+        ],
+    }
+    del expected["nbformat_minor"]
+    del obs["nbformat_minor"]
+    for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        assert obs_cell == expected_cell
+    assert obs == expected

@@ -2,9 +2,6 @@ import logging
 import uuid
 from copy import deepcopy
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.types import DictDot
-from great_expectations.types.configurations import ClassConfigSchema
 from marshmallow import (
     INCLUDE,
     Schema,
@@ -17,12 +14,16 @@ from marshmallow import (
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.types import DictDot
+from great_expectations.types.configurations import ClassConfigSchema
+
 logger = logging.getLogger(__name__)
 
 yaml = YAML()
 
-CURRENT_CONFIG_VERSION = 1
-MINIMUM_SUPPORTED_CONFIG_VERSION = 1
+CURRENT_CONFIG_VERSION = 2
+MINIMUM_SUPPORTED_CONFIG_VERSION = 2
 DEFAULT_USAGE_STATISTICS_URL = (
     "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 )
@@ -40,6 +41,7 @@ class DataContextConfig(DictDot):
         validation_operators,
         stores,
         data_docs_sites,
+        notebooks=None,
         config_variables_file_path=None,
         anonymous_usage_statistics=None,
         commented_map=None,
@@ -61,6 +63,7 @@ class DataContextConfig(DictDot):
             )
         self.validation_operators = validation_operators
         self.stores = stores
+        self.notebooks = notebooks
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
         if anonymous_usage_statistics is None:
@@ -224,6 +227,7 @@ class DatasourceConfigSchema(Schema):
         keys=fields.Str(), values=fields.Dict(), allow_none=True
     )
     credentials = fields.Raw(allow_none=True)
+    spark_context = fields.Raw(allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -237,6 +241,128 @@ class DatasourceConfigSchema(Schema):
     @post_load
     def make_datasource_config(self, data, **kwargs):
         return DatasourceConfig(**data)
+
+
+class NotebookTemplateConfig(DictDot):
+    def __init__(self, file_name, template_kwargs=None):
+        self.file_name = file_name
+        if template_kwargs:
+            self.template_kwargs = template_kwargs
+        else:
+            self.template_kwargs = {}
+
+
+class NotebookTemplateConfigSchema(Schema):
+    file_name = fields.String()
+    template_kwargs = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), allow_none=True
+    )
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_notebook_template_config(self, data, **kwargs):
+        return NotebookTemplateConfig(**data)
+
+
+class NotebookConfig(DictDot):
+    def __init__(
+        self,
+        class_name,
+        module_name,
+        custom_templates_module,
+        header_markdown=None,
+        footer_markdown=None,
+        table_expectations_header_markdown=None,
+        column_expectations_header_markdown=None,
+        table_expectations_not_found_markdown=None,
+        column_expectations_not_found_markdown=None,
+        authoring_intro_markdown=None,
+        column_expectations_markdown=None,
+        header_code=None,
+        footer_code=None,
+        column_expectation_code=None,
+        table_expectation_code=None,
+    ):
+        self.class_name = class_name
+        self.module_name = module_name
+        self.custom_templates_module = custom_templates_module
+
+        self.header_markdown = header_markdown
+        self.footer_markdown = footer_markdown
+        self.table_expectations_header_markdown = table_expectations_header_markdown
+        self.column_expectations_header_markdown = column_expectations_header_markdown
+        self.table_expectations_not_found_markdown = (
+            table_expectations_not_found_markdown
+        )
+        self.column_expectations_not_found_markdown = (
+            column_expectations_not_found_markdown
+        )
+        self.authoring_intro_markdown = authoring_intro_markdown
+        self.column_expectations_markdown = column_expectations_markdown
+
+        self.header_code = header_code
+        self.footer_code = footer_code
+        self.column_expectation_code = column_expectation_code
+        self.table_expectation_code = table_expectation_code
+
+
+class NotebookConfigSchema(Schema):
+    class_name = fields.String(missing="SuiteEditNotebookRenderer")
+    module_name = fields.String(
+        missing="great_expectations.render.renderer.suite_edit_notebook_renderer"
+    )
+    custom_templates_module = fields.String()
+
+    header_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    footer_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    table_expectations_header_markdown = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
+    column_expectations_header_markdown = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
+    table_expectations_not_found_markdown = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
+    column_expectations_not_found_markdown = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
+    authoring_intro_markdown = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
+    column_expectations_markdown = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
+
+    header_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    footer_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
+    column_expectation_code = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
+    table_expectation_code = fields.Nested(
+        NotebookTemplateConfigSchema, allow_none=True
+    )
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_notebook_config(self, data, **kwargs):
+        return NotebookConfig(**data)
+
+
+class NotebooksConfig(DictDot):
+    def __init__(self, suite_edit):
+        self.suite_edit = suite_edit
+
+
+class NotebooksConfigSchema(Schema):
+    # for now only suite_edit, could have other customization options for
+    # notebooks in the future
+    suite_edit = fields.Nested(NotebookConfigSchema)
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_notebooks_config(self, data, **kwargs):
+        return NotebooksConfig(**data)
 
 
 class DataContextConfigSchema(Schema):
@@ -253,6 +379,7 @@ class DataContextConfigSchema(Schema):
     plugins_directory = fields.Str(allow_none=True)
     validation_operators = fields.Dict(keys=fields.Str(), values=fields.Dict())
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
+    notebooks = fields.Nested(NotebooksConfigSchema, allow_none=True)
     data_docs_sites = fields.Dict(
         keys=fields.Str(), values=fields.Dict(), allow_none=True
     )
@@ -292,10 +419,9 @@ class DataContextConfigSchema(Schema):
             )
         elif data["config_version"] < MINIMUM_SUPPORTED_CONFIG_VERSION:
             raise ge_exceptions.UnsupportedConfigVersionError(
-                "You appear to have an invalid config version ({}).\n    The version number must be between {} and {}.".format(
-                    data["config_version"],
-                    MINIMUM_SUPPORTED_CONFIG_VERSION,
-                    CURRENT_CONFIG_VERSION,
+                "You appear to have an invalid config version ({}).\n    The version number must be at least {}. "
+                "Please see the migration guide at https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html".format(
+                    data["config_version"], MINIMUM_SUPPORTED_CONFIG_VERSION
                 ),
             )
         elif data["config_version"] > CURRENT_CONFIG_VERSION:
@@ -310,3 +436,4 @@ class DataContextConfigSchema(Schema):
 dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
+notebookConfigSchema = NotebookConfigSchema()

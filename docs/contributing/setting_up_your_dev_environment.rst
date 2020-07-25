@@ -6,7 +6,7 @@ Setting up your dev environment
 ===============================
 
 Prerequisites
--------------------
+-------------
 
 In order to contribute to Great Expectations, you will need the following:
 
@@ -29,7 +29,7 @@ Fork and clone the repository
 
     * Click the green ``Clone`` button and choose the SSH or HTTPS URL depending on your setup.
     * Copy the URL and run ``git clone <url>`` in your local terminal.
-    * This will clone the ``develop`` branch of the great_expectations repo. Please use ``develop`` (not ``master``!) as the starting point for your work.
+    * This will clone the ``develop`` branch of the great_expectations repo. Please use ``develop`` (not ``main``!) as the starting point for your work.
     * Atlassian has a `nice tutorial for developing on a fork <https://www.atlassian.com/git/tutorials/git-forks-and-upstreams>`__.
 
 
@@ -58,6 +58,7 @@ Install python dependencies
 
     * ``pip install -r requirements-dev.txt``
     *  This will ensure that sure you have the right libraries installed in your python environment.
+    * Note that you can also substitute ``requirements-dev-min.txt`` to only install requirements required for testing all backends, and ``requirements-dev-spark.txt`` or ``requirements-dev-sqlalchemy.txt`` if you would like to add support for spark or sqlalchemy tests, respectively.
 
 
 **7. Install great_expectations from your cloned repo**
@@ -103,6 +104,24 @@ Depending on which features of Great Expectations you want to work on, you may w
             sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) FATAL:  database "test_ci" does not exist
             (Background on this error at: http://sqlalche.me/e/e3q8)
 
+
+**If you want to develop against local mysql:**
+
+    * To simplify setup, the repository includes a docker-compose file that can stand up a local mysqldb container. To use it, you'll need to have `docker installed <https://docs.docker.com/install/>`__.
+    * Navigate to ``assets/docker/mysql`` in  your ``great_expectations`` repo and run ``docker-compose up -d``
+    * Within the same directory, you can run ``docker-compose ps`` to verify that the container is running. You should see something like:
+
+        .. code-block::
+
+                  Name                   Command             State                 Ports
+            ------------------------------------------------------------------------------------------
+            mysql_mysql_db_1   docker-entrypoint.sh mysqld   Up      0.0.0.0:3306->3306/tcp, 33060/tcp
+
+..
+
+    * Once you’re done testing, you can shut down your mysql container by running ``docker-compose down`` from the same directory.
+    * Caution: If another service is using port 3306, docker may start the container but silently fail to set up the port.
+
 **If you want to develop against local Spark:**
 
     * In most cases, ``pip install requirements-dev.txt`` should set up pyspark for you.
@@ -116,7 +135,7 @@ Depending on which features of Great Expectations you want to work on, you may w
     * Documentation will be generated in ``docs/build/html/`` with the ``index.html`` as the index page.
 
 Run tests to confirm that everything is working
------------------------------------------
+-----------------------------------------------
 
 You can run all tests by running ``pytest`` in the great_expectations directory root. Please see :ref:`contributing_testing` for testing options and details.
 
@@ -124,4 +143,3 @@ Start coding!
 -----------------------------------------
 
 At this point, you have everything you need to start coding!
-

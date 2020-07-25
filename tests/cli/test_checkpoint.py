@@ -5,9 +5,10 @@ import subprocess
 import mock
 import pytest
 from click.testing import CliRunner
+from ruamel.yaml import YAML
+
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from ruamel.yaml import YAML
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
@@ -234,7 +235,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
 # You can edit this file to add batches of data and expectation suites.
 #
 # For more details please see
-# https://docs.greatexpectations.io/en/latest/command_line.html#great-expectations-checkpoint-new-checkpoint-suite
+# https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
 validation_operator_name: action_list_operator
 # Batches are a list of batch_kwargs paired with a list of one or more suite
 # names. A checkpoint can have one or more batches. This makes deploying
@@ -248,6 +249,7 @@ batches:
 
     assert (
         """datasource: mydatasource
+      data_asset_name: Titanic
     expectation_suite_names: # one or more suites may validate against a single batch
       - Titanic.warning
 """
@@ -579,15 +581,10 @@ def test_checkpoint_run_on_non_existent_validation_operator(
         in stdout
     )
 
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
-        ),
-    ]
+    assert mock_emit.call_count == 3
+    assert mock_emit.call_args_list[0].args[0]["success"] == True
+    assert mock_emit.call_args_list[1].args[0]["success"] == False
+    assert mock_emit.call_args_list[2].args[0]["success"] == False
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
