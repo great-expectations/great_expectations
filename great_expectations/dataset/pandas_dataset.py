@@ -501,13 +501,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         if series.dtype in ["int", "float"]:
             if n_bins is None:
-                np.histogram_bin_edges(series, bins="auto")
+                bins = np.histogram_bin_edges(series[series.notnull()], bins="auto")
             else:
-                bins = np.histogram_bin_edges(series, bins=n_bins)
+                bins = np.histogram_bin_edges(series[series.notnull()], bins=n_bins)
 
             # Make sure max of series is included in rightmost bin
             bins[-1] = np.nextafter(bins[-1], bins[-1] + 1)
 
+            # Missings get digitized into bin = n_bins+1
             return np.digitize(series, bins=bins)
 
         else:
@@ -517,15 +518,15 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             if bins is None:
                 value_counts = series.value_counts(sort=True)
                 if len(value_counts) < n_bins + 1:
-                    return series
+                    return series.fillna("(missing)")
                 else:
-                    other_values = value_counts.index[n_bins:]
-                    replace = {value: "other" for value in other_values}
+                    other_values = sorted(value_counts.index[n_bins:])
+                    replace = {value: "(other)" for value in other_values}
             else:
                 replace = dict()
                 for x in bins:
                     replace.update({value: ", ".join(x) for value in x})
-            return series.replace(to_replace=replace)
+            return series.replace(to_replace=replace).fillna("(missing)")
 
     ### Expectation methods ###
 
