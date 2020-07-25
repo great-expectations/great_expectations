@@ -249,6 +249,7 @@ def test_content_block_list_available_expectations():
         "expect_table_columns_to_match_ordered_list",
         "expect_table_row_count_to_be_between",
         "expect_table_row_count_to_equal",
+        "expect_column_pair_values_to_be_independent"
     }
     assert known_validation_results_implemented_expectations <= set(
         available_expectations
