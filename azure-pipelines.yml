@@ -50,7 +50,7 @@ stages:
     jobs:
       - job: pandas_versions
         variables:
-          GE_pytest_pip_opts: '-r tests/requirements-dev-minimal.txt'
+          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt'
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
         strategy:
           matrix:
@@ -112,7 +112,7 @@ stages:
           mysql: mysql
 
         variables:
-          GE_pytest_pip_opts: '-r tests/requirements-dev-minimal.txt -r tests/requirements-dev-sqlalchemy.txt -r tests/requirements-dev-spark.txt'
+          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-spark.txt'
           GE_pytest_opts: ''
 
         strategy:
