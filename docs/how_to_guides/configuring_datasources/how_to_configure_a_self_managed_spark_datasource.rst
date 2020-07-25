@@ -106,6 +106,8 @@ To enable running Great Expectations against dataframe created by Spark SQL quer
 * **query_name** - Name by which you want to reference the datasource. For next points we will use `my_first_query` name. You will use this name to select datasource when creating expectations.
 * **spark_sql_query** - Spark SQL Query that will create DataFrame against which GE validations will be run. For next points we will use `select * from mydb.mytable` query.
 
+Now, when creating new expectation suite, query `main` will be available in the list of datasources.
+
 ----------------
 Additional Notes
 ----------------
@@ -135,8 +137,6 @@ To provide custom configuration options either:
                 spark.master: local[*]
 
 Full list of Spark configuration options is available here: [https://spark.apache.org/docs/latest/configuration.html](https://spark.apache.org/docs/latest/configuration.html)
-
-Now, when creating new expectation suite, query `main` will be available in the list of datasources.
 
 **Spark catalog**
 
