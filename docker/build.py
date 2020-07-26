@@ -10,9 +10,7 @@ import docker
 from docker import APIClient
 
 PROJECT_ROOT = str(pathlib.Path(__file__).parent.parent.absolute())
-try:
-    sys.path.index(PROJECT_ROOT)
-except ValueError:
+if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
 
 import versioneer  # isort:skip
