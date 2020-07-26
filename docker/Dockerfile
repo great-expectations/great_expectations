@@ -12,7 +12,13 @@ ENV PATH /usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:
 ENV GE_HOME ${HOME}/great_expectations
 
 LABEL maintainer="great-expectations"
-
+LABEL org.opencontainers.image.title="Great Expectations"
+LABEL org.opencontainers.image.description="Great Expectations. Always know what to expect from your data."
+LABEL org.opencontainers.image.version=${GE_VERSION}
+LABEL org.opencontainers.image.created=${CREATED}
+LABEL org.opencontainers.image.url="https://github.com/great-expectations/great_expectations"
+LABEL org.opencontainers.image.documentation="https://github.com/great-expectations/great_expectations"
+LABEL org.opencontainers.image.source="https://github.com/great-expectations/great_expectations"
 RUN useradd -mU great-expectations -d ${HOME}
 
 USER great-expectations
