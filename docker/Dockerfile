@@ -2,7 +2,7 @@ ARG PYTHON_DOCKER_TAG
 
 FROM python:${PYTHON_DOCKER_TAG}
 
-ARG GE_EXTRA_DEPS="spark,sqlalchemy,redshift,s3"
+ARG GE_EXTRA_DEPS="spark,sqlalchemy,redshift,s3,gcp"
 
 ENV PYTHONIOENCODING utf-8
 ENV LANG C.UTF-8
