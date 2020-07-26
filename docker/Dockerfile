@@ -32,3 +32,4 @@ RUN cd ${HOME}/great_expectations_install && \
 WORKDIR ${HOME}
 
 ENTRYPOINT ["great_expectations"]
+CMD ["--help"]
