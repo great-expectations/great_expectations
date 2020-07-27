@@ -59,12 +59,27 @@ def test_resource_key_passes_run_name_filter():
     )
 
     assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"equals": "profiling"}) is False
+    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"equals": "foofooprofilingfoo"}) is True
+
     assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"not_equals": "profiling"}) is True
+    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"not_equals": "foofooprofilingfoo"}) is\
+           False
+
     assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"includes": "profiling"}) is True
+    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"includes": "foobar"}) is False
+
+    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"not_includes": "foobar"}) is True
     assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"not_includes": "profiling"}) is False
+
     assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"matches_regex": "(foo){2}profiling("
                                                                                                "foo)+"}) is True
+    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"matches_regex": "(foo){3}profiling("
+                                                                                               "foo)+"}) is False
     with pytest.warns(DeprecationWarning):
         assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"eq": "profiling"}) is False
+        assert resource_key_passes_run_name_filter(resource_key,
+                                                   run_name_filter={"eq": "foofooprofilingfoo"}) is True
     with pytest.warns(DeprecationWarning):
         assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"ne": "profiling"}) is True
+        assert resource_key_passes_run_name_filter(resource_key,
+                                                   run_name_filter={"ne": "foofooprofilingfoo"}) is False
