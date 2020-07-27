@@ -3,6 +3,10 @@
 """Rendering utility"""
 import decimal
 import locale
+import re
+import warnings
+
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 
 DEFAULT_PRECISION = 4
 # create a new context for this task
@@ -71,3 +75,37 @@ def ordinal(num):
         # the second parameter is a default.
         suffix = SUFFIXES.get(num % 10, "th")
     return str(num) + suffix
+
+
+def resource_key_passes_run_name_filter(resource_key, run_name_filter):
+    if type(resource_key) == ValidationResultIdentifier:
+        run_name = resource_key.run_id.run_name
+    else:
+        raise TypeError(
+            "run_name_filter filtering is only implemented for ValidationResultResources."
+        )
+
+    if run_name_filter.get("equals"):
+        return run_name_filter.get("equals") == run_name
+    elif run_name_filter.get("not_equals"):
+        return run_name_filter.get("not_equals") != run_name
+    elif run_name_filter.get("includes"):
+        return run_name_filter.get("includes") in run_name
+    elif run_name_filter.get("not_includes"):
+        return run_name_filter.get("not_includes") not in run_name
+    elif run_name_filter.get("matches_regex"):
+        regex = run_name_filter.get("matches_regex")
+        regex_match = re.search(regex, run_name)
+        return False if regex_match is None else True
+    elif run_name_filter.get("eq"):
+        warnings.warn(
+            "The 'eq' key will be deprecated and renamed 'equals' - please update your code accordingly.",
+            DeprecationWarning,
+        )
+        return run_name_filter.get("eq") == run_name
+    elif run_name_filter.get("ne"):
+        warnings.warn(
+            "The 'ne' key will be deprecated and renamed 'not_equals' - please update your code accordingly.",
+            DeprecationWarning,
+        )
+        return run_name_filter.get("ne") != run_name

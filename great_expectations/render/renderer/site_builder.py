@@ -14,6 +14,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.render.util import resource_key_passes_run_name_filter
 
 logger = logging.getLogger(__name__)
 
@@ -380,7 +381,7 @@ class DefaultSiteSectionBuilder(object):
                 continue
 
             if self.run_name_filter:
-                if not self._resource_key_passes_run_name_filter(resource_key):
+                if not resource_key_passes_run_name_filter(resource_key, self.run_name_filter):
                     continue
             try:
                 resource = self.source_store.get(resource_key)
@@ -447,20 +448,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 ),
                 viewable_content,
             )
-
-    def _resource_key_passes_run_name_filter(self, resource_key):
-        if type(resource_key) == ValidationResultIdentifier:
-            run_name = resource_key.run_id.run_name
-        else:
-            raise TypeError(
-                "run_name_filter filtering is only implemented for ValidationResultResources."
-            )
-
-        if self.run_name_filter.get("eq"):
-            return self.run_name_filter.get("eq") == run_name
-
-        elif self.run_name_filter.get("ne"):
-            return self.run_name_filter.get("ne") != run_name
 
 
 class DefaultSiteIndexBuilder(object):
