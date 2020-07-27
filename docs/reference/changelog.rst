@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [FEATURE] Add --assume-yes/--yes/-y option to cli docs build command 
 * [ENHANCEMENT] Use green checkmark in Slack msgs instead of tada 
 * [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) -- thanks @Dandandan
 
