@@ -182,9 +182,13 @@ class SiteBuilder(object):
 
         # set default run_name_filter
         if site_section_builders["validations"].get("run_name_filter") is None:
-            site_section_builders["validations"]["run_name_filter"] = {"not_includes": "profiling"}
+            site_section_builders["validations"]["run_name_filter"] = {
+                "not_includes": "profiling"
+            }
         if site_section_builders["profiling"].get("run_name_filter") is None:
-            site_section_builders["profiling"]["run_name_filter"] = {"includes": "profiling"}
+            site_section_builders["profiling"]["run_name_filter"] = {
+                "includes": "profiling"
+            }
 
         self.site_section_builders = {}
         for site_section_name, site_section_config in site_section_builders.items():
@@ -242,8 +246,12 @@ class SiteBuilder(object):
                     section_name: section_config.get("source_store_name")
                     for (section_name, section_config) in site_section_builders.items()
                 },
-                "validations_run_name_filter": site_section_builders["validations"]["run_name_filter"],
-                "profiling_run_name_filter": site_section_builders["profiling"]["run_name_filter"]
+                "validations_run_name_filter": site_section_builders["validations"][
+                    "run_name_filter"
+                ],
+                "profiling_run_name_filter": site_section_builders["profiling"][
+                    "run_name_filter"
+                ],
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -388,7 +396,9 @@ class DefaultSiteSectionBuilder(object):
                 continue
 
             if self.run_name_filter:
-                if not resource_key_passes_run_name_filter(resource_key, self.run_name_filter):
+                if not resource_key_passes_run_name_filter(
+                    resource_key, self.run_name_filter
+                ):
                     continue
             try:
                 resource = self.source_store.get(resource_key)
@@ -691,12 +701,16 @@ class DefaultSiteIndexBuilder(object):
         profiling_result_keys = [
             validation_result_key
             for validation_result_key in validation_and_profiling_result_keys
-            if resource_key_passes_run_name_filter(validation_result_key, self.profiling_run_name_filter)
+            if resource_key_passes_run_name_filter(
+                validation_result_key, self.profiling_run_name_filter
+            )
         ]
         validation_result_keys = [
             validation_result_key
             for validation_result_key in validation_and_profiling_result_keys
-            if resource_key_passes_run_name_filter(validation_result_key, self.validations_run_name_filter)
+            if resource_key_passes_run_name_filter(
+                validation_result_key, self.validations_run_name_filter
+            )
         ]
         validation_result_keys = sorted(
             validation_result_keys, key=lambda x: x.run_id.run_time, reverse=True

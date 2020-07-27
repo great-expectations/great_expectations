@@ -2,9 +2,14 @@
 import pytest
 
 from great_expectations.core import RunIdentifier
-from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier, \
-    ExpectationSuiteIdentifier
-from great_expectations.render.util import num_to_str, resource_key_passes_run_name_filter
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
+from great_expectations.render.util import (
+    num_to_str,
+    resource_key_passes_run_name_filter,
+)
 
 
 def test_num_to_str():
@@ -55,31 +60,98 @@ def test_resource_key_passes_run_name_filter():
     resource_key = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier("test_suite"),
         run_id=RunIdentifier(run_name="foofooprofilingfoo"),
-        batch_identifier="f14c3d2f6e8028c2db0c25edabdb0d61"
+        batch_identifier="f14c3d2f6e8028c2db0c25edabdb0d61",
     )
 
-    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"equals": "profiling"}) is False
-    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"equals": "foofooprofilingfoo"}) is True
+    assert (
+        resource_key_passes_run_name_filter(
+            resource_key, run_name_filter={"equals": "profiling"}
+        )
+        is False
+    )
+    assert (
+        resource_key_passes_run_name_filter(
+            resource_key, run_name_filter={"equals": "foofooprofilingfoo"}
+        )
+        is True
+    )
 
-    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"not_equals": "profiling"}) is True
-    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"not_equals": "foofooprofilingfoo"}) is\
-           False
+    assert (
+        resource_key_passes_run_name_filter(
+            resource_key, run_name_filter={"not_equals": "profiling"}
+        )
+        is True
+    )
+    assert (
+        resource_key_passes_run_name_filter(
+            resource_key, run_name_filter={"not_equals": "foofooprofilingfoo"}
+        )
+        is False
+    )
 
-    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"includes": "profiling"}) is True
-    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"includes": "foobar"}) is False
+    assert (
+        resource_key_passes_run_name_filter(
+            resource_key, run_name_filter={"includes": "profiling"}
+        )
+        is True
+    )
+    assert (
+        resource_key_passes_run_name_filter(
+            resource_key, run_name_filter={"includes": "foobar"}
+        )
+        is False
+    )
 
-    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"not_includes": "foobar"}) is True
-    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"not_includes": "profiling"}) is False
+    assert (
+        resource_key_passes_run_name_filter(
+            resource_key, run_name_filter={"not_includes": "foobar"}
+        )
+        is True
+    )
+    assert (
+        resource_key_passes_run_name_filter(
+            resource_key, run_name_filter={"not_includes": "profiling"}
+        )
+        is False
+    )
 
-    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"matches_regex": "(foo){2}profiling("
-                                                                                               "foo)+"}) is True
-    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"matches_regex": "(foo){3}profiling("
-                                                                                               "foo)+"}) is False
+    assert (
+        resource_key_passes_run_name_filter(
+            resource_key,
+            run_name_filter={"matches_regex": "(foo){2}profiling(" "foo)+"},
+        )
+        is True
+    )
+    assert (
+        resource_key_passes_run_name_filter(
+            resource_key,
+            run_name_filter={"matches_regex": "(foo){3}profiling(" "foo)+"},
+        )
+        is False
+    )
     with pytest.warns(DeprecationWarning):
-        assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"eq": "profiling"}) is False
-        assert resource_key_passes_run_name_filter(resource_key,
-                                                   run_name_filter={"eq": "foofooprofilingfoo"}) is True
+        assert (
+            resource_key_passes_run_name_filter(
+                resource_key, run_name_filter={"eq": "profiling"}
+            )
+            is False
+        )
+        assert (
+            resource_key_passes_run_name_filter(
+                resource_key, run_name_filter={"eq": "foofooprofilingfoo"}
+            )
+            is True
+        )
     with pytest.warns(DeprecationWarning):
-        assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"ne": "profiling"}) is True
-        assert resource_key_passes_run_name_filter(resource_key,
-                                                   run_name_filter={"ne": "foofooprofilingfoo"}) is False
+        assert (
+            resource_key_passes_run_name_filter(
+                resource_key, run_name_filter={"ne": "profiling"}
+            )
+            is True
+        )
+        assert (
+            resource_key_passes_run_name_filter(
+                resource_key, run_name_filter={"ne": "foofooprofilingfoo"}
+            )
+            is False
+        )
