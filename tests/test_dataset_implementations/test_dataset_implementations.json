@@ -15,6 +15,13 @@
                   "z": "IntegerType",
                   "n": "IntegerType",
                   "b": "BooleanType"
+                },
+                "mssql": {
+                  "x": "FLOAT",
+                  "y": "INTEGER",
+                  "z": "INTEGER",
+                  "n": "INTEGER",
+                  "b": "BIT"
                 }
             }
         },
@@ -31,6 +38,12 @@
                   "b": "StringType",
                   "c": "StringType",
                   "d": "StringType"
+                },
+                "mssql": {
+                    "a": "INTEGER",
+                    "b": "VARCHAR",
+                    "c": "VARCHAR",
+                    "d": "VARCHAR"
                 }
             }
         },
@@ -45,6 +58,11 @@
                     "a": "IntegerType",
                     "b": "StringType",
                     "c": "IntegerType"
+                },
+                "mssql": {
+                    "a": "INTEGER",
+                    "b": "VARCHAR",
+                    "c": "INTEGER"
                 }
             }
         }
