@@ -26,7 +26,12 @@ logger = logging.getLogger(__name__)
 
 
 class ValidationResultsPageRenderer(Renderer):
-    def __init__(self, column_section_renderer=None):
+    def __init__(self, column_section_renderer=None, run_info_at_end: bool=False):
+        """
+        :param column_section_renderer:
+        :param run_info_at_end: Move the run info (Info, Batch Markers, Batch Kwargs) to the end
+                                of the rendered output rather than after Statistics.
+        """
         super().__init__()
         if column_section_renderer is None:
             column_section_renderer = {
@@ -46,6 +51,7 @@ class ValidationResultsPageRenderer(Renderer):
                 package_name=None,
                 class_name=column_section_renderer["class_name"],
             )
+        self.run_info_at_end = run_info_at_end
 
     def render(self, validation_results):
         run_id = validation_results.meta["run_id"]
@@ -129,7 +135,8 @@ class ValidationResultsPageRenderer(Renderer):
             }
         )
 
-        overview_content_blocks.append(collapse_content_block)
+        if not self.run_info_at_end:
+            overview_content_blocks.append(collapse_content_block)
 
         sections = [
             RenderedSectionContent(
@@ -151,6 +158,14 @@ class ValidationResultsPageRenderer(Renderer):
             self._column_section_renderer.render(validation_results=columns[column],)
             for column in ordered_columns
         ]
+
+        if self.run_info_at_end:
+            sections += [RenderedSectionContent(
+                **{
+                    "section_name": "Run Info",
+                    "content_blocks": collapse_content_blocks,
+                }
+            )]
 
         return RenderedDocumentContent(
             **{
