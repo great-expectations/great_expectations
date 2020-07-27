@@ -161,7 +161,6 @@ class SiteBuilder(object):
             "validations": {
                 "class_name": "DefaultSiteSectionBuilder",
                 "source_store_name": data_context.validations_store_name,
-                "run_name_filter": {"ne": "profiling"},
                 "renderer": {"class_name": "ValidationResultsPageRenderer"},
                 "validation_results_limit": site_index_builder.get(
                     "validation_results_limit"
@@ -170,7 +169,6 @@ class SiteBuilder(object):
             "profiling": {
                 "class_name": "DefaultSiteSectionBuilder",
                 "source_store_name": data_context.validations_store_name,
-                "run_name_filter": {"eq": "profiling"},
                 "renderer": {"class_name": "ProfilingResultsPageRenderer"},
             },
         }
@@ -181,6 +179,13 @@ class SiteBuilder(object):
             site_section_builders = nested_update(
                 default_site_section_builders_config, site_section_builders
             )
+
+        # set default run_name_filter
+        if site_section_builders["validations"].get("run_name_filter") is None:
+            site_section_builders["validations"]["run_name_filter"] = {"not_includes": "profiling"}
+        if site_section_builders["profiling"].get("run_name_filter") is None:
+            site_section_builders["profiling"]["run_name_filter"] = {"includes": "profiling"}
+
         self.site_section_builders = {}
         for site_section_name, site_section_config in site_section_builders.items():
             if not site_section_config or site_section_config in [
@@ -237,6 +242,8 @@ class SiteBuilder(object):
                     section_name: section_config.get("source_store_name")
                     for (section_name, section_config) in site_section_builders.items()
                 },
+                "validations_run_name_filter": site_section_builders["validations"]["run_name_filter"],
+                "profiling_run_name_filter": site_section_builders["profiling"]["run_name_filter"]
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -405,7 +412,7 @@ class DefaultSiteSectionBuilder(object):
                 expectation_suite_name = (
                     resource_key.expectation_suite_identifier.expectation_suite_name
                 )
-                if run_name == "profiling":
+                if self.name == "profiling":
                     logger.debug(
                         "        Rendering profiling for batch {}".format(
                             resource_key.batch_identifier
@@ -465,6 +472,8 @@ class DefaultSiteIndexBuilder(object):
         view=None,
         data_context_id=None,
         source_stores=None,
+        validations_run_name_filter=None,
+        profiling_run_name_filter=None,
         **kwargs,
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
@@ -476,6 +485,8 @@ class DefaultSiteIndexBuilder(object):
         self.data_context_id = data_context_id
         self.show_how_to_buttons = show_how_to_buttons
         self.source_stores = source_stores or {}
+        self.validations_run_name_filter = validations_run_name_filter
+        self.profiling_run_name_filter = profiling_run_name_filter
 
         if renderer is None:
             renderer = {
@@ -680,12 +691,12 @@ class DefaultSiteIndexBuilder(object):
         profiling_result_keys = [
             validation_result_key
             for validation_result_key in validation_and_profiling_result_keys
-            if validation_result_key.run_id.run_name == "profiling"
+            if resource_key_passes_run_name_filter(validation_result_key, self.profiling_run_name_filter)
         ]
         validation_result_keys = [
             validation_result_key
             for validation_result_key in validation_and_profiling_result_keys
-            if validation_result_key.run_id.run_name != "profiling"
+            if resource_key_passes_run_name_filter(validation_result_key, self.validations_run_name_filter)
         ]
         validation_result_keys = sorted(
             validation_result_keys, key=lambda x: x.run_id.run_time, reverse=True
