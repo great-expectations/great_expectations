@@ -6,6 +6,5 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    ignored_updates:
-      - match:
-          dependency_name: "isort"
+    ignored:
+      dependency_name: "isort"
