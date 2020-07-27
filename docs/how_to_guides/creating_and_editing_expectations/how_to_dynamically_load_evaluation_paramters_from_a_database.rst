@@ -18,11 +18,11 @@ Steps
 
     A SqlAlchemy Query Store acts as a bridge that can query a SqlAlchemy-connected database and return the result of the query to be available for an evaluation parameter.
 
-    Find the ``stores`` section in your ``great_expectations.yml`` file, and add the following configuration for a new store called "query_store".
+    Find the ``stores`` section in your ``great_expectations.yml`` file, and add the following configuration for a new store called "my_query_store". You can add and reference multiple Query Stores with different names.
 
     .. code-block:: yaml
 
-      query_store:
+      my_query_store:
         class_name: SqlAlchemyQueryStore
         credentials: ${rds_movies_db}
         queries:
@@ -63,13 +63,13 @@ Steps
 
 #. **Define an expectation that relies on a dynamic query**
 
-    Great Expectations recognizes several types of :ref:`Evaluation Parameters <reference__core_concepts__evaluation_parameters>` that can use advanced features provided by the Data Context. To dynamically load data, we will be using a store-style URN, which starts with "urn:great_expectations:stores". The next component of the URN is the name of the store we configured above (``query_store``), and the final component is the name of the query we defined above (``current_genre_ids``):
+    Great Expectations recognizes several types of :ref:`Evaluation Parameters <reference__core_concepts__evaluation_parameters>` that can use advanced features provided by the Data Context. To dynamically load data, we will be using a store-style URN, which starts with "urn:great_expectations:stores". The next component of the URN is the name of the store we configured above (``my_query_store``), and the final component is the name of the query we defined above (``current_genre_ids``):
 
     .. code-block:: python
 
         batch.expect_column_values_to_be_in_set(
             column="genre_id",
-            value_set={"$PARAMETER": "urn:great_expectations:stores:query_store:current_genre_ids"}
+            value_set={"$PARAMETER": "urn:great_expectations:stores:my_query_store:current_genre_ids"}
         )
 
     The SqlAlchemyQueryStore that you configured above will execute the defined query and return the results as the value of the ``value_set`` parameter to evaluate your expectation:
@@ -118,4 +118,4 @@ Comments
 --------
 
 .. discourse::
-   :topic_identifier: {{265}}
+   :topic_identifier: 265
