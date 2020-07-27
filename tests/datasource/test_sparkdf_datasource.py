@@ -13,6 +13,7 @@ from great_expectations.dataset import SparkDFDataset
 from great_expectations.datasource import SparkDFDatasource
 from great_expectations.datasource.types import InMemoryBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
+from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import Validator
 
 yaml = YAML()
@@ -343,6 +344,10 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
     assert batch.data.head()["a"] == "1"
 
 
+@pytest.mark.skipif(
+    is_library_loadable(library_name="pyspark"),
+    reason="Spark 3.0.0 creates one JVM per session, makikng configuration immutable.  A future PR handles this better.",
+)
 def test_spark_config(test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")

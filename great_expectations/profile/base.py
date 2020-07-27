@@ -72,14 +72,15 @@ class ProfilerTypeMapping:
     STRING_TYPE_NAMES = [
         "CHAR",
         "VARCHAR",
+        "NVARCHAR",
         "TEXT",
         "STRING",
         "StringType",
         "string",
         "str",
     ]
-    BOOLEAN_TYPE_NAMES = ["BOOLEAN", "boolean", "BOOL", "bool", "BooleanType"]
-    DATETIME_TYPE_NAMES = {
+    BOOLEAN_TYPE_NAMES = ["BOOLEAN", "boolean", "BOOL", "BIT", "bool", "BooleanType"]
+    DATETIME_TYPE_NAMES = [
         "DATETIME",
         "DATE",
         "TIME",
@@ -88,7 +89,7 @@ class ProfilerTypeMapping:
         "TimestampType",
         "datetime64",
         "Timestamp",
-    }
+    ]
 
 
 class Profiler(object, metaclass=abc.ABCMeta):

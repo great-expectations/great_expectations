@@ -8,7 +8,8 @@ Develop
 -----------------
 * [FEATURE] Add --assume-yes/--yes/-y option to cli docs build command (thanks @feluelle)
 * [FEATURE] Add SSO and SSH key pair authentication for Snowflake (thanks @dmateusp)
-* [ENHANCEMENT] Use green checkmark in Slack msgs instead of tada 
+* [FEATURE] Add the Microsoft SQL Server database management system to the list of supported data sources
+* [ENHANCEMENT] Use green checkmark in Slack msgs instead of tada
 * [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) (thanks @Dandandan)
 * [BUGFIX] Handle case when unexpected_count list element is str
 * [DOCS] New how-to guide: How to instantiate a Data Context on an EMR Spark cluster
