@@ -347,16 +347,25 @@ class MetaSqlAlchemyDataset(Dataset):
             )
             self.engine.execute(inner_case_query)
 
-        count_query: Select = sa.select(
+        element_count_query: Select = sa.select(
             [
                 sa.func.count().label("element_count"),
                 sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
                     "null_count"
                 ),
-                sa.func.sum(sa.text("TempTable.condition"),).label("unexpected_count"),
             ]
-        ).select_from(self._table).select_from(
-            sa.text(f"[{temp_table_name}] AS TempTable")
+        ).select_from(self._table).alias("ElementAndNullCountsSubquery")
+
+        unexpected_count_query: Select = sa.select(
+            [sa.func.sum(sa.column("condition")).label("unexpected_count"),]
+        ).select_from(temp_table_obj).alias("UnexpectedCountSubquery")
+
+        count_query: Select = sa.select(
+            [
+                element_count_query.c.element_count,
+                element_count_query.c.null_count,
+                unexpected_count_query.c.unexpected_count,
+            ]
         )
 
         return count_query
