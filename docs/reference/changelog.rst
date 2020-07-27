@@ -6,9 +6,9 @@ Changelog
 
 Develop
 -----------------
-* [ENHANCEMENT] Use green checkmark in Slack msgs instead of tada 
+* [ENHANCEMENT] Use green checkmark in Slack msgs instead of tada
 * [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) -- thanks @Dandandan
-
+* [ENHANCEMENT] Make Data Docs rendering of profiling results more flexible by deprecating the reliance on validation results having the specific run_name of "profiling"
 
 0.11.8
 -----------------
