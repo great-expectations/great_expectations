@@ -480,6 +480,237 @@ def _deduplicate_evaluation_parameter_dependencies(dependencies):
 class ExpectationConfiguration(DictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
+    kwarg_lookup_dict = {
+        "expect_column_to_exist": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["column_index"],
+        },
+        "expect_table_columns_to_match_ordered_list": {
+            "domain_kwargs": [],
+            "success_kwargs": ["column_list"],
+        },
+        "expect_table_column_count_to_be_between": {
+            "domain_kwargs": [],
+            "success_kwargs": ["min_value", "max_value"],
+        },
+        "expect_table_column_count_to_equal": {
+            "domain_kwargs": [],
+            "success_kwargs": ["value"],
+        },
+        "expect_table_row_count_to_be_between": {
+            "domain_kwargs": [],
+            "success_kwargs": ["min_value", "max_value"],
+        },
+        "expect_table_row_count_to_equal": {
+            "domain_kwargs": [],
+            "success_kwargs": ["value"],
+        },
+        "expect_column_values_to_be_unique": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["mostly"],
+        },
+        "expect_column_values_to_not_be_null": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["mostly"],
+        },
+        "expect_column_values_to_be_null": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["mostly"],
+        },
+        "expect_column_values_to_be_of_type": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["type_", "mostly"],
+        },
+        "expect_column_values_to_be_in_type_list": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["type_list", "mostly"],
+        },
+        "expect_column_values_to_be_in_set": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["value_set", "mostly", "parse_strings_as_datetimes"],
+        },
+        "expect_column_values_to_not_be_in_set": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["value_set", "mostly", "parse_strings_as_datetimes"],
+        },
+        "expect_column_values_to_be_between": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": [
+                "min_value",
+                "max_value",
+                "strict_min",
+                "strict_max",
+                "allow_cross_type_comparisons",
+                "parse_strings_as_datetimes",
+                "output_strftime_format",
+                "mostly",
+            ],
+        },
+        "expect_column_values_to_be_increasing": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["strictly", "parse_strings_as_datetimes", "mostly"],
+        },
+        "expect_column_values_to_be_decreasing": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["strictly", "parse_strings_as_datetimes", "mostly"],
+        },
+        "expect_column_value_lengths_to_be_between": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["min_value", "max_value", "mostly"],
+        },
+        "expect_column_value_lengths_to_equal": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["value", "mostly"],
+        },
+        "expect_column_values_to_match_regex": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["regex", "mostly"],
+        },
+        "expect_column_values_to_not_match_regex": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["regex", "mostly"],
+        },
+        "expect_column_values_to_match_regex_list": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["regex_list", "match_on", "mostly"],
+        },
+        "expect_column_values_to_not_match_regex_list": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["regex_list", "mostly"],
+        },
+        "expect_column_values_to_match_strftime_format": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["strftime_format", "mostly"],
+        },
+        "expect_column_values_to_be_dateutil_parseable": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["mostly"],
+        },
+        "expect_column_values_to_be_json_parseable": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["mostly"],
+        },
+        "expect_column_values_to_match_json_schema": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["json_schema", "mostly"],
+        },
+        "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["distribution", "p_value", "params"],
+        },
+        "expect_column_distinct_values_to_be_in_set": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["value_set", "parse_strings_as_datetimes"],
+        },
+        "expect_column_distinct_values_to_equal_set": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["value_set", "parse_strings_as_datetimes"],
+        },
+        "expect_column_distinct_values_to_contain_set": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["value_set", "parse_strings_as_datetimes"],
+        },
+        "expect_column_mean_to_be_between": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max",],
+        },
+        "expect_column_median_to_be_between": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max",],
+        },
+        "expect_column_quantile_values_to_be_between": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["quantile_ranges", "allow_relative_error"],
+        },
+        "expect_column_stdev_to_be_between": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max",],
+        },
+        "expect_column_unique_value_count_to_be_between": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["min_value", "max_value"],
+        },
+        "expect_column_proportion_of_unique_values_to_be_between": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max",],
+        },
+        "expect_column_most_common_value_to_be_in_set": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["value_set", "ties_okay"],
+        },
+        "expect_column_sum_to_be_between": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max",],
+        },
+        "expect_column_min_to_be_between": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": [
+                "min_value",
+                "max_value",
+                "strict_min",
+                "strict_max",
+                "parse_strings_as_datetimes",
+                "output_strftime_format",
+            ],
+        },
+        "expect_column_max_to_be_between": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": [
+                "min_value",
+                "max_value",
+                "strict_min",
+                "strict_max",
+                "parse_strings_as_datetimes",
+                "output_strftime_format",
+            ],
+        },
+        "expect_column_chisquare_test_p_value_to_be_greater_than": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": ["partition_object", "p", "tail_weight_holdout"],
+        },
+        "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": [
+                "partition_object",
+                "p",
+                "bootstrap_samples",
+                "bootstrap_sample_size",
+            ],
+        },
+        "expect_column_kl_divergence_to_be_less_than": {
+            "domain_kwargs": ["column"],
+            "success_kwargs": [
+                "partition_object",
+                "threshold",
+                "tail_weight_holdout",
+                "internal_weight_holdout",
+                "bucketize_data",
+            ],
+        },
+        "expect_column_pair_values_to_be_equal": {
+            "domain_kwargs": ["column_A", "column_B"],
+            "success_kwargs": ["ignore_row_if"],
+        },
+        "expect_column_pair_values_A_to_be_greater_than_B": {
+            "domain_kwargs": ["column_A", "column_B"],
+            "success_kwargs": [
+                "or_equal",
+                "parse_strings_as_datetimes",
+                "allow_cross_type_comparisons",
+                "ignore_row_if",
+            ],
+        },
+        "expect_column_pair_values_to_be_in_set": {
+            "domain_kwargs": ["column_A", "column_B"],
+            "success_kwargs": ["value_pairs_set", "ignore_row_if",],
+        },
+        "expect_multicolumn_values_to_be_unique": {
+            "domain_kwargs": [],
+            "success_kwargs": ["column_list", "ignore_row_if"],
+        },
+    }
+    runtime_kwargs = ["result_format", "include_config", "catch_exceptions"]
+
     def __init__(self, expectation_type, kwargs, meta=None, success_on_last_run=None):
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
@@ -506,6 +737,42 @@ class ExpectationConfiguration(DictDot):
     @property
     def kwargs(self):
         return self._kwargs
+
+# exception when don't provide sufficient info to check for match
+# if can't find matching expectation
+# default values?
+
+    # flip this around to iterate over expected kwargs, .get(..)
+    def get_domain_kwargs(self):
+        return {
+            key: val
+            for key, val in self.kwargs.items()
+            if key
+            in self.kwarg_lookup_dict[self.expectation_type]["domain_kwargs"]
+        }
+
+    def get_success_kwargs(self):
+        return {
+            key: val
+            for key, val in self.kwargs.items()
+            if key in self.kwarg_lookup_dict[self.expectation_type]["success_kwargs"]
+        }
+
+    def get_runtime_kwargs(self):
+        return {
+            key: val for key, val in self.kwargs.items() if key in self.runtime_kwargs
+        }
+
+    def applies_to_same_domain(self, other_expectation_configuration):
+        if (
+            not self.expectation_type
+            == other_expectation_configuration.expectation_type
+        ):
+            return False
+        return (
+            self.get_domain_kwargs()
+            == other_expectation_configuration.get_domain_kwargs()
+        )
 
     def isEquivalentTo(self, other):
         """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""
