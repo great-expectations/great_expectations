@@ -461,8 +461,6 @@ class DefaultMarkdownPageView(DefaultJinjaView):
     def _validate_document(self, document: RenderedDocumentContent) -> bool:
         """
         Validate that the document is of the appropriate type at runtime.
-        :param document: RenderedDocumentContent object
-        :return: boolean
         """
         assert isinstance(document, RenderedDocumentContent)
 
@@ -471,8 +469,12 @@ class DefaultMarkdownPageView(DefaultJinjaView):
     def render_string_template(self, template: pTemplate) -> pTemplate:
         """
         Render string for markdown rendering. Bold all parameters and perform substitution.
-        :param template: python Template object
-        :return: Template with substituted values and all parameters bolded
+        Args:
+            template: python Template object
+
+        Returns:
+            Template with substituted values and all parameters bolded
+
         """
 
         if not isinstance(template, (dict, OrderedDict)):
@@ -521,12 +523,15 @@ class DefaultMarkdownPageView(DefaultJinjaView):
     ):
         """
         Render a content block to markdown using jinja templates.
-        :param jinja_context:
-        :param content_block:
-        :param index:
-        :param content_block_id:
-        :param render_to_markdown: Default of True here instead of parent class default of False
-        :return:
+        Args:
+            jinja_context:
+            content_block:
+            index:
+            content_block_id:
+            render_to_markdown: Default of True here instead of parent class default of False
+
+        Returns:
+
         """
 
         return super().render_content_block(

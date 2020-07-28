@@ -1,4 +1,5 @@
 import json
+import os
 from collections import OrderedDict
 
 import pytest
@@ -14,17 +15,28 @@ from great_expectations.render.types import (
     RenderedDocumentContent,
 )
 from great_expectations.render.view import DefaultMarkdownPageView
-from great_expectations.validation_operators.types.validation_operator_result import ValidationOperatorResult
-from great_expectations.render.page_renderer_util import render_multiple_validation_result_pages_markdown
+from great_expectations.validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
+from great_expectations.render.page_renderer_util import (
+    render_multiple_validation_result_pages_markdown,
+)
+
 
 @pytest.fixture()
 def validation_results():
-    with open("./tests/render/fixtures/ValidationOperatorResult_with_multiple_validation_results.json", "r") as infile:
+    fixture_filename = os.path.join(
+        os.path.dirname(__file__),
+        "fixtures/ValidationOperatorResult_with_multiple_validation_results.json",
+    )
+    with open(fixture_filename, "r") as infile:
         validation_operator_result = json.load(infile, object_pairs_hook=OrderedDict)
-        run_results = validation_operator_result['run_results']
+        run_results = validation_operator_result["run_results"]
         for k, validation_result in run_results.items():
-            validation_result['validation_result'] = (
-                ExpectationSuiteValidationResultSchema().load(validation_result['validation_result'])
+            validation_result[
+                "validation_result"
+            ] = ExpectationSuiteValidationResultSchema().load(
+                validation_result["validation_result"]
             )
         return validation_operator_result
 
@@ -57,9 +69,7 @@ def test_render_section_page():
     )
 
     rendered_doc = ge.render.view.view.DefaultMarkdownPageView().render(
-        RenderedDocumentContent(
-            sections=[section]
-        )
+        RenderedDocumentContent(sections=[section])
     )
 
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -81,19 +91,26 @@ def test_render_section_page():
     )
 
 
-def test_render_section_page_with_fixture_data(validation_results):
+def test_snapshot_render_section_page_with_fixture_data(validation_results):
     """
     Make sure the appropriate markdown rendering is done for the applied fixture.
-    :param validation_results: test fixture
-    :return: None
+    Args:
+        validation_results: test fixture
+
+    Returns: None
+
     """
 
     validation_operator_result = ValidationOperatorResult(**validation_results)
 
     md_str = ""
-    validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=True)
+    validation_results_page_renderer = ValidationResultsPageRenderer(
+        run_info_at_end=True
+    )
     for validation_result in validation_operator_result.list_validation_results():
-        rendered_document_content = validation_results_page_renderer.render(validation_result)
+        rendered_document_content = validation_results_page_renderer.render(
+            validation_result
+        )
         md_str += DefaultMarkdownPageView().render(rendered_document_content) + " "
 
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -437,7 +454,11 @@ Run Time  | 2020-07-27T17:19:32.959193+00:00
 
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
-""".replace(" ", "").replace("\t", "").replace("\n", "")
+""".replace(
+            " ", ""
+        )
+        .replace("\t", "")
+        .replace("\n", "")
     )
 
 
@@ -450,7 +471,9 @@ def test_render_section_page_with_fixture_data_multiple_validations(validation_r
 
     validation_operator_result = ValidationOperatorResult(**validation_results)
 
-    md_str = render_multiple_validation_result_pages_markdown(validation_operator_result)
+    md_str = render_multiple_validation_result_pages_markdown(
+        validation_operator_result
+    )
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
 
     print(md_str)
@@ -792,5 +815,9 @@ Run Time  | 2020-07-27T17:19:32.959193+00:00
 
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
-""".replace(" ", "").replace("\t", "").replace("\n", "")
+""".replace(
+            " ", ""
+        )
+        .replace("\t", "")
+        .replace("\n", "")
     )

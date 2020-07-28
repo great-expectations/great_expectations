@@ -22,9 +22,7 @@ from ..types import (
 )
 from .renderer import Renderer
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from great_expectations.validation_operators.types.validation_operator_result import ValidationOperatorResult
+from great_expectations.validation_operators.types.validation_operator_result import ValidationOperatorResult
 
 
 logger = logging.getLogger(__name__)
@@ -33,9 +31,10 @@ logger = logging.getLogger(__name__)
 class ValidationResultsPageRenderer(Renderer):
     def __init__(self, column_section_renderer=None, run_info_at_end: bool=False):
         """
-        :param column_section_renderer:
-        :param run_info_at_end: Move the run info (Info, Batch Markers, Batch Kwargs) to the end
-                                of the rendered output rather than after Statistics.
+        Args:
+            column_section_renderer:
+            run_info_at_end: Move the run info (Info, Batch Markers, Batch Kwargs) to the end
+                of the rendered output rather than after Statistics.
         """
         super().__init__()
         if column_section_renderer is None:
@@ -58,7 +57,7 @@ class ValidationResultsPageRenderer(Renderer):
             )
         self.run_info_at_end = run_info_at_end
 
-    def render(self, validation_results: 'ValidationOperatorResult'):
+    def render(self, validation_results: ValidationOperatorResult):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import os
 from collections import OrderedDict
 
 import mistune
@@ -474,12 +475,14 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
 def ValidationResultsPageRenderer_render_with_run_info_at_end():
     """
     Rendered validation results with run info at the end
-    :return: json string of rendered validation results
+    Returns:
+        json string of rendered validation results
     """
-    with open(
-        "./tests/render/fixtures/ValidationResultsPageRenderer_render_with_run_info_at_end.json",
-        "r",
-    ) as infile:
+    fixture_filename = os.path.join(
+        os.path.dirname(__file__),
+        "fixtures/ValidationResultsPageRenderer_render_with_run_info_at_end.json",
+    )
+    with open(fixture_filename, "r") as infile:
         rendered_validation_results = json.load(infile)
         return rendered_validation_results
 
@@ -488,17 +491,19 @@ def ValidationResultsPageRenderer_render_with_run_info_at_end():
 def ValidationResultsPageRenderer_render_with_run_info_at_start():
     """
     Rendered validation results with run info at the start
-    :return: json string of rendered validation results
+    Returns:
+        json string of rendered validation results
     """
-    with open(
-        "./tests/render/fixtures/ValidationResultsPageRenderer_render_with_run_info_at_start.json",
-        "r",
-    ) as infile:
+    fixture_filename = os.path.join(
+        os.path.dirname(__file__),
+        "fixtures/ValidationResultsPageRenderer_render_with_run_info_at_start.json",
+    )
+    with open(fixture_filename, "r") as infile:
         rendered_validation_results = json.load(infile)
         return rendered_validation_results
 
 
-def test_ValidationResultsPageRenderer_render_with_run_info_at_end(
+def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
     titanic_profiled_evrs_1, ValidationResultsPageRenderer_render_with_run_info_at_end,
 ):
     validation_results_page_renderer = ValidationResultsPageRenderer(
@@ -517,7 +522,7 @@ def test_ValidationResultsPageRenderer_render_with_run_info_at_end(
     )
 
 
-def test_ValidationResultsPageRenderer_render_with_run_info_at_start(
+def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
     titanic_profiled_evrs_1,
     ValidationResultsPageRenderer_render_with_run_info_at_start,
 ):
