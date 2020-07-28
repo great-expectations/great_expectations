@@ -124,7 +124,13 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         if result.get("partial_unexpected_counts"):
             header_row = ["Unexpected Value", "Count"]
             for unexpected_count in result.get("partial_unexpected_counts"):
-                if unexpected_count.get("value"):
+                if not isinstance(unexpected_count, dict):
+                    # handles case: "partial_exception_counts requires a hashable type"
+                    # this case is also now deprecated (because the error is moved to an errors key
+                    # the error also *should have* been updated to "partial_unexpected_counts ..." long ago.
+                    # NOTE: JPC 20200724 - Consequently, this codepath should be removed by approximately Q1 2021
+                    continue
+                elif unexpected_count.get("value"):
                     table_rows.append(
                         [unexpected_count.get("value"), unexpected_count.get("count")]
                     )
