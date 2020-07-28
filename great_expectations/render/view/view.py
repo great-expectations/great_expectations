@@ -127,8 +127,22 @@ class DefaultJinjaView(object):
 
     @contextfilter
     def render_content_block(
-        self, jinja_context, content_block, index=None, content_block_id=None
+        self,
+        jinja_context,
+        content_block,
+        index=None,
+        content_block_id=None,
+        render_to_markdown: bool = False,
     ):
+        """
+
+        :param jinja_context:
+        :param content_block:
+        :param index:
+        :param content_block_id:
+        :param render_to_markdown: Whether this method should render the markdown version instead of HTML
+        :return:
+        """
         if isinstance(content_block, str):
             return content_block
         elif content_block is None:
@@ -152,16 +166,19 @@ class DefaultJinjaView(object):
                         content_block_id=new_content_block_id,
                     )
                 else:
-                    rendered_block += "<span>" + str(content_block_el) + "</span>"
+                    if render_to_markdown:
+                        rendered_block += str(content_block_el)
+                    else:
+                        rendered_block += "<span>" + str(content_block_el) + "</span>"
             return rendered_block
         elif not isinstance(content_block, dict):
             return content_block
         content_block_type = content_block.get("content_block_type")
-        template = self._get_template(
-            template="{content_block_type}.j2".format(
-                content_block_type=content_block_type
-            )
-        )
+        if render_to_markdown:
+            template_filename = f"markdown_{content_block_type}.j2"
+        else:
+            template_filename = f"{content_block_type}.j2"
+        template = self._get_template(template=template_filename)
         if content_block_id:
             return template.render(
                 jinja_context,
@@ -436,18 +453,27 @@ class DefaultJinjaComponentView(DefaultJinjaView):
         )  # For now low-level views take dicts
 
 
-# TODO: the methods in DefaultMarkdownView can be made more DRY as they are very similar to DefaultJinjaView methods
-class DefaultMarkdownView(DefaultJinjaView):
+class DefaultMarkdownPageView(DefaultJinjaView):
     """
     Convert a document to markdown format.
     """
 
-    def _validate_document(self, document):
+    def _validate_document(self, document: RenderedDocumentContent) -> bool:
+        """
+        Validate that the document is of the appropriate type at runtime.
+        :param document: RenderedDocumentContent object
+        :return: boolean
+        """
         assert isinstance(document, RenderedDocumentContent)
 
     _template = "markdown_page.j2"
 
-    def render_string_template(self, template):
+    def render_string_template(self, template: pTemplate) -> pTemplate:
+        """
+        Render string for markdown rendering. Bold all parameters and perform substitution.
+        :param template: python Template object
+        :return: Template with substituted values and all parameters bolded
+        """
 
         if not isinstance(template, (dict, OrderedDict)):
             return template
@@ -474,61 +500,39 @@ class DefaultMarkdownView(DefaultJinjaView):
 
             template["params"][parameter] = pTemplate(
                 base_param_template_string
-            ).safe_substitute(
-                {
-                    "content": template["params"][parameter],
-                }
-            )
+            ).safe_substitute({"content": template["params"][parameter],})
 
         template["template"] = template.get("template", "").replace(
             "$PARAMETER", "$$PARAMETER"
         )
 
-        return pTemplate(template.get("template")).safe_substitute(template.get("params", {}))
-
+        return pTemplate(template.get("template")).safe_substitute(
+            template.get("params", {})
+        )
 
     @contextfilter
     def render_content_block(
-        self, jinja_context, content_block, index=None, content_block_id=None
+        self,
+        jinja_context,
+        content_block,
+        index=None,
+        content_block_id=None,
+        render_to_markdown: bool = True,
     ):
-        if isinstance(content_block, str):
-            return content_block
-        elif content_block is None:
-            return ""
-        elif isinstance(content_block, list):
-            # If the content_block item here is actually a list of content blocks then we want to recursively render
-            rendered_block = ""
-            for idx, content_block_el in enumerate(content_block):
-                if (
-                    isinstance(content_block_el, RenderedComponentContent)
-                    or isinstance(content_block_el, dict)
-                    and "content_block_type" in content_block_el
-                ):
-                    new_content_block_id = None
-                    if content_block_id:
-                        new_content_block_id = content_block_id + "-" + str(idx)
-                    rendered_block += self.render_content_block(
-                        jinja_context,
-                        content_block_el,
-                        idx,
-                        content_block_id=new_content_block_id,
-                    )
-                else:
-                    rendered_block += str(content_block_el)
-            return rendered_block
-        elif not isinstance(content_block, dict):
-            return content_block
-        content_block_type = content_block.get("content_block_type")
-        template = self._get_template(template=f"markdown_{content_block_type}.j2")
-        if content_block_id:
-            return template.render(
-                jinja_context,
-                content_block=content_block,
-                index=index,
-                content_block_id=content_block_id,
-            )
-        else:
-            return template.render(
-                jinja_context, content_block=content_block, index=index
-            )
+        """
+        Render a content block to markdown using jinja templates.
+        :param jinja_context:
+        :param content_block:
+        :param index:
+        :param content_block_id:
+        :param render_to_markdown: Default of True here instead of parent class default of False
+        :return:
+        """
 
+        return super().render_content_block(
+            jinja_context=jinja_context,
+            content_block=content_block,
+            index=index,
+            content_block_id=content_block_id,
+            render_to_markdown=render_to_markdown,
+        )

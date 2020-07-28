@@ -22,6 +22,11 @@ from ..types import (
 )
 from .renderer import Renderer
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from great_expectations.validation_operators.types.validation_operator_result import ValidationOperatorResult
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -53,7 +58,7 @@ class ValidationResultsPageRenderer(Renderer):
             )
         self.run_info_at_end = run_info_at_end
 
-    def render(self, validation_results):
+    def render(self, validation_results: 'ValidationOperatorResult'):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
