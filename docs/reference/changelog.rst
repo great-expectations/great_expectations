@@ -4,6 +4,10 @@
 Changelog
 #########
 
+develop
+-----------------
+* [ENHANCEMENT] log class instantiation errors for better debugging
+
 
 0.11.8
 -----------------
