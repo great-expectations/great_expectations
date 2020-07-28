@@ -4,10 +4,30 @@
 Changelog
 #########
 
-
 Develop
 -----------------
+* [FEATURE] Add --assume-yes/--yes/-y option to cli docs build command (thanks @feluelle)
+* [FEATURE] Add SSO and SSH key pair authentication for Snowflake (thanks @dmateusp)
+* [FEATURE] Add the Microsoft SQL Server database management system to the list of supported data sources
+* [ENHANCEMENT] Use green checkmark in Slack msgs instead of tada
+* [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) (thanks @Dandandan)
+* [BUGFIX] Handle case when unexpected_count list element is str
+* [DOCS] New how-to guide: How to instantiate a Data Context on an EMR Spark cluster
+* [DOCS] Managed Spark DF Documentation #1729 (thanks @mgorsk1)
+* [DOCS] Typos and clarifications (thanks @dechoma @sbrugman @rexboyce)
+
+0.11.8
+-----------------
+* [FEATURE] Customizable "Suite Edit" generated notebooks
+* [ENHANCEMENT] Add support and docs for loading evaluation parameter from SQL database
 * [ENHANCEMENT] Fixed some typos/grammar and a broken link in the suite_scaffold_notebook_renderer
+* [ENHANCEMENT] allow updates to DatabaseStoreBackend keys by default, requiring `allow_update=False` to disallow
+* [ENHANCEMENT] Improve support for prefixes declared in TupleS3StoreBackend that include reserved characters
+* [BUGFIX] Fix issue where allow_updates was set for StoreBackend that did not support it
+* [BUGFIX] Fix issue where GlobReaderBatchKwargsGenerator failed with relative base_directory
+* [BUGFIX] Adding explicit requirement for "importlib-metadata" (needed for Python versions prior to Python 3.8).
+* [MAINTENANCE] Install GitHub Dependabot
+* [BUGFIX] Fix missing importlib for python 3.8 #1651
 
 0.11.7
 -----------------

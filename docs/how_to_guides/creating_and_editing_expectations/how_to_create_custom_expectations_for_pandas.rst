@@ -278,9 +278,14 @@ Here's a single code block containing all the notebook code in this article:
 
     import re
     import pytz
-    
-    class MyCustomPandasDataset(PandasDataset):
 
+    import great_expectations as ge
+    from great_expectations.dataset import (
+        PandasDataset,
+        MetaPandasDataset,
+    )
+
+    class MyCustomPandasDataset(PandasDataset):
         _data_asset_type = "MyCustomPandasDataset"
 
         @MetaPandasDataset.column_map_expectation
@@ -288,11 +293,11 @@ Here's a single code block containing all the notebook code in this article:
             return column.map(lambda x: x%2==0)
 
         @MetaPandasDataset.column_map_expectation
-        def expect_column_value_most_common_characters_to_be(self, column, values):
-            return column.map(lambda x: set(get_most_common_characters(x))==set(values))
+        def expect_column_values_to_be_less_than(self, column, value):
+            return column.map(lambda x: x < value)
 
         @MetaPandasDataset.column_map_expectation
-        def expect_column_value_word_counts_to_be_between(self, column, min_value=None, max_value=None):        
+        def expect_column_value_word_counts_to_be_between(self, column, min_value=None, max_value=None):
             def count_words(string):
                 word_list = re.findall("(\S+)", string)
                 return len(word_list)
@@ -311,6 +316,7 @@ Here's a single code block containing all the notebook code in this article:
         @MetaPandasDataset.column_map_expectation
         def expect_column_values_to_be_valid_timezones(self, column, timezone_values=pytz.all_timezones):
             return column.map(lambda x: x in timezone_values)
+
     
     #Instantiate the class in several different ways
     my_df = ge.read_csv("my_data/Titanic.csv", dataset_class=MyCustomPandasDataset)

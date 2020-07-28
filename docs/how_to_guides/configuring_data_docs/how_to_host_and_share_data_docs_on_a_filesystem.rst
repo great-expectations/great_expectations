@@ -1,19 +1,62 @@
 .. _how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_a_filesystem:
 
 How to host and share Data Docs on a filesystem
-===============================================
+================================================
 
-.. admonition:: Admonition from Mr. Dickens
+This guide will explain how to host and share Data Docs on a filesystem.
 
-    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
 
+    - :ref:`Set up a working deployment of Great Expectations <getting_started>`
 
-This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
+Steps
+-----
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+1. **Filesystem-hosted Data Docs are configured by default for Great Expectations deployments created using great_expectations init.**
 
-If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
+  To create additional Data Docs sites, you may re-use the default Data Docs configuration below. You may replace ``local_site`` with your own site name, or leave the default.
 
+  .. code-block:: yaml
 
-.. discourse::
-   :topic_identifier: 230
+    data_docs_sites:
+      local_site:  # this is a user-selected name - you may select your own
+        class_name: SiteBuilder
+        store_backend:
+          class_name: TupleFilesystemStoreBackend
+          base_directory: uncommitted/data_docs/local_site/ # this is the default path but can be changed as required
+        site_index_builder:
+          class_name: DefaultSiteIndexBuilder
+
+2. **Test that your configuration is correct by building the site.**
+
+  Use the following CLI command: ``great_expectations docs build --site-name local_site``. If successful, the CLI will open your newly built Data Docs site and provide the path to the index page.
+
+  .. code-block:: bash
+
+    > great_expectations docs build --site-name local_site
+
+    The following Data Docs sites will be built:
+
+     - local_site: file:///great_expectations/uncommitted/data_docs/local_site/index.html
+
+    Would you like to proceed? [Y/n]: Y
+
+    Building Data Docs...
+
+    Done building Data Docs
+
+Additional notes
+----------------
+
+- To share the site, you can zip the directory specified under the ``base_directory`` key in your site configuration and distribute as desired.
+
+Additional resources
+--------------------
+
+- :ref:`Core concepts: Data Docs <data_docs>`
+
+Comments
+--------
+
+  .. discourse::
+     :topic_identifier: 230

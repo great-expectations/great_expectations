@@ -32,6 +32,25 @@ class SparkDFDatasource(Datasource):
         - PathBatchKwargs ("path" or "s3" keys)
         - InMemoryBatchKwargs ("dataset" key)
         - QueryBatchKwargs ("query" key)
+
+--ge-feature-maturity-info--
+
+    id: datasource_hdfs_spark
+        title: Datasource - HDFS
+        icon:
+        short_description: HDFS
+        description: Use HDFS as an external datasource in conjunction with Spark.
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Unknown
+            unit_test_coverage: Minimal (none)
+            integration_infrastructure_test_coverage: Minimal (none)
+            documentation_completeness:  Minimal (none)
+            bug_risk: Unknown
+
+--ge-feature-maturity-info--
     """
 
     recognized_batch_parameters = {

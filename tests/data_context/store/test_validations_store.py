@@ -65,7 +65,7 @@ def test_ValidationsStore_with_TupleS3StoreBackend():
     assert set(
         [
             s3_object_info["Key"]
-            for s3_object_info in boto3.client("s3").list_objects(
+            for s3_object_info in boto3.client("s3").list_objects_v2(
                 Bucket=bucket, Prefix=prefix
             )["Contents"]
         ]

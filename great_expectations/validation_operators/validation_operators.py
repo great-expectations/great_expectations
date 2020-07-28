@@ -586,7 +586,7 @@ The value of "success" is True if no critical expectation suites ("failure") fai
 
     def _build_slack_query(self, validation_operator_result: ValidationOperatorResult):
         success = validation_operator_result.success
-        status_text = "Success :tada:" if success else "Failed :x:"
+        status_text = "Success :white_check_mark:" if success else "Failed :x:"
         run_id = validation_operator_result.run_id
         run_name = run_id.run_name
         run_time = run_id.run_time.strftime("%x %X")
