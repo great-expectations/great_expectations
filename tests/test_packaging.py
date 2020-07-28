@@ -43,6 +43,11 @@ def test_requirements_files():
             [f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)]
         )
 
+    with open(file_relative_path(__file__, "../requirements-dev-publish.txt")) as req:
+        requirements_dev_publish = set(
+            [f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)]
+        )
+
     assert requirements <= requirements_dev
 
     assert requirements_dev_util.intersection(requirements_dev_spark) == set()
@@ -59,6 +64,9 @@ def test_requirements_files():
 
     assert requirements_dev_test.intersection(requirements_dev_build) == set()
 
+    assert requirements_dev_publish.intersection(requirements_dev_test) == set()
+    assert requirements_dev_publish.intersection(requirements_dev_build) == set()
+
     assert (
         requirements_dev
         - (
@@ -68,6 +76,7 @@ def test_requirements_files():
             | requirements_dev_spark
             | requirements_dev_test
             | requirements_dev_build
+            | requirements_dev_publish
         )
         == set()
     )
