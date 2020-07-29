@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 from dateutil.parser import ParserError, parse
 
-from great_expectations.core import RunIdentifier
+from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.util import num_to_str
@@ -26,7 +26,13 @@ logger = logging.getLogger(__name__)
 
 
 class ValidationResultsPageRenderer(Renderer):
-    def __init__(self, column_section_renderer=None):
+    def __init__(self, column_section_renderer=None, run_info_at_end: bool = False):
+        """
+        Args:
+            column_section_renderer:
+            run_info_at_end: Move the run info (Info, Batch Markers, Batch Kwargs) to the end
+                of the rendered output rather than after Statistics.
+        """
         super().__init__()
         if column_section_renderer is None:
             column_section_renderer = {
@@ -46,8 +52,9 @@ class ValidationResultsPageRenderer(Renderer):
                 package_name=None,
                 class_name=column_section_renderer["class_name"],
             )
+        self.run_info_at_end = run_info_at_end
 
-    def render(self, validation_results):
+    def render(self, validation_results: ExpectationSuiteValidationResult):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
@@ -129,7 +136,8 @@ class ValidationResultsPageRenderer(Renderer):
             }
         )
 
-        overview_content_blocks.append(collapse_content_block)
+        if not self.run_info_at_end:
+            overview_content_blocks.append(collapse_content_block)
 
         sections = [
             RenderedSectionContent(
@@ -151,6 +159,16 @@ class ValidationResultsPageRenderer(Renderer):
             self._column_section_renderer.render(validation_results=columns[column],)
             for column in ordered_columns
         ]
+
+        if self.run_info_at_end:
+            sections += [
+                RenderedSectionContent(
+                    **{
+                        "section_name": "Run Info",
+                        "content_blocks": collapse_content_blocks,
+                    }
+                )
+            ]
 
         return RenderedDocumentContent(
             **{
@@ -182,10 +200,14 @@ class ValidationResultsPageRenderer(Renderer):
             os.path.join(*expectation_suite_path_components) + ".html"
         )
         if success:
-            success = '<i class="fas fa-check-circle text-success" aria-hidden="true"></i> Succeeded'
+            success = "Succeeded"
+            html_success_icon = (
+                '<i class="fas fa-check-circle text-success" aria-hidden="true"></i>'
+            )
         else:
-            success = (
-                '<i class="fas fa-times text-danger" aria-hidden="true"></i> Failed'
+            success = "Failed"
+            html_success_icon = (
+                '<i class="fas fa-times text-danger" aria-hidden="true"></i>'
             )
         return RenderedHeaderContent(
             **{
@@ -204,12 +226,13 @@ class ValidationResultsPageRenderer(Renderer):
                     **{
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": "${suite_title} ${expectation_suite_name}\n${status_title} ${success}",
+                            "template": "${suite_title} ${expectation_suite_name}\n${status_title} ${html_success_icon} ${success}",
                             "params": {
                                 "suite_title": "Expectation Suite:",
                                 "status_title": "Status:",
                                 "expectation_suite_name": expectation_suite_name,
                                 "success": success,
+                                "html_success_icon": html_success_icon,
                             },
                             "styling": {
                                 "params": {
