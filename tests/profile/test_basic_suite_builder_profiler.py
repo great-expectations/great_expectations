@@ -124,7 +124,13 @@ def test__create_expectations_for_numeric_column(
     expectation_suite = numeric_high_card_dataset.get_expectation_suite(
         suppress_warnings=True
     )
-    if test_backend in ["PandasDataset", "SparkDFDataset", "postgresql"]:
+    if test_backend in [
+        "PandasDataset",
+        "SparkDFDataset",
+        "postgresql",
+        "mysql",
+        "mssql",
+    ]:
         assert set(
             [
                 expectation.expectation_type

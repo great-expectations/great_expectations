@@ -9,7 +9,7 @@ The ``JsonSchemaProfiler`` helps you quickly create :ref:`Expectation Suites` fr
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
   - :ref:`Set up a working deployment of Great Expectations <getting_started>`
-  - Have a valid jsonschema file that is has top level object of type `object`.
+  - Have a valid jsonschema file that has top level object of type `object`.
 
 .. warning:: This implementation does not traverse any levels of nesting.
 
