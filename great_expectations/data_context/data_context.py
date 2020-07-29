@@ -287,7 +287,9 @@ class BaseDataContext(object):
             )
         except ge_exceptions.DataContextError as e:
             new_store = None
-            logger.critical(f"While attempting to instantiate the store named {store_name} an error occurred: {e}")
+            logger.critical(
+                f"While attempting to instantiate the store named {store_name} an error occurred: {e}"
+            )
         if not new_store:
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,
