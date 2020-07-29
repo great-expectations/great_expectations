@@ -22,6 +22,16 @@ resources:
     env:
      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
      MYSQL_DATABASE: test_ci
+  - container: mssql
+    image: microsoft/mssql-server-linux
+    env:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
+      MSSQL_DB: test_ci
+      MSSQL_PID: Developer
+    ports:
+      - 1433:1433
+
 
 stages:
   - stage: linting
@@ -109,7 +119,7 @@ stages:
       - job: full_suite_test
         services:
           postgres: postgres
-          mysql: mysql
+          # mysql: mysql
 
         variables:
           GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
@@ -168,4 +178,39 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
-  # - stage: experimental_tests
+  - stage: experimental_tests
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    dependsOn: []
+
+    jobs:
+      - job: mysql
+        services:
+          mysql: mysql
+        steps:
+          - script: |
+              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+              mysql --host=127.0.0.1 --port=3306 --user=root < mysql_setup_script.sql
+              pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest --mysql --no-postgres --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+            displayName: 'pytest'
+
+      - job: mssql
+        services:
+          mssql: mssql
+        steps:
+          - script: |
+              pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest --mssql --no-postgres --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+            displayName: 'pytest'

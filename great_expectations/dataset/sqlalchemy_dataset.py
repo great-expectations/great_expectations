@@ -19,6 +19,7 @@ from great_expectations.dataset.util import (
 )
 from great_expectations.util import import_library_module
 
+from ..core import convert_to_json_serializable
 from .dataset import Dataset
 from .pandas_dataset import PandasDataset
 
@@ -1033,7 +1034,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             .select_from(self._table)
         )
 
-        hist = list(self.engine.execute(query).fetchone())
+        # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
+        hist = convert_to_json_serializable(list(self.engine.execute(query).fetchone()))
         return hist
 
     def get_column_count_in_range(
