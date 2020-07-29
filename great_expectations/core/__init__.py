@@ -730,19 +730,27 @@ class ExpectationConfiguration(DictDot):
         self.meta = meta
         self.success_on_last_run = success_on_last_run
 
-    def patch(self, path, value):
-        if kwargs match existing kwargs:
-            op = 'replace'
-        else:
-            op = 'add'
+    def patch(
+            self,
+            op: str,
+            path: str,
+            value: str # what should this be?
+    ) -> ExpectationConfiguration: #what should be returned?
+        if op not in ['add', 'replace']:
+            raise ValueError("Op must be either 'add' or 'replace'")
+
+        if path.split('.') not in self.kwargs():
+            raise ValueError("Path not available in kwargs")
+
+        # TODO: Call validate_kwargs when implemented
 
         patch = jsonpatch.JsonPatch([
             {'op': op,
-             'path': path,
+             'path': '/' + path.replace('.', '/'), #TODO: design review for this . / replace notation
              'value': value}
         ])
 
-        return patch.apply(self._kwargs)
+        return patch.apply(self.kwargs, in_place=True) #should this be modified in place? What should be returned
 
 
 
@@ -806,22 +814,28 @@ class ExpectationConfiguration(DictDot):
                 # Delegate comparison to the other instance
                 return NotImplemented
         if match_type == "domain":
-            return all((
-                self.expectation_type == other.expectation_type,
-                self.get_domain_kwargs() == other.get_domain_kwargs())
+            return all(
+                (
+                    self.expectation_type == other.expectation_type,
+                    self.get_domain_kwargs() == other.get_domain_kwargs()
+                )
             )
 
         elif match_type == "success":
             return all(
-                    (self.expectation_type == other.expectation_type,
-                    self.get_success_kwargs() == other.get_success_kwargs)
-                    )
+                (
+                    self.expectation_type == other.expectation_type,
+                    self.get_success_kwargs() == other.get_success_kwargs()
+                )
+            )
                 
         elif match_type == "runtime":
-            return all((
-                        self.expectation_type == other.expectation_type,
-                        self.kwargs == other.kwargs)
-                    )
+            return all(
+                (
+                    self.expectation_type == other.expectation_type,
+                    self.kwargs == other.kwargs
+                )
+            )
 
 
     def __eq__(self, other):
@@ -1144,22 +1158,37 @@ class ExpectationSuite(object):
         Returns: The deleted ExpectationConfiguration
 
         Raises:
-            TODO: ncomplete configuration for type given
+            TODO: Incomplete configuration for type given
             No match
 
         """
         match_indexes = []
         for idx, expectation in enumerate(self.expectations):
-            if expectation.is_equivalent_to(expectation_configuration):
+            if expectation.isEquivalentTo(expectation_configuration, match_type):
                 match_indexes.append(idx)
-        if len(match_indexes) == 0:
-            raise ValueError("No matching expectation found.")
-        elif len(match_indexes) > 1:
+        if len(match_indexes) > 1:
             raise ValueError(
                 "Multiple expectations matched arguments. No expectations removed."
+        # elif len(match_indexes) == 0:
+        #     raise ValueError("No matching expectation found.")
             )
         else:
             return match_index[0]
+
+    def patch(
+            self,
+            expectation_type: str,
+            match_kwargs: dict,
+            op: str,
+            path: str,
+            value: str, # what should this be?
+            match_type: str
+            ) -> ExpectationConfiguration:
+
+        expectation_index = self.find_expectation_index(ExpectationConfiguration(expectation_type, match_kwargs), match_type)
+        self.expectations[expectation_index].patch(op, path, value)
+
+        return self.expectations[expectation_index]
 
 class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
