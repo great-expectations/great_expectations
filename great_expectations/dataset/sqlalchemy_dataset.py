@@ -1685,16 +1685,6 @@ WHERE
             pass
 
         try:
-            # MS SQL Server
-            if isinstance(self.sql_engine_dialect, sa.dialects.mssql.dialect):
-                if positive:
-                    return sa.column(column).like(literal(regex))
-                else:
-                    return sa.not_(sa.column(column).like(literal(regex)))
-        except AttributeError:
-            pass
-
-        try:
             # Snowflake
             if isinstance(
                 self.sql_engine_dialect,
@@ -1730,6 +1720,8 @@ WHERE
             TypeError,
         ):  # TypeError can occur if the driver was not installed and so is None
             pass
+
+        return None
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_match_regex(
@@ -1842,5 +1834,155 @@ WHERE
             *[
                 self._get_dialect_regex_expression(column, regex, positive=False)
                 for regex in regex_list
+            ]
+        )
+
+    def _get_dialect_like_pattern_expression(self, column, like_pattern, positive=True):
+        if isinstance(
+            self.sql_engine_dialect,
+            (
+                sa.dialects.sqlite.dialect,
+                sa.dialects.postgresql.dialect,
+                sqlalchemy_redshift.dialect.RedshiftDialect,
+                sa.dialects.mysql.dialect,
+                sa.dialects.mssql.dialect,
+                pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+            ),
+        ):
+            try:
+                if positive:
+                    return sa.column(column).like(literal(like_pattern))
+                else:
+                    return sa.not_(sa.column(column).like(literal(like_pattern)))
+            except AttributeError:
+                pass
+
+        return None
+
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_match_like_pattern(
+        self,
+        column,
+        like_pattern,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        like_pattern_expression = self._get_dialect_like_pattern_expression(
+            column, like_pattern
+        )
+        if like_pattern_expression is None:
+            logger.warning(
+                "Like patterns are not supported for dialect %s"
+                % str(self.sql_engine_dialect)
+            )
+            raise NotImplementedError
+
+        return like_pattern_expression
+
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_not_match_like_pattern(
+        self,
+        column,
+        like_pattern,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        like_pattern_expression = self._get_dialect_like_pattern_expression(
+            column, like_pattern, positive=False
+        )
+        if like_pattern_expression is None:
+            logger.warning(
+                "Like patterns are not supported for dialect %s"
+                % str(self.sql_engine_dialect)
+            )
+            raise NotImplementedError
+
+        return like_pattern_expression
+
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_match_like_pattern_list(
+        self,
+        column,
+        like_pattern_list,
+        match_on="any",
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+
+        if match_on not in ["any", "all"]:
+            raise ValueError("match_on must be any or all")
+
+        if len(like_pattern_list) == 0:
+            raise ValueError(
+                "At least one like_pattern must be supplied in the like_pattern_list."
+            )
+
+        like_pattern_expression = self._get_dialect_like_pattern_expression(
+            column, like_pattern_list[0]
+        )
+        if like_pattern_expression is None:
+            logger.warning(
+                "Like patterns are not supported for dialect %s"
+                % str(self.sql_engine_dialect)
+            )
+            raise NotImplementedError
+
+        if match_on == "any":
+            condition = sa.or_(
+                *[
+                    self._get_dialect_like_pattern_expression(column, like_pattern)
+                    for like_pattern in like_pattern_list
+                ]
+            )
+        else:
+            condition = sa.and_(
+                *[
+                    self._get_dialect_like_pattern_expression(column, like_pattern)
+                    for like_pattern in like_pattern_list
+                ]
+            )
+        return condition
+
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_not_match_like_pattern_list(
+        self,
+        column,
+        like_pattern_list,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        if len(like_pattern_list) == 0:
+            raise ValueError(
+                "At least one like_pattern must be supplied in the like_pattern_list."
+            )
+
+        like_pattern_expression = self._get_dialect_like_pattern_expression(
+            column, like_pattern_list[0], positive=False
+        )
+        if like_pattern_expression is None:
+            logger.warning(
+                "Like patterns are not supported for dialect %s"
+                % str(self.sql_engine_dialect)
+            )
+            raise NotImplementedError
+
+        return sa.and_(
+            *[
+                self._get_dialect_like_pattern_expression(
+                    column, like_pattern, positive=False
+                )
+                for like_pattern in like_pattern_list
             ]
         )

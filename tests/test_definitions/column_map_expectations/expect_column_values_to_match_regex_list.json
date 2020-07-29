@@ -11,14 +11,10 @@
         "w": "StringType",
         "x": "StringType",
         "column_name with space": "StringType"
-      },
-      "mssql": {
-        "w": "NVARCHAR",
-        "x": "VARCHAR",
-        "column_name with space": "VARCHAR"
       }
     },
-    "tests" : [{
+    "tests" : [
+    {
       "title" : "Basic positive test",
       "exact_match_out" : false,
       "in": {
@@ -31,7 +27,8 @@
         "success": true
       },
       "suppress_test_for": ["sqlite", "mssql"]
-    },{
+    },
+    {
       "title" : "Positive test with multiple regexes",
       "exact_match_out" : false,
       "in": {
@@ -45,7 +42,8 @@
         "success": true
       },
       "suppress_test_for": ["sqlite", "mssql"]
-    },{
+    },
+    {
       "title" : "Basic negative test",
       "exact_match_out" : false,
       "in": {
@@ -59,7 +57,8 @@
         "success": false
       },
       "suppress_test_for": ["sqlite", "mssql"]
-    },{
+    },
+    {
       "title" : "Negative test with more string-ish strings",
       "exact_match_out" : false,
       "in": {
@@ -72,7 +71,8 @@
         "success": false
       },
       "suppress_test_for": ["sqlite", "mssql"]
-    },{
+    },
+    {
       "title" : "Positive test with match_on=any",
       "exact_match_out" : false,
       "in": {
@@ -101,90 +101,6 @@
         "success": true
       },
       "suppress_test_for": ["sqlite", "mssql"]
-    },
-    {
-      "title" : "Basic positive test",
-      "exact_match_out" : false,
-      "in": {
-        "column": "w",
-        "regex_list": ["%[0-9]%"]
-      },
-      "out": {
-        "unexpected_list": [],
-        "unexpected_index_list": [],
-        "success": true
-      },
-      "only_for": ["mssql"]
-    },{
-      "title" : "Positive test with multiple regexes",
-      "exact_match_out" : false,
-      "in": {
-        "column": "w",
-        "regex_list": ["%[123]%", "%[456]%"],
-        "match_on": "any"
-      },
-      "out": {
-        "unexpected_list": [],
-        "unexpected_index_list": [],
-        "success": true
-      },
-      "only_for": ["mssql"]
-    },{
-      "title" : "Basic negative test",
-      "exact_match_out" : false,
-      "in": {
-        "column": "w",
-        "regex_list": ["[123]+", "[456]+"],
-        "match_on": "all"
-      },
-      "out": {
-        "unexpected_list": ["111", "222", "333", "123", "321", "444", "456", "654", "555"],
-        "unexpected_index_list": [0,1,2,3,4,5,6,7,8],
-        "success": false
-      },
-      "only_for": ["mssql"]
-    },{
-      "title" : "Negative test with more string-ish strings",
-      "exact_match_out" : false,
-      "in": {
-        "column": "x",
-        "regex_list": ["%a%"]
-      },
-      "out": {
-        "unexpected_list": ["bit", "bot", "but", "bet"],
-        "unexpected_index_list": [6,7,8,9],
-        "success": false
-      },
-      "only_for": ["mssql"]
-    },{
-      "title" : "Positive test with match_on=any",
-      "exact_match_out" : false,
-      "in": {
-        "column": "x",
-        "regex_list": ["%a%", "[b]%[t]"],
-        "match_on": "any"
-      },
-      "out": {
-        "unexpected_list": [],
-        "unexpected_index_list": [],
-        "success": true
-      },
-      "only_for": ["mssql"]
-    },
-    {
-      "title" : "Positive_test_column_name_has_space_and_match_on=any",
-      "exact_match_out" : false,
-      "in": {
-        "column": "column_name with space",
-        "regex_list": ["%a%", "[b]%[t]"],
-        "match_on": "any"
-      },
-      "out": {
-        "unexpected_list": [],
-        "unexpected_index_list": [],
-        "success": true
-      },
-      "only_for": ["mssql"]
     }]
   }]
 }

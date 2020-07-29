@@ -23,6 +23,7 @@ except ImportError:
 SCHEMAS = {
     "api_np": {"NegativeInfinity": -np.inf, "PositiveInfinity": np.inf,},
     "api_cast": {"NegativeInfinity": -float("inf"), "PositiveInfinity": float("inf"),},
+    "mysql": {"NegativeInfinity": -1.79e308, "PositiveInfinity": 1.79e308,},
     "mssql": {"NegativeInfinity": -1.79e308, "PositiveInfinity": 1.79e308,},
 }
 
@@ -98,7 +99,7 @@ def is_valid_continuous_partition_object(partition_object):
     return (
         (len(partition_object["bins"]) == (len(partition_object["weights"]) + 1))
         and np.all(np.diff(partition_object["bins"]) > 0)
-        and np.allclose(np.sum(comb_weights), 1)
+        and np.allclose(np.sum(comb_weights), 1.0)
     )
 
 
@@ -258,7 +259,7 @@ def build_continuous_partition_object(
     else:
         bins = list(bins)
     weights = list(
-        np.array(dataset.get_column_hist(column, tuple(bins)))
+        np.array(dataset.get_column_hist(column, tuple(bins))).astype(float)
         / dataset.get_column_nonnull_count(column)
     )
     tail_weights = (1 - sum(weights)) / 2

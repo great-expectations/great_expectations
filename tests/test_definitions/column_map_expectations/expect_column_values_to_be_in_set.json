@@ -160,8 +160,8 @@
       "dates" : ["2018-01-01", "2018-01-02", "2018-01-02 00:34:01"]
     },
     "schemas": {
-      "mssql": {
-        "dates": "DATETIME"
+      "pandas": {
+        "dates": "datetime64"
       },
       "sqlite": {
         "dates": "DATETIME"
@@ -169,8 +169,11 @@
       "postgresql": {
         "dates": "TIMESTAMP"
       },
-      "pandas": {
-        "dates": "datetime64"
+      "mysql": {
+        "dates": "TIMESTAMP"
+      },
+      "mssql": {
+        "dates": "DATETIME"
       }
     },
     "tests" : [

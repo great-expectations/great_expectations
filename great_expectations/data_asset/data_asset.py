@@ -1290,17 +1290,13 @@ class DataAsset(object):
         Returns:
             success (boolean), percent_success (float)
         """
-
         if nonnull_count > 0:
-            # percent_success = float(success_count)/nonnull_count
-            percent_success = success_count / nonnull_count
+            percent_success = float(success_count / nonnull_count)
 
             if mostly is not None:
                 success = bool(percent_success >= mostly)
-
             else:
                 success = bool(nonnull_count - success_count == 0)
-
         else:
             success = True
             percent_success = None
