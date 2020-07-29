@@ -93,8 +93,8 @@ stages:
             displayName: 'Install pandas - $(pandas.version)'
 
           - script: |
-              pip install --requirement requirements.txt
               pip install $(GE_pytest_pip_opts)
+              pip install --requirement requirements.txt
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install .
             displayName: 'Install dependencies'
