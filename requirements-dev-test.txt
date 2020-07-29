@@ -4,6 +4,6 @@
 # Otherwise (i.e., if/when you are not concerned with running tests), please ignore these comments.
 
 black==19.10b0  # lint
-pytest>=5.3.5  # all_tests
+pytest<6.0.0  # all_tests
 pytest-cov>=2.8.1  # all_tests
 requirements-parser>=0.2.0  # all_tests
