@@ -24,7 +24,7 @@ from great_expectations.validation_operators.types.validation_operator_result im
 
 
 @pytest.fixture()
-def validation_results():
+def validation_operator_result():
     fixture_filename = os.path.join(
         os.path.dirname(__file__),
         "fixtures/ValidationOperatorResult_with_multiple_validation_results.json",
@@ -91,17 +91,17 @@ def test_render_section_page():
     )
 
 
-def test_snapshot_render_section_page_with_fixture_data(validation_results):
+def test_snapshot_render_section_page_with_fixture_data(validation_operator_result):
     """
     Make sure the appropriate markdown rendering is done for the applied fixture.
     Args:
-        validation_results: test fixture
+        validation_operator_result: test fixture
 
     Returns: None
 
     """
 
-    validation_operator_result = ValidationOperatorResult(**validation_results)
+    validation_operator_result = ValidationOperatorResult(**validation_operator_result)
 
     md_str = ""
     validation_results_page_renderer = ValidationResultsPageRenderer(
@@ -462,14 +462,16 @@ Powered by [Great Expectations](https://greatexpectations.io/)
     )
 
 
-def test_render_section_page_with_fixture_data_multiple_validations(validation_results):
+def test_render_section_page_with_fixture_data_multiple_validations(
+    validation_operator_result,
+):
     """
     Make sure the appropriate markdown rendering is done for the applied fixture.
-    :param validation_results: test fixture
+    :param validation_operator_result: test fixture
     :return: None
     """
 
-    validation_operator_result = ValidationOperatorResult(**validation_results)
+    validation_operator_result = ValidationOperatorResult(**validation_operator_result)
 
     md_str = render_multiple_validation_result_pages_markdown(
         validation_operator_result

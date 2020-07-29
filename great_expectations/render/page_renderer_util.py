@@ -10,9 +10,13 @@ def render_multiple_validation_result_pages_markdown(
 ):
     """
     Loop through and render multiple validation results to markdown.
-    :param validation_operator_result: Result of validations, type ValidationOperatorResult
-    :param run_info_at_end: move run info below expectation results
-    :return: string containing formatted markdown validation results
+    Args:
+        validation_operator_result: (ValidationOperatorResult) Result of validation operator run
+        run_info_at_end: move run info below expectation results
+
+    Returns:
+        string containing formatted markdown validation results
+
     """
 
     md_str = ""

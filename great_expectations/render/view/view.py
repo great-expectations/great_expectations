@@ -464,7 +464,7 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         """
         assert isinstance(document, RenderedDocumentContent)
 
-    _template = "markdown_page.j2"
+    _template = "markdown_validation_results_page.j2"
 
     def render_string_template(self, template: pTemplate) -> pTemplate:
         """
@@ -492,6 +492,7 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         # Make sure template["params"] is a dict
         template["params"] = template.get("params", {})
 
+        # TODO: Revisit handling of icons in markdown. E.g. inline rendered icons.
         if "markdown_status_icon" in template["params"]:
             return template["params"]["markdown_status_icon"]
 

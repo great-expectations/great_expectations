@@ -9,7 +9,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.util import num_to_str
 from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
+    ExpectationSuiteValidationResult,
 )
 
 from ...core.id_dict import BatchKwargs
@@ -57,7 +57,7 @@ class ValidationResultsPageRenderer(Renderer):
             )
         self.run_info_at_end = run_info_at_end
 
-    def render(self, validation_results: ValidationOperatorResult):
+    def render(self, validation_results: ExpectationSuiteValidationResult):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
