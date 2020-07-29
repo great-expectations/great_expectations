@@ -8,6 +8,9 @@ from great_expectations.core import RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.util import num_to_str
+from great_expectations.validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
 
 from ...core.id_dict import BatchKwargs
 from ..types import (
@@ -22,14 +25,11 @@ from ..types import (
 )
 from .renderer import Renderer
 
-from great_expectations.validation_operators.types.validation_operator_result import ValidationOperatorResult
-
-
 logger = logging.getLogger(__name__)
 
 
 class ValidationResultsPageRenderer(Renderer):
-    def __init__(self, column_section_renderer=None, run_info_at_end: bool=False):
+    def __init__(self, column_section_renderer=None, run_info_at_end: bool = False):
         """
         Args:
             column_section_renderer:
@@ -164,12 +164,14 @@ class ValidationResultsPageRenderer(Renderer):
         ]
 
         if self.run_info_at_end:
-            sections += [RenderedSectionContent(
-                **{
-                    "section_name": "Run Info",
-                    "content_blocks": collapse_content_blocks,
-                }
-            )]
+            sections += [
+                RenderedSectionContent(
+                    **{
+                        "section_name": "Run Info",
+                        "content_blocks": collapse_content_blocks,
+                    }
+                )
+            ]
 
         return RenderedDocumentContent(
             **{
@@ -201,13 +203,15 @@ class ValidationResultsPageRenderer(Renderer):
             os.path.join(*expectation_suite_path_components) + ".html"
         )
         if success:
-            success = 'Succeeded'
-            html_success_icon = '<i class="fas fa-check-circle text-success" aria-hidden="true"></i>'
-        else:
-            success = (
-                'Failed'
+            success = "Succeeded"
+            html_success_icon = (
+                '<i class="fas fa-check-circle text-success" aria-hidden="true"></i>'
             )
-            html_success_icon = '<i class="fas fa-times text-danger" aria-hidden="true"></i>'
+        else:
+            success = "Failed"
+            html_success_icon = (
+                '<i class="fas fa-times text-danger" aria-hidden="true"></i>'
+            )
         return RenderedHeaderContent(
             **{
                 "content_block_type": "header",

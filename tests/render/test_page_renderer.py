@@ -217,7 +217,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(
                     "suite_title": "Expectation Suite:",
                     "status_title": "Status:",
                     "expectation_suite_name": "default",
-                    "success": 'Failed',
+                    "success": "Failed",
                     "html_success_icon": '<i class="fas fa-times text-danger" aria-hidden="true"></i>',
                 },
                 "styling": {
