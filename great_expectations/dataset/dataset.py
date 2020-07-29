@@ -313,9 +313,7 @@ class Dataset(MetaDataset):
                 n_bins = max(
                     int(np.ceil(sturges)), int(np.ceil(float(max_ - min_) / fd))
                 )
-            bins = np.linspace(
-                start=float(min_), stop=float(max_), num=n_bins + 1
-            ).astype(float)
+            bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins + 1)
         else:
             raise ValueError("Invalid parameter for bins argument")
         return bins

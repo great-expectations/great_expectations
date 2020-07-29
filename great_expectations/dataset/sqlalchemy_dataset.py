@@ -1136,8 +1136,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             .select_from(self._table)
         )
 
-        # convert to json-serializable because we want a warnable version of Decimal->float conversion
-        return convert_to_json_serializable(self.engine.execute(query).scalar())
+        return self.engine.execute(query).scalar()
 
     def create_temporary_table(self, table_name, custom_sql, schema_name=None):
         """
