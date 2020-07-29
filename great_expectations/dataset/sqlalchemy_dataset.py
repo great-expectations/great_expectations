@@ -7,6 +7,7 @@ from datetime import datetime
 from functools import wraps
 from typing import Dict, Iterable, List
 
+import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
@@ -846,6 +847,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         selects: List[WithinGroup] = []
         for idx, quantile in enumerate(reversed(quantiles)):
+            # pymysql cannot handle conversion of numpy float64 to float; convert just in case
+            if np.issubdtype(type(quantile), np.float_):
+                quantile = float(quantile)
             quantile_column: Label = sa.func.first_value(sa.column(column)).over(
                 order_by=sa.case(
                     [
@@ -867,7 +871,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             quantiles_results: RowProxy = self.engine.execute(
                 quantiles_query
             ).fetchone()
-            return list(quantiles_results)
+            return [float(quantile) for quantile in quantiles_results]
         except ProgrammingError as pe:
             exception_message: str = "An SQL syntax Exception occurred."
             exception_traceback: str = traceback.format_exc()
@@ -1132,7 +1136,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             .select_from(self._table)
         )
 
-        return self.engine.execute(query).scalar()
+        # convert to json-serializable because we want a warnable version of Decimal->float conversion
+        return convert_to_json_serializable(self.engine.execute(query).scalar())
 
     def create_temporary_table(self, table_name, custom_sql, schema_name=None):
         """
