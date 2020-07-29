@@ -744,13 +744,13 @@ class ExpectationConfiguration(DictDot):
 
         # TODO: Call validate_kwargs when implemented
 
-        patch = jsonpatch.JsonPatch([
+        patch = jsonpatch.JsonPatch([ # is this the library you want to use for patching?
             {'op': op,
              'path': '/' + path.replace('.', '/'), #TODO: design review for this . / replace notation
              'value': value}
         ])
-
-        return patch.apply(self.kwargs, in_place=True) #should this be modified in place? What should be returned
+        # Should we return the same thing that we return when creating an expectation?
+        return patch.apply(self.kwargs, in_place=True) #should this be modified in place?
 
 
 
