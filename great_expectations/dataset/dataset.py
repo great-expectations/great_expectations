@@ -4107,8 +4107,9 @@ class Dataset(MetaDataset):
 
                 # Main expected_weights and main observed weights had no tail_weights, so nothing needs to be removed.
 
-            comb_expected_weights = np.array(comb_expected_weights).astype(float)
-            comb_observed_weights = np.array(comb_observed_weights).astype(float)
+            # TODO: VERIFY THAT THIS STILL WORKS BASED ON CHANGE TO HIST
+            # comb_expected_weights = np.array(comb_expected_weights).astype(float)
+            # comb_observed_weights = np.array(comb_observed_weights).astype(float)
 
             kl_divergence = stats.entropy(comb_observed_weights, comb_expected_weights)
 

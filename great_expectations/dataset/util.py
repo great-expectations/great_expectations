@@ -259,7 +259,7 @@ def build_continuous_partition_object(
     else:
         bins = list(bins)
     weights = list(
-        np.array(dataset.get_column_hist(column, tuple(bins))).astype(float)
+        np.array(dataset.get_column_hist(column, tuple(bins)))
         / dataset.get_column_nonnull_count(column)
     )
     tail_weights = (1 - sum(weights)) / 2
