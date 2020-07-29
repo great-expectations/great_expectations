@@ -242,6 +242,12 @@ class MetaSqlAlchemyDataset(Dataset):
             ):
                 count_results["unexpected_count"] = 0
 
+            # Some engines may return Decimal from count queries (lookin' at you MSSQL)
+            # Convert to integers
+            count_results["element_count"] = int(count_results["element_count"])
+            count_results["null_count"] = int(count_results["null_count"])
+            count_results["unexpected_count"] = int(count_results["unexpected_count"])
+
             # Retrieve unexpected values
             unexpected_query_results = self.engine.execute(
                 sa.select([sa.column(column)])
