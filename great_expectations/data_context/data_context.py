@@ -96,9 +96,9 @@ class BaseDataContext(object):
     id: os_linux
     title: OS - Linux
     icon:
-    short_description: 
-    description: 
-    how_to_guide_url: 
+    short_description:
+    description:
+    how_to_guide_url:
     maturity: Production
     maturity_details:
         api_stability: N/A
@@ -111,9 +111,9 @@ class BaseDataContext(object):
     id: os_macos
     title: OS - MacOS
     icon:
-    short_description: 
-    description: 
-    how_to_guide_url: 
+    short_description:
+    description:
+    how_to_guide_url:
     maturity: Production
     maturity_details:
         api_stability: N/A
@@ -126,9 +126,9 @@ class BaseDataContext(object):
     id: os_windows
     title: OS - Windows
     icon:
-    short_description: 
-    description: 
-    how_to_guide_url: 
+    short_description:
+    description:
+    how_to_guide_url:
     maturity: Beta
     maturity_details:
         api_stability: N/A
