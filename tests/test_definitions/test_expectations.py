@@ -20,6 +20,10 @@ from ..test_utils import (
 )
 
 try:
+    from sqlalchemy.dialects.mssql import dialect as mssqlDialect
+except (ImportError, KeyError):
+    mssqlDialect = None
+try:
     from sqlalchemy.dialects.mysql import dialect as mysqlDialect
 except (ImportError, KeyError):
     mysqlDialect = None
@@ -137,6 +141,14 @@ def pytest_generate_tests(metafunc):
                                     )
                                 ):
                                     generate_test = True
+                                elif (
+                                    "mssql" in test["only_for"]
+                                    and mssqlDialect is not None
+                                    and isinstance(
+                                        data_asset.engine.dialect, mssqlDialect
+                                    )
+                                ):
+                                    generate_test = True
                             elif isinstance(data_asset, PandasDataset):
                                 if "pandas" in test["only_for"]:
                                     generate_test = True
@@ -180,6 +192,12 @@ def pytest_generate_tests(metafunc):
                                 and mysqlDialect is not None
                                 and isinstance(data_asset, SqlAlchemyDataset)
                                 and isinstance(data_asset.engine.dialect, mysqlDialect)
+                            )
+                            or (
+                                "mssql" in test["suppress_test_for"]
+                                and mssqlDialect is not None
+                                and isinstance(data_asset, SqlAlchemyDataset)
+                                and isinstance(data_asset.engine.dialect, mssqlDialect)
                             )
                             or (
                                 "pandas" in test["suppress_test_for"]

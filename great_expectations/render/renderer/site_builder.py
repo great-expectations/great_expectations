@@ -63,7 +63,7 @@ class SiteBuilder(object):
                 class_name: DefaultSiteIndexBuilder
 
             # Verbose version:
-            # index_builder:
+            # site_index_builder:
             #     module_name: great_expectations.render.builder
             #     class_name: DefaultSiteIndexBuilder
             #     renderer:

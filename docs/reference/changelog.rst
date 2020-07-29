@@ -9,6 +9,16 @@ Develop
 * [ENHANCEMENT] Use green checkmark in Slack msgs instead of tada
 * [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) -- thanks @Dandandan
 * [ENHANCEMENT] Make Data Docs rendering of profiling results more flexible by deprecating the reliance on validation results having the specific run_name of "profiling"
+* [FEATURE] Add --assume-yes/--yes/-y option to cli docs build command (thanks @feluelle)
+* [FEATURE] Add SSO and SSH key pair authentication for Snowflake (thanks @dmateusp)
+* [FEATURE] Add the Microsoft SQL Server database management system to the list of supported data sources
+* [ENHANCEMENT] Use green checkmark in Slack msgs instead of tada
+* [ENHANCEMENT] log class instantiation errors for better debugging
+* [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) (thanks @Dandandan)
+* [BUGFIX] Handle case when unexpected_count list element is str
+* [DOCS] New how-to guide: How to instantiate a Data Context on an EMR Spark cluster
+* [DOCS] Managed Spark DF Documentation #1729 (thanks @mgorsk1)
+* [DOCS] Typos and clarifications (thanks @dechoma @sbrugman @rexboyce)
 
 0.11.8
 -----------------
