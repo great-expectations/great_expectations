@@ -1334,7 +1334,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                     },
                     "string_template": {
                         "template": "$icon",
-                        "params": {"icon": ""},
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
                         "styling": {
                             "params": {
                                 "icon": {

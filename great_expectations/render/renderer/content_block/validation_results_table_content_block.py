@@ -41,7 +41,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
-                        "params": {"icon": ""},
+                        "params": {"icon": "", "markdown_status_icon": "❗"},
                         "styling": {
                             "params": {
                                 "icon": {
@@ -64,7 +64,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
-                        "params": {"icon": ""},
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
                         "styling": {
                             "params": {
                                 "icon": {
@@ -91,7 +91,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
-                        "params": {"icon": ""},
+                        "params": {"icon": "", "markdown_status_icon": "❌"},
                         "styling": {
                             "params": {
                                 "icon": {
