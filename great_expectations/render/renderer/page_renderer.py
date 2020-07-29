@@ -4,13 +4,10 @@ from collections import OrderedDict
 
 from dateutil.parser import ParserError, parse
 
-from great_expectations.core import RunIdentifier
+from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.util import num_to_str
-from great_expectations.validation_operators.types.validation_operator_result import (
-    ExpectationSuiteValidationResult,
-)
 
 from ...core.id_dict import BatchKwargs
 from ..types import (
