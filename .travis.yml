@@ -138,11 +138,10 @@ jobs:
         - git tag --annotate 0.11.9 -m "0.11.9" || echo "tag exists, skipping"
       deploy:
         provider: pypi
+        dist: trusty
         edge: true
         on:
           branch: main
-        install:
-          - pip install .
         distributions: sdist bdist_wheel
         skip_existing: true
         username: __token__
