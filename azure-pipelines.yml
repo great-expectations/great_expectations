@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 
 trigger:
-- master
+- main
 
 resources:
   containers:
@@ -32,6 +32,8 @@ resources:
     ports:
       - 1433:1433
 
+variables:
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
 
 stages:
   - stage: linting
@@ -214,3 +216,23 @@ stages:
               pip install --no-cache-dir pytest pytest-cov pytest-azurepipelines
               pytest --mssql --no-postgres --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
+
+  - stage: deploy
+    condition: and(succeeded(), eq(variables.isMain, true))
+
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    dependsOn: [required_tests, linting]
+
+    jobs:
+      - job: deploy
+
+        steps:
+          - script: |
+             pip install twine
+             git tag --annotate 0.11.9 -m "0.11.9" || echo "tag exists, skipping"
+
+          - task: TwineAuthenticate@0
+            inputs:
+              externalFeed: pypi
