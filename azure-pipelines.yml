@@ -269,16 +269,17 @@ stages:
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
-          # Build the python distribution from source
-          - script: |
-              python setup.py sdist
-              python setup.py bdist_wheel
-
           - script: |
               pip install twine
               echo "Creating tag: $(cat ./great_expectations/deployment_version)"
               git tag --annotate $(cat ./great_expectations/deployment_version) -m "$(cat ./great_expectations/deployment_version)" || echo "tag exists, skipping"
             displayName: 'Add new version tag'
+
+          # Build the python distribution from source
+          - script: |
+              python setup.py sdist
+              python setup.py bdist_wheel
+            displayName: 'Build distribution'
 
           - task: TwineAuthenticate@1
             condition: succeeded()
