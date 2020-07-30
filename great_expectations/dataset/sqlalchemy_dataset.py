@@ -839,14 +839,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             [
                 sa.column(column),
                 sa.cast(
-                    sa.func.percent_rank().over(order_by=sa.column(column).desc()),
+                    sa.func.percent_rank().over(order_by=sa.column(column).asc()),
                     sa.dialects.mysql.DECIMAL(18, 15),
                 ).label("p"),
             ]
-        ).order_by(sa.column("p").desc()).select_from(self._table).cte("t")
+        ).order_by(sa.column("p").asc()).select_from(self._table).cte("t")
 
         selects: List[WithinGroup] = []
-        for idx, quantile in enumerate(reversed(quantiles)):
+        for idx, quantile in enumerate(quantiles):
             # pymysql cannot handle conversion of numpy float64 to float; convert just in case
             if np.issubdtype(type(quantile), np.float_):
                 quantile = float(quantile)
@@ -871,7 +871,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             quantiles_results: RowProxy = self.engine.execute(
                 quantiles_query
             ).fetchone()
-            return [float(quantile) for quantile in quantiles_results]
+            return list(quantiles_results)
         except ProgrammingError as pe:
             exception_message: str = "An SQL syntax Exception occurred."
             exception_traceback: str = traceback.format_exc()
