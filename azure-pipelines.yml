@@ -124,7 +124,7 @@ stages:
           # mysql: mysql
 
         variables:
-          GE_pytest_pip_opts: '--requirement requirements-dev.txt'
+          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
           GE_pytest_opts: ''
 
         strategy:
@@ -155,7 +155,7 @@ stages:
             displayName: 'Install pandas - $(pandas.version)'
 
           - script: |
-              sudo apt-get install -y pandoc
+              pip install --requirement requirements.txt
               pip install $(GE_pytest_pip_opts)
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install  .
@@ -204,11 +204,13 @@ stages:
           - script: |
               echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
               mysql --host=127.0.0.1 --port=3306 --user=root < mysql_setup_script.sql
+              pip install -r requirements.txt
               pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
+              pip install -r requirements.txt
               pip install  pytest pytest-cov pytest-azurepipelines
               pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
@@ -222,12 +224,13 @@ stages:
 
         steps:
           - script: |
+              pip install -r requirements.txt
               pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install  pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines
               pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
