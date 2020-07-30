@@ -143,11 +143,13 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: sudo apt-get install -y pandoc
-            displayName: 'Install pandoc'
-
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
+
+          - script: |
+              sudo apt-get install -y pandoc
+              pip install pypandoc
+            displayName: 'Install pandoc'
 
           - bash: pip install  pandas
             condition: eq(variables['pandas.version'], 'latest')
@@ -234,7 +236,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -q "CREATE DATABASE test_ci;" -o create_db_output.txt
+              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
               pip install -r requirements.txt
