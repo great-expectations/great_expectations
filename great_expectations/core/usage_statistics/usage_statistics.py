@@ -320,6 +320,27 @@ def run_validation_operator_usage_statistics(
         logger.debug(
             "run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field"
         )
+    try:
+        # TODO: Add other dag runners
+        DAG_RUNNERS = [
+            "airflow",
+            "prefect",
+            "dagster",
+            "kedro",
+            # "argo",  # TODO: Argo is written in Go, how to include?
+            "flytekit",  # TODO: Check import name
+            # "ascend",  # TODO: How to import?
+            # "nifi",  # TODO: How to import?
+            # "metaflow",  # TODO: How to import?
+        ]
+        payload["pipeline_dag_runner"] = ", ".join(
+            [d if d in sys.modules.keys() else None for d in DAG_RUNNERS]
+        )
+    except Exception:
+        logger.debug(
+            "run_validation_operator_usage_statistics: Unable to create pipeline_dag_runner payload field"
+        )
+
     return payload
 
 
