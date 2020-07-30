@@ -207,7 +207,10 @@ stages:
 
           - script: |
               echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
-              mysql --host=127.0.0.1 --port=3306 --user=root < mysql_setup_script.sql
+              mysql --host=localhost --port=3306 --user=root < mysql_setup_script.sql
+            displayName: 'Configure mysql'
+
+          - script: |
               pip install -r requirements.txt
               pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
@@ -273,7 +276,9 @@ stages:
 
           - script: |
               pip install twine
-              git tag --annotate $(cat ./great_expectations/deployment_version) -m "$(cat ./great_expectations/deployment_version)\ || echo "tag exists, skipping"
+              echo "Creating tag: $(cat ./great_expectations/deployment_version)"
+              git tag --annotate $(cat ./great_expectations/deployment_version) -m "$(cat ./great_expectations/deployment_version)" || echo "tag exists, skipping"
+            displayName: 'Add new version tag'
 
           - task: TwineAuthenticate@0
             condition: succeeded()
