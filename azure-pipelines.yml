@@ -19,6 +19,8 @@ resources:
     image: mysql:8.0.20
     ports:
     - 3306:3306
+    # DISABLE the ONLY_FULL_GROUP_BY mode to ensure we can produce full range of required statistics
+    options: "--sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
     env:
      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
      MYSQL_DATABASE: test_ci
@@ -121,7 +123,6 @@ stages:
       - job: comprehensive
         services:
           postgres: postgres
-          # mysql: mysql
 
         variables:
           GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
@@ -136,7 +137,6 @@ stages:
               python.version: '3.7'
               pandas.version: 'latest'
 
-        # TODO: refactor steps into a task
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -206,11 +206,6 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
-              mysql --host=localhost --protocol=TCP --port=3306 --user=root < mysql_setup_script.sql
-            displayName: 'Configure mysql'
-
-          - script: |
               pip install -r requirements.txt
               pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
@@ -274,13 +269,22 @@ stages:
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
+          # Build the python distribution from source
+          - script: |
+              python setup.py sdist
+              python setup.py bdist_wheel
+
           - script: |
               pip install twine
               echo "Creating tag: $(cat ./great_expectations/deployment_version)"
               git tag --annotate $(cat ./great_expectations/deployment_version) -m "$(cat ./great_expectations/deployment_version)" || echo "tag exists, skipping"
             displayName: 'Add new version tag'
 
-          - task: TwineAuthenticate@0
+          - task: TwineAuthenticate@1
             condition: succeeded()
             inputs:
-              externalFeed: pypi
+              pythonUploadServiceConnection: pypi
+
+          # Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
+          - script: |
+              python -m twine upload -r "great-expectations" --config-file $(PYPIRC_PATH) dist/*
