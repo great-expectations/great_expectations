@@ -155,7 +155,7 @@ stages:
             displayName: 'Install pandas - $(pandas.version)'
 
           - script: |
-              apt-get install pandoc
+              sudo apt-get install pandoc
               pip install $(GE_pytest_pip_opts)
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install  .
@@ -188,31 +188,47 @@ stages:
       - job: mysql
         services:
           mysql: mysql
+
+        variables:
+          python.version: '3.8'
+
         steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
           - script: |
               echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
               mysql --host=127.0.0.1 --port=3306 --user=root < mysql_setup_script.sql
-              pip install  --requirement requirements.txt
-              pip install  .
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
+              pip install .
             displayName: 'Install dependencies'
 
           - script: |
               pip install  pytest pytest-cov pytest-azurepipelines
-              pytest --mysql --no-postgres --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest --mysql --no-postgres --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
       - job: mssql
+        variables:
+          python.version: '3.8'
+
         services:
           mssql: mssql
+
         steps:
           - script: |
-              pip install  --requirement requirements.txt
-              pip install  .
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
+              pip install .
             displayName: 'Install dependencies'
 
           - script: |
               pip install  pytest pytest-cov pytest-azurepipelines
-              pytest --mssql --no-postgres --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest --mssql --no-postgres --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
   - stage: deploy
@@ -228,9 +244,10 @@ stages:
 
         steps:
           - script: |
-             pip install twine
-             git tag --annotate 0.11.9 -m "0.11.9" || echo "tag exists, skipping"
+              pip install twine
+              git tag --annotate $(cat ./great_expectations/deployment_version) -m "$(cat ./great_expectations/deployment_version)\ || echo "tag exists, skipping"
 
           - task: TwineAuthenticate@0
+            condition: succeeded()
             inputs:
               externalFeed: pypi
