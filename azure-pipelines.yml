@@ -36,7 +36,7 @@ variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
 
 stages:
-  - stage: linting
+  - stage: lint
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -53,14 +53,14 @@ stages:
               isort --check-only --skip docs/
               black --check --exclude docs/ .
 
-  - stage: required_tests
+  - stage: required
     pool:
       vmImage: 'ubuntu-latest'
 
     dependsOn: []
 
     jobs:
-      - job: pandas_versions
+      - job: compatibility_matrix
         variables:
           GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
@@ -118,7 +118,7 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
-      - job: full_suite_test
+      - job: comprehensive
         services:
           postgres: postgres
           # mysql: mysql
@@ -143,6 +143,9 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
+          - bash: sudo apt-get install -y pandoc
+            displayName: 'Install pandoc'
+
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
@@ -157,12 +160,11 @@ stages:
           - script: |
               pip install --requirement requirements.txt
               pip install $(GE_pytest_pip_opts)
-              # Consider fragmenting *all* integration tests into separate folder and run
               pip install  .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install  pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
@@ -178,7 +180,7 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
-  - stage: experimental_tests
+  - stage: db_integration
     pool:
       vmImage: 'ubuntu-latest'
 
