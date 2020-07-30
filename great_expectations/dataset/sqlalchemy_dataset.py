@@ -1850,6 +1850,20 @@ WHERE
         )
 
     def _get_dialect_like_pattern_expression(self, column, like_pattern, positive=True):
+        dialect_supported: bool = False
+
+        try:
+            # Bigquery
+            if isinstance(
+                self.sql_engine_dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect
+            ):
+                dialect_supported = True
+        except (
+            AttributeError,
+            TypeError,
+        ):  # TypeError can occur if the driver was not installed and so is None
+            pass
+
         if isinstance(
             self.sql_engine_dialect,
             (
@@ -1858,9 +1872,11 @@ WHERE
                 sqlalchemy_redshift.dialect.RedshiftDialect,
                 sa.dialects.mysql.dialect,
                 sa.dialects.mssql.dialect,
-                pybigquery.sqlalchemy_bigquery.BigQueryDialect,
             ),
         ):
+            dialect_supported = True
+
+        if dialect_supported:
             try:
                 if positive:
                     return sa.column(column).like(literal(like_pattern))
