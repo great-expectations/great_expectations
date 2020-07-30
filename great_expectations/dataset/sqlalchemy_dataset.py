@@ -5,7 +5,7 @@ import uuid
 import warnings
 from datetime import datetime
 from functools import wraps
-from typing import Iterable, List
+from typing import Dict, Iterable, List
 
 import numpy as np
 import pandas as pd
@@ -16,9 +16,11 @@ from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     check_sql_engine_dialect,
     get_approximate_percentile_disc_sql,
+    get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.util import import_library_module
 
+from ..core import convert_to_json_serializable
 from .dataset import Dataset
 from .pandas_dataset import PandasDataset
 
@@ -29,9 +31,9 @@ try:
     from sqlalchemy.dialects import registry
     from sqlalchemy.engine import reflection
     from sqlalchemy.sql.expression import BinaryExpression, literal
-    from sqlalchemy.sql.operators import custom_op
     from sqlalchemy.sql.selectable import Select, CTE
-    from sqlalchemy.sql.elements import Label, WithinGroup
+    from sqlalchemy.sql.operators import custom_op
+    from sqlalchemy.sql.elements import Label, WithinGroup, TextClause
     from sqlalchemy.engine.result import RowProxy
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.exc import ProgrammingError
@@ -39,8 +41,20 @@ except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
-    DefaultDialect = None
+    sa = None
+    registry = None
+    reflection = None
+    BinaryExpression = None
+    literal = None
+    Select = None
+    CTE = None
+    custom_op = None
+    Label = None
     WithinGroup = None
+    TextClause = None
+    RowProxy = None
+    DefaultDialect = None
+    ProgrammingError = None
 
 try:
     import psycopg2
@@ -85,6 +99,19 @@ try:
 except ImportError:
     bigquery_types_tuple = None
     pybigquery = None
+
+
+try:
+    # SQLAlchemy does not export the "INT" type for the MS SQL Server dialect; however "INT" is supported by the engine.
+    # Since SQLAlchemy exports the "INTEGER" type for the MS SQL Server dialect, alias "INT" to the "INTEGER" type.
+    import sqlalchemy.dialects.mssql as mssqltypes
+
+    try:
+        getattr(mssqltypes, "INT")
+    except AttributeError:
+        mssqltypes.INT = mssqltypes.INTEGER
+except ImportError:
+    pass
 
 
 class SqlAlchemyBatchReference(object):
@@ -148,10 +175,10 @@ class MetaSqlAlchemyDataset(Dataset):
             else:
                 unexpected_count_limit = result_format["partial_unexpected_count"]
 
-            expected_condition = func(self, column, *args, **kwargs)
+            expected_condition: BinaryExpression = func(self, column, *args, **kwargs)
 
             # Added to prepare for when an ignore_values argument is added to the expectation
-            ignore_values = [None]
+            ignore_values: list = [None]
             if func.__name__ in [
                 "expect_column_values_to_not_be_null",
                 "expect_column_values_to_be_null",
@@ -164,7 +191,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 # we will instruct the result formatting method to skip this step.
                 result_format["partial_unexpected_count"] = 0
 
-            ignore_values_conditions = []
+            ignore_values_conditions: List[BinaryExpression] = []
             if (
                 len(ignore_values) > 0
                 and None not in ignore_values
@@ -179,37 +206,29 @@ class MetaSqlAlchemyDataset(Dataset):
             if None in ignore_values:
                 ignore_values_conditions += [sa.column(column).is_(None)]
 
+            ignore_values_condition: BinaryExpression
             if len(ignore_values_conditions) > 1:
                 ignore_values_condition = sa.or_(*ignore_values_conditions)
             elif len(ignore_values_conditions) == 1:
                 ignore_values_condition = ignore_values_conditions[0]
             else:
-                ignore_values_condition = sa.literal(False)
+                ignore_values_condition = BinaryExpression(
+                    sa.literal(False), sa.literal(True), custom_op("=")
+                )
 
-            count_query = sa.select(
-                [
-                    sa.func.count().label("element_count"),
-                    sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
-                        "null_count"
-                    ),
-                    sa.func.sum(
-                        sa.case(
-                            [
-                                (
-                                    sa.and_(
-                                        sa.not_(expected_condition),
-                                        sa.not_(ignore_values_condition),
-                                    ),
-                                    1,
-                                )
-                            ],
-                            else_=0,
-                        )
-                    ).label("unexpected_count"),
-                ]
-            ).select_from(self._table)
+            count_query: Select
+            if self.sql_engine_dialect.name.lower() == "mssql":
+                count_query = self._get_count_query_mssql(
+                    expected_condition=expected_condition,
+                    ignore_values_condition=ignore_values_condition,
+                )
+            else:
+                count_query = self._get_count_query_generic_sqlalchemy(
+                    expected_condition=expected_condition,
+                    ignore_values_condition=ignore_values_condition,
+                )
 
-            count_results = dict(self.engine.execute(count_query).fetchone())
+            count_results: dict = dict(self.engine.execute(count_query).fetchone())
 
             # Handle case of empty table gracefully:
             if (
@@ -225,6 +244,12 @@ class MetaSqlAlchemyDataset(Dataset):
             ):
                 count_results["unexpected_count"] = 0
 
+            # Some engines may return Decimal from count queries (lookin' at you MSSQL)
+            # Convert to integers
+            count_results["element_count"] = int(count_results["element_count"])
+            count_results["null_count"] = int(count_results["null_count"])
+            count_results["unexpected_count"] = int(count_results["unexpected_count"])
+
             # Retrieve unexpected values
             unexpected_query_results = self.engine.execute(
                 sa.select([sa.column(column)])
@@ -237,7 +262,9 @@ class MetaSqlAlchemyDataset(Dataset):
                 .limit(unexpected_count_limit)
             )
 
-            nonnull_count = count_results["element_count"] - count_results["null_count"]
+            nonnull_count: int = count_results["element_count"] - count_results[
+                "null_count"
+            ]
 
             if "output_strftime_format" in kwargs:
                 output_strftime_format = kwargs["output_strftime_format"]
@@ -291,6 +318,94 @@ class MetaSqlAlchemyDataset(Dataset):
 
         return inner_wrapper
 
+    def _get_count_query_mssql(
+        self,
+        expected_condition: BinaryExpression,
+        ignore_values_condition: BinaryExpression,
+    ) -> Select:
+        # mssql expects all temporary table names to have a prefix '#'
+        temp_table_name: str = f"#ge_tmp_{str(uuid.uuid4())[:8]}"
+
+        with self.engine.begin():
+            metadata: sa.MetaData = sa.MetaData(self.engine)
+            temp_table_obj: sa.Table = sa.Table(
+                temp_table_name,
+                metadata,
+                sa.Column("condition", sa.Integer, primary_key=False, nullable=False),
+            )
+            temp_table_obj.create(self.engine, checkfirst=True)
+
+            count_case_statement: List[sa.sql.elements.Label] = [
+                sa.case(
+                    [
+                        (
+                            sa.and_(
+                                sa.not_(expected_condition),
+                                sa.not_(ignore_values_condition),
+                            ),
+                            1,
+                        )
+                    ],
+                    else_=0,
+                ).label("condition")
+            ]
+            inner_case_query: sa.sql.dml.Insert = temp_table_obj.insert().from_select(
+                count_case_statement,
+                sa.select(count_case_statement).select_from(self._table),
+            )
+            self.engine.execute(inner_case_query)
+
+        element_count_query: Select = sa.select(
+            [
+                sa.func.count().label("element_count"),
+                sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
+                    "null_count"
+                ),
+            ]
+        ).select_from(self._table).alias("ElementAndNullCountsSubquery")
+
+        unexpected_count_query: Select = sa.select(
+            [sa.func.sum(sa.column("condition")).label("unexpected_count"),]
+        ).select_from(temp_table_obj).alias("UnexpectedCountSubquery")
+
+        count_query: Select = sa.select(
+            [
+                element_count_query.c.element_count,
+                element_count_query.c.null_count,
+                unexpected_count_query.c.unexpected_count,
+            ]
+        )
+
+        return count_query
+
+    def _get_count_query_generic_sqlalchemy(
+        self,
+        expected_condition: BinaryExpression,
+        ignore_values_condition: BinaryExpression,
+    ) -> Select:
+        return sa.select(
+            [
+                sa.func.count().label("element_count"),
+                sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
+                    "null_count"
+                ),
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (
+                                sa.and_(
+                                    sa.not_(expected_condition),
+                                    sa.not_(ignore_values_condition),
+                                ),
+                                1,
+                            )
+                        ],
+                        else_=0,
+                    )
+                ).label("unexpected_count"),
+            ]
+        ).select_from(self._table)
+
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     """
@@ -337,10 +452,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
             schema = None
-            table_name = "ge_tmp_" + str(uuid.uuid4())[:8]
+            table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
             # mssql expects all temporary table names to have a prefix '#'
             if engine.dialect.name.lower() == "mssql":
-                table_name = "#" + table_name
+                table_name = f"#{table_name}"
             generated_table_name = table_name
         else:
             generated_table_name = None
@@ -732,6 +847,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         selects: List[WithinGroup] = []
         for idx, quantile in enumerate(reversed(quantiles)):
+            # pymysql cannot handle conversion of numpy float64 to float; convert just in case
+            if np.issubdtype(type(quantile), np.float_):
+                quantile = float(quantile)
             quantile_column: Label = sa.func.first_value(sa.column(column)).over(
                 order_by=sa.case(
                     [
@@ -753,7 +871,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             quantiles_results: RowProxy = self.engine.execute(
                 quantiles_query
             ).fetchone()
-            return list(quantiles_results)
+            return [float(quantile) for quantile in quantiles_results]
         except ProgrammingError as pe:
             exception_message: str = "An SQL syntax Exception occurred."
             exception_traceback: str = traceback.format_exc()
@@ -787,7 +905,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 sql_approx: str = get_approximate_percentile_disc_sql(
                     selects=selects, sql_engine_dialect=self.sql_engine_dialect
                 )
-                selects_approx: List[WithinGroup] = [sa.text(sql_approx)]
+                selects_approx: List[TextClause] = [sa.text(sql_approx)]
                 quantiles_query_approx: Select = sa.select(selects_approx).select_from(
                     self._table
                 )
@@ -815,18 +933,20 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 )
 
     def get_column_stdev(self, column):
-        if self.sql_engine_dialect.name.lower() != "mssql":
+        if self.sql_engine_dialect.name.lower() == "mssql":
+            # Note: "stdev_samp" is not a recognized built-in function name (but "stdev" does exist for "mssql").
+            # This function is used to compute statistical standard deviation from sample data (per the reference in
+            # https://sqlserverrider.wordpress.com/2013/03/06/standard-deviation-functions-stdev-and-stdevp-sql-server).
+            res = self.engine.execute(
+                sa.select([sa.func.stdev(sa.column(column))])
+                .select_from(self._table)
+                .where(sa.column(column) is not None)
+            ).fetchone()
+        else:
             res = self.engine.execute(
                 sa.select([sa.func.stddev_samp(sa.column(column))])
                 .select_from(self._table)
-                .where(sa.column(column) != None)
-            ).fetchone()
-        else:
-            # stdev_samp is not a recognized built-in function name but stdevp does exist for mssql!
-            res = self.engine.execute(
-                sa.select([sa.func.stdevp(sa.column(column))])
-                .select_from(self._table)
-                .where(sa.column(column) != None)
+                .where(sa.column(column) is not None)
             ).fetchone()
         return float(res[0])
 
@@ -842,7 +962,17 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         bins = list(bins)
 
         # If we have an infinte lower bound, don't express that in sql
-        if (bins[0] == -np.inf) or (bins[0] == -float("inf")):
+        if (
+            bins[0]
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=True
+            )
+        ) or (
+            bins[0]
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=True
+            )
+        ):
             case_conditions.append(
                 sa.func.sum(
                     sa.case([(sa.column(column) < bins[idx + 1], 1)], else_=0)
@@ -868,7 +998,17 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 ).label("bin_" + str(idx))
             )
 
-        if (bins[-1] == np.inf) or (bins[-1] == float("inf")):
+        if (
+            bins[-1]
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=False
+            )
+        ) or (
+            bins[-1]
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=False
+            )
+        ):
             case_conditions.append(
                 sa.func.sum(
                     sa.case([(bins[-2] <= sa.column(column), 1)], else_=0)
@@ -898,7 +1038,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             .select_from(self._table)
         )
 
-        hist = list(self.engine.execute(query).fetchone())
+        # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
+        hist = convert_to_json_serializable(list(self.engine.execute(query).fetchone()))
         return hist
 
     def get_column_count_in_range(
@@ -908,6 +1049,66 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             raise ValueError("Must specify either min or max value")
         if min_val is not None and max_val is not None and min_val > max_val:
             raise ValueError("Min value must be <= to max value")
+
+        if (
+            min_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=True
+            )
+        ) or (
+            min_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=True
+            )
+        ):
+            min_val = get_sql_dialect_floating_point_infinity_value(
+                schema=self.sql_engine_dialect.name.lower(), negative=True
+            )
+
+        if (
+            min_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=False
+            )
+        ) or (
+            min_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=False
+            )
+        ):
+            min_val = get_sql_dialect_floating_point_infinity_value(
+                schema=self.sql_engine_dialect.name.lower(), negative=False
+            )
+
+        if (
+            max_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=True
+            )
+        ) or (
+            max_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=True
+            )
+        ):
+            max_val = get_sql_dialect_floating_point_infinity_value(
+                schema=self.sql_engine_dialect.name.lower(), negative=True
+            )
+
+        if (
+            max_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_np", negative=False
+            )
+        ) or (
+            max_val
+            == get_sql_dialect_floating_point_infinity_value(
+                schema="api_cast", negative=False
+            )
+        ):
+            max_val = get_sql_dialect_floating_point_infinity_value(
+                schema=self.sql_engine_dialect.name.lower(), negative=False
+            )
 
         min_condition = None
         max_condition = None
@@ -1007,24 +1208,35 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
-        if self.sql_engine_dialect.name.lower() != "mssql":
-            sql = sa.select([sa.text("*")]).select_from(self._table).limit(1)
-            col_names = self.engine.execute(sql).keys()
-            col_dict = [{"name": col_name} for col_name in col_names]
-        else:
+        col_info_dict_list: List[Dict]
+        if self.sql_engine_dialect.name.lower() == "mssql":
             type_module = self._get_dialect_type_module()
             # Get column names and types from the database
             # StackOverflow to the rescue: https://stackoverflow.com/a/38634368
-            col_info = self.engine.execute(
-                "SELECT cols.NAME,ty.NAME FROM tempdb.sys.columns cols JOIN sys.types ty ON cols.user_type_id = ty.user_type_id WHERE object_id = OBJECT_ID('tempdb..{}')".format(
-                    self._table
-                )
-            ).fetchall()
-            col_dict = [
+            col_info_query: TextClause = sa.text(
+                f"""
+SELECT
+    cols.NAME, ty.NAME
+FROM
+    tempdb.sys.columns AS cols
+JOIN
+    sys.types AS ty
+ON
+    cols.user_type_id = ty.user_type_id
+WHERE
+    object_id = OBJECT_ID('tempdb..{self._table}')
+                """
+            )
+            col_info_tuples_list = self.engine.execute(col_info_query).fetchall()
+            col_info_dict_list = [
                 {"name": col_name, "type": getattr(type_module, col_type.upper())()}
-                for col_name, col_type in col_info
+                for col_name, col_type in col_info_tuples_list
             ]
-        return col_dict
+        else:
+            query: Select = sa.select([sa.text("*")]).select_from(self._table).limit(1)
+            col_names: list = self.engine.execute(query).keys()
+            col_info_dict_list = [{"name": col_name} for col_name in col_names]
+        return col_info_dict_list
 
     ###
     ###
@@ -1469,8 +1681,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             TypeError,
         ):  # TypeError can occur if the driver was not installed and so is None
             pass
+
         try:
-            # Mysql
+            # MySQL
             if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
                 if positive:
                     return BinaryExpression(
@@ -1519,6 +1732,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             TypeError,
         ):  # TypeError can occur if the driver was not installed and so is None
             pass
+
+        return None
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_match_regex(
@@ -1631,5 +1846,171 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             *[
                 self._get_dialect_regex_expression(column, regex, positive=False)
                 for regex in regex_list
+            ]
+        )
+
+    def _get_dialect_like_pattern_expression(self, column, like_pattern, positive=True):
+        dialect_supported: bool = False
+
+        try:
+            # Bigquery
+            if isinstance(
+                self.sql_engine_dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect
+            ):
+                dialect_supported = True
+        except (
+            AttributeError,
+            TypeError,
+        ):  # TypeError can occur if the driver was not installed and so is None
+            pass
+
+        if isinstance(
+            self.sql_engine_dialect,
+            (
+                sa.dialects.sqlite.dialect,
+                sa.dialects.postgresql.dialect,
+                sqlalchemy_redshift.dialect.RedshiftDialect,
+                sa.dialects.mysql.dialect,
+                sa.dialects.mssql.dialect,
+            ),
+        ):
+            dialect_supported = True
+
+        if dialect_supported:
+            try:
+                if positive:
+                    return sa.column(column).like(literal(like_pattern))
+                else:
+                    return sa.not_(sa.column(column).like(literal(like_pattern)))
+            except AttributeError:
+                pass
+
+        return None
+
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_match_like_pattern(
+        self,
+        column,
+        like_pattern,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        like_pattern_expression = self._get_dialect_like_pattern_expression(
+            column, like_pattern
+        )
+        if like_pattern_expression is None:
+            logger.warning(
+                "Like patterns are not supported for dialect %s"
+                % str(self.sql_engine_dialect)
+            )
+            raise NotImplementedError
+
+        return like_pattern_expression
+
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_not_match_like_pattern(
+        self,
+        column,
+        like_pattern,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        like_pattern_expression = self._get_dialect_like_pattern_expression(
+            column, like_pattern, positive=False
+        )
+        if like_pattern_expression is None:
+            logger.warning(
+                "Like patterns are not supported for dialect %s"
+                % str(self.sql_engine_dialect)
+            )
+            raise NotImplementedError
+
+        return like_pattern_expression
+
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_match_like_pattern_list(
+        self,
+        column,
+        like_pattern_list,
+        match_on="any",
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+
+        if match_on not in ["any", "all"]:
+            raise ValueError("match_on must be any or all")
+
+        if len(like_pattern_list) == 0:
+            raise ValueError(
+                "At least one like_pattern must be supplied in the like_pattern_list."
+            )
+
+        like_pattern_expression = self._get_dialect_like_pattern_expression(
+            column, like_pattern_list[0]
+        )
+        if like_pattern_expression is None:
+            logger.warning(
+                "Like patterns are not supported for dialect %s"
+                % str(self.sql_engine_dialect)
+            )
+            raise NotImplementedError
+
+        if match_on == "any":
+            condition = sa.or_(
+                *[
+                    self._get_dialect_like_pattern_expression(column, like_pattern)
+                    for like_pattern in like_pattern_list
+                ]
+            )
+        else:
+            condition = sa.and_(
+                *[
+                    self._get_dialect_like_pattern_expression(column, like_pattern)
+                    for like_pattern in like_pattern_list
+                ]
+            )
+        return condition
+
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_not_match_like_pattern_list(
+        self,
+        column,
+        like_pattern_list,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        if len(like_pattern_list) == 0:
+            raise ValueError(
+                "At least one like_pattern must be supplied in the like_pattern_list."
+            )
+
+        like_pattern_expression = self._get_dialect_like_pattern_expression(
+            column, like_pattern_list[0], positive=False
+        )
+        if like_pattern_expression is None:
+            logger.warning(
+                "Like patterns are not supported for dialect %s"
+                % str(self.sql_engine_dialect)
+            )
+            raise NotImplementedError
+
+        return sa.and_(
+            *[
+                self._get_dialect_like_pattern_expression(
+                    column, like_pattern, positive=False
+                )
+                for like_pattern in like_pattern_list
             ]
         )

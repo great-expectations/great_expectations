@@ -127,13 +127,27 @@ class DefaultJinjaView(object):
 
     @contextfilter
     def render_content_block(
-        self, jinja_context, content_block, index=None, content_block_id=None
+        self,
+        jinja_context,
+        content_block,
+        index=None,
+        content_block_id=None,
+        render_to_markdown: bool = False,
     ):
-        if type(content_block) is str:
+        """
+
+        :param jinja_context:
+        :param content_block:
+        :param index:
+        :param content_block_id:
+        :param render_to_markdown: Whether this method should render the markdown version instead of HTML
+        :return:
+        """
+        if isinstance(content_block, str):
             return content_block
         elif content_block is None:
             return ""
-        elif type(content_block) is list:
+        elif isinstance(content_block, list):
             # If the content_block item here is actually a list of content blocks then we want to recursively render
             rendered_block = ""
             for idx, content_block_el in enumerate(content_block):
@@ -152,16 +166,19 @@ class DefaultJinjaView(object):
                         content_block_id=new_content_block_id,
                     )
                 else:
-                    rendered_block += "<span>" + str(content_block_el) + "</span>"
+                    if render_to_markdown:
+                        rendered_block += str(content_block_el)
+                    else:
+                        rendered_block += "<span>" + str(content_block_el) + "</span>"
             return rendered_block
         elif not isinstance(content_block, dict):
             return content_block
         content_block_type = content_block.get("content_block_type")
-        template = self._get_template(
-            template="{content_block_type}.j2".format(
-                content_block_type=content_block_type
-            )
-        )
+        if render_to_markdown:
+            template_filename = f"markdown_{content_block_type}.j2"
+        else:
+            template_filename = f"{content_block_type}.j2"
+        template = self._get_template(template=template_filename)
         if content_block_id:
             return template.render(
                 jinja_context,
@@ -434,3 +451,94 @@ class DefaultJinjaComponentView(DefaultJinjaView):
         assert isinstance(
             document["content_block"], dict
         )  # For now low-level views take dicts
+
+
+class DefaultMarkdownPageView(DefaultJinjaView):
+    """
+    Convert a document to markdown format.
+    """
+
+    def _validate_document(self, document: RenderedDocumentContent) -> bool:
+        """
+        Validate that the document is of the appropriate type at runtime.
+        """
+        assert isinstance(document, RenderedDocumentContent)
+
+    _template = "markdown_validation_results_page.j2"
+
+    def render_string_template(self, template: pTemplate) -> pTemplate:
+        """
+        Render string for markdown rendering. Bold all parameters and perform substitution.
+        Args:
+            template: python Template object
+
+        Returns:
+            Template with substituted values and all parameters bolded
+
+        """
+
+        if not isinstance(template, (dict, OrderedDict)):
+            return template
+
+        # if there are any groupings of two or more $, we need to double the groupings to account
+        # for template string substitution escaping
+        template["template"] = re.sub(
+            r"\${2,}", lambda m: m.group(0) * 2, template.get("template", "")
+        )
+
+        # Bold all parameters:
+        base_param_template_string = "**$content**"
+
+        # Make sure template["params"] is a dict
+        template["params"] = template.get("params", {})
+
+        # TODO: Revisit handling of icons in markdown. E.g. inline rendered icons.
+        if "markdown_status_icon" in template["params"]:
+            return template["params"]["markdown_status_icon"]
+
+        for parameter in template["params"].keys():
+            if parameter == "html_success_icon":
+                template["params"][parameter] = ""
+                continue
+
+            template["params"][parameter] = pTemplate(
+                base_param_template_string
+            ).safe_substitute({"content": template["params"][parameter],})
+
+        template["template"] = template.get("template", "").replace(
+            "$PARAMETER", "$$PARAMETER"
+        )
+
+        return pTemplate(template.get("template")).safe_substitute(
+            template.get("params", {})
+        )
+
+    @contextfilter
+    def render_content_block(
+        self,
+        jinja_context,
+        content_block,
+        index=None,
+        content_block_id=None,
+        render_to_markdown: bool = True,
+    ):
+        """
+        Render a content block to markdown using jinja templates.
+        Args:
+            jinja_context:
+            content_block:
+            index:
+            content_block_id:
+            render_to_markdown: Default of True here instead of parent class default of False
+
+        Returns:
+
+        """
+
+        return super().render_content_block(
+            jinja_context=jinja_context,
+            content_block=content_block,
+            index=index,
+            content_block_id=content_block_id,
+            render_to_markdown=render_to_markdown,
+        )

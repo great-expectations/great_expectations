@@ -13,7 +13,8 @@
         "column_name with space": "StringType"
       }
     },
-    "tests" : [{
+    "tests" : [
+    {
       "title" : "Basic positive test",
       "exact_match_out" : false,
       "in": {
@@ -25,8 +26,9 @@
         "unexpected_index_list": [],
         "success": true
       },
-      "suppress_test_for": ["sqlite"]
-    },{
+      "suppress_test_for": ["sqlite", "mssql"]
+    },
+    {
       "title" : "Positive test with multiple regexes",
       "exact_match_out" : false,
       "in": {
@@ -39,8 +41,9 @@
         "unexpected_index_list": [],
         "success": true
       },
-      "suppress_test_for": ["sqlite"]
-    },{
+      "suppress_test_for": ["sqlite", "mssql"]
+    },
+    {
       "title" : "Basic negative test",
       "exact_match_out" : false,
       "in": {
@@ -53,8 +56,9 @@
         "unexpected_index_list": [0,1,2,3,4,5,6,7,8],
         "success": false
       },
-      "suppress_test_for": ["sqlite"]
-    },{
+      "suppress_test_for": ["sqlite", "mssql"]
+    },
+    {
       "title" : "Negative test with more string-ish strings",
       "exact_match_out" : false,
       "in": {
@@ -66,8 +70,9 @@
         "unexpected_index_list": [6,7,8,9],
         "success": false
       },
-      "suppress_test_for": ["sqlite"]
-    },{
+      "suppress_test_for": ["sqlite", "mssql"]
+    },
+    {
       "title" : "Positive test with match_on=any",
       "exact_match_out" : false,
       "in": {
@@ -80,7 +85,7 @@
         "unexpected_index_list": [],
         "success": true
       },
-      "suppress_test_for": ["sqlite"]
+      "suppress_test_for": ["sqlite", "mssql"]
     },
     {
       "title" : "Positive_test_column_name_has_space_and_match_on=any",
@@ -95,7 +100,7 @@
         "unexpected_index_list": [],
         "success": true
       },
-      "suppress_test_for": ["sqlite"]
+      "suppress_test_for": ["sqlite", "mssql"]
     }]
   }]
 }
