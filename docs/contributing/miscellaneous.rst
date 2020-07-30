@@ -55,7 +55,7 @@ GE core team members use this checklist to ship releases.
 7. After successful checks, get it approved and merged.
 8. Update your local branches and switch to main: ``git fetch --all; git checkout main; git pull``.
 9. Merge the now-updated ``develop`` branch into ``main`` and trigger the release: ``git merge origin/develop; git push``
-10. Wait for all the build to complete. It should include 4 test jobs and a deploy job, which handles the actual publishing of code to pypi. You can watch the progress of these builds on Azure.
+10. Wait for all the builds to complete. The builds should include several test jobs and a deploy job, which handles the actual publishing of code to pypi. You can watch the progress of these builds on Azure.
 11. Check `PyPI <https://pypi.org/project/great-expectations/#history>`__ for the new release
 12. Create an annotated git tag:
 

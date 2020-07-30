@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+[DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 
 0.11.9
 -----------------
