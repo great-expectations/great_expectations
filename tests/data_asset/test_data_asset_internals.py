@@ -598,9 +598,19 @@ def test_calc_map_expectation_success():
         success_count=0, nonnull_count=100, mostly=None
     ) == (False, 0.0)
 
-    assert df._calc_map_expectation_success(
-        success_count=decimal.Decimal(80), nonnull_count=100, mostly=0.8
-    ) == (False, decimal.Decimal(80) / decimal.Decimal(100))
+    # NOTE - 20200229 - Alex/James:
+    # We no longer allow DECIMAL explicitly, because we do not expect
+    # decimal values in response to queries given potential problems
+    # with comparison to a float-valued mostly parameter
+
+    # assert df._calc_map_expectation_success(
+    #     success_count=decimal.Decimal(80), nonnull_count=100, mostly=0.8
+    # ) == (False, decimal.Decimal(80) / decimal.Decimal(100))
+    with pytest.raises(ValueError) as exc:
+        df._calc_map_expectation_success(
+            success_count=decimal.Decimal(80), nonnull_count=100, mostly=0.8
+        )
+    assert "must not be a decimal; check your db configuration" in str(exc.value)
 
     assert df._calc_map_expectation_success(
         success_count=100, nonnull_count=100, mostly=0

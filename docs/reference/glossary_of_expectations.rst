@@ -54,6 +54,10 @@ String matching
 * :func:`expect_column_values_to_not_match_regex <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_match_regex>`
 * :func:`expect_column_values_to_match_regex_list <great_expectations.dataset.dataset.Dataset.expect_column_values_to_match_regex_list>`
 * :func:`expect_column_values_to_not_match_regex_list <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_match_regex_list>`
+* :func:`expect_column_values_to_match_like_pattern <great_expectations.dataset.dataset.Dataset.expect_column_values_to_match_like_pattern>`
+* :func:`expect_column_values_to_not_match_like_pattern <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_match_like_pattern>`
+* :func:`expect_column_values_to_match_like_pattern_list <great_expectations.dataset.dataset.Dataset.expect_column_values_to_match_like_pattern_list>`
+* :func:`expect_column_values_to_not_match_like_pattern_list <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_match_like_pattern_list>`
 
 Datetime and JSON parsing
 =========================

@@ -21,15 +21,6 @@
           "s": "float64",
           "s1": "int64"
         },
-        "postgresql": {
-          "x": "INTEGER",
-          "y": "DOUBLE_PRECISION",
-          "z": "TEXT",
-          "n": "TEXT",
-          "b": "BOOLEAN",
-          "s": "DOUBLE_PRECISION",
-          "s1": "BIGINT"
-        },
         "spark": {
           "x": "IntegerType",
           "y": "FloatType",
@@ -48,12 +39,21 @@
           "s": "FLOAT",
           "s1": "INTEGER"
         },
+        "postgresql": {
+          "x": "INTEGER",
+          "y": "DOUBLE_PRECISION",
+          "z": "TEXT",
+          "n": "TEXT",
+          "b": "BOOLEAN",
+          "s": "DOUBLE_PRECISION",
+          "s1": "BIGINT"
+        },
         "mysql": {
           "x": "INTEGER",
           "y": "FLOAT",
           "z": "TEXT",
           "n": "TEXT",
-          "b": "BOOLEAN",
+          "b": "TINYINT",
           "s": "FLOAT",
           "s1": "BIGINT"
         },
@@ -273,7 +273,17 @@
             "success":true
           },
           "only_for": ["sqlalchemy"],
-          "suppress_test_for": ["mssql"]
+          "suppress_test_for": ["mysql", "mssql"]
+        },
+        {
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "negative_test_sqlalchemy_floats_are_not_BOOLEAN",
+          "exact_match_out": false,
+          "in":{"column":"b","type_":"TINYINT"},
+          "out":{
+            "success":true
+          },
+          "only_for": ["mysql"]
         },
         {
           "_note": "type name here works for mssql",
