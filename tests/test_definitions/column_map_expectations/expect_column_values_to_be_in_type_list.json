@@ -81,7 +81,7 @@
           "y": "FLOAT",
           "z": "TEXT",
           "n": "TEXT",
-          "b": "BOOLEAN",
+          "b": "TINYINT",
           "s": "TEXT",
           "s1": "TEXT"
         },
@@ -323,7 +323,7 @@
           "only_for": [
             "sqlalchemy"
           ],
-          "suppress_test_for": ["mssql"]
+          "suppress_test_for": ["mysql", "mssql"]
         },
         {
           "title": "positive_test_boolean_values",
@@ -339,6 +339,22 @@
           },
           "only_for": [
             "mssql"
+          ]
+        },
+        {
+          "title": "positive_test_boolean_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "b",
+            "type_list": [
+              "TINYINT"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "mysql"
           ]
         },
         {

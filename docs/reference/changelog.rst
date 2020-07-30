@@ -12,6 +12,7 @@ Develop
 * [FEATURE] Add --assume-yes/--yes/-y option to cli docs build command (thanks @feluelle)
 * [FEATURE] Add SSO and SSH key pair authentication for Snowflake (thanks @dmateusp)
 * [FEATURE] Add the Microsoft SQL Server database management system to the list of supported data sources
+* [FEATURE] Add pattern-matching expectations that use the Standard SQL "LIKE" operator: "expect_column_values_to_match_like_pattern", "expect_column_values_to_not_match_like_pattern", "expect_column_values_to_match_like_pattern_list", and "expect_column_values_to_not_match_like_pattern_list"
 * [ENHANCEMENT] Use green checkmark in Slack msgs instead of tada
 * [ENHANCEMENT] log class instantiation errors for better debugging
 * [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) (thanks @Dandandan)
