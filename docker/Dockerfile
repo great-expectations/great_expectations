@@ -9,7 +9,7 @@ ENV LANG C.UTF-8
 ENV HOME /root
 ENV PATH /usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${HOME}/.local/bin
 # Path where the root of the GE project will be expected
-ENV GE_HOME /usr/app
+ENV GE_HOME /usr/app/great_expectations
 
 LABEL maintainer="great-expectations"
 LABEL org.opencontainers.image.title="Great Expectations"
@@ -27,7 +27,7 @@ USER root
 
 COPY . /tmp/great_expectations_install
 
-RUN mkdir -p ${GE_HOME} ${HOME} && \
+RUN mkdir -p /usr/app ${HOME} && \
     cd /tmp/great_expectations_install && \
     pip install .[${GE_EXTRA_DEPS}] && \
     rm -rf /tmp/great_expectations_install
