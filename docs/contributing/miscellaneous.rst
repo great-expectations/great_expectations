@@ -17,6 +17,7 @@ Core team
 * `Sam Bail <https://github.com/spbail>`__
 * `William Shin <https://github.com/Shinnnyshinshin>`__
 * `Ben Castleton <https://github.com/bhcastleton>`__
+* `Anthony Burdi <https://github.com/anthonyburdi>`__
 
 
 .. _contributing_cla:
@@ -42,17 +43,19 @@ GE core team members use this checklist to ship releases.
 
 2. Merge all approved PRs into ``develop``.
 3. Make a new branch from ``develop`` called something like ``release-prep-2020-06-01``.
-4. In this branch, update the version number in the ``.travis.yml`` file (look in the deploy section). (This sed snippet is handy if you change the numbers ``sed -i '' 's/0\.9\.6/0\.9\.7/g' .travis.yml``)
+4. In this branch, update the version number in the ``great_expectations/deployment_version`` file.
 
 5. Update the ``changelog.rst``: move all things under ``develop`` under a new heading with the new release number.
 
   * Verify that any changes to requirements are specifically identified in the changelog
+  * Double check the grouping / order of changes matches [BREAKING], [FEATURE], [ENHANCEMENT], [BUGFIX], [DOCS], [MAINTENANCE] and that all changes since the last release are mentioned or summarized in a bullet.
+  * Make sure to shout out community contributions in the changelog! E.g. after the change title add ``(thanks @<contributor_id>)``
 
 6. Submit this as a PR against ``develop``
 7. After successful checks, get it approved and merged.
 8. Update your local branches and switch to main: ``git fetch --all; git checkout main; git pull``.
 9. Merge the now-updated ``develop`` branch into ``main`` and trigger the release: ``git merge origin/develop; git push``
-10. Wait for all the build to complete. It should include 4 test jobs and a deploy job, which handles the actual publishing of code to pypi. You can watch the progress of these builds on Travis.
+10. Wait for all the build to complete. It should include 4 test jobs and a deploy job, which handles the actual publishing of code to pypi. You can watch the progress of these builds on Azure.
 11. Check `PyPI <https://pypi.org/project/great-expectations/#history>`__ for the new release
 12. Create an annotated git tag:
 
@@ -73,4 +76,4 @@ GE core team members use this checklist to ship releases.
 Beta Release Notes
 
 * To ship a beta release, follow the above checklist, but use the branch name ``v0.11.x`` as the equivalent of ``main`` and ``v0.11.x-develop`` as the equivalent of ``develop``
-* Ship the release using beta version numbers when updating the ``.travis.yml`` and when creating the annotated tag (e.g. `0.11.0b0`)
+* Ship the release using beta version numbers when updating the ``great_expectations/deployment_version`` and when creating the annotated tag (e.g. `0.11.0b0`)
