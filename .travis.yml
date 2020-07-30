@@ -133,7 +133,7 @@ jobs:
       after_success:
         - python3 --version
     - stage: deploy
-      python: 3.6
+      python: 3.7
       script:
         - git tag --annotate 0.11.9 -m "0.11.9" || echo "tag exists, skipping"
       deploy:
@@ -141,6 +141,8 @@ jobs:
         edge: true
         on:
           branch: main
+        install:
+          - pip install .
         distributions: sdist bdist_wheel
         skip_existing: true
         username: __token__
