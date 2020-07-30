@@ -216,13 +216,21 @@ stages:
             displayName: 'pytest'
 
       - job: mssql
-        variables:
-          python.version: '3.8'
-
         services:
           mssql: mssql
 
+        variables:
+          python.version: '3.8'
+
         steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
           - script: |
               pip install -r requirements.txt
               pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
@@ -244,8 +252,18 @@ stages:
 
     jobs:
       - job: deploy
+        variables:
+          python.version: '3.8'
 
         steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
           - script: |
               pip install twine
               git tag --annotate $(cat ./great_expectations/deployment_version) -m "$(cat ./great_expectations/deployment_version)\ || echo "tag exists, skipping"
