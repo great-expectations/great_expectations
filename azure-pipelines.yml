@@ -18,12 +18,12 @@ resources:
   - container: mysql
     image: mysql:8.0.20
     ports:
-    - 3306:3306
-    # DISABLE the ONLY_FULL_GROUP_BY mode to ensure we can produce full range of required statistics
-    options: "--sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
+      - 3306:3306
     env:
-     MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-     MYSQL_DATABASE: test_ci
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: test_ci
+    # DISABLE the ONLY_FULL_GROUP_BY mode to ensure we can produce full range of required statistics
+    options: " --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION "
   - container: mssql
     image: microsoft/mssql-server-linux
     env:
@@ -271,7 +271,10 @@ stages:
 
           - script: |
               pip install twine
+              pip install wheel
               echo "Creating tag: $(cat ./great_expectations/deployment_version)"
+              git config --global user.email "team@greatexpectations.io"
+              git config --global user.name "Great Expectations"
               git tag --annotate $(cat ./great_expectations/deployment_version) -m "$(cat ./great_expectations/deployment_version)" || echo "tag exists, skipping"
             displayName: 'Add new version tag'
 
