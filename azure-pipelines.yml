@@ -155,7 +155,7 @@ stages:
             displayName: 'Install pandas - $(pandas.version)'
 
           - script: |
-              sudo apt-get install pandoc
+              sudo apt-get install -y pandoc
               pip install $(GE_pytest_pip_opts)
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install  .
@@ -210,7 +210,7 @@ stages:
 
           - script: |
               pip install  pytest pytest-cov pytest-azurepipelines
-              pytest --mysql --no-postgres --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
       - job: mssql
@@ -228,7 +228,7 @@ stages:
 
           - script: |
               pip install  pytest pytest-cov pytest-azurepipelines
-              pytest --mssql --no-postgres --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
   - stage: deploy
