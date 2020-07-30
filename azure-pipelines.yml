@@ -234,6 +234,9 @@ stages:
             displayName: 'Update pip'
 
           - script: |
+              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -q "CREATE DATABASE test_ci;" -o create_db_output.txt
+
+          - script: |
               pip install -r requirements.txt
               pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
@@ -250,7 +253,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [required_tests, linting]
+    dependsOn: [required, lint]
 
     jobs:
       - job: deploy
