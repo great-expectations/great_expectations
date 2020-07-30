@@ -36,23 +36,23 @@ variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
 
 stages:
-  - stage: lint
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    jobs:
-      - job: lint
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: 3.7
-            displayName: 'Use Python 3.7'
-
-          - script: |
-              pip install  isort[requirements]==4.3.21 black==19.10b0
-              isort --check-only --skip docs/
-              black --check --exclude docs/ .
-
+#  - stage: lint
+#    pool:
+#      vmImage: 'ubuntu-latest'
+#
+#    jobs:
+#      - job: lint
+#        steps:
+#          - task: UsePythonVersion@0
+#            inputs:
+#              versionSpec: 3.7
+#            displayName: 'Use Python 3.7'
+#
+#          - script: |
+#              pip install  isort[requirements]==4.3.21 black==19.10b0
+#              isort --check-only --skip docs/
+#              black --check --exclude docs/ .
+#
 #  - stage: required
 #    pool:
 #      vmImage: 'ubuntu-latest'
@@ -294,5 +294,5 @@ stages:
 
           # Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
           - script: |
-              python -m twine upload -r "great-expectations/great-expectations" --config-file $(PYPIRC_PATH) dist/*
+              python -m twine upload -r great-expectations --config-file $(PYPIRC_PATH) dist/*
             displayName: 'Upload'
