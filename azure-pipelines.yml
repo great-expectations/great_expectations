@@ -60,7 +60,7 @@ stages:
     jobs:
       - job: pandas_versions
         variables:
-          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
+          GE_pytest_pip_opts: '--no-cache-dir --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
         strategy:
           matrix:
@@ -94,7 +94,7 @@ stages:
 
           - script: |
               pip install $(GE_pytest_pip_opts)
-              pip install --requirement requirements.txt
+              pip install --no-cache-dir --requirement requirements.txt
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install .
             displayName: 'Install dependencies'
@@ -122,7 +122,7 @@ stages:
           # mysql: mysql
 
         variables:
-          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
+          GE_pytest_pip_opts: '--no-cache-dir --requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
           GE_pytest_opts: ''
 
         strategy:
@@ -155,7 +155,7 @@ stages:
           - script: |
               echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
               mysql --host=127.0.0.1 --port=3306 --user=root < mysql_setup_script.sql
-              pip install --requirement requirements.txt
+              pip install --no-cache-dir --requirement requirements.txt
               pip install $(GE_pytest_pip_opts)
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install .
@@ -192,7 +192,7 @@ stages:
           - script: |
               echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
               mysql --host=127.0.0.1 --port=3306 --user=root < mysql_setup_script.sql
-              pip install --requirement requirements.txt
+              pip install --no-cache-dir --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
@@ -206,7 +206,7 @@ stages:
           mssql: mssql
         steps:
           - script: |
-              pip install --requirement requirements.txt
+              pip install --no-cache-dir --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
