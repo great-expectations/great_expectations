@@ -108,7 +108,7 @@ def import_library_module(module_name: str) -> Union[ModuleType, None]:
 
     try:
         module_obj = importlib.import_module(module_name)
-    except ModuleNotFoundError:
+    except ImportError:
         module_obj = None
 
     return module_obj

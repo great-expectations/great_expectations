@@ -34,7 +34,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
-                        "params": {"icon": ""},
+                        "params": {"icon": "", "markdown_status_icon": "❗"},
                         "styling": {
                             "params": {
                                 "icon": {
@@ -142,7 +142,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
-                        "params": {"icon": ""},
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
                         "styling": {
                             "params": {
                                 "icon": {
@@ -685,7 +685,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
         "content_block_type": "string_template",
         "string_template": {
             "template": "$icon",
-            "params": {"icon": ""},
+            "params": {"icon": "", "markdown_status_icon": "❗"},
             "styling": {
                 "params": {
                     "icon": {
@@ -703,7 +703,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
         "content_block_type": "string_template",
         "string_template": {
             "template": "$icon",
-            "params": {"icon": ""},
+            "params": {"icon": "", "markdown_status_icon": "✅"},
             "styling": {
                 "params": {
                     "icon": {
@@ -722,7 +722,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
         "content_block_type": "string_template",
         "string_template": {
             "template": "$icon",
-            "params": {"icon": ""},
+            "params": {"icon": "", "markdown_status_icon": "❌"},
             "styling": {
                 "params": {
                     "icon": {"tag": "i", "classes": ["fas", "fa-times", "text-danger"]}

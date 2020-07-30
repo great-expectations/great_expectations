@@ -81,7 +81,9 @@ try:
         "TIMESTAMP": mysqltypes.TIMESTAMP,
         "DATE": mysqltypes.DATE,
         "FLOAT": mysqltypes.FLOAT,
+        "DOUBLE": mysqltypes.DOUBLE,
         "BOOLEAN": mysqltypes.BOOLEAN,
+        "TINYINT": mysqltypes.TINYINT,
     }
 except ImportError:
     mysqltypes = None
@@ -615,6 +617,10 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_values_to_not_match_regex",
             # "expect_column_values_to_match_regex_list",
             # "expect_column_values_to_not_match_regex_list",
+            # "expect_column_values_to_match_like_pattern",
+            # "expect_column_values_to_not_match_like_pattern",
+            # "expect_column_values_to_match_like_pattern_list",
+            # "expect_column_values_to_not_match_like_pattern_list",
             "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",

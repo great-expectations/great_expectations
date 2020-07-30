@@ -1261,7 +1261,7 @@ def numeric_high_card_dataset(test_backend, numeric_high_card_dict):
             "norm_0_1": "NUMERIC",
         },
         "sqlite": {"norm_0_1": "FLOAT",},
-        "mysql": {"norm_0_1": "FLOAT",},
+        "mysql": {"norm_0_1": "DOUBLE",},
         "mssql": {"norm_0_1": "FLOAT",},
         "spark": {"norm_0_1": "FloatType",},
     }
@@ -1871,7 +1871,7 @@ def dataset_sample_data(test_backend):
             "naturals": "NUMERIC",
         },
         "sqlite": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
-        "mysql": {"nulls": "FLOAT", "naturals": "FLOAT"},
+        "mysql": {"nulls": "DOUBLE", "naturals": "DOUBLE"},
         "mssql": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
         "spark": {
             "infinities": "FloatType",

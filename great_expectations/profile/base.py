@@ -60,6 +60,7 @@ class ProfilerTypeMapping:
     ]
     FLOAT_TYPE_NAMES = [
         "FLOAT",
+        "DOUBLE",
         "FLOAT4",
         "FLOAT8",
         "DOUBLE_PRECISION",
@@ -79,7 +80,15 @@ class ProfilerTypeMapping:
         "string",
         "str",
     ]
-    BOOLEAN_TYPE_NAMES = ["BOOLEAN", "boolean", "BOOL", "BIT", "bool", "BooleanType"]
+    BOOLEAN_TYPE_NAMES = [
+        "BOOLEAN",
+        "boolean",
+        "BOOL",
+        "TINYINT",
+        "BIT",
+        "bool",
+        "BooleanType",
+    ]
     DATETIME_TYPE_NAMES = [
         "DATETIME",
         "DATE",
