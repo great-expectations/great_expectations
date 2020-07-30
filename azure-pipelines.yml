@@ -47,7 +47,7 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install isort[requirements]==4.3.21 black==19.10b0
+              pip install --no-cache-dir isort[requirements]==4.3.21 black==19.10b0
               isort --check-only --skip docs/
               black --check --exclude docs/ .
 
@@ -84,23 +84,23 @@ stages:
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
-          - bash: pip install pandas
+          - bash: pip install --no-cache-dir pandas
             condition: eq(variables['pandas.version'], 'latest')
             displayName: 'Install pandas latest'
 
-          - bash: pip install pandas==$(pandas.version)
+          - bash: pip install --no-cache-dir pandas==$(pandas.version)
             condition: ne(variables['pandas.version'], 'latest')
             displayName: 'Install pandas - $(pandas.version)'
 
           - script: |
-              pip install $(GE_pytest_pip_opts)
-              pip install --requirement requirements.txt
+              pip install --no-cache-dir $(GE_pytest_pip_opts)
+              pip install --no-cache-dir --requirement requirements.txt
               # Consider fragmenting *all* integration tests into separate folder and run
-              pip install .
+              pip install --no-cache-dir .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install --no-cache-dir pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
@@ -144,25 +144,25 @@ stages:
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
-          - bash: pip install pandas
+          - bash: pip install --no-cache-dir pandas
             condition: eq(variables['pandas.version'], 'latest')
             displayName: 'Install pandas latest'
 
-          - bash: pip install pandas==$(pandas.version)
+          - bash: pip install --no-cache-dir pandas==$(pandas.version)
             condition: ne(variables['pandas.version'], 'latest')
             displayName: 'Install pandas - $(pandas.version)'
 
           - script: |
               echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
               mysql --host=127.0.0.1 --port=3306 --user=root < mysql_setup_script.sql
-              pip install --requirement requirements.txt
-              pip install $(GE_pytest_pip_opts)
+              pip install --no-cache-dir --requirement requirements.txt
+              pip install --no-cache-dir $(GE_pytest_pip_opts)
               # Consider fragmenting *all* integration tests into separate folder and run
-              pip install .
+              pip install --no-cache-dir .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install --no-cache-dir pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
@@ -192,12 +192,12 @@ stages:
           - script: |
               echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
               mysql --host=127.0.0.1 --port=3306 --user=root < mysql_setup_script.sql
-              pip install --requirement requirements.txt
-              pip install .
+              pip install --no-cache-dir --requirement requirements.txt
+              pip install --no-cache-dir .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install --no-cache-dir pytest pytest-cov pytest-azurepipelines
               pytest --mysql --no-postgres --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
@@ -206,11 +206,11 @@ stages:
           mssql: mssql
         steps:
           - script: |
-              pip install --requirement requirements.txt
-              pip install .
+              pip install --no-cache-dir --requirement requirements.txt
+              pip install --no-cache-dir .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install --no-cache-dir pytest pytest-cov pytest-azurepipelines
               pytest --mssql --no-postgres --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'

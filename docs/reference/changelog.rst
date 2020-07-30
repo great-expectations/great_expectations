@@ -6,17 +6,26 @@ Changelog
 
 Develop
 -----------------
-* [ENHANCEMENT] Use green checkmark in Slack msgs instead of tada
-* [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) -- thanks @Dandandan
-* [ENHANCEMENT] Make Data Docs rendering of profiling results more flexible by deprecating the reliance on validation results having the specific run_name of "profiling"
+
+
+0.11.9
+-----------------
+* [FEATURE] New Dataset Support: Microsoft SQL Server
+* [FEATURE] Render expectation validation results to markdown
+* [FEATURE][ENHANCEMENT][BUGFIX] Support for Pattern Matching Expectations Using the SQL LIKE Operator
 * [FEATURE] Add --assume-yes/--yes/-y option to cli docs build command (thanks @feluelle)
 * [FEATURE] Add SSO and SSH key pair authentication for Snowflake (thanks @dmateusp)
 * [FEATURE] Add the Microsoft SQL Server database management system to the list of supported data sources
 * [FEATURE] Add pattern-matching expectations that use the Standard SQL "LIKE" operator: "expect_column_values_to_match_like_pattern", "expect_column_values_to_not_match_like_pattern", "expect_column_values_to_match_like_pattern_list", and "expect_column_values_to_not_match_like_pattern_list"
+* [ENHANCEMENT] Deprecate magic "profiling" run_name for Data Docs profiling results rendering
+* [ENHANCEMENT] Make Data Docs rendering of profiling results more flexible by deprecating the reliance on validation results having the specific run_name of "profiling"
 * [ENHANCEMENT] Use green checkmark in Slack msgs instead of tada
 * [ENHANCEMENT] log class instantiation errors for better debugging
+* [BUGFIX] usage_statistics decorator now handles 'dry_run' flag
+* [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) -- thanks @Dandandan
 * [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) (thanks @Dandandan)
 * [BUGFIX] Handle case when unexpected_count list element is str
+* [DOCS] Deploying Data Docs
 * [DOCS] New how-to guide: How to instantiate a Data Context on an EMR Spark cluster
 * [DOCS] Managed Spark DF Documentation #1729 (thanks @mgorsk1)
 * [DOCS] Typos and clarifications (thanks @dechoma @sbrugman @rexboyce)
