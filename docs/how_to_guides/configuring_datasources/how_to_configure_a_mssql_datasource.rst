@@ -15,7 +15,7 @@ This guide shows how to connect to a MSSQL Datasource. Great Expectations uses S
 Steps
 -----
 
-# **Install the required ODBC drivers**
+#. **Install the required ODBC drivers**
 
     Follow guides from Microsoft according to your operating system. We have included additional links to relevant resources for connecting to MSSQL databases in the Additional Information section below.
 
