@@ -32,6 +32,7 @@ config = {
         ],
         "redshift": ["psycopg2>=2.8"],
         "s3": ["boto3>=1.14"],
+        "snowflake": ["snowflake-sqlalchemy>=1.2"],
     },
     "packages": find_packages(exclude=["docs*", "tests*", "examples*"]),
     "entry_points": {
