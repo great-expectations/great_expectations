@@ -272,35 +272,38 @@ stages:
         variables:
           python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: UsePythonVersion@0
+                  inputs:
+                    versionSpec: '$(python.version)'
+                  displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+                - bash: python -m pip install --upgrade pip
+                  displayName: 'Update pip'
 
-          - script: |
-              pip install twine
-              pip install wheel
-              echo "Creating tag: $(cat ./great_expectations/deployment_version)"
-              git config --global user.email "team@greatexpectations.io"
-              git config --global user.name "Great Expectations"
-              git tag --annotate $(cat ./great_expectations/deployment_version) -m "$(cat ./great_expectations/deployment_version)" || echo "tag exists, skipping"
-            displayName: 'Add new version tag'
+                - script: |
+                    pip install twine
+                    pip install wheel
+                    echo "Creating tag: $(cat ./great_expectations/deployment_version)"
+                    git config --global user.email "team@greatexpectations.io"
+                    git config --global user.name "Great Expectations"
+                    git tag --annotate $(cat ./great_expectations/deployment_version) -m "$(cat ./great_expectations/deployment_version)" || echo "tag exists, skipping"
+                  displayName: 'Add new version tag'
 
-          # Build the python distribution from source
-          - script: |
-              python setup.py sdist
-              python setup.py bdist_wheel
-            displayName: 'Build distribution'
+                # Build the python distribution from source
+                - script: |
+                    python setup.py sdist
+                    python setup.py bdist_wheel
+                  displayName: 'Build distribution'
 
-          - task: TwineAuthenticate@1
-            inputs:
-              pythonUploadServiceConnection: pypi
+                - task: TwineAuthenticate@1
+                  inputs:
+                    pythonUploadServiceConnection: pypi
 
-          # Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
-          - script: |
-              python -m twine upload -r great-expectations --config-file $(PYPIRC_PATH) dist/*
-            displayName: 'Upload'
+                # Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
+                - script: |
+                    python -m twine upload -r great-expectations --config-file $(PYPIRC_PATH) dist/*
+                  displayName: 'Upload'
