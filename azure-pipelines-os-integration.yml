@@ -9,7 +9,7 @@ stages:
   - stage: os_integration
     variables:
       python.version: '3.x'
-      GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
+      GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
       GE_pytest_opts: '--no-sqlalchemy --no-spark'
 
     jobs:
