@@ -184,7 +184,8 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: []
+#    # condition: eq(variables['Build.Reason'], 'Schedule')
+#    dependsOn: ['required']
 
     jobs:
       - job: mysql
@@ -202,6 +203,14 @@ stages:
 
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
+
+          - script: |
+              printf 'Waiting for MySQL database to accept connections'
+              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+                printf '.'
+                sleep 1;
+              done;
+            displayName: Wait for database to initialise
 
           - script: |
               echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
@@ -259,7 +268,7 @@ stages:
     dependsOn: [required, lint]
 
     jobs:
-      - job: deploy
+      - deployment: deploy
         variables:
           python.version: '3.8'
 
@@ -288,7 +297,6 @@ stages:
             displayName: 'Build distribution'
 
           - task: TwineAuthenticate@1
-            condition: succeeded()
             inputs:
               pythonUploadServiceConnection: pypi
 
