@@ -68,11 +68,12 @@ def test_expectation_configuration_equivalence(
     config1, config2, config3, config4, config5
 ):
     """Equivalence should depend only on properties that affect the result of the expectation."""
-    assert config1.isEquivalentTo(config2)  # no difference
-    assert config2.isEquivalentTo(config1)
-    assert config1.isEquivalentTo(config3)  # different meta
-    assert config1.isEquivalentTo(config4)  # different result format
-    assert not config1.isEquivalentTo(config5)  # different value_set
+    assert config1.isEquivalentTo(config2, match_type="runtime")  # no difference
+    assert config2.isEquivalentTo(config1, match_type="runtime")
+    assert config1.isEquivalentTo(config3, match_type="runtime")  # different meta
+    assert config1.isEquivalentTo(config4, match_type="success")  # different result format
+    assert not config1.isEquivalentTo(config5, match_type="success")  # different value_set
+    assert config1.isEquivalentTo(config5, match_type="domain")  # different result format
 
 
 def test_expectation_configuration_get_evaluation_parameter_dependencies():
@@ -117,3 +118,15 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies():
             }
         ]
     } == dependencies
+
+def test_expectation_configuration_patch_add(
+         config1, config2, config3, config4, config5
+):
+    assert config5.patch("add", "/value_set/-", 3).isEquivalentTo(config4)
+
+def test_expectation_configuration_patch_replace(
+         config1, config2, config3, config4, config5
+):
+    assert config5.patch("replace", "/value_set", [1, 2, 3]).isEquivalentTo(config4)
+
+

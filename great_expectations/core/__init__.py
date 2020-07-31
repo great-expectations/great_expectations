@@ -778,18 +778,17 @@ class ExpectationConfiguration(DictDot):
             path: str,
             value: Any
     ) -> 'ExpectationConfiguration':
-        print(self.get_runtime_kwargs().keys())
         if op not in ['add', 'replace']:
-            raise ValueError("Op must be either 'add' or 'replace'")
+            raise ValueError("Op must be either 'add', 'replace'")
 
-        if path.split('.', 1)[0] not in self.get_runtime_kwargs().keys():
+        if path.split('/')[1] not in self.get_runtime_kwargs().keys():
             raise ValueError("Path not available in kwargs")
 
         # TODO: Call validate_kwargs when implemented
-
+        foo = path
         patch = jsonpatch.JsonPatch([
             {'op': op,
-             'path': '/' + path.replace('.', '/'), #TODO: design review for this . / replace notation
+             'path': foo,
              'value': value}
         ])
 
