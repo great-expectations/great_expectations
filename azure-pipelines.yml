@@ -271,7 +271,7 @@ stages:
       - deployment: deploy
         variables:
           python.version: '3.8'
-
+        environment: 'great_expectations'
         strategy:
           runOnce:
             deploy:
