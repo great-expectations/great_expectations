@@ -4,6 +4,7 @@ import logging
 import warnings
 from collections import namedtuple
 from copy import deepcopy
+from operator import itemgetter
 from typing import Any, List
 
 import jsonpatch
@@ -1225,6 +1226,13 @@ class ExpectationSuite(object):
                 match_indexes.append(idx)
 
         return match_indexes
+
+    def find_expectations(self,
+              expectation_configuration: ExpectationConfiguration,
+              match_type: str = "domain"
+              ) -> List[ExpectationConfiguration]:
+        found_expectation_indexes = self.find_expectation_indexes(expectation_configuration, match_type)
+        return itemgetter(found_expectation_indexes)(self.expectations)
 
     def patch(
             self,

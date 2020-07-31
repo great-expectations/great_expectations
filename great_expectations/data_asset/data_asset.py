@@ -9,6 +9,7 @@ import warnings
 from collections import Counter, defaultdict, namedtuple
 from collections.abc import Hashable
 from functools import wraps
+from typing import List
 
 from dateutil.parser import ParserError, parse
 from marshmallow import ValidationError
@@ -389,28 +390,12 @@ class DataAsset(object):
 
         self._expectation_suite.append_expectation(expectation_config)
 
-    def _copy_and_clean_up_expectations_from_indexes(
-        self,
-        match_indexes,
-        discard_result_format_kwargs=True,
-        discard_include_config_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
-    ):
-        warnings.warn(
-            "_copy_and_clean_up_expectations_from_indexes is deprecated, and will be removed in a future release. ",
-            DeprecationWarning,
-        )
-        """This method is a thin wrapper for ExpectationSuite._copy_and_clean_up_expectations_from_indexes"""
-        return self._expectation_suite._copy_and_clean_up_expectations_from_indexes(
-            match_indexes=match_indexes,
-            discard_result_format_kwargs=discard_result_format_kwargs,
-            discard_include_config_kwargs=discard_include_config_kwargs,
-            discard_catch_exceptions_kwargs=discard_catch_exceptions_kwargs,
-        )
 
     def find_expectation_indexes(
-        self, expectation_type=None, column=None, expectation_kwargs=None
-    ):
+            self,
+            expectation_configuration: ExpectationConfiguration,
+            match_type: str = "domain"
+    ) -> List[int]:
         warnings.warn(
             "find_expectation_indexes is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
@@ -418,20 +403,14 @@ class DataAsset(object):
         )
         """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
         return self._expectation_suite.find_expectation_indexes(
-            expectation_type=expectation_type,
-            column=column,
-            expectation_kwargs=expectation_kwargs,
+            expectation_configuration=expectation_configuration,
+            match_type=match_type
         )
 
-    def find_expectations(
-        self,
-        expectation_type=None,
-        column=None,
-        expectation_kwargs=None,
-        discard_result_format_kwargs=True,
-        discard_include_config_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
-    ):
+    def find_expectations(self,
+              expectation_configuration: ExpectationConfiguration,
+              match_type: str = "domain"
+              ) -> List[ExpectationConfiguration]:
         warnings.warn(
             "find_expectations is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
@@ -439,12 +418,8 @@ class DataAsset(object):
         )
         """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
         return self._expectation_suite.find_expectations(
-            expectation_type=expectation_type,
-            column=column,
-            expectation_kwargs=expectation_kwargs,
-            discard_result_format_kwargs=discard_result_format_kwargs,
-            discard_include_config_kwargs=discard_include_config_kwargs,
-            discard_catch_exceptions_kwargs=discard_catch_exceptions_kwargs,
+            expectation_configuration=expectation_configuration,
+            match_type=match_type
         )
 
     def remove_expectation(
