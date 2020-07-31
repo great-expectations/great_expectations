@@ -184,7 +184,7 @@ stages:
   - stage: os_integration
     variables:
       GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
-      GE_pytest_opts: ''
+      GE_pytest_opts: '--no-sqlalchemy --no-spark'
 
     dependsOn: []
 
@@ -193,9 +193,6 @@ stages:
       - job: Windows
         pool:
           vmImage: 'windows-latest'
-
-        services:
-          postgres: postgres
 
         steps:
           - task: UsePythonVersion@0
@@ -220,9 +217,6 @@ stages:
       - job: macOS
         pool:
           vmImage: 'macOS-latest'
-
-        services:
-          postgres: postgres
 
         steps:
           - task: UsePythonVersion@0
