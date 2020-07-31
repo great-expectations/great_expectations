@@ -222,7 +222,7 @@ What's the best way to get in touch with the Great Expectations team?
 
 If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public [Slack channel](https://greatexpectations.io/slack)
 
-If you'd like hands-on assistance setting up Great Expectations, establishing a healthy practice of data testing, or adding functionality to Great Expectations, please see options for consulting help [here](https://greatexpectations.io/consulting/).
+If you'd like hands-on assistance setting up Great Expectations, establishing a healthy practice of data testing, or adding functionality to Great Expectations, please see options for consulting help [here](http://superconductive.com/).
 
 Can I contribute to the library?
 --------------------------------------------------------------------------------
