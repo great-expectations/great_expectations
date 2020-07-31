@@ -34,6 +34,7 @@ resources:
 
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 stages:
   - stage: lint
@@ -144,11 +145,6 @@ stages:
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
-          - script: |
-              sudo apt-get install -y pandoc
-              pip install pypandoc
-            displayName: 'Install pandoc'
-
           - bash: pip install  pandas
             condition: eq(variables['pandas.version'], 'latest')
             displayName: 'Install pandas latest'
@@ -181,24 +177,68 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: os_integration
+    variables:
+      GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
+      GE_pytest_opts: ''
     jobs:
+
       - job: Windows
         pool:
-          vmImage: 'vs2017-win2016'
+          vmImage: 'windows-latest'
+
+        services:
+          postgres: postgres
+
         steps:
-          - script: echo hello from Windows
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              pip install --requirement requirements.txt
+              pip install $(GE_pytest_pip_opts)
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest $(GE_pytest_opts)
+            displayName: 'pytest'
+
       - job: macOS
         pool:
-          vmImage: 'macOS-10.14'
+          vmImage: 'macOS-latest'
+
+        services:
+          postgres: postgres
+
         steps:
-          - script: echo hello from macOS
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              pip install --requirement requirements.txt
+              pip install $(GE_pytest_pip_opts)
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest $(GE_pytest_opts)
+            displayName: 'pytest'
 
   - stage: db_integration
     pool:
       vmImage: 'ubuntu-latest'
-
-#    # condition: eq(variables['Build.Reason'], 'Schedule')
-#    dependsOn: ['required']
 
     jobs:
       - job: mysql
