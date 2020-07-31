@@ -776,9 +776,13 @@ class ExpectationConfiguration(DictDot):
         self.success_on_last_run = success_on_last_run
 
     def patch(
-        self, op: str, path: str, value: str  # what should this be?
-    ) -> "ExpectationConfiguration":  # what should be returned?
-        if op not in ["add", "replace"]:
+            self,
+            op: str,
+            path: str,
+            value: Any
+    ) -> 'ExpectationConfiguration':
+        print(self.get_runtime_kwargs().keys())
+        if op not in ['add', 'replace']:
             raise ValueError("Op must be either 'add' or 'replace'")
 
         if path.split(".") not in self.kwargs():
@@ -819,14 +823,20 @@ class ExpectationConfiguration(DictDot):
 
     def get_success_kwargs(self):
         # TODO: add default values if kwarg not present
-        return {
+        domain_kwargs = self.get_domain_kwargs()
+        success_kwargs = {
             key: self.kwargs.get(key)
             for key in self.kwarg_lookup_dict[self.expectation_type]["success_kwargs"]
         }
+        success_kwargs.update(domain_kwargs)
+        return success_kwargs
 
     def get_runtime_kwargs(self):
         # TODO: add default values if kwarg not present
-        return {key: self.kwargs.get(key) for key in self.runtime_kwargs}
+        success_kwargs = self.get_success_kwargs()
+        runtime_kwargs = {key: self.kwargs.get(key) for key in self.runtime_kwargs}
+        runtime_kwargs.update(success_kwargs)
+        return runtime_kwargs
 
     def applies_to_same_domain(self, other_expectation_configuration):
         # "row_condition", "condition_parser"
