@@ -4,7 +4,9 @@ import logging
 import warnings
 from collections import namedtuple
 from copy import deepcopy
+from typing import Any, List
 
+import jsonpatch
 from dateutil.parser import ParserError as DateUtilParserError
 from dateutil.parser import parse
 from IPython import get_ipython
@@ -734,23 +736,24 @@ class ExpectationConfiguration(DictDot):
             self,
             op: str,
             path: str,
-            value: str # what should this be?
-    ) -> ExpectationConfiguration: #what should be returned?
+            value: Any
+    ) -> 'ExpectationConfiguration':
         if op not in ['add', 'replace']:
             raise ValueError("Op must be either 'add' or 'replace'")
 
-        if path.split('.') not in self.kwargs():
+        if path.split('.', 1)[0] not in self.get_runtime_kwargs().keys():
             raise ValueError("Path not available in kwargs")
 
         # TODO: Call validate_kwargs when implemented
 
-        patch = jsonpatch.JsonPatch([ # is this the library you want to use for patching?
+        patch = jsonpatch.JsonPatch([
             {'op': op,
              'path': '/' + path.replace('.', '/'), #TODO: design review for this . / replace notation
              'value': value}
         ])
-        # Should we return the same thing that we return when creating an expectation?
-        return patch.apply(self.kwargs, in_place=True) #should this be modified in place?
+
+        patch.apply(self.kwargs, in_place=True)
+        return self
 
 
 
@@ -1143,14 +1146,24 @@ class ExpectationSuite(object):
             No match
 
         """
-        index = self.find_expectation_index(expectation_configuration, match_type)
-        return self.expectations.pop(index)
+        found_expectation_indexes = self.find_expectation_indexes(expectation_configuration, match_type)
+        if len(found_expectation_indexes) < 1:
+            raise ValueError("No matching expectation was found.")
 
-    def find_expectation_index(
+        elif len(found_expectation_indexes) > 1:
+            removed_expectations = []
+            for index in sorted(found_expectation_indexes, reverse=True):
+                removed_expectations.append(self.expectations.pop(index))
+            return removed_expectations
+
+        else:
+            return self.expectations.pop(found_expectation_indexes)
+
+    def find_expectation_indexes(
             self,
             expectation_configuration: ExpectationConfiguration,
             match_type: str="domain"
-    ) -> int:
+    ) -> List[int]:
         """
 
         Args:
@@ -1171,14 +1184,8 @@ class ExpectationSuite(object):
         for idx, expectation in enumerate(self.expectations):
             if expectation.isEquivalentTo(expectation_configuration, match_type):
                 match_indexes.append(idx)
-        if len(match_indexes) > 1:
-            raise ValueError(
-                "Multiple expectations matched arguments. No expectations removed."
-        # elif len(match_indexes) == 0:
-        #     raise ValueError("No matching expectation found.")
-            )
-        else:
-            return match_index[0]
+
+        return match_indexes
 
     def patch(
             self,
@@ -1186,14 +1193,41 @@ class ExpectationSuite(object):
             match_kwargs: dict,
             op: str,
             path: str,
-            value: str, # what should this be?
+            value: Any,
             match_type: str
             ) -> ExpectationConfiguration:
 
-        expectation_index = self.find_expectation_index(ExpectationConfiguration(expectation_type, match_kwargs), match_type)
-        self.expectations[expectation_index].patch(op, path, value)
+        found_expectation_indexes = self.find_expectation_indexes(ExpectationConfiguration(expectation_type, match_kwargs), match_type)
 
-        return self.expectations[expectation_index]
+        if len(found_expectation_indexes) < 1:
+            raise ValueError("No matching expectation was found.")
+        elif len(found_expectation_indexes) > 1:
+            raise ValueError("More than one matching expectation was found. Please be more specific with your search "
+                             "criteria")
+
+        self.expectations[found_expectation_indexes[0]].patch(op, path, value)
+        return self.expectations[found_expectation_indexes]
+
+    def add_or_replace(
+            self,
+            expectation_configuration: ExpectationConfiguration,
+            match_type: str="domain"
+            ) -> ExpectationConfiguration:
+        found_expectation_indexes = self.find_expectation_indexes(expectation_configuration, match_type)
+
+        if len(found_expectation_indexes) > 1:
+            raise ValueError("More than one matching expectation was found. Please be more specific with your search "
+                             "criteria")
+        elif len(found_expectation_indexes) == 1:
+            # Currently, we completely replace the expectation_configuration, but we could potentially use patch
+            # to update instead. We need to consider how to handle meta in that situation.
+            # patch = jsonpatch.make_patch(self.expectations[found_expectation_index].kwargs, expectation_configuration.kwargs)
+            # patch.apply(self.expectations[found_expectation_index].kwargs, in_place=True)
+            self.expectations[found_expectation_index[0]] = expectation_configuration
+        else:
+            self.append_expectation(expectation_configuration)
+
+        return expectation_configuration
 
 class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()

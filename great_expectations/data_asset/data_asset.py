@@ -283,15 +283,15 @@ class DataAsset(object):
                     pass
                 else:
                     # Append the expectation to the config.
-                    self._append_expectation(expectation_config)
+                    stored_config = self._expectation_suite.add_or_replace(expectation_config)
 
                 if include_config:
-                    return_obj.expectation_config = copy.deepcopy(expectation_config)
+                    return_obj.expectation_config = copy.deepcopy(stored_config)
 
                 # If there was no interactive evaluation, success will not have been computed.
                 if return_obj.success is not None:
                     # Add a "success" object to the config
-                    expectation_config.success_on_last_run = return_obj.success
+                    stored_config.success_on_last_run = return_obj.success
 
                 if catch_exceptions:
                     return_obj.exception_info = {
@@ -380,83 +380,14 @@ class DataAsset(object):
         }
 
     def append_expectation(self, expectation_config):
-        """This method is a thin wrapper for ExpectationSuite.append_expectation"""
-        self._expectation_suite.append_expectation(expectation_config)
-
-    def _append_expectation(self, expectation_config):
-        """This method
-
-        This method should become a thin wrapper for ExpectationSuite.append_expectation
-
-        Included for backwards compatibility.
-        """
-        """Appends an expectation to `DataAsset._expectation_suite` and drops existing expectations of the same type.
-
-           If `expectation_config` is a column expectation, this drops existing expectations that are specific to \
-           that column and only if it is the same expectation type as `expectation_config`. Otherwise, if it's not a \
-           column expectation, this drops existing expectations of the same type as `expectation config`. \
-           After expectations of the same type are dropped, `expectation_config` is appended to \
-           `DataAsset._expectation_suite`.
-
-           Args:
-               expectation_config (json): \
-                   The JSON-serializable expectation to be added to the DataAsset expectations in `_expectation_suite`.
-
-           Notes:
-               May raise future errors once json-serializable tests are implemented to check for correct arg formatting
-
-        """
-        expectation_type = expectation_config.expectation_type
-
-        # Test to ensure the new expectation is serializable.
-        # FIXME: If it's not, are we sure we want to raise an error?
-        # FIXME: Should we allow users to override the error?
-        # FIXME: Should we try to convert the object using something like recursively_convert_to_json_serializable?
-        # json.dumps(expectation_config)
-
-        # Drop existing expectations with the same expectation_type.
-        # For column_expectations, _append_expectation should only replace expectations
-        # where the expectation_type AND the column match
-        # !!! This is good default behavior, but
-        # !!!    it needs to be documented, and
-        # !!!    we need to provide syntax to override it.
-
-        if "column" in expectation_config.kwargs:
-            column = expectation_config.kwargs["column"]
-
-            self._expectation_suite.expectations = [
-                f
-                for f in filter(
-                    lambda exp: (exp.expectation_type != expectation_type)
-                    or ("column" in exp.kwargs and exp.kwargs["column"] != column),
-                    self._expectation_suite.expectations,
-                )
-            ]
-        else:
-            self._expectation_suite.expectations = [
-                f
-                for f in filter(
-                    lambda exp: exp.expectation_type != expectation_type,
-                    self._expectation_suite.expectations,
-                )
-            ]
-
-        self._expectation_suite.append_expectation(expectation_config)
-
-    def _copy_and_clean_up_expectation(
-        self,
-        expectation,
-        discard_result_format_kwargs=True,
-        discard_include_config_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
-    ):
-        """This method is a thin wrapper for ExpectationSuite._copy_and_clean_up_expectation"""
-        return self._expectation_suite._copy_and_clean_up_expectation(
-            expectation=expectation,
-            discard_result_format_kwargs=discard_result_format_kwargs,
-            discard_include_config_kwargs=discard_include_config_kwargs,
-            discard_catch_exceptions_kwargs=discard_catch_exceptions_kwargs,
+        warnings.warn(
+            "append_expectation is deprecated, and will be removed in a future release. "
+            + "Please use ExpectationSuite.add_or_replace instead.",
+            DeprecationWarning,
         )
+        """This method is a thin wrapper for ExpectationSuite.append_expectation"""
+
+        self._expectation_suite.append_expectation(expectation_config)
 
     def _copy_and_clean_up_expectations_from_indexes(
         self,
@@ -465,6 +396,10 @@ class DataAsset(object):
         discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
     ):
+        warnings.warn(
+            "_copy_and_clean_up_expectations_from_indexes is deprecated, and will be removed in a future release. ",
+            DeprecationWarning,
+        )
         """This method is a thin wrapper for ExpectationSuite._copy_and_clean_up_expectations_from_indexes"""
         return self._expectation_suite._copy_and_clean_up_expectations_from_indexes(
             match_indexes=match_indexes,
@@ -476,6 +411,11 @@ class DataAsset(object):
     def find_expectation_indexes(
         self, expectation_type=None, column=None, expectation_kwargs=None
     ):
+        warnings.warn(
+            "find_expectation_indexes is deprecated, and will be removed in a future release. "
+            + "Please use ExpectationSuite.find_expectation_indexes instead.",
+            DeprecationWarning,
+        )
         """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
         return self._expectation_suite.find_expectation_indexes(
             expectation_type=expectation_type,
@@ -492,6 +432,11 @@ class DataAsset(object):
         discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
     ):
+        warnings.warn(
+            "find_expectations is deprecated, and will be removed in a future release. "
+            + "Please use ExpectationSuite.find_expectation_indexes instead.",
+            DeprecationWarning,
+        )
         """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
         return self._expectation_suite.find_expectations(
             expectation_type=expectation_type,
@@ -503,20 +448,19 @@ class DataAsset(object):
         )
 
     def remove_expectation(
-        self,
-        expectation_type=None,
-        column=None,
-        expectation_kwargs=None,
-        remove_multiple_matches=False,
-        dry_run=False,
-    ):
+            self,
+            expectation_configuration: ExpectationConfiguration,
+            match_type: str = "domain"
+    ) -> ExpectationConfiguration:
+        warnings.warn(
+            "DataAsset.remove_expectations is deprecated, and will be removed in a future release. "
+            + "Please use ExpectationSuite.remove_expectation instead.",
+            DeprecationWarning,
+        )
         """This method is a thin wrapper for ExpectationSuite.remove()"""
         return self._expectation_suite.remove_expectation(
-            expectation_type=expectation_type,
-            column=column,
-            expectation_kwargs=expectation_kwargs,
-            remove_multiple_matches=remove_multiple_matches,
-            dry_run=dry_run,
+            expectation_configuration=expectation_configuration,
+            match_type=match_type
         )
 
     def set_config_value(self, key, value):
