@@ -12,9 +12,9 @@ import pytest
 from dateutil.parser import parse
 
 from great_expectations.core import (
+    ExpectationConfigurationSchema,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
-    ExpectationConfigurationSchema,
 )
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.profile import ColumnsExistProfiler

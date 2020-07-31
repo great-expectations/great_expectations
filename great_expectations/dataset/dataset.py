@@ -82,7 +82,15 @@ class MetaDataset(DataAsset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(self, column, result_format=None, row_condition=None, condition_parser=None, *args, **kwargs):
+        def inner_wrapper(
+            self,
+            column,
+            result_format=None,
+            row_condition=None,
+            condition_parser=None,
+            *args,
+            **kwargs
+        ):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]

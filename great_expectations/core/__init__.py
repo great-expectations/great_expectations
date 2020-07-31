@@ -517,7 +517,7 @@ class ExpectationConfiguration(DictDot):
             "expect_column_pair_values_to_be_equal": "both_values_are_missing",
             "expect_column_pair_values_A_to_be_greater_than_B": "both_values_are_missing",
             "expect_column_pair_values_to_be_in_set": "both_values_are_missing",
-            "expect_multicolumn_values_to_be_unique": "all_values_are_missing"
+            "expect_multicolumn_values_to_be_unique": "all_values_are_missing",
         },
         "or_equal": None,
     }
@@ -730,11 +730,21 @@ class ExpectationConfiguration(DictDot):
             ],
         },
         "expect_column_pair_values_to_be_equal": {
-            "domain_kwargs": ["column_A", "column_B", "row_condition", "condition_parser"],
+            "domain_kwargs": [
+                "column_A",
+                "column_B",
+                "row_condition",
+                "condition_parser",
+            ],
             "success_kwargs": ["ignore_row_if"],
         },
         "expect_column_pair_values_A_to_be_greater_than_B": {
-            "domain_kwargs": ["column_A", "column_B", "row_condition", "condition_parser"],
+            "domain_kwargs": [
+                "column_A",
+                "column_B",
+                "row_condition",
+                "condition_parser",
+            ],
             "success_kwargs": [
                 "or_equal",
                 "parse_strings_as_datetimes",
@@ -743,7 +753,12 @@ class ExpectationConfiguration(DictDot):
             ],
         },
         "expect_column_pair_values_to_be_in_set": {
-            "domain_kwargs": ["column_A", "column_B", "row_condition", "condition_parser"],
+            "domain_kwargs": [
+                "column_A",
+                "column_B",
+                "row_condition",
+                "condition_parser",
+            ],
             "success_kwargs": ["value_pairs_set", "ignore_row_if",],
         },
         "expect_multicolumn_values_to_be_unique": {
@@ -772,30 +787,30 @@ class ExpectationConfiguration(DictDot):
         self.meta = meta
         self.success_on_last_run = success_on_last_run
 
-    def patch(
-            self,
-            op: str,
-            path: str,
-            value: Any
-    ) -> 'ExpectationConfiguration':
-        if op not in ['add', 'replace']:
+    def patch(self, op: str, path: str, value: Any) -> "ExpectationConfiguration":
+        if op not in ["add", "replace"]:
             raise ValueError("Op must be either 'add' or 'replace'")
 
-        if path.split('.', 1)[0] not in self.get_runtime_kwargs().keys():
+        if path.split(".", 1)[0] not in self.get_runtime_kwargs().keys():
             raise ValueError("Path not available in kwargs")
 
         # TODO: Call validate_kwargs when implemented
 
-        patch = jsonpatch.JsonPatch([
-            {'op': op,
-             'path': '/' + path.replace('.', '/'), #TODO: design review for this . / replace notation
-             'value': value}
-        ])
+        patch = jsonpatch.JsonPatch(
+            [
+                {
+                    "op": op,
+                    "path": "/"
+                    + path.replace(
+                        ".", "/"
+                    ),  # TODO: design review for this . / replace notation
+                    "value": value,
+                }
+            ]
+        )
 
         patch.apply(self.kwargs, in_place=True)
         return self
-
-
 
     @property
     def expectation_type(self):
@@ -1186,7 +1201,9 @@ class ExpectationSuite(object):
             No match
 
         """
-        found_expectation_indexes = self.find_expectation_indexes(expectation_configuration, match_type)
+        found_expectation_indexes = self.find_expectation_indexes(
+            expectation_configuration, match_type
+        )
         if len(found_expectation_indexes) < 1:
             raise ValueError("No matching expectation was found.")
 
@@ -1200,9 +1217,9 @@ class ExpectationSuite(object):
             return self.expectations.pop(found_expectation_indexes)
 
     def find_expectation_indexes(
-            self,
-            expectation_configuration: ExpectationConfiguration,
-            match_type: str="domain"
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        match_type: str = "domain",
     ) -> List[int]:
         """
 
@@ -1227,44 +1244,55 @@ class ExpectationSuite(object):
 
         return match_indexes
 
-    def find_expectations(self,
-              expectation_configuration: ExpectationConfiguration,
-              match_type: str = "domain"
-              ) -> List[ExpectationConfiguration]:
-        found_expectation_indexes = self.find_expectation_indexes(expectation_configuration, match_type)
+    def find_expectations(
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        match_type: str = "domain",
+    ) -> List[ExpectationConfiguration]:
+        found_expectation_indexes = self.find_expectation_indexes(
+            expectation_configuration, match_type
+        )
         return itemgetter(found_expectation_indexes)(self.expectations)
 
     def patch(
-            self,
-            expectation_type: str,
-            match_kwargs: dict,
-            op: str,
-            path: str,
-            value: Any,
-            match_type: str
-            ) -> ExpectationConfiguration:
+        self,
+        expectation_type: str,
+        match_kwargs: dict,
+        op: str,
+        path: str,
+        value: Any,
+        match_type: str,
+    ) -> ExpectationConfiguration:
 
-        found_expectation_indexes = self.find_expectation_indexes(ExpectationConfiguration(expectation_type, match_kwargs), match_type)
+        found_expectation_indexes = self.find_expectation_indexes(
+            ExpectationConfiguration(expectation_type, match_kwargs), match_type
+        )
 
         if len(found_expectation_indexes) < 1:
             raise ValueError("No matching expectation was found.")
         elif len(found_expectation_indexes) > 1:
-            raise ValueError("More than one matching expectation was found. Please be more specific with your search "
-                             "criteria")
+            raise ValueError(
+                "More than one matching expectation was found. Please be more specific with your search "
+                "criteria"
+            )
 
         self.expectations[found_expectation_indexes[0]].patch(op, path, value)
         return self.expectations[found_expectation_indexes]
 
     def add_or_replace(
-            self,
-            expectation_configuration: ExpectationConfiguration,
-            match_type: str="domain"
-            ) -> ExpectationConfiguration:
-        found_expectation_indexes = self.find_expectation_indexes(expectation_configuration, match_type)
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        match_type: str = "domain",
+    ) -> ExpectationConfiguration:
+        found_expectation_indexes = self.find_expectation_indexes(
+            expectation_configuration, match_type
+        )
 
         if len(found_expectation_indexes) > 1:
-            raise ValueError("More than one matching expectation was found. Please be more specific with your search "
-                             "criteria")
+            raise ValueError(
+                "More than one matching expectation was found. Please be more specific with your search "
+                "criteria"
+            )
         elif len(found_expectation_indexes) == 1:
             # Currently, we completely replace the expectation_configuration, but we could potentially use patch
             # to update instead. We need to consider how to handle meta in that situation.
@@ -1385,16 +1413,26 @@ class ExpectationValidationResult(object):
             # Delegate comparison to the other instance's __ne__.
             return NotImplemented
         try:
-            return any((
-                self.success != other.success,
-                (self.expectation_config is None and other.expectation_config is not None) or
-                (self.expectation_config is not None and not self.expectation_config.isEquivalentTo(
-                    other.expectation_config)),
-                # TODO should it be wrapped in all()/any()? Since it is the only difference to __eq__:
-                (self.result is None and other.result is not None) or (self.result != other.result),
-                self.meta != other.meta,
-                self.exception_info != other.exception_info
-            ))
+            return any(
+                (
+                    self.success != other.success,
+                    (
+                        self.expectation_config is None
+                        and other.expectation_config is not None
+                    )
+                    or (
+                        self.expectation_config is not None
+                        and not self.expectation_config.isEquivalentTo(
+                            other.expectation_config
+                        )
+                    ),
+                    # TODO should it be wrapped in all()/any()? Since it is the only difference to __eq__:
+                    (self.result is None and other.result is not None)
+                    or (self.result != other.result),
+                    self.meta != other.meta,
+                    self.exception_info != other.exception_info,
+                )
+            )
         except (ValueError, TypeError):
             # if invalid comparisons are attempted, the objects are not equal.
             return True

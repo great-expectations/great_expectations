@@ -54,8 +54,16 @@ class MetaPandasDataset(Dataset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(self, column, mostly=None,
-                          result_format=None, row_condition=None, condition_parser="pandas", *args, **kwargs):
+        def inner_wrapper(
+            self,
+            column,
+            mostly=None,
+            result_format=None,
+            row_condition=None,
+            condition_parser="pandas",
+            *args,
+            **kwargs
+        ):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -63,7 +71,9 @@ class MetaPandasDataset(Dataset):
             result_format = parse_result_format(result_format)
 
             if row_condition:
-                self = self.query(row_condition, parser=condition_parser).reset_index(drop=True)
+                self = self.query(row_condition, parser=condition_parser).reset_index(
+                    drop=True
+                )
 
             series = self[column]
             if func.__name__ in [
@@ -156,8 +166,18 @@ class MetaPandasDataset(Dataset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(self, column_A, column_B, mostly=None, ignore_row_if="both_values_are_missing",
-                          result_format=None, row_condition=None, condition_parser="pandas", *args, **kwargs):
+        def inner_wrapper(
+            self,
+            column_A,
+            column_B,
+            mostly=None,
+            ignore_row_if="both_values_are_missing",
+            result_format=None,
+            row_condition=None,
+            condition_parser="pandas",
+            *args,
+            **kwargs
+        ):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -251,8 +271,17 @@ class MetaPandasDataset(Dataset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(self, column_list, mostly=None, ignore_row_if="all_values_are_missing",
-                          result_format=None, row_condition=None, condition_parser="pandas", *args, **kwargs):
+        def inner_wrapper(
+            self,
+            column_list,
+            mostly=None,
+            ignore_row_if="all_values_are_missing",
+            result_format=None,
+            row_condition=None,
+            condition_parser="pandas",
+            *args,
+            **kwargs
+        ):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -489,46 +518,64 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_unique(self, column,
-                                          mostly=None,
-                                          result_format=None,
-                                          row_condition=None, condition_parser="pandas",
-                                          include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_be_unique(
+        self,
+        column,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
 
         return ~column.duplicated(keep=False)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_not_be_null(self, column,
-                                            mostly=None,
-                                            result_format=None,
-                                            row_condition=None, condition_parser="pandas",
-                                            include_config=True, catch_exceptions=None, meta=None, include_nulls=True):
+    def expect_column_values_to_not_be_null(
+        self,
+        column,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+        include_nulls=True,
+    ):
 
         return ~column.isnull()
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_null(self, column,
-                                        mostly=None,
-                                        result_format=None,
-                                        row_condition=None, condition_parser="pandas",
-                                        include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_be_null(
+        self,
+        column,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
 
         return column.isnull()
 
     @DocInherit
     def expect_column_values_to_be_of_type(
-            self,
-            column,
-            type_,
-            **kwargs
-            # Since we've now received the default arguments *before* the expectation decorator, we need to
-            # ensure we only pass what we actually received. Hence, we'll use kwargs
-
-            # mostly=None,
-            # result_format=None,
-            # row_condition=None, condition_parser="pandas", include_config=None, catch_exceptions=None, meta=None
+        self,
+        column,
+        type_,
+        **kwargs
+        # Since we've now received the default arguments *before* the expectation decorator, we need to
+        # ensure we only pass what we actually received. Hence, we'll use kwargs
+        # mostly=None,
+        # result_format=None,
+        # row_condition=None, condition_parser="pandas", include_config=None, catch_exceptions=None, meta=None
     ):
         """
         The pandas implementation of this expectation takes kwargs mostly, result_format, include_config,
@@ -623,11 +670,16 @@ Notes:
 
     @DataAsset.expectation(["column", "type_", "mostly"])
     def _expect_column_values_to_be_of_type__aggregate(
-            self,
-            column, type_,
-            mostly=None,
-            result_format=None,
-            row_condition=None, condition_parser="pandas", include_config=True, catch_exceptions=None, meta=None
+        self,
+        column,
+        type_,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
     ):
         if mostly is not None:
             raise ValueError(
@@ -691,11 +743,17 @@ Notes:
 
     @MetaPandasDataset.column_map_expectation
     def _expect_column_values_to_be_of_type__map(
-            self,
-            column, type_,
-            mostly=None,
-            result_format=None,
-            row_condition=None, condition_parser="pandas", include_config=True, catch_exceptions=None, meta=None):
+        self,
+        column,
+        type_,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
 
         comp_types = []
         try:
@@ -726,15 +784,15 @@ Notes:
 
     @DocInherit
     def expect_column_values_to_be_in_type_list(
-            self,
-            column, type_list,
-            **kwargs
-            # Since we've now received the default arguments *before* the expectation decorator, we need to
-            # ensure we only pass what we actually received. Hence, we'll use kwargs
-
-            # mostly=None,
-            # result_format = None,
-            # row_condition=None, condition_parser="pandas", include_config=None, catch_exceptions=None, meta=None
+        self,
+        column,
+        type_list,
+        **kwargs
+        # Since we've now received the default arguments *before* the expectation decorator, we need to
+        # ensure we only pass what we actually received. Hence, we'll use kwargs
+        # mostly=None,
+        # result_format = None,
+        # row_condition=None, condition_parser="pandas", include_config=None, catch_exceptions=None, meta=None
     ):
         """
         The pandas implementation of this expectation takes kwargs mostly, result_format, include_config,
@@ -825,11 +883,16 @@ Notes:
 
     @MetaPandasDataset.expectation(["column", "type_list", "mostly"])
     def _expect_column_values_to_be_in_type_list__aggregate(
-            self,
-            column, type_list,
-            mostly=None,
-            result_format=None,
-            row_condition=None, condition_parser="pandas", include_config=True, catch_exceptions=None, meta=None
+        self,
+        column,
+        type_list,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
     ):
         if mostly is not None:
             raise ValueError(
@@ -871,11 +934,17 @@ Notes:
 
     @MetaPandasDataset.column_map_expectation
     def _expect_column_values_to_be_in_type_list__map(
-            self,
-            column, type_list,
-            mostly=None,
-            result_format=None,
-            row_condition=None, condition_parser="pandas", include_config=True, catch_exceptions=None, meta=None):
+        self,
+        column,
+        type_list,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
 
         comp_types = []
         for type_ in type_list:
@@ -907,12 +976,19 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_in_set(self, column, value_set,
-                                          mostly=None,
-                                          parse_strings_as_datetimes=None,
-                                          result_format=None,
-                                          row_condition=None, condition_parser="pandas",
-                                          include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_be_in_set(
+        self,
+        column,
+        value_set,
+        mostly=None,
+        parse_strings_as_datetimes=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         if value_set is None:
             # Vacuously true
             return np.ones(len(column), dtype=np.bool_)
@@ -926,12 +1002,19 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_not_be_in_set(self, column, value_set,
-                                              mostly=None,
-                                              parse_strings_as_datetimes=None,
-                                              result_format=None,
-                                              row_condition=None, condition_parser="pandas",
-                                              include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_not_be_in_set(
+        self,
+        column,
+        value_set,
+        mostly=None,
+        parse_strings_as_datetimes=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
         else:
@@ -941,18 +1024,24 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_between(self,
-                                           column,
-                                           min_value=None, max_value=None,
-                                           strict_min=False, strict_max=False,  # tolerance=1e-9,
-                                           parse_strings_as_datetimes=None,
-                                           output_strftime_format=None,
-                                           allow_cross_type_comparisons=None,
-                                           mostly=None,
-                                           row_condition=None, condition_parser="pandas",
-                                           result_format=None,
-                                           include_config=True, catch_exceptions=None, meta=None
-                                           ):
+    def expect_column_values_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        strict_min=False,
+        strict_max=False,  # tolerance=1e-9,
+        parse_strings_as_datetimes=None,
+        output_strftime_format=None,
+        allow_cross_type_comparisons=None,
+        mostly=None,
+        row_condition=None,
+        condition_parser="pandas",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
@@ -1069,11 +1158,19 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_increasing(self, column, strictly=None, parse_strings_as_datetimes=None,
-                                              mostly=None,
-                                              row_condition=None, condition_parser="pandas",
-                                              result_format=None,
-                                              include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_be_increasing(
+        self,
+        column,
+        strictly=None,
+        parse_strings_as_datetimes=None,
+        mostly=None,
+        row_condition=None,
+        condition_parser="pandas",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         if parse_strings_as_datetimes:
             temp_column = column.map(parse)
 
@@ -1099,11 +1196,19 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_decreasing(self, column, strictly=None, parse_strings_as_datetimes=None,
-                                              mostly=None,
-                                              row_condition=None, condition_parser="pandas",
-                                              result_format=None,
-                                              include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_be_decreasing(
+        self,
+        column,
+        strictly=None,
+        parse_strings_as_datetimes=None,
+        mostly=None,
+        row_condition=None,
+        condition_parser="pandas",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         if parse_strings_as_datetimes:
             temp_column = column.map(parse)
 
@@ -1129,13 +1234,19 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_value_lengths_to_be_between(self, column,
-                                                  min_value=None,
-                                                  max_value=None,
-                                                  mostly=None,
-                                                  row_condition=None, condition_parser="pandas",
-                                                  result_format=None,
-                                                  include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_value_lengths_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        mostly=None,
+        row_condition=None,
+        condition_parser="pandas",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -1167,38 +1278,67 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_value_lengths_to_equal(self, column, value,
-                                             mostly=None,
-                                             result_format=None,
-                                             row_condition=None, condition_parser="pandas",
-                                             include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_value_lengths_to_equal(
+        self,
+        column,
+        value,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         return column.str.len() == value
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_match_regex(self, column, regex,
-                                            mostly=None,
-                                            result_format=None,
-                                            row_condition=None, condition_parser="pandas",
-                                            include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_match_regex(
+        self,
+        column,
+        regex,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         return column.astype(str).str.contains(regex)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_not_match_regex(self, column, regex,
-                                                mostly=None,
-                                                result_format=None,
-                                                row_condition=None, condition_parser="pandas",
-                                                include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_not_match_regex(
+        self,
+        column,
+        regex,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         return ~column.astype(str).str.contains(regex)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_match_regex_list(self, column, regex_list, match_on="any",
-                                                 mostly=None,
-                                                 result_format=None,
-                                                 row_condition=None, condition_parser="pandas",
-                                                 include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_match_regex_list(
+        self,
+        column,
+        regex_list,
+        match_on="any",
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
 
         regex_matches = []
         for regex in regex_list:
@@ -1214,11 +1354,18 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_not_match_regex_list(self, column, regex_list,
-                                                     mostly=None,
-                                                     result_format=None,
-                                                     row_condition=None, condition_parser="pandas",
-                                                     include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_not_match_regex_list(
+        self,
+        column,
+        regex_list,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         regex_matches = []
         for regex in regex_list:
             regex_matches.append(column.astype(str).str.contains(regex))
@@ -1228,11 +1375,18 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_match_strftime_format(self, column, strftime_format,
-                                                      mostly=None,
-                                                      result_format=None,
-                                                      row_condition=None, condition_parser="pandas",
-                                                      include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_match_strftime_format(
+        self,
+        column,
+        strftime_format,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         # Below is a simple validation that the provided format can both format and parse a datetime object.
         # %D is an example of a format that can format but not parse, e.g.
         try:
@@ -1257,11 +1411,17 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_dateutil_parseable(self, column,
-                                                      mostly=None,
-                                                      result_format=None,
-                                                      row_condition=None, condition_parser="pandas",
-                                                      include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_be_dateutil_parseable(
+        self,
+        column,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         def is_parseable(val):
             try:
                 if type(val) != str:
@@ -1279,11 +1439,17 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_json_parseable(self, column,
-                                                  mostly=None,
-                                                  result_format=None,
-                                                  row_condition=None, condition_parser="pandas",
-                                                  include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_be_json_parseable(
+        self,
+        column,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         def is_json(val):
             try:
                 json.loads(val)
@@ -1295,11 +1461,18 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_match_json_schema(self, column, json_schema,
-                                                  mostly=None,
-                                                  result_format=None,
-                                                  row_condition=None, condition_parser="pandas",
-                                                  include_config=True, catch_exceptions=None, meta=None):
+    def expect_column_values_to_match_json_schema(
+        self,
+        column,
+        json_schema,
+        mostly=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         def matches_json_schema(val):
             try:
                 val_json = json.loads(val)
@@ -1318,13 +1491,19 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(self, column, distribution,
-                                                                                    p_value=0.05, params=None,
-                                                                                    result_format=None,
-                                                                                    row_condition=None,
-                                                                                    condition_parser="pandas",
-                                                                                    include_config=True,
-                                                                                    catch_exceptions=None, meta=None):
+    def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(
+        self,
+        column,
+        distribution,
+        p_value=0.05,
+        params=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         column = self[column]
 
         if p_value <= 0 or p_value >= 1:
@@ -1360,12 +1539,20 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05,
-                                                                      bootstrap_samples=None, bootstrap_sample_size=None,
-                                                                      result_format=None,
-                                                                      row_condition=None, condition_parser="pandas",
-                                                                      include_config=True, catch_exceptions=None,
-                                                                      meta=None):
+    def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(
+        self,
+        column,
+        partition_object=None,
+        p=0.05,
+        bootstrap_samples=None,
+        bootstrap_sample_size=None,
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         column = self[column]
 
         if not is_valid_continuous_partition_object(partition_object):
@@ -1465,29 +1652,37 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_pair_map_expectation
-    def expect_column_pair_values_to_be_equal(self,
-                                              column_A,
-                                              column_B,
-                                              ignore_row_if="both_values_are_missing",
-                                              result_format=None,
-                                              row_condition=None, condition_parser="pandas",
-                                              include_config=True, catch_exceptions=None, meta=None
-                                              ):
+    def expect_column_pair_values_to_be_equal(
+        self,
+        column_A,
+        column_B,
+        ignore_row_if="both_values_are_missing",
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         return column_A == column_B
 
     @DocInherit
     @MetaPandasDataset.column_pair_map_expectation
-    def expect_column_pair_values_A_to_be_greater_than_B(self,
-                                                         column_A,
-                                                         column_B,
-                                                         or_equal=None,
-                                                         parse_strings_as_datetimes=None,
-                                                         allow_cross_type_comparisons=None,
-                                                         ignore_row_if="both_values_are_missing",
-                                                         result_format=None,
-                                                         row_condition=None, condition_parser="pandas",
-                                                         include_config=True, catch_exceptions=None, meta=None
-                                                         ):
+    def expect_column_pair_values_A_to_be_greater_than_B(
+        self,
+        column_A,
+        column_B,
+        or_equal=None,
+        parse_strings_as_datetimes=None,
+        allow_cross_type_comparisons=None,
+        ignore_row_if="both_values_are_missing",
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         # FIXME
         if allow_cross_type_comparisons == True:
             raise NotImplementedError
@@ -1507,15 +1702,19 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_pair_map_expectation
-    def expect_column_pair_values_to_be_in_set(self,
-                                               column_A,
-                                               column_B,
-                                               value_pairs_set,
-                                               ignore_row_if="both_values_are_missing",
-                                               result_format=None,
-                                               row_condition=None, condition_parser="pandas",
-                                               include_config=True, catch_exceptions=None, meta=None
-                                               ):
+    def expect_column_pair_values_to_be_in_set(
+        self,
+        column_A,
+        column_B,
+        value_pairs_set,
+        ignore_row_if="both_values_are_missing",
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         if value_pairs_set is None:
             # vacuously true
             return np.ones(len(column_A), dtype=np.bool_)
@@ -1541,13 +1740,17 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.multicolumn_map_expectation
-    def expect_multicolumn_values_to_be_unique(self,
-                                               column_list,
-                                               ignore_row_if="all_values_are_missing",
-                                               result_format=None,
-                                               row_condition=None, condition_parser="pandas",
-                                               include_config=True, catch_exceptions=None, meta=None
-                                               ):
+    def expect_multicolumn_values_to_be_unique(
+        self,
+        column_list,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        row_condition=None,
+        condition_parser="pandas",
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
         threshold = len(column_list.columns)
         # Do not dropna here, since we have separately dealt with na in decorator
         return column_list.nunique(dropna=False, axis=1) >= threshold
