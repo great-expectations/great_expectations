@@ -482,6 +482,45 @@ def _deduplicate_evaluation_parameter_dependencies(dependencies):
 class ExpectationConfiguration(DictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
+    default_runtime_kwargs = {
+        "include_config": True,
+        "catch_exceptions": False,
+        "result_format": "BASIC",
+    }
+
+    default_success_kwargs = {
+        "column_index": None,
+        "min_value": None,
+        "max_value": None,
+        "mostly": None,
+        "parse_strings_as_datetimes": None,
+        "strict_min": False,
+        "strict_max": False,
+        "allow_cross_type_comparisons": None,
+        "output_strftime_format": None,
+        "strictly": None,
+        "match_on": "any",
+        "p_value": 0.05,
+        "params": None,
+        "allow_relative_error": False,
+        "ties_okay": None,
+        "partition_object": None,
+        "p": 0.05,
+        "tail_weight_holdout": 0,
+        "bootstrap_samples": None,
+        "bootstrap_sample_size": None,
+        "internal_weight_holdout": 0,
+        "bucketize_data": True,
+        "threshold": None,
+        "ignore_row_if": {
+            "expect_column_pair_values_to_be_equal": "both_values_are_missing",
+            "expect_column_pair_values_A_to_be_greater_than_B": "both_values_are_missing",
+            "expect_column_pair_values_to_be_in_set": "both_values_are_missing",
+            "expect_multicolumn_values_to_be_unique": "all_values_are_missing"
+        },
+        "or_equal": None,
+    }
+
     kwarg_lookup_dict = {
         "expect_column_to_exist": {
             "domain_kwargs": ["column"],
@@ -707,8 +746,8 @@ class ExpectationConfiguration(DictDot):
             "success_kwargs": ["value_pairs_set", "ignore_row_if",],
         },
         "expect_multicolumn_values_to_be_unique": {
-            "domain_kwargs": [],
-            "success_kwargs": ["column_list", "ignore_row_if"],
+            "domain_kwargs": ["column_list"],
+            "success_kwargs": ["ignore_row_if"],
         },
     }
     runtime_kwargs = ["result_format", "include_config", "catch_exceptions"]
@@ -780,10 +819,7 @@ class ExpectationConfiguration(DictDot):
 
     def get_runtime_kwargs(self):
         # TODO: add default values if kwarg not present
-        return {
-            key: self.kwargs.get(key)
-            for key in self.runtime_kwargs
-        }
+        return {key: self.kwargs.get(key) for key in self.runtime_kwargs}
 
     def applies_to_same_domain(self, other_expectation_configuration):
         # "row_condition", "condition_parser"
@@ -796,10 +832,14 @@ class ExpectationConfiguration(DictDot):
             == other_expectation_configuration.expectation_type
         ):
             return False
-        if set(self.get_domain_kwargs().keys()) != set(self.kwarg_lookup_dict[self.expectation_type]["domain_kwargs"]):
-            missing_kwargs = set(self.kwarg_lookup_dict[self.expectation_type]["domain_kwargs"]) - set(self.get_domain_kwargs().keys())
+        if set(self.get_domain_kwargs().keys()) != set(
+            self.kwarg_lookup_dict[self.expectation_type]["domain_kwargs"]
+        ):
+            missing_kwargs = set(
+                self.kwarg_lookup_dict[self.expectation_type]["domain_kwargs"]
+            ) - set(self.get_domain_kwargs().keys())
             raise InvalidExpectationKwargsError(
-                f'Cannot check if expectation applies to same domain. Missing kwargs: {list(missing_kwargs)}'
+                f"Cannot check if expectation applies to same domain. Missing kwargs: {list(missing_kwargs)}"
             )
         return (
             self.get_domain_kwargs()
@@ -825,7 +865,7 @@ class ExpectationConfiguration(DictDot):
             return all(
                 (
                     self.expectation_type == other.expectation_type,
-                    self.get_domain_kwargs() == other.get_domain_kwargs()
+                    self.get_domain_kwargs() == other.get_domain_kwargs(),
                 )
             )
 
@@ -833,18 +873,17 @@ class ExpectationConfiguration(DictDot):
             return all(
                 (
                     self.expectation_type == other.expectation_type,
-                    self.get_success_kwargs() == other.get_success_kwargs()
+                    self.get_success_kwargs() == other.get_success_kwargs(),
                 )
             )
-                
+
         elif match_type == "runtime":
             return all(
                 (
                     self.expectation_type == other.expectation_type,
-                    self.kwargs == other.kwargs
+                    self.kwargs == other.kwargs,
                 )
             )
-
 
     def __eq__(self, other):
         """ExpectationConfiguration equality does include meta, but ignores instance identity."""
@@ -1126,9 +1165,9 @@ class ExpectationSuite(object):
         self.expectations.append(expectation_config)
 
     def remove_expectation(
-            self,
-            expectation_configuration: ExpectationConfiguration,
-            match_type: str="domain"
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        match_type: str = "domain",
     ) -> ExpectationConfiguration:
         """
 
@@ -1228,6 +1267,7 @@ class ExpectationSuite(object):
             self.append_expectation(expectation_configuration)
 
         return expectation_configuration
+
 
 class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
