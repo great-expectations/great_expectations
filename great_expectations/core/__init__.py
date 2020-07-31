@@ -5,6 +5,7 @@ import warnings
 from collections import namedtuple
 from copy import deepcopy
 
+import jsonpatch
 from dateutil.parser import ParserError as DateUtilParserError
 from dateutil.parser import parse
 from IPython import get_ipython
@@ -1226,7 +1227,7 @@ class ExpectationSuite(object):
                 #     raise ValueError("No matching expectation found.")
             )
         else:
-            return match_index[0]
+            return match_indexes[0]
 
     def patch(
         self,
