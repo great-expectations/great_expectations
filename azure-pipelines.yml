@@ -180,6 +180,19 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
+  - stage: os_integration
+    jobs:
+      - job: Windows
+        pool:
+          vmImage: 'vs2017-win2016'
+        steps:
+          - script: echo hello from Windows
+      - job: macOS
+        pool:
+          vmImage: 'macOS-10.14'
+        steps:
+          - script: echo hello from macOS
+
   - stage: db_integration
     pool:
       vmImage: 'ubuntu-latest'
