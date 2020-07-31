@@ -145,6 +145,11 @@ stages:
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
+          - script: |
+              sudo apt-get install -y pandoc
+              pip install pypandoc
+            displayName: 'Install pandoc'
+
           - bash: pip install  pandas
             condition: eq(variables['pandas.version'], 'latest')
             displayName: 'Install pandas latest'
@@ -180,6 +185,9 @@ stages:
     variables:
       GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
       GE_pytest_opts: ''
+
+    dependsOn: []
+
     jobs:
 
       - job: Windows
@@ -239,6 +247,8 @@ stages:
   - stage: db_integration
     pool:
       vmImage: 'ubuntu-latest'
+
+    dependsOn: []
 
     jobs:
       - job: mysql
