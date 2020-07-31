@@ -1,25 +1,16 @@
-from datetime import datetime
+import datetime
 import json
 import sys
-from datetime import datetime
 
 import click
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli.cli_logging import logger
-
-
-from great_expectations.cli.datasource import (
-    get_batch_kwargs,
-    select_datasource,
-)
-from great_expectations.cli.util import (
-    cli_message,
-    load_expectation_suite,
-    cli_message_list,
-    cli_message_dict
-)
+from great_expectations.cli import toolkit
+from great_expectations.cli.datasource import get_batch_kwargs
+from great_expectations.cli.mark import Mark as mark
+from great_expectations.cli.util import cli_message, cli_message_dict
+from great_expectations.core import RunIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 json_parse_exception = json.decoder.JSONDecodeError
@@ -30,7 +21,7 @@ except ImportError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
     SQLAlchemyError = ge_exceptions.ProfilerError
-()
+
 
 @click.group()
 def validation_operator():
@@ -40,11 +31,12 @@ def validation_operator():
 
 @validation_operator.command(name="list")
 @click.option(
-    '--directory',
-    '-d',
+    "--directory",
+    "-d",
     default=None,
-    help="The project's great_expectations directory."
+    help="The project's great_expectations directory.",
 )
+@mark.cli_as_experimental
 def validation_operator_list(directory):
     """List known Validation Operators."""
     try:
@@ -59,27 +51,23 @@ def validation_operator_list(directory):
         if len(validation_operators) == 0:
             cli_message("No Validation Operators found")
             return
-
-        if len(validation_operators) == 1:
+        elif len(validation_operators) == 1:
             list_intro_string = "1 Validation Operator found:"
-
-        if len(validation_operators) > 1:
-            list_intro_string = "{} Validation Operators found:".format(len(validation_operators))
+        else:
+            list_intro_string = "{} Validation Operators found:".format(
+                len(validation_operators)
+            )
 
         cli_message(list_intro_string)
         for validation_operator in validation_operators:
             cli_message("")
             cli_message_dict(validation_operator)
         send_usage_message(
-            data_context=context,
-            event="cli.validation_operator.list",
-            success=True
+            data_context=context, event="cli.validation_operator.list", success=True
         )
     except Exception as e:
         send_usage_message(
-            data_context=context,
-            event="cli.validation_operator.list",
-            success=False
+            data_context=context, event="cli.validation_operator.list", success=False
         )
         raise e
 
@@ -92,22 +80,16 @@ def validation_operator_list(directory):
     help="""The path of the validation config file (JSON). """,
 )
 @click.option(
-    "--name",
-    "-n",
-    default=None,
-    help="""The name of the validation operator. """,
+    "--name", "-n", default=None, help="""The name of the validation operator. """,
 )
 @click.option(
-    "--suite",
-    "-s",
-    default=None,
-    help="""The name of the expectation suite. """,
+    "--suite", "-s", default=None, help="""The name of the expectation suite. """,
 )
 @click.option(
-    "--run_id",
+    "--run_name",
     "-r",
     default=None,
-    help="""Run id. If not specified, a timestamp-based run id will be automatically generated. """,
+    help="""Run name. If not specified, a timestamp-based run id will be automatically generated. """,
 )
 @click.option(
     "--directory",
@@ -115,7 +97,13 @@ def validation_operator_list(directory):
     default=None,
     help="The project's great_expectations directory.",
 )
-def validation_operator_run(name, run_id, validation_config_file, suite, directory):
+@mark.cli_as_deprecation(
+    """<yellow>In the next major release this command will be deprecated.
+Please consider using either:
+  - `checkpoint new` if you wish to configure a new checkpoint interactively
+  - `checkpoint run` if you wish to run a saved checkpoint</yellow>"""
+)
+def validation_operator_run(name, run_name, validation_config_file, suite, directory):
     # Note though the long lines here aren't pythonic, they look best if Click does the line wraps.
     """
     Run a validation operator against some data.
@@ -155,32 +143,37 @@ def validation_operator_run(name, run_id, validation_config_file, suite, directo
             try:
                 with open(validation_config_file) as f:
                     validation_config = json.load(f)
-            except (
-                IOError,
-                json_parse_exception
-            ) as e:
-                cli_message(f"Failed to process the --validation_config_file argument: <red>{e}</red>")
+            except (IOError, json_parse_exception) as e:
+                cli_message(
+                    f"Failed to process the --validation_config_file argument: <red>{e}</red>"
+                )
                 send_usage_message(
                     data_context=context,
                     event="cli.validation_operator.run",
-                    success=False
+                    success=False,
                 )
                 sys.exit(1)
 
-            validation_config_error_message = _validate_valdiation_config(validation_config)
+            validation_config_error_message = _validate_valdiation_config(
+                validation_config
+            )
             if validation_config_error_message is not None:
-                cli_message("<red>The validation config in {0:s} is misconfigured: {1:s}</red>".format(validation_config_file, validation_config_error_message))
+                cli_message(
+                    "<red>The validation config in {0:s} is misconfigured: {1:s}</red>".format(
+                        validation_config_file, validation_config_error_message
+                    )
+                )
                 send_usage_message(
                     data_context=context,
                     event="cli.validation_operator.run",
-                    success=False
+                    success=False,
                 )
                 sys.exit(1)
 
         else:
             if suite is None:
                 cli_message(
-"""
+                    """
 Please use --suite argument to specify the name of the expectation suite.
 Call `great_expectation suite list` command to list the expectation suites in your project.
 """
@@ -188,15 +181,17 @@ Call `great_expectation suite list` command to list the expectation suites in yo
                 send_usage_message(
                     data_context=context,
                     event="cli.validation_operator.run",
-                    success=False
+                    success=False,
                 )
                 sys.exit(0)
 
-            suite = load_expectation_suite(context, suite)
+            suite = toolkit.load_expectation_suite(
+                context, suite, "cli.validation_operator.run"
+            )
 
             if name is None:
                 cli_message(
-"""
+                    """
 Please use --name argument to specify the name of the validation operator.
 Call `great_expectation validation-operator list` command to list the operators in your project.
 """
@@ -204,13 +199,13 @@ Call `great_expectation validation-operator list` command to list the operators 
                 send_usage_message(
                     data_context=context,
                     event="cli.validation_operator.run",
-                    success=False
+                    success=False,
                 )
                 sys.exit(1)
             else:
                 if name not in context.list_validation_operator_names():
                     cli_message(
-                    f"""
+                        f"""
 Could not find a validation operator {name}.
 Call `great_expectation validation-operator list` command to list the operators in your project.
 """
@@ -218,25 +213,25 @@ Call `great_expectation validation-operator list` command to list the operators 
                     send_usage_message(
                         data_context=context,
                         event="cli.validation_operator.run",
-                        success=False
+                        success=False,
                     )
                     sys.exit(1)
 
             batch_kwargs = None
 
             cli_message(
-            """
-Let's help you specify the batch of data your want the validation operator to validate."""
+                """
+Let us help you specify the batch of data your want the validation operator to validate."""
             )
 
             try:
-                data_source = select_datasource(context)
+                data_source = toolkit.select_datasource(context)
             except ValueError as ve:
                 cli_message("<red>{}</red>".format(ve))
                 send_usage_message(
                     data_context=context,
                     event="cli.validation_operator.run",
-                    success=False
+                    success=False,
                 )
                 sys.exit(1)
 
@@ -245,7 +240,7 @@ Let's help you specify the batch of data your want the validation operator to va
                 send_usage_message(
                     data_context=context,
                     event="cli.validation_operator.run",
-                    success=False
+                    success=False,
                 )
                 sys.exit(1)
 
@@ -259,7 +254,7 @@ Let's help you specify the batch of data your want the validation operator to va
                     context,
                     datasource_name=data_source.name,
                     batch_kwargs_generator_name=None,
-                    generator_asset=None,
+                    data_asset_name=None,
                     additional_batch_kwargs=None,
                 )
 
@@ -268,9 +263,9 @@ Let's help you specify the batch of data your want the validation operator to va
                 "batches": [
                     {
                         "batch_kwargs": batch_kwargs,
-                        "expectation_suite_names": [suite.expectation_suite_name]
+                        "expectation_suite_names": [suite.expectation_suite_name],
                     }
-                ]
+                ],
             }
 
         try:
@@ -278,66 +273,60 @@ Let's help you specify the batch of data your want the validation operator to va
             batches_to_validate = []
             for entry in validation_config["batches"]:
                 for expectation_suite_name in entry["expectation_suite_names"]:
-                    batch = context.get_batch(entry["batch_kwargs"], expectation_suite_name)
+                    batch = context.get_batch(
+                        entry["batch_kwargs"], expectation_suite_name
+                    )
                     batches_to_validate.append(batch)
 
-            if run_id is None:
-                run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+            if run_name is None:
+                run_name = datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+
+            run_id = RunIdentifier(run_name=run_name)
 
             if suite is None:
                 results = context.run_validation_operator(
                     validation_operator_name,
                     assets_to_validate=batches_to_validate,
-                    run_id=run_id
+                    run_id=run_id,
                 )
             else:
                 if suite.evaluation_parameters is None:
                     results = context.run_validation_operator(
                         validation_operator_name,
                         assets_to_validate=batches_to_validate,
-                        run_id=run_id
+                        run_id=run_id,
                     )
                 else:
                     results = context.run_validation_operator(
                         validation_operator_name,
                         assets_to_validate=batches_to_validate,
                         run_id=run_id,
-                        evaluation_parameters=suite.evaluation_parameters
+                        evaluation_parameters=suite.evaluation_parameters,
                     )
-        except (
-            ge_exceptions.DataContextError,
-            IOError,
-            SQLAlchemyError,
-        ) as e:
+        except (ge_exceptions.DataContextError, IOError, SQLAlchemyError,) as e:
             cli_message("<red>{}</red>".format(e))
             send_usage_message(
-                data_context=context,
-                event="cli.validation_operator.run",
-                success=False
+                data_context=context, event="cli.validation_operator.run", success=False
             )
             sys.exit(1)
 
         if not results["success"]:
             cli_message("Validation Failed!")
             send_usage_message(
-                data_context=context,
-                event="cli.validation_operator.run",
-                success=True
+                data_context=context, event="cli.validation_operator.run", success=True
             )
             sys.exit(1)
         else:
             cli_message("Validation Succeeded!")
             send_usage_message(
-                data_context=context,
-                event="cli.validation_operator.run",
-                success=True
+                data_context=context, event="cli.validation_operator.run", success=True
             )
             sys.exit(0)
     except Exception as e:
         send_usage_message(
-            data_context=context,
-            event="cli.validation_operator.run",
-            success=False
+            data_context=context, event="cli.validation_operator.run", success=False
         )
         raise e
 

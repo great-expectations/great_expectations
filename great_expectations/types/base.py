@@ -1,5 +1,5 @@
-import logging
 import copy
+import logging
 
 from ruamel.yaml import YAML, yaml_object
 
@@ -26,7 +26,9 @@ class DotDict(dict):
 
     # Cargo-cultishly copied from: https://github.com/spindlelabs/pyes/commit/d2076b385c38d6d00cebfe0df7b0d1ba8df934bc
     def __deepcopy__(self, memo):
-        return DotDict([(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()])
+        return DotDict(
+            [(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()]
+        )
 
     # The following are required to support yaml serialization, since we do not raise
     # AttributeError from __getattr__ in DotDict. We *do* raise that AttributeError when it is possible to know

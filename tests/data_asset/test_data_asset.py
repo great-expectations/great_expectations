@@ -1,7 +1,11 @@
 import pytest
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core import ExpectationSuite, ExpectationConfiguration, ExpectationKwargs
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationKwargs,
+    ExpectationSuite,
+)
 from great_expectations.data_asset import DataAsset, FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
 
@@ -11,10 +15,8 @@ def test_data_asset_expectation_suite():
     default_suite = ExpectationSuite(
         expectation_suite_name="default",
         data_asset_type="DataAsset",
-        meta={
-            "great_expectations.__version__": ge_version
-        },
-        expectations=[]
+        meta={"great_expectations.__version__": ge_version},
+        expectations=[],
     )
 
     # We should have a default-initialized suite stored internally and available for getting
@@ -27,12 +29,16 @@ def test_interactive_evaluation(dataset):
 
     # Default is on
     assert dataset.get_config_value("interactive_evaluation") is True
-    res = dataset.expect_column_values_to_be_between("naturals", 1, 10, include_config=True)
+    res = dataset.expect_column_values_to_be_between(
+        "naturals", 1, 10, include_config=True
+    )
     assert res.success is True
 
     # Disable
     dataset.set_config_value("interactive_evaluation", False)
-    disable_res = dataset.expect_column_values_to_be_between("naturals", 1, 10)  # No need to explicitly include_config
+    disable_res = dataset.expect_column_values_to_be_between(
+        "naturals", 1, 10
+    )  # No need to explicitly include_config
     assert disable_res.success is None
 
     assert res.expectation_config == disable_res.expectation_config
@@ -65,7 +71,9 @@ def test_data_asset_name_inheritance(dataset):
 def test_catch_exceptions_with_bad_expectation_type():
     # We want to catch degenerate cases where an expectation suite is incompatible with
     my_df = PandasDataset({"x": range(10)})
-    my_df._append_expectation(ExpectationConfiguration(expectation_type='foobar', kwargs={}))
+    my_df._append_expectation(
+        ExpectationConfiguration(expectation_type="foobar", kwargs={})
+    )
     result = my_df.validate(catch_exceptions=True)
 
     # Find the foobar result
@@ -78,8 +86,10 @@ def test_catch_exceptions_with_bad_expectation_type():
     assert result.results[idx].expectation_config.expectation_type == "foobar"
     assert result.results[idx].expectation_config.kwargs == ExpectationKwargs()
     assert result.results[idx].exception_info["raised_exception"] is True
-    assert "AttributeError: \'PandasDataset\' object has no attribute \'foobar\'" in \
-           result.results[idx].exception_info["exception_traceback"]
+    assert (
+        "AttributeError: 'PandasDataset' object has no attribute 'foobar'"
+        in result.results[idx].exception_info["exception_traceback"]
+    )
 
     with pytest.raises(AttributeError):
         result = my_df.validate(catch_exceptions=False)

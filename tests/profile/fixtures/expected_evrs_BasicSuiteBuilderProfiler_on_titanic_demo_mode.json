@@ -288,6 +288,7 @@
               ]
             ]
           },
+          "allow_relative_error": false,
           "result_format": "SUMMARY"
         },
         "meta": {},
@@ -738,7 +739,7 @@
       "expectation_config": {
         "kwargs": {
           "column": "Age",
-          "mostly": 0.47578065498857575,
+          "mostly": 0.476,
           "result_format": "SUMMARY"
         },
         "meta": {},
@@ -893,6 +894,7 @@
               ]
             ]
           },
+          "allow_relative_error": false,
           "result_format": "SUMMARY"
         },
         "meta": {},

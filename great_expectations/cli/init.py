@@ -5,18 +5,15 @@ import click
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli.datasource import \
-    add_datasource as add_datasource_impl
-from great_expectations.cli.datasource import \
-    create_expectation_suite as create_expectation_suite_impl
-from great_expectations.cli.docs import build_docs
-from great_expectations.cli.init_messages import (
+from great_expectations.cli import toolkit
+from great_expectations.cli.cli_messages import (
     BUILD_DOCS_PROMPT,
     GREETING,
     LETS_BEGIN_PROMPT,
     ONBOARDING_COMPLETE,
     PROJECT_IS_COMPLETE,
     RUN_INIT_AGAIN,
+    SECTION_SEPARATOR,
     SETUP_SUCCESS,
     SLACK_LATER,
     SLACK_SETUP_COMPLETE,
@@ -24,7 +21,10 @@ from great_expectations.cli.init_messages import (
     SLACK_SETUP_PROMPT,
     SLACK_WEBHOOK_PROMPT,
 )
+from great_expectations.cli.datasource import add_datasource as add_datasource_impl
+from great_expectations.cli.docs import build_docs
 from great_expectations.cli.util import cli_message, is_sane_slack_webhook
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.exceptions import (
     DataContextError,
     DatasourceInitializationError,
@@ -54,7 +54,7 @@ except ImportError:
 @click.option(
     "--usage-stats/--no-usage-stats",
     help="By default, usage statistics are enabled unless you specify the --no-usage-stats flag.",
-    default=True
+    default=True,
 )
 def init(target_directory, view, usage_stats):
     """
@@ -80,7 +80,9 @@ def init(target_directory, view, usage_stats):
             sys.exit(1)
 
         try:
-            context = DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
+            context = DataContext.create(
+                target_directory, usage_statistics_enabled=usage_stats
+            )
             cli_message(ONBOARDING_COMPLETE)
             # TODO if this is correct, ensure this is covered by a test
             # cli_message(SETUP_SUCCESS)
@@ -96,7 +98,12 @@ def init(target_directory, view, usage_stats):
             exit(0)
 
         try:
-            context = DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
+            context = DataContext.create(
+                target_directory, usage_statistics_enabled=usage_stats
+            )
+            send_usage_message(
+                data_context=context, event="cli.init.create", success=True
+            )
         except DataContextError as e:
             # TODO ensure this is covered by a test
             cli_message("<red>{}</red>".format(e))
@@ -111,7 +118,15 @@ def init(target_directory, view, usage_stats):
         else:
             datasources = context.list_datasources()
             if len(datasources) == 0:
-                datasource_name, data_source_type = add_datasource_impl(context, choose_one_data_asset=True)
+                cli_message(SECTION_SEPARATOR)
+                if not click.confirm(
+                    "Would you like to configure a Datasource?", default=True
+                ):
+                    cli_message("Okay, bye!")
+                    sys.exit(1)
+                datasource_name, data_source_type = add_datasource_impl(
+                    context, choose_one_data_asset=False
+                )
                 if not datasource_name:  # no datasource was created
                     sys.exit(1)
 
@@ -119,25 +134,59 @@ def init(target_directory, view, usage_stats):
             if len(datasources) == 1:
                 datasource_name = datasources[0]["name"]
 
-                success, suite_name = create_expectation_suite_impl(
+                cli_message(SECTION_SEPARATOR)
+                if not click.confirm(
+                    "Would you like to profile new Expectations for a single data asset within your new Datasource?",
+                    default=True,
+                ):
+                    cli_message(
+                        "Okay, exiting now. To learn more about Profilers, run great_expectations profile --help or visit docs.greatexpectations.io!"
+                    )
+                    sys.exit(1)
+
+                (
+                    success,
+                    suite_name,
+                    profiling_results,
+                ) = toolkit.create_expectation_suite(
                     context,
                     datasource_name=datasource_name,
-                    show_intro_message=False,
                     additional_batch_kwargs={"limit": 1000},
-                    open_docs=view,
+                    flag_build_docs=False,
+                    open_docs=False,
                 )
-                if success:
-                    cli_message(
-                        "A new Expectation suite '{}' was added to your project".format(suite_name)
-                    )
 
+                cli_message(SECTION_SEPARATOR)
+                if not click.confirm(
+                    "Would you like to build Data Docs?", default=True
+                ):
+                    cli_message(
+                        "Okay, exiting now. To learn more about Data Docs, run great_expectations docs --help or visit docs.greatexpectations.io!"
+                    )
+                    sys.exit(1)
+
+                build_docs(context, view=False)
+
+                if not click.confirm(
+                    "\nWould you like to view your new Expectations in Data Docs? This will open a new browser window.",
+                    default=True,
+                ):
+                    cli_message(
+                        "Okay, exiting now. You can view the site that has been created in a browser, or visit docs.greatexpectations.io for more information!"
+                    )
+                    sys.exit(1)
+                toolkit.attempt_to_open_validation_results_in_data_docs(
+                    context, profiling_results
+                )
+
+                cli_message(SECTION_SEPARATOR)
                 cli_message(SETUP_SUCCESS)
                 sys.exit(0)
     except (
         DataContextError,
         ge_exceptions.ProfilerError,
         IOError,
-        SQLAlchemyError
+        SQLAlchemyError,
     ) as e:
         cli_message("<red>{}</red>".format(e))
         sys.exit(1)
@@ -167,9 +216,3 @@ def _slack_setup(context):
 
 def _get_full_path_to_ge_dir(target_directory):
     return os.path.abspath(os.path.join(target_directory, DataContext.GE_DIR))
-
-
-def _complete_onboarding(target_dir):
-    DataContext.create(target_dir)
-    cli_message(ONBOARDING_COMPLETE)
-    return True

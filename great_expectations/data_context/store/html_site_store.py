@@ -1,50 +1,127 @@
-import os
+import inspect
 import logging
+import os
 from mimetypes import guess_type
 
-from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
     SiteSectionIdentifier,
+    ValidationResultIdentifier,
 )
-from .tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.util import (
-    load_class,
+    file_relative_path,
     instantiate_class_from_config,
-    file_relative_path
+    load_class,
 )
-from great_expectations.exceptions import (
-    DataContextError,
-    ClassInstantiationError,
-)
+from great_expectations.exceptions import ClassInstantiationError, DataContextError
+from great_expectations.util import verify_dynamic_loading_support
+
 from ...core.data_context_key import DataContextKey
+from .tuple_store_backend import TupleStoreBackend
 
 logger = logging.getLogger(__name__)
 
 
 class HtmlSiteStore(object):
+    """
+A HtmlSiteStore facilitates publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results.
+
+--ge-feature-maturity-info--
+
+    id: html_site_store_filesystem
+    title: HTML Site Store - Filesystem
+    icon:
+    short_description: DataDocs on Filesystem
+    description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on the Filesystem
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.html
+    maturity: Production
+    maturity_details:
+        api_stability: Mostly Stable (profiling)
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A
+        documentation_completeness: Partial
+        bug_risk: Low
+
+    id: html_site_store_s3
+    title: HTML Site Store - S3
+    icon:
+    short_description: DataDocs on S3
+    description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on S3
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_s3.html
+    maturity: Beta
+    maturity_details:
+        api_stability: Mostly Stable (profiling)
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Complete
+        bug_risk: Moderate
+
+    id: html_site_store_gcs
+    title: HTMLSiteStore - GCS
+    icon:
+    short_description: DataDocs on GCS
+    description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on GCS
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.html
+    maturity: Beta
+    maturity_details:
+        api_stability: Mostly Stable (profiling)
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Partial (needs auth)
+        bug_risk: Moderate (resource URL may have bugs)
+
+    id: html_site_store_azure_blob_storage
+    title: HTMLSiteStore - Azure
+    icon:
+    short_description: DataDocs on Azure Blob Storage
+    description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on Azure Blob Storage
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.html
+    maturity: N/A
+    maturity_details:
+        api_stability: Mostly Stable (profiling)
+        implementation_completeness: Minimal
+        unit_test_coverage: Minimal
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Minimal
+        bug_risk: Moderate
+
+--ge-feature-maturity-info--
+    """
+
     _key_class = SiteSectionIdentifier
 
     def __init__(self, store_backend=None, runtime_environment=None):
-        store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
-        store_backend_class_name = store_backend.get("class_name", "TupleFilesystemStoreBackend")
-        verify_dynamic_loading_support(module_name=store_backend_module_name, package_name=None)
+        store_backend_module_name = store_backend.get(
+            "module_name", "great_expectations.data_context.store"
+        )
+        store_backend_class_name = store_backend.get(
+            "class_name", "TupleFilesystemStoreBackend"
+        )
+        verify_dynamic_loading_support(module_name=store_backend_module_name)
         store_class = load_class(store_backend_class_name, store_backend_module_name)
 
         # Store Class was loaded successfully; verify that it is of a correct subclass.
         if not issubclass(store_class, TupleStoreBackend):
-            raise DataContextError("Invalid configuration: HtmlSiteStore needs a TupleStoreBackend")
-        if "filepath_template" in store_backend or ("fixed_length_key" in store_backend and
-                                                    store_backend["fixed_length_key"] is True):
-            logger.warning("Configuring a filepath_template or using fixed_length_key is not supported in SiteBuilder: "
-                           "filepaths will be selected based on the type of asset rendered.")
+            raise DataContextError(
+                "Invalid configuration: HtmlSiteStore needs a TupleStoreBackend"
+            )
+        if "filepath_template" in store_backend or (
+            "fixed_length_key" in store_backend
+            and store_backend["fixed_length_key"] is True
+        ):
+            logger.warning(
+                "Configuring a filepath_template or using fixed_length_key is not supported in SiteBuilder: "
+                "filepaths will be selected based on the type of asset rendered."
+            )
 
         # One thing to watch for is reversibility of keys.
         # If several types are being written to overlapping directories, we could get collisions.
-        module_name = 'great_expectations.data_context.store'
-        filepath_prefix = 'expectations'
-        filepath_suffix = '.html'
+        module_name = "great_expectations.data_context.store"
+        filepath_prefix = "expectations"
+        filepath_suffix = ".html"
         expectation_suite_identifier_obj = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment,
@@ -52,16 +129,16 @@ class HtmlSiteStore(object):
                 "module_name": module_name,
                 "filepath_prefix": filepath_prefix,
                 "filepath_suffix": filepath_suffix,
-            }
+            },
         )
         if not expectation_suite_identifier_obj:
             raise ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
-                class_name=store_backend['class_name']
+                class_name=store_backend["class_name"],
             )
 
-        filepath_prefix = 'validations'
+        filepath_prefix = "validations"
         validation_result_idendifier_obj = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment,
@@ -69,29 +146,29 @@ class HtmlSiteStore(object):
                 "module_name": module_name,
                 "filepath_prefix": filepath_prefix,
                 "filepath_suffix": filepath_suffix,
-            }
+            },
         )
         if not validation_result_idendifier_obj:
             raise ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
-                class_name=store_backend['class_name']
+                class_name=store_backend["class_name"],
             )
 
-        filepath_template = 'index.html'
+        filepath_template = "index.html"
         index_page_obj = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment,
             config_defaults={
                 "module_name": module_name,
                 "filepath_template": filepath_template,
-            }
+            },
         )
         if not index_page_obj:
             raise ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
-                class_name=store_backend['class_name']
+                class_name=store_backend["class_name"],
             )
 
         filepath_template = None
@@ -101,13 +178,13 @@ class HtmlSiteStore(object):
             config_defaults={
                 "module_name": module_name,
                 "filepath_template": filepath_template,
-            }
+            },
         )
         if not static_assets_obj:
             raise ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
-                class_name=store_backend['class_name']
+                class_name=store_backend["class_name"],
             )
 
         self.store_backends = {
@@ -129,20 +206,20 @@ class HtmlSiteStore(object):
 
     def get(self, key):
         self._validate_key(key)
-        return self.store_backends[
-            type(key.resource_identifier)
-        ].get(key.to_tuple())
+        return self.store_backends[type(key.resource_identifier)].get(key.to_tuple())
 
     def set(self, key, serialized_value):
         self._validate_key(key)
         self.keys.add(key)
 
-        return self.store_backends[
-            type(key.resource_identifier)
-        ].set(key.resource_identifier.to_tuple(), serialized_value,
-              content_encoding='utf-8', content_type='text/html; charset=utf-8')
+        return self.store_backends[type(key.resource_identifier)].set(
+            key.resource_identifier.to_tuple(),
+            serialized_value,
+            content_encoding="utf-8",
+            content_type="text/html; charset=utf-8",
+        )
 
-    def get_url_for_resource(self, resource_identifier=None):
+    def get_url_for_resource(self, resource_identifier=None, only_if_exists=True):
         """
         Return the URL of the HTML document that renders a resource
         (e.g., an expectation suite or a validation result).
@@ -163,16 +240,25 @@ class HtmlSiteStore(object):
             key = resource_identifier.to_tuple()
         else:
             # this method does not support getting the URL of static assets
-            raise ValueError("Cannot get URL for resource {0:s}".format(str(resource_identifier)))
+            raise ValueError(
+                "Cannot get URL for resource {0:s}".format(str(resource_identifier))
+            )
 
+        if only_if_exists:
+            return (
+                store_backend.get_url_for_key(key)
+                if store_backend.has_key(key)
+                else None
+            )
         return store_backend.get_url_for_key(key)
 
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):
-            raise TypeError("key: {!r} must a SiteSectionIdentifier, not {!r}".format(
-                key,
-                type(key),
-            ))
+            raise TypeError(
+                "key: {!r} must a SiteSectionIdentifier, not {!r}".format(
+                    key, type(key),
+                )
+            )
 
         for key_class in self.store_backends.keys():
             try:
@@ -183,11 +269,11 @@ class HtmlSiteStore(object):
                 continue
 
         # The key's resource_identifier didn't match any known key_class
-        raise TypeError("resource_identifier in key: {!r} must one of {}, not {!r}".format(
-            key,
-            set(self.store_backends.keys()),
-            type(key),
-        ))
+        raise TypeError(
+            "resource_identifier in key: {!r} must one of {}, not {!r}".format(
+                key, set(self.store_backends.keys()), type(key),
+            )
+        )
 
     def list_keys(self):
         keys = []
@@ -207,8 +293,18 @@ class HtmlSiteStore(object):
 
     def write_index_page(self, page):
         """This third param_store has a special method, which uses a zero-length tuple as a key."""
-        return self.store_backends["index_page"].set((), page, content_encoding='utf-8', content_type='text/html; '
-                                                                                                      'charset=utf-8')
+        return self.store_backends["index_page"].set(
+            (),
+            page,
+            content_encoding="utf-8",
+            content_type="text/html; " "charset=utf-8",
+        )
+
+    def clean_site(self):
+        for _, target_store_backend in self.store_backends.items():
+            keys = target_store_backend.list_keys()
+            for key in keys:
+                target_store_backend.remove_key(key)
 
     def copy_static_assets(self, static_assets_source_dir=None):
         """
@@ -219,7 +315,9 @@ class HtmlSiteStore(object):
         dir_exclusions = []
 
         if not static_assets_source_dir:
-            static_assets_source_dir = file_relative_path(__file__, os.path.join("..", "..", "render", "view", "static"))
+            static_assets_source_dir = file_relative_path(
+                __file__, os.path.join("..", "..", "render", "view", "static")
+            )
 
         for item in os.listdir(static_assets_source_dir):
             # Directory
@@ -235,10 +333,10 @@ class HtmlSiteStore(object):
                 if item in file_exclusions:
                     continue
                 source_name = os.path.join(static_assets_source_dir, item)
-                with open(source_name, 'rb') as f:
+                with open(source_name, "rb") as f:
                     # Only use path elements starting from static/ for key
                     store_key = tuple(os.path.normpath(source_name).split(os.sep))
-                    store_key = store_key[store_key.index('static'):]
+                    store_key = store_key[store_key.index("static") :]
                     content_type, content_encoding = guess_type(item, strict=False)
 
                     if content_type is None:
@@ -247,12 +345,16 @@ class HtmlSiteStore(object):
                             content_type = "font/opentype"
                         else:
                             # fallback
-                            logger.warning("Unable to automatically determine content_type for {}".format(source_name))
+                            logger.warning(
+                                "Unable to automatically determine content_type for {}".format(
+                                    source_name
+                                )
+                            )
                             content_type = "text/html; charset=utf8"
 
                     self.store_backends["static_assets"].set(
                         store_key,
                         f.read(),
                         content_encoding=content_encoding,
-                        content_type=content_type
+                        content_type=content_type,
                     )

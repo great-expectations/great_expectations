@@ -3,10 +3,12 @@ Tests for autoinspection framework.
 """
 
 import pytest
-from .test_utils import get_dataset
 
 import great_expectations as ge
 from great_expectations.core import ExpectationConfiguration
+
+from .test_utils import get_dataset
+
 
 def test_no_autoinspection():
     df = ge.dataset.PandasDataset({"a": [1, 2, 3]}, profiler=None)
@@ -34,17 +36,25 @@ def test_autoinspect_existing_dataset(test_backend):
 
     # Ensure that autoinspect worked
     assert len(suite.expectations) == 1
-    assert suite.expectations == \
-        [ge.core.ExpectationConfiguration(expectation_type='expect_column_to_exist', kwargs={'column': 'a'})]
+    assert suite.expectations == [
+        ge.core.ExpectationConfiguration(
+            expectation_type="expect_column_to_exist", kwargs={"column": "a"}
+        )
+    ]
 
 
 def test_autoinspect_columns_exist(test_backend):
-    df = get_dataset(test_backend, {"a": [1, 2, 3]}, profiler=ge.profile.ColumnsExistProfiler)
+    df = get_dataset(
+        test_backend, {"a": [1, 2, 3]}, profiler=ge.profile.ColumnsExistProfiler
+    )
     suite = df.get_expectation_suite()
 
     assert len(suite.expectations) == 1
-    assert suite.expectations == \
-        [ExpectationConfiguration(expectation_type='expect_column_to_exist', kwargs={'column': 'a'})]
+    assert suite.expectations == [
+        ExpectationConfiguration(
+            expectation_type="expect_column_to_exist", kwargs={"column": "a"}
+        )
+    ]
 
 
 def test_autoinspect_warning():

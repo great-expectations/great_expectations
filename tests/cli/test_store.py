@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-from click.testing import CliRunner
 import pytest
+from click.testing import CliRunner
 
 from great_expectations import DataContext
-from great_expectations.exceptions import InvalidConfigurationYamlError
 from great_expectations.cli import cli
+from great_expectations.exceptions import InvalidConfigurationYamlError
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
@@ -17,17 +15,23 @@ def test_store_list_with_zero_stores(caplog, empty_data_context):
     context._save_project_config()
     runner = CliRunner(mix_stderr=False)
 
-    with pytest.raises(InvalidConfigurationYamlError):
-        runner.invoke(
-            cli, "store list -d {}".format(project_dir), catch_exceptions=False,
-        )
+    result = runner.invoke(
+        cli, "store list -d {}".format(project_dir), catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+    assert (
+        "Your configuration file is not a valid yml file likely due to a yml syntax error"
+        in result.output.strip()
+    )
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_store_list_with_one_store(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
-    del(context._project_config.stores)["validations_store"]
-    del(context._project_config.stores)["evaluation_parameter_store"]
+    del (context._project_config.stores)["validations_store"]
+    del (context._project_config.stores)["evaluation_parameter_store"]
     context._project_config.validations_store_name = "expectations_store"
     context._project_config.evaluation_parameter_store_name = "expectations_store"
     context._save_project_config()

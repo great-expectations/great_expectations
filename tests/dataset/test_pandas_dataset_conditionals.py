@@ -280,7 +280,7 @@ def test_row_condition_in_expectation_config():
             "max_value": 5,
             "result_format": "SUMMARY",
             "row_condition": "group=='a'",
-            "condition_engine": "pandas",
+            "condition_parser": "pandas",
         },
         "expectation_type": "expect_column_values_to_be_between"
     })
@@ -303,7 +303,7 @@ def test_row_condition_in_expectation_config():
 
 
 # TODO: this test should be changed when other engines will be implemented
-def test_default_condition_engine_in_expectation_config():
+def test_default_condition_parser_in_expectation_config():
     df = duplicate_and_obfuscuate(
         ge.dataset.PandasDataset({
             'x': [1, 2, 3, 4, 5, 6, 7, 7, None, None]
@@ -316,11 +316,11 @@ def test_default_condition_engine_in_expectation_config():
            df.expect_column_values_to_be_between('x', min_value=1, max_value=5,
                                                  result_format="SUMMARY",
                                                  row_condition="group=='a'"
-                                                 ).expectation_config["kwargs"]["condition_engine"]
+                                                 ).expectation_config["kwargs"]["condition_parser"]
 
     assert "pandas" == \
            df.expect_column_values_to_be_between('x', min_value=1, max_value=5,
                                                  result_format="SUMMARY",
                                                  row_condition="group=='a'",
-                                                 condition_engine="SQL"
-                                                 ).expectation_config["kwargs"]["condition_engine"]
+                                                 condition_parser="SQL"
+                                                 ).expectation_config["kwargs"]["condition_parser"]

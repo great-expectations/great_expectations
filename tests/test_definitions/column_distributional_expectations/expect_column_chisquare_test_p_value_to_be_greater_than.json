@@ -10,7 +10,7 @@
       "in": {
         "column": "categorical_fixed",
         "partition_object": {
-          "values": ["A", "B", "C"], 
+          "values": ["A", "B", "C"],
           "weights": [0.54, 0.32, 0.14]
         },
         "p": 0.05
@@ -26,7 +26,7 @@
       "in": {
         "column": "categorical_fixed",
         "partition_object": {
-          "values": ["A", "B", "C"], 
+          "values": ["A", "B", "C"],
           "weights": [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
         },
         "p": 0.05
@@ -42,7 +42,7 @@
       "in": {
         "column": "categorical_fixed",
         "partition_object": {
-          "values": ["A", "B", "C"], 
+          "values": ["A", "B", "C"],
           "weights": [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
         },
         "p": 0.05,
@@ -80,7 +80,7 @@
         "in": {
           "column": "categorical_list",
           "partition_object": {
-            "values": ["A", "B", "C"], 
+            "values": ["A", "B", "C"],
             "weights": [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
           },
           "p": 0.05
@@ -95,7 +95,7 @@
         "in": {
           "column": "categorical_list",
           "partition_object": {
-            "values": ["A", "B", "C"], 
+            "values": ["A", "B", "C"],
             "weights": [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
           },
           "p": 0.05,

@@ -7,14 +7,8 @@ from great_expectations.core import ExpectationConfiguration
 def config1():
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "a",
-            "value_set": [1, 2, 3],
-            "result_format": "BASIC"
-        },
-        meta={
-            "notes": "This is an expectation."
-        }
+        kwargs={"column": "a", "value_set": [1, 2, 3], "result_format": "BASIC"},
+        meta={"notes": "This is an expectation."},
     )
 
 
@@ -22,14 +16,8 @@ def config1():
 def config2():
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "a",
-            "value_set": [1, 2, 3],
-            "result_format": "BASIC"
-        },
-        meta={
-            "notes": "This is an expectation."
-        }
+        kwargs={"column": "a", "value_set": [1, 2, 3], "result_format": "BASIC"},
+        meta={"notes": "This is an expectation."},
     )
 
 
@@ -37,14 +25,8 @@ def config2():
 def config3():
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "a",
-            "value_set": [1, 2, 3],
-            "result_format": "BASIC"
-        },
-        meta={
-            "notes": "This is another expectation."
-        }
+        kwargs={"column": "a", "value_set": [1, 2, 3], "result_format": "BASIC"},
+        meta={"notes": "This is another expectation."},
     )
 
 
@@ -52,14 +34,8 @@ def config3():
 def config4():
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "a",
-            "value_set": [1, 2, 3],
-            "result_format": "COMPLETE"
-        },
-        meta={
-            "notes": "This is another expectation."
-        }
+        kwargs={"column": "a", "value_set": [1, 2, 3], "result_format": "COMPLETE"},
+        meta={"notes": "This is another expectation."},
     )
 
 
@@ -70,11 +46,9 @@ def config5():
         kwargs={
             "column": "a",
             "value_set": [1, 2],  # differs from others
-            "result_format": "COMPLETE"
+            "result_format": "COMPLETE",
         },
-        meta={
-            "notes": "This is another expectation."
-        }
+        meta={"notes": "This is another expectation."},
     )
 
 
@@ -90,10 +64,56 @@ def test_expectation_configuration_equality(config1, config2, config3, config4):
     assert config3 != config4  # different result format
 
 
-def test_expectation_configuration_equivalence(config1, config2, config3, config4, config5):
+def test_expectation_configuration_equivalence(
+    config1, config2, config3, config4, config5
+):
     """Equivalence should depend only on properties that affect the result of the expectation."""
     assert config1.isEquivalentTo(config2)  # no difference
     assert config2.isEquivalentTo(config1)
     assert config1.isEquivalentTo(config3)  # different meta
     assert config1.isEquivalentTo(config4)  # different result format
     assert not config1.isEquivalentTo(config5)  # different value_set
+
+
+def test_expectation_configuration_get_evaluation_parameter_dependencies():
+    # Getting evaluation parameter dependencies relies on pyparsing, but the expectation
+    # configuration is responsible for ensuring that it only returns one copy of required metrics.
+
+    # If different expectations rely on the same upstream dependency,then it is possible for duplicates
+    # to be present nonetheless
+    ec = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_between",
+        kwargs={
+            "column": "norm",
+            "min_value": {
+                "$PARAMETER": "(-3 * urn:great_expectations:validations:profile:expect_column_stdev_to_be_between"
+                ".result.observed_value:column=norm) + "
+                "urn:great_expectations:validations:profile:expect_column_mean_to_be_between.result.observed_value"
+                ":column=norm"
+            },
+            "max_value": {
+                "$PARAMETER": "(3 * urn:great_expectations:validations:profile:expect_column_stdev_to_be_between"
+                ".result.observed_value:column=norm) + "
+                "urn:great_expectations:validations:profile:expect_column_mean_to_be_between.result.observed_value"
+                ":column=norm"
+            },
+        },
+    )
+
+    dependencies = ec.get_evaluation_parameter_dependencies()
+    dependencies["profile"][0]["metric_kwargs_id"]["column=norm"] = set(
+        dependencies["profile"][0]["metric_kwargs_id"]["column=norm"]
+    )
+
+    assert {
+        "profile": [
+            {
+                "metric_kwargs_id": {
+                    "column=norm": {
+                        "expect_column_stdev_to_be_between.result.observed_value",
+                        "expect_column_mean_to_be_between.result.observed_value",
+                    }
+                }
+            }
+        ]
+    } == dependencies

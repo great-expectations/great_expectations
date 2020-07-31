@@ -1,13 +1,13 @@
 from abc import ABCMeta, abstractmethod
 
 
-class DataContextKey(object):
-    __metaclass__ = ABCMeta
+class DataContextKey(object, metaclass=ABCMeta):
     """DataContextKey objects are used to uniquely identify resources used by the DataContext.
 
     A DataContextKey is designed to support clear naming with multiple representations including a hashable
     version making it suitable for use as the key in a dictionary.
     """
+
     @abstractmethod
     def to_tuple(self):
         pass
@@ -37,3 +37,20 @@ class DataContextKey(object):
 
     def __repr__(self):
         return self.__class__.__name__ + "::" + "/".join(self.to_tuple())
+
+
+class StringKey(DataContextKey):
+    """A simple DataContextKey with just a single string value"""
+
+    def __init__(self, key):
+        self._key = key
+
+    def to_tuple(self):
+        return (self._key,)
+
+    def to_fixed_length_tuple(self):
+        return self.to_tuple()
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        return cls.from_tuple(tuple_)

@@ -1,5 +1,5 @@
 """
-A basic generated Great Expectations tap that validates a single batch of data.
+A basic generated Great Expectations checkpoint that validates a single batch of data.
 
 Data that is validated is controlled by BatchKwargs, which can be adjusted in
 this script.
@@ -20,13 +20,13 @@ import sys
 
 from great_expectations import DataContext
 
-# tap configuration
+# checkpoint configuration
 context = DataContext("{1}")
 suite = context.get_expectation_suite("{2}")
 # You can modify your BatchKwargs to select different data
 batch_kwargs = {3}
 
-# tap validation process
+# checkpoint validation process
 batch = context.get_batch(batch_kwargs, suite)
 results = context.run_validation_operator("action_list_operator", [batch])
 

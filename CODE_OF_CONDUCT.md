@@ -2,13 +2,13 @@
 
 ## Our Pledge
 
-We as members, contributors, and leaders pledge to make participation in our 
-community a harassment-free experience for everyone. We value everyone as 
-whole human beings. To foster an atmosphere of kindness, cooperation, and 
-understanding, we encourage and support participation regardless of age, 
-body size, visible or invisible disability, ethnicity, sex characteristics, 
-gender identity and expression, level of experience, education, socio-economic 
-status, nationality, personal appearance, race, religion, sexual identity and 
+We as members, contributors, and leaders pledge to make participation in our
+community a harassment-free experience for everyone. We value everyone as
+whole human beings. To foster an atmosphere of kindness, cooperation, and
+understanding, we encourage and support participation regardless of age,
+body size, visible or invisible disability, ethnicity, sex characteristics,
+gender identity and expression, level of experience, education, socio-economic
+status, nationality, personal appearance, race, religion, sexual identity and
 orientation, or other characteristics.
 
 In the interest of fostering an open and welcoming environment, we as

@@ -183,7 +183,7 @@
           {
             "success":true
           },
-          "only_for": ["postgres"]
+          "only_for": ["postgresql"]
         },
         {
           "_note": "type name here works for tested sql non-postgres types; for sql non-postgres note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
@@ -341,8 +341,8 @@
           "datetime_tz": "DATETIME"
         },
         "mysql": {
-          "timestamp": "DATETIME",
-          "timestamp_tz": "DATETIME"
+          "datetime": "DATETIME",
+          "datetime_tz": "DATETIME"
         }
       },
       "tests": [

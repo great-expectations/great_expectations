@@ -1,54 +1,18 @@
+import copy
+import inspect
 import logging
 import os
-import errno
-import six
-import importlib
-import copy
 import re
-import inspect
 from collections import OrderedDict
 
-from great_expectations.util import verify_dynamic_loading_support
-from great_expectations.data_context.types.base import DataContextConfig, DataContextConfigSchema
-from great_expectations.exceptions import (
-    PluginModuleNotFoundError,
-    PluginClassNotFoundError,
-    MissingConfigVariableError,
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    DataContextConfigSchema,
 )
+from great_expectations.exceptions import MissingConfigVariableError
+from great_expectations.util import load_class, verify_dynamic_loading_support
 
 logger = logging.getLogger(__name__)
-
-
-def safe_mmkdir(directory, exist_ok=True):
-    """Simple wrapper since exist_ok is not available in python 2"""
-    if not isinstance(directory, six.string_types):
-        raise TypeError("directory must be of type str, not {0}".format({
-            "directory_type": str(type(directory))
-        }))
-
-    if not exist_ok:
-        raise ValueError(
-            "This wrapper should only be used for exist_ok=True; it is designed to make porting easier later")
-    try:
-        os.makedirs(directory)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
-
-
-def load_class(class_name, module_name):
-    """Dynamically load a class from strings or raise a helpful error."""
-    try:
-        loaded_module = importlib.import_module(module_name)
-        class_ = getattr(loaded_module, class_name)
-    except ModuleNotFoundError as e:
-        raise PluginModuleNotFoundError(module_name)
-    except AttributeError as e:
-        raise PluginClassNotFoundError(
-            module_name=module_name,
-            class_name=class_name
-        )
-    return class_
 
 
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
@@ -65,26 +29,32 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     if module_name is None:
         try:
             module_name = config_defaults.pop("module_name")
-        except KeyError as e:
-            raise KeyError("Neither config : {} nor config_defaults : {} contains a module_name key.".format(
-                config, config_defaults,
-            ))
+        except KeyError:
+            raise KeyError(
+                "Neither config : {} nor config_defaults : {} contains a module_name key.".format(
+                    config, config_defaults,
+                )
+            )
     else:
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
         config_defaults.pop("module_name", None)
 
-    verify_dynamic_loading_support(module_name=module_name, package_name=None)
+    verify_dynamic_loading_support(module_name=module_name)
 
     class_name = config.pop("class_name", None)
     if class_name is None:
-        logger.warning("Instantiating class from config without an explicit class_name is dangerous. Consider adding "
-                       "an explicit class_name for %s" % config.get("name"))
+        logger.warning(
+            "Instantiating class from config without an explicit class_name is dangerous. Consider adding "
+            "an explicit class_name for %s" % config.get("name")
+        )
         try:
             class_name = config_defaults.pop("class_name")
-        except KeyError as e:
-            raise KeyError("Neither config : {} nor config_defaults : {} contains a class_name key.".format(
-                config, config_defaults,
-            ))
+        except KeyError:
+            raise KeyError(
+                "Neither config : {} nor config_defaults : {} contains a class_name key.".format(
+                    config, config_defaults,
+                )
+            )
     else:
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
         config_defaults.pop("class_name", None)
@@ -96,14 +66,15 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     if runtime_environment is not None:
         # If there are additional kwargs available in the runtime_environment requested by a
         # class to be instantiated, provide them
-        if six.PY3:
-            argspec = inspect.getfullargspec(class_.__init__)[0][1:]
-        else:
-            argspec = inspect.getargspec(class_.__init__)[0][1:]
+        argspec = inspect.getfullargspec(class_.__init__)[0][1:]
+
         missing_args = set(argspec) - set(config_with_defaults.keys())
         config_with_defaults.update(
-            {missing_arg: runtime_environment[missing_arg] for missing_arg in missing_args
-             if missing_arg in runtime_environment}
+            {
+                missing_arg: runtime_environment[missing_arg]
+                for missing_arg in missing_args
+                if missing_arg in runtime_environment
+            }
         )
         # Add the entire runtime_environment as well if it's requested
         if "runtime_environment" in missing_args:
@@ -112,10 +83,12 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     try:
         class_instance = class_(**config_with_defaults)
     except TypeError as e:
-        raise TypeError("Couldn't instantiate class : {} with config : \n\t{}\n \n".format(
-            class_name,
-            format_dict_for_error_message(config_with_defaults)
-        ) + str(e))
+        raise TypeError(
+            "Couldn't instantiate class : {} with config : \n\t{}\n \n".format(
+                class_name, format_dict_for_error_message(config_with_defaults)
+            )
+            + str(e)
+        )
 
     return class_instance
 
@@ -123,7 +96,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
 def format_dict_for_error_message(dict_):
     # TODO : Tidy this up a bit. Indentation isn't fully consistent.
 
-    return '\n\t'.join('\t\t'.join((str(key), str(dict_[key]))) for key in dict_)
+    return "\n\t".join("\t\t".join((str(key), str(dict_[key]))) for key in dict_)
 
 
 def substitute_config_variable(template_str, config_variables_dict):
@@ -146,28 +119,41 @@ def substitute_config_variable(template_str, config_variables_dict):
         return template_str
 
     try:
-        match = re.search(r'\$\{(.*?)\}', template_str) or re.search(r'\$([_a-z][_a-z0-9]*)', template_str)
+        match = re.search(r"\$\{(.*?)\}", template_str) or re.search(
+            r"\$([_a-z][_a-z0-9]*)", template_str
+        )
     except TypeError:
         # If the value is not a string (e.g., a boolean), we should return it as is
         return template_str
 
     if match:
-        config_variable_value = os.getenv(match.group(1))
-        if not config_variable_value:
-            config_variable_value = config_variables_dict.get(match.group(1))
+        config_variable_value = config_variables_dict.get(match.group(1))
+        try:
+            inner_match = re.search(r"\$\{(.*?)\}", config_variable_value) or re.search(
+                r"\$([_a-z][_a-z0-9]*)", config_variable_value
+            )
+        except TypeError:
+            inner_match = None
 
-        if config_variable_value:
+        if inner_match:
+            config_variable_value = os.getenv(inner_match.group(1))
+
+        if config_variable_value is not None:
             if match.start() == 0 and match.end() == len(template_str):
                 return config_variable_value
             else:
-                return template_str[:match.start()] + config_variable_value + template_str[match.end():]
+                return (
+                    template_str[: match.start()]
+                    + config_variable_value
+                    + template_str[match.end() :]
+                )
 
         raise MissingConfigVariableError(
-                    f"""\n\nUnable to find a match for config substitution variable: `{match.group(1)}`.
+            f"""\n\nUnable to find a match for config substitution variable: `{match.group(1)}`.
 Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
 See https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets""",
-                    missing_config_variable=match.group(1)
-                )
+            missing_config_variable=match.group(1),
+        )
 
     return template_str
 
@@ -187,10 +173,14 @@ def substitute_all_config_variables(data, replace_variables_dict):
         data = DataContextConfigSchema().dump(data)
 
     if isinstance(data, dict) or isinstance(data, OrderedDict):
-        return {k: substitute_all_config_variables(v, replace_variables_dict) for
-                k, v in data.items()}
+        return {
+            k: substitute_all_config_variables(v, replace_variables_dict)
+            for k, v in data.items()
+        }
     elif isinstance(data, list):
-        return [substitute_all_config_variables(v, replace_variables_dict) for v in data]
+        return [
+            substitute_all_config_variables(v, replace_variables_dict) for v in data
+        ]
     return substitute_config_variable(data, replace_variables_dict)
 
 
