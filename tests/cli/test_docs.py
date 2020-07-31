@@ -92,3 +92,21 @@ def test_docs_build_no_view(
     assert os.path.isdir(os.path.join(local_site_dir, "expectations"))
     assert os.path.isdir(os.path.join(local_site_dir, "validations"))
     assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_docs_build_assume_yes(
+    caplog, site_builder_data_context_with_html_store_titanic_random
+):
+    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["docs", "build", "--no-view", "--assume-yes", "-d", root_dir],
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+    assert "Would you like to proceed? [Y/n]:" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)

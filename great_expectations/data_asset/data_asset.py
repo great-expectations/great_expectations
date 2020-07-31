@@ -1,5 +1,6 @@
 import copy
 import datetime
+import decimal
 import inspect
 import json
 import logging
@@ -1157,9 +1158,12 @@ class DataAsset(object):
                     )
                 ]
             except TypeError:
-                partial_unexpected_counts = [
-                    "partial_exception_counts requires a hashable type"
-                ]
+                partial_unexpected_counts = []
+                if "details" not in return_obj["result"]:
+                    return_obj["result"]["details"] = {}
+                return_obj["result"]["details"][
+                    "partial_unexpected_counts_error"
+                ] = "partial_unexpected_counts requested, but requires a hashable type"
             finally:
                 return_obj["result"].update(
                     {
@@ -1205,17 +1209,23 @@ class DataAsset(object):
         Returns:
             success (boolean), percent_success (float)
         """
+        if isinstance(success_count, decimal.Decimal):
+            raise ValueError(
+                "success_count must not be a decimal; check your db configuration"
+            )
+
+        if isinstance(nonnull_count, decimal.Decimal):
+            raise ValueError(
+                "nonnull_count must not be a decimal; check your db configuration"
+            )
 
         if nonnull_count > 0:
-            # percent_success = float(success_count)/nonnull_count
             percent_success = success_count / nonnull_count
 
             if mostly is not None:
                 success = bool(percent_success >= mostly)
-
             else:
                 success = bool(nonnull_count - success_count == 0)
-
         else:
             success = True
             percent_success = None

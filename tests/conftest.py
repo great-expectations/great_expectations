@@ -3,6 +3,8 @@ import json
 import locale
 import os
 import shutil
+from types import ModuleType
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -21,6 +23,8 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset.pandas_dataset import PandasDataset
+from great_expectations.datasource import SqlAlchemyDatasource
+from great_expectations.util import import_library_module
 
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
 
@@ -52,7 +56,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--no-spark",
         action="store_true",
-        help="If set, suppress tests against the spark test suite",
+        help="If set, suppress all tests against the spark test suite",
     )
     parser.addoption(
         "--no-sqlalchemy",
@@ -62,10 +66,13 @@ def pytest_addoption(parser):
     parser.addoption(
         "--no-postgresql",
         action="store_true",
-        help="If set, suppress tests against postgresql",
+        help="If set, suppress all tests against postgresql",
     )
     parser.addoption(
-        "--mysql", action="store_true", help="If set, test against mysql",
+        "--mysql", action="store_true", help="If set, execute tests against mysql",
+    )
+    parser.addoption(
+        "--mssql", action="store_true", help="If set, execute tests against mssql",
     )
     parser.addoption(
         "--aws-integration",
@@ -86,10 +93,11 @@ def build_test_backends_list(metafunc):
     no_sqlalchemy = metafunc.config.getoption("--no-sqlalchemy")
     if not no_sqlalchemy:
         test_backends += ["sqlite"]
-        import sqlalchemy as sa
+
+        sa: Union[ModuleType, None] = import_library_module(module_name="sqlalchemy")
 
         no_postgresql = metafunc.config.getoption("--no-postgresql")
-        if not no_postgresql:
+        if not (sa is None or no_postgresql):
             ###
             # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
             # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
@@ -109,7 +117,7 @@ def build_test_backends_list(metafunc):
                 )
             test_backends += ["postgresql"]
         mysql = metafunc.config.getoption("--mysql")
-        if mysql:
+        if sa and mysql:
             try:
                 engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
                 conn = engine.connect()
@@ -120,6 +128,21 @@ def build_test_backends_list(metafunc):
                     "'mysql+pymysql://root@localhost/test_ci'"
                 )
             test_backends += ["mysql"]
+        mssql = metafunc.config.getoption("--mssql")
+        if sa and mssql:
+            try:
+                engine = sa.create_engine(
+                    "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+                    # echo=True,
+                )
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError):
+                raise ImportError(
+                    "mssql tests are requested, but unable to connect to the mssql database at "
+                    "'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
+                )
+            test_backends += ["mssql"]
     return test_backends
 
 
@@ -155,6 +178,7 @@ def sa(test_backends):
         "postgresql" not in test_backends
         and "sqlite" not in test_backends
         and "mysql" not in test_backends
+        and "mssql" not in test_backends
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
@@ -1235,7 +1259,8 @@ def numeric_high_card_dataset(test_backend, numeric_high_card_dict):
             "norm_0_1": "NUMERIC",
         },
         "sqlite": {"norm_0_1": "FLOAT",},
-        "mysql": {"norm_0_1": "FLOAT",},
+        "mysql": {"norm_0_1": "DOUBLE",},
+        "mssql": {"norm_0_1": "FLOAT",},
         "spark": {"norm_0_1": "FloatType",},
     }
     return get_dataset(test_backend, numeric_high_card_dict, schemas=schemas)
@@ -1263,6 +1288,7 @@ def datetime_dataset(test_backend):
         "postgresql": {"datetime": "TIMESTAMP",},
         "sqlite": {"datetime": "TIMESTAMP",},
         "mysql": {"datetime": "TIMESTAMP",},
+        "mssql": {"datetime": "DATETIME",},
         "spark": {"datetime": "TimestampType",},
     }
     return get_dataset(test_backend, data, schemas=schemas)
@@ -1387,6 +1413,7 @@ def non_numeric_low_card_dataset(test_backend):
         "postgresql": {"lowcardnonnum": "TEXT",},
         "sqlite": {"lowcardnonnum": "VARCHAR",},
         "mysql": {"lowcardnonnum": "TEXT",},
+        "mssql": {"lowcardnonnum": "VARCHAR",},
         "spark": {"lowcardnonnum": "StringType",},
     }
     return get_dataset(test_backend, data, schemas=schemas)
@@ -1814,6 +1841,7 @@ def non_numeric_high_card_dataset(test_backend):
         "postgresql": {"highcardnonnum": "TEXT", "medcardnonnum": "TEXT",},
         "sqlite": {"highcardnonnum": "VARCHAR", "medcardnonnum": "VARCHAR",},
         "mysql": {"highcardnonnum": "TEXT", "medcardnonnum": "TEXT",},
+        "mssql": {"highcardnonnum": "VARCHAR", "medcardnonnum": "VARCHAR",},
         "spark": {"highcardnonnum": "StringType", "medcardnonnum": "StringType",},
     }
     return get_dataset(test_backend, data, schemas=schemas)
@@ -1841,7 +1869,8 @@ def dataset_sample_data(test_backend):
             "naturals": "NUMERIC",
         },
         "sqlite": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
-        "mysql": {"nulls": "FLOAT", "naturals": "FLOAT"},
+        "mysql": {"nulls": "DOUBLE", "naturals": "DOUBLE"},
+        "mssql": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
         "spark": {
             "infinities": "FloatType",
             "nulls": "FloatType",
@@ -2559,3 +2588,8 @@ def sqlite_view_engine(test_backends):
 @pytest.fixture
 def expectation_suite_identifier():
     return ExpectationSuiteIdentifier("my.expectation.suite.name")
+
+
+@pytest.fixture
+def basic_sqlalchemy_datasource(sqlitedb_engine):
+    return SqlAlchemyDatasource("basic_sqlalchemy_datasource", engine=sqlitedb_engine)

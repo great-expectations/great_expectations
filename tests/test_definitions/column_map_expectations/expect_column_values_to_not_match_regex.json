@@ -13,129 +13,138 @@
         "c": "StringType"
       }
     },
-    "tests": [{
+    "tests": [
+    {
       "title": "Negative test, insufficient Mostly + one non-matching value",
       "exact_match_out" : false,
-      "in":{
+      "in": {
         "column": "a",
         "regex": "^a",
         "mostly": 0.3
       },
-      "out":{
+      "out": {
         "success":false,
         "unexpected_index_list": [0, 1, 2, 3],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
       },
-      "suppress_test_for": ["sqlite"]
-    },{
+      "suppress_test_for": ["sqlite", "mssql"]
+    },
+    {
       "title": "Positive test, exact mostly w/ one non-matching value",
       "exact_match_out" : false,
-      "in":{
+      "in": {
         "column": "a",
         "regex": "^a",
         "mostly": 0.2
       },
-      "out":{
+      "out": {
         "success":true,
         "unexpected_index_list": [0, 1, 2, 3],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
       },
-      "suppress_test_for": ["sqlite"]
-    },{
+      "suppress_test_for": ["sqlite", "mssql"]
+    },
+    {
       "title": "Positive test, sufficient mostly w/ one non-matching value",
       "exact_match_out" : false,
-      "in":{
+      "in": {
         "column": "a",
         "regex": "^a",
         "mostly": 0.1
       },
-      "out":{
+      "out": {
         "success":true,
         "unexpected_index_list": [0, 1, 2, 3],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
       },
-      "suppress_test_for": ["sqlite"]
-    },{
+      "suppress_test_for": ["sqlite", "mssql"]
+    },
+    {
       "title": "Negative test, one missing value and insufficent mostly",
       "exact_match_out" : false,
-      "in":{
+      "in": {
         "column": "b",
         "regex": "^a",
         "mostly": 0.5
       },
-      "out":{
+      "out": {
         "success":false,
         "unexpected_index_list": [0, 1, 2],
         "unexpected_list": ["aaa", "abb", "acc"]
       },
-      "suppress_test_for": ["sqlite"]
-    },{
+      "suppress_test_for": ["sqlite", "mssql"]
+    },
+    {
       "title": "Positive test, one missing value, no exceptions",
       "exact_match_out" : false,
-      "in":{
+      "in": {
         "column": "b",
         "regex": "^c"
       },
-      "out":{
+      "out": {
         "success":true,
         "unexpected_index_list": [],
         "unexpected_list": []
       },
-      "suppress_test_for": ["sqlite"]
-    },{
+      "suppress_test_for": ["sqlite", "mssql"]
+    },
+    {
       "title": "Positive test. all missing values",
       "exact_match_out" : false,
-      "in":{
+      "in": {
         "column": "c",
         "regex": "^a"
       },
-      "out":{
+      "out": {
         "success": true,
         "unexpected_index_list": [],
         "unexpected_list": []
       },
-      "suppress_test_for": ["sqlite"]
-    },{
+      "suppress_test_for": ["sqlite", "mssql"]
+    },
+    {
       "title": "Positive test. all missing values, mostly",
       "exact_match_out" : false,
-      "in":{
+      "in": {
         "column": "c",
         "regex": "^a",
         "mostly": 0.2
       },
-      "out":{
+      "out": {
         "success": true,
         "unexpected_index_list": [],
         "unexpected_list": []
       },
-      "suppress_test_for": ["sqlite"]
-    },{
+      "suppress_test_for": ["sqlite", "mssql"]
+    },
+    {
       "title": "Negative test, Empty regex",
       "exact_match_out" : false,
-      "in":{
+      "in": {
         "column": "b",
         "regex": ""
       },
-      "out":{
+      "out": {
         "success": false,
         "unexpected_index_list": [0, 1, 2, 3],
         "unexpected_list": ["aaa", "abb", "acc", "bdd"]
       },
-      "suppress_test_for": ["sqlite"]
-    },{
+      "suppress_test_for": ["sqlite", "mysql", "mssql"]
+    },
+    {
       "title": "Negative test, match characters not at the beginning of string, exact mostly",
       "exact_match_out" : false,
-      "in":{
+      "in": {
         "column": "a",
         "regex": "b",
         "mostly": 0.6
       },
-      "out":{
+      "out": {
         "success": true,
         "unexpected_index_list": [1, 4],
         "unexpected_list": ["abb", "bee"]
       },
-      "suppress_test_for": ["sqlite"]
+      "suppress_test_for": ["sqlite", "mssql"]
     }]
   }]
 }
