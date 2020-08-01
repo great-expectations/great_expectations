@@ -6,7 +6,8 @@ Changelog
 
 Develop
 -----------------
-[DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
+* [ENHANCEMENT] Improve data docs page breadcrumbs to have clearer run information
+* [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 
 0.11.9
 -----------------
