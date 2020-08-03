@@ -6,7 +6,8 @@ Changelog
 
 Develop
 -----------------
-[DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
+* [ENHANCEMENT] Data Docs Validation Results only shows unexpected value counts if all unexpected values are available
+* [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 
 0.11.9
 -----------------
