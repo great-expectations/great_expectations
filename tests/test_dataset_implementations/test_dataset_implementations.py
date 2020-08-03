@@ -74,6 +74,13 @@ def test_get_column_value_counts(test_backend):
             "n": "IntegerType",
             "b": "BooleanType",
         },
+        "mysql": {
+            "x": "DOUBLE",
+            "y": "INTEGER",
+            "z": "INTEGER",
+            "n": "INTEGER",
+            "b": "TINYINT",
+        },
         "mssql": {
             "x": "FLOAT",
             "y": "INTEGER",
