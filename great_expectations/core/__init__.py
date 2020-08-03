@@ -482,18 +482,15 @@ def _deduplicate_evaluation_parameter_dependencies(dependencies):
 class ExpectationConfiguration(DictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
-    default_domain_kwargs = {
+    default_kwarg_values = {
+        # domain_kwargs
         "row_condition": None,
-        "condition_parser": "pandas"
-    }
-
-    default_runtime_kwargs = {
+        "condition_parser": "pandas",
+        # runtime_kwargs
         "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
-    }
-
-    default_success_kwargs = {
+        # success_kwargs
         "column_index": None,
         "min_value": None,
         "max_value": None,
