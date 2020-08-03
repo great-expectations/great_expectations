@@ -185,7 +185,7 @@ class ValidationResultsPageRenderer(Renderer):
         if run_name_as_time != run_time_datetime and run_name_as_time != "__none__":
             include_run_name = True
 
-        page_title = expectation_suite_name
+        page_title = "Validations / " + expectation_suite_name
         if data_asset_name:
             page_title += " / " + data_asset_name
         if include_run_name:
@@ -523,7 +523,7 @@ class ExpectationSuitePageRenderer(Renderer):
         return RenderedDocumentContent(
             **{
                 "renderer_type": "ExpectationSuitePageRenderer",
-                "page_title": expectation_suite_name,
+                "page_title": "Expectations / " + expectation_suite_name,
                 "expectation_suite_name": expectation_suite_name,
                 "utm_medium": "expectation-suite-page",
                 "sections": sections,
@@ -794,7 +794,7 @@ class ProfilingResultsPageRenderer(Renderer):
         if run_name_as_time != run_time_datetime and run_name_as_time != "__none__":
             include_run_name = True
 
-        page_title = expectation_suite_name
+        page_title = "Profiling Results / " + expectation_suite_name
         if data_asset_name:
             page_title += " / " + data_asset_name
         if include_run_name:
