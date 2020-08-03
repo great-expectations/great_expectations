@@ -122,37 +122,48 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         table_rows = []
 
         if result.get("partial_unexpected_counts"):
-            header_row = ["Unexpected Value", "Count"]
-            for unexpected_count in result.get("partial_unexpected_counts"):
-                if not isinstance(unexpected_count, dict):
+            # We will check to see whether we have *all* of the unexpected values
+            # accounted for in our count, and include counts if we do. If we do not,
+            # we will use this as simply a better (non-repeating) source of
+            # "sampled" unexpected values
+            total_count = 0
+            for unexpected_count_dict in result.get("partial_unexpected_counts"):
+                if not isinstance(unexpected_count_dict, dict):
                     # handles case: "partial_exception_counts requires a hashable type"
                     # this case is also now deprecated (because the error is moved to an errors key
                     # the error also *should have* been updated to "partial_unexpected_counts ..." long ago.
                     # NOTE: JPC 20200724 - Consequently, this codepath should be removed by approximately Q1 2021
                     continue
-                elif unexpected_count.get("value"):
-                    table_rows.append(
-                        [unexpected_count.get("value"), unexpected_count.get("count")]
-                    )
-                elif unexpected_count.get("value") == "":
-                    table_rows.append(["EMPTY", unexpected_count.get("count")])
-                elif unexpected_count.get("value") is not None:
-                    table_rows.append(
-                        [unexpected_count.get("value"), unexpected_count.get("count")]
-                    )
+                value = unexpected_count_dict.get("value")
+                count = unexpected_count_dict.get("count")
+                total_count += count
+                if value is not None and value != "":
+                    table_rows.append([value, count])
+                elif value == "":
+                    table_rows.append(["EMPTY", count])
                 else:
-                    table_rows.append(["null", unexpected_count.get("count")])
+                    table_rows.append(["null", count])
+
+            # Check to see if we have *all* of the unexpected values accounted for. If so,
+            # we show counts. If not, we only show "sampled" unexpected values.
+            if total_count == result.get("unexpected_count"):
+                header_row = ["Unexpected Value", "Count"]
+            else:
+                header_row = ["Sampled Unexpected Values"]
+                table_rows = [[row[0]] for row in table_rows]
         else:
-            header_row = ["Unexpected Value"]
+            header_row = ["Sampled Unexpected Values"]
+            sampled_values_set = set()
             for unexpected_value in result.get("partial_unexpected_list"):
                 if unexpected_value:
-                    table_rows.append([unexpected_value])
+                    string_unexpected_value = unexpected_value
                 elif unexpected_value == "":
-                    table_rows.append(["EMPTY"])
-                elif unexpected_value is not None:
-                    table_rows.append([unexpected_value])
+                    string_unexpected_value = "EMPTY"
                 else:
-                    table_rows.append(["null"])
+                    string_unexpected_value = "null"
+                if string_unexpected_value not in sampled_values_set:
+                    table_rows.append([string_unexpected_value])
+                    sampled_values_set.add(string_unexpected_value)
 
         unexpected_table_content_block = RenderedTableContent(
             **{

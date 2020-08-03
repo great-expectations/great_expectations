@@ -834,89 +834,68 @@
                   },
                   "table": [
                     [
-                      1,
                       1
                     ],
                     [
-                      2,
-                      1
+                      2
                     ],
                     [
-                      3,
-                      1
+                      3
                     ],
                     [
-                      4,
-                      1
+                      4
                     ],
                     [
-                      5,
-                      1
+                      5
                     ],
                     [
-                      6,
-                      1
+                      6
                     ],
                     [
-                      7,
-                      1
+                      7
                     ],
                     [
-                      8,
-                      1
+                      8
                     ],
                     [
-                      9,
-                      1
+                      9
                     ],
                     [
-                      10,
-                      1
+                      10
                     ],
                     [
-                      11,
-                      1
+                      11
                     ],
                     [
-                      12,
-                      1
+                      12
                     ],
                     [
-                      13,
-                      1
+                      13
                     ],
                     [
-                      14,
-                      1
+                      14
                     ],
                     [
-                      15,
-                      1
+                      15
                     ],
                     [
-                      16,
-                      1
+                      16
                     ],
                     [
-                      17,
-                      1
+                      17
                     ],
                     [
-                      18,
-                      1
+                      18
                     ],
                     [
-                      19,
-                      1
+                      19
                     ],
                     [
-                      20,
-                      1
+                      20
                     ]
                   ],
                   "header_row": [
-                    "Unexpected Value",
-                    "Count"
+                    "Sampled Unexpected Values"
                   ]
                 }
               ],
@@ -1385,89 +1364,68 @@
                   },
                   "table": [
                     [
-                      "Carlsson, Mr Frans Olof",
-                      2
+                      "Carlsson, Mr Frans Olof"
                     ],
                     [
-                      "Connolly, Miss Kate",
-                      2
+                      "Connolly, Miss Kate"
                     ],
                     [
-                      "Kelly, Mr James",
-                      2
+                      "Kelly, Mr James"
                     ],
                     [
-                      "Allen, Miss Elisabeth Walton",
-                      1
+                      "Allen, Miss Elisabeth Walton"
                     ],
                     [
-                      "Allison, Master Hudson Trevor",
-                      1
+                      "Allison, Master Hudson Trevor"
                     ],
                     [
-                      "Allison, Miss Helen Loraine",
-                      1
+                      "Allison, Miss Helen Loraine"
                     ],
                     [
-                      "Allison, Mr Hudson Joshua Creighton",
-                      1
+                      "Allison, Mr Hudson Joshua Creighton"
                     ],
                     [
-                      "Allison, Mrs Hudson JC (Bessie Waldo Daniels)",
-                      1
+                      "Allison, Mrs Hudson JC (Bessie Waldo Daniels)"
                     ],
                     [
-                      "Anderson, Mr Harry",
-                      1
+                      "Anderson, Mr Harry"
                     ],
                     [
-                      "Andrews, Miss Kornelia Theodosia",
-                      1
+                      "Andrews, Miss Kornelia Theodosia"
                     ],
                     [
-                      "Andrews, Mr Thomas, jr",
-                      1
+                      "Andrews, Mr Thomas, jr"
                     ],
                     [
-                      "Appleton, Mrs Edward Dale (Charlotte Lamson)",
-                      1
+                      "Appleton, Mrs Edward Dale (Charlotte Lamson)"
                     ],
                     [
-                      "Artagaveytia, Mr Ramon",
-                      1
+                      "Artagaveytia, Mr Ramon"
                     ],
                     [
-                      "Astor, Colonel John Jacob",
-                      1
+                      "Astor, Colonel John Jacob"
                     ],
                     [
-                      "Astor, Mrs John Jacob (Madeleine Talmadge Force)",
-                      1
+                      "Astor, Mrs John Jacob (Madeleine Talmadge Force)"
                     ],
                     [
-                      "Aubert, Mrs Leontine Pauline",
-                      1
+                      "Aubert, Mrs Leontine Pauline"
                     ],
                     [
-                      "Barkworth, Mr Algernon H",
-                      1
+                      "Barkworth, Mr Algernon H"
                     ],
                     [
-                      "Baumann, Mr John D",
-                      1
+                      "Baumann, Mr John D"
                     ],
                     [
-                      "Baxter, Mr Quigg Edmond",
-                      1
+                      "Baxter, Mr Quigg Edmond"
                     ],
                     [
-                      "Baxter, Mrs James (Helene DeLaudeniere Chaput)",
-                      1
+                      "Baxter, Mrs James (Helene DeLaudeniere Chaput)"
                     ]
                   ],
                   "header_row": [
-                    "Unexpected Value",
-                    "Count"
+                    "Sampled Unexpected Values"
                   ]
                 }
               ],
@@ -2528,89 +2486,68 @@
                   },
                   "table": [
                     [
-                      22.0,
-                      35
+                      22.0
                     ],
                     [
-                      21.0,
-                      31
+                      21.0
                     ],
                     [
-                      30.0,
-                      31
+                      30.0
                     ],
                     [
-                      18.0,
-                      30
+                      18.0
                     ],
                     [
-                      36.0,
-                      29
+                      36.0
                     ],
                     [
-                      24.0,
-                      27
+                      24.0
                     ],
                     [
-                      26.0,
-                      27
+                      26.0
                     ],
                     [
-                      27.0,
-                      24
+                      27.0
                     ],
                     [
-                      28.0,
-                      24
+                      28.0
                     ],
                     [
-                      19.0,
-                      23
+                      19.0
                     ],
                     [
-                      20.0,
-                      23
+                      20.0
                     ],
                     [
-                      23.0,
-                      23
+                      23.0
                     ],
                     [
-                      25.0,
-                      23
+                      25.0
                     ],
                     [
-                      32.0,
-                      22
+                      32.0
                     ],
                     [
-                      45.0,
-                      20
+                      45.0
                     ],
                     [
-                      29.0,
-                      15
+                      29.0
                     ],
                     [
-                      31.0,
-                      14
+                      31.0
                     ],
                     [
-                      33.0,
-                      14
+                      33.0
                     ],
                     [
-                      35.0,
-                      14
+                      35.0
                     ],
                     [
-                      39.0,
-                      14
+                      39.0
                     ]
                   ],
                   "header_row": [
-                    "Unexpected Value",
-                    "Count"
+                    "Sampled Unexpected Values"
                   ]
                 }
               ],
