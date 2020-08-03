@@ -1270,13 +1270,13 @@ def _get_batch_kwargs_for_sqlalchemy_datasource(
 
     if datasource.engine.dialect.name.lower() == "bigquery":
         # bigquery also requires special handling
-        table_name = click.prompt(
+        bigquery_temp_table = click.prompt(
             "GE will create a table to use for "
             "validation." + os.linesep + "Please enter a name for this table: ",
             default="SOME_PROJECT.SOME_DATASET.ge_tmp_" + str(uuid.uuid4())[:8],
         )
         temp_table_kwargs = {
-            "bigquery_temp_table": table_name,
+            "bigquery_temp_table": bigquery_temp_table,
         }
 
     try:
