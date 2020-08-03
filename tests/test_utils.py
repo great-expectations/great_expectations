@@ -233,7 +233,6 @@ def get_dataset(
             engine = create_engine(f"sqlite:////{sqlite_db_path}")
         else:
             engine = create_engine("sqlite://")
-        conn = engine.connect()
         # Add the data to the database as a new table
 
         sql_dtypes = {}
@@ -277,7 +276,7 @@ def get_dataset(
             )
         df.to_sql(
             name=table_name,
-            con=conn,
+            con=engine,
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
@@ -285,7 +284,7 @@ def get_dataset(
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "postgresql":
@@ -294,7 +293,6 @@ def get_dataset(
 
         # Create a new database
         engine = create_engine("postgresql://postgres@localhost/test_ci")
-        conn = engine.connect()
 
         sql_dtypes = {}
         if (
@@ -339,7 +337,7 @@ def get_dataset(
             )
         df.to_sql(
             name=table_name,
-            con=conn,
+            con=engine,
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
@@ -347,7 +345,7 @@ def get_dataset(
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "mysql":
@@ -355,7 +353,6 @@ def get_dataset(
             return None
 
         engine = create_engine("mysql+pymysql://root@localhost/test_ci")
-        conn = engine.connect()
 
         sql_dtypes = {}
         if (
@@ -398,7 +395,7 @@ def get_dataset(
             )
         df.to_sql(
             name=table_name,
-            con=conn,
+            con=engine,
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
@@ -406,7 +403,7 @@ def get_dataset(
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "mssql":
@@ -421,8 +418,6 @@ def get_dataset(
         # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
         # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
         # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
-
-        conn = engine.connect()
 
         sql_dtypes = {}
         if (
@@ -465,7 +460,7 @@ def get_dataset(
             )
         df.to_sql(
             name=table_name,
-            con=conn,
+            con=engine,
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
@@ -473,7 +468,7 @@ def get_dataset(
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "SparkDFDataset":
