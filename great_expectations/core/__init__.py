@@ -778,8 +778,18 @@ class ExpectationConfiguration(DictDot):
             path: str,
             value: Any
     ) -> 'ExpectationConfiguration':
-        if op not in ['add', 'replace']:
-            raise ValueError("Op must be either 'add', 'replace'")
+        """
+
+        Args:
+            op: A jsonpatch operation. One of 'add', 'replace', or 'remove'
+            path: A jsonpatch path for the patch operation
+            value: The value to patch
+
+        Returns:
+            The patched ExpectationConfiguration object
+        """
+        if op not in ['add', 'replace', 'remove']:
+            raise ValueError("Op must be either 'add', 'replace', or 'remove'")
 
         if path.split('/')[1] not in self.get_runtime_kwargs().keys():
             raise ValueError("Path not available in kwargs")
@@ -997,6 +1007,13 @@ class ExpectationConfigurationSchema(Schema):
 
 
 class ExpectationSuite(object):
+    """
+    This ExpectationSuite object has create, read, update, and delete functionality:
+        -create: self.add_or_replace()
+        -read: self.find_expectation_indexes()
+        -update: self.add_or_replace()
+        -delete: self.remove_expectation()
+    """
     def __init__(
         self,
         expectation_suite_name,
@@ -1070,7 +1087,9 @@ class ExpectationSuite(object):
             else:
                 # Delegate comparison to the other instance
                 return NotImplemented
-        return all(
+
+        return len(self.expectations) == len(other.expectations) \
+               and all(
             [
                 mine.isEquivalentTo(theirs)
                 for (mine, theirs) in zip(self.expectations, other.expectations)
@@ -1203,7 +1222,7 @@ class ExpectationSuite(object):
             return removed_expectations
 
         else:
-            return self.expectations.pop(found_expectation_indexes)
+            return self.expectations.pop(found_expectation_indexes[0])
 
     def find_expectation_indexes(
             self,
@@ -1249,7 +1268,23 @@ class ExpectationSuite(object):
             value: Any,
             match_type: str
             ) -> ExpectationConfiguration:
+        """
 
+               Args:
+                   expectation_type: This is used to set up the ExpectationConfiguration
+                   match_kwargs: This is used to set up the ExpectationConfiguration
+                   op: A jsonpatch operation (one of 'add','update', or 'remove')
+                   path: A jsonpatch path for the patch operation
+                   value: The value to patch
+                   match_type: The match type to use for find_expectation_index(_)
+
+               Returns: The patched ExpectationConfiguration
+
+               Raises:
+                   No match
+                   More than 1 match
+
+               """
         found_expectation_indexes = self.find_expectation_indexes(ExpectationConfiguration(expectation_type, match_kwargs), match_type)
 
         if len(found_expectation_indexes) < 1:
@@ -1259,13 +1294,24 @@ class ExpectationSuite(object):
                              "criteria")
 
         self.expectations[found_expectation_indexes[0]].patch(op, path, value)
-        return self.expectations[found_expectation_indexes]
+        return self.expectations[found_expectation_indexes[0]]
 
     def add_or_replace(
             self,
             expectation_configuration: ExpectationConfiguration,
-            match_type: str="domain"
+            match_type: str = "domain"
             ) -> ExpectationConfiguration:
+        """
+
+        Args:
+            expectation_configuration: The ExpectationConfiguration to add or update
+            match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
+                and so whether we should add or replace.
+
+        Returns:
+            The ExpectationConfiguration we added or replaced.
+
+        """
         found_expectation_indexes = self.find_expectation_indexes(expectation_configuration, match_type)
 
         if len(found_expectation_indexes) > 1:
@@ -1276,10 +1322,9 @@ class ExpectationSuite(object):
             # to update instead. We need to consider how to handle meta in that situation.
             # patch = jsonpatch.make_patch(self.expectations[found_expectation_index].kwargs, expectation_configuration.kwargs)
             # patch.apply(self.expectations[found_expectation_index].kwargs, in_place=True)
-            self.expectations[found_expectation_index[0]] = expectation_configuration
+            self.expectations[found_expectation_indexes[0]] = expectation_configuration
         else:
             self.append_expectation(expectation_configuration)
-
         return expectation_configuration
 
 

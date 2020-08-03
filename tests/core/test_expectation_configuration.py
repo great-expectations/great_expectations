@@ -51,6 +51,18 @@ def config5():
         meta={"notes": "This is another expectation."},
     )
 
+@pytest.fixture
+def config6():
+    return ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "a",
+            "value_set": [1, 2, 3, 4],  # differs from others
+            "result_format": "COMPLETE",
+        },
+        meta={"notes": "This is another expectation."},
+    )
+
 
 def test_expectation_configuration_equality(config1, config2, config3, config4):
     """Equality should depend on all defined properties of a configuration object, but not on whether the *instances*
@@ -119,14 +131,8 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies():
         ]
     } == dependencies
 
-def test_expectation_configuration_patch_add(
-         config1, config2, config3, config4, config5
+def test_expectation_configuration_patch(
+         config4, config5, config6
 ):
-    assert config5.patch("add", "/value_set/-", 3).isEquivalentTo(config4)
-
-def test_expectation_configuration_patch_replace(
-         config1, config2, config3, config4, config5
-):
-    assert config5.patch("replace", "/value_set", [1, 2, 3]).isEquivalentTo(config4)
-
-
+    assert config5.patch("replace", "/value_set", [1, 2, 3]).isEquivalentTo(config4, match_type="success")
+    assert config5.patch("add", "/value_set/-", 4).isEquivalentTo(config6, match_type="success")
