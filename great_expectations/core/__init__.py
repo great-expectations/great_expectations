@@ -777,7 +777,7 @@ class ExpectationConfiguration(DictDot):
 
     def patch(
         self, op: str, path: str, value: str  # what should this be?
-    ) -> ExpectationConfiguration:  # what should be returned?
+    ) -> "ExpectationConfiguration":  # what should be returned?
         if op not in ["add", "replace"]:
             raise ValueError("Op must be either 'add' or 'replace'")
 
