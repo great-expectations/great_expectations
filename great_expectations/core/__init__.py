@@ -4,6 +4,7 @@ import logging
 import warnings
 from collections import namedtuple
 from copy import deepcopy
+from typing import Any
 
 import jsonpatch
 from dateutil.parser import ParserError as DateUtilParserError
