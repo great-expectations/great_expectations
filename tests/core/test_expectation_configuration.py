@@ -51,6 +51,7 @@ def config5():
         meta={"notes": "This is another expectation."},
     )
 
+
 @pytest.fixture
 def config6():
     return ExpectationConfiguration(
@@ -83,9 +84,15 @@ def test_expectation_configuration_equivalence(
     assert config1.isEquivalentTo(config2, match_type="runtime")  # no difference
     assert config2.isEquivalentTo(config1, match_type="runtime")
     assert config1.isEquivalentTo(config3, match_type="runtime")  # different meta
-    assert config1.isEquivalentTo(config4, match_type="success")  # different result format
-    assert not config1.isEquivalentTo(config5, match_type="success")  # different value_set
-    assert config1.isEquivalentTo(config5, match_type="domain")  # different result format
+    assert config1.isEquivalentTo(
+        config4, match_type="success"
+    )  # different result format
+    assert not config1.isEquivalentTo(
+        config5, match_type="success"
+    )  # different value_set
+    assert config1.isEquivalentTo(
+        config5, match_type="domain"
+    )  # different result format
 
 
 def test_expectation_configuration_get_evaluation_parameter_dependencies():
@@ -131,8 +138,11 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies():
         ]
     } == dependencies
 
-def test_expectation_configuration_patch(
-         config4, config5, config6
-):
-    assert config5.patch("replace", "/value_set", [1, 2, 3]).isEquivalentTo(config4, match_type="success")
-    assert config5.patch("add", "/value_set/-", 4).isEquivalentTo(config6, match_type="success")
+
+def test_expectation_configuration_patch(config4, config5, config6):
+    assert config5.patch("replace", "/value_set", [1, 2, 3]).isEquivalentTo(
+        config4, match_type="success"
+    )
+    assert config5.patch("add", "/value_set/-", 4).isEquivalentTo(
+        config6, match_type="success"
+    )

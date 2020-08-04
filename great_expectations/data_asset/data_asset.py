@@ -285,7 +285,9 @@ class DataAsset(object):
                     pass
                 else:
                     # Append the expectation to the config.
-                    stored_config = self._expectation_suite.add_or_replace(expectation_config)
+                    stored_config = self._expectation_suite.add_or_replace(
+                        expectation_config
+                    )
 
                 if include_config:
                     return_obj.expectation_config = copy.deepcopy(stored_config)
@@ -391,11 +393,10 @@ class DataAsset(object):
 
         self._expectation_suite.append_expectation(expectation_config)
 
-
     def find_expectation_indexes(
-            self,
-            expectation_configuration: ExpectationConfiguration,
-            match_type: str = "domain"
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        match_type: str = "domain",
     ) -> List[int]:
         warnings.warn(
             "find_expectation_indexes is deprecated, and will be removed in a future release. "
@@ -404,14 +405,14 @@ class DataAsset(object):
         )
         """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
         return self._expectation_suite.find_expectation_indexes(
-            expectation_configuration=expectation_configuration,
-            match_type=match_type
+            expectation_configuration=expectation_configuration, match_type=match_type
         )
 
-    def find_expectations(self,
-              expectation_configuration: ExpectationConfiguration,
-              match_type: str = "domain"
-              ) -> List[ExpectationConfiguration]:
+    def find_expectations(
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        match_type: str = "domain",
+    ) -> List[ExpectationConfiguration]:
         warnings.warn(
             "find_expectations is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
@@ -419,14 +420,13 @@ class DataAsset(object):
         )
         """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
         return self._expectation_suite.find_expectations(
-            expectation_configuration=expectation_configuration,
-            match_type=match_type
+            expectation_configuration=expectation_configuration, match_type=match_type
         )
 
     def remove_expectation(
-            self,
-            expectation_configuration: ExpectationConfiguration,
-            match_type: str = "domain"
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        match_type: str = "domain",
     ) -> ExpectationConfiguration:
         warnings.warn(
             "DataAsset.remove_expectations is deprecated, and will be removed in a future release. "
@@ -435,8 +435,7 @@ class DataAsset(object):
         )
         """This method is a thin wrapper for ExpectationSuite.remove()"""
         return self._expectation_suite.remove_expectation(
-            expectation_configuration=expectation_configuration,
-            match_type=match_type
+            expectation_configuration=expectation_configuration, match_type=match_type
         )
 
     def set_config_value(self, key, value):
