@@ -26,22 +26,31 @@ def test_comprehensive_list_of_messages():
     valid_message_list = list(valid_usage_statistics_messages.keys())
     # NOTE: If you are changing the expected valid message list below, you need
     # to also update one or more tests below!
-
     """
     assert valid_message_list == [
-        "data_context.__init__",
-        "cli.suite.list",
-        "cli.suite.new",
-        "cli.checkpoint.list",
-        "cli.init.create",
-        "cli.new_ds_choice",
-        "data_context.open_data_docs",
-        "data_context.build_data_docs",
-        "data_context.save.expectation.suite",
-        "data_context.add_datasource",
-
-
-    ]"""
+        "data_context.__init__",\
+        "data_context.open_data_docs",\
+        "data_context.build_data_docs",\
+        "data_context.save_expectation_suite",\
+        "data_context.add_datasource",\
+        "data_asset.validate",\
+        "cli.suite.list",\
+        "cli.suite.new",\
+        "cli.init.create",\
+        "cli.new_ds_choice",\
+        "cli.validation_operator.list",\
+        "cli.validation_operator.run",\
+        "cli.project.check_config",\
+        "cli.store.list",\
+        "cli.suite.list",\
+        "cli.datasource.list",\
+        "cli.suite.edit",\
+        "cli.datasource.new",\
+        "cli.docs.build",\
+        "cli.docs.list",\
+        "datasource.sqlalchemy.connect"\
+    ]
+    """
 
 
 def test_init_message():
@@ -166,13 +175,11 @@ def test_usage_stats_record_schema():
         "cli.suite.list",
         "cli.suite.new",
         "cli.store.list",
-        # "cli.checkpoint.list",
         "cli.project.check_config",
         "cli.validation_operator.run",
         "cli.validation_operator.list",
         "cli.docs.list",
         "cli.docs.build",
-        # "cli.datasource.profile",
         "cli.datasource.list",
         "cli.datasource.new",
         "data_context.open_data_docs",
