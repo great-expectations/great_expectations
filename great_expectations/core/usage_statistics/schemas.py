@@ -404,6 +404,7 @@ usage_statistics_record_schema = {
                         "cli.suite.list",
                         "cli.suite.new",
                         "cli.store.list",
+                        "cli.checkpoint.list",
                         "cli.project.check_config",
                         "cli.validation_operator.run",
                         "cli.validation_operator.list",
