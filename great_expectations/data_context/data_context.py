@@ -96,9 +96,9 @@ class BaseDataContext(object):
     id: os_linux
     title: OS - Linux
     icon:
-    short_description: 
-    description: 
-    how_to_guide_url: 
+    short_description:
+    description:
+    how_to_guide_url:
     maturity: Production
     maturity_details:
         api_stability: N/A
@@ -111,9 +111,9 @@ class BaseDataContext(object):
     id: os_macos
     title: OS - MacOS
     icon:
-    short_description: 
-    description: 
-    how_to_guide_url: 
+    short_description:
+    description:
+    how_to_guide_url:
     maturity: Production
     maturity_details:
         api_stability: N/A
@@ -126,9 +126,9 @@ class BaseDataContext(object):
     id: os_windows
     title: OS - Windows
     icon:
-    short_description: 
-    description: 
-    how_to_guide_url: 
+    short_description:
+    description:
+    how_to_guide_url:
     maturity: Beta
     maturity_details:
         api_stability: N/A
@@ -285,8 +285,11 @@ class BaseDataContext(object):
                 runtime_environment={"root_directory": self.root_directory,},
                 config_defaults={"module_name": module_name},
             )
-        except ge_exceptions.DataContextError:
+        except ge_exceptions.DataContextError as e:
             new_store = None
+            logger.critical(
+                f"While attempting to instantiate the store named {store_name} an error occurred: {e}"
+            )
         if not new_store:
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,

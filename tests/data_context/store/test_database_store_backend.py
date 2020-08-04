@@ -6,7 +6,10 @@ from great_expectations.data_context.store import DatabaseStoreBackend
 from great_expectations.exceptions import StoreBackendError
 
 
-def test_database_store_backend_get_url_for_key(caplog, sa):
+def test_database_store_backend_get_url_for_key(caplog, sa, test_backends):
+    if "postgresql" not in test_backends:
+        pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
+
     store_backend = DatabaseStoreBackend(
         credentials={
             "drivername": "postgresql",
@@ -29,7 +32,10 @@ def test_database_store_backend_get_url_for_key(caplog, sa):
     assert "postgresql://test_ci/not_here" == store_backend.get_url_for_key(key)
 
 
-def test_database_store_backend_duplicate_key_violation(caplog, sa):
+def test_database_store_backend_duplicate_key_violation(caplog, sa, test_backends):
+    if "postgresql" not in test_backends:
+        pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
+
     store_backend = DatabaseStoreBackend(
         credentials={
             "drivername": "postgresql",

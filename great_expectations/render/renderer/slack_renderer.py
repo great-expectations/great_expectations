@@ -46,7 +46,7 @@ class SlackRenderer(Renderer):
             )
 
             if validation_result.success:
-                status = "Success :tada:"
+                status = "Success :white_check_mark:"
 
             summary_text = """*Batch Validation Status*: {}
 *Expectation suite name*: `{}`
