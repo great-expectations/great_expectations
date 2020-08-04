@@ -503,12 +503,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 module_name="sqlalchemy.dialects." + self.engine.dialect.name
             )
 
-<<<<<<< HEAD
-=======
             if engine and engine.dialect.name.lower() in ["sqlite", "mssql"]:
                 # sqlite/mssql temp tables only persist within a connection so override the engine
                 self.engine = engine
->>>>>>> refactor: use query schema in config_variables.yml to create transient table(s)
         elif self.engine.dialect.name.lower() == "snowflake":
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
