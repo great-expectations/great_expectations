@@ -408,7 +408,6 @@ usage_statistics_record_schema = {
                         "cli.project.check_config",
                         "cli.validation_operator.run",
                         "cli.validation_operator.list",
-                        "cli.tap.new",
                         "cli.docs.list",
                         "cli.docs.build",
                         "cli.datasource.profile",

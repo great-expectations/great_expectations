@@ -37,6 +37,8 @@ def test_comprehensive_list_of_messages():
         "data_context.build_data_docs",
         "data_context.save.expectation.suite",
         "data_context.add_datasource",
+
+
     ]"""
 
 
@@ -61,12 +63,14 @@ def test_cli_suite_list_message():
     )
 
 
+"""
 def test_cli_checkpoint_list_message():
     # empty payload
     jsonschema.validate(
         valid_usage_statistics_messages["cli.checkpoint.list"][0],
         usage_statistics_record_schema,
     )
+"""
 
 
 def test_cli_suite_new_message():
@@ -77,10 +81,23 @@ def test_cli_suite_new_message():
     )
 
 
+def test_data_asset_validate_message():
+    # record itself
+    jsonschema.validate(
+        valid_usage_statistics_messages["data_asset.validate"][0],
+        usage_statistics_record_schema,
+    )
+    # non-empty payload
+    jsonschema.validate(
+        valid_usage_statistics_messages["data_asset.validate"][0]["event_payload"],
+        cli_new_ds_choice_payload,
+    )
+
+
 def test_cli_new_ds_choice_message():
     # record itself
     jsonschema.validate(
-        valid_usage_statistics_messages["cli.new_ds_choice"][0],
+        valid_usage_statistics_messages["data_asset.validate"][0],
         usage_statistics_record_schema,
     )
     # non-empty payload
@@ -142,13 +159,3 @@ def test_data_context_add_datasource_message():
         ],
         anonymized_datasource_schema,
     )
-
-
-"""
-def test_data_context_run_validation_operator_message():
-    # record itself
-    jsonschema.validate(
-        valid_usage_statistics_messages["data_context.run_validation_operator"][0],
-        usage_statistics_record_schema,
-    )
-"""
