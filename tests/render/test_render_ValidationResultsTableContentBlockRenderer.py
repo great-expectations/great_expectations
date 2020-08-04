@@ -34,7 +34,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
-                        "params": {"icon": ""},
+                        "params": {"icon": "", "markdown_status_icon": "❗"},
                         "styling": {
                             "params": {
                                 "icon": {
@@ -142,7 +142,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
-                        "params": {"icon": ""},
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
                         "styling": {
                             "params": {
                                 "icon": {
@@ -637,7 +637,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             [19],
             [20],
         ],
-        "header_row": ["Unexpected Value"],
+        "header_row": ["Sampled Unexpected Values"],
         "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
     }
 
@@ -648,28 +648,28 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     assert output_5.to_json_dict() == {
         "content_block_type": "table",
         "table": [
-            [1, 1],
-            [2, 1],
-            [3, 1],
-            [4, 1],
-            [5, 1],
-            [6, 1],
-            [7, 1],
-            [8, 1],
-            [9, 1],
-            [10, 1],
-            [11, 1],
-            [12, 1],
-            [13, 1],
-            [14, 1],
-            [15, 1],
-            [16, 1],
-            [17, 1],
-            [18, 1],
-            [19, 1],
-            [20, 1],
+            [1],
+            [2],
+            [3],
+            [4],
+            [5],
+            [6],
+            [7],
+            [8],
+            [9],
+            [10],
+            [11],
+            [12],
+            [13],
+            [14],
+            [15],
+            [16],
+            [17],
+            [18],
+            [19],
+            [20],
         ],
-        "header_row": ["Unexpected Value", "Count"],
+        "header_row": ["Sampled Unexpected Values"],
         "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
     }
 
@@ -685,7 +685,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
         "content_block_type": "string_template",
         "string_template": {
             "template": "$icon",
-            "params": {"icon": ""},
+            "params": {"icon": "", "markdown_status_icon": "❗"},
             "styling": {
                 "params": {
                     "icon": {
@@ -703,7 +703,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
         "content_block_type": "string_template",
         "string_template": {
             "template": "$icon",
-            "params": {"icon": ""},
+            "params": {"icon": "", "markdown_status_icon": "✅"},
             "styling": {
                 "params": {
                     "icon": {
@@ -722,7 +722,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
         "content_block_type": "string_template",
         "string_template": {
             "template": "$icon",
-            "params": {"icon": ""},
+            "params": {"icon": "", "markdown_status_icon": "❌"},
             "styling": {
                 "params": {
                     "icon": {"tag": "i", "classes": ["fas", "fa-times", "text-danger"]}

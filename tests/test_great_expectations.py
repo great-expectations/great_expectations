@@ -1065,8 +1065,8 @@ class TestIO(unittest.TestCase):
         else:
             pandas_major_version = int(pandas_version.group(1))
             pandas_minor_version = int(pandas_version.group(2))
-            if pandas_major_version == 0 and pandas_minor_version < 21:
-                return
+            if pandas_major_version == 0 and pandas_minor_version < 23:
+                pytest.skip("Pandas version < 23 is no longer compatible with pyarrow")
 
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_parquet(script_path + "/test_sets/Titanic.parquet")

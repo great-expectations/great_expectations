@@ -51,6 +51,7 @@ def config5():
         meta={"notes": "This is another expectation."},
     )
 
+
 @pytest.fixture
 def config6():
     return ExpectationConfiguration(

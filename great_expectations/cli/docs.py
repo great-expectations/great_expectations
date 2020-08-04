@@ -33,10 +33,16 @@ def docs():
     help="By default open in browser unless you specify the --no-view flag",
     default=True,
 )
-def docs_build(directory, site_name, view=True):
+@click.option(
+    "--assume-yes/--yes",
+    "-y",
+    help="By default request confirmation to build docs unless you specify -y/--yes/--assume-yes flag to skip dialog",
+    default=False,
+)
+def docs_build(directory, site_name, view=True, assume_yes=False):
     """ Build Data Docs for a project."""
     context = toolkit.load_data_context_with_error_handling(directory)
-    build_docs(context, site_name=site_name, view=view)
+    build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
     send_usage_message(data_context=context, event="cli.docs.build", success=True)
 
 
@@ -115,7 +121,7 @@ def _build_intro_string(docs_sites_strings):
     return list_intro_string
 
 
-def build_docs(context, site_name=None, view=True):
+def build_docs(context, site_name=None, view=True, assume_yes=False):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 
@@ -133,7 +139,8 @@ def build_docs(context, site_name=None, view=True):
         msg += "{}\n".format(index_page_locator_info)
 
     cli_message(msg)
-    toolkit.confirm_proceed_or_exit()
+    if not assume_yes:
+        toolkit.confirm_proceed_or_exit()
 
     cli_message("\nBuilding Data Docs...\n")
     index_page_locator_infos = context.build_data_docs(site_names=site_names)

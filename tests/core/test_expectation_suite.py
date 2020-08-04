@@ -41,6 +41,7 @@ def exp4():
         meta={"notes": "This is an expectation."},
     )
 
+
 @pytest.fixture
 def exp5():
     return ExpectationConfiguration(
@@ -48,6 +49,7 @@ def exp5():
         kwargs={"column": "b", "value_set": [1, 2, 3], "result_format": "COMPLETE"},
         meta={"notes": "This is an expectation."},
     )
+
 
 @pytest.fixture
 def exp6():
@@ -57,6 +59,7 @@ def exp6():
         meta={"notes": "This is an expectation."},
     )
 
+
 @pytest.fixture
 def exp7():
     return ExpectationConfiguration(
@@ -65,6 +68,7 @@ def exp7():
         meta={"notes": "This is an expectation."},
     )
 
+
 @pytest.fixture
 def exp8():
     return ExpectationConfiguration(
@@ -72,6 +76,7 @@ def exp8():
         kwargs={"column": "b", "value_set": [1, 2, 3]},
         meta={"notes": "This is an expectation."},
     )
+
 
 @pytest.fixture
 def column_pair_expectation():
@@ -179,6 +184,7 @@ def baseline_suite(exp1, exp2):
         meta={"notes": "This is an expectation suite."},
     )
 
+
 @pytest.fixture
 def domain_success_runtime_suite(exp1, exp2, exp3, exp4, exp5):
     return ExpectationSuite(
@@ -186,6 +192,7 @@ def domain_success_runtime_suite(exp1, exp2, exp3, exp4, exp5):
         expectations=[exp1, exp2, exp3, exp4, exp5],
         meta={"notes": "This is an expectation suite."},
     )
+
 
 @pytest.fixture
 def identical_suite(exp1, exp3):
@@ -215,6 +222,7 @@ def different_suite(exp1, exp4):
         meta={"notes": "This is an expectation suite."},
     )
 
+
 @pytest.fixture
 def single_expectation_suite(exp1):
     return ExpectationSuite(
@@ -238,7 +246,11 @@ def test_expectation_suite_equality(baseline_suite, identical_suite, equivalent_
 
 
 def test_expectation_suite_equivalence(
-    baseline_suite, identical_suite, equivalent_suite, different_suite, single_expectation_suite
+    baseline_suite,
+    identical_suite,
+    equivalent_suite,
+    different_suite,
+    single_expectation_suite,
 ):
     """Equivalence should depend only on properties that affect the result of the expectation."""
     assert baseline_suite.isEquivalentTo(baseline_suite)  # no difference
@@ -248,6 +260,7 @@ def test_expectation_suite_equivalence(
         different_suite
     )  # different value_set in one expectation
     assert not single_expectation_suite.isEquivalentTo(baseline_suite)
+
 
 def test_expectation_suite_dictionary_equivalence(baseline_suite):
     assert (
@@ -489,13 +502,17 @@ def test_find_expectation_indexes(
 
 
 def test_remove_expectations(
-  exp1, exp2, exp3, exp4, exp5, single_expectation_suite, domain_success_runtime_suite
+    exp1, exp2, exp3, exp4, exp5, single_expectation_suite, domain_success_runtime_suite
 ):
     domain_success_runtime_suite.remove_expectation(exp5, match_type="runtime", remove_multiple_matches=False) # remove one matching expectation
 
     with pytest.raises(ValueError):
         domain_success_runtime_suite.remove_expectation(exp5, match_type="runtime")
-    assert domain_success_runtime_suite.find_expectation_indexes(exp4, "domain") == [1, 2, 3]
+    assert domain_success_runtime_suite.find_expectation_indexes(exp4, "domain") == [
+        1,
+        2,
+        3,
+    ]
     assert domain_success_runtime_suite.find_expectation_indexes(exp4, "success") == [3]
 
     with pytest.raises(ValueError):
@@ -509,53 +526,64 @@ def test_remove_expectations(
     with pytest.raises(ValueError):
         domain_success_runtime_suite.remove_expectation(exp3, match_type="runtime")
 
-    assert domain_success_runtime_suite.find_expectation_indexes(exp1, match_type="domain") == [0]
+    assert domain_success_runtime_suite.find_expectation_indexes(
+        exp1, match_type="domain"
+    ) == [0]
     assert domain_success_runtime_suite.isEquivalentTo(single_expectation_suite)
 
 
-def test_patch_expectation_replace(
-    exp5, exp6, domain_success_runtime_suite
-):
+def test_patch_expectation_replace(exp5, exp6, domain_success_runtime_suite):
     assert domain_success_runtime_suite.expectations[4] is exp5
 
-    assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(exp6, match_type="success")
+    assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(
+        exp6, match_type="success"
+    )
     domain_success_runtime_suite.patch(
         exp5,
         op="replace",
         path="/value_set",
         value=[1, 2],
-        match_type="runtime")
-    assert domain_success_runtime_suite.expectations[4].isEquivalentTo(exp6, match_type="success")
+        match_type="runtime",
+    )
+    assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
+        exp6, match_type="success"
+    )
 
 
-def test_patch_expectation_add(
-    exp5, exp7, domain_success_runtime_suite
-):
+def test_patch_expectation_add(exp5, exp7, domain_success_runtime_suite):
     assert domain_success_runtime_suite.expectations[4] is exp5
 
-    assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(exp7, match_type="success")
+    assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(
+        exp7, match_type="success"
+    )
     domain_success_runtime_suite.patch(
         exp5,
         op="add",
         path="/value_set/-",
         value=4,
-        match_type="runtime")
-    assert domain_success_runtime_suite.expectations[4].isEquivalentTo(exp7, match_type="success")
+        match_type="runtime",
+    )
+    assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
+        exp7, match_type="success"
+    )
 
 
-def test_patch_expectation_remove(
-    exp5, exp8, domain_success_runtime_suite
-):
+def test_patch_expectation_remove(exp5, exp8, domain_success_runtime_suite):
     assert domain_success_runtime_suite.expectations[4] is exp5
 
-    assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(exp8, match_type="runtime")
+    assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(
+        exp8, match_type="runtime"
+    )
     domain_success_runtime_suite.patch(
         exp5,
         op="remove",
         path="/result_format",
         value=None,
-        match_type="runtime")
-    assert domain_success_runtime_suite.expectations[4].isEquivalentTo(exp8, match_type="runtime")
+        match_type="runtime",
+    )
+    assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
+        exp8, match_type="runtime"
+    )
 
 
 def test_add_expectation(

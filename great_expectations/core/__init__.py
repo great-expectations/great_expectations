@@ -484,99 +484,153 @@ def _deduplicate_evaluation_parameter_dependencies(dependencies):
 class ExpectationConfiguration(DictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
-    default_kwarg_values = {
-        # domain_kwargs
-        "row_condition": None,
-        "condition_parser": "pandas",
-        # runtime_kwargs
-        "include_config": True,
-        "catch_exceptions": False,
-        "result_format": "BASIC",
-        # success_kwargs
-        "column_index": None,
-        "min_value": None,
-        "max_value": None,
-        "mostly": None,
-        "parse_strings_as_datetimes": None,
-        "strict_min": False,
-        "strict_max": False,
-        "allow_cross_type_comparisons": None,
-        "output_strftime_format": None,
-        "strictly": None,
-        "match_on": "any",
-        "p_value": 0.05,
-        "params": None,
-        "allow_relative_error": False,
-        "ties_okay": None,
-        "partition_object": None,
-        "p": 0.05,
-        "tail_weight_holdout": 0,
-        "bootstrap_samples": None,
-        "bootstrap_sample_size": None,
-        "internal_weight_holdout": 0,
-        "bucketize_data": True,
-        "threshold": None,
-        "ignore_row_if": {
-            "expect_column_pair_values_to_be_equal": "both_values_are_missing",
-            "expect_column_pair_values_A_to_be_greater_than_B": "both_values_are_missing",
-            "expect_column_pair_values_to_be_in_set": "both_values_are_missing",
-            "expect_multicolumn_values_to_be_unique": "all_values_are_missing"
-        },
-        "or_equal": None,
-    }
-
     kwarg_lookup_dict = {
         "expect_column_to_exist": {
-            "domain_kwargs": ["column", "row_condition", "condition_engine"],
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["column_index"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "column_index": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_table_columns_to_match_ordered_list": {
             "domain_kwargs": [],
             "success_kwargs": ["column_list"],
+            "default_kwarg_values": {
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_table_column_count_to_be_between": {
             "domain_kwargs": [],
             "success_kwargs": ["min_value", "max_value"],
+            "default_kwarg_values": {
+                "min_value": None,
+                "max_value": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_table_column_count_to_equal": {
             "domain_kwargs": [],
             "success_kwargs": ["value"],
+            "default_kwarg_values": {
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_table_row_count_to_be_between": {
             "domain_kwargs": [],
             "success_kwargs": ["min_value", "max_value"],
+            "default_kwarg_values": {
+                "min_value": None,
+                "max_value": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_table_row_count_to_equal": {
             "domain_kwargs": [],
             "success_kwargs": ["value"],
+            "default_kwarg_values": {
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_be_unique": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_not_be_null": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_be_null": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_be_of_type": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["type_", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_be_in_type_list": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["type_list", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_be_in_set": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["value_set", "mostly", "parse_strings_as_datetimes"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "parse_strings_as_datetimes": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_not_be_in_set": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["value_set", "mostly", "parse_strings_as_datetimes"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "parse_strings_as_datetimes": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
@@ -590,102 +644,333 @@ class ExpectationConfiguration(DictDot):
                 "output_strftime_format",
                 "mostly",
             ],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "allow_cross_type_comparisons": None,
+                "parse_strings_as_datetimes": None,
+                "output_strftime_format": None,
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_be_increasing": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["strictly", "parse_strings_as_datetimes", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "strictly": None,
+                "parse_strings_as_datetimes": None,
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_be_decreasing": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["strictly", "parse_strings_as_datetimes", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "strictly": None,
+                "parse_strings_as_datetimes": None,
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_value_lengths_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["min_value", "max_value", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_value_lengths_to_equal": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["value", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_match_regex": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["regex", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_not_match_regex": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["regex", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_match_regex_list": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["regex_list", "match_on", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "match_on": "any",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_not_match_regex_list": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["regex_list", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_match_strftime_format": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["strftime_format", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_be_dateutil_parseable": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_be_json_parseable": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_values_to_match_json_schema": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["json_schema", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["distribution", "p_value", "params"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "p_value": 0.05,
+                "params": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_distinct_values_to_be_in_set": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["value_set", "parse_strings_as_datetimes"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "parse_strings_as_datetimes": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_distinct_values_to_equal_set": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["value_set", "parse_strings_as_datetimes"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "parse_strings_as_datetimes": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_distinct_values_to_contain_set": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["value_set", "parse_strings_as_datetimes"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "parse_strings_as_datetimes": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_mean_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max", ],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_median_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max", ],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_quantile_values_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["quantile_ranges", "allow_relative_error"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "allow_relative_error": False,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_stdev_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max", ],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_unique_value_count_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["min_value", "max_value"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_proportion_of_unique_values_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max", ],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_most_common_value_to_be_in_set": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["value_set", "ties_okay"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "ties_okay": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_sum_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max", ],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_min_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
@@ -697,6 +982,19 @@ class ExpectationConfiguration(DictDot):
                 "parse_strings_as_datetimes",
                 "output_strftime_format",
             ],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "parse_strings_as_datetimes": None,
+                "output_strftime_format": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_max_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
@@ -708,10 +1006,33 @@ class ExpectationConfiguration(DictDot):
                 "parse_strings_as_datetimes",
                 "output_strftime_format",
             ],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "parse_strings_as_datetimes": None,
+                "output_strftime_format": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_chisquare_test_p_value_to_be_greater_than": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["partition_object", "p", "tail_weight_holdout"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "partition_object": None,
+                "p": 0.05,
+                "tail_weight_holdout": 0,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
@@ -721,6 +1042,17 @@ class ExpectationConfiguration(DictDot):
                 "bootstrap_samples",
                 "bootstrap_sample_size",
             ],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "partition_object": None,
+                "p": 0.05,
+                "bootstrap_samples": None,
+                "bootstrap_sample_size": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_kl_divergence_to_be_less_than": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
@@ -731,27 +1063,89 @@ class ExpectationConfiguration(DictDot):
                 "internal_weight_holdout",
                 "bucketize_data",
             ],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "partition_object": None,
+                "threshold": None,
+                "tail_weight_holdout": 0,
+                "internal_weight_holdout": 0,
+                "bucketize_data": True,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_pair_values_to_be_equal": {
-            "domain_kwargs": ["column_A", "column_B", "row_condition", "condition_engine"],
+            "domain_kwargs": [
+                "column_A",
+                "column_B",
+                "row_condition",
+                "condition_parser",
+            ],
             "success_kwargs": ["ignore_row_if"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "ignore_row_if": "both_values_are_missing",
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_pair_values_A_to_be_greater_than_B": {
-            "domain_kwargs": ["column_A", "column_B", "row_condition", "condition_engine"],
+            "domain_kwargs": [
+                "column_A",
+                "column_B",
+                "row_condition",
+                "condition_parser",
+            ],
             "success_kwargs": [
                 "or_equal",
                 "parse_strings_as_datetimes",
                 "allow_cross_type_comparisons",
                 "ignore_row_if",
             ],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "or_equal": None,
+                "parse_strings_as_datetimes": None,
+                "allow_cross_type_comparisons": None,
+                "ignore_row_if": "both_values_are_missing",
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_column_pair_values_to_be_in_set": {
-            "domain_kwargs": ["column_A", "column_B", "row_condition", "condition_engine"],
-            "success_kwargs": ["value_pairs_set", "ignore_row_if", ],
+            "domain_kwargs": [
+                "column_A",
+                "column_B",
+                "row_condition",
+                "condition_parser",
+            ],
+            "success_kwargs": ["value_pairs_set", "ignore_row_if"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "ignore_row_if": "both_values_are_missing",
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
         "expect_multicolumn_values_to_be_unique": {
-            "domain_kwargs": ["column_list", "row_condition", "condition_engine"],
+            "domain_kwargs": ["column_list", "row_condition", "condition_parser"],
             "success_kwargs": ["ignore_row_if"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "ignore_row_if": "all_values_are_missing",
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
         },
     }
     runtime_kwargs = ["result_format", "include_config", "catch_exceptions"]
@@ -775,12 +1169,7 @@ class ExpectationConfiguration(DictDot):
         self.meta = meta
         self.success_on_last_run = success_on_last_run
 
-    def patch(
-            self,
-            op: str,
-            path: str,
-            value: Any
-    ) -> 'ExpectationConfiguration':
+    def patch(self, op: str, path: str, value: Any) -> "ExpectationConfiguration":
         """
 
         Args:
@@ -791,7 +1180,7 @@ class ExpectationConfiguration(DictDot):
         Returns:
             The patched ExpectationConfiguration object
         """
-        if op not in ['add', 'replace', 'remove']:
+        if op not in ["add", "replace", "remove"]:
             raise ValueError("Op must be either 'add', 'replace', or 'remove'")
 
         try:
@@ -1095,8 +1484,7 @@ class ExpectationSuite(object):
                 # Delegate comparison to the other instance
                 return NotImplemented
 
-        return len(self.expectations) == len(other.expectations) \
-               and all(
+        return len(self.expectations) == len(other.expectations) and all(
             [
                 mine.isEquivalentTo(theirs)
                 for (mine, theirs) in zip(self.expectations, other.expectations)
@@ -1219,7 +1607,9 @@ class ExpectationSuite(object):
             No match
             More than 1 match, if remove_multiple_matches = False
         """
-        found_expectation_indexes = self.find_expectation_indexes(expectation_configuration, match_type)
+        found_expectation_indexes = self.find_expectation_indexes(
+            expectation_configuration, match_type
+        )
         if len(found_expectation_indexes) < 1:
             raise ValueError("No matching expectation was found.")
 
@@ -1315,8 +1705,10 @@ class ExpectationSuite(object):
         if len(found_expectation_indexes) < 1:
             raise ValueError("No matching expectation was found.")
         elif len(found_expectation_indexes) > 1:
-            raise ValueError("More than one matching expectation was found. Please be more specific with your search "
-                             "criteria")
+            raise ValueError(
+                "More than one matching expectation was found. Please be more specific with your search "
+                "criteria"
+            )
 
         self.expectations[found_expectation_indexes[0]].patch(op, path, value)
         return self.expectations[found_expectation_indexes[0]]
@@ -1341,11 +1733,15 @@ class ExpectationSuite(object):
             More than one match
             One match if overwrite_existing = False
         """
-        found_expectation_indexes = self.find_expectation_indexes(expectation_configuration, match_type)
+        found_expectation_indexes = self.find_expectation_indexes(
+            expectation_configuration, match_type
+        )
 
         if len(found_expectation_indexes) > 1:
-            raise ValueError("More than one matching expectation was found. Please be more specific with your search "
-                             "criteria")
+            raise ValueError(
+                "More than one matching expectation was found. Please be more specific with your search "
+                "criteria"
+            )
         elif len(found_expectation_indexes) == 1:
             # Currently, we completely replace the expectation_configuration, but we could potentially use patch
             # to update instead. We need to consider how to handle meta in that situation.
