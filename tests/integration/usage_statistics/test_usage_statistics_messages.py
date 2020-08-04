@@ -285,20 +285,18 @@ valid_usage_statistics_messages = {
             "ge_version": "0.11.5.manual_testing",
         }
     ],
-    """
-    "cli.checkpoint.list":[
+    "cli.checkpoint.list": [
         {
-            'event': 'cli.checkpoint.list',
-            'event_payload': {},
-            'success': True,
-            'version': '1.0.0',
-            'event_time': '2020-08-03T23:58:34.553Z',
+            "event": "cli.checkpoint.list",
+            "event_payload": {},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-03T23:58:34.553Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.5.manual_testing",
         }
     ],
-    """
     "cli.suite.list": [
         {
             "event": "cli.suite.list",

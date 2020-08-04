@@ -298,6 +298,7 @@ cli_new_ds_choice_payload = {
     "additionalProperties": False,
 }
 
+
 datasource_sqlalchemy_connect_payload = {
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
