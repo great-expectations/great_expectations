@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [FEATURE] Expectations now define “Domain,” “Success,” and “Runtime” kwargs to allow them to determine expectation equivalence for updating expectations. Fixes column pair expectation update logic.
 
 
 0.11.8
