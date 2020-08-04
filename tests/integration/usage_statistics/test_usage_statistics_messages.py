@@ -14,12 +14,6 @@ Whenever a new kind of message is added, an example of that message should be in
 
 Each message will be sent to the server to ensure it is accepted.
 
-
-
-
-
-
-
 """
 valid_usage_statistics_messages = {
     "data_context.__init__": [
