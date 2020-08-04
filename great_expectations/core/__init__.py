@@ -27,6 +27,7 @@ from great_expectations.exceptions import (
     InvalidExpectationKwargsError,
     ParserError,
     UnavailableMetricError,
+    DataContextError
 )
 from great_expectations.types import DictDot
 
@@ -95,14 +96,14 @@ def convert_to_json_serializable(data):
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
     if isinstance(
-        data,
-        (
-            ExpectationConfiguration,
-            ExpectationSuite,
-            ExpectationValidationResult,
-            ExpectationSuiteValidationResult,
-            RunIdentifier,
-        ),
+            data,
+            (
+                    ExpectationConfiguration,
+                    ExpectationSuite,
+                    ExpectationValidationResult,
+                    ExpectationSuiteValidationResult,
+                    RunIdentifier,
+            ),
     ):
         return data.to_json_dict()
 
@@ -215,14 +216,14 @@ def ensure_json_serializable(data):
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
     if isinstance(
-        data,
-        (
-            ExpectationConfiguration,
-            ExpectationSuite,
-            ExpectationValidationResult,
-            ExpectationSuiteValidationResult,
-            RunIdentifier,
-        ),
+            data,
+            (
+                    ExpectationConfiguration,
+                    ExpectationSuite,
+                    ExpectationValidationResult,
+                    ExpectationSuiteValidationResult,
+                    RunIdentifier,
+            ),
     ):
         return
 
@@ -410,8 +411,8 @@ class ExpectationKwargs(dict):
         elif result_format in RESULT_FORMATS:
             pass
         elif (
-            isinstance(result_format, dict)
-            and result_format.get("result_format", None) in RESULT_FORMATS
+                isinstance(result_format, dict)
+                and result_format.get("result_format", None) in RESULT_FORMATS
         ):
             pass
         else:
@@ -656,11 +657,11 @@ class ExpectationConfiguration(DictDot):
         },
         "expect_column_mean_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max",],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max", ],
         },
         "expect_column_median_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max",],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max", ],
         },
         "expect_column_quantile_values_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
@@ -668,7 +669,7 @@ class ExpectationConfiguration(DictDot):
         },
         "expect_column_stdev_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max",],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max", ],
         },
         "expect_column_unique_value_count_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
@@ -676,7 +677,7 @@ class ExpectationConfiguration(DictDot):
         },
         "expect_column_proportion_of_unique_values_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max",],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max", ],
         },
         "expect_column_most_common_value_to_be_in_set": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
@@ -684,7 +685,7 @@ class ExpectationConfiguration(DictDot):
         },
         "expect_column_sum_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max",],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max", ],
         },
         "expect_column_min_to_be_between": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
@@ -746,7 +747,7 @@ class ExpectationConfiguration(DictDot):
         },
         "expect_column_pair_values_to_be_in_set": {
             "domain_kwargs": ["column_A", "column_B", "row_condition", "condition_engine"],
-            "success_kwargs": ["value_pairs_set", "ignore_row_if",],
+            "success_kwargs": ["value_pairs_set", "ignore_row_if", ],
         },
         "expect_multicolumn_values_to_be_unique": {
             "domain_kwargs": ["column_list", "row_condition", "condition_engine"],
@@ -793,21 +794,24 @@ class ExpectationConfiguration(DictDot):
         if op not in ['add', 'replace', 'remove']:
             raise ValueError("Op must be either 'add', 'replace', or 'remove'")
 
-        if path.split('/')[1] not in self.get_runtime_kwargs().keys():
-            raise ValueError("Path not available in kwargs")
+        try:
+            valid_path = path.split('/')[1]
+        except IndexError:
+            raise IndexError("Ensure you have a valid jsonpatch path of the form '/path/foo' "
+                             "(see http://jsonpatch.com/)")
+
+        if valid_path not in self.get_runtime_kwargs().keys():
+            raise ValueError("Path not available in kwargs (see http://jsonpatch.com/)")
 
         # TODO: Call validate_kwargs when implemented
-        foo = path
         patch = jsonpatch.JsonPatch([
             {'op': op,
-             'path': foo,
+             'path': path,
              'value': value}
         ])
 
         patch.apply(self.kwargs, in_place=True)
         return self
-
-
 
     @property
     def expectation_type(self):
@@ -847,12 +851,12 @@ class ExpectationConfiguration(DictDot):
         # check whether two evals are equivalent
         # engines = pandas parser, python parser
         if (
-            not self.expectation_type
-            == other_expectation_configuration.expectation_type
+                not self.expectation_type
+                    == other_expectation_configuration.expectation_type
         ):
             return False
         if set(self.get_domain_kwargs().keys()) != set(
-            self.kwarg_lookup_dict[self.expectation_type]["domain_kwargs"]
+                self.kwarg_lookup_dict[self.expectation_type]["domain_kwargs"]
         ):
             missing_kwargs = set(
                 self.kwarg_lookup_dict[self.expectation_type]["domain_kwargs"]
@@ -861,11 +865,11 @@ class ExpectationConfiguration(DictDot):
                 f"Cannot check if expectation applies to same domain. Missing kwargs: {list(missing_kwargs)}"
             )
         return (
-            self.get_domain_kwargs()
-            == other_expectation_configuration.get_domain_kwargs()
+                self.get_domain_kwargs()
+                == other_expectation_configuration.get_domain_kwargs()
         )
 
-    def isEquivalentTo(self, other, match_type="runtime"):
+    def isEquivalentTo(self, other, match_type="success"):
         """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
@@ -1010,19 +1014,20 @@ class ExpectationConfigurationSchema(Schema):
 
 class ExpectationSuite(object):
     """
-    This ExpectationSuite object has create, read, update, and delete functionality:
-        -create: self.add_or_replace()
+    This ExpectationSuite object has create, read, update, and delete functionality for its expectations:
+        -create: self.add_expectation()
         -read: self.find_expectation_indexes()
-        -update: self.add_or_replace()
+        -update: self.add_expectation()
         -delete: self.remove_expectation()
     """
+
     def __init__(
-        self,
-        expectation_suite_name,
-        expectations=None,
-        evaluation_parameters=None,
-        data_asset_type=None,
-        meta=None,
+            self,
+            expectation_suite_name,
+            expectations=None,
+            evaluation_parameters=None,
+            data_asset_type=None,
+            meta=None,
     ):
         self.expectation_suite_name = expectation_suite_name
         if expectations is None:
@@ -1046,19 +1051,19 @@ class ExpectationSuite(object):
         self.meta = meta
 
     def add_citation(
-        self,
-        comment,
-        batch_kwargs=None,
-        batch_markers=None,
-        batch_parameters=None,
-        citation_date=None,
+            self,
+            comment,
+            batch_kwargs=None,
+            batch_markers=None,
+            batch_parameters=None,
+            citation_date=None,
     ):
         if "citations" not in self.meta:
             self.meta["citations"] = []
         self.meta["citations"].append(
             {
                 "citation_date": citation_date
-                or datetime.datetime.now(datetime.timezone.utc).strftime(
+                                 or datetime.datetime.now(datetime.timezone.utc).strftime(
                     "%Y%m%dT%H%M%S.%fZ"
                 ),
                 "batch_kwargs": batch_kwargs,
@@ -1193,60 +1198,79 @@ class ExpectationSuite(object):
         self.expectations.append(expectation_config)
 
     def remove_expectation(
-        self,
-        expectation_configuration: ExpectationConfiguration,
-        match_type: str = "domain",
-    ) -> ExpectationConfiguration:
+            self,
+            expectation_configuration: ExpectationConfiguration,
+            match_type: str = "domain",
+            remove_multiple_matches: bool = False
+    ) -> List[ExpectationConfiguration]:
         """
 
         Args:
-            expectation_configuration: This is the configuration for the expectation
+            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against for
+                for the removal of expectations.
             match_type: This determines what kwargs to use when matching. Options are 'domain' to match based
                 on the data evaluated by that expectation, 'success' to match based on all configuration parameters
                  that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
                  based on all configuration parameters
-
-        Returns: The deleted ExpectationConfiguration
+            remove_multiple_matches: If True, will remove multiple matching expectations. If False, will raise a ValueError.
+        Returns: The list of deleted ExpectationConfigurations
 
         Raises:
-            Incomplete configuration for type given
             No match
-
+            More than 1 match, if remove_multiple_matches = False
         """
         found_expectation_indexes = self.find_expectation_indexes(expectation_configuration, match_type)
         if len(found_expectation_indexes) < 1:
             raise ValueError("No matching expectation was found.")
 
         elif len(found_expectation_indexes) > 1:
-            removed_expectations = []
-            for index in sorted(found_expectation_indexes, reverse=True):
-                removed_expectations.append(self.expectations.pop(index))
-            return removed_expectations
+            if remove_multiple_matches == True:
+                removed_expectations = []
+                for index in sorted(found_expectation_indexes, reverse=True):
+                    removed_expectations.append(self.expectations.pop(index))
+                return removed_expectations
+            else:
+                raise ValueError("More than one matching expectation was found. Specify more precise matching criteria,"
+                                 "or set remove_multiple_matches=True")
 
         else:
-            return self.expectations.pop(found_expectation_indexes[0])
+            return [self.expectations.pop(found_expectation_indexes[0])]
+
+    def remove_all_expectations_of_type(
+            self,
+            expectation_type: str
+    ) -> List[ExpectationConfiguration]:
+        removed_expectations = []
+        for expectation in self.expectations:
+            if expectation.expectation_type == expectation_type:
+                removed_expectations += self.remove_expectation(expectation, match_type="domain",
+                                                                remove_multiple_matches=True)
+
+        return removed_expectations
 
     def find_expectation_indexes(
             self,
             expectation_configuration: ExpectationConfiguration,
-            match_type: str="domain"
+            match_type: str = "domain"
     ) -> List[int]:
         """
 
         Args:
-            expectation_configuration: This is the configuration for the expectation
+            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against to
+                find the index of any matching Expectation Configurations on the suite.
             match_type: This determines what kwargs to use when matching. Options are 'domain' to match based
                 on the data evaluated by that expectation, 'success' to match based on all configuration parameters
                  that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
                  based on all configuration parameters
 
-        Returns: The deleted ExpectationConfiguration
+        Returns: A list of indexes of matching ExpectationConfiguration
 
         Raises:
-            TODO: Incomplete configuration for type given
-            No match
+            InvalidExpectationConfigurationError
 
         """
+        if not isinstance(expectation_configuration, ExpectationConfiguration):
+            raise InvalidExpectationConfigurationError("Ensure that expectation configuration is valid.")
         match_indexes = []
         for idx, expectation in enumerate(self.expectations):
             if expectation.isEquivalentTo(expectation_configuration, match_type):
@@ -1255,39 +1279,38 @@ class ExpectationSuite(object):
         return match_indexes
 
     def find_expectations(self,
-              expectation_configuration: ExpectationConfiguration,
-              match_type: str = "domain"
-              ) -> List[ExpectationConfiguration]:
+                          expectation_configuration: ExpectationConfiguration,
+                          match_type: str = "domain"
+                          ) -> List[ExpectationConfiguration]:
         found_expectation_indexes = self.find_expectation_indexes(expectation_configuration, match_type)
-        return itemgetter(found_expectation_indexes)(self.expectations)
+        return list(itemgetter(*found_expectation_indexes)(self.expectations))
 
     def patch(
             self,
-            expectation_type: str,
-            match_kwargs: dict,
+            expectation_configuration: ExpectationConfiguration,
             op: str,
             path: str,
             value: Any,
             match_type: str
-            ) -> ExpectationConfiguration:
+    ) -> ExpectationConfiguration:
         """
 
-               Args:
-                   expectation_type: This is used to set up the ExpectationConfiguration
-                   match_kwargs: This is used to set up the ExpectationConfiguration
-                   op: A jsonpatch operation (one of 'add','update', or 'remove')
-                   path: A jsonpatch path for the patch operation
-                   value: The value to patch
-                   match_type: The match type to use for find_expectation_index(_)
+       Args:
+            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against to
+                find the expectation to patch.
+            op: A jsonpatch operation (one of 'add','update', or 'remove') (see http://jsonpatch.com/)
+            path: A jsonpatch path for the patch operation (see http://jsonpatch.com/)
+            value: The value to patch (see http://jsonpatch.com/)
+            match_type: The match type to use for find_expectation_index()
 
-               Returns: The patched ExpectationConfiguration
+       Returns: The patched ExpectationConfiguration
 
-               Raises:
-                   No match
-                   More than 1 match
+       Raises:
+           No match
+           More than 1 match
 
                """
-        found_expectation_indexes = self.find_expectation_indexes(ExpectationConfiguration(expectation_type, match_kwargs), match_type)
+        found_expectation_indexes = self.find_expectation_indexes(expectation_configuration, match_type)
 
         if len(found_expectation_indexes) < 1:
             raise ValueError("No matching expectation was found.")
@@ -1298,21 +1321,25 @@ class ExpectationSuite(object):
         self.expectations[found_expectation_indexes[0]].patch(op, path, value)
         return self.expectations[found_expectation_indexes[0]]
 
-    def add_or_replace(
+    def add_expectation(
             self,
             expectation_configuration: ExpectationConfiguration,
-            match_type: str = "domain"
-            ) -> ExpectationConfiguration:
+            match_type: str = "domain",
+            overwrite_existing: bool = False
+    ) -> ExpectationConfiguration:
         """
 
         Args:
             expectation_configuration: The ExpectationConfiguration to add or update
             match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
                 and so whether we should add or replace.
-
+            overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
+                False.
         Returns:
-            The ExpectationConfiguration we added or replaced.
-
+            The ExpectationConfiguration to add or replace.
+        Raises:
+            More than one match
+            One match if overwrite_existing = False
         """
         found_expectation_indexes = self.find_expectation_indexes(expectation_configuration, match_type)
 
@@ -1322,11 +1349,19 @@ class ExpectationSuite(object):
         elif len(found_expectation_indexes) == 1:
             # Currently, we completely replace the expectation_configuration, but we could potentially use patch
             # to update instead. We need to consider how to handle meta in that situation.
-            # patch = jsonpatch.make_patch(self.expectations[found_expectation_index].kwargs, expectation_configuration.kwargs)
+            # patch = jsonpatch.make_patch(self.expectations[found_expectation_index] \
+            #   .kwargs, expectation_configuration.kwargs)
             # patch.apply(self.expectations[found_expectation_index].kwargs, in_place=True)
-            self.expectations[found_expectation_indexes[0]] = expectation_configuration
+            if overwrite_existing:
+                self.expectations[found_expectation_indexes[0]] = expectation_configuration
+            else:
+                raise DataContextError(
+                    "A matching ExpectationConfiguration already exists. If you would like to overwrite this "
+                    "ExpectationConfiguration, set overwrite_existing=True"
+                )
         else:
             self.append_expectation(expectation_configuration)
+
         return expectation_configuration
 
 
@@ -1369,12 +1404,12 @@ class ExpectationSuiteSchema(Schema):
 
 class ExpectationValidationResult(object):
     def __init__(
-        self,
-        success=None,
-        expectation_config=None,
-        result=None,
-        meta=None,
-        exception_info=None,
+            self,
+            success=None,
+            expectation_config=None,
+            result=None,
+            meta=None,
+            exception_info=None,
     ):
         if result and not self.validate_result_dict(result):
             raise InvalidCacheValueError(result)
@@ -1409,14 +1444,14 @@ class ExpectationValidationResult(object):
                 (
                     self.success == other.success,
                     (
-                        self.expectation_config is None
-                        and other.expectation_config is None
+                            self.expectation_config is None
+                            and other.expectation_config is None
                     )
                     or (
-                        self.expectation_config is not None
-                        and self.expectation_config.isEquivalentTo(
-                            other.expectation_config
-                        )
+                            self.expectation_config is not None
+                            and self.expectation_config.isEquivalentTo(
+                        other.expectation_config
+                    )
                     ),
                     # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
                     # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparision is
@@ -1445,16 +1480,16 @@ class ExpectationValidationResult(object):
         if result.get("unexpected_count") and result["unexpected_count"] < 0:
             return False
         if result.get("unexpected_percent") and (
-            result["unexpected_percent"] < 0 or result["unexpected_percent"] > 100
+                result["unexpected_percent"] < 0 or result["unexpected_percent"] > 100
         ):
             return False
         if result.get("missing_percent") and (
-            result["missing_percent"] < 0 or result["missing_percent"] > 100
+                result["missing_percent"] < 0 or result["missing_percent"] > 100
         ):
             return False
         if result.get("unexpected_percent_nonmissing") and (
-            result["unexpected_percent_nonmissing"] < 0
-            or result["unexpected_percent_nonmissing"] > 100
+                result["unexpected_percent_nonmissing"] < 0
+                or result["unexpected_percent_nonmissing"] > 100
         ):
             return False
         if result.get("missing_count") and result["missing_count"] < 0:
@@ -1553,12 +1588,12 @@ class ExpectationValidationResultSchema(Schema):
 
 class ExpectationSuiteValidationResult(DictDot):
     def __init__(
-        self,
-        success=None,
-        results=None,
-        evaluation_parameters=None,
-        statistics=None,
-        meta=None,
+            self,
+            success=None,
+            results=None,
+            evaluation_parameters=None,
+            statistics=None,
+            meta=None,
     ):
         self.success = success
         if results is None:
@@ -1634,8 +1669,8 @@ class ExpectationSuiteValidationResult(DictDot):
                 for result in self.results:
                     try:
                         if (
-                            metric_name_parts[0]
-                            == result.expectation_config.expectation_type
+                                metric_name_parts[0]
+                                == result.expectation_config.expectation_type
                         ):
                             metric_value = result.get_metric(metric_name, **kwargs)
                             break
