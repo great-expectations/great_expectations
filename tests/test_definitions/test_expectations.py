@@ -2,13 +2,13 @@ import glob
 import json
 import logging
 import os
+import random
+import string
+import tempfile
 from collections import OrderedDict
 
 import pandas as pd
 import pytest
-from sqlalchemy.dialects.mysql import dialect as mysqlDialect
-from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
-from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
 
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 
@@ -19,7 +19,26 @@ from ..test_utils import (
     get_dataset,
 )
 
+try:
+    from sqlalchemy.dialects.mssql import dialect as mssqlDialect
+except (ImportError, KeyError):
+    mssqlDialect = None
+try:
+    from sqlalchemy.dialects.mysql import dialect as mysqlDialect
+except (ImportError, KeyError):
+    mysqlDialect = None
+try:
+    from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
+except (ImportError, KeyError):
+    postgresqlDialect = None
+try:
+    from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
+except (ImportError, KeyError):
+    sqliteDialect = None
+
+
 logger = logging.getLogger(__name__)
+tmp_dir = str(tempfile.mkdtemp())
 
 
 def pytest_generate_tests(metafunc):
@@ -46,18 +65,44 @@ def pytest_generate_tests(metafunc):
                 test_configuration = json.load(file, object_pairs_hook=OrderedDict)
 
                 for d in test_configuration["datasets"]:
-                    skip_expectation = False
-                    # Pass the test if we are in a test condition that is a known exception
+                    datasets = []
                     if candidate_test_is_on_temporary_notimplemented_list(
                         c, test_configuration["expectation_type"]
                     ):
                         skip_expectation = True
-
-                    if skip_expectation:
                         schemas = data_asset = None
                     else:
-                        schemas = d["schemas"] if "schemas" in d else None
-                        data_asset = get_dataset(c, d["data"], schemas=schemas)
+                        skip_expectation = False
+                        if isinstance(d["data"], list):
+                            sqlite_db_path = os.path.abspath(
+                                os.path.join(
+                                    tmp_dir,
+                                    "sqlite_db"
+                                    + "".join(
+                                        [
+                                            random.choice(
+                                                string.ascii_letters + string.digits
+                                            )
+                                            for _ in range(8)
+                                        ]
+                                    )
+                                    + ".db",
+                                )
+                            )
+                            for dataset in d["data"]:
+                                datasets.append(
+                                    get_dataset(
+                                        c,
+                                        dataset["data"],
+                                        dataset.get("schemas"),
+                                        table_name=dataset.get("dataset_name"),
+                                        sqlite_db_path=sqlite_db_path,
+                                    )
+                                )
+                            data_asset = datasets[0]
+                        else:
+                            schemas = d["schemas"] if "schemas" in d else None
+                            data_asset = get_dataset(c, d["data"], schemas=schemas)
 
                     for test in d["tests"]:
                         generate_test = True
@@ -72,16 +117,36 @@ def pytest_generate_tests(metafunc):
                                 # Call out supported dialects
                                 if "sqlalchemy" in test["only_for"]:
                                     generate_test = True
-                                elif "sqlite" in test["only_for"] and isinstance(
-                                    data_asset.engine.dialect, sqliteDialect
+                                elif (
+                                    "sqlite" in test["only_for"]
+                                    and sqliteDialect is not None
+                                    and isinstance(
+                                        data_asset.engine.dialect, sqliteDialect
+                                    )
                                 ):
                                     generate_test = True
-                                elif "postgresql" in test["only_for"] and isinstance(
-                                    data_asset.engine.dialect, postgresqlDialect
+                                elif (
+                                    "postgresql" in test["only_for"]
+                                    and postgresqlDialect is not None
+                                    and isinstance(
+                                        data_asset.engine.dialect, postgresqlDialect
+                                    )
                                 ):
                                     generate_test = True
-                                elif "mysql" in test["only_for"] and isinstance(
-                                    data_asset.engine.dialect, mysqlDialect
+                                elif (
+                                    "mysql" in test["only_for"]
+                                    and mysqlDialect is not None
+                                    and isinstance(
+                                        data_asset.engine.dialect, mysqlDialect
+                                    )
+                                ):
+                                    generate_test = True
+                                elif (
+                                    "mssql" in test["only_for"]
+                                    and mssqlDialect is not None
+                                    and isinstance(
+                                        data_asset.engine.dialect, mssqlDialect
+                                    )
                                 ):
                                     generate_test = True
                             elif isinstance(data_asset, PandasDataset):
@@ -110,11 +175,13 @@ def pytest_generate_tests(metafunc):
                             )
                             or (
                                 "sqlite" in test["suppress_test_for"]
+                                and sqliteDialect is not None
                                 and isinstance(data_asset, SqlAlchemyDataset)
                                 and isinstance(data_asset.engine.dialect, sqliteDialect)
                             )
                             or (
                                 "postgresql" in test["suppress_test_for"]
+                                and postgresqlDialect is not None
                                 and isinstance(data_asset, SqlAlchemyDataset)
                                 and isinstance(
                                     data_asset.engine.dialect, postgresqlDialect
@@ -122,8 +189,15 @@ def pytest_generate_tests(metafunc):
                             )
                             or (
                                 "mysql" in test["suppress_test_for"]
+                                and mysqlDialect is not None
                                 and isinstance(data_asset, SqlAlchemyDataset)
                                 and isinstance(data_asset.engine.dialect, mysqlDialect)
+                            )
+                            or (
+                                "mssql" in test["suppress_test_for"]
+                                and mssqlDialect is not None
+                                and isinstance(data_asset, SqlAlchemyDataset)
+                                and isinstance(data_asset.engine.dialect, mssqlDialect)
                             )
                             or (
                                 "pandas" in test["suppress_test_for"]

@@ -65,7 +65,7 @@ def test_ValidationsStore_with_TupleS3StoreBackend():
     assert set(
         [
             s3_object_info["Key"]
-            for s3_object_info in boto3.client("s3").list_objects(
+            for s3_object_info in boto3.client("s3").list_objects_v2(
                 Bucket=bucket, Prefix=prefix
             )["Contents"]
         ]
@@ -198,7 +198,7 @@ test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir0/
     )
 
 
-def test_ValidationsStore_with_DatabaseStoreBackend():
+def test_ValidationsStore_with_DatabaseStoreBackend(sa):
     # Use sqlite so we don't require postgres for this test.
     connection_kwargs = {"drivername": "sqlite"}
 

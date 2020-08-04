@@ -1,0 +1,67 @@
+# Python package
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+trigger:
+  - main
+  - develop
+
+pr: none
+
+stages:
+  - stage: os_integration
+    variables:
+      python.version: '3.x'
+      GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
+      GE_pytest_opts: '--no-sqlalchemy --no-spark'
+
+    jobs:
+
+      - job: Windows
+        pool:
+          vmImage: 'windows-latest'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              pip install --requirement requirements.txt
+              pip install $(GE_pytest_pip_opts)
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest $(GE_pytest_opts)
+            displayName: 'pytest'
+
+      - job: macOS
+        pool:
+          vmImage: 'macOS-latest'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              pip install --requirement requirements.txt
+              pip install $(GE_pytest_pip_opts)
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest $(GE_pytest_opts)
+            displayName: 'pytest'

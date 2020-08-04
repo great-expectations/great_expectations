@@ -64,15 +64,24 @@ class UsageStatisticsHandler(object):
         self._data_docs_sites_anonymizer = DataDocsSiteAnonymizer(data_context_id)
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
-        self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
-        self._sigint_handler = signal.signal(signal.SIGINT, self._teardown)
+        try:
+            self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
+        except ValueError:
+            # if we are not the main thread, we don't get to ask for signal handling.
+            self._sigterm_handler = None
+        try:
+            self._sigint_handler = signal.signal(signal.SIGINT, self._teardown)
+        except ValueError:
+            # if we are not the main thread, we don't get to ask for signal handling.
+            self._sigint_handler = None
+
         atexit.register(self._close_worker)
 
     def _teardown(self, signum: int, frame):
         self._close_worker()
-        if signum == signal.SIGTERM:
+        if signum == signal.SIGTERM and self._sigterm_handler:
             self._sigterm_handler(signum, frame)
-        if signum == signal.SIGINT:
+        if signum == signal.SIGINT and self._sigint_handler:
             self._sigint_handler(signum, frame)
 
     def _close_worker(self):
@@ -236,6 +245,10 @@ def usage_statistics_enabled_method(
 
         @wraps(func)
         def usage_statistics_wrapped_method(*args, **kwargs):
+            # if a function like `build_data_docs()` is being called as a `dry_run`
+            # then we dont want to emit usage_statistics. We just return the function without sending a usage_stats message
+            if "dry_run" in kwargs and kwargs["dry_run"]:
+                return func(*args, **kwargs)
             # Set event_payload now so it can be updated below
             event_payload = {}
             message = {"event_payload": event_payload, "event": event_name}

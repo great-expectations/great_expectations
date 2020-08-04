@@ -583,7 +583,7 @@ def _collect_postgres_credentials(default_credentials=None):
     if default_credentials is None:
         default_credentials = {}
 
-    credentials = {"drivername": "postgres"}
+    credentials = {"drivername": "postgresql"}
 
     credentials["host"] = click.prompt(
         "What is the host for the postgres connection?",
@@ -617,28 +617,29 @@ def _collect_postgres_credentials(default_credentials=None):
 def _collect_snowflake_credentials(default_credentials=None):
     if default_credentials is None:
         default_credentials = {}
-
     credentials = {"drivername": "snowflake"}
 
-    # required
+    auth_method = click.prompt(
+        """What authentication method would you like to use?
+    1. User and Password
+    2. Single sign-on (SSO)
+    3. Key pair authentication
+""",
+        type=click.Choice(["1", "2", "3"]),
+        show_choices=False,
+    )
 
     credentials["username"] = click.prompt(
         "What is the user login name for the snowflake connection?",
         default=default_credentials.get("username", ""),
     ).strip()
-    credentials["password"] = click.prompt(
-        "What is the password for the snowflake connection?",
-        default="",
-        show_default=False,
-        hide_input=True,
-    )
+
     credentials["host"] = click.prompt(
         "What is the account name for the snowflake connection (include region -- ex "
         "'ABCD.us-east-1')?",
         default=default_credentials.get("host", ""),
     ).strip()
 
-    # optional
     database = click.prompt(
         "What is database name for the snowflake connection? (optional -- leave blank for none)",
         default=default_credentials.get("database", ""),
@@ -670,6 +671,54 @@ def _collect_snowflake_credentials(default_credentials=None):
     ).strip()
     if len(role) > 0:
         credentials["query"]["role"] = role
+
+    if auth_method == "1":
+        credentials = {**credentials, **_collect_snowflake_credentials_user_password()}
+    elif auth_method == "2":
+        credentials = {**credentials, **_collect_snowflake_credentials_sso()}
+    elif auth_method == "3":
+        credentials = {**credentials, **_collect_snowflake_credentials_key_pair()}
+    return credentials
+
+
+def _collect_snowflake_credentials_user_password():
+    credentials = {}
+
+    credentials["password"] = click.prompt(
+        "What is the password for the snowflake connection?",
+        default="",
+        show_default=False,
+        hide_input=True,
+    )
+
+    return credentials
+
+
+def _collect_snowflake_credentials_sso():
+    credentials = {}
+
+    credentials["connect_args"] = {}
+    credentials["connect_args"]["authenticator"] = click.prompt(
+        "Valid okta URL or 'externalbrowser' used to connect through SSO",
+        default="externalbrowser",
+        show_default=False,
+    )
+
+    return credentials
+
+
+def _collect_snowflake_credentials_key_pair():
+    credentials = {}
+
+    credentials["private_key_path"] = click.prompt(
+        "Path to the private key used for authentication", show_default=False,
+    )
+
+    credentials["private_key_passphrase"] = click.prompt(
+        "Passphrase for the private key used for authentication (optional -- leave blank for none)",
+        default="",
+        show_default=False,
+    )
 
     return credentials
 

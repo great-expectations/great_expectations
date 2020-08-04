@@ -60,7 +60,7 @@ To download the NPI data using wget, please run:
 
 .. code-block:: bash
 
-    wget https://superconductive-public.s3.amazonaws.com/data/npi/weekly/npidata_pfile_20200511-20200517.csv.gz -O my_data
+    wget https://superconductive-public.s3.amazonaws.com/data/npi/weekly/npidata_pfile_20200511-20200517.csv.gz -P my_data
 
 Alternatively, you can use curl:
 

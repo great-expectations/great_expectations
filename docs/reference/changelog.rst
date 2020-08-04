@@ -4,10 +4,68 @@
 Changelog
 #########
 
-
 Develop
 -----------------
+* [ENHANCEMENT] Improve data docs page breadcrumbs to have clearer run information
+* [ENHANCEMENT] Data Docs Validation Results only shows unexpected value counts if all unexpected values are available
+* [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 
+0.11.9
+-----------------
+* [FEATURE] New Dataset Support: Microsoft SQL Server
+* [FEATURE] Render expectation validation results to markdown
+* [FEATURE] Add --assume-yes/--yes/-y option to cli docs build command (thanks @feluelle)
+* [FEATURE] Add SSO and SSH key pair authentication for Snowflake (thanks @dmateusp)
+* [FEATURE] Add pattern-matching expectations that use the Standard SQL "LIKE" operator: "expect_column_values_to_match_like_pattern", "expect_column_values_to_not_match_like_pattern", "expect_column_values_to_match_like_pattern_list", and "expect_column_values_to_not_match_like_pattern_list"
+* [ENHANCEMENT] Make Data Docs rendering of profiling results more flexible by deprecating the reliance on validation results having the specific run_name of "profiling"
+* [ENHANCEMENT] Use green checkmark in Slack msgs instead of tada
+* [ENHANCEMENT] log class instantiation errors for better debugging
+* [BUGFIX] usage_statistics decorator now handles 'dry_run' flag
+* [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) (thanks @Dandandan)
+* [BUGFIX] Handle case when unexpected_count list element is str
+* [DOCS] Deploying Data Docs
+* [DOCS] New how-to guide: How to instantiate a Data Context on an EMR Spark cluster
+* [DOCS] Managed Spark DF Documentation #1729 (thanks @mgorsk1)
+* [DOCS] Typos and clarifications (thanks @dechoma @sbrugman @rexboyce)
+
+0.11.8
+-----------------
+* [FEATURE] Customizable "Suite Edit" generated notebooks
+* [ENHANCEMENT] Add support and docs for loading evaluation parameter from SQL database
+* [ENHANCEMENT] Fixed some typos/grammar and a broken link in the suite_scaffold_notebook_renderer
+* [ENHANCEMENT] allow updates to DatabaseStoreBackend keys by default, requiring `allow_update=False` to disallow
+* [ENHANCEMENT] Improve support for prefixes declared in TupleS3StoreBackend that include reserved characters
+* [BUGFIX] Fix issue where allow_updates was set for StoreBackend that did not support it
+* [BUGFIX] Fix issue where GlobReaderBatchKwargsGenerator failed with relative base_directory
+* [BUGFIX] Adding explicit requirement for "importlib-metadata" (needed for Python versions prior to Python 3.8).
+* [MAINTENANCE] Install GitHub Dependabot
+* [BUGFIX] Fix missing importlib for python 3.8 #1651
+
+0.11.7
+-----------------
+* [ENHANCEMENT] Improve CLI error handling.
+* [ENHANCEMENT] Do not register signal handlers if not running in main thread
+* [ENHANCEMENT] store_backend (S3 and GCS) now throws InvalidKeyError if file does not exist at expected location
+* [BUGFIX] ProfilerTypeMapping uses lists instead of sets to prevent serialization errors when saving suites created by JsonSchemaProfiler
+* [DOCS] Update suite scaffold how-to
+* [DOCS] Docs/how to define expectations that span multiple tables
+* [DOCS] how to metadata stores validation on s3
+
+0.11.6
+-----------------
+* [FEATURE] Auto-install Python DB packages.  If the required packages for a DB library are not installed, GE will offer the user to install them, without exiting CLI
+* [FEATURE] Add new expectation expect_table_row_count_to_equal_other_table for SqlAlchemyDataset
+* [FEATURE] A profiler that builds suites from JSONSchema files
+* [ENHANCEMENT] Add ``.feather`` file support to PandasDatasource
+* [ENHANCEMENT] Use ``colorama init`` to support terminal color on Windows
+* [ENHANCEMENT] Update how_to_trigger_slack_notifications_as_a_validation_action.rst
+* [ENHANCEMENT] Added note for config_version in great_expectations.yml
+* [ENHANCEMENT] Implement "column_quantiles" for MySQL (via a compound SQLAlchemy query, since MySQL does not support "percentile_disc")
+* [BUGFIX] "data_asset.validate" events with "data_asset_name" key in the batch kwargs were failing schema validation
+* [BUGFIX] database_store_backend does not support storing Expectations in DB
+* [BUGFIX] instantiation of ExpectationSuite always adds GE version metadata to prevent datadocs from crashing
+* [BUGFIX] Fix all tests having to do with missing data source libraries
+* [DOCS] will/docs/how_to/Store Expectations on Google Cloud Store
 
 0.11.5
 -----------------
@@ -18,8 +76,6 @@ Develop
 * [BUGFIX] fixed issue where calling head() on a SqlAlchemyDataset would fail if the underlying table is empty
 * [BUGFIX] fixed bug in rounding of mostly argument to nullity expectations produced by the BasicSuiteBuilderProfiler
 * [DOCS] New How-to guide: How to add a Validation Operator (+ updated in Validation Operator doc strings)
-* [FEATURE] Auto-install Python DB packages.  If the required packages for a DB library are not installed, GE will offer the user to install them, without exiting CLI.
-* [ENHANCEMENT] Implement "column_quantiles" for MySQL (via a compound SQLAlchemy query, since MySQL does not support "percentile_disc").
 
 0.11.4
 -----------------

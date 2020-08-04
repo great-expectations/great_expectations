@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
+import json
+import os
+from collections import OrderedDict
 
 import mistune
+import pytest
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer import (
     ExpectationSuitePageRenderer,
     ProfilingResultsPageRenderer,
@@ -208,12 +213,13 @@ def test_ValidationResultsPageRenderer_render_validation_header(
         "subheader": {
             "content_block_type": "string_template",
             "string_template": {
-                "template": "${suite_title} ${expectation_suite_name}\n${status_title} ${success}",
+                "template": "${suite_title} ${expectation_suite_name}\n${status_title} ${html_success_icon} ${success}",
                 "params": {
                     "suite_title": "Expectation Suite:",
                     "status_title": "Status:",
                     "expectation_suite_name": "default",
-                    "success": '<i class="fas fa-times text-danger" aria-hidden="true"></i> Failed',
+                    "success": "Failed",
+                    "html_success_icon": '<i class="fas fa-times text-danger" aria-hidden="true"></i>',
                 },
                 "styling": {
                     "params": {
@@ -265,7 +271,7 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
         "table": [
             ["Great Expectations Version", "0.9.7+17.g02805059.dirty"],
             ["Run Name", "20200322T170247.671855Z"],
-            ["Run Time", "20200322T170247.671855Z"],
+            ["Run Time", "2020-03-22T17:02:47.671855Z"],
         ],
     }
 
@@ -464,3 +470,74 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
     }
 
     assert batch_kwargs_table == expected_batch_kwarg_table
+
+
+@pytest.fixture()
+def ValidationResultsPageRenderer_render_with_run_info_at_end():
+    """
+    Rendered validation results with run info at the end
+    Returns:
+        json string of rendered validation results
+    """
+    fixture_filename = file_relative_path(
+        __file__,
+        "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_end.json",
+    )
+    with open(fixture_filename, "r") as infile:
+        rendered_validation_results = json.load(infile)
+        return rendered_validation_results
+
+
+@pytest.fixture()
+def ValidationResultsPageRenderer_render_with_run_info_at_start():
+    """
+    Rendered validation results with run info at the start
+    Returns:
+        json string of rendered validation results
+    """
+    fixture_filename = file_relative_path(
+        __file__,
+        "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_start.json",
+    )
+    with open(fixture_filename, "r") as infile:
+        rendered_validation_results = json.load(infile)
+        return rendered_validation_results
+
+
+def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
+    titanic_profiled_evrs_1, ValidationResultsPageRenderer_render_with_run_info_at_end,
+):
+    validation_results_page_renderer = ValidationResultsPageRenderer(
+        run_info_at_end=True
+    )
+    rendered_validation_results = validation_results_page_renderer.render(
+        titanic_profiled_evrs_1
+    ).to_json_dict()
+    print(rendered_validation_results)
+    # with open(file_relative_path(__file__, "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_end.json"), "w") as f:
+    #     json.dump(rendered_validation_results, f, indent=2)
+
+    assert (
+        rendered_validation_results
+        == ValidationResultsPageRenderer_render_with_run_info_at_end
+    )
+
+
+def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
+    titanic_profiled_evrs_1,
+    ValidationResultsPageRenderer_render_with_run_info_at_start,
+):
+    validation_results_page_renderer = ValidationResultsPageRenderer(
+        run_info_at_end=False
+    )
+    rendered_validation_results = validation_results_page_renderer.render(
+        titanic_profiled_evrs_1
+    ).to_json_dict()
+    print(rendered_validation_results)
+    # with open(file_relative_path(__file__, "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_start.json"), "w") as f:
+    #     json.dump(rendered_validation_results, f, indent=2)
+
+    assert (
+        rendered_validation_results
+        == ValidationResultsPageRenderer_render_with_run_info_at_start
+    )
