@@ -344,9 +344,7 @@ def _suite_new(
                         """<green>Because you requested an empty suite, we'll open a notebook for you now to edit it!
 If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
                     )
-            send_usage_message(
-                data_context=context, event=usage_event, success=True
-            )  #######
+            send_usage_message(data_context=context, event=usage_event, success=True)
 
             _suite_edit(
                 suite_name,
@@ -354,8 +352,8 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
                 directory,
                 jupyter=jupyter,
                 batch_kwargs=batch_kwargs,
-                usage_event="cli.suite.edit",
-                actually_send_usage_message=False,
+                usage_event="cli.suite.edit",  # or else we will be sending `cli.suite.new` which is incorrect
+                actually_send_usage_message=False,  # dont want actually send usage_message since the function call is not the result of actual usage
             )
         else:
             send_usage_message(data_context=context, event=usage_event, success=False)

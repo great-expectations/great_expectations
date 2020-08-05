@@ -110,25 +110,36 @@ valid_usage_statistics_messages = {
             "ge_version": "0.11.9.manual_test",
         }
     ],
-    "cli.checkpoint.list": [
+    "data_asset.validate": [
         {
-            "event": "cli.checkpoint.list",
-            "event_payload": {},
+            "event": "data_asset.validate",
+            "event_payload": {
+                "anonymized_batch_kwarg_keys": [
+                    "path",
+                    "datasource",
+                    "data_asset_name",
+                ],
+                "anonymized_expectation_suite_name": "dbb859464809a03647feb14a514f12b8",
+                "anonymized_datasource_name": "a41caeac7edb993cfbe55746e6a328b5",
+            },
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
+            "event_time": "2020-08-03T23:36:26.422Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
         }
     ],
-    "data_context.open_data_docs": [
+    "data_context.add_datasource": [
         {
-            "event_payload": {},
-            "event": "data_context.open_data_docs",
+            "event_payload": {
+                "anonymized_name": "c9633f65c36d1ba9fbaa9009c1404cfa",
+                "parent_class": "PandasDatasource",
+            },
+            "event": "data_context.add_datasource",
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-06-25T16:08:28.070Z",
+            "event_time": "2020-06-25T16:08:16.030Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
@@ -142,6 +153,19 @@ valid_usage_statistics_messages = {
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:24.349Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        }
+    ],
+    "data_context.open_data_docs": [
+        {
+            "event_payload": {},
+            "event": "data_context.open_data_docs",
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:28.070Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
@@ -163,37 +187,176 @@ valid_usage_statistics_messages = {
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         }
     ],
-    "data_context.add_datasource": [
+    "datasource.sqlalchemy.connect": [
         {
+            "event": "datasource.sqlalchemy.connect",
             "event_payload": {
-                "anonymized_name": "c9633f65c36d1ba9fbaa9009c1404cfa",
-                "parent_class": "PandasDatasource",
+                "anonymized_name": "6989a7654d0e27470dc01292b6ed0dea",
+                "sqlalchemy_dialect": "postgresql",
             },
-            "event": "data_context.add_datasource",
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-06-25T16:08:16.030Z",
+            "event_time": "2020-08-04T00:38:32.664Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.5.manual_testing",
+        }
+    ],
+    "cli.init.create": [
+        {
+            "event": "cli.init.create",
+            "event_payload": {},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:06:47.697Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         }
     ],
-    "data_asset.validate": [
+    "cli.checkpoint.list": [
         {
-            "event": "data_asset.validate",
+            "event": "cli.checkpoint.list",
+            "event_payload": {},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T22:50:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+        }
+    ],
+    "cli.datasource.list": [
+        {
+            "event": "cli.datasource.list",
+            "event_payload": {},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T00:01:06.628Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+        }
+    ],
+    "cli.datasource.new": [
+        {
+            "event": "cli.datasource.new",
+            "event_payload": {},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T00:38:32.701Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+        }
+    ],
+    "cli.datasource.profile": [
+        {
+            "event": "cli.datasource.profile",
+            "event_payload": {},
+            "success": False,
+            "version": "1.0.0",
+            "event_time": "2020-08-05T01:03:17.567Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+        }
+    ],
+    "cli.docs.build": [
+        {
+            "event": "cli.docs.build",
+            "event_payload": {},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T00:25:27.088Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+        }
+    ],
+    "cli.docs.clean": [
+        {
+            "event": "cli.docs.clean",
+            "event_payload": {},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-05T00:36:50.979Z",
+            "data_context_id": "2a948908-ec42-47f2-b972-c07bb0393de4",
+            "data_context_instance_id": "e7e0916d-d527-437a-b89d-5eb8c36d408f",
+            "ge_version": "0.11.9+25.g3ca555c.dirty",
+        }
+    ],
+    "cli.docs.list": [
+        {
+            "event": "cli.docs.list",
+            "event_payload": {},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T00:20:37.828Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+        }
+    ],
+    "cli.new_ds_choice": [
+        {
+            "event": "cli.new_ds_choice",
+            "event_payload": {"type": "pandas"},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:08.963Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        }
+    ],
+    "cli.project.check_config": [
+        {
+            "event": "cli.project.check_config",
+            "event_payload": {},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-03T23:42:34.068Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+        }
+    ],
+    "cli.store.list": [
+        {
+            "event": "cli.store.list",
+            "event_payload": {},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-03T23:56:53.908Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+        }
+    ],
+    "cli.suite.demo": [
+        {
+            "event": "cli.suite.demo",
+            "event_payload": {},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-05T00:40:41.401Z",
+            "data_context_id": "2a948908-ec42-47f2-b972-c07bb0393de4",
+            "data_context_instance_id": "e7e0916d-d527-437a-b89d-5eb8c36d408f",
+            "ge_version": "0.11.9+25.g3ca555c.dirty",
+        }
+    ],
+    "cli.suite.edit": [
+        {
+            "event": "cli.suite.edit",
             "event_payload": {
-                "anonymized_batch_kwarg_keys": [
-                    "path",
-                    "datasource",
-                    "data_asset_name",
-                ],
-                "anonymized_expectation_suite_name": "dbb859464809a03647feb14a514f12b8",
-                "anonymized_datasource_name": "a41caeac7edb993cfbe55746e6a328b5",
+                "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e"
             },
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-08-03T23:36:26.422Z",
+            "event_time": "2020-08-04T00:16:22.149Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
@@ -235,30 +398,16 @@ valid_usage_statistics_messages = {
             "ge_version": "0.11.9.manual_testing",
         }
     ],
-    "cli.init.create": [
+    "cli.suite.list": [
         {
-            "event": "cli.init.create",
+            "event": "cli.suite.list",
             "event_payload": {},
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-06-25T16:06:47.697Z",
+            "event_time": "2020-08-03T23:59:38.233Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
-            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
-        }
-    ],
-    "cli.new_ds_choice": [
-        {
-            "event": "cli.new_ds_choice",
-            "event_payload": {"type": "pandas"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-06-25T16:08:08.963Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         }
     ],
     "cli.validation_operator.list": [
@@ -273,7 +422,6 @@ valid_usage_statistics_messages = {
             "ge_version": "0.11.9.manual_testing",
         }
     ],
-    # this was originally success: False
     "cli.validation_operator.run": [
         {
             "event": "cli.validation_operator.run",
@@ -284,179 +432,6 @@ valid_usage_statistics_messages = {
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
-        }
-    ],
-    "cli.project.check_config": [
-        {
-            "event": "cli.project.check_config",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-03T23:42:34.068Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        }
-    ],
-    "cli.datasource.profile": [
-        {
-            "event": "cli.datasource.profile",
-            "event_payload": {},
-            "success": False,
-            "version": "1.0.0",
-            "event_time": "2020-08-05T01:03:17.567Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        }
-    ],
-    "cli.store.list": [
-        {
-            "event": "cli.store.list",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-03T23:56:53.908Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        }
-    ],
-    "cli.suite.list": [
-        {
-            "event": "cli.suite.list",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-03T23:59:38.233Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        }
-    ],
-    "cli.datasource.list": [
-        {
-            "event": "cli.datasource.list",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:01:06.628Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        }
-    ],
-    "cli.suite.edit": [
-        {
-            "event": "cli.suite.edit",
-            "event_payload": {
-                "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e"
-            },
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:16:22.149Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        }
-    ],
-    "cli.new_ds_choice": [
-        {
-            "event": "cli.new_ds_choice",
-            "event_payload": {"type": "pandas"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:22:57.945Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        }
-    ],
-    "cli.init.create": [
-        {
-            "event": "cli.init.create",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:22:54.482Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        }
-    ],
-    "cli.datasource.new": [
-        {
-            "event": "cli.datasource.new",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:38:32.701Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        }
-    ],
-    "cli.docs.build": [
-        {
-            "event": "cli.docs.build",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:25:27.088Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        }
-    ],
-    "cli.docs.list": [
-        {
-            "event": "cli.docs.list",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:20:37.828Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        }
-    ],
-    "cli.docs.clean": [
-        {
-            "event": "cli.docs.clean",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-05T00:36:50.979Z",
-            "data_context_id": "2a948908-ec42-47f2-b972-c07bb0393de4",
-            "data_context_instance_id": "e7e0916d-d527-437a-b89d-5eb8c36d408f",
-            "ge_version": "0.11.9+25.g3ca555c.dirty",
-        }
-    ],
-    "cli.suite.demo": [
-        {
-            "event": "cli.suite.demo",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-05T00:40:41.401Z",
-            "data_context_id": "2a948908-ec42-47f2-b972-c07bb0393de4",
-            "data_context_instance_id": "e7e0916d-d527-437a-b89d-5eb8c36d408f",
-            "ge_version": "0.11.9+25.g3ca555c.dirty",
-        }
-    ],
-    "datasource.sqlalchemy.connect": [
-        {
-            "event": "datasource.sqlalchemy.connect",
-            "event_payload": {
-                "anonymized_name": "6989a7654d0e27470dc01292b6ed0dea",
-                "sqlalchemy_dialect": "postgresql",
-            },
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:38:32.664Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.5.manual_testing",
         }
     ],
 }
