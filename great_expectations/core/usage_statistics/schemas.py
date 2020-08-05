@@ -351,7 +351,7 @@ usage_statistics_record_schema = {
             "type": "object",
             "properties": {
                 "event": {
-                    "enum": ["data_context.save_expectation_suite", "cli.suite.edit",]
+                    "enum": ["data_context.save_expectation_suite", "cli.suite.edit"]
                 },
                 "event_payload": {
                     "$ref": "#/definitions/save_or_edit_expectation_suite_payload"
@@ -404,6 +404,8 @@ usage_statistics_record_schema = {
                     "enum": [
                         "cli.suite.list",
                         "cli.suite.new",
+                        "cli.suite.demo",
+                        "cli.suite.scaffold",
                         "cli.store.list",
                         "cli.checkpoint.list",
                         "cli.project.check_config",
@@ -411,6 +413,7 @@ usage_statistics_record_schema = {
                         "cli.validation_operator.list",
                         "cli.docs.list",
                         "cli.docs.build",
+                        "cli.docs.clean",
                         "cli.datasource.profile",
                         "cli.datasource.list",
                         "cli.datasource.new",
