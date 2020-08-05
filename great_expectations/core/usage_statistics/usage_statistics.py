@@ -198,11 +198,7 @@ class UsageStatisticsHandler(object):
             if not self.validate_message(
                 message, schema=usage_statistics_record_schema
             ):
-                # print("---- FROM EMIT : MESSAGE INVALID ----")
-                # print(message)
                 return
-            # print("-----FROM EMIT------")
-            # print(message)
             self._message_queue.put(message)
         # noinspection PyBroadException
         except Exception as e:
