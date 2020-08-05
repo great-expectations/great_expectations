@@ -1,10 +1,7 @@
 import pytest
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuite,
-)
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.data_asset import DataAsset, FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
 
@@ -70,7 +67,7 @@ def test_data_asset_name_inheritance(dataset):
 def test_catch_exceptions_with_bad_expectation_type():
     # We want to catch degenerate cases where an expectation suite is incompatible with
     my_df = PandasDataset({"x": range(10)})
-    my_df._append_expectation(
+    my_df._expectation_suite.append_expectation(
         ExpectationConfiguration(expectation_type="foobar", kwargs={})
     )
     result = my_df.validate(catch_exceptions=True)

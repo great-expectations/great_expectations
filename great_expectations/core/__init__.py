@@ -5,7 +5,7 @@ import warnings
 from collections import namedtuple
 from copy import deepcopy
 from operator import itemgetter
-from typing import Any, List
+from typing import Any, List, Union
 
 import jsonpatch
 from dateutil.parser import ParserError as DateUtilParserError
@@ -1255,47 +1255,52 @@ class ExpectationConfiguration(DictDot):
     def kwargs(self):
         return self._kwargs
 
+    def _get_default_custom_kwargs(self):
+        # NOTE: this is a holdover until class-first expectations control their
+        # defaults, and so defaults are inherited.
+        if self.expectation_type.startswith("expect_column_pair"):
+            return {
+                "domain_kwargs": [
+                    "column_A",
+                    "column_B",
+                    "row_condition",
+                    "condition_parser",
+                ],
+                # NOTE: this is almost certainly incomplete; subclasses should override
+                "success_kwargs": [],
+                "default_kwarg_values": {
+                    "column_A": None,
+                    "column_B": None,
+                    "row_condition": None,
+                    "condition_parser": None,
+                },
+            }
+        elif self.expectation_type.startswith("expect_column"):
+            return {
+                "domain_kwargs": ["column", "row_condition", "condition_parser"],
+                # NOTE: this is almost certainly incomplete; subclasses should override
+                "success_kwargs": [],
+                "default_kwarg_values": {
+                    "column": None,
+                    "row_condition": None,
+                    "condition_parser": None,
+                },
+            }
+
+        logger.error("Requested kwargs for an unrecognized expectation.")
+        return {
+            "domain_kwargs": [],
+            # NOTE: this is almost certainly incomplete; subclasses should override
+            "success_kwargs": [],
+            "default_kwarg_values": {},
+        }
+
     def get_domain_kwargs(self):
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
         if expectation_kwargs_dict is None:
-            if self.expectation_type.startswith("expect_column_pair"):
-                return {
-                    "domain_kwargs": [
-                        "column_A",
-                        "column_B",
-                        "row_condition",
-                        "condition_parser",
-                    ],
-                    # NOTE: this is almost certainly incomplete; subclasses should override
-                    "success_kwargs": [],
-                    "default_kwarg_values": {
-                        "column_A": None,
-                        "column_B": None,
-                        "row_condition": None,
-                        "condition_parser": None,
-                    },
-                }
-            elif self.expectation_type.startswith("expect_column"):
-                return {
-                    "domain_kwargs": ["column", "row_condition", "condition_parser"],
-                    # NOTE: this is almost certainly incomplete; subclasses should override
-                    "success_kwargs": [],
-                    "default_kwarg_values": {
-                        "column": None,
-                        "row_condition": None,
-                        "condition_parser": None,
-                    },
-                }
-            if self.expectation_type.startswith("expect_"):
-                logger.error("Requested kwargs for an unrecognized expectation.")
-                return {
-                    "domain_kwargs": [],
-                    # NOTE: this is almost certainly incomplete; subclasses should override
-                    "success_kwargs": [],
-                    "default_kwarg_values": {},
-                }
+            expectation_kwargs_dict = self._get_default_custom_kwargs()
         domain_kwargs = {
             key: self.kwargs.get(
                 key, expectation_kwargs_dict.get("default_kwarg_values").get(key)
@@ -1312,7 +1317,11 @@ class ExpectationConfiguration(DictDot):
         return domain_kwargs
 
     def get_success_kwargs(self):
-        expectation_kwargs_dict = self.kwarg_lookup_dict[self.expectation_type]
+        expectation_kwargs_dict = self.kwarg_lookup_dict.get(
+            self.expectation_type, None
+        )
+        if expectation_kwargs_dict is None:
+            expectation_kwargs_dict = self._get_default_custom_kwargs()
         domain_kwargs = self.get_domain_kwargs()
         success_kwargs = {
             key: self.kwargs.get(
@@ -1324,7 +1333,11 @@ class ExpectationConfiguration(DictDot):
         return success_kwargs
 
     def get_runtime_kwargs(self):
-        expectation_kwargs_dict = self.kwarg_lookup_dict[self.expectation_type]
+        expectation_kwargs_dict = self.kwarg_lookup_dict.get(
+            self.expectation_type, None
+        )
+        if expectation_kwargs_dict is None:
+            expectation_kwargs_dict = self._get_default_custom_kwargs()
         success_kwargs = self.get_success_kwargs()
         runtime_kwargs = {
             key: self.kwargs.get(
@@ -1717,11 +1730,13 @@ class ExpectationSuite(object):
             return [self.expectations.pop(found_expectation_indexes[0])]
 
     def remove_all_expectations_of_type(
-        self, expectation_type: str
+        self, expectation_types: Union[List[str], str]
     ) -> List[ExpectationConfiguration]:
+        if isinstance(expectation_types, str):
+            expectation_types = [expectation_types]
         removed_expectations = []
         for expectation in self.expectations:
-            if expectation.expectation_type == expectation_type:
+            if expectation.expectation_type in expectation_types:
                 removed_expectations += self.remove_expectation(
                     expectation, match_type="domain", remove_multiple_matches=True
                 )
@@ -1769,7 +1784,11 @@ class ExpectationSuite(object):
             expectation_configuration, match_type
         )
         if len(found_expectation_indexes) > 0:
-            return [expectation for idx, expectation in enumerate(self.expectations) if idx in found_expectation_indexes]
+            return [
+                expectation
+                for idx, expectation in enumerate(self.expectations)
+                if idx in found_expectation_indexes
+            ]
         else:
             return []
 

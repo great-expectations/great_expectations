@@ -329,7 +329,7 @@ def test_ge_pandas_concatenating_no_autoinspect():
     #      to the concatenated dataframes and still make sense (since no autoinspection happens).
 
     assert isinstance(df, ge.dataset.PandasDataset)
-    assert df.find_expectations() == exp_c
+    assert df.get_expectation_suite().expectations == exp_c
 
 
 def test_ge_pandas_joining():
@@ -367,7 +367,7 @@ def test_ge_pandas_joining():
     #   2. Have no expectations (no autoinspection)
 
     assert isinstance(df, ge.dataset.PandasDataset)
-    assert df.find_expectations() == exp_j
+    assert df.get_expectation_suite().expectations == exp_j
 
 
 def test_ge_pandas_merging():
@@ -399,7 +399,7 @@ def test_ge_pandas_merging():
     #   2. Have no expectations (no autoinspection is now default)
 
     assert isinstance(df, ge.dataset.PandasDataset)
-    assert df.find_expectations() == exp_m
+    assert df.get_expectation_suite().expectations == exp_m
 
 
 def test_ge_pandas_sampling():
@@ -419,7 +419,7 @@ def test_ge_pandas_sampling():
     df.expect_column_values_to_be_in_set("C", ["a", "b", "c", "d"])
     df.expect_column_values_to_be_in_set("D", ["e", "f", "g", "h"])
 
-    exp1 = df.find_expectations()
+    exp1 = df.get_expectation_suite().expectations
 
     # The sampled data frame should:
     #
@@ -428,11 +428,11 @@ def test_ge_pandas_sampling():
 
     samp1 = df.sample(n=2)
     assert isinstance(samp1, ge.dataset.PandasDataset)
-    assert samp1.find_expectations() == exp1
+    assert samp1.get_expectation_suite().expectations == exp1
 
     samp1 = df.sample(frac=0.25, replace=True)
     assert isinstance(samp1, ge.dataset.PandasDataset)
-    assert samp1.find_expectations() == exp1
+    assert samp1.get_expectation_suite().expectations == exp1
 
     # Change expectation on column "D", sample, and check expectations.
     # The failing expectation on column "D" is NOT automatically dropped
@@ -478,7 +478,7 @@ def test_ge_pandas_sampling():
             ],
         }
     )
-    assert samp1.find_expectations() == exp1.expectations
+    assert samp1.get_expectation_suite().expectations == exp1.expectations
 
 
 def test_ge_pandas_subsetting():
@@ -502,39 +502,39 @@ def test_ge_pandas_subsetting():
     #   1. Be a ge.dataset.PandaDataSet
     #   2. Inherit ALL the expectations of the parent data frame
 
-    exp1 = df.find_expectations()
+    exp1 = df.get_expectation_suite().expectations
 
     sub1 = df[["A", "D"]]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[["A"]]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[:3]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[1:2]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[:-1]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[-1:]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df.iloc[:3, 1:4]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df.loc[0:, "A":"B"]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
 
 def test_ge_pandas_automatic_failure_removal():
@@ -588,12 +588,12 @@ def test_ge_pandas_automatic_failure_removal():
         ),
     ]
     samp1 = df.sample(n=2)
-    assert samp1.find_expectations() == exp1
+    assert samp1.get_expectation_suite().expectations == exp1
 
     # Now check subsetting to verify that failing expectations are NOT
     # automatically dropped when subsetting.
     sub1 = df[["A", "D"]]
-    assert samp1.find_expectations() == exp1
+    assert samp1.get_expectation_suite().expectations == exp1
 
     # Set property/attribute so that failing expectations are
     # automatically removed when sampling or subsetting.
@@ -631,7 +631,7 @@ def test_ge_pandas_automatic_failure_removal():
     ]
 
     samp2 = df.sample(n=2)
-    assert samp2.find_expectations() == exp_samp
+    assert samp2.get_expectation_suite().expectations == exp_samp
 
     # Now check subsetting. In additional to the failure on column "C",
     # the expectations on column "B" now fail since column "B" doesn't
@@ -653,7 +653,7 @@ def test_ge_pandas_automatic_failure_removal():
             kwargs={"column": "D", "value_set": ["e", "f", "g", "h"]},
         ),
     ]
-    assert samp2.find_expectations() == exp_samp
+    assert samp2.get_expectation_suite().expectations == exp_samp
 
 
 def test_subclass_pandas_subset_retains_subclass():
