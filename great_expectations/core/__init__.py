@@ -1211,10 +1211,17 @@ class ExpectationConfiguration(DictDot):
         return self._kwargs
 
     def get_domain_kwargs(self):
-        return {
-            key: self.kwargs.get(key)
-            for key in self.kwarg_lookup_dict[self.expectation_type]["domain_kwargs"]
+        expectation_kwargs_dict = self.kwarg_lookup_dict[self.expectation_type]
+        domain_kwargs = {
+            key: self.kwargs.get(key, expectation_kwargs_dict.get("default_kwarg_values").get(key))
+            for key in expectation_kwargs_dict["domain_kwargs"]
         }
+        missing_kwargs = set(expectation_kwargs_dict["domain_kwargs"]) - set(domain_kwargs.keys())
+        if missing_kwargs:
+            raise InvalidExpectationKwargsError(
+                f"Missing domain kwargs: {list(missing_kwargs)}"
+            )
+        return domain_kwargs
 
     def get_success_kwargs(self):
         # TODO: add default values if kwarg not present
