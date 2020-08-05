@@ -586,16 +586,21 @@ Notes:
 
             # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
             # of the proper expectation_type
-            existing_expectations = self.find_expectation_indexes(
-                "expect_column_values_to_be_of_type", column
+            existing_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_of_type",
+                    kwargs={"column": column},
+                )
             )
             if len(existing_expectations) == 1:
                 self._expectation_suite.expectations.pop(existing_expectations[0])
 
             # Now, rename the expectation we just added
-
-            new_expectations = self.find_expectation_indexes(
-                "_expect_column_values_to_be_of_type__aggregate", column
+            new_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="_expect_column_values_to_be_of_type__aggregate",
+                    kwargs={"column": column},
+                )
             )
             assert len(new_expectations) == 1
             old_config = self._expectation_suite.expectations[new_expectations[0]]
@@ -617,15 +622,21 @@ Notes:
 
             # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
             # of the proper expectation_type
-            existing_expectations = self.find_expectation_indexes(
-                "expect_column_values_to_be_of_type", column
+            existing_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_of_type",
+                    kwargs={"column": column},
+                )
             )
             if len(existing_expectations) == 1:
                 self._expectation_suite.expectations.pop(existing_expectations[0])
 
             # Now, rename the expectation we just added
-            new_expectations = self.find_expectation_indexes(
-                "_expect_column_values_to_be_of_type__map", column
+            new_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="_expect_column_values_to_be_of_type__map",
+                    kwargs={"column": column},
+                )
             )
             assert len(new_expectations) == 1
             old_config = self._expectation_suite.expectations[new_expectations[0]]

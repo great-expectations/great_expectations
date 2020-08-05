@@ -282,7 +282,7 @@ class DataAsset(object):
                 # If validate has set active_validation to true, then we do not save the config to avoid
                 # saving updating expectation configs to the same suite during validation runs
                 if self._active_validation is True:
-                    pass
+                    stored_config = expectation_config
                 else:
                     # Append the expectation to the config.
                     stored_config = self._expectation_suite.add_expectation(
