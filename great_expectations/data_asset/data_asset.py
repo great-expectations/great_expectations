@@ -427,6 +427,7 @@ class DataAsset(object):
         self,
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
+        remove_multiple_matches: bool = False,
     ) -> List[ExpectationConfiguration]:
         warnings.warn(
             "DataAsset.remove_expectations is deprecated, and will be removed in a future release. "
@@ -435,7 +436,9 @@ class DataAsset(object):
         )
         """This method is a thin wrapper for ExpectationSuite.remove()"""
         return self._expectation_suite.remove_expectation(
-            expectation_configuration=expectation_configuration, match_type=match_type
+            expectation_configuration=expectation_configuration,
+            match_type=match_type,
+            remove_multiple_matches=remove_multiple_matches,
         )
 
     def set_config_value(self, key, value):
