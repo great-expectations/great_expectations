@@ -3,7 +3,6 @@ import pytest
 from great_expectations import __version__ as ge_version
 from great_expectations.core import (
     ExpectationConfiguration,
-    # ExpectationKwargs,
     ExpectationSuite,
 )
 from great_expectations.data_asset import DataAsset, FileDataAsset
@@ -84,7 +83,7 @@ def test_catch_exceptions_with_bad_expectation_type():
 
     assert result.results[idx].success is False
     assert result.results[idx].expectation_config.expectation_type == "foobar"
-    assert result.results[idx].expectation_config.kwargs == ExpectationKwargs()
+    assert result.results[idx].expectation_config.kwargs == {}
     assert result.results[idx].exception_info["raised_exception"] is True
     assert (
         "AttributeError: 'PandasDataset' object has no attribute 'foobar'"
