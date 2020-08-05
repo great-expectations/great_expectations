@@ -50,6 +50,7 @@ def exp4():
         meta={"notes": "This is an expectation."},
     )
 
+
 @pytest.fixture
 def exp5():
     return ExpectationConfiguration(
@@ -109,7 +110,6 @@ def table_exp3():
     )
 
 
-
 @pytest.fixture
 def column_pair_expectation():
     return ExpectationConfiguration(
@@ -150,7 +150,6 @@ def domain_success_runtime_suite(exp1, exp2, exp3, exp4, exp5):
     )
 
 
-
 @pytest.fixture
 def suite_with_table_and_column_expectations(
     exp1, exp2, exp3, exp4, column_pair_expectation, table_exp1, table_exp2, table_exp3
@@ -188,12 +187,7 @@ def suite_with_column_pair_and_table_expectations(
 ):
     suite = ExpectationSuite(
         expectation_suite_name="warning",
-        expectations=[
-            column_pair_expectation,
-            table_exp1,
-            table_exp2,
-            table_exp3,
-        ],
+        expectations=[column_pair_expectation, table_exp1, table_exp2, table_exp3,],
         meta={"notes": "This is an expectation suite."},
     )
     assert suite.expectations == [
@@ -203,6 +197,8 @@ def suite_with_column_pair_and_table_expectations(
         table_exp3,
     ]
     return suite
+
+
 # def test_append_expectation(empty_suite, exp1, exp2):
 #
 #     assert len(empty_suite.expectations) == 0
@@ -217,13 +213,13 @@ def suite_with_column_pair_and_table_expectations(
 #     empty_suite.append_expectation(exp2)
 #     assert len(empty_suite.expectations) == 3
 
-    # Turn this on once we're ready to enforce strict typing.
-    # with pytest.raises(TypeError):
-    #     empty_suite.append_expectation("not an expectation")
+# Turn this on once we're ready to enforce strict typing.
+# with pytest.raises(TypeError):
+#     empty_suite.append_expectation("not an expectation")
 
-    # Turn this on once we're ready to enforce strict typing.
-    # with pytest.raises(TypeError):
-    #     empty_suite.append_expectation(exp1.to_json_dict())
+# Turn this on once we're ready to enforce strict typing.
+# with pytest.raises(TypeError):
+#     empty_suite.append_expectation(exp1.to_json_dict())
 
 
 # def test_find_expectation_indexes_original(baseline_suite, exp5):
@@ -419,15 +415,25 @@ def suite_with_column_pair_and_table_expectations(
 def test_find_expectation_indexes(
     exp1, exp2, exp3, exp4, exp5, domain_success_runtime_suite
 ):
-    assert domain_success_runtime_suite.find_expectation_indexes(exp4, "domain") == [1, 2, 3, 4]
-    assert domain_success_runtime_suite.find_expectation_indexes(exp4, "success") == [3, 4]
+    assert domain_success_runtime_suite.find_expectation_indexes(exp4, "domain") == [
+        1,
+        2,
+        3,
+        4,
+    ]
+    assert domain_success_runtime_suite.find_expectation_indexes(exp4, "success") == [
+        3,
+        4,
+    ]
     assert domain_success_runtime_suite.find_expectation_indexes(exp4, "runtime") == [3]
 
 
 def test_remove_expectation(
     exp1, exp2, exp3, exp4, exp5, single_expectation_suite, domain_success_runtime_suite
 ):
-    domain_success_runtime_suite.remove_expectation(exp5, match_type="runtime", remove_multiple_matches=False) # remove one matching expectation
+    domain_success_runtime_suite.remove_expectation(
+        exp5, match_type="runtime", remove_multiple_matches=False
+    )  # remove one matching expectation
 
     with pytest.raises(ValueError):
         domain_success_runtime_suite.remove_expectation(exp5, match_type="runtime")
@@ -439,10 +445,14 @@ def test_remove_expectation(
     assert domain_success_runtime_suite.find_expectation_indexes(exp4, "success") == [3]
 
     with pytest.raises(ValueError):
-        domain_success_runtime_suite.remove_expectation(exp4, match_type="domain", remove_multiple_matches=False)
+        domain_success_runtime_suite.remove_expectation(
+            exp4, match_type="domain", remove_multiple_matches=False
+        )
 
     # remove 3 matching expectations
-    domain_success_runtime_suite.remove_expectation(exp4, match_type="domain", remove_multiple_matches=True)
+    domain_success_runtime_suite.remove_expectation(
+        exp4, match_type="domain", remove_multiple_matches=True
+    )
 
     with pytest.raises(ValueError):
         domain_success_runtime_suite.remove_expectation(exp2, match_type="runtime")
@@ -461,12 +471,8 @@ def test_patch_expectation_replace(exp5, exp6, domain_success_runtime_suite):
     assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(
         exp6, match_type="success"
     )
-    domain_success_runtime_suite.patch(
-        exp5,
-        op="replace",
-        path="/value_set",
-        value=[1, 2],
-        match_type="runtime",
+    domain_success_runtime_suite.patch_expectation(
+        exp5, op="replace", path="/value_set", value=[1, 2], match_type="runtime",
     )
     assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
         exp6, match_type="success"
@@ -479,12 +485,8 @@ def test_patch_expectation_add(exp5, exp7, domain_success_runtime_suite):
     assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(
         exp7, match_type="success"
     )
-    domain_success_runtime_suite.patch(
-        exp5,
-        op="add",
-        path="/value_set/-",
-        value=4,
-        match_type="runtime",
+    domain_success_runtime_suite.patch_expectation(
+        exp5, op="add", path="/value_set/-", value=4, match_type="runtime",
     )
     assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
         exp7, match_type="success"
@@ -497,12 +499,8 @@ def test_patch_expectation_remove(exp5, exp8, domain_success_runtime_suite):
     assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(
         exp8, match_type="runtime"
     )
-    domain_success_runtime_suite.patch(
-        exp5,
-        op="remove",
-        path="/result_format",
-        value=None,
-        match_type="runtime",
+    domain_success_runtime_suite.patch_expectation(
+        exp5, op="remove", path="/result_format", value=None, match_type="runtime",
     )
     assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
         exp8, match_type="runtime"
@@ -510,30 +508,51 @@ def test_patch_expectation_remove(exp5, exp8, domain_success_runtime_suite):
 
 
 def test_add_expectation(
-    exp1, exp2, exp4, single_expectation_suite, baseline_suite, different_suite, domain_success_runtime_suite
+    exp1,
+    exp2,
+    exp4,
+    single_expectation_suite,
+    baseline_suite,
+    different_suite,
+    domain_success_runtime_suite,
 ):
     assert not single_expectation_suite.isEquivalentTo(baseline_suite)
-    single_expectation_suite.add_expectation(exp2, match_type="runtime", overwrite_existing=False)
+    single_expectation_suite.add_expectation(
+        exp2, match_type="runtime", overwrite_existing=False
+    )
     assert single_expectation_suite.isEquivalentTo(baseline_suite)
 
     # Should raise if overwrite_existing=False and a matching expectation is found
     with pytest.raises(DataContextError):
-        single_expectation_suite.add_expectation(exp4, match_type="domain", overwrite_existing=False)
+        single_expectation_suite.add_expectation(
+            exp4, match_type="domain", overwrite_existing=False
+        )
 
     assert not single_expectation_suite.isEquivalentTo(different_suite)
-    single_expectation_suite.add_expectation(exp4, match_type="domain", overwrite_existing=True)
+    single_expectation_suite.add_expectation(
+        exp4, match_type="domain", overwrite_existing=True
+    )
     assert single_expectation_suite.isEquivalentTo(different_suite)
 
     # Should raise if more than one matching expectation is found
     with pytest.raises(ValueError):
-        domain_success_runtime_suite.add_expectation(exp2, match_type="success", overwrite_existing=False)
+        domain_success_runtime_suite.add_expectation(
+            exp2, match_type="success", overwrite_existing=False
+        )
 
 
 def test_remove_all_expectations_of_type(
-    suite_with_table_and_column_expectations, suite_with_column_pair_and_table_expectations
+    suite_with_table_and_column_expectations,
+    suite_with_column_pair_and_table_expectations,
 ):
-    assert not suite_with_table_and_column_expectations.isEquivalentTo(suite_with_column_pair_and_table_expectations)
+    assert not suite_with_table_and_column_expectations.isEquivalentTo(
+        suite_with_column_pair_and_table_expectations
+    )
 
-    suite_with_table_and_column_expectations.remove_all_expectations_of_type("expect_column_values_to_be_in_set")
+    suite_with_table_and_column_expectations.remove_all_expectations_of_type(
+        "expect_column_values_to_be_in_set"
+    )
 
-    assert suite_with_table_and_column_expectations.isEquivalentTo(suite_with_column_pair_and_table_expectations)
+    assert suite_with_table_and_column_expectations.isEquivalentTo(
+        suite_with_column_pair_and_table_expectations
+    )

@@ -22,12 +22,12 @@ from great_expectations.core.id_dict import IDDict
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
+    DataContextError,
     InvalidCacheValueError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
     ParserError,
     UnavailableMetricError,
-    DataContextError,
 )
 from great_expectations.types import DictDot
 
@@ -392,43 +392,42 @@ class RunIdentifierSchema(Schema):
     def make_run_identifier(self, data, **kwargs):
         return RunIdentifier(**data)
 
-
-# class ExpectationKwargs(dict):
-#     # ignored_keys = ["result_format", "include_config", "catch_exceptions"]
-#
-#     """ExpectationKwargs store information necessary to evaluate an expectation."""
-#
-#     def __init__(self, *args, **kwargs):
-#         include_config = kwargs.pop("include_config", None)
-#         if include_config is not None and not isinstance(include_config, bool):
-#             raise InvalidExpectationKwargsError(
-#                 "include_config must be a boolean value"
-#             )
-#
-#         result_format = kwargs.get("result_format", None)
-#         if result_format is None:
-#             pass
-#         elif result_format in RESULT_FORMATS:
-#             pass
-#         elif (
-#                 isinstance(result_format, dict)
-#                 and result_format.get("result_format", None) in RESULT_FORMATS
-#         ):
-#             pass
-#         else:
-#             raise InvalidExpectationKwargsError(
-#                 "result format must be one of the valid formats: %s"
-#                 % str(RESULT_FORMATS)
-#             )
-#
-#         catch_exceptions = kwargs.pop("catch_exceptions", None)
-#         if catch_exceptions is not None and not isinstance(catch_exceptions, bool):
-#             raise InvalidExpectationKwargsError(
-#                 "catch_exceptions must be a boolean value"
-#             )
-#
-#         super().__init__(*args, **kwargs)
-#         ensure_json_serializable(self)
+    # class ExpectationKwargs(dict):
+    #     # ignored_keys = ["result_format", "include_config", "catch_exceptions"]
+    #
+    #     """ExpectationKwargs store information necessary to evaluate an expectation."""
+    #
+    #     def __init__(self, *args, **kwargs):
+    #         include_config = kwargs.pop("include_config", None)
+    #         if include_config is not None and not isinstance(include_config, bool):
+    #             raise InvalidExpectationKwargsError(
+    #                 "include_config must be a boolean value"
+    #             )
+    #
+    #         result_format = kwargs.get("result_format", None)
+    #         if result_format is None:
+    #             pass
+    #         elif result_format in RESULT_FORMATS:
+    #             pass
+    #         elif (
+    #                 isinstance(result_format, dict)
+    #                 and result_format.get("result_format", None) in RESULT_FORMATS
+    #         ):
+    #             pass
+    #         else:
+    #             raise InvalidExpectationKwargsError(
+    #                 "result format must be one of the valid formats: %s"
+    #                 % str(RESULT_FORMATS)
+    #             )
+    #
+    #         catch_exceptions = kwargs.pop("catch_exceptions", None)
+    #         if catch_exceptions is not None and not isinstance(catch_exceptions, bool):
+    #             raise InvalidExpectationKwargsError(
+    #                 "catch_exceptions must be a boolean value"
+    #             )
+    #
+    #         super().__init__(*args, **kwargs)
+    #         ensure_json_serializable(self)
 
     # def isEquivalentTo(self, other):
     #     try:
@@ -1257,7 +1256,46 @@ class ExpectationConfiguration(DictDot):
         return self._kwargs
 
     def get_domain_kwargs(self):
-        expectation_kwargs_dict = self.kwarg_lookup_dict[self.expectation_type]
+        expectation_kwargs_dict = self.kwarg_lookup_dict.get(
+            self.expectation_type, None
+        )
+        if expectation_kwargs_dict is None:
+            if self.expectation_type.startswith("expect_column_pair"):
+                return {
+                    "domain_kwargs": [
+                        "column_A",
+                        "column_B",
+                        "row_condition",
+                        "condition_parser",
+                    ],
+                    # NOTE: this is almost certainly incomplete; subclasses should override
+                    "success_kwargs": [],
+                    "default_kwarg_values": {
+                        "column_A": None,
+                        "column_B": None,
+                        "row_condition": None,
+                        "condition_parser": None,
+                    },
+                }
+            elif self.expectation_type.startswith("expect_column"):
+                return {
+                    "domain_kwargs": ["column", "row_condition", "condition_parser"],
+                    # NOTE: this is almost certainly incomplete; subclasses should override
+                    "success_kwargs": [],
+                    "default_kwarg_values": {
+                        "column": None,
+                        "row_condition": None,
+                        "condition_parser": None,
+                    },
+                }
+            if self.expectation_type.startswith("expect_"):
+                logger.error("Requested kwargs for an unrecognized expectation.")
+                return {
+                    "domain_kwargs": [],
+                    # NOTE: this is almost certainly incomplete; subclasses should override
+                    "success_kwargs": [],
+                    "default_kwarg_values": {},
+                }
         domain_kwargs = {
             key: self.kwargs.get(
                 key, expectation_kwargs_dict.get("default_kwarg_values").get(key)
@@ -1456,7 +1494,7 @@ class ExpectationSuite(object):
     This ExpectationSuite object has create, read, update, and delete functionality for its expectations:
         -create: self.add_expectation()
         -read: self.find_expectation_indexes()
-        -update: self.add_expectation()
+        -update: self.add_expectation() or self.patch_expectation()
         -delete: self.remove_expectation()
     """
 
@@ -1732,7 +1770,7 @@ class ExpectationSuite(object):
         )
         return list(itemgetter(*found_expectation_indexes)(self.expectations))
 
-    def patch(
+    def patch_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
         op: str,
@@ -1773,10 +1811,10 @@ class ExpectationSuite(object):
         return self.expectations[found_expectation_indexes[0]]
 
     def add_expectation(
-            self,
-            expectation_configuration: ExpectationConfiguration,
-            match_type: str = "domain",
-            overwrite_existing: bool = True
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        match_type: str = "domain",
+        overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
         """
 
@@ -1802,11 +1840,11 @@ class ExpectationSuite(object):
                 "criteria"
             )
         elif len(found_expectation_indexes) == 1:
-            # Currently, we completely replace the expectation_configuration, but we could potentially use patch
+            # Currently, we completely replace the expectation_configuration, but we could potentially use patch_expectation
             # to update instead. We need to consider how to handle meta in that situation.
-            # patch = jsonpatch.make_patch(self.expectations[found_expectation_index] \
+            # patch_expectation = jsonpatch.make_patch(self.expectations[found_expectation_index] \
             #   .kwargs, expectation_configuration.kwargs)
-            # patch.apply(self.expectations[found_expectation_index].kwargs, in_place=True)
+            # patch_expectation.apply(self.expectations[found_expectation_index].kwargs, in_place=True)
             if overwrite_existing:
                 self.expectations[
                     found_expectation_indexes[0]
