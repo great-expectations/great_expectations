@@ -180,27 +180,30 @@ class SiteBuilder(object):
                 default_site_section_builders_config, site_section_builders
             )
 
+        falsey_strings = [
+            "0",
+            "None",
+            "False",
+            "false",
+            "FALSE",
+            "none",
+            "NONE",
+        ]
         # set default run_name_filter
-        if site_section_builders["validations"].get("run_name_filter") is None:
-            site_section_builders["validations"]["run_name_filter"] = {
-                "not_includes": "profiling"
-            }
-        if site_section_builders["profiling"].get("run_name_filter") is None:
-            site_section_builders["profiling"]["run_name_filter"] = {
-                "includes": "profiling"
-            }
+        if site_section_builders.get("validations", "None") not in falsey_strings:
+            if site_section_builders["validations"].get("run_name_filter") is None:
+                site_section_builders["validations"]["run_name_filter"] = {
+                    "not_includes": "profiling"
+                }
+        if site_section_builders.get("profiling", "None") not in falsey_strings:
+            if site_section_builders["profiling"].get("run_name_filter") is None:
+                site_section_builders["profiling"]["run_name_filter"] = {
+                    "includes": "profiling"
+                }
 
         self.site_section_builders = {}
         for site_section_name, site_section_config in site_section_builders.items():
-            if not site_section_config or site_section_config in [
-                "0",
-                "None",
-                "False",
-                "false",
-                "FALSE",
-                "none",
-                "NONE",
-            ]:
+            if not site_section_config or site_section_config in falsey_strings:
                 continue
             module_name = (
                 site_section_config.get("module_name")
@@ -245,13 +248,14 @@ class SiteBuilder(object):
                 "source_stores": {
                     section_name: section_config.get("source_store_name")
                     for (section_name, section_config) in site_section_builders.items()
+                    if section_config not in falsey_strings
                 },
                 "validations_run_name_filter": site_section_builders["validations"][
                     "run_name_filter"
-                ],
+                ] if site_section_builders.get("validations", "None") not in falsey_strings else None,
                 "profiling_run_name_filter": site_section_builders["profiling"][
                     "run_name_filter"
-                ],
+                ] if site_section_builders.get("profiling", "None") not in falsey_strings else None,
             },
             config_defaults={
                 "name": "site_index_builder",
