@@ -1768,7 +1768,10 @@ class ExpectationSuite(object):
         found_expectation_indexes = self.find_expectation_indexes(
             expectation_configuration, match_type
         )
-        return list(itemgetter(*found_expectation_indexes)(self.expectations))
+        if len(found_expectation_indexes) > 0:
+            return [expectation for idx, expectation in enumerate(self.expectations) if idx in found_expectation_indexes]
+        else:
+            return []
 
     def patch_expectation(
         self,
