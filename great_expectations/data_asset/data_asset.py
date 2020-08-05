@@ -285,7 +285,7 @@ class DataAsset(object):
                     pass
                 else:
                     # Append the expectation to the config.
-                    stored_config = self._expectation_suite.add_or_replace(
+                    stored_config = self._expectation_suite.add_expectation(
                         expectation_config
                     )
 
@@ -386,7 +386,7 @@ class DataAsset(object):
     def append_expectation(self, expectation_config):
         warnings.warn(
             "append_expectation is deprecated, and will be removed in a future release. "
-            + "Please use ExpectationSuite.add_or_replace instead.",
+            + "Please use ExpectationSuite.add_expectation instead.",
             DeprecationWarning,
         )
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""
@@ -427,7 +427,7 @@ class DataAsset(object):
         self,
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
-    ) -> ExpectationConfiguration:
+    ) -> List[ExpectationConfiguration]:
         warnings.warn(
             "DataAsset.remove_expectations is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.remove_expectation instead.",
@@ -465,8 +465,8 @@ class DataAsset(object):
         if any(res):
             for item in res:
                 self.remove_expectation(
-                    expectation_type=item.expectation_config.expectation_type,
-                    expectation_kwargs=item.expectation_config["kwargs"],
+                    expectation_configuration=item.expectation_config,
+                    match_type="runtime",
                 )
             warnings.warn("Removed %s expectations that were 'False'" % len(res))
 

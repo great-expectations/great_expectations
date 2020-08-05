@@ -393,42 +393,42 @@ class RunIdentifierSchema(Schema):
         return RunIdentifier(**data)
 
 
-class ExpectationKwargs(dict):
-    # ignored_keys = ["result_format", "include_config", "catch_exceptions"]
-
-    """ExpectationKwargs store information necessary to evaluate an expectation."""
-
-    def __init__(self, *args, **kwargs):
-        include_config = kwargs.pop("include_config", None)
-        if include_config is not None and not isinstance(include_config, bool):
-            raise InvalidExpectationKwargsError(
-                "include_config must be a boolean value"
-            )
-
-        result_format = kwargs.get("result_format", None)
-        if result_format is None:
-            pass
-        elif result_format in RESULT_FORMATS:
-            pass
-        elif (
-                isinstance(result_format, dict)
-                and result_format.get("result_format", None) in RESULT_FORMATS
-        ):
-            pass
-        else:
-            raise InvalidExpectationKwargsError(
-                "result format must be one of the valid formats: %s"
-                % str(RESULT_FORMATS)
-            )
-
-        catch_exceptions = kwargs.pop("catch_exceptions", None)
-        if catch_exceptions is not None and not isinstance(catch_exceptions, bool):
-            raise InvalidExpectationKwargsError(
-                "catch_exceptions must be a boolean value"
-            )
-
-        super().__init__(*args, **kwargs)
-        ensure_json_serializable(self)
+# class ExpectationKwargs(dict):
+#     # ignored_keys = ["result_format", "include_config", "catch_exceptions"]
+#
+#     """ExpectationKwargs store information necessary to evaluate an expectation."""
+#
+#     def __init__(self, *args, **kwargs):
+#         include_config = kwargs.pop("include_config", None)
+#         if include_config is not None and not isinstance(include_config, bool):
+#             raise InvalidExpectationKwargsError(
+#                 "include_config must be a boolean value"
+#             )
+#
+#         result_format = kwargs.get("result_format", None)
+#         if result_format is None:
+#             pass
+#         elif result_format in RESULT_FORMATS:
+#             pass
+#         elif (
+#                 isinstance(result_format, dict)
+#                 and result_format.get("result_format", None) in RESULT_FORMATS
+#         ):
+#             pass
+#         else:
+#             raise InvalidExpectationKwargsError(
+#                 "result format must be one of the valid formats: %s"
+#                 % str(RESULT_FORMATS)
+#             )
+#
+#         catch_exceptions = kwargs.pop("catch_exceptions", None)
+#         if catch_exceptions is not None and not isinstance(catch_exceptions, bool):
+#             raise InvalidExpectationKwargsError(
+#                 "catch_exceptions must be a boolean value"
+#             )
+#
+#         super().__init__(*args, **kwargs)
+#         ensure_json_serializable(self)
 
     # def isEquivalentTo(self, other):
     #     try:
@@ -1161,7 +1161,7 @@ class ExpectationConfiguration(DictDot):
                 "expectation configuration kwargs must be an "
                 "ExpectationKwargs object."
             )
-        self._kwargs = ExpectationKwargs(kwargs)
+        self._kwargs = kwargs
         if meta is None:
             meta = {}
         # We require meta information to be serializable, but do not convert until necessary
@@ -1717,7 +1717,7 @@ class ExpectationSuite(object):
             self,
             expectation_configuration: ExpectationConfiguration,
             match_type: str = "domain",
-            overwrite_existing: bool = False
+            overwrite_existing: bool = True
     ) -> ExpectationConfiguration:
         """
 
