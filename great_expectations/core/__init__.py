@@ -1234,25 +1234,8 @@ class ExpectationConfiguration(DictDot):
         return runtime_kwargs
 
     def applies_to_same_domain(self, other_expectation_configuration):
-        # "row_condition", "condition_parser"
-        # only applies to column map expectations
-        # pandas query, pandas dataframe eval
-        # check whether two evals are equivalent
-        # engines = pandas parser, python parser
-        if (
-                not self.expectation_type
-                    == other_expectation_configuration.expectation_type
-        ):
+        if not self.expectation_type == other_expectation_configuration.expectation_type:
             return False
-        if set(self.get_domain_kwargs().keys()) != set(
-                self.kwarg_lookup_dict[self.expectation_type]["domain_kwargs"]
-        ):
-            missing_kwargs = set(
-                self.kwarg_lookup_dict[self.expectation_type]["domain_kwargs"]
-            ) - set(self.get_domain_kwargs().keys())
-            raise InvalidExpectationKwargsError(
-                f"Cannot check if expectation applies to same domain. Missing kwargs: {list(missing_kwargs)}"
-            )
         return (
                 self.get_domain_kwargs()
                 == other_expectation_configuration.get_domain_kwargs()
