@@ -4,7 +4,7 @@
 Reference
 #########
 
-These pages provide a high-level overview of key great expectations features, with an emphasis on explaining
+These pages provide a high-level overview of key Great Expectations features, with an emphasis on explaining
 the thinking behind the tools.
 
 .. toctree::
