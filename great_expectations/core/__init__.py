@@ -1194,7 +1194,7 @@ class ExpectationConfiguration(DictDot):
                 "include_config": True,
                 "catch_exceptions": False,
             },
-        }
+        },
     }
     runtime_kwargs = ["result_format", "include_config", "catch_exceptions"]
 

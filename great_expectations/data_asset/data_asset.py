@@ -436,7 +436,9 @@ class DataAsset(object):
         )
         """This method is a thin wrapper for ExpectationSuite.remove()"""
         return self._expectation_suite.remove_expectation(
-            expectation_configuration=expectation_configuration, match_type=match_type, remove_multiple_matches=remove_multiple_matches
+            expectation_configuration=expectation_configuration,
+            match_type=match_type,
+            remove_multiple_matches=remove_multiple_matches,
         )
 
     def set_config_value(self, key, value):
