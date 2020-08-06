@@ -6,6 +6,8 @@ import re
 import shutil
 from abc import ABCMeta
 
+import requests
+
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
 
@@ -346,6 +348,94 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         return os.path.isfile(
             os.path.join(self.full_base_directory, self._convert_key_to_filepath(key))
         )
+
+
+class TupleNetlifyStoreBackend(TupleStoreBackend):
+    """
+    Implementation POC plan:
+
+    1. [ ] get tokens from config file
+    2. [ ] authentication calls to REST API
+    3. [ ] put a file
+    4. [ ] get url of uploaded file
+
+    Netlifu concepts:
+    - **Site**: map to a docs site - probably has a name
+    - **Deploy**: A version of a site. My hypothesis is that we don't care about
+        this abstraction since data docs is versionless.
+    - **Files**: files that can be deployed individually or as a zip
+    """
+    BASE_URL = "https://api.netlify.com/api/v1/"
+
+    def __init__(self, site_name: str, deploy: str, token: str):
+        """
+        1. build authorization header
+        2. Authentication
+        2. Check if netlify site exists
+        3. Build netlify site if it does not exist
+        """
+        super().__init__(
+            filepath_template=None,
+            filepath_prefix=None,
+            filepath_suffix=None,
+            forbidden_substrings=None,
+            platform_specific_separator=None,
+            fixed_length_key=None,
+        )
+        self._site_name = site_name
+        self._deploy = deploy
+        # self._authorization = f"Authorization: Bearer ${token}"
+        self._header = {"User-Agent": "MyApp (taylor@superconductive.com)", "Authorization": f"Bearer ${token}"}
+
+    def _create_site(self):
+        """If a site doesn't exist make one."""
+
+    def _list_sites(self):
+        r = requests.get("https://api.netlify.com/api/v1/sites", headers=self._header)
+        print(r.status_code)
+        return r.text
+        # return r.json()
+
+    def _site_exists(self, site_name) -> bool:
+        """Check if netlify site exists"""
+        raise NotImplementedError()
+
+    def _create_deploy(self):
+        """If a deploy doesn't exist make one."""
+        pass
+
+    def _list_deploys(self, site):
+        pass
+
+    def _does_deploy_exist(self, site, deploy):
+        pass
+
+    def _update_deploy(self):
+        """
+        Update the files in a deploy.
+        This can be done in two ways:
+
+        1. Easy: zip up all files and let Netlify deal with them.
+        2. Efficient: create a digest of files and only uplod the changed ones.
+        """
+
+    def _get(self, key):
+        raise NotImplementedError()
+
+    def _set(self, key, value, **kwargs):
+        raise NotImplementedError()
+
+    def _move(self, source_key, dest_key, **kwargs):
+        raise NotImplementedError()
+
+    def list_keys(self, prefix=()):
+        raise NotImplementedError()
+
+    def remove_key(self, key):
+        raise NotImplementedError()
+
+    def _has_key(self, key):
+        raise NotImplementedError()
 
 
 class TupleS3StoreBackend(TupleStoreBackend):
@@ -706,3 +796,14 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def _has_key(self, key):
         all_keys = self.list_keys()
         return key in all_keys
+
+
+if __name__ == '__main__':
+    token = os.getenv("NETLIFY", None)
+    print(token)
+    if token is None:
+        raise ValueError("Could not find NETLIFY token.")
+
+    netlify = TupleNetlifyStoreBackend("my_site", token)
+    key = ("foo", "bar")
+    print(netlify._list_sites())
