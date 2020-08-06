@@ -66,29 +66,37 @@ class SlackRenderer(Renderer):
 
             if "data_docs_link" in validation_result.meta:
                 # extracting message first
-                data_docs_link = validation_result.meta["data_docs_link"]
-                if "file:///" in data_docs_link:
-                    # handle special case since Slack does not render these links
-                    report_element = {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": "*DataDocs* can be found here: `{}` \n (Please copy and paste link into a browser to view)\n".format(
-                                data_docs_link
-                            ),
-                        },
-                    }
-                else:
-                    report_element = {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": "*DataDocs* can be found here: <{}|{}>".format(
-                                data_docs_link, data_docs_link
-                            ),
-                        },
-                    }
-                query["blocks"].append(report_element)
+                data_docs_links = validation_result.meta["data_docs_link"]
+                # Note: there can be more than one link :
+                # can we have more than one?
+                for docs_link_key in data_docs_links.keys():
+
+                    docs_link = data_docs_links[docs_link_key]
+
+                    if "file:///" in docs_link:
+                        # handle special case since Slack does not render these links
+                        report_element = {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": "*DataDocs* can be found here: `{}` \n (Please copy and paste link into a browser to view)\n".format(
+                                    docs_link
+                                ),
+                            },
+                        }
+                    else:
+                        report_element = {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": "*DataDocs* can be found here: <{}|{}>".format(
+                                    docs_link, docs_link
+                                ),
+                            },
+                        }
+
+                    # can we keep doing this?
+                    query["blocks"].append(report_element)
 
             if "result_reference" in validation_result.meta:
                 report_element = {

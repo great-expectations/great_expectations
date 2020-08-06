@@ -391,20 +391,15 @@ The ``run`` method returns a ValidationOperatorResult object:
                     validation_result_suite_identifier=validation_result_id,
                     validation_result_suite=batch_validation_result,
                     data_asset=batch,
-                    payload=payload
-                    ####### THIS IS WHERE I AM #######
+                    payload=payload,  # added
                 )
                 if action_result is not None:
                     payload[action["name"]] = action_result
 
-                print("action result!")
-                print(action_result)
-                print("payload!")
-                print(payload)
-
                 batch_actions_results[action["name"]] = (
                     {} if action_result is None else action_result
                 )
+
             except Exception as e:
                 logger.exception(
                     "Error running action with name {}".format(action["name"])

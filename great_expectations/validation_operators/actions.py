@@ -146,9 +146,22 @@ SlackNotificationAction sends a Slack notification to a given webhook.
 
         validation_success = validation_result_suite.success
 
-        # also get link to DataDocs site
-        docs_link = self.data_context.get_docs_sites_urls()[0]["site_url"]
-        validation_result_suite.meta["data_docs_link"] = docs_link
+        print(" I AM IN SLACK NOTIF ACTION ")
+        print("here is my payload!")
+        print(payload)
+        doc_links = None  # this is set to None
+        if "update_data_docs" in payload.keys():
+            docs_links = payload["update_data_docs"]
+
+            """
+            {'update_data_docs': {
+                'local_site': 'file:///Users/work/Development/GE_sandbox/great_expectations/uncommitted/data_docs/local_site/index.html',
+                's3_site': 'https://s3.amazonaws.com/data-docs.ge.test/great_expectations_S3/index.html'}}
+            """
+
+        # load it into validation_result_suite.meta. It can be passed along in different ways
+        validation_result_suite.meta["data_docs_link"] = docs_links
+
         if (
             self.notify_on == "all"
             or self.notify_on == "success"
@@ -156,7 +169,9 @@ SlackNotificationAction sends a Slack notification to a given webhook.
             or self.notify_on == "failure"
             and not validation_success
         ):
-            query = self.renderer.render(validation_result_suite)
+            #
+            query = self.renderer.render(validation_result_suite)  # th
+            # this will actually sent the POST request to the Slack webapp server
             return send_slack_notification(query, slack_webhook=self.slack_webhook)
         else:
             return
@@ -424,13 +439,10 @@ list of sites to update:
                 )
             )
 
-        self.data_context.build_data_docs(
+        to_return = self._site_names
+        me_likey = self.data_context.build_data_docs(
             site_names=self._site_names,
             resource_identifiers=[validation_result_suite_identifier],
         )
 
-        to_return = self._site_names
-        if to_return:
-            return to_return
-        else:
-            return "THIS IS VALIDATION"
+        return me_likey
