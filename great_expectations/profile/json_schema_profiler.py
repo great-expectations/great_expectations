@@ -4,10 +4,7 @@ from typing import Any, Dict, Optional
 
 import jsonschema
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuite,
-)
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.profile.base import Profiler, ProfilerTypeMapping
 
 logger = logging.getLogger(__name__)
@@ -182,9 +179,7 @@ class JsonSchemaProfiler(Profiler):
             kwargs["max_value"] = exclusive_maximum
             kwargs["strict_max"] = True
 
-        return ExpectationConfiguration(
-            "expect_column_values_to_be_between", kwargs
-        )
+        return ExpectationConfiguration("expect_column_values_to_be_between", kwargs)
 
     def _create_string_length_expectation(
         self, key: str, details: dict

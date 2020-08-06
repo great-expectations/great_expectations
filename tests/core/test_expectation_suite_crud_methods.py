@@ -1,7 +1,10 @@
 import pytest
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
-from great_expectations.exceptions import DataContextError, InvalidExpectationConfigurationError
+from great_expectations.exceptions import (
+    DataContextError,
+    InvalidExpectationConfigurationError,
+)
 
 
 @pytest.fixture
@@ -207,12 +210,7 @@ def suite_with_column_pair_and_table_expectations(
 
 
 def test_find_expectation_indexes_on_empty_suite(exp1, empty_suite):
-    assert (
-        empty_suite.find_expectation_indexes(
-            exp1, "domain"
-        )
-        == []
-    )
+    assert empty_suite.find_expectation_indexes(exp1, "domain") == []
 
 
 def test_find_expectation_indexes(
@@ -233,35 +231,45 @@ def test_find_expectation_indexes(
     assert single_expectation_suite.find_expectation_indexes(exp4, "runtime") == []
 
     with pytest.raises(InvalidExpectationConfigurationError):
-        domain_success_runtime_suite.remove_expectation("not an expectation", match_type="runtime")
+        domain_success_runtime_suite.remove_expectation(
+            "not an expectation", match_type="runtime"
+        )
 
     with pytest.raises(ValueError):
-        domain_success_runtime_suite.remove_expectation(exp1, match_type="not a match_type")
+        domain_success_runtime_suite.remove_expectation(
+            exp1, match_type="not a match_type"
+        )
+
 
 def test_find_expectations(
     exp1, exp2, exp3, exp4, exp5, domain_success_runtime_suite, single_expectation_suite
 ):
     expectation_to_find1 = ExpectationConfiguration(
-                                expectation_type="expect_column_values_to_be_in_set",
-                                kwargs={"column": "b",
-                                        "value_set": [-1, -2, -3],
-                                        "result_format": "COMPLETE"
-                                        })
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={"column": "b", "value_set": [-1, -2, -3], "result_format": "COMPLETE"},
+    )
 
     expectation_to_find2 = ExpectationConfiguration(
-                                expectation_type="expect_column_values_to_be_in_set",
-                                kwargs={"column": "b",
-                                        "value_set": [1, 2, 3],
-                                        "result_format": "COMPLETE"
-                                        })
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={"column": "b", "value_set": [1, 2, 3], "result_format": "COMPLETE"},
+    )
 
-    assert domain_success_runtime_suite.find_expectations(expectation_to_find1, "domain") == [exp2, exp3, exp4, exp5]
+    assert domain_success_runtime_suite.find_expectations(
+        expectation_to_find1, "domain"
+    ) == [exp2, exp3, exp4, exp5]
 
-    assert domain_success_runtime_suite.find_expectations(expectation_to_find1, "success") == [exp2, exp3]
+    assert domain_success_runtime_suite.find_expectations(
+        expectation_to_find1, "success"
+    ) == [exp2, exp3]
 
-    assert domain_success_runtime_suite.find_expectations(expectation_to_find2, "runtime") == [exp5]
+    assert domain_success_runtime_suite.find_expectations(
+        expectation_to_find2, "runtime"
+    ) == [exp5]
 
-    assert domain_success_runtime_suite.find_expectations(expectation_to_find1, "runtime") == []
+    assert (
+        domain_success_runtime_suite.find_expectations(expectation_to_find1, "runtime")
+        == []
+    )
 
 
 def test_remove_expectation(

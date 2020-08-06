@@ -423,5 +423,3 @@ def test_get_column_expectations(
 ):
     obs = suite_with_table_and_column_expectations.get_column_expectations()
     assert obs == [exp1, exp2, exp3, exp4]
-
-

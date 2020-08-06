@@ -46,8 +46,7 @@ def test_expectation_decorator_build_config():
 
     assert (
         ExpectationConfiguration(
-            expectation_type="no_op_value_expectation",
-            kwargs={"value": "a"},
+            expectation_type="no_op_value_expectation", kwargs={"value": "a"},
         )
         == config.expectations[1]
     )
