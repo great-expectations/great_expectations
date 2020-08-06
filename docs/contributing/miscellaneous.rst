@@ -77,3 +77,15 @@ Beta Release Notes
 
 * To ship a beta release, follow the above checklist, but use the branch name ``v0.11.x`` as the equivalent of ``main`` and ``v0.11.x-develop`` as the equivalent of ``develop``
 * Ship the release using beta version numbers when updating the ``great_expectations/deployment_version`` and when creating the annotated tag (e.g. `0.11.0b0`)
+
+
+Issue Tags
+-----------------------------------------
+
+We use ``stalebot`` to automatically tag issues without activity as ``stale``, and close them if no response is received in one week. Adding the ``stalebot-exempt`` tag will prevent the bot from trying to close the issue.
+
+Additionally, we try to add tags to indicate the status of key discussion elements:
+
+* ``help wanted`` covers issues where we have not prioritized the request, but believe the feature is useful and so we would welcome community contributors to help accelerate development.
+* ``enhacement`` and ``expectation-request`` indicate discussion of potential new features for Great Expectations
+* ``good first issue`` indicates a small-ish task that would be a good way to begin making contributions to Great Expectations
