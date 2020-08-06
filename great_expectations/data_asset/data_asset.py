@@ -384,13 +384,12 @@ class DataAsset(object):
         }
 
     def append_expectation(self, expectation_config):
+        """This method is a thin wrapper for ExpectationSuite.append_expectation"""
         warnings.warn(
             "append_expectation is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.add_expectation instead.",
             DeprecationWarning,
         )
-        """This method is a thin wrapper for ExpectationSuite.append_expectation"""
-
         self._expectation_suite.append_expectation(expectation_config)
 
     def find_expectation_indexes(
@@ -398,12 +397,12 @@ class DataAsset(object):
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
     ) -> List[int]:
+        """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
         warnings.warn(
             "find_expectation_indexes is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
-        """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
         return self._expectation_suite.find_expectation_indexes(
             expectation_configuration=expectation_configuration, match_type=match_type
         )
@@ -413,12 +412,12 @@ class DataAsset(object):
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
     ) -> List[ExpectationConfiguration]:
+        """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
         warnings.warn(
             "find_expectations is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
-        """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
         return self._expectation_suite.find_expectations(
             expectation_configuration=expectation_configuration, match_type=match_type
         )
@@ -429,12 +428,12 @@ class DataAsset(object):
         match_type: str = "domain",
         remove_multiple_matches: bool = False,
     ) -> List[ExpectationConfiguration]:
+        """This method is a thin wrapper for ExpectationSuite.remove()"""
         warnings.warn(
             "DataAsset.remove_expectations is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.remove_expectation instead.",
             DeprecationWarning,
         )
-        """This method is a thin wrapper for ExpectationSuite.remove()"""
         return self._expectation_suite.remove_expectation(
             expectation_configuration=expectation_configuration,
             match_type=match_type,

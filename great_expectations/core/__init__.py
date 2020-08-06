@@ -390,63 +390,6 @@ class RunIdentifierSchema(Schema):
     def make_run_identifier(self, data, **kwargs):
         return RunIdentifier(**data)
 
-    # class ExpectationKwargs(dict):
-    #     # ignored_keys = ["result_format", "include_config", "catch_exceptions"]
-    #
-    #     """ExpectationKwargs store information necessary to evaluate an expectation."""
-    #
-    #     def __init__(self, *args, **kwargs):
-    #         include_config = kwargs.pop("include_config", None)
-    #         if include_config is not None and not isinstance(include_config, bool):
-    #             raise InvalidExpectationKwargsError(
-    #                 "include_config must be a boolean value"
-    #             )
-    #
-    #         result_format = kwargs.get("result_format", None)
-    #         if result_format is None:
-    #             pass
-    #         elif result_format in RESULT_FORMATS:
-    #             pass
-    #         elif (
-    #                 isinstance(result_format, dict)
-    #                 and result_format.get("result_format", None) in RESULT_FORMATS
-    #         ):
-    #             pass
-    #         else:
-    #             raise InvalidExpectationKwargsError(
-    #                 "result format must be one of the valid formats: %s"
-    #                 % str(RESULT_FORMATS)
-    #             )
-    #
-    #         catch_exceptions = kwargs.pop("catch_exceptions", None)
-    #         if catch_exceptions is not None and not isinstance(catch_exceptions, bool):
-    #             raise InvalidExpectationKwargsError(
-    #                 "catch_exceptions must be a boolean value"
-    #             )
-    #
-    #         super().__init__(*args, **kwargs)
-    #         ensure_json_serializable(self)
-
-    # def isEquivalentTo(self, other):
-    #     try:
-    #         n_self_keys = len([k for k in self.keys() if k not in self.ignored_keys])
-    #         n_other_keys = len([k for k in other.keys() if k not in self.ignored_keys])
-    #         return n_self_keys == n_other_keys and all(
-    #             [self[k] == other[k] for k in self.keys() if k not in self.ignored_keys]
-    #         )
-    #     except KeyError:
-    #         return False
-
-    def __repr__(self):
-        return json.dumps(self.to_json_dict())
-
-    def __str__(self):
-        return json.dumps(self.to_json_dict(), indent=2)
-
-    def to_json_dict(self):
-        myself = convert_to_json_serializable(self)
-        return myself
-
 
 def _deduplicate_evaluation_parameter_dependencies(dependencies):
     deduplicated = dict()
@@ -1193,6 +1136,7 @@ class ExpectationConfiguration(DictDot):
             },
         },
     }
+
     runtime_kwargs = ["result_format", "include_config", "catch_exceptions"]
 
     def __init__(self, expectation_type, kwargs, meta=None, success_on_last_run=None):
@@ -1203,8 +1147,7 @@ class ExpectationConfiguration(DictDot):
         self._expectation_type = expectation_type
         if not isinstance(kwargs, dict):
             raise InvalidExpectationConfigurationError(
-                "expectation configuration kwargs must be an "
-                "ExpectationKwargs object."
+                "expectation configuration kwargs must be a dict."
             )
         self._kwargs = kwargs
         if meta is None:

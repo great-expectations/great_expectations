@@ -403,6 +403,7 @@ def test_ge_pandas_merging():
 
 
 def test_ge_pandas_sampling():
+    df = ge.dataset.PandasDataset()
     df = ge.dataset.PandasDataset(
         {
             "A": [1, 2, 3, 4],
