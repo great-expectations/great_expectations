@@ -37,9 +37,8 @@ sys.path.insert(0, os.path.abspath("../"))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "autoapi.extension",
     # 'sphinx_rtd_theme',
-    "sphinx.ext.autodoc",
+    # "sphinx.ext.autodoc",
     "sphinx.ext.todo",
     "sphinx.ext.coverage",
     # 'sphinx.ext.mathjax'
@@ -48,6 +47,7 @@ extensions = [
     "sphinx_gitstamp",
     "sphinx.ext.autosectionlabel",
     "sphinxcontrib.discourse",
+    "autoapi.extension",
 ]
 
 autoapi_type = "python"
