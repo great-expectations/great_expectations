@@ -92,7 +92,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
     """
 
     def __init__(
-        self, data_context, renderer, slack_webhook, notify_on="all",
+        self, data_context, renderer, slack_webhook, notify_on="all", payload=None
     ):
         """Construct a SlackNotificationAction
 
@@ -105,6 +105,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
                }
             slack_webhook: incoming Slack webhook to which to send notification
             notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
+            payload: *Optional* payload from other ValidationActions
         """
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
@@ -120,12 +121,14 @@ SlackNotificationAction sends a Slack notification to a given webhook.
         self.slack_webhook = slack_webhook
         assert slack_webhook, "No Slack webhook found in action config."
         self.notify_on = notify_on
+        self.payload = payload
 
     def _run(
         self,
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset=None,
+        payload=None,
     ):
         logger.debug("SlackNotificationAction.run")
 
@@ -193,7 +196,11 @@ class StoreValidationResultAction(ValidationAction):
             self.target_store = data_context.stores[target_store_name]
 
     def _run(
-        self, validation_result_suite, validation_result_suite_identifier, data_asset
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset,
+        payload=None,
     ):
         logger.debug("StoreValidationResultAction.run")
 
@@ -251,7 +258,11 @@ in the process of validating other prior expectations.
             self.target_store = data_context.stores[target_store_name]
 
     def _run(
-        self, validation_result_suite, validation_result_suite_identifier, data_asset
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset,
+        payload=None,
     ):
         logger.debug("StoreEvaluationParametersAction.run")
 
@@ -322,7 +333,11 @@ in a metrics store.
             )
 
     def _run(
-        self, validation_result_suite, validation_result_suite_identifier, data_asset
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset,
+        payload=None,
     ):
         logger.debug("StoreMetricsAction.run")
 
@@ -372,6 +387,7 @@ list of sites to update:
         """
         :param data_context: Data Context
         :param site_names: *optional* List of site names for building data docs
+        :param payload: *optional* Payload for passing along information from other ValidationActions
         """
         super().__init__(data_context)
         if target_site_names:
@@ -388,7 +404,11 @@ list of sites to update:
         self._site_names = site_names
 
     def _run(
-        self, validation_result_suite, validation_result_suite_identifier, data_asset
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset,
+        payload=None,
     ):
         logger.debug("UpdateDataDocsAction.run")
 
@@ -408,3 +428,9 @@ list of sites to update:
             site_names=self._site_names,
             resource_identifiers=[validation_result_suite_identifier],
         )
+
+        to_return = self._site_names
+        if to_return:
+            return to_return
+        else:
+            return "THIS IS VALIDATION"

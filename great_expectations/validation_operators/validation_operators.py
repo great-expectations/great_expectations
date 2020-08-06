@@ -207,6 +207,7 @@ The ``run`` method returns a ValidationOperatorResult object:
         self.result_format = result_format
 
         self.action_list = action_list
+
         self.actions = OrderedDict()
         for action_config in action_list:
             assert isinstance(action_config, dict)
@@ -232,6 +233,9 @@ The ``run`` method returns a ValidationOperatorResult object:
                     class_name=config["class_name"],
                 )
             self.actions[action_config["name"]] = new_action
+
+        print("self.actions")
+        print(self.actions)
 
     @property
     def validation_operator_config(self) -> dict:
@@ -284,6 +288,9 @@ The ``run`` method returns a ValidationOperatorResult object:
         run_time=None,
         result_format=None,
     ):
+
+        print("hello when does this actually run")
+
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
@@ -362,7 +369,13 @@ The ``run`` method returns a ValidationOperatorResult object:
         :return: a dictionary: {action name -> result returned by the action}
         """
         batch_actions_results = {}
+
+        # TODO this is IT
+        payload = {}
+
         for action in self.action_list:
+            print("LOOPING THROUGH ACTIONS IN ACTION LIST")
+            print(action)
             # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
             logger.debug(
                 "Processing validation action with name {}".format(action["name"])
@@ -378,7 +391,16 @@ The ``run`` method returns a ValidationOperatorResult object:
                     validation_result_suite_identifier=validation_result_id,
                     validation_result_suite=batch_validation_result,
                     data_asset=batch,
+                    payload=payload
+                    ####### THIS IS WHERE I AM #######
                 )
+                if action_result is not None:
+                    payload[action["name"]] = action_result
+
+                print("action result!")
+                print(action_result)
+                print("payload!")
+                print(payload)
 
                 batch_actions_results[action["name"]] = (
                     {} if action_result is None else action_result
