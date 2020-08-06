@@ -7,6 +7,7 @@ Changelog
 Develop
 -----------------
 * [FEATURE] Expectations now define “Domain,” “Success,” and “Runtime” kwargs to allow them to determine expectation equivalence for updating expectations. Fixes column pair expectation update logic.
+  * [BREAKING] Calls to `add_expectation`, `remove_expectation`, and `find_expectations` now take an ExpectationConfiguration object and `match_type` to allow more flexibility in determining which expectations should be modified. See :ref:`migrating_versions`_ for more information.
 * [ENHANCEMENT] Improve data docs page breadcrumbs to have clearer run information
 * [ENHANCEMENT] Data Docs Validation Results only shows unexpected value counts if all unexpected values are available
 * [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources

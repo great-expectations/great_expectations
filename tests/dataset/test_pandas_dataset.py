@@ -403,7 +403,6 @@ def test_ge_pandas_merging():
 
 
 def test_ge_pandas_sampling():
-    df = ge.dataset.PandasDataset()
     df = ge.dataset.PandasDataset(
         {
             "A": [1, 2, 3, 4],
@@ -479,7 +478,7 @@ def test_ge_pandas_sampling():
             ],
         }
     )
-    assert samp1.get_expectation_suite().expectations == exp1.expectations
+    assert samp1.get_expectation_suite(discard_failed_expectations=False).expectations == exp1.expectations
 
 
 def test_ge_pandas_subsetting():
@@ -589,12 +588,12 @@ def test_ge_pandas_automatic_failure_removal():
         ),
     ]
     samp1 = df.sample(n=2)
-    assert samp1.get_expectation_suite().expectations == exp1
+    assert samp1.get_expectation_suite(discard_failed_expectations=False).expectations == exp1
 
     # Now check subsetting to verify that failing expectations are NOT
     # automatically dropped when subsetting.
     sub1 = df[["A", "D"]]
-    assert samp1.get_expectation_suite().expectations == exp1
+    assert samp1.get_expectation_suite(discard_failed_expectations=False).expectations == exp1
 
     # Set property/attribute so that failing expectations are
     # automatically removed when sampling or subsetting.
@@ -632,7 +631,7 @@ def test_ge_pandas_automatic_failure_removal():
     ]
 
     samp2 = df.sample(n=2)
-    assert samp2.get_expectation_suite().expectations == exp_samp
+    assert samp2.get_expectation_suite(discard_failed_expectations=False).expectations == exp_samp
 
     # Now check subsetting. In additional to the failure on column "C",
     # the expectations on column "B" now fail since column "B" doesn't
@@ -654,7 +653,7 @@ def test_ge_pandas_automatic_failure_removal():
             kwargs={"column": "D", "value_set": ["e", "f", "g", "h"]},
         ),
     ]
-    assert samp2.get_expectation_suite().expectations == exp_samp
+    assert samp2.get_expectation_suite(discard_failed_expectations=False).expectations == exp_samp
 
 
 def test_subclass_pandas_subset_retains_subclass():

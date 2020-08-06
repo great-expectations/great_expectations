@@ -1675,12 +1675,12 @@ class ExpectationSuite(object):
     ) -> List[ExpectationConfiguration]:
         if isinstance(expectation_types, str):
             expectation_types = [expectation_types]
-        removed_expectations = []
-        for expectation in self.expectations:
-            if expectation.expectation_type in expectation_types:
-                removed_expectations += self.remove_expectation(
-                    expectation, match_type="domain", remove_multiple_matches=True
-                )
+        removed_expectations = [
+            expectation for expectation in self.expectations if expectation.expectation_type in expectation_types
+        ]
+        self.expectations = [
+            expectation for expectation in self.expectations if expectation.expectation_type not in expectation_types
+        ]
 
         return removed_expectations
 
