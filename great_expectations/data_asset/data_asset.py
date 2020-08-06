@@ -12,7 +12,7 @@ from collections.abc import Hashable
 from functools import wraps
 from typing import List
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
@@ -788,7 +788,7 @@ class DataAsset(object):
                 )
                 try:
                     run_time = parse(run_id)
-                except (ParserError, TypeError):
+                except (ValueError, TypeError):
                     pass
                 run_id = RunIdentifier(run_name=run_id, run_time=run_time)
             elif isinstance(run_id, dict):

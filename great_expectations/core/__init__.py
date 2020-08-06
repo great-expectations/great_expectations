@@ -4,11 +4,9 @@ import logging
 import warnings
 from collections import namedtuple
 from copy import deepcopy
-from operator import itemgetter
 from typing import Any, List, Union
 
 import jsonpatch
-from dateutil.parser import ParserError as DateUtilParserError
 from dateutil.parser import parse
 from IPython import get_ipython
 from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
@@ -323,7 +321,7 @@ class RunIdentifier(DataContextKey):
         if isinstance(run_time, str):
             try:
                 run_time = parse(run_time)
-            except (DateUtilParserError, TypeError):
+            except (ValueError, TypeError):
                 warnings.warn(
                     f'Unable to parse provided run_time str ("{run_time}") to datetime. Defaulting '
                     f"run_time to current time."
@@ -333,7 +331,7 @@ class RunIdentifier(DataContextKey):
         if not run_time:
             try:
                 run_time = parse(run_name)
-            except (DateUtilParserError, TypeError):
+            except (ValueError, TypeError):
                 run_time = None
 
         run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
