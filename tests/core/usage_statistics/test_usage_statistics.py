@@ -61,25 +61,6 @@ def in_memory_data_context_config_usage_stats_enabled():
     )
 
 
-def test_add_datasource_usage_statistics(
-    in_memory_data_context_config_usage_stats_enabled, monkeypatch
-):
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
-    context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
-
-    # check if datacontext created correctly
-    assert context.data_context_id == "00000000-0000-0000-0000-000000000001"
-    my_kwargs = {
-        "class_name": "PandasDatasource",
-        "module_name": "great_expectations.datasource",
-    }
-    payload = add_datasource_usage_statistics(context, "testing", **my_kwargs)
-
-    jsonschema.validate(payload, anonymized_datasource_schema)
-
-
 def test_consistent_name_anonymization(
     in_memory_data_context_config_usage_stats_enabled, monkeypatch
 ):
