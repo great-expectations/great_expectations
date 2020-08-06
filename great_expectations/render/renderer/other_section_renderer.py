@@ -123,7 +123,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         column_type_counter = Counter(column_types.values())
         table_rows = [
             [type, str(column_type_counter[type])]
-            for type in ["int", "float", "string", "unknown"]
+            for type in ["int", "float", "string", "datetime", "bool", "unknown"]
         ]
 
         content_blocks.append(
@@ -334,7 +334,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                 else:
                     expected_types = set(evr.expectation_config.kwargs["type_list"])
             else:  # assuming expect_column_values_to_be_of_type
-                expected_types = set([evr.expectation_config.kwargs["type_"]])
+                expected_types = {evr.expectation_config.kwargs["type_"]}
 
             if expected_types.issubset(ProfilerTypeMapping.INT_TYPE_NAMES):
                 column_types[column] = "int"
