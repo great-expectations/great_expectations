@@ -12,7 +12,7 @@ from collections.abc import Hashable
 from functools import wraps
 from typing import List
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
@@ -282,10 +282,10 @@ class DataAsset(object):
                 # If validate has set active_validation to true, then we do not save the config to avoid
                 # saving updating expectation configs to the same suite during validation runs
                 if self._active_validation is True:
-                    pass
+                    stored_config = expectation_config
                 else:
                     # Append the expectation to the config.
-                    stored_config = self._expectation_suite.add_or_replace(
+                    stored_config = self._expectation_suite.add_expectation(
                         expectation_config
                     )
 
@@ -384,13 +384,12 @@ class DataAsset(object):
         }
 
     def append_expectation(self, expectation_config):
+        """This method is a thin wrapper for ExpectationSuite.append_expectation"""
         warnings.warn(
             "append_expectation is deprecated, and will be removed in a future release. "
-            + "Please use ExpectationSuite.add_or_replace instead.",
+            + "Please use ExpectationSuite.add_expectation instead.",
             DeprecationWarning,
         )
-        """This method is a thin wrapper for ExpectationSuite.append_expectation"""
-
         self._expectation_suite.append_expectation(expectation_config)
 
     def find_expectation_indexes(
@@ -398,12 +397,12 @@ class DataAsset(object):
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
     ) -> List[int]:
+        """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
         warnings.warn(
             "find_expectation_indexes is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
-        """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
         return self._expectation_suite.find_expectation_indexes(
             expectation_configuration=expectation_configuration, match_type=match_type
         )
@@ -413,12 +412,12 @@ class DataAsset(object):
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
     ) -> List[ExpectationConfiguration]:
+        """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
         warnings.warn(
             "find_expectations is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
-        """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
         return self._expectation_suite.find_expectations(
             expectation_configuration=expectation_configuration, match_type=match_type
         )
@@ -427,15 +426,18 @@ class DataAsset(object):
         self,
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
-    ) -> ExpectationConfiguration:
+        remove_multiple_matches: bool = False,
+    ) -> List[ExpectationConfiguration]:
+        """This method is a thin wrapper for ExpectationSuite.remove()"""
         warnings.warn(
             "DataAsset.remove_expectations is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.remove_expectation instead.",
             DeprecationWarning,
         )
-        """This method is a thin wrapper for ExpectationSuite.remove()"""
         return self._expectation_suite.remove_expectation(
-            expectation_configuration=expectation_configuration, match_type=match_type
+            expectation_configuration=expectation_configuration,
+            match_type=match_type,
+            remove_multiple_matches=remove_multiple_matches,
         )
 
     def set_config_value(self, key, value):
@@ -465,8 +467,8 @@ class DataAsset(object):
         if any(res):
             for item in res:
                 self.remove_expectation(
-                    expectation_type=item.expectation_config.expectation_type,
-                    expectation_kwargs=item.expectation_config["kwargs"],
+                    expectation_configuration=item.expectation_config,
+                    match_type="runtime",
                 )
             warnings.warn("Removed %s expectations that were 'False'" % len(res))
 
@@ -785,7 +787,7 @@ class DataAsset(object):
                 )
                 try:
                     run_time = parse(run_id)
-                except (ParserError, TypeError):
+                except (ValueError, TypeError):
                     pass
                 run_id = RunIdentifier(run_name=run_id, run_time=run_time)
             elif isinstance(run_id, dict):
