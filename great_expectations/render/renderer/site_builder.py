@@ -681,6 +681,12 @@ class DefaultSiteIndexBuilder(object):
         return results
 
     def build(self, skip_and_clean_missing=True):
+        """
+        :param skip_and_clean_missing: if True, target html store keys without corresponding source store keys will
+        be skipped and removed from the target store
+        :return: tuple(index_page_url, index_links_dict)
+        """
+
         # Loop over sections in the HtmlStore
         logger.debug("DefaultSiteIndexBuilder.build")
 
@@ -695,12 +701,28 @@ class DefaultSiteIndexBuilder(object):
             and self.site_section_builders_config.get("expectations", "None")
             not in FALSEY_YAML_STRINGS
         ):
+            expectation_suite_source_keys = self.data_context.stores[
+                self.site_section_builders_config["expectations"].get(
+                    "source_store_name"
+                )
+            ].list_keys()
             expectation_suite_site_keys = [
                 ExpectationSuiteIdentifier.from_tuple(expectation_suite_tuple)
                 for expectation_suite_tuple in self.target_store.store_backends[
                     ExpectationSuiteIdentifier
                 ].list_keys()
             ]
+            if skip_and_clean_missing:
+                cleaned_keys = []
+                for expectation_suite_site_key in expectation_suite_site_keys:
+                    if expectation_suite_site_key not in expectation_suite_source_keys:
+                        self.target_store.store_backends[
+                            ExpectationSuiteIdentifier
+                        ].remove_key(expectation_suite_site_key)
+                    else:
+                        cleaned_keys.append(expectation_suite_site_key)
+                expectation_suite_site_keys = cleaned_keys
+
             for expectation_suite_key in expectation_suite_site_keys:
                 self.add_resource_info_to_index_links_dict(
                     index_links_dict=index_links_dict,
@@ -709,15 +731,45 @@ class DefaultSiteIndexBuilder(object):
                 )
 
         validation_and_profiling_result_site_keys = []
-        if self.site_section_builders_config.get(
-            "validations"
-        ) or self.site_section_builders_config.get("profiling"):
+        if (
+            self.site_section_builders_config.get("validations", "None")
+            and self.site_section_builders_config.get("validations", "None")
+            not in FALSEY_YAML_STRINGS
+            or self.site_section_builders_config.get("profiling", "None")
+            and self.site_section_builders_config.get("profiling", "None")
+            not in FALSEY_YAML_STRINGS
+        ):
+            source_store = (
+                "validations"
+                if self.site_section_builders_config.get("validations", "None")
+                and self.site_section_builders_config.get("validations", "None")
+                not in FALSEY_YAML_STRINGS
+                else "profiling"
+            )
+            validation_and_profiling_result_source_keys = self.data_context.stores[
+                self.site_section_builders_config[source_store].get("source_store_name")
+            ].list_keys()
             validation_and_profiling_result_site_keys = [
                 ValidationResultIdentifier.from_tuple(validation_result_tuple)
                 for validation_result_tuple in self.target_store.store_backends[
                     ValidationResultIdentifier
                 ].list_keys()
             ]
+            if skip_and_clean_missing:
+                cleaned_keys = []
+                for (
+                    validation_result_site_key
+                ) in validation_and_profiling_result_site_keys:
+                    if (
+                        validation_result_site_key
+                        not in validation_and_profiling_result_source_keys
+                    ):
+                        self.target_store.store_backends[
+                            ValidationResultIdentifier
+                        ].remove_key(validation_result_site_key)
+                    else:
+                        cleaned_keys.append(validation_result_site_key)
+                validation_and_profiling_result_site_keys = cleaned_keys
 
         if (
             self.site_section_builders_config.get("profiling", "None")
@@ -778,7 +830,9 @@ class DefaultSiteIndexBuilder(object):
                 )
             ]
             validation_result_site_keys = sorted(
-                validation_result_site_keys, key=lambda x: x.run_id.run_time, reverse=True
+                validation_result_site_keys,
+                key=lambda x: x.run_id.run_time,
+                reverse=True,
             )
             if self.validation_results_limit:
                 validation_result_site_keys = validation_result_site_keys[
