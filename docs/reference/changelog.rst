@@ -8,6 +8,7 @@ Develop
 -----------------
 * [ENHANCEMENT] Improve data docs page breadcrumbs to have clearer run information
 * [ENHANCEMENT] Data Docs Validation Results only shows unexpected value counts if all unexpected values are available
+* [BUGFIX] Add guard for checking Redshift Dialect in match_like_pattern expectation
 * [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 * [DOCS] Add information about issue tags to contributing docs
 
