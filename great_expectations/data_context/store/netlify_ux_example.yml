@@ -1,0 +1,22 @@
+data_docs_sites:
+  local_site:
+    class_name: SiteBuilder
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site/
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
+      show_cta_footer: true
+    show_how_to_buttons: true
+
+  netlify_site:
+    class_name: SiteBuilder
+    store_backend:
+      class_name: TupleNetlifyStoreBackend
+      site_name: data_docs
+      deploy_name: prod
+      token: ${NETLIFY_TOKEN}
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
+      show_cta_footer: true
+    show_how_to_buttons: true
