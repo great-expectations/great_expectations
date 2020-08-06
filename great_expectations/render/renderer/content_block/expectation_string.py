@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import copy
 import json
+import re
 
 import altair as alt
 import pandas as pd
@@ -34,6 +35,49 @@ def substitute_none_for_missing(kwargs, kwarg_list):
         if kwarg not in new_kwargs:
             new_kwargs[kwarg] = None
     return new_kwargs
+
+
+# NOTE: the method is pretty dirty
+def parse_row_condition_string_pandas_engine(condition_string):
+    if len(condition_string) == 0:
+        condition_string = "True"
+
+    template_str = "if "
+    params = dict()
+
+    condition_string = (
+        condition_string.replace("&", " AND ")
+        .replace(" and ", " AND ")
+        .replace("|", " OR ")
+        .replace(" or ", " OR ")
+        .replace("~", " NOT ")
+        .replace(" not ", " NOT ")
+    )
+    condition_string = " ".join(condition_string.split())
+
+    # replace tuples of values by lists of values
+    tuples_list = re.findall(r"\([^\(\)]*,[^\(\)]*\)", condition_string)
+    for value_tuple in tuples_list:
+        value_list = value_tuple.replace("(", "[").replace(")", "]")
+        condition_string = condition_string.replace(value_tuple, value_list)
+
+    # divide the whole condition into smaller parts
+    conditions_list = re.split(r"AND|OR|NOT(?! in)|\(|\)", condition_string)
+    conditions_list = [
+        condition.strip()
+        for condition in conditions_list
+        if condition != "" and condition != " "
+    ]
+
+    for i, condition in enumerate(conditions_list):
+        params["row_condition__" + str(i)] = condition.replace(" NOT ", " not ")
+        condition_string = condition_string.replace(
+            condition, "$row_condition__" + str(i)
+        )
+
+    template_str += condition_string.lower()
+
+    return template_str, params
 
 
 class ExpectationStringRenderer(ContentBlockRenderer):
@@ -80,9 +124,9 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         else:
             params["column_indexth"] = ordinal(params["column_index"])
             if include_column_name:
-                template_str = "$column must be the $column_indexth field"
+                template_str = "$column must be the $column_indexth field."
             else:
-                template_str = "must be the $column_indexth field"
+                template_str = "must be the $column_indexth field."
 
         return [
             RenderedStringTemplateContent(
@@ -102,7 +146,15 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "min_value", "max_value", "mostly"],
+            expectation.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
@@ -132,6 +184,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -151,7 +211,15 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "min_value", "max_value", "mostly"]
+            expectation.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         template_str = ""
@@ -189,6 +257,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -215,11 +291,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "ignore_row_if",
                 "mostly",
                 "or_equal",
+                "row_condition",
+                "condition_parser",
             ],
         )
 
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
+            params["row_condition"] = None
 
         if params["mostly"] is None:
             if params["or_equal"] in [None, False]:
@@ -239,6 +318,19 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -257,13 +349,22 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column_A", "column_B", "ignore_row_if", "mostly",]
+            expectation.kwargs,
+            [
+                "column_A",
+                "column_B",
+                "ignore_row_if",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         # NOTE: This renderer doesn't do anything with "ignore_row_if"
 
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
+            params["row_condition"] = None
 
         if params["mostly"] is None:
             template_str = "Values in $column_A and $column_B must always be equal."
@@ -273,6 +374,19 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -324,7 +438,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column_list", "ignore_row_if"]
+            expectation.kwargs,
+            ["column_list", "ignore_row_if", "row_condition", "condition_parser"],
         )
 
         template_str = "Values must always be unique across columns: "
@@ -335,6 +450,19 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         last_idx = len(params["column_list"]) - 1
         template_str += "$column_list_" + str(last_idx)
         params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -402,7 +530,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["min_value", "max_value"]
+            expectation.kwargs,
+            ["min_value", "max_value", "row_condition", "condition_parser"],
         )
 
         if params["min_value"] is None and params["max_value"] is None:
@@ -414,6 +543,19 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "Must have less than than $max_value rows."
             elif params["max_value"] is None:
                 template_str = "Must have more than $min_value rows."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -432,8 +574,23 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     def expect_table_row_count_to_equal(
         cls, expectation, styling=None, include_column_name=True
     ):
-        params = substitute_none_for_missing(expectation.kwargs, ["value"])
+        params = substitute_none_for_missing(
+            expectation.kwargs, ["value", "row_condition", "condition_parser"]
+        )
         template_str = "Must have exactly $value rows."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -473,7 +630,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "value_set"],
+            expectation.kwargs,
+            ["column", "value_set", "row_condition", "condition_parser"],
         )
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
@@ -502,6 +660,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     "distinct values must belong to this set: " + values_string + "."
                 )
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -519,7 +685,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     def expect_column_values_to_not_be_null(
         cls, expectation, styling=None, include_column_name=True
     ):
-        params = substitute_none_for_missing(expectation.kwargs, ["column", "mostly"],)
+        params = substitute_none_for_missing(
+            expectation.kwargs,
+            ["column", "mostly", "row_condition", "condition_parser"],
+        )
 
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(
@@ -538,6 +707,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             else:
                 template_str = "values must never be null."
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -555,7 +732,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     def expect_column_values_to_be_null(
         cls, expectation, styling=None, include_column_name=True
     ):
-        params = substitute_none_for_missing(expectation.kwargs, ["column", "mostly"])
+        params = substitute_none_for_missing(
+            expectation.kwargs,
+            ["column", "mostly", "row_condition", "condition_parser"],
+        )
 
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(
@@ -568,6 +748,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         if include_column_name:
             template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -587,7 +775,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "type_", "mostly"]
+            expectation.kwargs,
+            ["column", "type_", "mostly", "row_condition", "condition_parser"],
         )
 
         if params["mostly"] is not None:
@@ -603,6 +792,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         if include_column_name:
             template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -622,7 +819,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "type_list", "mostly"],
+            expectation.kwargs,
+            ["column", "type_list", "mostly", "row_condition", "condition_parser"],
         )
 
         if params["type_list"] is not None:
@@ -668,6 +866,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     "value types may be any value, but observed value will be reported"
                 )
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -687,7 +893,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column", "value_set", "mostly", "parse_strings_as_datetimes"],
+            [
+                "column",
+                "value_set",
+                "mostly",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
@@ -717,6 +930,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -736,7 +957,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column", "value_set", "mostly", "parse_strings_as_datetimes"],
+            [
+                "column",
+                "value_set",
+                "mostly",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
@@ -764,7 +992,15 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column"
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -784,7 +1020,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "min_value", "max_value"],
+            expectation.kwargs,
+            ["column", "min_value", "max_value", "row_condition", "condition_parser"],
         )
 
         if params["min_value"] is None and params["max_value"] is None:
@@ -804,6 +1041,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         if include_column_name:
             template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -825,7 +1070,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column", "strictly", "mostly", "parse_strings_as_datetimes"],
+            [
+                "column",
+                "strictly",
+                "mostly",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         if params.get("strictly"):
@@ -848,6 +1100,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -868,7 +1128,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column", "strictly", "mostly", "parse_strings_as_datetimes"],
+            [
+                "column",
+                "strictly",
+                "mostly",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         if params.get("strictly"):
@@ -891,6 +1158,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -909,7 +1184,15 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "min_value", "max_value", "mostly"],
+            expectation.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
@@ -945,6 +1228,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -963,7 +1254,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "value", "mostly"]
+            expectation.kwargs,
+            ["column", "value", "mostly", "row_condition", "condition_parser"],
         )
 
         if params.get("value") is None:
@@ -981,6 +1273,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         if include_column_name:
             template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -1000,7 +1300,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "regex", "mostly"]
+            expectation.kwargs,
+            ["column", "regex", "mostly", "row_condition", "condition_parser"],
         )
 
         if not params.get("regex"):
@@ -1021,6 +1322,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -1039,7 +1348,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "regex", "mostly"],
+            expectation.kwargs,
+            ["column", "regex", "mostly", "row_condition", "condition_parser"],
         )
 
         if not params.get("regex"):
@@ -1066,6 +1376,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                         "values must not match this regular expression: $regex."
                     )
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -1084,7 +1402,15 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "regex_list", "mostly", "match_on"],
+            expectation.kwargs,
+            [
+                "column",
+                "regex_list",
+                "mostly",
+                "match_on",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         if not params.get("regex_list") or len(params.get("regex_list")) == 0:
@@ -1119,6 +1445,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -1137,7 +1471,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "regex_list", "mostly"],
+            expectation.kwargs,
+            ["column", "regex_list", "mostly", "row_condition", "condition_parser"],
         )
 
         if not params.get("regex_list") or len(params.get("regex_list")) == 0:
@@ -1166,6 +1501,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -1184,7 +1527,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "strftime_format", "mostly"],
+            expectation.kwargs,
+            [
+                "column",
+                "strftime_format",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         if not params.get("strftime_format"):
@@ -1205,6 +1555,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -1222,7 +1580,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     def expect_column_values_to_be_dateutil_parseable(
         cls, expectation, styling=None, include_column_name=True
     ):
-        params = substitute_none_for_missing(expectation.kwargs, ["column", "mostly"],)
+        params = substitute_none_for_missing(
+            expectation.kwargs,
+            ["column", "mostly", "row_condition", "condition_parser"],
+        )
 
         template_str = "values must be parseable by dateutil"
 
@@ -1237,6 +1598,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         if include_column_name:
             template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -1255,7 +1624,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     def expect_column_values_to_be_json_parseable(
         cls, expectation, styling=None, include_column_name=True
     ):
-        params = substitute_none_for_missing(expectation.kwargs, ["column", "mostly"],)
+        params = substitute_none_for_missing(
+            expectation.kwargs,
+            ["column", "mostly", "row_condition", "condition_parser"],
+        )
 
         template_str = "values must be parseable as JSON"
 
@@ -1270,6 +1642,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         if include_column_name:
             template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -1289,7 +1669,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "mostly", "json_schema"],
+            expectation.kwargs,
+            ["column", "mostly", "json_schema", "row_condition", "condition_parser"],
         )
 
         if not params.get("json_schema"):
@@ -1312,6 +1693,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -1330,7 +1719,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "value_set", "parse_strings_as_datetimes"]
+            expectation.kwargs,
+            [
+                "column",
+                "value_set",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
@@ -1351,6 +1747,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -1369,7 +1773,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "value_set", "parse_strings_as_datetimes"]
+            expectation.kwargs,
+            [
+                "column",
+                "value_set",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
@@ -1390,6 +1801,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -1408,7 +1827,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "min_value", "max_value"]
+            expectation.kwargs,
+            ["column", "min_value", "max_value", "row_condition", "condition_parser"],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
@@ -1423,6 +1843,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         if include_column_name:
             template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -1442,7 +1870,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "min_value", "max_value"]
+            expectation.kwargs,
+            ["column", "min_value", "max_value", "row_condition", "condition_parser"],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
@@ -1457,6 +1886,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         if include_column_name:
             template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -1476,7 +1913,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "min_value", "max_value"]
+            expectation.kwargs,
+            ["column", "min_value", "max_value", "row_condition", "condition_parser"],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
@@ -1493,6 +1931,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         if include_column_name:
             template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -1513,7 +1959,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column", "min_value", "max_value", "parse_strings_as_datetimes"],
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
@@ -1534,6 +1987,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -1553,7 +2014,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column", "min_value", "max_value", "parse_strings_as_datetimes"],
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
@@ -1574,6 +2042,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -1592,7 +2068,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "min_value", "max_value"]
+            expectation.kwargs,
+            ["column", "min_value", "max_value", "row_condition", "condition_parser"],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
@@ -1607,6 +2084,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         if include_column_name:
             template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -1626,7 +2111,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "value_set", "ties_okay"]
+            expectation.kwargs,
+            ["column", "value_set", "ties_okay", "row_condition", "condition_parser"],
         )
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
@@ -1648,6 +2134,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         if include_column_name:
             template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
@@ -1758,12 +2252,26 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation["kwargs"], ["column", "quantile_ranges"]
+            expectation["kwargs"],
+            ["column", "quantile_ranges", "row_condition", "condition_parser"],
         )
         template_str = "quantiles must be within the following value ranges."
 
         if include_column_name:
             template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
 
         expectation_string_obj = {
             "content_block_type": "string_template",
@@ -1909,7 +2417,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "partition_object", "threshold"]
+            expectation.kwargs,
+            [
+                "column",
+                "partition_object",
+                "threshold",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         expected_distribution = None
@@ -1927,6 +2442,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
 
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
         expectation_string_obj = {
             "content_block_type": "string_template",
             "string_template": {"template": template_str, "params": params},
@@ -1941,7 +2464,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     def expect_column_values_to_be_unique(
         cls, expectation, styling=None, include_column_name=True
     ):
-        params = substitute_none_for_missing(expectation.kwargs, ["column", "mostly"],)
+        params = substitute_none_for_missing(
+            expectation.kwargs,
+            ["column", "mostly", "row_condition", "condition_parser"],
+        )
 
         if include_column_name:
             template_str = "$column values must be unique"
@@ -1956,6 +2482,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(

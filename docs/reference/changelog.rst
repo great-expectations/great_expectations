@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [FEATURE] Add support for conditional expectations using pandas execution engine (#1217 HUGE thanks @arsenii!)
 * [ENHANCEMENT] Include datetime and bool column types in descriptive documentation results
 * [ENHANCEMENT] Improve data docs page breadcrumbs to have clearer run information
 * [ENHANCEMENT] Data Docs Validation Results only shows unexpected value counts if all unexpected values are available

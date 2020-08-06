@@ -13,6 +13,7 @@ import pytest
 from dateutil.parser import parse
 
 from great_expectations.core import (
+    ExpectationConfigurationSchema,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
 )
@@ -24,6 +25,7 @@ from great_expectations.profile import ColumnsExistProfiler
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
+expectationConfigurationSchema = ExpectationConfigurationSchema()
 
 try:
     from sqlalchemy import create_engine
