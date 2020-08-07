@@ -1,7 +1,7 @@
 .. _using_ge_on_teams:
 
 #################################
-Using Great Expectations on Teams
+Collaborating With Great Expectations As a Team
 #################################
 
 Now that you've enjoyed single player mode, let's bring Great Expectations to

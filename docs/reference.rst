@@ -12,7 +12,9 @@ the thinking behind the tools.
 
    /reference/glossary_of_expectations
    /reference/core_concepts
+   /reference/deployment_patterns
    /reference/supporting_resources
+
 
 .. toctree::
    :maxdepth: 1
