@@ -35,6 +35,28 @@ You will most likely be prompted to install a new template. Rest assured that
 your original yaml file will be archived automatically for you. Even so, it's
 in your source control system already, right? ;-)
 
+.. _upgrading_to_0.12:
+
+*************************
+Upgrading to 0.12.x
+*************************
+
+The 0.12.0 release makes a small but breaking change to the ``add_expectation``, ``remove_expectation``, and ``find_expectations`` methods. To update your code, replace the ``expectation_type``, ``column``, or ``kwargs`` arguments with an Expectation Configuration object. For more information on the ``match_type`` parameter, see :ref:`expectation_suite_operations`_.
+
+For example, using the old API:
+
+.. code-block:: python
+
+    remove_expectation(expectation_type="expect_column_values_to_be_in_set", column="city", expectation_kwargs={"value_set": ["New York","London","Tokyo"]})
+
+
+Using the new API:
+
+.. code-block:: python
+
+    remove_expectation(ExpectationConfiguration(expectation_type="expect_column_values_to_be_in_set", column="city", expectation_kwargs={"column": "city", "value_set": ["New York","London","Tokyo"]}), match_type="success")
+
+
 .. _upgrading_to_0.11:
 
 *************************
