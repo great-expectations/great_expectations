@@ -522,6 +522,56 @@
           "unexpected_index_list": [],
           "success": true
         }
+      },{
+        "title": "test_conditional_expectation_passes",
+        "only_for": ["pandas"],
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 10,
+          "strict_max": false,
+          "row_condition": "y == 'abc'",
+          "condition_parser": "pandas"
+        },
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        }
+      },{
+        "title": "test_conditional_expectation_fails",
+        "only_for": ["pandas"],
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 10,
+          "strict_max": false,
+          "row_condition": "y == 9",
+          "condition_parser": "pandas"
+        },
+        "out": {
+          "unexpected_list": [9],
+          "unexpected_index_list": [0],
+          "success": false
+        }
+      },{
+        "title": "test_conditional_expectation_parser_errors",
+        "only_for": ["pandas"],
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 10,
+          "catch_exceptions": true,
+          "strict_max": false,
+          "row_condition": "y == 9",
+          "condition_parser": "bad_parser"
+        },
+        "out": {
+          "traceback_substring": "Invalid parser"
+        }
       }
     ]
   }]
