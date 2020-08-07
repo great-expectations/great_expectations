@@ -24,7 +24,7 @@ def test_comprehensive_list_of_messages():
     valid_message_list = list(valid_usage_statistics_messages.keys())
     # NOTE: If you are changing the expected valid message list below, you need
     # to also update one or more tests below!
-    pass
+
     assert valid_message_list == [
         "data_context.__init__",
         "data_asset.validate",

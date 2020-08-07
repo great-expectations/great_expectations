@@ -94,7 +94,7 @@ def _suite_edit(
     jupyter,
     batch_kwargs,
     usage_event,
-    actually_send_usage_message=True,
+    suppress_usage_message=False,
 ):
     # actually_send_usage_message flag is for the situation where _suite_edit is called by _suite_new().
     # when called by _suite_new(), the flag will be set to False, otherwise it will default to True
@@ -118,7 +118,7 @@ def _suite_edit(
                         je
                     )
                 )
-                if actually_send_usage_message:
+                if not suppress_usage_message:
                     send_usage_message(
                         data_context=context, event=usage_event, success=False
                     )
@@ -138,7 +138,7 @@ def _suite_edit(
                         ve
                     )
                 )
-                if actually_send_usage_message:
+                if not suppress_usage_message:
                     send_usage_message(
                         data_context=context, event=usage_event, success=False
                     )
@@ -167,7 +167,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
             if not data_source:
                 cli_message("<red>No datasources found in the context.</red>")
-                if actually_send_usage_message:
+                if not suppress_usage_message:
                     send_usage_message(
                         data_context=context, event=usage_event, success=False
                     )
@@ -202,7 +202,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
             data_context=context, expectation_suite_name=suite.expectation_suite_name
         )
 
-        if actually_send_usage_message:
+        if not suppress_usage_message:
             send_usage_message(
                 data_context=context,
                 event=usage_event,
@@ -353,7 +353,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
                 jupyter=jupyter,
                 batch_kwargs=batch_kwargs,
                 usage_event="cli.suite.edit",  # or else we will be sending `cli.suite.new` which is incorrect
-                actually_send_usage_message=False,  # dont want actually send usage_message since the function call is not the result of actual usage
+                suppress_usage_message=True,  # dont want actually send usage_message since the function call is not the result of actual usage
             )
         else:
             send_usage_message(data_context=context, event=usage_event, success=False)
