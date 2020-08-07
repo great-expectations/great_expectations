@@ -312,3 +312,17 @@ def test_dataset_attempt_allowing_relative_error_when_redshift_library_not_insta
 
     assert isinstance(dataset, SqlAlchemyDataset)
     assert dataset.attempt_allowing_relative_error() is False
+
+def test_multicolumn_unique_values(sa):
+    engine = sa.create_engine("sqlite://")
+    data = pd.DataFrame(
+        {
+            "name": ["Frank", "Steve", "Jane", "Frank", "Michael"],
+            "surname": ["Smith", "Jones", "Evans", "Smith", "Caine"]
+        }
+    )
+
+    data.to_sql(name="test_sql_data", con=engine, index=False)
+    dataset = SqlAlchemyDataset("test_sql_data", engine=engine)
+    res = dataset.expect_multicolumn_values_to_be_unique(['name', 'surname'])
+    assert res.success is True
