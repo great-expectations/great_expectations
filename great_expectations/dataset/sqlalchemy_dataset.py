@@ -206,15 +206,7 @@ class MetaSqlAlchemyDataset(Dataset):
             if None in ignore_values:
                 ignore_values_conditions += [sa.column(column).is_(None)]
 
-            ignore_values_condition: BinaryExpression
-            if len(ignore_values_conditions) > 1:
-                ignore_values_condition = sa.or_(*ignore_values_conditions)
-            elif len(ignore_values_conditions) == 1:
-                ignore_values_condition = ignore_values_conditions[0]
-            else:
-                ignore_values_condition = BinaryExpression(
-                    sa.literal(False), sa.literal(True), custom_op("=")
-                )
+            ignore_values_condition = self._compose_ignore_values_condition(ignore_values_conditions)
 
             count_query: Select
             if self.sql_engine_dialect.name.lower() == "mssql":
@@ -231,22 +223,7 @@ class MetaSqlAlchemyDataset(Dataset):
             count_results: dict = dict(self.engine.execute(count_query).fetchone())
 
             # Handle case of empty table gracefully:
-            if (
-                "element_count" not in count_results
-                or count_results["element_count"] is None
-            ):
-                count_results["element_count"] = 0
-            if "null_count" not in count_results or count_results["null_count"] is None:
-                count_results["null_count"] = 0
-            if (
-                "unexpected_count" not in count_results
-                or count_results["unexpected_count"] is None
-            ):
-                count_results["unexpected_count"] = 0
-
-            count_results["element_count"] = int(count_results["element_count"])
-            count_results["null_count"] = int(count_results["null_count"])
-            count_results["unexpected_count"] = int(count_results["unexpected_count"])
+            count_results = self._clean_count_results(count_results)
 
             # Retrieve unexpected values
             unexpected_query_results = self.engine.execute(
@@ -311,6 +288,8 @@ class MetaSqlAlchemyDataset(Dataset):
 
             return return_obj
 
+
+
         inner_wrapper.__name__ = func.__name__
         inner_wrapper.__doc__ = func.__doc__
 
@@ -370,15 +349,7 @@ class MetaSqlAlchemyDataset(Dataset):
                     sa.tuple_(*column_list).is_(tuple([None] * len(column_list)))
                 ]
 
-            ignore_values_condition: BinaryExpression
-            if len(ignore_values_conditions) > 1:
-                ignore_values_condition = sa.or_(*ignore_values_conditions)
-            elif len(ignore_values_conditions) == 1:
-                ignore_values_condition = ignore_values_conditions[0]
-            else:
-                ignore_values_condition = BinaryExpression(
-                    sa.literal(False), sa.literal(True), custom_op("=")
-                )
+            ignore_values_condition = self._compose_ignore_values_condition(ignore_values_conditions)
 
             count_query: Select
             if self.sql_engine_dialect.name.lower() == "mssql":
@@ -395,22 +366,7 @@ class MetaSqlAlchemyDataset(Dataset):
             count_results = dict(self.engine.execute(count_query).fetchone())
 
             # Handle case of empty table gracefully:
-            if (
-                "element_count" not in count_results
-                or count_results["element_count"] is None
-            ):
-                count_results["element_count"] = 0
-            if "null_count" not in count_results or count_results["null_count"] is None:
-                count_results["null_count"] = 0
-            if (
-                "unexpected_count" not in count_results
-                or count_results["unexpected_count"] is None
-            ):
-                count_results["unexpected_count"] = 0
-
-            count_results["element_count"] = int(count_results["element_count"])
-            count_results["null_count"] = int(count_results["null_count"])
-            count_results["unexpected_count"] = int(count_results["unexpected_count"])
+            count_results = self._clean_count_results(count_results)
 
             # Retrieve unexpected values
             unexpected_query_results = self.engine.execute(
@@ -431,12 +387,15 @@ class MetaSqlAlchemyDataset(Dataset):
                     cols = []
                     for column in column_list:
                         if isinstance(x[column], str):
-                            col = parse(x[column])
+                            try:
+                                col = parse(x[column]).strftime(output_strftime_format)
+                            except ValueError: #fall-back if column is not datetime-parseable
+                                col = column
                         else:
                             col = x[column]
                         cols.append(col)
                     maybe_limited_unexpected_list.append(
-                        datetime.strftime(cols, output_strftime_format)
+                        tuple(cols)
                     )
             else:
                 maybe_limited_unexpected_list = [
@@ -465,6 +424,40 @@ class MetaSqlAlchemyDataset(Dataset):
         inner_wrapper.__doc__ = func.__doc__
 
         return inner_wrapper
+
+    @staticmethod
+    def _compose_ignore_values_condition(ignore_values_conditions):
+        """composes a SQL expression for excluding values that match the given list of conditions"""
+        ignore_values_condition: BinaryExpression
+        if len(ignore_values_conditions) > 1:
+            ignore_values_condition = sa.or_(*ignore_values_conditions)
+        elif len(ignore_values_conditions) == 1:
+            ignore_values_condition = ignore_values_conditions[0]
+        else:
+            ignore_values_condition = BinaryExpression(
+                sa.literal(False), sa.literal(True), custom_op("=")
+            )
+        return ignore_values_condition
+
+    @staticmethod
+    def _clean_count_results(count_results):
+        """Adds required count values if missing from count results"""
+        if (
+                "element_count" not in count_results
+                or count_results["element_count"] is None
+        ):
+            count_results["element_count"] = 0
+        if "null_count" not in count_results or count_results["null_count"] is None:
+            count_results["null_count"] = 0
+        if (
+                "unexpected_count" not in count_results
+                or count_results["unexpected_count"] is None
+        ):
+            count_results["unexpected_count"] = 0
+        count_results["element_count"] = int(count_results["element_count"])
+        count_results["null_count"] = int(count_results["null_count"])
+        count_results["unexpected_count"] = int(count_results["unexpected_count"])
+        return count_results
 
     def _get_count_query_mssql(
         self,
