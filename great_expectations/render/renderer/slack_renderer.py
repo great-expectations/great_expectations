@@ -9,9 +9,6 @@ class SlackRenderer(Renderer):
         super().__init__()
 
     def render(self, validation_result=None):
-        timestamp = datetime.datetime.strftime(
-            datetime.datetime.now(datetime.timezone.utc), "%x %X %Z"
-        )
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )
@@ -51,19 +48,13 @@ class SlackRenderer(Renderer):
                                 *Expectation suite name*: `{}`
                                 *Run ID*: `{}`
                                 *Batch ID*: `{}`
-                                *Timestamp*: `{}`
                                 *Summary*: {}""".format(
-                status,
-                expectation_suite_name,
-                run_id,
-                batch_id,
-                timestamp,
-                check_details_text,
+                status, expectation_suite_name, run_id, batch_id, check_details_text,
             )
             query["blocks"][0]["text"]["text"] = summary_text
             # this abbreviated root level "text" will show up in the notification and not the message
             query["text"] = "{}: {}".format(expectation_suite_name, status)
-
+            gcs_data_docs_documentation = "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.html"
             if "data_docs_link" in validation_result.meta:
                 # extracting message first
                 data_docs_links = validation_result.meta["data_docs_link"]
@@ -84,7 +75,20 @@ class SlackRenderer(Renderer):
                                 ),
                             },
                         }
-                    else:
+                    elif "storage.googleapis.com" in docs_link or "gs://" in docs_link:
+                        report_element = {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": "*DataDocs* can be found here: <{}|{}> \n (Please refer to GCS documentation if you are running into problems with access <{}|{}>)".format(
+                                    docs_link,
+                                    docs_link,
+                                    gcs_data_docs_documentation,
+                                    gcs_data_docs_documentation,
+                                ),
+                            },
+                        }
+                    else:  # this is S3://
                         report_element = {
                             "type": "section",
                             "text": {
