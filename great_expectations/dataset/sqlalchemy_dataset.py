@@ -244,8 +244,6 @@ class MetaSqlAlchemyDataset(Dataset):
             ):
                 count_results["unexpected_count"] = 0
 
-            # Some engines may return Decimal from count queries (lookin' at you MSSQL)
-            # Convert to integers
             count_results["element_count"] = int(count_results["element_count"])
             count_results["null_count"] = int(count_results["null_count"])
             count_results["unexpected_count"] = int(count_results["unexpected_count"])
@@ -310,6 +308,156 @@ class MetaSqlAlchemyDataset(Dataset):
                     del return_obj["result"]["partial_unexpected_list"]
                 except KeyError:
                     pass
+
+            return return_obj
+
+        inner_wrapper.__name__ = func.__name__
+        inner_wrapper.__doc__ = func.__doc__
+
+        return inner_wrapper
+
+    @classmethod
+    def multicolumn_map_expectation(cls, func):
+        """
+        The multicolumn_map_expectation decorator handles boilerplate issues \
+        surrounding the common pattern of evaluating truthiness of some condition \
+        on a per row basis across a set of columns.
+        """
+        argspec = inspect.getfullargspec(func)[0][1:]
+
+        @cls.expectation(argspec)
+        @wraps(func)
+        def inner_wrapper(
+                self, column_list, mostly=None, result_format=None, *args, **kwargs
+        ):
+            column_list = [sa.column(c) for c in column_list]
+
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
+
+            result_format = parse_result_format(result_format)
+
+            if result_format["result_format"] == "COMPLETE":
+                warnings.warn(
+                    "Setting result format to COMPLETE for a SqlAlchemyDataset \
+                    can be dangerous because it will not limit the number of returned \
+                    results."
+                )
+                unexpected_count_limit = None
+            else:
+                unexpected_count_limit = result_format["partial_unexpected_count"]
+
+            expected_condition: BinaryExpression = func(
+                self, column_list, *args, **kwargs
+            )
+
+            ignore_values: list = [None]
+
+            ignore_values_conditions: List[BinaryExpression] = []
+            if (
+                    len(ignore_values) > 0
+                    and None not in ignore_values
+                    or len(ignore_values) > 1
+                    and None in ignore_values
+            ):
+                ignore_values_conditions += [
+                    sa.tuple_(*column_list).in_(
+                        [val for val in ignore_values if val is not None]
+                    )
+                ]
+            if None in ignore_values:
+                ignore_values_conditions += [
+                    sa.tuple_(*column_list).is_(tuple([None] * len(column_list)))
+                ]
+
+            ignore_values_condition: BinaryExpression
+            if len(ignore_values_conditions) > 1:
+                ignore_values_condition = sa.or_(*ignore_values_conditions)
+            elif len(ignore_values_conditions) == 1:
+                ignore_values_condition = ignore_values_conditions[0]
+            else:
+                ignore_values_condition = BinaryExpression(
+                    sa.literal(False), sa.literal(True), custom_op("=")
+                )
+
+            count_query: Select
+            if self.sql_engine_dialect.name.lower() == "mssql":
+                count_query = self._get_count_query_mssql(
+                    expected_condition=expected_condition,
+                    ignore_values_condition=ignore_values_condition,
+                )
+            else:
+                count_query = self._get_count_query_generic_sqlalchemy(
+                    expected_condition=expected_condition,
+                    ignore_values_condition=ignore_values_condition,
+                )
+
+            count_results = dict(self.engine.execute(count_query).fetchone())
+
+            # Handle case of empty table gracefully:
+            if (
+                "element_count" not in count_results
+                or count_results["element_count"] is None
+            ):
+                count_results["element_count"] = 0
+            if "null_count" not in count_results or count_results["null_count"] is None:
+                count_results["null_count"] = 0
+            if (
+                "unexpected_count" not in count_results
+                or count_results["unexpected_count"] is None
+            ):
+                count_results["unexpected_count"] = 0
+
+            count_results["element_count"] = int(count_results["element_count"])
+            count_results["null_count"] = int(count_results["null_count"])
+            count_results["unexpected_count"] = int(count_results["unexpected_count"])
+
+            # Retrieve unexpected values
+            unexpected_query_results = self.engine.execute(
+                sa.select(column_list)
+                    .select_from(self._table)
+                    .where(sa.not_(expected_condition))
+                    .limit(unexpected_count_limit)
+            )
+
+            nonnull_count: int = count_results["element_count"] - count_results[
+                "null_count"
+            ]
+
+            if "output_strftime_format" in kwargs:
+                output_strftime_format = kwargs["output_strftime_format"]
+                maybe_limited_unexpected_list = []
+                for x in unexpected_query_results.fetchall():
+                    cols = []
+                    for column in column_list:
+                        if isinstance(x[column], str):
+                            col = parse(x[column])
+                        else:
+                            col = x[column]
+                        cols.append(col)
+                    maybe_limited_unexpected_list.append(
+                        datetime.strftime(cols, output_strftime_format)
+                    )
+            else:
+                maybe_limited_unexpected_list = [
+                    tuple(x[column] for column in column_list)
+                    for x in unexpected_query_results.fetchall()
+                ]
+
+            success_count = nonnull_count - count_results["unexpected_count"]
+            success, percent_success = self._calc_map_expectation_success(
+                success_count, nonnull_count, mostly
+            )
+
+            return_obj = self._format_map_output(
+                result_format,
+                success,
+                count_results["element_count"],
+                nonnull_count,
+                count_results["unexpected_count"],
+                maybe_limited_unexpected_list,
+                None,
+            )
 
             return return_obj
 
