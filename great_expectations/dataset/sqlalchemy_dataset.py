@@ -2155,3 +2155,34 @@ WHERE
                 for like_pattern in like_pattern_list
             ]
         )
+
+    @MetaSqlAlchemyDataset.multicolumn_map_expectation
+    def expect_multicolumn_values_to_be_unique(
+            self, column_list, threshold=1, **kwargs
+    ):
+        """
+        Expects that every row has a unique combination of values \
+        for the given column list.
+        Parameters
+        ----------
+        column_list: List[str]
+            A list of columns names
+        threshold: int
+            Maximum allowed number of rows for each combination of values. \
+            Note that for true uniqueness, this should be 1.
+        kwargs:
+            optional keyword arguments that are consumed by \
+            the multicolumn_map_expectation
+        """
+        count_label = "count" if "count" not in column_list else "count_"
+        count_query = (
+            sa.select(column_list + [sa.func.count().label(count_label)])
+                .select_from(self._table)
+                .group_by(*column_list)
+        )
+        dup_query = (
+            sa.select(column_list)
+                .select_from(count_query)
+                .where(sa.column(count_label) > threshold)
+        )
+        return sa.tuple_(*column_list).notin_(dup_query)
