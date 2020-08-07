@@ -1876,7 +1876,9 @@ WHERE
             dialect_supported = True
 
         try:
-            if isinstance(self.sql_engine_dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+            if isinstance(
+                self.sql_engine_dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+            ):
                 dialect_supported = True
         except (AttributeError, TypeError):
             pass
