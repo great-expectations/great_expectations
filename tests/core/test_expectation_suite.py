@@ -87,6 +87,15 @@ def empty_suite():
 
 
 @pytest.fixture
+def single_expectation_suite(exp1):
+    return ExpectationSuite(
+        expectation_suite_name="warning",
+        expectations=[exp1],
+        meta={"notes": "This is an expectation suite."},
+    )
+
+
+@pytest.fixture
 def suite_with_table_and_column_expectations(
     exp1, exp2, exp3, exp4, column_pair_expectation, table_exp1, table_exp2, table_exp3
 ):
@@ -169,7 +178,11 @@ def test_expectation_suite_equality(baseline_suite, identical_suite, equivalent_
 
 
 def test_expectation_suite_equivalence(
-    baseline_suite, identical_suite, equivalent_suite, different_suite
+    baseline_suite,
+    identical_suite,
+    equivalent_suite,
+    different_suite,
+    single_expectation_suite,
 ):
     """Equivalence should depend only on properties that affect the result of the expectation."""
     assert baseline_suite.isEquivalentTo(baseline_suite)  # no difference
@@ -178,6 +191,7 @@ def test_expectation_suite_equivalence(
     assert not baseline_suite.isEquivalentTo(
         different_suite
     )  # different value_set in one expectation
+    assert not single_expectation_suite.isEquivalentTo(baseline_suite)
 
 
 def test_expectation_suite_dictionary_equivalence(baseline_suite):
