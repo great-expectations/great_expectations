@@ -127,7 +127,7 @@ def _suite_edit(
                 cli_message(
                     "<red>Please check that your batch_kwargs are able to load a batch.</red>"
                 )
-                if actually_send_usage_message:
+                if not suppress_usage_message:
                     send_usage_message(
                         data_context=context, event=usage_event, success=False
                     )
