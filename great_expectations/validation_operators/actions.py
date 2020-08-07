@@ -92,7 +92,12 @@ SlackNotificationAction sends a Slack notification to a given webhook.
     """
 
     def __init__(
-        self, data_context, renderer, slack_webhook, notify_on="all", payload=None
+        self,
+        data_context,
+        renderer,
+        slack_webhook,
+        notify_on="all",
+        validation_operator_payload=None,
     ):
         """Construct a SlackNotificationAction
 
@@ -105,7 +110,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
                }
             slack_webhook: incoming Slack webhook to which to send notification
             notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-            payload: *Optional* payload from other ValidationActions
+            validation_operator_payload: *Optional* validation_operator_payload from other ValidationActions
         """
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
@@ -121,14 +126,14 @@ SlackNotificationAction sends a Slack notification to a given webhook.
         self.slack_webhook = slack_webhook
         assert slack_webhook, "No Slack webhook found in action config."
         self.notify_on = notify_on
-        self.payload = payload
+        self.validation_operator_payload = validation_operator_payload
 
     def _run(
         self,
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset=None,
-        payload=None,
+        validation_operator_payload=None,
     ):
         logger.debug("SlackNotificationAction.run")
 
@@ -148,10 +153,10 @@ SlackNotificationAction sends a Slack notification to a given webhook.
 
         print(" I AM IN SLACK NOTIF ACTION ")
         print("here is my payload!")
-        print(payload)
+        print(validation_operator_payload)
         doc_links = None  # this is set to None
-        if "update_data_docs" in payload.keys():
-            docs_links = payload["update_data_docs"]
+        if "update_data_docs" in validation_operator_payload.keys():
+            docs_links = validation_operator_payload["update_data_docs"]
 
             """
             {'update_data_docs': {
@@ -215,7 +220,7 @@ class StoreValidationResultAction(ValidationAction):
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset,
-        payload=None,
+        validation_operator_payload=None,
     ):
         logger.debug("StoreValidationResultAction.run")
 
@@ -277,7 +282,7 @@ in the process of validating other prior expectations.
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset,
-        payload=None,
+        validation_operator_payload=None,
     ):
         logger.debug("StoreEvaluationParametersAction.run")
 
@@ -352,7 +357,7 @@ in a metrics store.
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset,
-        payload=None,
+        validation_operator_payload=None,
     ):
         logger.debug("StoreMetricsAction.run")
 
@@ -402,7 +407,7 @@ list of sites to update:
         """
         :param data_context: Data Context
         :param site_names: *optional* List of site names for building data docs
-        :param payload: *optional* Payload for passing along information from other ValidationActions
+        :param validation_operator_payload: *optional* validation_operator_payload for passing along information from other ValidationActions
         """
         super().__init__(data_context)
         if target_site_names:
@@ -423,7 +428,7 @@ list of sites to update:
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset,
-        payload=None,
+        validation_operator_payload=None,
     ):
         logger.debug("UpdateDataDocsAction.run")
 

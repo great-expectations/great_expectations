@@ -63,7 +63,7 @@ class SlackRenderer(Renderer):
                 for docs_link_key in data_docs_links.keys():
 
                     docs_link = data_docs_links[docs_link_key]
-
+                    report_element = None
                     if "file:///" in docs_link:
                         # handle special case since Slack does not render these links
                         report_element = {
@@ -75,20 +75,7 @@ class SlackRenderer(Renderer):
                                 ),
                             },
                         }
-                    elif "storage.googleapis.com" in docs_link or "gs://" in docs_link:
-                        report_element = {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "*DataDocs* can be found here: <{}|{}> \n (Please refer to GCS documentation if you are running into problems with access <{}|{}>)".format(
-                                    docs_link,
-                                    docs_link,
-                                    gcs_data_docs_documentation,
-                                    gcs_data_docs_documentation,
-                                ),
-                            },
-                        }
-                    else:  # this is S3://
+                    elif "s3.amazonaws.com" in docs_link or "s3://" in docs_link:
                         report_element = {
                             "type": "section",
                             "text": {
@@ -99,8 +86,8 @@ class SlackRenderer(Renderer):
                             },
                         }
 
-                    # can we keep doing this?
-                    query["blocks"].append(report_element)
+                    if report_element:
+                        query["blocks"].append(report_element)
 
             if "result_reference" in validation_result.meta:
                 report_element = {

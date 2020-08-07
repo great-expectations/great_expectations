@@ -369,13 +369,9 @@ The ``run`` method returns a ValidationOperatorResult object:
         :return: a dictionary: {action name -> result returned by the action}
         """
         batch_actions_results = {}
-
-        # TODO this is IT
-        payload = {}
+        validation_operator_payload = {}
 
         for action in self.action_list:
-            print("LOOPING THROUGH ACTIONS IN ACTION LIST")
-            print(action)
             # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
             logger.debug(
                 "Processing validation action with name {}".format(action["name"])
@@ -391,10 +387,10 @@ The ``run`` method returns a ValidationOperatorResult object:
                     validation_result_suite_identifier=validation_result_id,
                     validation_result_suite=batch_validation_result,
                     data_asset=batch,
-                    payload=payload,  # added
+                    validation_operator_payload=validation_operator_payload,  # added
                 )
                 if action_result is not None:
-                    payload[action["name"]] = action_result
+                    validation_operator_payload[action["name"]] = action_result
 
                 batch_actions_results[action["name"]] = (
                     {} if action_result is None else action_result
