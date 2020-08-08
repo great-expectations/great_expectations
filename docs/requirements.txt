@@ -6,4 +6,4 @@ sphinx-gitstamp>=0.3.1
 git+https://github.com/pdavide/sphinxcontrib-discourse
 sphinx-autoapi>=1.4.0
 autoapi>=2.0.1
-pandas==1.0.5
+pandas==1.0.5 # Pandas 1.1.0 doesn't work with autoapi, so we're (temporarily) pinning this to keep docs builds working.
