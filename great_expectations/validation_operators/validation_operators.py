@@ -289,8 +289,6 @@ The ``run`` method returns a ValidationOperatorResult object:
         result_format=None,
     ):
 
-        print("hello when does this actually run")
-
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
@@ -368,8 +366,8 @@ The ``run`` method returns a ValidationOperatorResult object:
         :param run_id:
         :return: a dictionary: {action name -> result returned by the action}
         """
-        batch_actions_results = {}
-        validation_operator_payload = {}
+        # batch_actions_results = {}
+        validation_action_payload = {}
 
         for action in self.action_list:
             # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
@@ -387,14 +385,16 @@ The ``run`` method returns a ValidationOperatorResult object:
                     validation_result_suite_identifier=validation_result_id,
                     validation_result_suite=batch_validation_result,
                     data_asset=batch,
-                    validation_operator_payload=validation_operator_payload,  # added
+                    validation_action_payload=validation_action_payload,
                 )
-                if action_result is not None:
-                    validation_operator_payload[action["name"]] = action_result
 
-                batch_actions_results[action["name"]] = (
+                # add action_result
+                validation_action_payload[action["name"]] = (
                     {} if action_result is None else action_result
                 )
+                validation_action_payload[action["name"]]["class"] = action["action"][
+                    "class_name"
+                ]
 
             except Exception as e:
                 logger.exception(
@@ -402,7 +402,7 @@ The ``run`` method returns a ValidationOperatorResult object:
                 )
                 raise e
 
-        return batch_actions_results
+        return validation_action_payload
 
 
 class WarningAndFailureExpectationSuitesValidationOperator(

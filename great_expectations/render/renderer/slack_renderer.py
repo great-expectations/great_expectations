@@ -8,7 +8,7 @@ class SlackRenderer(Renderer):
     def __init__(self):
         super().__init__()
 
-    def render(self, validation_result=None):
+    def render(self, validation_result=None, data_docs_index_pages=None):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )
@@ -25,7 +25,6 @@ class SlackRenderer(Renderer):
             "text": default_text,
         }
 
-        # TODO improve this nested logic
         if validation_result:
             expectation_suite_name = validation_result.meta.get(
                 "expectation_suite_name", "__no_expectation_suite_name__"
@@ -45,24 +44,19 @@ class SlackRenderer(Renderer):
                 status = "Success :tada:"
 
             summary_text = """*Batch Validation Status*: {}
-                                *Expectation suite name*: `{}`
-                                *Run ID*: `{}`
-                                *Batch ID*: `{}`
-                                *Summary*: {}""".format(
+*Expectation suite name*: `{}`
+*Run ID*: `{}`
+*Batch ID*: `{}`
+*Summary*: {}""".format(
                 status, expectation_suite_name, run_id, batch_id, check_details_text,
             )
             query["blocks"][0]["text"]["text"] = summary_text
             # this abbreviated root level "text" will show up in the notification and not the message
             query["text"] = "{}: {}".format(expectation_suite_name, status)
-            gcs_data_docs_documentation = "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.html"
-            if "data_docs_link" in validation_result.meta:
-                # extracting message first
-                data_docs_links = validation_result.meta["data_docs_link"]
-                # Note: there can be more than one link :
-                # can we have more than one?
-                for docs_link_key in data_docs_links.keys():
 
-                    docs_link = data_docs_links[docs_link_key]
+            if data_docs_index_pages:
+                for docs_link_key in data_docs_index_pages.keys():
+                    docs_link = data_docs_index_pages[docs_link_key]
                     report_element = None
                     if "file:///" in docs_link:
                         # handle special case since Slack does not render these links
