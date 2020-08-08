@@ -18,8 +18,9 @@ These tutorials will teach you everything you need to know to get up and running
    :maxdepth: 2
 
    /tutorials/quick_start
-   /tutorials/exploring_ge_notebook
+   /tutorials/exploring_expectations
    /tutorials/getting_started
+   /tutorials/customize_your_deployment
    /tutorials/contributing
 
 
