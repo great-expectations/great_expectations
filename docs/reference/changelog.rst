@@ -581,7 +581,7 @@ Highlights include:
 
    - **Environments**: A DataContext can now manage :ref:`environment_and_secrets` more easily thanks to more dynamic and
      flexible variable substitution.
-   - **Stores**: A new internal abstraction for DataContexts, :ref:`stores_reference`, make extending GE easier by
+   - **Stores**: A new internal abstraction for DataContexts, :ref:`Stores`, make extending GE easier by
      consolidating logic for reading and writing resources from a database, local, or cloud storage.
    - **Types**: Utilities configured in a DataContext are now referenced using `class_name` and `module_name` throughout
      the DataContext configuration, making it easier to extend or supplement pre-built resources. For now, the "type"
@@ -589,7 +589,7 @@ Highlights include:
 
 3. Partitioners: Batch Kwargs are clarified and enhanced to help easily reference well-known chunks of data using a
    partition_id. Batch ID and Batch Fingerprint help round out support for enhanced metadata around data
-   assets that GE validates. See :ref:`batch_identifiers` for more information. The `GlobReaderBatchKwargsGenerator`,
+   assets that GE validates. See :ref:`Batch Identifiers` for more information. The `GlobReaderBatchKwargsGenerator`,
    `QueryBatchKwargsGenerator`, `S3GlobReaderBatchKwargsGenerator`, `SubdirReaderBatchKwargsGenerator`, and `TableBatchKwargsGenerator` all support partition_id for
    easily accessing data assets.
 

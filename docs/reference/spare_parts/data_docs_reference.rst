@@ -117,7 +117,7 @@ will automatically save the resulting site to that bucket.
     bucket: data-docs.my_org.org
     prefix:
 
-See the tutorial on :ref:`publishing data docs to S3 <publishing_data_docs_to_s3>` for more information.
+See the tutorial on `how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_s3` for more information.
 
 More advanced configuration
 ============================

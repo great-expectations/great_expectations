@@ -210,7 +210,7 @@ After::
 
   great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/my_run_id/my_run_time/batch_identifier.html
 
-.. _Upgrading to 0.10.x:
+.. _upgrading_to_0.10.x:
 ************************
 How to upgrade to 0.10.x
 ************************
@@ -416,7 +416,7 @@ CODE CHANGES:
     the number of returned rows, accessing saved kwargs, or using any other
     BatchKwargsGenerator feature. BatchKwargsGenerators *must* be attached to
     a specific datasource to be instantiated.
-  - This tutorial uses the latest API for validating data: :ref:`tutorial_validate_data`
+  - The API for validating data has changed.
 
 - **Database store tables are not compatible** between versions and require a
   manual migration; the new default table names are: `ge_validations_store`,
@@ -451,7 +451,7 @@ Some specific changes:
 
 - Deprecation of the `type` key for configuring objects (replaced by
   `class_name` (and `module_name` as well when ambiguous).
-- Completely new `SiteBuilder` configuration. See :ref:`data_docs_reference`.
+- Completely new `SiteBuilder` configuration.
 
 BREAKING:
  - **top-level `validate` has a new signature**, that offers a variety of different options for specifying the DataAsset
