@@ -14,16 +14,45 @@ Off we go! Install Great Expectations:
 
     pip install great_expectations
 
-You can quickly try out Great Expectations using this guide: :ref:`how_to_guides__creating_and_editing_expectations__how_to_quickly_explore_data_using_expectations_in_a_notebook`.
+This is it! From here, you have two options to get started with Great Expectations:
 
-    .. figure:: ../images/interactive_mostly.gif
+.. raw:: html
 
-To unlock more of the power of Great Expectations, you'll also need to configure a Data Context. From the root of the directory where you want to deploy Great Expectations:
+   <embed>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css">
+      <style>
+         .custom-indented-paragraph {
+            margin-left: 70px;
+         }
+      </style>
+   </embed>
 
-.. code-block:: bash
+.. raw:: html
 
-    great_expectations init
+   <embed>
+      <h2><span class="fa-stack">
+         <span class="fa fa-circle-o fa-stack-2x"></span>
+         <strong class="fa-stack-1x">
+            1
+         </strong>
+      </span> Explore Expectations in a notebook</h2>
+   </embed>
 
-The CLI will guide you through all the steps to set up a basic deployment of Great Expectations.
+.. container:: custom-indented-paragraph
 
-After that, if you want to understand what just happened, check out :ref:`Getting started`. Alternatively, you can :ref:`Customize your deployment <tutorials__getting_started__customize_your_deployment>`.
+   You can quickly try out Great Expectations in a Jupter notebook to explore building your first set of Expectations. Follow this guide: :ref:`how_to_guides__creating_and_editing_expectations__how_to_quickly_explore_data_using_expectations_in_a_notebook`.
+
+.. raw:: html
+
+   <embed>
+      <h2><span class="fa-stack">
+         <span class="fa fa-circle-o fa-stack-2x"></span>
+         <strong class="fa-stack-1x">
+            2
+         </strong>
+      </span> Set up a local deployment of Great Expectations</h2>
+   </embed>
+
+.. container:: custom-indented-paragraph
+
+   To unlock more of the power of Great Expectations, you'll also need to configure a Data Context. Check out the :ref:`getting_started` tutorial for instructions on how to set up your first local deployment of Great Expectations using a sample data set.

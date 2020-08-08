@@ -1,10 +1,10 @@
 .. _getting_started:
 
 ###############
-GE 101: Getting started
+Getting started with Great Expectations
 ###############
 
-Welcome to Great Expectations! This tutorial will help you set up your first deployment of Great Expectactions. We'll also introduce important concepts, with links to detailed material you can dig into later. After completing this tutorial, you will know how to
+Welcome to Great Expectations! This tutorial will help you set up your first local deployment of Great Expectactions. We'll also introduce important concepts, with links to detailed material you can dig into later. After completing this tutorial, you will know how to
 
 - Initialize a Data Context to manage your project configuration
 - Set up a Datasource to connect Great Expectations to sample data
@@ -104,42 +104,11 @@ Please follow these steps to get started:
          <strong class="fa-stack-1x">
             5
          </strong>
-      </span> Set up your first Checkpoint</h2>
+      </span> Validate your data</h2>
    </embed>
 
 .. container:: custom-indented-paragraph
 
    In normal usage, the best way to validate data is with a :ref:`Checkpoint`. Checkpoints simplify deployment, by pre-specifying the data and Expectations that to validate at any given point in your data infrastructure, along with follow-up actions to trigger based on the results of validation.
 
-   Follow these instructions to :ref:`set up your first Checkpoint`.
-
-.. raw:: html
-
-   <embed>
-      <h2><span class="fa-stack">
-         <span class="fa fa-circle-o fa-stack-2x"></span>
-         <strong class="fa-stack-1x">
-            6
-         </strong>
-      </span> Customize your deployment</h2>
-   </embed>
-
-.. container:: custom-indented-paragraph
-
-   By this point, you'll have your first, working deployment of Great Expectations. The next step is to :ref:`tutorials__getting_started__customize_your_deployment`.
-   
-   Data Contexts make this modular, so that you can add or swap out one component at a time. Most of these changes are quick, incremental steps---so you can upgrade from a basic demo deployment to a full production deployment at your own pace, and be confident that your Data Context will continue to work at every step along the way.
-   
------
-
-Table of contents for Getting Started:
-
-.. toctree::
-   :maxdepth: 1
-
-   /tutorials/getting_started/initialize_a_data_context
-   /tutorials/getting_started/connect_to_data
-   /tutorials/getting_started/create_your_first_expectations
-   /tutorials/getting_started/set_up_data_docs
-   /tutorials/getting_started/set_up_your_first_checkpoint
-   /tutorials/getting_started/customize_your_deployment
+   Follow these instructions to :ref:`set up your first Checkpoint<_tutorials__getting_started__set_up_your_first_checkpoint>`.

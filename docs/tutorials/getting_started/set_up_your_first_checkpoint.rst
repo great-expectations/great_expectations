@@ -1,9 +1,9 @@
 .. _tutorials__getting_started__set_up_your_first_checkpoint:
 
-Set up your first Checkpoint
+Validate your data
 ============================
 
-As we said earlier, validation the core operation of Great Expectations: “Validate X data against Y Expectations.”
+As we said earlier, validation is the core operation of Great Expectations: “Validate X data against Y Expectations.”
 
 In normal usage, the best way to validate data is with a :ref:`Checkpoint`. Checkpoints bring :ref:`Batches` of data together with corresponding :ref:`Expectation Suites` for validation. Configuring Checkpoints simplifies deployment, by pre-specifying the "X"s and "Y"s that you want to validate at any given point in your data infrastructure.
 
@@ -57,40 +57,6 @@ Our newly configured Checkpoint knows how to load ``npidata_pfile_20200511-20200
 
 You don't need to worry much about the details of Validation Operators for now. They orchestrate the actual work of validating data and processing the results. After executing validation, the Validation Operator can kick off additional workflows through :ref:`Validation Actions`.
 
-You can see the configuration for ``action_list_operator`` in your ``great_expectations.yml`` file. With comments removed, it looks like this:
-
-.. code-block:: yaml
-
-    action_list_operator:
-      class_name: ActionListValidationOperator
-      action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-      - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
-      # - name: send_slack_notification_on_validation_result
-      #   action:
-      #     class_name: SlackNotificationAction
-      #     # put the actual webhook URL in the uncommitted/config_variables.yml file
-      #     slack_webhook: ${validation_notification_slack_webhook}
-      #     notify_on: all # possible values: "all", "failure", "success"
-      #     renderer:
-      #       module_name: great_expectations.render.renderer.slack_renderer
-      #       class_name: SlackRenderer
-
-You can see that the ``action_list`` for your validation Operator contains three Validation Actions. After each run using this operator...
-
-1. ``store_validation_result`` : store the :ref:`Validation Results`.
-2. ``store_evaluation_params`` : store :ref:`Evaluation Parameters`.
-3. ``update_data_docs`` : update your :ref:`Data Docs`.
-
-A fourth action, ``send_slack_notification_on_validation_result``, will trigger a notification in Slack. It's currently commented out. See :ref:`How to trigger Slack notifications as a Validation Action` to configure it.
-
 For more examples of post-validation actions, please see the :ref:`How-to section for Validation <how_to_guides__validation>`.
 
 How to run Checkpoints
@@ -102,10 +68,21 @@ Checkpoints can be run like applications from the command line or cron:
 
     great_expectations checkpoint run my_checkpoint
 
-You can also generate Checkpoint scripts that you can edit and run using python, or within data orchestration tools like airflow.
+You can also generate Checkpoint scripts that you can edit and run using python, or within data orchestration tools like Airflow. For example, see the How to Run a Checkpoint in Airflow how-to guide.
 
 .. code-block:: bash
 
     great_expectations checkpoint script my_checkpoint
 
-Now that you know how to configure Checkpoints, let's proceed to the last step of the tutorial: :ref:`Customize your deployment`.
+Once the Checkpoint is run, you can head back to your Data Docs to see the results of the latest Validation run with your Checkpoint.
+
+
+Congratulations! Where to go from here?
+----------------------
+
+At this point, you have your first, working local deployment of Great Expectations. This is the end of the Getting Started tutorial!
+
+You've also been introduced to the foundational concepts in the library: :ref:`Data Contexts`, :ref:`Datasources`, :ref:`Expectations`, :ref:`Profilers`, :ref:`Data Docs`, :ref:`Validation`, and :ref:`Checkpoints`.
+
+Data Contexts make this modular, so that you can add or swap out one component at a time. Most of these changes are quick, incremental steps---so you can upgrade from a basic demo deployment to a full production deployment at your own pace, and be confident that your Data Context will continue to work at every step along the way. The next step is to :ref:`tutorials__getting_started__customize_your_deployment`.
+
