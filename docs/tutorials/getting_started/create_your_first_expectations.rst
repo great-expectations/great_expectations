@@ -3,13 +3,11 @@
 Create your first Expectations
 ==============================
 
-:ref:`Expectations` are the workhorse abstraction in Great Expectations.
+:ref:`Expectations` are the key concept in Great Expectations for asserting what you *expect* from your data.
 
-Each Expectation is a declarative, machine-verifiable assertion about the expected format, content, or behavior of your data. Great Expectations comes with :ref:`dozens of built-in Expectations <Glossary of Expectations>`, and it's easy to :ref:`develop your own custom Expectations <how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations>`, too.
+Each Expectation is a declarative, machine-verifiable assertion about the expected format, content, or behavior of your data. Great Expectations comes with :ref:`dozens of built-in Expectations <Glossary of Expectations>`, and it's possible to :ref:`develop your own custom Expectations <how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations>`, too.
 
-.. admonition:: Admonition from Mr. Dickens.
-
-    "Take nothing on its looks; take everything on evidence. There's no better rule."
+Remember that in the example data, we wanted to ensure that the ``passenger_count`` column always ranges between the numbers 1 and 6. Let's go ahead and create an Expectation suite to
 
 The CLI will help you create your first Expectations. You can accept the defaults by typing [Enter] twice:
 

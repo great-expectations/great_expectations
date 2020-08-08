@@ -1,10 +1,16 @@
 .. _getting_started:
 
 ###############
-Getting started
+GE 101: Getting started
 ###############
 
-Welcome to Great Expectations! This tutorial will help you set up your first deployment of Great Expectactions. We'll also introduce important concepts, with links to detailed material you can dig into later.
+Welcome to Great Expectations! This tutorial will help you set up your first deployment of Great Expectactions. We'll also introduce important concepts, with links to detailed material you can dig into later. After completing this tutorial, you will know how to
+
+- Initialize a Data Context to manage your project configuration
+- Set up a Datasource to connect Great Expectations to sample data
+- Create your first Expectations
+- Validate data with those Expectations
+- View the validation output in Data Docs
 
 Please follow these steps to get started:
 
