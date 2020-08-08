@@ -1,0 +1,325 @@
+{
+  "expectation_type" : "expect_column_values_to_match_like_pattern",
+  "datasets" : [{
+    "data" : {
+      "a" : ["aaa", "abb", "acc", "add", "bee"],
+      "b" : ["aaa", "abb", "acc", "bdd", null],
+      "c" : [ null,  null,  null,  null, null],
+      "column_name with space": ["aaa", "abb", "acc", "add", "bee"]
+    },
+    "schemas": {
+      "spark": {
+        "a": "StringType",
+        "b": "StringType",
+        "c": "StringType",
+        "column_name with space": "StringType"
+      },
+      "mssql": {
+        "a": "VARCHAR",
+        "b": "NVARCHAR",
+        "c": "NVARCHAR",
+        "column_name with space": "VARCHAR"
+      }
+    },
+    "tests": [
+    {
+      "title": "Negative test, insufficient Mostly + one non-matching value",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "[a]%",
+        "mostly": 0.9
+      },
+      "out": {
+        "success":false,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "Positive test, exact mostly w/ one non-matching value",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "[a]%",
+        "mostly": 0.8
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "Positive_test_column_name_has_space",
+      "exact_match_out" : false,
+      "in": {
+        "column": "column_name with space",
+        "like_pattern": "[a]%",
+        "mostly": 0.8
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "Positive test, sufficient mostly w/ one non-matching value",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "[a]%",
+        "mostly": 0.7
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "Negative test, one missing value and insufficent mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "b",
+        "like_pattern": "[a]%",
+        "mostly": 0.8
+      },
+      "out": {
+        "success":false,
+        "unexpected_index_list": [3],
+        "unexpected_list": ["bdd"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "Positive test, one missing value and exact mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "b",
+        "like_pattern": "[a]%",
+        "mostly": 0.75
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [3],
+        "unexpected_list": ["bdd"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "Positive test, one missing value and sufficent mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "b",
+        "like_pattern": "[a]%",
+        "mostly": 0.7
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [3],
+        "unexpected_list": ["bdd"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "Positive test. all missing values",
+      "exact_match_out" : false,
+      "in": {
+        "column": "c",
+        "like_pattern": "[a]%"
+      },
+      "out": {
+        "success": true,
+        "unexpected_index_list": [],
+        "unexpected_list": []
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "Positive test. all missing values, mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "c",
+        "like_pattern": "[a]%",
+        "mostly": 0.2
+      },
+      "out": {
+        "success": true,
+        "unexpected_index_list": [],
+        "unexpected_list": []
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "Positive test, match characters not at the beginning of string",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "%[b]%",
+        "mostly": 0.4
+      },
+      "out": {
+        "success": true,
+        "unexpected_index_list": [0, 2, 3],
+        "unexpected_list": ["aaa", "acc", "add"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "Negative test, insufficient Mostly + one non-matching value",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "a%",
+        "mostly": 0.9
+      },
+      "out": {
+        "success":false,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["sqlite", "postresql", "mysql"]
+    },
+    {
+      "title": "Positive test, exact mostly w/ one non-matching value",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "a%",
+        "mostly": 0.8
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["sqlite", "postresql", "mysql"]
+    },
+    {
+      "title": "Positive_test_column_name_has_space",
+      "exact_match_out" : false,
+      "in": {
+        "column": "column_name with space",
+        "like_pattern": "a%",
+        "mostly": 0.8
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["sqlite", "postresql", "mysql"]
+    },
+    {
+      "title": "Positive test, sufficient mostly w/ one non-matching value",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "a%",
+        "mostly": 0.7
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["sqlite", "postresql", "mysql"]
+    },
+    {
+      "title": "Negative test, one missing value and insufficent mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "b",
+        "like_pattern": "a%",
+        "mostly": 0.8
+      },
+      "out": {
+        "success":false,
+        "unexpected_index_list": [3],
+        "unexpected_list": ["bdd"]
+      },
+      "only_for": ["sqlite", "postresql", "mysql"]
+    },
+    {
+      "title": "Positive test, one missing value and exact mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "b",
+        "like_pattern": "a%",
+        "mostly": 0.75
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [3],
+        "unexpected_list": ["bdd"]
+      },
+      "only_for": ["sqlite", "postresql", "mysql"]
+    },
+    {
+      "title": "Positive test, one missing value and sufficent mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "b",
+        "like_pattern": "a%",
+        "mostly": 0.7
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [3],
+        "unexpected_list": ["bdd"]
+      },
+      "only_for": ["sqlite", "postresql", "mysql"]
+    },
+    {
+      "title": "Positive test. all missing values",
+      "exact_match_out" : false,
+      "in": {
+        "column": "c",
+        "like_pattern": "a%"
+      },
+      "out": {
+        "success": true,
+        "unexpected_index_list": [],
+        "unexpected_list": []
+      },
+      "only_for": ["sqlite", "postresql", "mysql"]
+    },
+    {
+      "title": "Positive test. all missing values, mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "c",
+        "like_pattern": "a%",
+        "mostly": 0.2
+      },
+      "out": {
+        "success": true,
+        "unexpected_index_list": [],
+        "unexpected_list": []
+      },
+      "only_for": ["sqlite", "postresql", "mysql"]
+    },
+    {
+      "title": "Positive test, match characters not at the beginning of string",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "%b%",
+        "mostly": 0.4
+      },
+      "out": {
+        "success": true,
+        "unexpected_index_list": [0, 2, 3],
+        "unexpected_list": ["aaa", "acc", "add"]
+      },
+      "only_for": ["sqlite", "postresql", "mysql"]
+    }
+   ]
+  }]
+}

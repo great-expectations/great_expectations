@@ -3,16 +3,152 @@
 How to configure a self managed Spark Datasource
 ================================================
 
-.. admonition:: Admonition from Mr. Dickens
+This guide will help you add a managed Spark dataset (Spark Dataframe created by Spark SQL Query) as a Datasource. This will allow you to run expectations against tables available within your Spark cluster.
 
-    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
+When you use a managed Spark Datasource, the validation is done in Spark itself. Your data is not downloaded.
 
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
+  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - Installed the pyspark package (``pip install pyspark``)
+  - Setup `SPARK_HOME` and `JAVA_HOME` variables for runtime environment
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+-----
+Steps
+-----
 
-If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
+To enable running Great Expectations against dataframe created by Spark SQL query, follow below steps:
+
+#. **Run datasource new**
+
+    From the command line, run:
+
+    .. code-block:: bash
+
+        great_expectations datasource new
+
+#. **Choose "Files on a filesystem (for processing with Pandas or Spark)"**
+
+    .. code-block:: bash
+
+        What data would you like Great Expectations to connect to?
+            1. Files on a filesystem (for processing with Pandas or Spark)
+            2. Relational database (SQL)
+
+        : 1
+
+#. **Choose PySpark**
+
+    .. code-block:: bash
+
+        What are you processing your files with?
+            1. Pandas
+            2. PySpark
+
+        : 2
+
+#. **Enter /tmp** (it doesn't matter what you enter as we will replace this in a few steps).
+
+    .. code-block:: bash
+
+        Enter the path (relative or absolute) of the root directory where the data files are stored.
+
+        : /tmp
+
+#. **Enter spark_dataframe**
+
+    .. code-block:: bash
+
+        Give your new Datasource a short name.
+        [tmp__dir]: spark_dataframe
+
+#. **Enter Y**
+
+    .. code-block:: bash
+
+        Would you like to proceed? [Y/n]: Y
+
+#. **Replace lines in great_expectations.yml file**
+
+    .. code-block:: yaml
+
+        datasources:
+          spark_dataframe:
+            data_asset_type:
+              class_name: SparkDFDataset
+              module_name: great_expectations.dataset
+            batch_kwargs_generators:
+              subdir_reader:
+                class_name: SubdirReaderBatchKwargsGenerator
+                base_directory: /tmp
+            class_name: SparkDFDatasource
+            module_name: great_expectations.datasource
+
+    with
+
+    .. code-block:: yaml
+
+        datasources:
+          spark_dataframe:
+            data_asset_type:
+              class_name: SparkDFDataset
+              module_name: great_expectations.dataset
+            batch_kwargs_generators:
+              spark_sql_query:
+                class_name: QueryBatchKwargsGenerator
+                queries:
+                  ${query_name}: ${spark_sql_query}
+            module_name: great_expectations.datasource
+            class_name: SparkDFDatasource
+
+#. **Fill values:**
+
+* **query_name** - Name by which you want to reference the datasource. For next points we will use `my_first_query` name. You will use this name to select datasource when creating expectations.
+* **spark_sql_query** - Spark SQL Query that will create DataFrame against which GE validations will be run. For next points we will use `select * from mydb.mytable` query.
+
+Now, when creating new expectation suite, query `main` will be available in the list of datasources.
+
+----------------
+Additional Notes
+----------------
+
+#. **Configuring Spark options**
+
+To provide custom configuration options either:
+
+1. Create curated `spark-defaults.conf` configuration file in `$SPARK_HOME/conf` directory
+2. Provide `spark_context` dictionary to Datasource config:
+
+    .. code-block:: yaml
+
+        datasources:
+          spark_dataframe:
+            data_asset_type:
+              class_name: SparkDFDataset
+              module_name: great_expectations.dataset
+            batch_kwargs_generators:
+              spark_sql_query:
+                class_name: QueryBatchKwargsGenerator
+                queries:
+                  ${query_name}: ${spark_sql_query}
+            module_name: great_expectations.datasource
+            class_name: SparkDFDatasource
+            spark_context:
+                spark.master: local[*]
+
+Full list of Spark configuration options is available here: [https://spark.apache.org/docs/latest/configuration.html](https://spark.apache.org/docs/latest/configuration.html)
+
+**Spark catalog**
+
+Running SQL queries requires either registering temporary views or enabling Spark catalog (like Hive metastore).
+
+This configuraiton options enable using Hive Metastore catalog - an equivalent of `.enableHiveSupport()`
+
+    .. code-block:: bash
+
+        spark.sql.catalogImplementation     hive
+        spark.sql.warehouse.dir             /tmp/hive
+        spark.hadoop.hive.metastore.uris    thrift://localhost:9083
 
 .. discourse::
     :topic_identifier: 170

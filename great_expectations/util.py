@@ -91,10 +91,17 @@ def import_library_module(module_name: str) -> Union[ModuleType, None]:
 
     try:
         module_obj = importlib.import_module(module_name)
-    except ModuleNotFoundError:
+    except ImportError:
         module_obj = None
 
     return module_obj
+
+
+def is_library_loadable(library_name: str) -> bool:
+    module_obj: Union[ModuleType, None] = import_library_module(
+        module_name=library_name
+    )
+    return module_obj is not None
 
 
 def load_class(class_name, module_name):

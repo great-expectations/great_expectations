@@ -469,13 +469,13 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
     validations_site_section_builder = site_section_builders["validations"]
     assert isinstance(validations_site_section_builder.source_store, ExpectationsStore)
     assert validations_site_section_builder.run_name_filter == {
-        "ne": "custom_validations_filter"
+        "not_equals": "custom_validations_filter"
     }
 
     profiling_site_section_builder = site_section_builders["profiling"]
     assert isinstance(validations_site_section_builder.source_store, ExpectationsStore)
     assert profiling_site_section_builder.run_name_filter == {
-        "eq": "custom_profiling_filter"
+        "equals": "custom_profiling_filter"
     }
 
 

@@ -1,5 +1,6 @@
 import datetime
 import logging
+from pathlib import Path
 from string import Template
 from urllib.parse import urlparse
 
@@ -8,7 +9,10 @@ from great_expectations.core.util import nested_update
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.types import BatchMarkers
-from great_expectations.exceptions import DatasourceInitializationError
+from great_expectations.exceptions import (
+    DatasourceInitializationError,
+    DatasourceKeyPairAuthBadPassphraseError,
+)
 from great_expectations.types import ClassConfig
 from great_expectations.types.configurations import classConfigSchema
 
@@ -247,9 +251,13 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
 
             # Otherwise, connect using remaining kwargs
             else:
-                options, drivername = self._get_sqlalchemy_connection_options(**kwargs)
+                (
+                    options,
+                    create_engine_kwargs,
+                    drivername,
+                ) = self._get_sqlalchemy_connection_options(**kwargs)
                 self.drivername = drivername
-                self.engine = create_engine(options)
+                self.engine = create_engine(options, **create_engine_kwargs)
                 self.engine.connect()
 
             # since we switched to lazy loading of Datasources when we initialise a DataContext,
@@ -283,6 +291,12 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
         else:
             credentials = {}
 
+        create_engine_kwargs = {}
+
+        connect_args = credentials.pop("connect_args", None)
+        if connect_args:
+            create_engine_kwargs["connect_args"] = connect_args
+
         # if a connection string or url was provided in the profile, use that
         if "connection_string" in credentials:
             options = credentials["connection_string"]
@@ -297,8 +311,53 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
                     "schema_name specified creating a URL with schema is not supported. Set a default "
                     "schema on the user connecting to your database."
                 )
-            options = sqlalchemy.engine.url.URL(drivername, **credentials)
-        return options, drivername
+
+            if "private_key_path" in credentials:
+                options, create_engine_kwargs = self._get_sqlalchemy_key_pair_auth_url(
+                    drivername, credentials
+                )
+            else:
+                options = sqlalchemy.engine.url.URL(drivername, **credentials)
+        return options, create_engine_kwargs, drivername
+
+    def _get_sqlalchemy_key_pair_auth_url(self, drivername, credentials):
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.backends import default_backend
+
+        private_key_path = credentials.pop("private_key_path")
+        private_key_passphrase = credentials.pop("private_key_passphrase")
+
+        with Path(private_key_path).expanduser().resolve().open(mode="rb") as key:
+            try:
+                p_key = serialization.load_pem_private_key(
+                    key.read(),
+                    password=private_key_passphrase.encode()
+                    if private_key_passphrase
+                    else None,
+                    backend=default_backend(),
+                )
+            except ValueError as e:
+                if "incorrect password" in str(e).lower():
+                    raise DatasourceKeyPairAuthBadPassphraseError(
+                        datasource_name="SqlAlchemyDatasource",
+                        message="Decryption of key failed, was the passphrase incorrect?",
+                    ) from e
+                else:
+                    raise e
+        pkb = p_key.private_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+
+        credentials_driver_name = credentials.pop("drivername", None)
+        create_engine_kwargs = {"connect_args": {"private_key": pkb}}
+        return (
+            sqlalchemy.engine.url.URL(
+                drivername or credentials_driver_name, **credentials
+            ),
+            create_engine_kwargs,
+        )
 
     def get_batch(self, batch_kwargs, batch_parameters=None):
         # We need to build a batch_id to be used in the dataframe

@@ -11,7 +11,11 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.python_subprocess import (
     execute_shell_command_with_progress_polling,
 )
-from great_expectations.util import get_project_distribution, import_library_module
+from great_expectations.util import (
+    get_project_distribution,
+    import_library_module,
+    is_library_loadable,
+)
 
 try:
     from termcolor import colored
@@ -221,13 +225,6 @@ but the package `{pip_library_name}` containing this library is not installed.
         return 1
 
     return status_code
-
-
-def is_library_loadable(library_name: str) -> bool:
-    module_obj: Union[ModuleType, None] = import_library_module(
-        module_name=library_name
-    )
-    return module_obj is not None
 
 
 def reload_modules(module_names: list) -> None:
