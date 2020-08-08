@@ -18,6 +18,7 @@ These tutorials will teach you everything you need to know to get up and running
    :maxdepth: 2
 
    /tutorials/quick_start
+   /tutorials/exploring_ge_notebook
    /tutorials/getting_started
    /tutorials/contributing
 
