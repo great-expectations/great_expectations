@@ -3,6 +3,8 @@
 How to create Expectations
 ==========================
 
+.. warning:: This doc has been partially migrated from old documentation. It's potentially helpful, but may be incomplete, incorrect, or confusing.
+
 This tutorial covers the workflow of creating and editing expectations.
 
 The tutorial assumes that you have created a new Data Context (project), as covered here: :ref:`tutorial_init`.

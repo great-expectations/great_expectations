@@ -8,6 +8,8 @@ This document provides examples that walk through several methods for building a
 Most of the core Great Expectations expectations are built using expectation decorators, and using decorators on
 existing logic can make bringing custom integrations into your pipeline tests easy.
 
+.. warning:: This doc has been partially migrated from old documentation. It's potentially helpful, but may be incomplete, incorrect, or confusing.
+
 ****************************************
 Using Expectation Decorators
 ****************************************
