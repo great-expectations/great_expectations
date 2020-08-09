@@ -1343,28 +1343,25 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         # check if column is any type that could have na (numeric types)
         na_types = [isinstance(column.schema[column_name].dataType,typ) for typ in [sparktypes.LongType,sparktypes.DoubleType,sparktypes.IntegerType]]
 
-        # if column is any type that could have NA values, remove them
+        # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
         if any(na_types):
-            column = column.withColumn('na', when(isnan(column[0]),1).otherwise(0))\
-                .filter(col('na')==0)
-    
-        # create constant column to order by in window function to preserve order of original df
-        column = column.withColumn('constant',lit('constant'))
-
+            column = column.filter(~isnan(column[0]))
         
         if parse_strings_as_datetimes:
-            column = column\
-                .withColumn('ts_col',column[0].cast(sparktypes.TimestampType()))\
+            # convert column to timestamp format
+            column = self._apply_dateutil_parse(column)
+             # create constant column to order by in window function to preserve order of original df
+            column = column.withColumn('constant',lit('constant'))\
                 .withColumn('lag',lag(column[0]).over(Window.orderBy(col('constant'))))
 
-            column = column.withColumn('diff',datediff(col('ts_col'),col('lag')))
+            column = column.withColumn('diff',datediff(col(column_name),col('lag')))
 
         else:
-            column = column\
+            column = column.withColumn('constant',lit('constant'))\
                 .withColumn('lag',lag(column[0]).over(Window.orderBy(col('constant'))))\
                 .withColumn('diff',column[0]-col('lag'))
 
-        # replace first row null lag with 1 so that it is not flagged as fail
+        # replace lag first row null with 1 so that it is not flagged as fail
         column = column.withColumn('diff',when(col('diff').isNull(),1).otherwise(col('diff')))
         
         if strictly:
