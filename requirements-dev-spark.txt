@@ -1,2 +1,1 @@
 pyspark>=2.3.2,<3.0.0  # spark
-# if using python 3.8, must install ==3.0.0 due to cloudpickle incompatibililty
