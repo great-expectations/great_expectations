@@ -1338,7 +1338,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         catch_exceptions=None,
         meta=None,
     ):
+        # string column name
         column_name = column.schema.names[0]
+        # check if column is any type that could have na (numeric types)
         na_types = [isinstance(column.schema[column_name].dataType,typ) for typ in [sparktypes.LongType,sparktypes.DoubleType,sparktypes.IntegerType]]
 
         # if column is any type that could have NA values, remove them
@@ -1349,13 +1351,13 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         # create constant column to order by in window function to preserve order of original df
         column = column.withColumn('constant',lit('constant'))
 
-        #string column name
         
         if parse_strings_as_datetimes:
             column = column\
-                .withColumn(column_name,column[0].cast(sparktypes.TimestampType()))\
-                .withColumn('lag',lag(column[0]).over(Window.orderBy(col('constant'))))\
-                .withColumn('diff',datediff(column[0],col('lag')))
+                .withColumn('ts_col',column[0].cast(sparktypes.TimestampType()))\
+                .withColumn('lag',lag(column[0]).over(Window.orderBy(col('constant'))))
+
+            column = column.withColumn('diff',datediff(col('ts_col'),col('lag')))
 
         else:
             column = column\
