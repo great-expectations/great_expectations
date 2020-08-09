@@ -36,7 +36,7 @@ try:
         isnan,
         datediff,
         lag,
-        
+
     )
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
@@ -1338,7 +1338,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         catch_exceptions=None,
         meta=None,
     ):
-        na_types = [isinstance(column.schema[column[0]].dataType,typ) for typ in [sparktypes.LongType,sparktypes.DoubleType,sparktypes.IntegerType]]
+        column_name = column.schema.names[0]
+        na_types = [isinstance(column.schema[column_name].dataType,typ) for typ in [sparktypes.LongType,sparktypes.DoubleType,sparktypes.IntegerType]]
 
         # if column is any type that could have NA values, remove them
         if any(na_types):
@@ -1349,7 +1350,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         column = column.withColumn('constant',lit('constant'))
 
         #string column name
-        column_name = column.schema.names[0]
         
         if parse_strings_as_datetimes:
             column = column\
@@ -1360,7 +1360,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         else:
             column = column\
                 .withColumn('lag',lag(column[0]).over(Window.orderBy(col('constant'))))\
-                .withColumn('diff',col(column[0])-col('lag'))
+                .withColumn('diff',column[0]-col('lag'))
 
         # replace first row null lag with 1 so that it is not flagged as fail
         column = column.withColumn('diff',when(col('diff').isNull(),1).otherwise(col('diff')))
