@@ -14,6 +14,9 @@ Develop
 * [BUGFIX] Add guard for checking Redshift Dialect in match_like_pattern expectation
 * [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 * [DOCS] Add information about issue tags to contributing docs
+* [FEATURE] Slack Messages sent as ValidationActions now have link to DataDocs, if available.
+* [FEATURE] ValidationActions can now consume and return "payload", which can be used to share information across ValidationActions
+
 
 0.11.9
 -----------------
