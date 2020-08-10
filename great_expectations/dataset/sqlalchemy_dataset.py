@@ -478,8 +478,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
         else:
-            # use the schema name configured for the datasource
-            query_schema = self.engine.url.query.get("schema")
+            try:
+                # use the schema name configured for the datasource
+                query_schema = self.engine.url.query.get("schema")
+            except AttributeError as err:
+                # sqlite/mssql dialects use a Connection object instead of Engine and override self.engine
+                # retrieve the schema from the Connection object i.e. self.engine
+                conn_object = self.engine
+                query_schema = conn_object.engine.url.query.get("schema")
+
             self._table = sa.Table(table_name, sa.MetaData(), schema=query_schema)
 
         # Get the dialect **for purposes of identifying types**
