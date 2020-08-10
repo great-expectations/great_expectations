@@ -2,7 +2,6 @@ import pytest
 
 from great_expectations.core import (
     ExpectationConfiguration,
-    ExpectationKwargs,
     ExpectationValidationResult,
 )
 from great_expectations.data_asset import DataAsset
@@ -47,8 +46,7 @@ def test_expectation_decorator_build_config():
 
     assert (
         ExpectationConfiguration(
-            expectation_type="no_op_value_expectation",
-            kwargs=ExpectationKwargs({"value": "a"}),
+            expectation_type="no_op_value_expectation", kwargs={"value": "a"},
         )
         == config.expectations[1]
     )

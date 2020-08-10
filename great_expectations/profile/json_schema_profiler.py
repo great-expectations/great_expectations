@@ -4,11 +4,7 @@ from typing import Any, Dict, Optional
 
 import jsonschema
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationKwargs,
-    ExpectationSuite,
-)
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.profile.base import Profiler, ProfilerTypeMapping
 
 logger = logging.getLogger(__name__)
@@ -113,7 +109,7 @@ class JsonSchemaProfiler(Profiler):
     def _create_existence_expectation(
         self, key: str, details: dict
     ) -> ExpectationConfiguration:
-        kwargs = ExpectationKwargs(column=key)
+        kwargs = {"column": key}
         description = details.get("description", None)
         meta = None
         if description:
@@ -133,7 +129,7 @@ class JsonSchemaProfiler(Profiler):
             return None
 
         type_list = self.PROFILER_TYPE_LIST_BY_JSON_SCHEMA_TYPE[type_]
-        kwargs = ExpectationKwargs(column=key, type_list=type_list)
+        kwargs = {"column": key, "type_list": type_list}
         return ExpectationConfiguration(
             "expect_column_values_to_be_in_type_list", kwargs
         )
@@ -147,7 +143,7 @@ class JsonSchemaProfiler(Profiler):
             return None
 
         # TODO map JSONSchema types to which type backend? Pandas? Should this value set be parameterized per back end?
-        kwargs = ExpectationKwargs(column=key, value_set=[True, False])
+        kwargs = {"column": key, "value_set": [True, False]}
         return ExpectationConfiguration("expect_column_values_to_be_in_set", kwargs)
 
     def _create_range_expectation(
@@ -183,9 +179,7 @@ class JsonSchemaProfiler(Profiler):
             kwargs["max_value"] = exclusive_maximum
             kwargs["strict_max"] = True
 
-        return ExpectationConfiguration(
-            "expect_column_values_to_be_between", ExpectationKwargs(kwargs)
-        )
+        return ExpectationConfiguration("expect_column_values_to_be_between", kwargs)
 
     def _create_string_length_expectation(
         self, key: str, details: dict
@@ -206,7 +200,7 @@ class JsonSchemaProfiler(Profiler):
         if minimum == maximum:
             kwargs["value"] = minimum
             return ExpectationConfiguration(
-                "expect_column_value_lengths_to_equal", ExpectationKwargs(kwargs)
+                "expect_column_value_lengths_to_equal", kwargs
             )
         if minimum is not None:
             kwargs["min_value"] = minimum
@@ -214,7 +208,7 @@ class JsonSchemaProfiler(Profiler):
             kwargs["max_value"] = maximum
 
         return ExpectationConfiguration(
-            "expect_column_value_lengths_to_be_between", ExpectationKwargs(kwargs)
+            "expect_column_value_lengths_to_be_between", kwargs
         )
 
     def _create_set_expectation(
@@ -227,7 +221,7 @@ class JsonSchemaProfiler(Profiler):
         if not isinstance(enum, list):
             return None
 
-        kwargs = ExpectationKwargs(column=key, value_set=enum)
+        kwargs = {"column": key, "value_set": enum}
         return ExpectationConfiguration("expect_column_values_to_be_in_set", kwargs)
 
     def _create_regex_expectation(

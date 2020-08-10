@@ -1,6 +1,6 @@
 import warnings
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 
 from great_expectations.core import RunIdentifier
 from great_expectations.core.data_context_key import DataContextKey
@@ -120,7 +120,7 @@ class ValidationMetric(Metric):
             )
             try:
                 run_time = parse(run_id)
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 run_time = None
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):
@@ -170,7 +170,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
             )
             try:
                 run_time = parse(run_id)
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 run_time = None
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):
