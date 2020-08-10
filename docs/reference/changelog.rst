@@ -14,6 +14,8 @@ Develop
 * [BUGFIX] Add guard for checking Redshift Dialect in match_like_pattern expectation
 * [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 * [DOCS] Add information about issue tags to contributing docs
+* [FEATURE] add support for `expect_column_values_to_be_increasing` to `Spark`.
+* [FEATURE] add support for `expect_column_values_to_be_decreasing` to `Spark`.
 
 0.11.9
 -----------------
