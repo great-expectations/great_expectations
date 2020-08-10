@@ -17,8 +17,8 @@ These tutorials will teach you everything you need to know to get up and running
 .. toctree::
    :maxdepth: 2
 
-   /tutorials/quick_start
-   /tutorials/getting_started
-   /tutorials/contributing
+   tutorials/quick_start
+   tutorials/getting_started
+   tutorials/contributing
 
 
