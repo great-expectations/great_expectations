@@ -11,6 +11,6 @@ This page contains a collection of instructional guides for workflows, best prac
 .. toctree::
    :maxdepth: 2
 
-   workflows_patterns/deployment_airflow
-   workflows_patterns/deployment_hosted_environments
-   workflows_patterns/ge_on_teams
+   /guides/workflows_patterns/deployment_airflow
+   /guides/workflows_patterns/deployment_hosted_environments
+   /guides/workflows_patterns/ge_on_teams
