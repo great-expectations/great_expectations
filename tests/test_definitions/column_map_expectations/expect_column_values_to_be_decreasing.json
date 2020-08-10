@@ -71,10 +71,11 @@
       "in": {
         "column": "z",
         "parse_strings_as_datetimes" : true,
+        "output_strftime_format" : "%m/%d/%Y",
         "strictly": true
       },
       "out": {
-        "unexpected_list": ["10/2/2016"],
+        "unexpected_list": ["10/02/2016"],
         "unexpected_index_list": [3],
         "success": false
       }

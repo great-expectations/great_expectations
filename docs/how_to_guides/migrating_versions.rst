@@ -35,6 +35,28 @@ You will most likely be prompted to install a new template. Rest assured that
 your original yaml file will be archived automatically for you. Even so, it's
 in your source control system already, right? ;-)
 
+.. _upgrading_to_0.12:
+
+*************************
+Upgrading to 0.12.x
+*************************
+
+The 0.12.0 release makes a small but breaking change to the ``add_expectation``, ``remove_expectation``, and ``find_expectations`` methods. To update your code, replace the ``expectation_type``, ``column``, or ``kwargs`` arguments with an Expectation Configuration object. For more information on the ``match_type`` parameter, see :ref:`expectation_suite_operations`_.
+
+For example, using the old API:
+
+.. code-block:: python
+
+    remove_expectation(expectation_type="expect_column_values_to_be_in_set", column="city", expectation_kwargs={"value_set": ["New York","London","Tokyo"]})
+
+
+Using the new API:
+
+.. code-block:: python
+
+    remove_expectation(ExpectationConfiguration(expectation_type="expect_column_values_to_be_in_set", column="city", expectation_kwargs={"column": "city", "value_set": ["New York","London","Tokyo"]}), match_type="success")
+
+
 .. _upgrading_to_0.11:
 
 *************************
@@ -210,7 +232,7 @@ After::
 
   great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/my_run_id/my_run_time/batch_identifier.html
 
-.. _Upgrading to 0.10.x:
+.. _upgrading_to_0.10.x:
 ************************
 How to upgrade to 0.10.x
 ************************
@@ -416,7 +438,7 @@ CODE CHANGES:
     the number of returned rows, accessing saved kwargs, or using any other
     BatchKwargsGenerator feature. BatchKwargsGenerators *must* be attached to
     a specific datasource to be instantiated.
-  - This tutorial uses the latest API for validating data: :ref:`tutorial_validate_data`
+  - The API for validating data has changed.
 
 - **Database store tables are not compatible** between versions and require a
   manual migration; the new default table names are: `ge_validations_store`,
@@ -451,7 +473,7 @@ Some specific changes:
 
 - Deprecation of the `type` key for configuring objects (replaced by
   `class_name` (and `module_name` as well when ambiguous).
-- Completely new `SiteBuilder` configuration. See :ref:`data_docs_reference`.
+- Completely new `SiteBuilder` configuration.
 
 BREAKING:
  - **top-level `validate` has a new signature**, that offers a variety of different options for specifying the DataAsset

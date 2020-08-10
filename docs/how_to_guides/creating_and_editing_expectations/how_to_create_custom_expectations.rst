@@ -8,6 +8,8 @@ This document provides examples that walk through several methods for building a
 Most of the core Great Expectations expectations are built using expectation decorators, and using decorators on
 existing logic can make bringing custom integrations into your pipeline tests easy.
 
+.. warning:: This doc has been partially migrated from old documentation. It's potentially helpful, but may be incomplete, incorrect, or confusing.
+
 ****************************************
 Using Expectation Decorators
 ****************************************
@@ -36,7 +38,7 @@ To use the high-level decorators (e.g. ``column_map_expectation`` or ```column_a
 2. Define custom functions containing your business logic
 3. Use the `column_map_expectation` and `column_aggregate_expectation` decorators to turn them into full Expectations. Note that each dataset class implements its own versions of `@column_map_expectation` and `@column_aggregate_expectation`, so you should consult the documentation of each class to ensure you are returning the correct information to the decorator.
 
-Note: following Great Expectations patterns for :ref:`extending_great_expectations` is highly recommended, but not
+Note: following Great Expectations naming conventions for Expectations is highly recommended, but not
 strictly required. If you want to confuse yourself with bad names, the package won't stop you.
 
 For example, in Pandas:

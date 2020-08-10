@@ -102,7 +102,7 @@ All of these steps take place within your notebook:
     
         my_df.get_expectation_suite()
 
-    which will return an :ref:`ExpectationSuite` object.
+    which will return an :ref:`Expectation Suite` object.
 
     By default, ``get_expectation_suite()`` only returns Expectations with ``success=True`` on their most recent validation. You can override this behavior with:
     

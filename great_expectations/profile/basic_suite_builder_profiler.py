@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 from dateutil.parser import parse
 
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.dataset.util import build_categorical_partition_object
 from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.base import ProfilerCardinality, ProfilerDataType
@@ -98,7 +99,10 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             column_cache_entry["type"] = column_type
             # remove the expectation
             dataset.remove_expectation(
-                expectation_type="expect_column_values_to_be_in_type_list"
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_in_type_list",
+                    kwargs={"column": column_name},
+                )
             )
             dataset.set_config_value("interactive_evaluation", True)
 
@@ -116,10 +120,16 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             column_cache_entry["cardinality"] = column_cardinality
             # remove the expectations
             dataset.remove_expectation(
-                expectation_type="expect_column_unique_value_count_to_be_between"
+                ExpectationConfiguration(
+                    expectation_type="expect_column_unique_value_count_to_be_between",
+                    kwargs={"column": column_name},
+                )
             )
             dataset.remove_expectation(
-                expectation_type="expect_column_proportion_of_unique_values_to_be_between"
+                ExpectationConfiguration(
+                    expectation_type="expect_column_proportion_of_unique_values_to_be_between",
+                    kwargs={"column": column_name},
+                )
             )
             dataset.set_config_value("interactive_evaluation", True)
 
@@ -355,7 +365,11 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
         if min_value is not None:
             dataset.remove_expectation(
-                expectation_type="expect_column_min_to_be_between", column=column
+                ExpectationConfiguration(
+                    expectation_type="expect_column_min_to_be_between",
+                    kwargs={"column": column},
+                ),
+                match_type="domain",
             )
             try:
                 min_value = min_value + datetime.timedelta(days=-365)
@@ -369,7 +383,11 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         ).result["observed_value"]
         if max_value is not None:
             dataset.remove_expectation(
-                expectation_type="expect_column_max_to_be_between", column=column
+                ExpectationConfiguration(
+                    expectation_type="expect_column_max_to_be_between",
+                    kwargs={"column": column},
+                ),
+                match_type="domain",
             )
             try:
                 max_value = max_value + datetime.timedelta(days=365)
@@ -479,8 +497,11 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                         )
 
         if excluded_expectations:
-            dataset = _remove_table_expectations(dataset, excluded_expectations)
-            dataset = _remove_column_expectations(dataset, excluded_expectations)
+            # NOTE: we reach into a private member here because of an expected future
+            # refactor that will make the suite directly accessible
+            dataset._expectation_suite.remove_all_expectations_of_type(
+                excluded_expectations
+            )
         if included_expectations:
             for expectation in dataset.get_expectation_suite(
                 discard_failed_expectations=False, suppress_logging=True,
@@ -488,9 +509,11 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 if expectation.expectation_type not in included_expectations:
                     try:
                         dataset.remove_expectation(
-                            expectation_type=expectation.expectation_type,
-                            expectation_kwargs=expectation.kwargs,
-                            column=expectation.kwargs.get("column", None),
+                            ExpectationConfiguration(
+                                expectation_type=expectation.expectation_type,
+                                kwargs=expectation.kwargs,
+                            ),
+                            match_type="domain",
                             remove_multiple_matches=True,
                         )
                     except ValueError:
@@ -615,36 +638,3 @@ def _is_nan(value):
         return np.isnan(value)
     except TypeError:
         return False
-
-
-def _remove_table_expectations(dataset, all_types_to_remove):
-    suite = dataset.get_expectation_suite(discard_failed_expectations=False)
-    table_expectations = suite.get_table_expectations()
-    removals = [
-        e.expectation_type
-        for e in table_expectations
-        if e.expectation_type in all_types_to_remove
-    ]
-    for expectation in removals:
-        try:
-            dataset.remove_expectation(expectation_type=expectation)
-        except ValueError:
-            pass
-    return dataset
-
-
-def _remove_column_expectations(dataset, all_types_to_remove):
-    suite = dataset.get_expectation_suite(discard_failed_expectations=False)
-    column_expectations = suite.get_column_expectations()
-    removals = [
-        e.expectation_type
-        for e in column_expectations
-        if e.expectation_type in all_types_to_remove
-    ]
-    for column in dataset.get_table_columns():
-        for exp in removals:
-            try:
-                dataset.remove_expectation(expectation_type=exp, column=column)
-            except ValueError:
-                pass
-    return dataset
