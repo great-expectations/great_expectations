@@ -22,4 +22,3 @@ How-to guides
    /how_to_guides/configuring_generated_notebooks
    /how_to_guides/migrating_versions
    /how_to_guides/miscellaneous
-   /how_to_guides/spare_parts

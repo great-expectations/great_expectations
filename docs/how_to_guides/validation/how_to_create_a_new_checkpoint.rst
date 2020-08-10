@@ -8,7 +8,7 @@ This guide will help you create a new Checkpoint, which allows you to couple an 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
   - :ref:`Set up a working deployment of Great Expectations <getting_started>`
-  - :ref:`Created an Expectation Suite <how_to_create_a_new_expectation_suite_using_the_cli>`
+  - :ref:`Created an Expectation Suite <how_to_guides__creating_and_editing_expectations>`
 
 Steps
 -----

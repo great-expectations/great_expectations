@@ -17,16 +17,16 @@ Great Expectations' built-in library includes more than 50 common Expectations, 
 * ``expect_table_row_count_to_be_between``
 * ``expect_column_median_to_be_between``
 
-For a full list of available Expectations, please check out the :ref:`expectation_glossary`. Please note that not all Expectations are implemented on all :ref:`Execution engines` yet. You can see the grid of supported Expectations :ref:`here <#FIXME>`. We welcome :ref:`contributions <contributing>` to fill in the gaps.
+For a full list of available Expectations, please check out the :ref:`expectation_glossary`. Please note that not all Expectations are implemented on all :ref:`Execution engines` yet. You can see the grid of supported Expectations :ref:`here <implemented_expectations>`. We welcome :ref:`contributions <contributing>` to fill in the gaps.
 
-You can also extend Great Expectations by :ref:`creating your own custom Expectations <how_to__create_custom_expectations>`.
+You can also extend Great Expectations by :ref:`creating your own custom Expectations <_how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations>`.
 
 Expectations *enhance communication* about your data and *amplify quality* in data applications. Using expectations
 helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."
 
 .. attention::
 
-  Not all Expectations are implemented on all execution engines yet. You can see the grid of supported Expectations :ref:`here <#FIXME>`. We welcome :ref:`contributions <contributing>` to fill in the gaps.
+  Not all Expectations are implemented on all execution engines yet. You can see the grid of supported Expectations :ref:`here <implemented_expectations>`. We welcome :ref:`contributions <contributing>` to fill in the gaps.
 
 
 .. _expectation_suites:
@@ -82,7 +82,7 @@ These Expectations aren't included in the default set, but could be very useful 
 Fear not! Great Expectations is designed for customization and extensibility.
 
 Building custom expectations is easy and allows your custom logic to become part of the validation, documentation, and
-even profiling workflows that make Great Expectations stand out. See the guide on :ref:`custom_expectations_reference`
+even profiling workflows that make Great Expectations stand out. See the guide on :ref:`how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations`
 for more information on building expectations and updating DataContext configurations to automatically load batches
 of data with custom Data Assets.
 
