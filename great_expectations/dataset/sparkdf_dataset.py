@@ -72,7 +72,7 @@ class MetaSparkDFDataset(Dataset):
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
-            self, column, mostly=None, result_format=None, *args, **kwargs
+                self, column, mostly=None, result_format=None, non_nested=False, *args, **kwargs
         ):
             """
             This whole decorator is pending a re-write. Currently there is are huge performance issues
@@ -80,6 +80,13 @@ class MetaSparkDFDataset(Dataset):
             easy optimization opportunities by coupling result_format with how many different transformations
             are done on the dataset, as is done in sqlalchemy_dataset.
             """
+
+            # Rename column so we only have to handle dot notation here
+            target_col = "__target_col"
+            if non_nested:
+                self.spark_df = self.spark_df.withColumn(target_col, col(f"`{column}`"))
+            else:
+                self.spark_df = self.spark_df.withColumn(target_col, col(column))
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -94,7 +101,7 @@ class MetaSparkDFDataset(Dataset):
             else:
                 unexpected_count_limit = result_format["partial_unexpected_count"]
 
-            col_df = self.spark_df.select(column)  # pyspark.sql.DataFrame
+            col_df = self.spark_df.select(col(target_col))  # pyspark.sql.DataFrame
 
             # a couple of tests indicate that caching here helps performance
             col_df.cache()
@@ -107,7 +114,7 @@ class MetaSparkDFDataset(Dataset):
             ]:
                 col_df = col_df.filter(col_df[0].isNotNull())
                 # these nonnull_counts are cached by SparkDFDataset
-                nonnull_count = self.get_column_nonnull_count(column)
+                nonnull_count = self.get_column_nonnull_count(target_col)
             else:
                 nonnull_count = element_count
 
@@ -117,6 +124,7 @@ class MetaSparkDFDataset(Dataset):
             success_count = success_df.filter("__success = True").count()
 
             unexpected_count = nonnull_count - success_count
+
             if unexpected_count == 0:
                 # save some computation time if no unexpected items
                 maybe_limited_unexpected_list = []
@@ -127,7 +135,7 @@ class MetaSparkDFDataset(Dataset):
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
-                    row[column] for row in unexpected_df.collect()
+                    row[target_col] for row in unexpected_df.collect()
                 ]
 
                 if "output_strftime_format" in kwargs:
@@ -208,9 +216,28 @@ class MetaSparkDFDataset(Dataset):
             mostly=None,
             ignore_row_if="both_values_are_missing",
             result_format=None,
+            non_nested_A=False,
+            non_nested_B=False,
             *args,
             **kwargs
         ):
+            # Rename column so we only have to handle dot notation here
+            target_col_A = "__target_col_A"
+            target_col_B = "__target_col_B"
+
+            if non_nested_A:
+                self.spark_df = self.spark_df \
+                    .withColumn(target_col_A, col(f"`{column_A}`"))
+            if non_nested_B:
+                self.spark_df = self.spark_df \
+                    .withColumn(target_col_B, col(f"`{column_B}`"))
+            if not non_nested_A:
+                self.spark_df = self.spark_df \
+                    .withColumn(target_col_A, col(column_A))
+            if not non_nested_B:
+                self.spark_df = self.spark_df \
+                    .withColumn(target_col_B, col(column_B))
+
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
@@ -224,7 +251,7 @@ class MetaSparkDFDataset(Dataset):
             else:
                 unexpected_count_limit = result_format["partial_unexpected_count"]
 
-            cols_df = self.spark_df.select(column_A, column_B).withColumn(
+            cols_df = self.spark_df.select(target_col_A, target_col_B).withColumn(
                 "__row", monotonically_increasing_id()
             )  # pyspark.sql.DataFrame
 
@@ -235,26 +262,26 @@ class MetaSparkDFDataset(Dataset):
             if ignore_row_if == "both_values_are_missing":
                 boolean_mapped_null_values = cols_df.selectExpr(
                     "`__row`",
-                    "`{0}` AS `A_{0}`".format(column_A),
-                    "`{0}` AS `B_{0}`".format(column_B),
+                    "`{0}` AS `A_{0}`".format(target_col_A),
+                    "`{0}` AS `B_{0}`".format(target_col_B),
                     "ISNULL(`{0}`) AND ISNULL(`{1}`) AS `__null_val`".format(
-                        column_A, column_B
+                        target_col_A, target_col_B
                     ),
                 )
             elif ignore_row_if == "either_value_is_missing":
                 boolean_mapped_null_values = cols_df.selectExpr(
                     "`__row`",
-                    "`{0}` AS `A_{0}`".format(column_A),
-                    "`{0}` AS `B_{0}`".format(column_B),
+                    "`{0}` AS `A_{0}`".format(target_col_A),
+                    "`{0}` AS `B_{0}`".format(target_col_B),
                     "ISNULL(`{0}`) OR ISNULL(`{1}`) AS `__null_val`".format(
-                        column_A, column_B
+                        target_col_A, target_col_B
                     ),
                 )
             elif ignore_row_if == "never":
                 boolean_mapped_null_values = cols_df.selectExpr(
                     "`__row`",
-                    "`{0}` AS `A_{0}`".format(column_A),
-                    "`{0}` AS `B_{0}`".format(column_B),
+                    "`{0}` AS `A_{0}`".format(target_col_A),
+                    "`{0}` AS `B_{0}`".format(target_col_B),
                     lit(False).alias("__null_val"),
                 )
             else:
@@ -267,8 +294,8 @@ class MetaSparkDFDataset(Dataset):
             nonnull_df = boolean_mapped_null_values.filter("__null_val = False")
             nonnull_count = nonnull_df.count()
 
-            col_A_df = nonnull_df.select("__row", "`A_{0}`".format(column_A))
-            col_B_df = nonnull_df.select("__row", "`B_{0}`".format(column_B))
+            col_A_df = nonnull_df.select("__row", "`A_{0}`".format(target_col_A))
+            col_B_df = nonnull_df.select("__row", "`B_{0}`".format(target_col_B))
 
             success_df = func(self, col_A_df, col_B_df, *args, **kwargs)
             success_count = success_df.filter("__success = True").count()
@@ -284,7 +311,7 @@ class MetaSparkDFDataset(Dataset):
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
-                    (row["A_{0}".format(column_A)], row["B_{0}".format(column_B)])
+                    (row["A_{0}".format(target_col_A)], row["B_{0}".format(target_col_B)])
                     for row in unexpected_df.collect()
                 ]
 
@@ -360,14 +387,24 @@ class MetaSparkDFDataset(Dataset):
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
-            self,
-            column_list,
-            mostly=None,
-            ignore_row_if="all_values_are_missing",
-            result_format=None,
-            *args,
-            **kwargs
+                self,
+                column_list,
+                mostly=None,
+                ignore_row_if="all_values_are_missing",
+                result_format=None,
+                non_nested_column_list=[],
+                *args,
+                **kwargs
         ):
+            # Rename column so we only have to handle dot notation here
+            target_cols = []
+            for i, c in enumerate(column_list):
+                target_col = f"target_col_{i}"
+                target_cols.append(target_col)
+                if c in non_nested_column_list:
+                    self.spark_df = self.spark_df.withColumn(target_col, col(f"`{c}`"))
+                else:
+                    self.spark_df = self.spark_df.withColumn(target_col, col(c))
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
@@ -381,7 +418,7 @@ class MetaSparkDFDataset(Dataset):
             else:
                 unexpected_count_limit = result_format["partial_unexpected_count"]
 
-            temp_df = self.spark_df.select(*column_list)  # pyspark.sql.DataFrame
+            temp_df = self.spark_df.select(*target_cols)  # pyspark.sql.DataFrame
 
             # a couple of tests indicate that caching here helps performance
             temp_df.cache()
@@ -390,24 +427,24 @@ class MetaSparkDFDataset(Dataset):
             if ignore_row_if == "all_values_are_missing":
                 boolean_mapped_skip_values = temp_df.select(
                     [
-                        *column_list,
+                        *target_cols,
                         reduce(
-                            lambda a, b: a & b, [col(c).isNull() for c in column_list]
+                            lambda a, b: a & b, [col(c).isNull() for c in target_cols]
                         ).alias("__null_val"),
                     ]
                 )
             elif ignore_row_if == "any_value_is_missing":
                 boolean_mapped_skip_values = temp_df.select(
                     [
-                        *column_list,
+                        *target_cols,
                         reduce(
-                            lambda a, b: a | b, [col(c).isNull() for c in column_list]
+                            lambda a, b: a | b, [col(c).isNull() for c in target_cols]
                         ).alias("__null_val"),
                     ]
                 )
             elif ignore_row_if == "never":
                 boolean_mapped_skip_values = temp_df.select(
-                    [*column_list, lit(False).alias("__null_val")]
+                    [*target_cols, lit(False).alias("__null_val")]
                 )
             else:
                 raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
@@ -415,7 +452,7 @@ class MetaSparkDFDataset(Dataset):
             nonnull_df = boolean_mapped_skip_values.filter("__null_val = False")
             nonnull_count = nonnull_df.count()
 
-            cols_df = nonnull_df.select(*column_list)
+            cols_df = nonnull_df.select(*target_cols)
 
             success_df = func(self, cols_df, *args, **kwargs)
             success_count = success_df.filter("__success = True").count()
@@ -430,7 +467,7 @@ class MetaSparkDFDataset(Dataset):
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
-                    OrderedDict((c, row[c]) for c in column_list)
+                    OrderedDict((c, row[c]) for c in target_cols)
                     for row in unexpected_df.collect()
                 ]
 
@@ -648,9 +685,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             raise ValueError("collate parameter is not supported in SparkDFDataset")
         value_counts = (
             self.spark_df.select(column)
-            .where(col(column).isNotNull())
-            .groupBy(column)
-            .count()
+                .where(col(column).isNotNull())
+                .groupBy(column)
+                .count()
         )
         if sort == "value":
             value_counts = value_counts.orderBy(column)
@@ -981,6 +1018,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         include_config=True,
         catch_exceptions=None,
         meta=None,
+        non_nested=False,
     ):
         return column.withColumn(
             "__success", count(lit(1)).over(Window.partitionBy(column[0])) <= 1
@@ -1105,14 +1143,22 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         include_config=True,
         catch_exceptions=None,
         meta=None,
+        non_nested=False
     ):
+        # Rename column so we only have to handle dot notation here
+        target_col = "__target_col"
+        if non_nested:
+            self.spark_df = self.spark_df.withColumn(target_col, col(f"`{column}`"))
+        else:
+            self.spark_df = self.spark_df.withColumn(target_col, col(column))
         if mostly is not None:
             raise ValueError(
                 "SparkDFDataset does not support column map semantics for column types"
             )
 
         try:
-            col_data = [f for f in self.spark_df.schema.fields if f.name == column][0]
+            col_df = self.spark_df.select(target_col)
+            col_data = [f for f in col_df.schema.fields if f.name == target_col][0]
             col_type = type(col_data.dataType)
         except IndexError:
             raise ValueError("Unrecognized column: %s" % column)
@@ -1142,6 +1188,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         include_config=True,
         catch_exceptions=None,
         meta=None,
+        non_nested=False,
     ):
         if mostly is not None:
             raise ValueError(
@@ -1149,7 +1196,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             )
 
         try:
-            col_data = [f for f in self.spark_df.schema.fields if f.name == column][0]
+            col_data = self.spark_df.select(column)
             col_type = type(col_data.dataType)
         except IndexError:
             raise ValueError("Unrecognized column: %s" % column)
@@ -1175,43 +1222,43 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
     def expect_column_values_to_match_regex(
-        self,
-        column,
-        regex,
-        mostly=None,
-        result_format=None,
-        include_config=True,
-        catch_exceptions=None,
-        meta=None,
+            self,
+            column,
+            regex,
+            mostly=None,
+            result_format=None,
+            include_config=True,
+            catch_exceptions=None,
+            meta=None,
     ):
         return column.withColumn("__success", column[0].rlike(regex))
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
     def expect_column_values_to_not_match_regex(
-        self,
-        column,
-        regex,
-        mostly=None,
-        result_format=None,
-        include_config=True,
-        catch_exceptions=None,
-        meta=None,
+            self,
+            column,
+            regex,
+            mostly=None,
+            result_format=None,
+            include_config=True,
+            catch_exceptions=None,
+            meta=None,
     ):
         return column.withColumn("__success", ~column[0].rlike(regex))
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
     def expect_column_values_to_match_regex_list(
-        self,
-        column,
-        regex_list,
-        match_on="any",
-        mostly=None,
-        result_format=None,
-        include_config=True,
-        catch_exceptions=None,
-        meta=None,
+            self,
+            column,
+            regex_list,
+            match_on="any",
+            mostly=None,
+            result_format=None,
+            include_config=True,
+            catch_exceptions=None,
+            meta=None,
     ):
         if match_on == "any":
             return column.withColumn("__success", column[0].rlike("|".join(regex_list)))
@@ -1226,14 +1273,16 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
     def expect_column_pair_values_to_be_equal(
-        self,
-        column_A,
-        column_B,
-        ignore_row_if="both_values_are_missing",
-        result_format=None,
-        include_config=True,
-        catch_exceptions=None,
-        meta=None,
+            self,
+            column_A,
+            column_B,
+            ignore_row_if="both_values_are_missing",
+            result_format=None,
+            include_config=True,
+            catch_exceptions=None,
+            meta=None,
+            non_nested_A=False,
+            non_nested_B=False,
     ):
         column_A_name = column_A.schema.names[1]
         column_B_name = column_B.schema.names[1]
@@ -1248,17 +1297,17 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
     def expect_column_pair_values_A_to_be_greater_than_B(
-        self,
-        column_A,
-        column_B,
-        or_equal=None,
-        parse_strings_as_datetimes=None,
-        allow_cross_type_comparisons=None,
-        ignore_row_if="both_values_are_missing",
-        result_format=None,
-        include_config=True,
-        catch_exceptions=None,
-        meta=None,
+            self,
+            column_A,
+            column_B,
+            or_equal=None,
+            parse_strings_as_datetimes=None,
+            allow_cross_type_comparisons=None,
+            ignore_row_if="both_values_are_missing",
+            result_format=None,
+            include_config=True,
+            catch_exceptions=None,
+            meta=None,
     ):
         # FIXME
         if allow_cross_type_comparisons:
@@ -1301,14 +1350,16 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     @DocInherit
     @MetaSparkDFDataset.multicolumn_map_expectation
     def expect_multicolumn_values_to_be_unique(
-        self,
-        column_list,  # pyspark.sql.DataFrame
-        ignore_row_if="all_values_are_missing",
-        result_format=None,
-        include_config=True,
-        catch_exceptions=None,
-        meta=None,
+            self,
+            column_list,  # pyspark.sql.DataFrame
+            ignore_row_if="all_values_are_missing",
+            result_format=None,
+            include_config=True,
+            catch_exceptions=None,
+            meta=None,
+            non_nested_column_list=[],
     ):
+        # Might want to throw an exception if only 1 column is passed
         column_names = column_list.schema.names[:]
         conditions = []
         for i in range(0, len(column_names) - 1):
