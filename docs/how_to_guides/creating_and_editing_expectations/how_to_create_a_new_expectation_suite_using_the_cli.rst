@@ -12,12 +12,18 @@ Run this command in the root directory of your project (where the init command c
     great_expectations suite new
 
 
-This command prompts you to name your new Expectation Suite and to select a sample batch of data the suite will describe.
-Then it uses a sample of the selected data to add some initial expectations to the suite.
-The purpose of these is expectations is to provide examples of data assertions, and not to be meaningful.
-They are intended only a starting point for you to build upon.
+This command prompts you to name your new Expectation Suite and to select a sample batch of data the suite will eventually describe.
+Then an empty suite is created and added to your project.
+Then it creates a jupyter notebook for you to start creating your new suite.
+The command concludes by opening the newly generated jupyter notebook.
 
-The command concludes by saving the newly generated Expectation Suite as a JSON file and rendering the expectation suite into an HTML page in Data Docs.
+If you wish to skip the automated opening of jupyter notebook, add the `--no-jupyter` flag:
+
+
+.. code-block:: bash
+
+    great_expectations suite new --no-jupyter
+
 
 .. discourse::
     :topic_identifier: 240
