@@ -44,6 +44,22 @@
         "ts": "TIMESTAMP",
         "alpha": "TEXT",
         "numeric": "INTEGER"
+      },
+      "mysql": {
+        "x": "INTEGER",
+        "y": "TEXT",
+        "z": "INTEGER",
+        "ts": "TIMESTAMP",
+        "alpha": "TEXT",
+        "numeric": "INTEGER"
+      },
+      "mssql": {
+        "x": "INTEGER",
+        "y": "VARCHAR",
+        "z": "INTEGER",
+        "ts": "DATETIME",
+        "alpha": "VARCHAR",
+        "numeric": "INTEGER"
       }
     },
     "tests": [

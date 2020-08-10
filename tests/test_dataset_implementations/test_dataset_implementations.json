@@ -15,6 +15,20 @@
                   "z": "IntegerType",
                   "n": "IntegerType",
                   "b": "BooleanType"
+                },
+                "mysql": {
+                  "x": "DOUBLE",
+                  "y": "INTEGER",
+                  "z": "INTEGER",
+                  "n": "INTEGER",
+                  "b": "TINYINT"
+                },
+                "mssql": {
+                    "x": "FLOAT",
+                    "y": "INTEGER",
+                    "z": "INTEGER",
+                    "n": "INTEGER",
+                    "b": "BIT"
                 }
             }
         },
@@ -31,6 +45,18 @@
                   "b": "StringType",
                   "c": "StringType",
                   "d": "StringType"
+                },
+                "mysql": {
+                    "a": "INTEGER",
+                    "b": "VARCHAR",
+                    "c": "VARCHAR",
+                    "d": "VARCHAR"
+                },
+                "mssql": {
+                    "a": "INTEGER",
+                    "b": "VARCHAR",
+                    "c": "VARCHAR",
+                    "d": "VARCHAR"
                 }
             }
         },
@@ -45,6 +71,16 @@
                     "a": "IntegerType",
                     "b": "StringType",
                     "c": "IntegerType"
+                },
+                "mysql": {
+                    "a": "INTEGER",
+                    "b": "VARCHAR",
+                    "c": "INTEGER"
+                },
+                "mssql": {
+                    "a": "INTEGER",
+                    "b": "VARCHAR",
+                    "c": "INTEGER"
                 }
             }
         }
@@ -465,7 +501,7 @@
             "kwargs": {
                 "column": "a"
             },
-            "expected": [ 1.0, 1.9, 2.8, 3.7, 4.6, 5.5, 6.4, 7.3, 8.2, 9.1, 10.0],
+            "expected": [1.0, 1.9, 2.8, 3.7, 4.6, 5.5, 6.4, 7.3, 8.2, 9.1, 10.0],
             "suppress_test_for": ["sqlite"],
             "tolerance": 0.0001,
             "_note": "we use the default arguments here"

@@ -87,7 +87,17 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
     )
 
 
-def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs, usage_event):
+def _suite_edit(
+    suite,
+    datasource,
+    directory,
+    jupyter,
+    batch_kwargs,
+    usage_event,
+    suppress_usage_message=False,
+):
+    # actually_send_usage_message flag is for the situation where _suite_edit is called by _suite_new().
+    # when called by _suite_new(), the flag will be set to False, otherwise it will default to True
     batch_kwargs_json = batch_kwargs
     batch_kwargs = None
     context = toolkit.load_data_context_with_error_handling(directory)
@@ -108,17 +118,19 @@ def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs, usage_event
                         je
                     )
                 )
-                send_usage_message(
-                    data_context=context, event=usage_event, success=False
-                )
+                if not suppress_usage_message:
+                    send_usage_message(
+                        data_context=context, event=usage_event, success=False
+                    )
                 sys.exit(1)
             except ge_exceptions.DataContextError:
                 cli_message(
                     "<red>Please check that your batch_kwargs are able to load a batch.</red>"
                 )
-                send_usage_message(
-                    data_context=context, event=usage_event, success=False
-                )
+                if not suppress_usage_message:
+                    send_usage_message(
+                        data_context=context, event=usage_event, success=False
+                    )
                 sys.exit(1)
             except ValueError as ve:
                 cli_message(
@@ -126,9 +138,10 @@ def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs, usage_event
                         ve
                     )
                 )
-                send_usage_message(
-                    data_context=context, event=usage_event, success=False
-                )
+                if not suppress_usage_message:
+                    send_usage_message(
+                        data_context=context, event=usage_event, success=False
+                    )
                 sys.exit(1)
         elif citations:
             citation = citations[-1]
@@ -154,9 +167,10 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
             if not data_source:
                 cli_message("<red>No datasources found in the context.</red>")
-                send_usage_message(
-                    data_context=context, event=usage_event, success=False
-                )
+                if not suppress_usage_message:
+                    send_usage_message(
+                        data_context=context, event=usage_event, success=False
+                    )
                 sys.exit(1)
 
             if batch_kwargs is None:
@@ -175,7 +189,9 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
         notebook_name = "edit_{}.ipynb".format(suite.expectation_suite_name)
         notebook_path = _get_notebook_path(context, notebook_name)
-        SuiteEditNotebookRenderer().render_to_disk(suite, notebook_path, batch_kwargs)
+        SuiteEditNotebookRenderer.from_data_context(context).render_to_disk(
+            suite, notebook_path, batch_kwargs
+        )
 
         if not jupyter:
             cli_message(
@@ -186,9 +202,13 @@ A batch of data is required to edit the suite - let's help you to specify it."""
             data_context=context, expectation_suite_name=suite.expectation_suite_name
         )
 
-        send_usage_message(
-            data_context=context, event=usage_event, event_payload=payload, success=True
-        )
+        if not suppress_usage_message:
+            send_usage_message(
+                data_context=context,
+                event=usage_event,
+                event_payload=payload,
+                success=True,
+            )
 
         if jupyter:
             toolkit.launch_jupyter_notebook(notebook_path)
@@ -324,15 +344,17 @@ def _suite_new(
                         """<green>Because you requested an empty suite, we'll open a notebook for you now to edit it!
 If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
                     )
+            send_usage_message(data_context=context, event=usage_event, success=True)
+
             _suite_edit(
                 suite_name,
                 datasource_name,
                 directory,
                 jupyter=jupyter,
                 batch_kwargs=batch_kwargs,
-                usage_event=usage_event,
+                usage_event="cli.suite.edit",  # or else we will be sending `cli.suite.new` which is incorrect
+                suppress_usage_message=True,  # dont want actually send usage_message since the function call is not the result of actual usage
             )
-            send_usage_message(data_context=context, event=usage_event, success=True)
         else:
             send_usage_message(data_context=context, event=usage_event, success=False)
     except (
@@ -428,14 +450,14 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
     renderer = SuiteScaffoldNotebookRenderer(context, _suite, batch_kwargs)
     renderer.render_to_disk(notebook_path)
 
+    send_usage_message(data_context=context, event=usage_event, success=True)
+
     if jupyter:
         toolkit.launch_jupyter_notebook(notebook_path)
     else:
         cli_message(
             f"To continue scaffolding this suite, run `jupyter notebook {notebook_path}`"
         )
-
-    send_usage_message(data_context=context, event=usage_event, success=True)
 
 
 @suite.command(name="list")

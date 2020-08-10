@@ -137,6 +137,9 @@
       "schemas": {
         "postgresql": {
           "empty_column": "TEXT"
+        },
+        "mssql": {
+          "empty_column": "VARCHAR"
         }
       },
       "tests": [{
@@ -157,19 +160,26 @@
       "dates" : ["2018-01-01", "2018-01-02", "2018-01-02 00:34:01"]
     },
     "schemas": {
+      "pandas": {
+        "dates": "datetime64"
+      },
       "sqlite": {
         "dates": "DATETIME"
       },
       "postgresql": {
         "dates": "TIMESTAMP"
       },
-      "pandas": {
-        "dates": "datetime64"
+      "mysql": {
+        "dates": "TIMESTAMP"
+      },
+      "mssql": {
+        "dates": "DATETIME"
       }
     },
     "tests" : [
       {
         "title": "Basic positive test case, datetime set",
+        "suppress_test_for": ["sqlite"],
         "exact_match_out": false,
         "in": {
           "column": "dates",
@@ -178,11 +188,11 @@
         },
         "out": {
           "success": true
-        },
-        "suppress_test_for": ["sqlite"]
+        }
     },
     {
       "title": "Basic negative test case, datetime set",
+      "suppress_test_for": ["sqlite"],
       "exact_match_out": false,
       "in": {
         "column": "dates",
@@ -193,8 +203,7 @@
         "success": false,
         "unexpected_index_list": [0],
         "unexpected_list": ["2018-01-01T00:00:00"]
-      },
-      "suppress_test_for": ["sqlite"]
+      }
     }]
   }]
 }

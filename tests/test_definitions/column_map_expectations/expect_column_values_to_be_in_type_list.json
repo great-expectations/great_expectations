@@ -81,9 +81,18 @@
           "y": "FLOAT",
           "z": "TEXT",
           "n": "TEXT",
-          "b": "BOOLEAN",
+          "b": "TINYINT",
           "s": "TEXT",
           "s1": "TEXT"
+        },
+        "mssql": {
+          "x": "INTEGER",
+          "y": "FLOAT",
+          "z": "TEXT",
+          "n": "VARCHAR",
+          "b": "BIT",
+          "s": "VARCHAR",
+          "s1": "VARCHAR"
         }
       },
       "tests": [
@@ -313,6 +322,39 @@
           },
           "only_for": [
             "sqlalchemy"
+          ],
+          "suppress_test_for": ["mysql", "mssql"]
+        },
+        {
+          "title": "positive_test_boolean_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "b",
+            "type_list": [
+              "BIT"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "mssql"
+          ]
+        },
+        {
+          "title": "positive_test_boolean_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "b",
+            "type_list": [
+              "TINYINT"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "mysql"
           ]
         },
         {

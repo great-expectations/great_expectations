@@ -3,4 +3,5 @@ from .view import (
     DefaultJinjaIndexPageView,
     DefaultJinjaPageView,
     DefaultJinjaSectionView,
+    DefaultMarkdownPageView,
 )

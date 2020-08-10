@@ -4,11 +4,48 @@
 Changelog
 #########
 
-
 Develop
 -----------------
-* [ENHANCEMENT] Fixed some typos/grammar and a broken link in the suite_scaffold_notebook_renderer
+* [BREAKING] This release includes a breaking change that *only* affects users who directly call `add_expectation`, `remove_expectation`, or `find_expectations`. (Most users do not use these APIs but add Expectations by stating them directly on Datasets). Those methods have been updated to take an ExpectationConfiguration object and `match_type` object. The change provides more flexibility in determining which expectations should be modified and allows us provide substantially improved support for two major features that we have frequently heard requested: conditional Expectations and more flexible multi-column custom expectations. See :ref:`expectation_suite_operations`_ and :ref:`migrating_versions`_ for more information.
+* [FEATURE] Expectations now define “domain,” “success,” and “runtime” kwargs to allow them to determine expectation equivalence for updating expectations. Fixes column pair expectation update logic.
+* [ENHANCEMENT] Include datetime and bool column types in descriptive documentation results
+* [ENHANCEMENT] Improve data docs page breadcrumbs to have clearer run information
+* [ENHANCEMENT] Data Docs Validation Results only shows unexpected value counts if all unexpected values are available
+* [BUGFIX] Add guard for checking Redshift Dialect in match_like_pattern expectation
+* [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
+* [DOCS] Add information about issue tags to contributing docs
 * [FEATURE] Add new exception: expect_sum_of_columns_to_be_equal (pandas)
+
+0.11.9
+-----------------
+* [FEATURE] New Dataset Support: Microsoft SQL Server
+* [FEATURE] Render expectation validation results to markdown
+* [FEATURE] Add --assume-yes/--yes/-y option to cli docs build command (thanks @feluelle)
+* [FEATURE] Add SSO and SSH key pair authentication for Snowflake (thanks @dmateusp)
+* [FEATURE] Add pattern-matching expectations that use the Standard SQL "LIKE" operator: "expect_column_values_to_match_like_pattern", "expect_column_values_to_not_match_like_pattern", "expect_column_values_to_match_like_pattern_list", and "expect_column_values_to_not_match_like_pattern_list"
+* [ENHANCEMENT] Make Data Docs rendering of profiling results more flexible by deprecating the reliance on validation results having the specific run_name of "profiling"
+* [ENHANCEMENT] Use green checkmark in Slack msgs instead of tada
+* [ENHANCEMENT] log class instantiation errors for better debugging
+* [BUGFIX] usage_statistics decorator now handles 'dry_run' flag
+* [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) (thanks @Dandandan)
+* [BUGFIX] Handle case when unexpected_count list element is str
+* [DOCS] Deploying Data Docs
+* [DOCS] New how-to guide: How to instantiate a Data Context on an EMR Spark cluster
+* [DOCS] Managed Spark DF Documentation #1729 (thanks @mgorsk1)
+* [DOCS] Typos and clarifications (thanks @dechoma @sbrugman @rexboyce)
+
+0.11.8
+-----------------
+* [FEATURE] Customizable "Suite Edit" generated notebooks
+* [ENHANCEMENT] Add support and docs for loading evaluation parameter from SQL database
+* [ENHANCEMENT] Fixed some typos/grammar and a broken link in the suite_scaffold_notebook_renderer
+* [ENHANCEMENT] allow updates to DatabaseStoreBackend keys by default, requiring `allow_update=False` to disallow
+* [ENHANCEMENT] Improve support for prefixes declared in TupleS3StoreBackend that include reserved characters
+* [BUGFIX] Fix issue where allow_updates was set for StoreBackend that did not support it
+* [BUGFIX] Fix issue where GlobReaderBatchKwargsGenerator failed with relative base_directory
+* [BUGFIX] Adding explicit requirement for "importlib-metadata" (needed for Python versions prior to Python 3.8).
+* [MAINTENANCE] Install GitHub Dependabot
+* [BUGFIX] Fix missing importlib for python 3.8 #1651
 
 0.11.7
 -----------------

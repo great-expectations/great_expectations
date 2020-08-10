@@ -360,7 +360,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def __init__(
         self,
         bucket,
-        prefix="",
+        prefix=None,
         filepath_template=None,
         filepath_prefix=None,
         filepath_suffix=None,
@@ -377,19 +377,38 @@ class TupleS3StoreBackend(TupleStoreBackend):
             fixed_length_key=fixed_length_key,
         )
         self.bucket = bucket
+        if prefix:
+            if self.platform_specific_separator:
+                prefix = prefix.strip(os.sep)
+
+            # we *always* strip "/" from the prefix based on the norms of s3
+            # whether the rest of the key is built with platform-specific separators or not
+            prefix = prefix.strip("/")
         self.prefix = prefix
 
-    def _get(self, key):
+    def _build_s3_object_key(self, key):
         if self.platform_specific_separator:
-            s3_object_key = os.path.join(
-                self.prefix, self._convert_key_to_filepath(key)
-            )
+            if self.prefix:
+                s3_object_key = os.path.join(
+                    self.prefix, self._convert_key_to_filepath(key)
+                )
+            else:
+                s3_object_key = self._convert_key_to_filepath(key)
         else:
-            s3_object_key = "/".join((self.prefix, self._convert_key_to_filepath(key)))
+            if self.prefix:
+                s3_object_key = "/".join(
+                    (self.prefix, self._convert_key_to_filepath(key))
+                )
+            else:
+                s3_object_key = self._convert_key_to_filepath(key)
+        return s3_object_key
 
+    def _get(self, key):
         import boto3
 
         s3 = boto3.client("s3")
+
+        s3_object_key = self._build_s3_object_key(key)
 
         try:
             s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
@@ -407,25 +426,26 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def _set(
         self, key, value, content_encoding="utf-8", content_type="application/json"
     ):
-        if self.platform_specific_separator:
-            s3_object_key = os.path.join(
-                self.prefix, self._convert_key_to_filepath(key)
-            )
-        else:
-            s3_object_key = "/".join((self.prefix, self._convert_key_to_filepath(key)))
-
         import boto3
 
         s3 = boto3.resource("s3")
-        result_s3 = s3.Object(self.bucket, s3_object_key)
-        if isinstance(value, str):
-            result_s3.put(
-                Body=value.encode(content_encoding),
-                ContentEncoding=content_encoding,
-                ContentType=content_type,
-            )
-        else:
-            result_s3.put(Body=value, ContentType=content_type)
+
+        s3_object_key = self._build_s3_object_key(key)
+
+        try:
+            result_s3 = s3.Object(self.bucket, s3_object_key)
+            if isinstance(value, str):
+                result_s3.put(
+                    Body=value.encode(content_encoding),
+                    ContentEncoding=content_encoding,
+                    ContentType=content_type,
+                )
+            else:
+                result_s3.put(Body=value, ContentType=content_type)
+        except s3.exceptions.ClientError as e:
+            logger.debug(str(e))
+            raise StoreBackendError("Unable to set object in s3.")
+
         return s3_object_key
 
     def _move(self, source_key, dest_key, **kwargs):
@@ -453,7 +473,11 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         s3 = boto3.client("s3")
 
-        s3_objects = s3.list_objects(Bucket=self.bucket, Prefix=self.prefix)
+        if self.prefix:
+            s3_objects = s3.list_objects_v2(Bucket=self.bucket, Prefix=self.prefix)
+        else:
+            s3_objects = s3.list_objects_v2(Bucket=self.bucket)
+
         if "Contents" in s3_objects:
             objects = s3_objects["Contents"]
         elif "CommonPrefixes" in s3_objects:
@@ -469,8 +493,13 @@ class TupleS3StoreBackend(TupleStoreBackend):
             s3_object_key = s3_object_info["Key"]
             if self.platform_specific_separator:
                 s3_object_key = os.path.relpath(s3_object_key, self.prefix)
-            elif s3_object_key.startswith(self.prefix + "/"):
-                s3_object_key = s3_object_key[len(self.prefix) + 1 :]
+            else:
+                if self.prefix is None:
+                    if s3_object_key.startswith("/"):
+                        s3_object_key = s3_object_key[1:]
+                else:
+                    if s3_object_key.startswith(self.prefix + "/"):
+                        s3_object_key = s3_object_key[len(self.prefix) + 1 :]
             if self.filepath_prefix and not s3_object_key.startswith(
                 self.filepath_prefix
             ):
@@ -505,11 +534,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
         from botocore.exceptions import ClientError
 
         s3 = boto3.resource("s3")
-        s3_key = self._convert_key_to_filepath(key)
-        if s3_key:
+        s3_object_key = self._build_s3_object_key(key)
+        s3.Object(self.bucket, s3_object_key).delete()
+        if s3_object_key:
             try:
-                # s3.Object(boto3.client('s3').get_bucket_location(Bucket=self.bucket), s3_key).delete()
-                objects_to_delete = s3.meta.client.list_objects(
+                #
+                objects_to_delete = s3.meta.client.list_objects_v2(
                     Bucket=self.bucket, Prefix=self.prefix
                 )
 
