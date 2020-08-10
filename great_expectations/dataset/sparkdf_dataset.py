@@ -72,7 +72,13 @@ class MetaSparkDFDataset(Dataset):
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
-                self, column, mostly=None, result_format=None, non_nested=False, *args, **kwargs
+            self,
+            column,
+            mostly=None,
+            result_format=None,
+            non_nested=False,
+            *args,
+            **kwargs,
         ):
             """
             This whole decorator is pending a re-write. Currently there is are huge performance issues
@@ -219,24 +225,24 @@ class MetaSparkDFDataset(Dataset):
             non_nested_A=False,
             non_nested_B=False,
             *args,
-            **kwargs
+            **kwargs,
         ):
             # Rename column so we only have to handle dot notation here
             target_col_A = "__target_col_A"
             target_col_B = "__target_col_B"
 
             if non_nested_A:
-                self.spark_df = self.spark_df \
-                    .withColumn(target_col_A, col(f"`{column_A}`"))
+                self.spark_df = self.spark_df.withColumn(
+                    target_col_A, col(f"`{column_A}`")
+                )
             if non_nested_B:
-                self.spark_df = self.spark_df \
-                    .withColumn(target_col_B, col(f"`{column_B}`"))
+                self.spark_df = self.spark_df.withColumn(
+                    target_col_B, col(f"`{column_B}`")
+                )
             if not non_nested_A:
-                self.spark_df = self.spark_df \
-                    .withColumn(target_col_A, col(column_A))
+                self.spark_df = self.spark_df.withColumn(target_col_A, col(column_A))
             if not non_nested_B:
-                self.spark_df = self.spark_df \
-                    .withColumn(target_col_B, col(column_B))
+                self.spark_df = self.spark_df.withColumn(target_col_B, col(column_B))
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -311,7 +317,10 @@ class MetaSparkDFDataset(Dataset):
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
-                    (row["A_{0}".format(target_col_A)], row["B_{0}".format(target_col_B)])
+                    (
+                        row["A_{0}".format(target_col_A)],
+                        row["B_{0}".format(target_col_B)],
+                    )
                     for row in unexpected_df.collect()
                 ]
 
@@ -394,7 +403,7 @@ class MetaSparkDFDataset(Dataset):
             result_format=None,
             non_nested_column_list=[],
             *args,
-            **kwargs
+            **kwargs,
         ):
             # Rename column so we only have to handle dot notation here
             target_cols = []
@@ -685,9 +694,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             raise ValueError("collate parameter is not supported in SparkDFDataset")
         value_counts = (
             self.spark_df.select(column)
-                .where(col(column).isNotNull())
-                .groupBy(column)
-                .count()
+            .where(col(column).isNotNull())
+            .groupBy(column)
+            .count()
         )
         if sort == "value":
             value_counts = value_counts.orderBy(column)
@@ -1143,7 +1152,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         include_config=True,
         catch_exceptions=None,
         meta=None,
-        non_nested=False
+        non_nested=False,
     ):
         # Rename column so we only have to handle dot notation here
         target_col = "__target_col"
