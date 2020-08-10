@@ -224,19 +224,20 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
     assert exc.value.missing_config_variable == "arg1"
 
 
-def test_substitute_env_var_in_config_variable_file(monkeypatch, empty_data_context_with_config_variables):
+def test_substitute_env_var_in_config_variable_file(
+    monkeypatch, empty_data_context_with_config_variables
+):
     monkeypatch.setenv("FOO", "correct_val_of_replace_me")
     context = empty_data_context_with_config_variables
     context_config = context.get_config_with_variables_substituted()
     assert (
-        context_config["datasources"]["mydatasource"]["batch_kwargs_generators"]["mygenerator"][
-            "reader_options"
-        ]["test_variable_sub3"]
+        context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
+            "mygenerator"
+        ]["reader_options"]["test_variable_sub3"]
         == "correct_val_of_replace_me"
     )
-    assert (
-            context_config["datasources"]["mydatasource"]["batch_kwargs_generators"]["mygenerator"][
-                "reader_options"
-            ]["test_variable_sub4"]
-            == {'inner_env_sub': 'correct_val_of_replace_me'}
-    )
+    assert context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
+        "mygenerator"
+    ]["reader_options"]["test_variable_sub4"] == {
+        "inner_env_sub": "correct_val_of_replace_me"
+    }
