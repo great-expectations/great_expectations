@@ -702,8 +702,12 @@ class BaseDataContext(object):
         if not config:
             config = self._project_config
 
+        substituted_config_variables = substitute_all_config_variables(
+            dict(self._load_config_variables_file()), dict(os.environ)
+        )
+
         substitutions = {
-            **dict(self._load_config_variables_file()),
+            **substituted_config_variables,
             **dict(os.environ),
             **self.runtime_environment,
         }
