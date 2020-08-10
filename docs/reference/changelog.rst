@@ -14,6 +14,7 @@ Develop
 * [BUGFIX] Add guard for checking Redshift Dialect in match_like_pattern expectation
 * [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 * [DOCS] Add information about issue tags to contributing docs
+* [DEPRECATION] Deprecate demo suite behavior in `suite new`
 
 0.11.9
 -----------------
