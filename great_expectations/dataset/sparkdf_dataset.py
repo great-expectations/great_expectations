@@ -36,7 +36,6 @@ try:
         isnan,
         datediff,
         lag,
-
     )
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
@@ -1342,35 +1341,50 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         # string column name
         column_name = column.schema.names[0]
         # check if column is any type that could have na (numeric types)
-        na_types = [isinstance(column.schema[column_name].dataType,typ) for typ in [sparktypes.LongType,sparktypes.DoubleType,sparktypes.IntegerType]]
+        na_types = [
+            isinstance(column.schema[column_name].dataType, typ)
+            for typ in [
+                sparktypes.LongType,
+                sparktypes.DoubleType,
+                sparktypes.IntegerType,
+            ]
+        ]
 
         # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
         if any(na_types):
             column = column.filter(~isnan(column[0]))
-        
+
         if parse_strings_as_datetimes:
             # convert column to timestamp format
             column = self._apply_dateutil_parse(column)
-             # create constant column to order by in window function to preserve order of original df
-            column = column.withColumn('constant',lit('constant'))\
-                .withColumn('lag',lag(column[0]).over(Window.orderBy(col('constant'))))
+            # create constant column to order by in window function to preserve order of original df
+            column = column.withColumn("constant", lit("constant")).withColumn(
+                "lag", lag(column[0]).over(Window.orderBy(col("constant")))
+            )
 
-            column = column.withColumn('diff',datediff(col(column_name),col('lag')))
+            column = column.withColumn("diff", datediff(col(column_name), col("lag")))
 
         else:
-            column = column.withColumn('constant',lit('constant'))\
-                .withColumn('lag',lag(column[0]).over(Window.orderBy(col('constant'))))\
-                .withColumn('diff',column[0]-col('lag'))
+            column = (
+                column.withColumn("constant", lit("constant"))
+                .withColumn("lag", lag(column[0]).over(Window.orderBy(col("constant"))))
+                .withColumn("diff", column[0] - col("lag"))
+            )
 
         # replace lag first row null with 1 so that it is not flagged as fail
-        column = column.withColumn('diff',when(col('diff').isNull(),1).otherwise(col('diff')))
-        
+        column = column.withColumn(
+            "diff", when(col("diff").isNull(), 1).otherwise(col("diff"))
+        )
+
         if strictly:
-            return column.withColumn('__success',when(col('diff')>=1,lit(True)).otherwise(lit(False)))
+            return column.withColumn(
+                "__success", when(col("diff") >= 1, lit(True)).otherwise(lit(False))
+            )
 
         else:
-            return column.withColumn('__success',when(col('diff')>=0,lit(True)).otherwise(lit(False)))
-
+            return column.withColumn(
+                "__success", when(col("diff") >= 0, lit(True)).otherwise(lit(False))
+            )
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
@@ -1389,31 +1403,47 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         # string column name
         column_name = column.schema.names[0]
         # check if column is any type that could have na (numeric types)
-        na_types = [isinstance(column.schema[column_name].dataType,typ) for typ in [sparktypes.LongType,sparktypes.DoubleType,sparktypes.IntegerType]]
+        na_types = [
+            isinstance(column.schema[column_name].dataType, typ)
+            for typ in [
+                sparktypes.LongType,
+                sparktypes.DoubleType,
+                sparktypes.IntegerType,
+            ]
+        ]
 
         # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
         if any(na_types):
             column = column.filter(~isnan(column[0]))
-        
+
         if parse_strings_as_datetimes:
             # convert column to timestamp format
             column = self._apply_dateutil_parse(column)
-             # create constant column to order by in window function to preserve order of original df
-            column = column.withColumn('constant',lit('constant'))\
-                .withColumn('lag',lag(column[0]).over(Window.orderBy(col('constant'))))
+            # create constant column to order by in window function to preserve order of original df
+            column = column.withColumn("constant", lit("constant")).withColumn(
+                "lag", lag(column[0]).over(Window.orderBy(col("constant")))
+            )
 
-            column = column.withColumn('diff',datediff(col(column_name),col('lag')))
+            column = column.withColumn("diff", datediff(col(column_name), col("lag")))
 
         else:
-            column = column.withColumn('constant',lit('constant'))\
-                .withColumn('lag',lag(column[0]).over(Window.orderBy(col('constant'))))\
-                .withColumn('diff',column[0]-col('lag'))
+            column = (
+                column.withColumn("constant", lit("constant"))
+                .withColumn("lag", lag(column[0]).over(Window.orderBy(col("constant"))))
+                .withColumn("diff", column[0] - col("lag"))
+            )
 
         # replace lag first row null with -1 so that it is not flagged as fail
-        column = column.withColumn('diff',when(col('diff').isNull(),-1).otherwise(col('diff')))
-        
+        column = column.withColumn(
+            "diff", when(col("diff").isNull(), -1).otherwise(col("diff"))
+        )
+
         if strictly:
-            return column.withColumn('__success',when(col('diff')<=-1,lit(True)).otherwise(lit(False)))
+            return column.withColumn(
+                "__success", when(col("diff") <= -1, lit(True)).otherwise(lit(False))
+            )
 
         else:
-            return column.withColumn('__success',when(col('diff')<=0,lit(True)).otherwise(lit(False)))
+            return column.withColumn(
+                "__success", when(col("diff") <= 0, lit(True)).otherwise(lit(False))
+            )
