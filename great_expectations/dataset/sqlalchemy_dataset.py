@@ -1870,12 +1870,19 @@ WHERE
             (
                 sa.dialects.sqlite.dialect,
                 sa.dialects.postgresql.dialect,
-                sqlalchemy_redshift.dialect.RedshiftDialect,
                 sa.dialects.mysql.dialect,
                 sa.dialects.mssql.dialect,
             ),
         ):
             dialect_supported = True
+
+        try:
+            if isinstance(
+                self.sql_engine_dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+            ):
+                dialect_supported = True
+        except (AttributeError, TypeError):
+            pass
 
         if dialect_supported:
             try:

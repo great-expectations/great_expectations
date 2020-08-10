@@ -4,8 +4,9 @@ import logging
 import warnings
 from collections import namedtuple
 from copy import deepcopy
+from typing import Any, List, Union
 
-from dateutil.parser import ParserError as DateUtilParserError
+import jsonpatch
 from dateutil.parser import parse
 from IPython import get_ipython
 from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
@@ -19,6 +20,7 @@ from great_expectations.core.id_dict import IDDict
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
+    DataContextError,
     InvalidCacheValueError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
@@ -319,7 +321,7 @@ class RunIdentifier(DataContextKey):
         if isinstance(run_time, str):
             try:
                 run_time = parse(run_time)
-            except (DateUtilParserError, TypeError):
+            except (ValueError, TypeError):
                 warnings.warn(
                     f'Unable to parse provided run_time str ("{run_time}") to datetime. Defaulting '
                     f"run_time to current time."
@@ -329,7 +331,7 @@ class RunIdentifier(DataContextKey):
         if not run_time:
             try:
                 run_time = parse(run_name)
-            except (DateUtilParserError, TypeError):
+            except (ValueError, TypeError):
                 run_time = None
 
         run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
@@ -389,64 +391,6 @@ class RunIdentifierSchema(Schema):
         return RunIdentifier(**data)
 
 
-class ExpectationKwargs(dict):
-    ignored_keys = ["result_format", "include_config", "catch_exceptions"]
-
-    """ExpectationKwargs store information necessary to evaluate an expectation."""
-
-    def __init__(self, *args, **kwargs):
-        include_config = kwargs.pop("include_config", None)
-        if include_config is not None and not isinstance(include_config, bool):
-            raise InvalidExpectationKwargsError(
-                "include_config must be a boolean value"
-            )
-
-        result_format = kwargs.get("result_format", None)
-        if result_format is None:
-            pass
-        elif result_format in RESULT_FORMATS:
-            pass
-        elif (
-            isinstance(result_format, dict)
-            and result_format.get("result_format", None) in RESULT_FORMATS
-        ):
-            pass
-        else:
-            raise InvalidExpectationKwargsError(
-                "result format must be one of the valid formats: %s"
-                % str(RESULT_FORMATS)
-            )
-
-        catch_exceptions = kwargs.pop("catch_exceptions", None)
-        if catch_exceptions is not None and not isinstance(catch_exceptions, bool):
-            raise InvalidExpectationKwargsError(
-                "catch_exceptions must be a boolean value"
-            )
-
-        super().__init__(*args, **kwargs)
-        ensure_json_serializable(self)
-
-    def isEquivalentTo(self, other):
-        try:
-            n_self_keys = len([k for k in self.keys() if k not in self.ignored_keys])
-            n_other_keys = len([k for k in other.keys() if k not in self.ignored_keys])
-            return n_self_keys == n_other_keys and all(
-                [self[k] == other[k] for k in self.keys() if k not in self.ignored_keys]
-            )
-        except KeyError:
-            return False
-
-    def __repr__(self):
-        return json.dumps(self.to_json_dict())
-
-    def __str__(self):
-        return json.dumps(self.to_json_dict(), indent=2)
-
-    def to_json_dict(self):
-        myself = convert_to_json_serializable(self)
-        return myself
-
-
 def _deduplicate_evaluation_parameter_dependencies(dependencies):
     deduplicated = dict()
     for suite_name, required_metrics in dependencies.items():
@@ -480,6 +424,721 @@ def _deduplicate_evaluation_parameter_dependencies(dependencies):
 class ExpectationConfiguration(DictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
+    kwarg_lookup_dict = {
+        "expect_column_to_exist": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["column_index"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "column_index": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_table_columns_to_match_ordered_list": {
+            "domain_kwargs": [],
+            "success_kwargs": ["column_list"],
+            "default_kwarg_values": {
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_table_column_count_to_be_between": {
+            "domain_kwargs": [],
+            "success_kwargs": ["min_value", "max_value"],
+            "default_kwarg_values": {
+                "min_value": None,
+                "max_value": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_table_column_count_to_equal": {
+            "domain_kwargs": [],
+            "success_kwargs": ["value"],
+            "default_kwarg_values": {
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_table_row_count_to_be_between": {
+            "domain_kwargs": [],
+            "success_kwargs": ["min_value", "max_value"],
+            "default_kwarg_values": {
+                "min_value": None,
+                "max_value": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_table_row_count_to_equal": {
+            "domain_kwargs": [],
+            "success_kwargs": ["value"],
+            "default_kwarg_values": {
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_be_unique": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_not_be_null": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_be_null": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_be_of_type": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["type_", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_be_in_type_list": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["type_list", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_be_in_set": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["value_set", "mostly", "parse_strings_as_datetimes"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "parse_strings_as_datetimes": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_not_be_in_set": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["value_set", "mostly", "parse_strings_as_datetimes"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "parse_strings_as_datetimes": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_be_between": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": [
+                "min_value",
+                "max_value",
+                "strict_min",
+                "strict_max",
+                "allow_cross_type_comparisons",
+                "parse_strings_as_datetimes",
+                "output_strftime_format",
+                "mostly",
+            ],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "allow_cross_type_comparisons": None,
+                "parse_strings_as_datetimes": None,
+                "output_strftime_format": None,
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_be_increasing": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["strictly", "parse_strings_as_datetimes", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "strictly": None,
+                "parse_strings_as_datetimes": None,
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_be_decreasing": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["strictly", "parse_strings_as_datetimes", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "strictly": None,
+                "parse_strings_as_datetimes": None,
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_value_lengths_to_be_between": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["min_value", "max_value", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_value_lengths_to_equal": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["value", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_match_regex": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["regex", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_not_match_regex": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["regex", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_match_regex_list": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["regex_list", "match_on", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "match_on": "any",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_not_match_regex_list": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["regex_list", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_match_strftime_format": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["strftime_format", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_be_dateutil_parseable": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_be_json_parseable": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_values_to_match_json_schema": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["json_schema", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["distribution", "p_value", "params"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "p_value": 0.05,
+                "params": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_distinct_values_to_be_in_set": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["value_set", "parse_strings_as_datetimes"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "parse_strings_as_datetimes": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_distinct_values_to_equal_set": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["value_set", "parse_strings_as_datetimes"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "parse_strings_as_datetimes": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_distinct_values_to_contain_set": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["value_set", "parse_strings_as_datetimes"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "parse_strings_as_datetimes": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_mean_to_be_between": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_median_to_be_between": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_quantile_values_to_be_between": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["quantile_ranges", "allow_relative_error"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "allow_relative_error": False,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_stdev_to_be_between": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_unique_value_count_to_be_between": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["min_value", "max_value"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_proportion_of_unique_values_to_be_between": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_most_common_value_to_be_in_set": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["value_set", "ties_okay"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "ties_okay": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_sum_to_be_between": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_min_to_be_between": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": [
+                "min_value",
+                "max_value",
+                "strict_min",
+                "strict_max",
+                "parse_strings_as_datetimes",
+                "output_strftime_format",
+            ],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "parse_strings_as_datetimes": None,
+                "output_strftime_format": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_max_to_be_between": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": [
+                "min_value",
+                "max_value",
+                "strict_min",
+                "strict_max",
+                "parse_strings_as_datetimes",
+                "output_strftime_format",
+            ],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "min_value": None,
+                "max_value": None,
+                "strict_min": False,
+                "strict_max": False,
+                "parse_strings_as_datetimes": None,
+                "output_strftime_format": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_chisquare_test_p_value_to_be_greater_than": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["partition_object", "p", "tail_weight_holdout"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "partition_object": None,
+                "p": 0.05,
+                "tail_weight_holdout": 0,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": [
+                "partition_object",
+                "p",
+                "bootstrap_samples",
+                "bootstrap_sample_size",
+            ],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "partition_object": None,
+                "p": 0.05,
+                "bootstrap_samples": None,
+                "bootstrap_sample_size": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_kl_divergence_to_be_less_than": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": [
+                "partition_object",
+                "threshold",
+                "tail_weight_holdout",
+                "internal_weight_holdout",
+                "bucketize_data",
+            ],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "partition_object": None,
+                "threshold": None,
+                "tail_weight_holdout": 0,
+                "internal_weight_holdout": 0,
+                "bucketize_data": True,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_pair_values_to_be_equal": {
+            "domain_kwargs": [
+                "column_A",
+                "column_B",
+                "row_condition",
+                "condition_parser",
+            ],
+            "success_kwargs": ["ignore_row_if"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "ignore_row_if": "both_values_are_missing",
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_pair_values_A_to_be_greater_than_B": {
+            "domain_kwargs": [
+                "column_A",
+                "column_B",
+                "row_condition",
+                "condition_parser",
+            ],
+            "success_kwargs": [
+                "or_equal",
+                "parse_strings_as_datetimes",
+                "allow_cross_type_comparisons",
+                "ignore_row_if",
+            ],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "or_equal": None,
+                "parse_strings_as_datetimes": None,
+                "allow_cross_type_comparisons": None,
+                "ignore_row_if": "both_values_are_missing",
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_column_pair_values_to_be_in_set": {
+            "domain_kwargs": [
+                "column_A",
+                "column_B",
+                "row_condition",
+                "condition_parser",
+            ],
+            "success_kwargs": ["value_pairs_set", "ignore_row_if"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "ignore_row_if": "both_values_are_missing",
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_multicolumn_values_to_be_unique": {
+            "domain_kwargs": ["column_list", "row_condition", "condition_parser"],
+            "success_kwargs": ["ignore_row_if"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "ignore_row_if": "all_values_are_missing",
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "_expect_column_values_to_be_of_type__aggregate": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["type_", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "_expect_column_values_to_be_of_type__map": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["type_", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "_expect_column_values_to_be_in_type_list__aggregate": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["type_list", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "_expect_column_values_to_be_in_type_list__map": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["type_list", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+    }
+
+    runtime_kwargs = ["result_format", "include_config", "catch_exceptions"]
+
     def __init__(self, expectation_type, kwargs, meta=None, success_on_last_run=None):
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
@@ -488,16 +1147,46 @@ class ExpectationConfiguration(DictDot):
         self._expectation_type = expectation_type
         if not isinstance(kwargs, dict):
             raise InvalidExpectationConfigurationError(
-                "expectation configuration kwargs must be an "
-                "ExpectationKwargs object."
+                "expectation configuration kwargs must be a dict."
             )
-        self._kwargs = ExpectationKwargs(kwargs)
+        self._kwargs = kwargs
         if meta is None:
             meta = {}
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
         self.success_on_last_run = success_on_last_run
+
+    def patch(self, op: str, path: str, value: Any) -> "ExpectationConfiguration":
+        """
+
+        Args:
+            op: A jsonpatch operation. One of 'add', 'replace', or 'remove'
+            path: A jsonpatch path for the patch operation
+            value: The value to patch
+
+        Returns:
+            The patched ExpectationConfiguration object
+        """
+        if op not in ["add", "replace", "remove"]:
+            raise ValueError("Op must be either 'add', 'replace', or 'remove'")
+
+        try:
+            valid_path = path.split("/")[1]
+        except IndexError:
+            raise IndexError(
+                "Ensure you have a valid jsonpatch path of the form '/path/foo' "
+                "(see http://jsonpatch.com/)"
+            )
+
+        if valid_path not in self.get_runtime_kwargs().keys():
+            raise ValueError("Path not available in kwargs (see http://jsonpatch.com/)")
+
+        # TODO: Call validate_kwargs when implemented
+        patch = jsonpatch.JsonPatch([{"op": op, "path": path, "value": value}])
+
+        patch.apply(self.kwargs, in_place=True)
+        return self
 
     @property
     def expectation_type(self):
@@ -507,7 +1196,111 @@ class ExpectationConfiguration(DictDot):
     def kwargs(self):
         return self._kwargs
 
-    def isEquivalentTo(self, other):
+    def _get_default_custom_kwargs(self):
+        # NOTE: this is a holdover until class-first expectations control their
+        # defaults, and so defaults are inherited.
+        if self.expectation_type.startswith("expect_column_pair"):
+            return {
+                "domain_kwargs": [
+                    "column_A",
+                    "column_B",
+                    "row_condition",
+                    "condition_parser",
+                ],
+                # NOTE: this is almost certainly incomplete; subclasses should override
+                "success_kwargs": [],
+                "default_kwarg_values": {
+                    "column_A": None,
+                    "column_B": None,
+                    "row_condition": None,
+                    "condition_parser": None,
+                },
+            }
+        elif self.expectation_type.startswith("expect_column"):
+            return {
+                "domain_kwargs": ["column", "row_condition", "condition_parser"],
+                # NOTE: this is almost certainly incomplete; subclasses should override
+                "success_kwargs": [],
+                "default_kwarg_values": {
+                    "column": None,
+                    "row_condition": None,
+                    "condition_parser": None,
+                },
+            }
+
+        logger.error("Requested kwargs for an unrecognized expectation.")
+        return {
+            "domain_kwargs": [],
+            # NOTE: this is almost certainly incomplete; subclasses should override
+            "success_kwargs": [],
+            "default_kwarg_values": {},
+        }
+
+    def get_domain_kwargs(self):
+        expectation_kwargs_dict = self.kwarg_lookup_dict.get(
+            self.expectation_type, None
+        )
+        if expectation_kwargs_dict is None:
+            expectation_kwargs_dict = self._get_default_custom_kwargs()
+        domain_kwargs = {
+            key: self.kwargs.get(
+                key, expectation_kwargs_dict.get("default_kwarg_values").get(key)
+            )
+            for key in expectation_kwargs_dict["domain_kwargs"]
+        }
+        missing_kwargs = set(expectation_kwargs_dict["domain_kwargs"]) - set(
+            domain_kwargs.keys()
+        )
+        if missing_kwargs:
+            raise InvalidExpectationKwargsError(
+                f"Missing domain kwargs: {list(missing_kwargs)}"
+            )
+        return domain_kwargs
+
+    def get_success_kwargs(self):
+        expectation_kwargs_dict = self.kwarg_lookup_dict.get(
+            self.expectation_type, None
+        )
+        if expectation_kwargs_dict is None:
+            expectation_kwargs_dict = self._get_default_custom_kwargs()
+        domain_kwargs = self.get_domain_kwargs()
+        success_kwargs = {
+            key: self.kwargs.get(
+                key, expectation_kwargs_dict.get("default_kwarg_values").get(key)
+            )
+            for key in expectation_kwargs_dict["success_kwargs"]
+        }
+        success_kwargs.update(domain_kwargs)
+        return success_kwargs
+
+    def get_runtime_kwargs(self):
+        expectation_kwargs_dict = self.kwarg_lookup_dict.get(
+            self.expectation_type, None
+        )
+        if expectation_kwargs_dict is None:
+            expectation_kwargs_dict = self._get_default_custom_kwargs()
+        success_kwargs = self.get_success_kwargs()
+        runtime_kwargs = {
+            key: self.kwargs.get(
+                key, expectation_kwargs_dict.get("default_kwarg_values").get(key)
+            )
+            for key in self.runtime_kwargs
+        }
+        runtime_kwargs.update(success_kwargs)
+        return runtime_kwargs
+
+    def applies_to_same_domain(self, other_expectation_configuration):
+        if (
+            not self.expectation_type
+            == other_expectation_configuration.expectation_type
+        ):
+            return False
+        return (
+            self.get_domain_kwargs()
+            == other_expectation_configuration.get_domain_kwargs()
+        )
+
+    def isEquivalentTo(self, other, match_type="success"):
         """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
@@ -522,12 +1315,29 @@ class ExpectationConfiguration(DictDot):
             else:
                 # Delegate comparison to the other instance
                 return NotImplemented
-        return all(
-            (
-                self.expectation_type == other.expectation_type,
-                self.kwargs.isEquivalentTo(other.kwargs),
+        if match_type == "domain":
+            return all(
+                (
+                    self.expectation_type == other.expectation_type,
+                    self.get_domain_kwargs() == other.get_domain_kwargs(),
+                )
             )
-        )
+
+        elif match_type == "success":
+            return all(
+                (
+                    self.expectation_type == other.expectation_type,
+                    self.get_success_kwargs() == other.get_success_kwargs(),
+                )
+            )
+
+        elif match_type == "runtime":
+            return all(
+                (
+                    self.expectation_type == other.expectation_type,
+                    self.kwargs == other.kwargs,
+                )
+            )
 
     def __eq__(self, other):
         """ExpectationConfiguration equality does include meta, but ignores instance identity."""
@@ -634,6 +1444,14 @@ class ExpectationConfigurationSchema(Schema):
 
 
 class ExpectationSuite(object):
+    """
+    This ExpectationSuite object has create, read, update, and delete functionality for its expectations:
+        -create: self.add_expectation()
+        -read: self.find_expectation_indexes()
+        -update: self.add_expectation() or self.patch_expectation()
+        -delete: self.remove_expectation()
+    """
+
     def __init__(
         self,
         expectation_suite_name,
@@ -707,7 +1525,8 @@ class ExpectationSuite(object):
             else:
                 # Delegate comparison to the other instance
                 return NotImplemented
-        return all(
+
+        return len(self.expectations) == len(other.expectations) and all(
             [
                 mine.isEquivalentTo(theirs)
                 for (mine, theirs) in zip(self.expectations, other.expectations)
@@ -794,98 +1613,6 @@ class ExpectationSuite(object):
     def _sort_citations(citations):
         return sorted(citations, key=lambda x: x["citation_date"])
 
-    def _copy_and_clean_up_expectation(
-        self,
-        expectation,
-        discard_result_format_kwargs=True,
-        discard_include_config_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
-    ):
-        """Returns copy of `expectation` without `success_on_last_run` and other specified key-value pairs removed
-
-          Returns a copy of specified expectation will not have `success_on_last_run` key-value. The other key-value \
-          pairs will be removed by default but will remain in the copy if specified.
-
-          Args:
-              expectation (json): \
-                  The expectation to copy and clean.
-              discard_result_format_kwargs (boolean): \
-                  if True, will remove the kwarg `output_format` key-value pair from the copied expectation.
-              discard_include_config_kwargs (boolean):
-                  if True, will remove the kwarg `include_config` key-value pair from the copied expectation.
-              discard_catch_exceptions_kwargs (boolean):
-                  if True, will remove the kwarg `catch_exceptions` key-value pair from the copied expectation.
-
-          Returns:
-              A copy of the provided expectation with `success_on_last_run` and other specified key-value pairs removed
-
-          Note:
-              This method may move to ExpectationConfiguration, minus the "copy" part.
-        """
-        new_expectation = deepcopy(expectation)
-
-        if "success_on_last_run" in new_expectation:
-            del new_expectation["success_on_last_run"]
-
-        if discard_result_format_kwargs:
-            if "result_format" in new_expectation.kwargs:
-                del new_expectation.kwargs["result_format"]
-                # discards["result_format"] += 1
-
-        if discard_include_config_kwargs:
-            if "include_config" in new_expectation.kwargs:
-                del new_expectation.kwargs["include_config"]
-                # discards["include_config"] += 1
-
-        if discard_catch_exceptions_kwargs:
-            if "catch_exceptions" in new_expectation.kwargs:
-                del new_expectation.kwargs["catch_exceptions"]
-                # discards["catch_exceptions"] += 1
-
-        return new_expectation
-
-    def _copy_and_clean_up_expectations_from_indexes(
-        self,
-        match_indexes,
-        discard_result_format_kwargs=True,
-        discard_include_config_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
-    ):
-        """Copies and cleans all expectations provided by their index in DataAsset._expectation_suite.expectations.
-
-           Applies the _copy_and_clean_up_expectation method to multiple expectations, provided by their index in \
-           `DataAsset,_expectation_suite.expectations`. Returns a list of the copied and cleaned expectations.
-
-           Args:
-               match_indexes (List): \
-                   Index numbers of the expectations from `expectation_config.expectations` to be copied and cleaned.
-               discard_result_format_kwargs (boolean): \
-                   if True, will remove the kwarg `output_format` key-value pair from the copied expectation.
-               discard_include_config_kwargs (boolean):
-                   if True, will remove the kwarg `include_config` key-value pair from the copied expectation.
-               discard_catch_exceptions_kwargs (boolean):
-                   if True, will remove the kwarg `catch_exceptions` key-value pair from the copied expectation.
-
-           Returns:
-               A list of the copied expectations with `success_on_last_run` and other specified \
-               key-value pairs removed.
-
-           See also:
-               _copy_and_clean_expectation
-        """
-        rval = []
-        for i in match_indexes:
-            rval.append(
-                self._copy_and_clean_up_expectation(
-                    self.expectations[i],
-                    discard_result_format_kwargs,
-                    discard_include_config_kwargs,
-                    discard_catch_exceptions_kwargs,
-                )
-            )
-
-        return rval
-
     ### CRUD methods ###
 
     def append_expectation(self, expectation_config):
@@ -900,156 +1627,204 @@ class ExpectationSuite(object):
         """
         self.expectations.append(expectation_config)
 
-    def find_expectation_indexes(
-        self, expectation_type=None, column=None, expectation_kwargs=None
-    ):
-        """Find matching expectations and return their indexes.
-        Args:
-            expectation_type=None                : The name of the expectation type to be matched.
-            column=None                          : The name of the column to be matched.
-            expectation_kwargs=None              : A dictionary of kwargs to match against.
-
-        Returns:
-            A list of indexes for matching expectation objects.
-            If there are no matches, the list will be empty.
+    def remove_expectation(
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        match_type: str = "domain",
+        remove_multiple_matches: bool = False,
+    ) -> List[ExpectationConfiguration]:
         """
-        if expectation_kwargs is None:
-            expectation_kwargs = {}
 
-        if (
-            "column" in expectation_kwargs
-            and column is not None
-            and column is not expectation_kwargs["column"]
-        ):
-            raise ValueError(
-                "Conflicting column names in find_expectation_indexes: %s and %s"
-                % (column, expectation_kwargs["column"])
+        Args:
+            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against for
+                for the removal of expectations.
+            match_type: This determines what kwargs to use when matching. Options are 'domain' to match based
+                on the data evaluated by that expectation, 'success' to match based on all configuration parameters
+                 that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
+                 based on all configuration parameters
+            remove_multiple_matches: If True, will remove multiple matching expectations. If False, will raise a ValueError.
+        Returns: The list of deleted ExpectationConfigurations
+
+        Raises:
+            No match
+            More than 1 match, if remove_multiple_matches = False
+        """
+        found_expectation_indexes = self.find_expectation_indexes(
+            expectation_configuration, match_type
+        )
+        if len(found_expectation_indexes) < 1:
+            raise ValueError("No matching expectation was found.")
+
+        elif len(found_expectation_indexes) > 1:
+            if remove_multiple_matches == True:
+                removed_expectations = []
+                for index in sorted(found_expectation_indexes, reverse=True):
+                    removed_expectations.append(self.expectations.pop(index))
+                return removed_expectations
+            else:
+                raise ValueError(
+                    "More than one matching expectation was found. Specify more precise matching criteria,"
+                    "or set remove_multiple_matches=True"
+                )
+
+        else:
+            return [self.expectations.pop(found_expectation_indexes[0])]
+
+    def remove_all_expectations_of_type(
+        self, expectation_types: Union[List[str], str]
+    ) -> List[ExpectationConfiguration]:
+        if isinstance(expectation_types, str):
+            expectation_types = [expectation_types]
+        removed_expectations = [
+            expectation
+            for expectation in self.expectations
+            if expectation.expectation_type in expectation_types
+        ]
+        self.expectations = [
+            expectation
+            for expectation in self.expectations
+            if expectation.expectation_type not in expectation_types
+        ]
+
+        return removed_expectations
+
+    def find_expectation_indexes(
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        match_type: str = "domain",
+    ) -> List[int]:
+        """
+
+        Args:
+            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against to
+                find the index of any matching Expectation Configurations on the suite.
+            match_type: This determines what kwargs to use when matching. Options are 'domain' to match based
+                on the data evaluated by that expectation, 'success' to match based on all configuration parameters
+                 that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
+                 based on all configuration parameters
+
+        Returns: A list of indexes of matching ExpectationConfiguration
+
+        Raises:
+            InvalidExpectationConfigurationError
+
+        """
+        if not isinstance(expectation_configuration, ExpectationConfiguration):
+            raise InvalidExpectationConfigurationError(
+                "Ensure that expectation configuration is valid."
             )
-
-        if column is not None:
-            expectation_kwargs["column"] = column
-
         match_indexes = []
-        for i, exp in enumerate(self.expectations):
-            if expectation_type is None or (expectation_type == exp.expectation_type):
-                # if column == None or ('column' not in exp['kwargs']) or
-                # (exp['kwargs']['column'] == column) or (exp['kwargs']['column']==:
-                match = True
-
-                for k, v in expectation_kwargs.items():
-                    if k in exp["kwargs"] and exp["kwargs"][k] == v:
-                        continue
-                    else:
-                        match = False
-
-                if match:
-                    match_indexes.append(i)
+        for idx, expectation in enumerate(self.expectations):
+            if expectation.isEquivalentTo(expectation_configuration, match_type):
+                match_indexes.append(idx)
 
         return match_indexes
 
     def find_expectations(
         self,
-        expectation_type=None,
-        column=None,
-        expectation_kwargs=None,
-        discard_result_format_kwargs=True,
-        discard_include_config_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
-    ):
-        """Find matching expectations and return them.
-        Args:
-            expectation_type=None                : The name of the expectation type to be matched.
-            column=None                          : The name of the column to be matched.
-            expectation_kwargs=None              : A dictionary of kwargs to match against.
-            discard_result_format_kwargs=True    : In returned expectation object(s), \
-            suppress the `result_format` parameter.
-            discard_include_config_kwargs=True  : In returned expectation object(s), \
-            suppress the `include_config` parameter.
-            discard_catch_exceptions_kwargs=True : In returned expectation object(s), \
-            suppress the `catch_exceptions` parameter.
-
-        Returns:
-            A list of matching expectation objects.
-            If there are no matches, the list will be empty.
-        """
-
-        match_indexes = self.find_expectation_indexes(
-            expectation_type, column, expectation_kwargs,
+        expectation_configuration: ExpectationConfiguration,
+        match_type: str = "domain",
+    ) -> List[ExpectationConfiguration]:
+        found_expectation_indexes = self.find_expectation_indexes(
+            expectation_configuration, match_type
         )
+        if len(found_expectation_indexes) > 0:
+            return [
+                expectation
+                for idx, expectation in enumerate(self.expectations)
+                if idx in found_expectation_indexes
+            ]
+        else:
+            return []
 
-        return self._copy_and_clean_up_expectations_from_indexes(
-            match_indexes,
-            discard_result_format_kwargs,
-            discard_include_config_kwargs,
-            discard_catch_exceptions_kwargs,
-        )
-
-    def remove_expectation(
+    def patch_expectation(
         self,
-        expectation_type=None,
-        column=None,
-        expectation_kwargs=None,
-        remove_multiple_matches=False,
-        dry_run=False,
-    ):
-        """Remove matching expectation(s).
-        Args:
-            expectation_type=None                : The name of the expectation type to be matched.
-            column=None                          : The name of the column to be matched.
-            expectation_kwargs=None              : A dictionary of kwargs to match against.
-            remove_multiple_matches=False        : Match multiple expectations
-            dry_run=False                        : Return a list of matching expectations without removing
-
-        Returns:
-            None, unless dry_run=True.
-            If dry_run=True and remove_multiple_matches=False then return the expectation that *would be* removed.
-            If dry_run=True and remove_multiple_matches=True then return a list of expectations that *would be* removed.
-
-        Note:
-            If remove_expectation doesn't find any matches, it raises a ValueError.
-            If remove_expectation finds more than one matches and remove_multiple_matches!=True, it raises a ValueError.
-            If dry_run=True, then `remove_expectation` acts as a thin layer to find_expectations, with the default \
-            values for discard_result_format_kwargs, discard_include_config_kwargs, and discard_catch_exceptions_kwargs
+        expectation_configuration: ExpectationConfiguration,
+        op: str,
+        path: str,
+        value: Any,
+        match_type: str,
+    ) -> ExpectationConfiguration:
         """
 
-        match_indexes = self.find_expectation_indexes(
-            expectation_type, column, expectation_kwargs,
+       Args:
+            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against to
+                find the expectation to patch.
+            op: A jsonpatch operation (one of 'add','update', or 'remove') (see http://jsonpatch.com/)
+            path: A jsonpatch path for the patch operation (see http://jsonpatch.com/)
+            value: The value to patch (see http://jsonpatch.com/)
+            match_type: The match type to use for find_expectation_index()
+
+       Returns: The patched ExpectationConfiguration
+
+       Raises:
+           No match
+           More than 1 match
+
+               """
+        found_expectation_indexes = self.find_expectation_indexes(
+            expectation_configuration, match_type
         )
 
-        if len(match_indexes) == 0:
-            raise ValueError("No matching expectation found.")
-
-        elif len(match_indexes) > 1:
-            if not remove_multiple_matches:
-                raise ValueError(
-                    "Multiple expectations matched arguments. No expectations removed."
-                )
-            else:
-
-                if not dry_run:
-                    self.expectations = [
-                        i
-                        for j, i in enumerate(self.expectations)
-                        if j not in match_indexes
-                    ]
-                else:
-                    return self._copy_and_clean_up_expectations_from_indexes(
-                        match_indexes
-                    )
-
-        else:  # Exactly one match
-            expectation = self._copy_and_clean_up_expectation(
-                self.expectations[match_indexes[0]]
+        if len(found_expectation_indexes) < 1:
+            raise ValueError("No matching expectation was found.")
+        elif len(found_expectation_indexes) > 1:
+            raise ValueError(
+                "More than one matching expectation was found. Please be more specific with your search "
+                "criteria"
             )
 
-            if not dry_run:
-                del self.expectations[match_indexes[0]]
+        self.expectations[found_expectation_indexes[0]].patch(op, path, value)
+        return self.expectations[found_expectation_indexes[0]]
 
+    def add_expectation(
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        match_type: str = "domain",
+        overwrite_existing: bool = True,
+    ) -> ExpectationConfiguration:
+        """
+
+        Args:
+            expectation_configuration: The ExpectationConfiguration to add or update
+            match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
+                and so whether we should add or replace.
+            overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
+                False.
+        Returns:
+            The ExpectationConfiguration to add or replace.
+        Raises:
+            More than one match
+            One match if overwrite_existing = False
+        """
+        found_expectation_indexes = self.find_expectation_indexes(
+            expectation_configuration, match_type
+        )
+
+        if len(found_expectation_indexes) > 1:
+            raise ValueError(
+                "More than one matching expectation was found. Please be more specific with your search "
+                "criteria"
+            )
+        elif len(found_expectation_indexes) == 1:
+            # Currently, we completely replace the expectation_configuration, but we could potentially use patch_expectation
+            # to update instead. We need to consider how to handle meta in that situation.
+            # patch_expectation = jsonpatch.make_patch(self.expectations[found_expectation_index] \
+            #   .kwargs, expectation_configuration.kwargs)
+            # patch_expectation.apply(self.expectations[found_expectation_index].kwargs, in_place=True)
+            if overwrite_existing:
+                self.expectations[
+                    found_expectation_indexes[0]
+                ] = expectation_configuration
             else:
-                if remove_multiple_matches:
-                    return [expectation]
-                else:
-                    return expectation
+                raise DataContextError(
+                    "A matching ExpectationConfiguration already exists. If you would like to overwrite this "
+                    "ExpectationConfiguration, set overwrite_existing=True"
+                )
+        else:
+            self.append_expectation(expectation_configuration)
+
+        return expectation_configuration
 
 
 class ExpectationSuiteSchema(Schema):
