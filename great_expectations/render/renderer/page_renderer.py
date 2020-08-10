@@ -2,14 +2,13 @@ import logging
 import os
 from collections import OrderedDict
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 
 from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.util import num_to_str
 
-from ...core.id_dict import BatchKwargs
 from ..types import (
     CollapseContent,
     RenderedDocumentContent,
@@ -59,7 +58,7 @@ class ValidationResultsPageRenderer(Renderer):
         if isinstance(run_id, str):
             try:
                 run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 run_time = "__none__"
             run_name = run_id
         elif isinstance(run_id, dict):
@@ -174,11 +173,11 @@ class ValidationResultsPageRenderer(Renderer):
         # Determine whether we have a custom run_name
         try:
             run_name_as_time = parse(run_name)
-        except ParserError:
+        except ValueError:
             run_name_as_time = None
         try:
             run_time_datetime = parse(run_time)
-        except ParserError:
+        except ValueError:
             run_time_datetime = None
 
         include_run_name: bool = False
@@ -277,7 +276,7 @@ class ValidationResultsPageRenderer(Renderer):
         if isinstance(run_id, str):
             try:
                 run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 run_time = "__none__"
             run_name = run_id
         elif isinstance(run_id, dict):
@@ -751,7 +750,7 @@ class ProfilingResultsPageRenderer(Renderer):
         if isinstance(run_id, str):
             try:
                 run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 run_time = "__none__"
             run_name = run_id
         elif isinstance(run_id, dict):
@@ -783,11 +782,11 @@ class ProfilingResultsPageRenderer(Renderer):
         # Determine whether we have a custom run_name
         try:
             run_name_as_time = parse(run_name)
-        except ParserError:
+        except ValueError:
             run_name_as_time = None
         try:
             run_time_datetime = parse(run_time)
-        except ParserError:
+        except ValueError:
             run_time_datetime = None
 
         include_run_name: bool = False

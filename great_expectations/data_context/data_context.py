@@ -13,7 +13,7 @@ import warnings
 import webbrowser
 from typing import Dict, List, Optional, Union
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
@@ -1900,7 +1900,7 @@ class BaseDataContext(object):
             )
             try:
                 run_time = parse(run_id)
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):
