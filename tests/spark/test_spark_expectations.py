@@ -1,8 +1,8 @@
 import pytest
-
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 from pyspark.sql.utils import AnalysisException
-from great_expectations.dataset import SparkDFDataset
+
+from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
 
 
 @pytest.fixture
@@ -98,10 +98,4 @@ def test_expect_column_value_lengths_to_equal(spark_session, test_dataframe):
     assert test_dataframe.expect_column_value_lengths_to_equal("age", 1).success
     assert test_dataframe.expect_column_value_lengths_to_equal("address.street", 8).success
 
-
 # TODO: Get tests working for expect_column_values_to_be_in_type_list
-# def test_expect_column_values_to_be_in_type_list(spark_session, test_dataframe):
-#     """
-#     data asset expectation
-#     """
-#     assert test_dataframe.expect_column_values_to_be_in_type_list("age", ["StringType", "IntegerType"]).success

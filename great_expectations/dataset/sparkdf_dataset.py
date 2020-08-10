@@ -387,14 +387,14 @@ class MetaSparkDFDataset(Dataset):
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
-                self,
-                column_list,
-                mostly=None,
-                ignore_row_if="all_values_are_missing",
-                result_format=None,
-                non_nested_column_list=[],
-                *args,
-                **kwargs
+            self,
+            column_list,
+            mostly=None,
+            ignore_row_if="all_values_are_missing",
+            result_format=None,
+            non_nested_column_list=[],
+            *args,
+            **kwargs
         ):
             # Rename column so we only have to handle dot notation here
             target_cols = []
@@ -1188,7 +1188,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         include_config=True,
         catch_exceptions=None,
         meta=None,
-        non_nested=False,
     ):
         if mostly is not None:
             raise ValueError(
@@ -1222,43 +1221,43 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
     def expect_column_values_to_match_regex(
-            self,
-            column,
-            regex,
-            mostly=None,
-            result_format=None,
-            include_config=True,
-            catch_exceptions=None,
-            meta=None,
+        self,
+        column,
+        regex,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
     ):
         return column.withColumn("__success", column[0].rlike(regex))
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
     def expect_column_values_to_not_match_regex(
-            self,
-            column,
-            regex,
-            mostly=None,
-            result_format=None,
-            include_config=True,
-            catch_exceptions=None,
-            meta=None,
+        self,
+        column,
+        regex,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
     ):
         return column.withColumn("__success", ~column[0].rlike(regex))
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
     def expect_column_values_to_match_regex_list(
-            self,
-            column,
-            regex_list,
-            match_on="any",
-            mostly=None,
-            result_format=None,
-            include_config=True,
-            catch_exceptions=None,
-            meta=None,
+        self,
+        column,
+        regex_list,
+        match_on="any",
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
     ):
         if match_on == "any":
             return column.withColumn("__success", column[0].rlike("|".join(regex_list)))
@@ -1273,16 +1272,16 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
     def expect_column_pair_values_to_be_equal(
-            self,
-            column_A,
-            column_B,
-            ignore_row_if="both_values_are_missing",
-            result_format=None,
-            include_config=True,
-            catch_exceptions=None,
-            meta=None,
-            non_nested_A=False,
-            non_nested_B=False,
+        self,
+        column_A,
+        column_B,
+        ignore_row_if="both_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+        non_nested_A=False,
+        non_nested_B=False,
     ):
         column_A_name = column_A.schema.names[1]
         column_B_name = column_B.schema.names[1]
@@ -1297,17 +1296,17 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
     def expect_column_pair_values_A_to_be_greater_than_B(
-            self,
-            column_A,
-            column_B,
-            or_equal=None,
-            parse_strings_as_datetimes=None,
-            allow_cross_type_comparisons=None,
-            ignore_row_if="both_values_are_missing",
-            result_format=None,
-            include_config=True,
-            catch_exceptions=None,
-            meta=None,
+        self,
+        column_A,
+        column_B,
+        or_equal=None,
+        parse_strings_as_datetimes=None,
+        allow_cross_type_comparisons=None,
+        ignore_row_if="both_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
     ):
         # FIXME
         if allow_cross_type_comparisons:
@@ -1350,14 +1349,14 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     @DocInherit
     @MetaSparkDFDataset.multicolumn_map_expectation
     def expect_multicolumn_values_to_be_unique(
-            self,
-            column_list,  # pyspark.sql.DataFrame
-            ignore_row_if="all_values_are_missing",
-            result_format=None,
-            include_config=True,
-            catch_exceptions=None,
-            meta=None,
-            non_nested_column_list=[],
+        self,
+        column_list,  # pyspark.sql.DataFrame
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+        non_nested_column_list=[],
     ):
         # Might want to throw an exception if only 1 column is passed
         column_names = column_list.schema.names[:]
