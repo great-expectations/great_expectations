@@ -207,7 +207,6 @@ The ``run`` method returns a ValidationOperatorResult object:
         self.result_format = result_format
 
         self.action_list = action_list
-
         self.actions = OrderedDict()
         for action_config in action_list:
             assert isinstance(action_config, dict)
@@ -233,9 +232,6 @@ The ``run`` method returns a ValidationOperatorResult object:
                     class_name=config["class_name"],
                 )
             self.actions[action_config["name"]] = new_action
-
-        print("self.actions")
-        print(self.actions)
 
     @property
     def validation_operator_config(self) -> dict:
@@ -336,6 +332,7 @@ The ``run`` method returns a ValidationOperatorResult object:
                 batch_validation_result,
                 run_id,
             )
+
             run_result_obj["actions_results"] = batch_actions_results
             run_results[validation_result_id] = run_result_obj
 
@@ -366,9 +363,7 @@ The ``run`` method returns a ValidationOperatorResult object:
         :param run_id:
         :return: a dictionary: {action name -> result returned by the action}
         """
-        # batch_actions_results = {}
-        validation_action_payload = {}
-
+        batch_actions_results = {}
         for action in self.action_list:
             # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
             logger.debug(
@@ -385,14 +380,14 @@ The ``run`` method returns a ValidationOperatorResult object:
                     validation_result_suite_identifier=validation_result_id,
                     validation_result_suite=batch_validation_result,
                     data_asset=batch,
-                    validation_action_payload=validation_action_payload,
+                    payload=batch_actions_results,
                 )
 
                 # add action_result
-                validation_action_payload[action["name"]] = (
+                batch_actions_results[action["name"]] = (
                     {} if action_result is None else action_result
                 )
-                validation_action_payload[action["name"]]["class"] = action["action"][
+                batch_actions_results[action["name"]]["class"] = action["action"][
                     "class_name"
                 ]
 
@@ -402,7 +397,7 @@ The ``run`` method returns a ValidationOperatorResult object:
                 )
                 raise e
 
-        return validation_action_payload
+        return batch_actions_results
 
 
 class WarningAndFailureExpectationSuitesValidationOperator(

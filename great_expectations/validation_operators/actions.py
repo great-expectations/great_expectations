@@ -105,7 +105,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
                }
             slack_webhook: incoming Slack webhook to which to send notification
             notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-            validation_action_payload: *Optional* payload from other ValidationActions
+            payload: *Optional* payload from other ValidationActions
         """
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
@@ -127,7 +127,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset=None,
-        validation_action_payload=None,
+        payload=None,
     ):
         logger.debug("SlackNotificationAction.run")
 
@@ -144,14 +144,11 @@ SlackNotificationAction sends a Slack notification to a given webhook.
             )
 
         validation_success = validation_result_suite.success
-
+        data_docs_index_pages = None
         # process the payload
-        for action_names in validation_action_payload.keys():
-            if (
-                validation_action_payload[action_names]["class"]
-                == "UpdateDataDocsAction"
-            ):
-                data_docs_index_pages = validation_action_payload[action_names]
+        for action_names in payload.keys():
+            if payload[action_names]["class"] == "UpdateDataDocsAction":
+                data_docs_index_pages = payload[action_names]
                 data_docs_index_pages.pop("class")  # keep only the index pages
             else:
                 data_docs_index_pages = None
@@ -213,7 +210,7 @@ class StoreValidationResultAction(ValidationAction):
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset,
-        validation_action_payload=None,
+        payload=None,
     ):
         logger.debug("StoreValidationResultAction.run")
 
@@ -275,7 +272,7 @@ in the process of validating other prior expectations.
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset,
-        validation_action_payload=None,
+        payload=None,
     ):
         logger.debug("StoreEvaluationParametersAction.run")
 
@@ -350,7 +347,7 @@ in a metrics store.
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset,
-        validation_action_payload=None,
+        payload=None,
     ):
         logger.debug("StoreMetricsAction.run")
 
@@ -420,7 +417,7 @@ list of sites to update:
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset,
-        validation_action_payload=None,
+        payload=None,
     ):
         logger.debug("UpdateDataDocsAction.run")
 
@@ -437,7 +434,7 @@ list of sites to update:
             )
 
         # index pages of all data_docs that were rendered.
-        # will be passed along as validation_action_payload
+        # will be passed along as payload
         data_docs_index_pages = self.data_context.build_data_docs(
             site_names=self._site_names,
             resource_identifiers=[validation_result_suite_identifier],
