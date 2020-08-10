@@ -60,7 +60,7 @@ class MetaPandasDataset(Dataset):
             mostly=None,
             result_format=None,
             row_condition=None,
-            condition_parser="pandas",
+            condition_parser=None,
             *args,
             **kwargs
         ):
@@ -69,13 +69,18 @@ class MetaPandasDataset(Dataset):
                 result_format = self.default_expectation_args["result_format"]
 
             result_format = parse_result_format(result_format)
-
             if row_condition:
-                self = self.query(row_condition, parser=condition_parser).reset_index(
-                    drop=True
-                )
+                if condition_parser not in ["python", "pandas"]:
+                    raise ValueError("condition_parser is required when setting a row_condition,"
+                                     " and must be 'python' or 'pandas'")
+                else:
+                    data = self.query(row_condition, parser=condition_parser).reset_index(
+                        drop=True
+                    )
+            else:
+                data = self
 
-            series = self[column]
+            series = data[column]
             if func.__name__ in [
                 "expect_column_values_to_not_be_null",
                 "expect_column_values_to_be_null",
@@ -174,7 +179,7 @@ class MetaPandasDataset(Dataset):
             ignore_row_if="both_values_are_missing",
             result_format=None,
             row_condition=None,
-            condition_parser="pandas",
+            condition_parser=None,
             *args,
             **kwargs
         ):
@@ -278,7 +283,7 @@ class MetaPandasDataset(Dataset):
             ignore_row_if="all_values_are_missing",
             result_format=None,
             row_condition=None,
-            condition_parser="pandas",
+            condition_parser=None,
             *args,
             **kwargs
         ):
@@ -524,7 +529,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -540,7 +545,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -557,7 +562,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -575,7 +580,7 @@ Notes:
         # ensure we only pass what we actually received. Hence, we'll use kwargs
         # mostly=None,
         # result_format=None,
-        # row_condition=None, condition_parser="pandas", include_config=None, catch_exceptions=None, meta=None
+        # row_condition=None, condition_parser=None, include_config=None, catch_exceptions=None, meta=None
     ):
         """
         The pandas implementation of this expectation takes kwargs mostly, result_format, include_config,
@@ -687,7 +692,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -760,7 +765,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -803,7 +808,7 @@ Notes:
         # ensure we only pass what we actually received. Hence, we'll use kwargs
         # mostly=None,
         # result_format = None,
-        # row_condition=None, condition_parser="pandas", include_config=None, catch_exceptions=None, meta=None
+        # row_condition=None, condition_parser=None, include_config=None, catch_exceptions=None, meta=None
     ):
         """
         The pandas implementation of this expectation takes kwargs mostly, result_format, include_config,
@@ -912,7 +917,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -963,7 +968,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1007,7 +1012,7 @@ Notes:
         parse_strings_as_datetimes=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1033,7 +1038,7 @@ Notes:
         parse_strings_as_datetimes=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1059,7 +1064,7 @@ Notes:
         allow_cross_type_comparisons=None,
         mostly=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1188,7 +1193,7 @@ Notes:
         parse_strings_as_datetimes=None,
         mostly=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1226,7 +1231,7 @@ Notes:
         parse_strings_as_datetimes=None,
         mostly=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1264,7 +1269,7 @@ Notes:
         max_value=None,
         mostly=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1308,7 +1313,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1324,7 +1329,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1340,7 +1345,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1357,7 +1362,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1384,7 +1389,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1405,7 +1410,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1440,7 +1445,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1468,7 +1473,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1491,7 +1496,7 @@ Notes:
         mostly=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1522,7 +1527,7 @@ Notes:
         params=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1571,7 +1576,7 @@ Notes:
         bootstrap_sample_size=None,
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1682,7 +1687,7 @@ Notes:
         ignore_row_if="both_values_are_missing",
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1701,7 +1706,7 @@ Notes:
         ignore_row_if="both_values_are_missing",
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1733,7 +1738,7 @@ Notes:
         ignore_row_if="both_values_are_missing",
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1769,7 +1774,7 @@ Notes:
         ignore_row_if="all_values_are_missing",
         result_format=None,
         row_condition=None,
-        condition_parser="pandas",
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
