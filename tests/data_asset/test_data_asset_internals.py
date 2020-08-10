@@ -598,9 +598,19 @@ def test_calc_map_expectation_success():
         success_count=0, nonnull_count=100, mostly=None
     ) == (False, 0.0)
 
-    assert df._calc_map_expectation_success(
-        success_count=decimal.Decimal(80), nonnull_count=100, mostly=0.8
-    ) == (False, decimal.Decimal(80) / decimal.Decimal(100))
+    # NOTE - 20200229 - Alex/James:
+    # We no longer allow DECIMAL explicitly, because we do not expect
+    # decimal values in response to queries given potential problems
+    # with comparison to a float-valued mostly parameter
+
+    # assert df._calc_map_expectation_success(
+    #     success_count=decimal.Decimal(80), nonnull_count=100, mostly=0.8
+    # ) == (False, decimal.Decimal(80) / decimal.Decimal(100))
+    with pytest.raises(ValueError) as exc:
+        df._calc_map_expectation_success(
+            success_count=decimal.Decimal(80), nonnull_count=100, mostly=0.8
+        )
+    assert "must not be a decimal; check your db configuration" in str(exc.value)
 
     assert df._calc_map_expectation_success(
         success_count=100, nonnull_count=100, mostly=0
@@ -613,222 +623,6 @@ def test_calc_map_expectation_success():
     assert df._calc_map_expectation_success(
         success_count=0, nonnull_count=100, mostly=0
     ) == (True, 0.0)
-
-
-def test_find_expectations():
-    my_df = ge.dataset.PandasDataset(
-        {
-            "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            "y": [1, 2, None, 4, None, 6, 7, 8, 9, None],
-            "z": [
-                "cello",
-                "hello",
-                "jello",
-                "bellow",
-                "fellow",
-                "mellow",
-                "wellow",
-                "xello",
-                "yellow",
-                "zello",
-            ],
-        },
-        profiler=ge.profile.ColumnsExistProfiler,
-    )
-    my_df.expect_column_values_to_be_of_type("x", "int")
-    my_df.expect_column_values_to_be_of_type("y", "int")
-    my_df.expect_column_values_to_be_of_type("z", "int")
-    my_df.expect_column_values_to_be_increasing("x")
-    my_df.expect_column_values_to_match_regex("z", "ello")
-
-    assert my_df.find_expectations("expect_column_to_exist", "w") == []
-
-    assert my_df.find_expectations(
-        "expect_column_to_exist", "x", expectation_kwargs={}
-    ) == [
-        ExpectationConfiguration(
-            expectation_type="expect_column_to_exist", kwargs={"column": "x"}
-        )
-    ]
-
-    assert my_df.find_expectations(
-        "expect_column_to_exist", expectation_kwargs={"column": "y"}
-    ) == [
-        ExpectationConfiguration(
-            expectation_type="expect_column_to_exist", kwargs={"column": "y"}
-        )
-    ]
-
-    exp1 = [
-        ExpectationConfiguration(
-            expectation_type="expect_column_to_exist", kwargs={"column": "x"}
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_to_exist", kwargs={"column": "y"}
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_to_exist", kwargs={"column": "z"}
-        ),
-    ]
-
-    assert my_df.find_expectations("expect_column_to_exist") == exp1
-
-    with pytest.raises(ValueError) as exc:
-        my_df.find_expectations("expect_column_to_exist", "x", {"column": "y"})
-
-    assert "Conflicting column names in find_expectation_indexes:" in str(exc.value)
-
-    exp1 = [
-        ExpectationConfiguration(
-            expectation_type="expect_column_to_exist", kwargs={"column": "x"}
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_of_type",
-            kwargs={"column": "x", "type_": "int"},
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_increasing",
-            kwargs={"column": "x"},
-        ),
-    ]
-
-    assert my_df.find_expectations(column="x") == exp1
-
-
-def test_remove_expectation():
-    my_df = ge.dataset.PandasDataset(
-        {
-            "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            "y": [1, 2, None, 4, None, 6, 7, 8, 9, None],
-            "z": [
-                "cello",
-                "hello",
-                "jello",
-                "bellow",
-                "fellow",
-                "mellow",
-                "wellow",
-                "xello",
-                "yellow",
-                "zello",
-            ],
-        },
-        profiler=ge.profile.ColumnsExistProfiler,
-    )
-    my_df.expect_column_values_to_be_of_type("x", "int")
-    my_df.expect_column_values_to_be_of_type("y", "int")
-    my_df.expect_column_values_to_be_of_type(
-        "z", "int", include_config=True, catch_exceptions=True
-    )
-    my_df.expect_column_values_to_be_increasing("x")
-    my_df.expect_column_values_to_match_regex("z", "ello")
-
-    with pytest.raises(ValueError) as exc:
-        my_df.remove_expectation("expect_column_to_exist", "w", dry_run=True),
-
-    assert "No matching expectation found." in str(exc.value)
-
-    assert my_df.remove_expectation(
-        "expect_column_to_exist", "x", expectation_kwargs={}, dry_run=True
-    ) == ExpectationConfiguration(
-        expectation_type="expect_column_to_exist", kwargs={"column": "x"}
-    )
-
-    assert my_df.remove_expectation(
-        "expect_column_to_exist", expectation_kwargs={"column": "y"}, dry_run=True
-    ) == ExpectationConfiguration(
-        expectation_type="expect_column_to_exist", kwargs={"column": "y"}
-    )
-
-    assert my_df.remove_expectation(
-        "expect_column_to_exist",
-        expectation_kwargs={"column": "y"},
-        remove_multiple_matches=True,
-        dry_run=True,
-    ) == [
-        ExpectationConfiguration(
-            expectation_type="expect_column_to_exist", kwargs={"column": "y"}
-        )
-    ]
-
-    with pytest.raises(ValueError) as exc:
-        my_df.remove_expectation("expect_column_to_exist", dry_run=True)
-
-    assert "Multiple expectations matched arguments. No expectations removed." in str(
-        exc.value
-    )
-
-    exp1 = [
-        ExpectationConfiguration(
-            expectation_type="expect_column_to_exist", kwargs={"column": "x"}
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_to_exist", kwargs={"column": "y"}
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_to_exist", kwargs={"column": "z"}
-        ),
-    ]
-
-    assert (
-        my_df.remove_expectation(
-            "expect_column_to_exist", remove_multiple_matches=True, dry_run=True
-        )
-        == exp1
-    )
-
-    with pytest.raises(ValueError) as exc:
-        my_df.remove_expectation(
-            "expect_column_to_exist", "x", {"column": "y"}, dry_run=True
-        )
-
-    assert "Conflicting column names in find_expectation_indexes" in str(exc.value)
-
-    exp1 = [
-        ExpectationConfiguration(
-            expectation_type="expect_column_to_exist", kwargs={"column": "x"}
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_of_type",
-            kwargs={"column": "x", "type_": "int"},
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_increasing",
-            kwargs={"column": "x"},
-        ),
-    ]
-
-    assert (
-        my_df.remove_expectation(column="x", remove_multiple_matches=True, dry_run=True)
-        == exp1
-    )
-
-    assert len(my_df._expectation_suite.expectations) == 8
-
-    assert my_df.remove_expectation("expect_column_to_exist", "x") is None
-    assert len(my_df._expectation_suite.expectations) == 7
-    assert my_df.remove_expectation(column="x", remove_multiple_matches=True) is None
-    assert len(my_df._expectation_suite.expectations) == 5
-
-    my_df.remove_expectation(column="z", remove_multiple_matches=True)
-    assert len(my_df._expectation_suite.expectations) == 2
-
-    assert my_df.get_expectation_suite(
-        discard_failed_expectations=False
-    ) == ExpectationSuite(
-        expectations=[
-            ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "y"}
-            ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_values_to_be_of_type",
-                kwargs={"column": "y", "type_": "int"},
-            ),
-        ],
-        expectation_suite_name="default",
-        data_asset_type="Dataset",
-        meta={"great_expectations.__version__": ge.__version__},
-    )
 
 
 def test_discard_failing_expectations():
@@ -882,19 +676,19 @@ def test_discard_failing_expectations():
     sub1 = df[:3]
 
     sub1.discard_failing_expectations()
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[1:2]
     sub1.discard_failing_expectations()
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[:-1]
     sub1.discard_failing_expectations()
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[-1:]
     sub1.discard_failing_expectations()
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[["A", "D"]]
     exp1 = [
@@ -915,7 +709,7 @@ def test_discard_failing_expectations():
     ]
     with pytest.warns(UserWarning, match=r"Removed \d expectations that were 'False'"):
         sub1.discard_failing_expectations()
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[["A"]]
     exp1 = [
@@ -929,7 +723,7 @@ def test_discard_failing_expectations():
     ]
     with pytest.warns(UserWarning, match=r"Removed \d expectations that were 'False'"):
         sub1.discard_failing_expectations()
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df.iloc[:3, 1:4]
     exp1 = [
@@ -957,7 +751,7 @@ def test_discard_failing_expectations():
     ]
     with pytest.warns(UserWarning, match=r"Removed \d expectations that were 'False'"):
         sub1.discard_failing_expectations()
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df.loc[0:, "A":"B"]
     exp1 = [
@@ -978,7 +772,7 @@ def test_discard_failing_expectations():
     ]
     with pytest.warns(UserWarning, match=r"Removed \d expectations that were 'False'"):
         sub1.discard_failing_expectations()
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
 
 def test_test_expectation_function():

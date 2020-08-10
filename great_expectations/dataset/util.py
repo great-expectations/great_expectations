@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import Any, List
+from typing import Any, Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -18,6 +18,30 @@ except ImportError:
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
     DefaultDialect = None
     WithinGroup = None
+
+
+SCHEMAS = {
+    "api_np": {"NegativeInfinity": -np.inf, "PositiveInfinity": np.inf,},
+    "api_cast": {"NegativeInfinity": -float("inf"), "PositiveInfinity": float("inf"),},
+    "mysql": {"NegativeInfinity": -1.79e308, "PositiveInfinity": 1.79e308,},
+    "mssql": {"NegativeInfinity": -1.79e308, "PositiveInfinity": 1.79e308,},
+}
+
+
+def get_sql_dialect_floating_point_infinity_value(
+    schema: str, negative: bool = False
+) -> float:
+    res: Union[Dict, None] = SCHEMAS.get(schema)
+    if res is None:
+        if negative:
+            return -np.inf
+        else:
+            return np.inf
+    else:
+        if negative:
+            return res["NegativeInfinity"]
+        else:
+            return res["PositiveInfinity"]
 
 
 def is_valid_partition_object(partition_object):
@@ -75,7 +99,7 @@ def is_valid_continuous_partition_object(partition_object):
     return (
         (len(partition_object["bins"]) == (len(partition_object["weights"]) + 1))
         and np.all(np.diff(partition_object["bins"]) > 0)
-        and np.allclose(np.sum(comb_weights), 1)
+        and np.allclose(np.sum(comb_weights), 1.0)
     )
 
 

@@ -12,10 +12,12 @@ This guide will explain how to host and share Data Docs on a filesystem.
 Steps
 -----
 
-1. Filesystem-hosted Data Docs are configured by default for Great Expectations deployments created using ``great_expectations init``. To create additional Data Docs sites, you may re-use the default Data Docs configuration below. You may replace ``local_site`` with your own site name, or leave the default.
+1. **Filesystem-hosted Data Docs are configured by default for Great Expectations deployments created using great_expectations init.**
+
+  To create additional Data Docs sites, you may re-use the default Data Docs configuration below. You may replace ``local_site`` with your own site name, or leave the default.
 
   .. code-block:: yaml
-  
+
     data_docs_sites:
       local_site:  # this is a user-selected name - you may select your own
         class_name: SiteBuilder
@@ -25,28 +27,33 @@ Steps
         site_index_builder:
           class_name: DefaultSiteIndexBuilder
 
-2. Test that your configuration is correct by building the site using the following CLI command: ``great_expectations docs build --site-name local_site``. If successful, the CLI will open your newly built Data Docs site and provide the path to the index page.
+2. **Test that your configuration is correct by building the site.**
+
+  Use the following CLI command: ``great_expectations docs build --site-name local_site``. If successful, the CLI will open your newly built Data Docs site and provide the path to the index page.
 
   .. code-block:: bash
-  
+
     > great_expectations docs build --site-name local_site
-    
+
     The following Data Docs sites will be built:
-    
+
      - local_site: file:///great_expectations/uncommitted/data_docs/local_site/index.html
-    
+
     Would you like to proceed? [Y/n]: Y
-    
+
     Building Data Docs...
-    
+
     Done building Data Docs
-    
-3. To share the site, zip the directory specified under the ``base_directory`` key in your site configuration and distribute as desired.
+
+Additional notes
+----------------
+
+- To share the site, you can zip the directory specified under the ``base_directory`` key in your site configuration and distribute as desired.
 
 Additional resources
 --------------------
 
-- :ref:`Core concepts: Data Docs <data_docs>` 
+- :ref:`Core concepts: Data Docs <data_docs>`
 
 Comments
 --------

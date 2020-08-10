@@ -3,16 +3,7 @@
 How to configure an EMR Spark Datasource
 ========================================
 
-.. admonition:: Admonition from Mr. Dickens
-
-    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
-
-
-This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
-
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
-
-If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
+In most cases, using spark on EMR is easiest to configure using a dyanmic DataContext configuration in your notebook. Please see the guide on :ref:`how to instantiate a Data Context on an EMR Spark Cluster for details! <how_to_instantiate_a_data_context_on_an_emr_spark_cluster>`.
 
 .. discourse::
     :topic_identifier: 172

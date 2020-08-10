@@ -5,7 +5,7 @@ import warnings
 from enum import Enum
 from typing import Any
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 
 from great_expectations.core import ExpectationSuite, RunIdentifier
 from great_expectations.exceptions import GreatExpectationsError
@@ -60,6 +60,7 @@ class ProfilerTypeMapping:
     ]
     FLOAT_TYPE_NAMES = [
         "FLOAT",
+        "DOUBLE",
         "FLOAT4",
         "FLOAT8",
         "DOUBLE_PRECISION",
@@ -72,14 +73,23 @@ class ProfilerTypeMapping:
     STRING_TYPE_NAMES = [
         "CHAR",
         "VARCHAR",
+        "NVARCHAR",
         "TEXT",
         "STRING",
         "StringType",
         "string",
         "str",
     ]
-    BOOLEAN_TYPE_NAMES = ["BOOLEAN", "boolean", "BOOL", "bool", "BooleanType"]
-    DATETIME_TYPE_NAMES = {
+    BOOLEAN_TYPE_NAMES = [
+        "BOOLEAN",
+        "boolean",
+        "BOOL",
+        "TINYINT",
+        "BIT",
+        "bool",
+        "BooleanType",
+    ]
+    DATETIME_TYPE_NAMES = [
         "DATETIME",
         "DATE",
         "TIME",
@@ -88,7 +98,7 @@ class ProfilerTypeMapping:
         "TimestampType",
         "datetime64",
         "Timestamp",
-    }
+    ]
 
 
 class Profiler(object, metaclass=abc.ABCMeta):
@@ -187,7 +197,7 @@ class DatasetProfiler(DataAssetProfiler):
             )
             try:
                 run_time = parse(run_id)
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):

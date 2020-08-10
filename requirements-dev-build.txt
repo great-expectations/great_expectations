@@ -1,0 +1,7 @@
+# A lot of Great Expectations' codebase and tests are tied to specific databases, cloud providers, etc.
+# In this file, comments on each row indicate which tests that package is used for.
+# To run tests for smaller subsets of infrastructure, please look at other requirements-dev-*.txt files.
+# Otherwise (i.e., if/when you are not concerned with running tests), please ignore these comments.
+
+isort[requirements]==4.3.21  # lint
+pre-commit>=2.3.0  # lint

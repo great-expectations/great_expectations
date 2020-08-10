@@ -2,7 +2,7 @@ import logging
 import warnings
 from collections import OrderedDict
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 
 from great_expectations.core import RunIdentifier
 from great_expectations.data_asset import DataAsset
@@ -298,7 +298,7 @@ The ``run`` method returns a ValidationOperatorResult object:
             )
             try:
                 run_time = parse(run_id)
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):
@@ -594,7 +594,7 @@ The value of "success" is True if no critical expectation suites ("failure") fai
 
     def _build_slack_query(self, validation_operator_result: ValidationOperatorResult):
         success = validation_operator_result.success
-        status_text = "Success :tada:" if success else "Failed :x:"
+        status_text = "Success :white_check_mark:" if success else "Failed :x:"
         run_id = validation_operator_result.run_id
         run_name = run_id.run_name
         run_time = run_id.run_time.strftime("%x %X")
@@ -708,7 +708,7 @@ The value of "success" is True if no critical expectation suites ("failure") fai
             )
             try:
                 run_time = parse(run_id)
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):
