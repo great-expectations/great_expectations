@@ -1,4 +1,4 @@
-.. _getting_started:
+.. _tutorials__getting_started:
 
 ###############
 Getting started
