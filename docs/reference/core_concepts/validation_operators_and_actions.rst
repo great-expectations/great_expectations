@@ -60,6 +60,6 @@ The Validation Operator implementations above invoke actions.
 
 An action is a way to take an arbitrary method and make it configurable and runnable within a data context.
 
-The only requirement from an action is for it to have a `run` method.  The `run` method will consume and return a `payload`, which can be used to pass information from one ValidationAction to another. The `payload` is a dictionary that will have the name of the ValidationAction as a key, a nested dictionary w the `class` of the ValidationAction and any additional parameters returned by the ValidationAction as its value.
+The only requirement from an action is for it to have a `run` method.  The `run` method will consume and return a `payload`, which can be used to pass information from one ValidationAction to another. The `payload` is a dictionary that will have the name of the ValidationAction as a key, and a nested dictionary containing the `class` of the ValidationAction and any additional parameters returned by the ValidationAction as its value.
 
 GE comes with a list of actions that we consider useful and you can reuse in your pipelines. Most of them take in validation results and do something with them.
