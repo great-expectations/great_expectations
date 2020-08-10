@@ -21,7 +21,7 @@ def test_suite_help_output(caplog):
   demo      Create a new demo Expectation Suite.
   edit      Generate a Jupyter notebook for editing an existing Expectation...
   list      Lists available Expectation Suites.
-  new       Create a new Expectation Suite.
+  new       Create a new empty Expectation Suite.
   scaffold  Scaffold a new Expectation Suite."""
         in result.stdout
     )
@@ -215,10 +215,9 @@ def test_suite_new_creates_empty_suite(
     os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
     csv = os.path.join(filesystem_csv_2, "f1.csv")
-    # TODO this test must be updated to remove the --empty flag in the next major release
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--empty", "--suite", "foo"],
+        ["suite", "new", "-d", root_dir, "--suite", "foo"],
         input=f"{csv}\n",
         catch_exceptions=False,
     )
@@ -300,10 +299,9 @@ def test_suite_new_empty_with_no_jupyter(
     root_dir = data_context_parameterized_expectation_suite.root_directory
     runner = CliRunner(mix_stderr=False)
     csv = os.path.join(filesystem_csv_2, "f1.csv")
-    # TODO this test must be updated to remove the --empty flag in the next major release
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--empty", "--suite", "foo", "--no-jupyter"],
+        ["suite", "new", "-d", root_dir, "--suite", "foo", "--no-jupyter"],
         input=f"{csv}\n",
         catch_exceptions=False,
     )

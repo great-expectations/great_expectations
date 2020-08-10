@@ -1256,7 +1256,7 @@ class DataAsset(object):
             define custom classes, etc. To use developed expectations from the command-line tool, you will still need \
             to define custom classes, etc.
 
-            Check out :ref:`custom_expectations_reference` for more information.
+            Check out :ref:`how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations` for more information.
         """
 
         argspec = inspect.getfullargspec(function)[0][1:]

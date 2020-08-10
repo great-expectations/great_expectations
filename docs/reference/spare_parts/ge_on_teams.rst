@@ -22,7 +22,7 @@ question is already answered! Expectations live right in your repo!
 
 It is also possible to store expectations on cloud storage providers--we recommend enabling versioning in that case.
 See the documentation on :ref:`customizing the data docs store backend <customizing_data_docs_store_backend>` for
-more information, or follow the :ref:`tutorial <publishing_data_docs_to_s3>`.
+more information, or follow the :ref:`tutorial <how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_s3>`.
 
 Where Should Validations Live?
 ------------------------------
@@ -48,7 +48,7 @@ You can configure a store to write these to a cloud provider blob storage such
 as Amazon S3, Google Cloud Storage, or some other securely mounted file system.
 
 See the :ref:`data docs reference <data_docs_reference>` for more information on configuring data docs to use cloud
-storage, or follow the :ref:`tutorial <publishing_data_docs_to_s3>` to configure a site now.
+storage, or follow the :ref:`tutorial <how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_s3>` to configure a site now.
 
 Where Should Notifications Go?
 ------------------------------
