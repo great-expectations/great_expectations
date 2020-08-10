@@ -18,6 +18,8 @@ datasources:
           engine: python
           test_variable_sub1: ${replace_me}
           test_variable_sub2: $replace_me
+          test_variable_sub3: ${replace_me_1}
+          test_variable_sub4: ${replace_me_2}
 
 
 config_variables_file_path: uncommitted/config_variables.yml
