@@ -253,7 +253,6 @@ def suite_demo(suite, directory, view):
 
 @suite.command(name="new")
 @click.option("--suite", "-es", default=None, help="Expectation suite name.")
-@click.option("--empty", "empty", flag_value=True, help="Create an empty suite.")
 @click.option(
     "--directory",
     "-d",
@@ -267,39 +266,22 @@ def suite_demo(suite, directory, view):
     default=True,
 )
 @click.option(
-    "--view/--no-view",
-    help="By default open in browser unless you specify the --no-view flag",
-    default=True,
-)
-@click.option(
     "--batch-kwargs",
     default=None,
     help="Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary",
 )
-@mark.cli_as_deprecation(
-    """<yellow>In the next major release:
-  - `suite new` will create an empty suite and will no longer have the --empty flag
-  - `suite new` will no longer have a --view/no-view flag. Data Docs will not be opened.
-  - The current behavior of creating a demo suite will transition to the new command `suite demo` which can be used now.
-  - We also suggest using the `suite scaffold` command for faster suite creation.
-</yellow>"""
-)
-def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
-    # TODO update docstring on next major release
+def suite_new(suite, directory, jupyter, batch_kwargs):
     """
-    Create a new Expectation Suite.
+    Create a new empty Expectation Suite.
 
-    Great Expectations will choose a couple of columns and generate expectations about them
-    to demonstrate some examples of assertions you can make about your data.
-
-    If you wish to skip the examples, add the `--empty` flag.
+    Edit in jupyter notebooks, or skip with the --no-jupyter flag
     """
     _suite_new(
         suite=suite,
         directory=directory,
-        empty=empty,
+        empty=True,
         jupyter=jupyter,
-        view=view,
+        view=False,
         batch_kwargs=batch_kwargs,
         usage_event="cli.suite.new",
     )
