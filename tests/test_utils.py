@@ -1,10 +1,11 @@
 import copy
-import importlib
 import locale
 import os
 import random
 import string
 from functools import wraps
+from types import ModuleType
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -16,10 +17,18 @@ from great_expectations.core import (
     ExpectationValidationResultSchema,
 )
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
+from great_expectations.dataset.util import (
+    get_sql_dialect_floating_point_infinity_value,
+)
 from great_expectations.profile import ColumnsExistProfiler
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
+
+try:
+    from sqlalchemy import create_engine
+except ImportError:
+    create_engine = None
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
@@ -36,6 +45,7 @@ try:
         "TIMESTAMP": sqlitetypes.TIMESTAMP,
     }
 except ImportError:
+    sqlitetypes = None
     SQLITE_TYPES = {}
 
 try:
@@ -54,6 +64,7 @@ try:
         "NUMERIC": postgresqltypes.NUMERIC,
     }
 except ImportError:
+    postgresqltypes = None
     POSTGRESQL_TYPES = {}
 
 try:
@@ -69,10 +80,51 @@ try:
         "TIMESTAMP": mysqltypes.TIMESTAMP,
         "DATE": mysqltypes.DATE,
         "FLOAT": mysqltypes.FLOAT,
+        "DOUBLE": mysqltypes.DOUBLE,
         "BOOLEAN": mysqltypes.BOOLEAN,
+        "TINYINT": mysqltypes.TINYINT,
     }
 except ImportError:
+    mysqltypes = None
     MYSQL_TYPES = {}
+
+try:
+    import sqlalchemy.dialects.mssql as mssqltypes
+
+    MSSQL_TYPES = {
+        "BIGINT": mssqltypes.BIGINT,
+        "BINARY": mssqltypes.BINARY,
+        "BIT": mssqltypes.BIT,
+        "CHAR": mssqltypes.CHAR,
+        "DATE": mssqltypes.DATE,
+        "DATETIME": mssqltypes.DATETIME,
+        "DATETIME2": mssqltypes.DATETIME2,
+        "DATETIMEOFFSET": mssqltypes.DATETIMEOFFSET,
+        "DECIMAL": mssqltypes.DECIMAL,
+        "FLOAT": mssqltypes.FLOAT,
+        "IMAGE": mssqltypes.IMAGE,
+        "INTEGER": mssqltypes.INTEGER,
+        "MONEY": mssqltypes.MONEY,
+        "NCHAR": mssqltypes.NCHAR,
+        "NTEXT": mssqltypes.NTEXT,
+        "NUMERIC": mssqltypes.NUMERIC,
+        "NVARCHAR": mssqltypes.NVARCHAR,
+        "REAL": mssqltypes.REAL,
+        "SMALLDATETIME": mssqltypes.SMALLDATETIME,
+        "SMALLINT": mssqltypes.SMALLINT,
+        "SMALLMONEY": mssqltypes.SMALLMONEY,
+        "SQL_VARIANT": mssqltypes.SQL_VARIANT,
+        "TEXT": mssqltypes.TEXT,
+        "TIME": mssqltypes.TIME,
+        "TIMESTAMP": mssqltypes.TIMESTAMP,
+        "TINYINT": mssqltypes.TINYINT,
+        "UNIQUEIDENTIFIER": mssqltypes.UNIQUEIDENTIFIER,
+        "VARBINARY": mssqltypes.VARBINARY,
+        "VARCHAR": mssqltypes.VARCHAR,
+    }
+except ImportError:
+    mssqltypes = None
+    MSSQL_TYPES = {}
 
 
 def modify_locale(func):
@@ -134,7 +186,13 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
 
 
 def get_dataset(
-    dataset_type, data, schemas=None, profiler=ColumnsExistProfiler, caching=True
+    dataset_type,
+    data,
+    schemas=None,
+    profiler=ColumnsExistProfiler,
+    caching=True,
+    table_name=None,
+    sqlite_db_path=None,
 ):
     """Utility to create datasets for json-formatted tests.
     """
@@ -166,9 +224,13 @@ def get_dataset(
         return PandasDataset(df, profiler=profiler, caching=caching)
 
     elif dataset_type == "sqlite":
-        from sqlalchemy import create_engine
+        if not create_engine:
+            return None
 
-        engine = create_engine("sqlite://")
+        if sqlite_db_path is not None:
+            engine = create_engine(f"sqlite:////{sqlite_db_path}")
+        else:
+            engine = create_engine("sqlite://")
         conn = engine.connect()
         # Add the data to the database as a new table
 
@@ -186,21 +248,47 @@ def get_dataset(
                     df[col] = pd.to_numeric(df[col], downcast="signed")
                 elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
-        tablename = "test_data_" + "".join(
-            [random.choice(string.ascii_letters + string.digits) for n in range(8)]
+        if table_name is None:
+            table_name = "test_data_" + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+        df.to_sql(
+            name=table_name,
+            con=conn,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
         )
-        df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            tablename, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=conn, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "postgresql":
-        from sqlalchemy import create_engine
+        if not create_engine:
+            return None
 
         # Create a new database
         engine = create_engine("postgresql://postgres@localhost/test_ci")
@@ -222,23 +310,49 @@ def get_dataset(
                     df[col] = pd.to_numeric(df[col], downcast="signed")
                 elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
-        tablename = "test_data_" + "".join(
-            [random.choice(string.ascii_letters + string.digits) for n in range(8)]
+        if table_name is None:
+            table_name = "test_data_" + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+        df.to_sql(
+            name=table_name,
+            con=conn,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
         )
-        df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            tablename, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=conn, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "mysql":
-        from sqlalchemy import create_engine
+        if not create_engine:
+            return None
 
-        engine = create_engine("mysql://root@localhost/test_ci")
+        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
         conn = engine.connect()
 
         sql_dtypes = {}
@@ -255,17 +369,109 @@ def get_dataset(
                     df[col] = pd.to_numeric(df[col], downcast="signed")
                 elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
-        tablename = "test_data_" + "".join(
-            [random.choice(string.ascii_letters + string.digits) for n in range(8)]
+        if table_name is None:
+            table_name = "test_data_" + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+        df.to_sql(
+            name=table_name,
+            con=conn,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
         )
-        df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            tablename, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=conn, profiler=profiler, caching=caching
+        )
+
+    elif dataset_type == "mssql":
+        if not create_engine:
+            return None
+
+        engine = create_engine(
+            "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+            # echo=True,
+        )
+
+        # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
+        # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
+        # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
+
+        conn = engine.connect()
+
+        sql_dtypes = {}
+        if (
+            schemas
+            and dataset_type in schemas
+            and isinstance(engine.dialect, mssqltypes.dialect)
+        ):
+            schema = schemas[dataset_type]
+            sql_dtypes = {col: MSSQL_TYPES[dtype] for (col, dtype) in schema.items()}
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast="signed")
+                elif type_ in ["FLOAT"]:
+                    df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+
+        if table_name is None:
+            table_name = "test_data_" + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+        df.to_sql(
+            name=table_name,
+            con=conn,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+        )
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(
+            table_name, engine=conn, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "SparkDFDataset":
@@ -377,14 +583,14 @@ def get_dataset(
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
     if context in ["sqlite"]:
         return getter in ["get_column_modes", "get_column_stdev"]
-    if context in ["postgresql", "mysql"]:
+    if context in ["postgresql", "mysql", "mssql"]:
         return getter in ["get_column_modes"]
     if context == "SparkDFDataset":
         return getter in []
 
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql"]:
+    if context in ["sqlite", "postgresql", "mysql", "mssql"]:
         return expectation_type in [
             # "expect_column_to_exist",
             # "expect_table_row_count_to_be_between",
@@ -409,6 +615,10 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_values_to_not_match_regex",
             # "expect_column_values_to_match_regex_list",
             # "expect_column_values_to_not_match_regex_list",
+            # "expect_column_values_to_match_like_pattern",
+            # "expect_column_values_to_not_match_like_pattern",
+            # "expect_column_values_to_match_like_pattern_list",
+            # "expect_column_values_to_not_match_like_pattern_list",
             "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
@@ -431,6 +641,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_pair_values_A_to_be_greater_than_B",
             "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
+            # "expect_table_row_count_to_equal_other_table",
         ]
     if context == "SparkDFDataset":
         return expectation_type in [
@@ -449,8 +660,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_distinct_values_to_equal_set",
             # "expect_column_distinct_values_to_contain_set",
             # "expect_column_values_to_be_between",
-            "expect_column_values_to_be_increasing",
-            "expect_column_values_to_be_decreasing",
+            # "expect_column_values_to_be_increasing",
+            # "expect_column_values_to_be_decreasing",
             # "expect_column_value_lengths_to_be_between",
             # "expect_column_value_lengths_to_equal",
             # "expect_column_values_to_match_regex",
@@ -479,6 +690,11 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_pair_values_A_to_be_greater_than_B",
             "expect_column_pair_values_to_be_in_set",
             # "expect_multicolumn_values_to_be_unique",
+            "expect_table_row_count_to_equal_other_table",
+        ]
+    if context == "PandasDataset":
+        return expectation_type in [
+            "expect_table_row_count_to_equal_other_table",
         ]
     return False
 
@@ -531,6 +747,10 @@ def evaluate_json_test(data_asset, expectation_type, test):
     else:
         result = getattr(data_asset, expectation_type)(**test["in"])
 
+    check_json_test_result(test=test, result=result, data_asset=data_asset)
+
+
+def check_json_test_result(test, result, data_asset=None):
     # Check results
     if test["exact_match_out"] is True:
         assert expectationValidationResultSchema.load(test["out"]) == result
@@ -664,17 +884,6 @@ def evaluate_json_test(data_asset, expectation_type, test):
                 raise ValueError(
                     "Invalid test specification: unknown key " + key + " in 'out'"
                 )
-
-
-def is_library_installed(library_name):
-    """
-    Tests if a library is installed.
-    """
-    try:
-        importlib.import_module(library_name)
-        return True
-    except ModuleNotFoundError:
-        return False
 
 
 def safe_remove(path):

@@ -12,19 +12,21 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
 
 .. attention::
 
-   Welcome to our brand new docs site! We are actively improving the docs and migrating content to this new format, but there are still some places under construction. Feel free to ask questions on our `slack channel <greatexpectations.io/slack>`__ or `discussion forum <discuss.greatexpectations.io>`__!
+   Welcome to our brand new docs site! We are actively improving the docs and migrating content to this new format, but there are still some places under construction. Feel free to ask questions on our `Slack channel <greatexpectations.io/slack>`__ or `discussion forum <discuss.greatexpectations.io>`__!
 
 .. toctree::
    :maxdepth: 2
 
    intro
-   tutorials
-   how_to_guides
-   features
+   guides
    reference
    community
    contributing
-   module_docs
+
+.. toctree::
+   :maxdepth: 1
+
+   changelog
 
 *****
 Index
@@ -32,9 +34,3 @@ Index
 
 * :ref:`genindex`
 * :ref:`modindex`
-
-
-.. toctree::
-   :maxdepth: 2
-
-   autoapi/index

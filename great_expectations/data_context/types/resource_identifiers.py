@@ -2,7 +2,7 @@ import logging
 import warnings
 from typing import Union
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 from marshmallow import Schema, fields, post_load
 
 from great_expectations.core import IDDict, RunIdentifier, RunIdentifierSchema
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class ExpectationSuiteIdentifier(DataContextKey):
     def __init__(self, expectation_suite_name: str):
-        super(ExpectationSuiteIdentifier, self).__init__()
+        super().__init__()
         if not isinstance(expectation_suite_name, str):
             raise InvalidDataContextKeyError(
                 f"expectation_suite_name must be a string, not {type(expectation_suite_name).__name__}"
@@ -61,7 +61,7 @@ class BatchIdentifier(DataContextKey):
         batch_identifier: Union[BatchKwargs, dict, str],
         data_asset_name: str = None,
     ):
-        super(BatchIdentifier, self).__init__()
+        super().__init__()
         # if isinstance(batch_identifier, (BatchKwargs, dict)):
         #     self._batch_identifier = batch_identifier.batch_fingerprint
 
@@ -107,7 +107,7 @@ class ValidationResultIdentifier(DataContextKey):
                 identifying information for the fully qualified expectation suite used to validate
             run_id (RunIdentifier): The run_id for which validation occurred
         """
-        super(ValidationResultIdentifier, self).__init__()
+        super().__init__()
         self._expectation_suite_identifier = expectation_suite_identifier
         if isinstance(run_id, str):
             warnings.warn(
@@ -118,7 +118,7 @@ class ValidationResultIdentifier(DataContextKey):
             )
             try:
                 run_time = parse(run_id)
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 run_time = None
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):

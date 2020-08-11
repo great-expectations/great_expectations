@@ -93,10 +93,22 @@ class DatabaseStoreBackend(StoreBackend):
             logger.debug("Error fetching value: " + str(e))
             raise ge_exceptions.StoreError("Unable to fetch value for key: " + str(key))
 
-    def _set(self, key, value, **kwargs):
+    def _set(self, key, value, allow_update=True):
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
         cols["value"] = value
-        ins = self._table.insert().values(**cols)
+
+        if allow_update:
+            if self.has_key(key):
+                ins = (
+                    self._table.update()
+                    .where(getattr(self._table.columns, self.key_columns[0]) == key[0])
+                    .values(**cols)
+                )
+            else:
+                ins = self._table.insert().values(**cols)
+        else:
+            ins = self._table.insert().values(**cols)
+
         try:
             self.engine.execute(ins)
         except IntegrityError as e:
@@ -104,11 +116,29 @@ class DatabaseStoreBackend(StoreBackend):
                 logger.info(f"Key {str(key)} already exists with the same value.")
             else:
                 raise ge_exceptions.StoreBackendError(
-                    "Integrity error {str(e)} while trying to store key"
+                    f"Integrity error {str(e)} while trying to store key"
                 )
 
     def _move(self):
         raise NotImplementedError
+
+    def get_url_for_key(self, key):
+        url = self._convert_engine_and_key_to_url(key)
+        return url
+
+    def _convert_engine_and_key_to_url(self, key):
+        # SqlAlchemy engine URL is formatted in the following way
+        # postgresql://postgres:password@localhost:5433/work
+        # [engine]://[username]:[password]@[host]:[port]/[db_name]
+
+        # which contains information like username and password that should not be public
+        # This function changes the formatting to the following:
+        # [engine]://[db_name]/[key]
+
+        full_url = str(self.engine.url)
+        engine_name = full_url.split("://")[0]
+        db_name = full_url.split("/")[-1]
+        return engine_name + "://" + db_name + "/" + str(key[0])
 
     def _has_key(self, key):
         sel = (

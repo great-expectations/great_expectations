@@ -24,6 +24,15 @@ config = {
         "spark": ["pyspark>=2.3.2"],
         "sqlalchemy": ["sqlalchemy>=1.2"],
         "airflow": ["apache-airflow[s3]>=1.9.0", "boto3>=1.7.3"],
+        "gcp": [
+            "google-cloud>=0.34.0",
+            "google-cloud-storage>=1.28.0",
+            "google-cloud-secret-manager>=1.0.0",
+            "pybigquery==0.4.15",
+        ],
+        "redshift": ["psycopg2>=2.8"],
+        "s3": ["boto3>=1.14"],
+        "snowflake": ["snowflake-sqlalchemy>=1.2"],
     },
     "packages": find_packages(exclude=["docs*", "tests*", "examples*"]),
     "entry_points": {
@@ -46,6 +55,7 @@ config = {
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
 }
 

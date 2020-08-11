@@ -3,6 +3,8 @@ import json
 import locale
 import os
 import shutil
+from types import ModuleType
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -10,6 +12,7 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as ge
+from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -21,6 +24,8 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset.pandas_dataset import PandasDataset
+from great_expectations.datasource import SqlAlchemyDatasource
+from great_expectations.util import import_library_module
 
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
 
@@ -52,7 +57,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--no-spark",
         action="store_true",
-        help="If set, suppress tests against the spark test suite",
+        help="If set, suppress all tests against the spark test suite",
     )
     parser.addoption(
         "--no-sqlalchemy",
@@ -62,7 +67,13 @@ def pytest_addoption(parser):
     parser.addoption(
         "--no-postgresql",
         action="store_true",
-        help="If set, suppress tests against postgresql",
+        help="If set, suppress all tests against postgresql",
+    )
+    parser.addoption(
+        "--mysql", action="store_true", help="If set, execute tests against mysql",
+    )
+    parser.addoption(
+        "--mssql", action="store_true", help="If set, execute tests against mssql",
     )
     parser.addoption(
         "--aws-integration",
@@ -83,10 +94,11 @@ def build_test_backends_list(metafunc):
     no_sqlalchemy = metafunc.config.getoption("--no-sqlalchemy")
     if not no_sqlalchemy:
         test_backends += ["sqlite"]
-        import sqlalchemy as sa
+
+        sa: Union[ModuleType, None] = import_library_module(module_name="sqlalchemy")
 
         no_postgresql = metafunc.config.getoption("--no-postgresql")
-        if not no_postgresql:
+        if not (sa is None or no_postgresql):
             ###
             # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
             # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
@@ -105,15 +117,33 @@ def build_test_backends_list(metafunc):
                     "'postgresql://postgres@localhost/test_ci'"
                 )
             test_backends += ["postgresql"]
-            # TODO: enable mysql or other backend tests to be optionally specified
-            # if mysql:
-            #     try:
-            #         engine = sa.create_engine('mysql://root@localhost/test_ci')
-            #         conn = engine.connect()
-            #         test_backends += ['mysql']
-            #         conn.close()
-            #     except (ImportError, sa.exc.SQLAlchemyError):
-            #         warnings.warn("No mysql context available for testing.")
+        mysql = metafunc.config.getoption("--mysql")
+        if sa and mysql:
+            try:
+                engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError):
+                raise ImportError(
+                    "mysql tests are requested, but unable to connect to the mysql database at "
+                    "'mysql+pymysql://root@localhost/test_ci'"
+                )
+            test_backends += ["mysql"]
+        mssql = metafunc.config.getoption("--mssql")
+        if sa and mssql:
+            try:
+                engine = sa.create_engine(
+                    "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+                    # echo=True,
+                )
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError):
+                raise ImportError(
+                    "mssql tests are requested, but unable to connect to the mssql database at "
+                    "'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
+                )
+            test_backends += ["mssql"]
     return test_backends
 
 
@@ -145,7 +175,12 @@ def no_usage_stats(monkeypatch):
 
 @pytest.fixture
 def sa(test_backends):
-    if "postgresql" not in test_backends and "sqlite" not in test_backends:
+    if (
+        "postgresql" not in test_backends
+        and "sqlite" not in test_backends
+        and "mysql" not in test_backends
+        and "mssql" not in test_backends
+    ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
         import sqlalchemy as sa
@@ -1225,7 +1260,8 @@ def numeric_high_card_dataset(test_backend, numeric_high_card_dict):
             "norm_0_1": "NUMERIC",
         },
         "sqlite": {"norm_0_1": "FLOAT",},
-        "mysql": {"norm_0_1": "FLOAT",},
+        "mysql": {"norm_0_1": "DOUBLE",},
+        "mssql": {"norm_0_1": "FLOAT",},
         "spark": {"norm_0_1": "FloatType",},
     }
     return get_dataset(test_backend, numeric_high_card_dict, schemas=schemas)
@@ -1253,6 +1289,7 @@ def datetime_dataset(test_backend):
         "postgresql": {"datetime": "TIMESTAMP",},
         "sqlite": {"datetime": "TIMESTAMP",},
         "mysql": {"datetime": "TIMESTAMP",},
+        "mssql": {"datetime": "DATETIME",},
         "spark": {"datetime": "TimestampType",},
     }
     return get_dataset(test_backend, data, schemas=schemas)
@@ -1377,6 +1414,7 @@ def non_numeric_low_card_dataset(test_backend):
         "postgresql": {"lowcardnonnum": "TEXT",},
         "sqlite": {"lowcardnonnum": "VARCHAR",},
         "mysql": {"lowcardnonnum": "TEXT",},
+        "mssql": {"lowcardnonnum": "VARCHAR",},
         "spark": {"lowcardnonnum": "StringType",},
     }
     return get_dataset(test_backend, data, schemas=schemas)
@@ -1804,6 +1842,7 @@ def non_numeric_high_card_dataset(test_backend):
         "postgresql": {"highcardnonnum": "TEXT", "medcardnonnum": "TEXT",},
         "sqlite": {"highcardnonnum": "VARCHAR", "medcardnonnum": "VARCHAR",},
         "mysql": {"highcardnonnum": "TEXT", "medcardnonnum": "TEXT",},
+        "mssql": {"highcardnonnum": "VARCHAR", "medcardnonnum": "VARCHAR",},
         "spark": {"highcardnonnum": "StringType", "medcardnonnum": "StringType",},
     }
     return get_dataset(test_backend, data, schemas=schemas)
@@ -1831,7 +1870,8 @@ def dataset_sample_data(test_backend):
             "naturals": "NUMERIC",
         },
         "sqlite": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
-        "mysql": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
+        "mysql": {"nulls": "DOUBLE", "naturals": "DOUBLE"},
+        "mssql": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
         "spark": {
             "infinities": "FloatType",
             "nulls": "FloatType",
@@ -1913,6 +1953,21 @@ def empty_data_context(tmp_path_factory):
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
     return context
+
+
+@pytest.fixture
+def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
+    monkeypatch.setenv("FOO", "BAR")
+    root_dir = empty_data_context.root_directory
+    ge_config_path = file_relative_path(
+        __file__, "./test_fixtures/great_expectations_basic_with_variables.yml",
+    )
+    shutil.copy(ge_config_path, os.path.join(root_dir, "great_expectations.yml"))
+    config_variables_path = file_relative_path(
+        __file__, "./test_fixtures/config_variables.yml",
+    )
+    shutil.copy(config_variables_path, os.path.join(root_dir, "uncommitted"))
+    return DataContext(context_root_dir=root_dir)
 
 
 @pytest.fixture
@@ -1999,7 +2054,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 
 @pytest.fixture
-def titanic_sqlite_db():
+def titanic_sqlite_db(sa):
     from sqlalchemy import create_engine
 
     titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
@@ -2027,7 +2082,7 @@ def titanic_expectation_suite():
 
 
 @pytest.fixture
-def empty_sqlite_db():
+def empty_sqlite_db(sa):
     """An empty in-memory sqlite db that always gets run."""
     try:
         from sqlalchemy import create_engine
@@ -2195,6 +2250,71 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_with_bad_notebooks(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    custom_notebook_assets_dir = "notebook_assets"
+
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_basic_with_bad_notebooks.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(asset_config_path, "my_dag_node/default.json"),
+    )
+
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    shutil.copytree(
+        os.path.join(fixture_dir, custom_notebook_assets_dir),
+        str(os.path.join(context_path, "plugins", custom_notebook_assets_dir)),
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_custom_notebooks(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_custom_notebooks.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(asset_config_path, "my_dag_node/default.json"),
+    )
+
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+
     return ge.data_context.DataContext(context_path)
 
 
@@ -2484,3 +2604,8 @@ def sqlite_view_engine(test_backends):
 @pytest.fixture
 def expectation_suite_identifier():
     return ExpectationSuiteIdentifier("my.expectation.suite.name")
+
+
+@pytest.fixture
+def basic_sqlalchemy_datasource(sqlitedb_engine):
+    return SqlAlchemyDatasource("basic_sqlalchemy_datasource", engine=sqlitedb_engine)

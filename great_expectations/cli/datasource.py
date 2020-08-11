@@ -1,5 +1,4 @@
 import enum
-import importlib
 import json
 import logging
 import os
@@ -16,7 +15,12 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.mark import Mark as mark
-from great_expectations.cli.util import cli_message, cli_message_dict
+from great_expectations.cli.util import (
+    CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+    cli_message,
+    cli_message_dict,
+    verify_library_dependent_modules,
+)
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import DatasourceConfigSchema
@@ -46,12 +50,6 @@ class DatasourceTypes(enum.Enum):
     SPARK = "spark"
     # TODO DBT = "dbt"
 
-
-DATASOURCE_TYPE_BY_DATASOURCE_CLASS = {
-    "PandasDatasource": DatasourceTypes.PANDAS,
-    "SparkDFDatasource": DatasourceTypes.SPARK,
-    "SqlAlchemyDatasource": DatasourceTypes.SQL,
-}
 
 MANUAL_GENERATOR_CLASSES = ManualBatchKwargsGenerator
 
@@ -339,6 +337,13 @@ What are you processing your files with?
 def _add_pandas_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
+    send_usage_message(
+        data_context=context,
+        event="cli.new_ds_choice",
+        success=True,
+        event_payload={"type": "pandas"},
+    )
+
     if passthrough_generator_only:
         datasource_name = "files_datasource"
         configuration = PandasDatasource.build_configuration()
@@ -373,6 +378,7 @@ def _add_pandas_datasource(
         )
 
         configuration["class_name"] = "PandasDatasource"
+        configuration["module_name"] = "great_expectations.datasource"
         errors = DatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
             raise ge_exceptions.GreatExpectationsError(
@@ -399,43 +405,13 @@ Great Expectations will now add a new Datasource '{0:s}' to your deployment, by 
     return datasource_name
 
 
-def load_library(library_name, install_instructions_string=None):
-    """
-    Dynamically load a module from strings or raise a helpful error.
-
-    :param library_name: name of the library to load
-    :param install_instructions_string: optional - used when the install instructions
-            are different from 'pip install library_name'
-    :return: True if the library was loaded successfully, False otherwise
-    """
-    try:
-        _ = importlib.import_module(library_name)
-        return True
-    except ModuleNotFoundError:
-        if install_instructions_string:
-            cli_message(
-                """<red>ERROR: Great Expectations relies on the library `{}` to connect to your data.</red>
-            - Please `{}` before trying again.""".format(
-                    library_name, install_instructions_string
-                )
-            )
-        else:
-            cli_message(
-                """<red>ERROR: Great Expectations relies on the library `{}` to connect to your data.</red>
-      - Please `pip install {}` before trying again.""".format(
-                    library_name, library_name
-                )
-            )
-
-        return False
-
-
 def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
+
     msg_success_database = (
         "\n<green>Great Expectations connected to your database!</green>"
     )
 
-    if not load_library("sqlalchemy"):
+    if not _verify_sqlalchemy_dependent_modules():
         return None
 
     db_choices = [str(x) for x in list(range(1, 1 + len(SupportedDatabases)))]
@@ -451,6 +427,13 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
     )  # don't show user a zero index list :)
 
     selected_database = list(SupportedDatabases)[selected_database]
+
+    send_usage_message(
+        data_context=context,
+        event="cli.new_ds_choice",
+        success=True,
+        event_payload={"type": "sqlalchemy", "db": selected_database.name},
+    )
 
     datasource_name = "my_{}_db".format(selected_database.value.lower())
     if selected_database == SupportedDatabases.OTHER:
@@ -473,42 +456,31 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
         cli_message(msg_db_config.format(datasource_name))
 
         if selected_database == SupportedDatabases.MYSQL:
-            if not load_library("pymysql"):
+            if not _verify_mysql_dependent_modules():
                 return None
+
             credentials = _collect_mysql_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.POSTGRES:
-            if not load_library(
-                "psycopg2",
-                "pip install psycopg2 (or if on macOS pip install psycopg2-binary)",
-            ):
+            if not _verify_postgresql_dependent_modules():
                 return None
+
             credentials = _collect_postgres_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.REDSHIFT:
-            if not load_library(
-                "psycopg2",
-                "pip install psycopg2 (or if on macOS pip install psycopg2-binary)",
-            ):
+            if not _verify_redshift_dependent_modules():
                 return None
+
             credentials = _collect_redshift_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.SNOWFLAKE:
-            cli_message(
-                "<yellow>Please consider going through "
-                "https://docs.greatexpectations.io/en/latest/reference/integrations/snowflake.html for helpful "
-                "information regarding connecting Great Expectations to Snowflake.</yellow>\n"
-            )
-            if not load_library(
-                "snowflake",
-                install_instructions_string="pip install snowflake-sqlalchemy",
-            ):
+            if not _verify_snowflake_dependent_modules():
                 return None
+
             credentials = _collect_snowflake_credentials(
                 default_credentials=credentials
             )
         elif selected_database == SupportedDatabases.BIGQUERY:
-            if not load_library(
-                "pybigquery", install_instructions_string="pip install pybigquery"
-            ):
+            if not _verify_bigquery_dependent_modules():
                 return None
+
             credentials = _collect_bigquery_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.OTHER:
             sqlalchemy_url = click.prompt(
@@ -529,11 +501,13 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             cli_message(
                 "<cyan>Attempting to connect to your database. This may take a moment...</cyan>"
             )
+
             configuration = SqlAlchemyDatasource.build_configuration(
                 credentials="${" + datasource_name + "}"
             )
 
             configuration["class_name"] = "SqlAlchemyDatasource"
+            configuration["module_name"] = "great_expectations.datasource"
             errors = DatasourceConfigSchema().validate(configuration)
             if len(errors) != 0:
                 raise ge_exceptions.GreatExpectationsError(
@@ -609,7 +583,7 @@ def _collect_postgres_credentials(default_credentials=None):
     if default_credentials is None:
         default_credentials = {}
 
-    credentials = {"drivername": "postgres"}
+    credentials = {"drivername": "postgresql"}
 
     credentials["host"] = click.prompt(
         "What is the host for the postgres connection?",
@@ -643,28 +617,29 @@ def _collect_postgres_credentials(default_credentials=None):
 def _collect_snowflake_credentials(default_credentials=None):
     if default_credentials is None:
         default_credentials = {}
-
     credentials = {"drivername": "snowflake"}
 
-    # required
+    auth_method = click.prompt(
+        """What authentication method would you like to use?
+    1. User and Password
+    2. Single sign-on (SSO)
+    3. Key pair authentication
+""",
+        type=click.Choice(["1", "2", "3"]),
+        show_choices=False,
+    )
 
     credentials["username"] = click.prompt(
         "What is the user login name for the snowflake connection?",
         default=default_credentials.get("username", ""),
     ).strip()
-    credentials["password"] = click.prompt(
-        "What is the password for the snowflake connection?",
-        default="",
-        show_default=False,
-        hide_input=True,
-    )
+
     credentials["host"] = click.prompt(
         "What is the account name for the snowflake connection (include region -- ex "
         "'ABCD.us-east-1')?",
         default=default_credentials.get("host", ""),
     ).strip()
 
-    # optional
     database = click.prompt(
         "What is database name for the snowflake connection? (optional -- leave blank for none)",
         default=default_credentials.get("database", ""),
@@ -696,6 +671,54 @@ def _collect_snowflake_credentials(default_credentials=None):
     ).strip()
     if len(role) > 0:
         credentials["query"]["role"] = role
+
+    if auth_method == "1":
+        credentials = {**credentials, **_collect_snowflake_credentials_user_password()}
+    elif auth_method == "2":
+        credentials = {**credentials, **_collect_snowflake_credentials_sso()}
+    elif auth_method == "3":
+        credentials = {**credentials, **_collect_snowflake_credentials_key_pair()}
+    return credentials
+
+
+def _collect_snowflake_credentials_user_password():
+    credentials = {}
+
+    credentials["password"] = click.prompt(
+        "What is the password for the snowflake connection?",
+        default="",
+        show_default=False,
+        hide_input=True,
+    )
+
+    return credentials
+
+
+def _collect_snowflake_credentials_sso():
+    credentials = {}
+
+    credentials["connect_args"] = {}
+    credentials["connect_args"]["authenticator"] = click.prompt(
+        "Valid okta URL or 'externalbrowser' used to connect through SSO",
+        default="externalbrowser",
+        show_default=False,
+    )
+
+    return credentials
+
+
+def _collect_snowflake_credentials_key_pair():
+    credentials = {}
+
+    credentials["private_key_path"] = click.prompt(
+        "Path to the private key used for authentication", show_default=False,
+    )
+
+    credentials["private_key_passphrase"] = click.prompt(
+        "Passphrase for the private key used for authentication (optional -- leave blank for none)",
+        default="",
+        show_default=False,
+    )
 
     return credentials
 
@@ -799,7 +822,14 @@ def _collect_redshift_credentials(default_credentials=None):
 def _add_spark_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
-    if not load_library("pyspark"):
+    send_usage_message(
+        data_context=context,
+        event="cli.new_ds_choice",
+        success=True,
+        event_payload={"type": "spark"},
+    )
+
+    if not _verify_pyspark_dependent_modules():
         return None
 
     if passthrough_generator_only:
@@ -841,6 +871,7 @@ def _add_spark_datasource(
             }
         )
         configuration["class_name"] = "SparkDFDatasource"
+        configuration["module_name"] = "great_expectations.datasource"
         errors = DatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
             raise ge_exceptions.GreatExpectationsError(
@@ -985,6 +1016,7 @@ def get_batch_kwargs(
         data_asset_name, batch_kwargs = _get_batch_kwargs_for_sqlalchemy_datasource(
             context, datasource_name, additional_batch_kwargs=additional_batch_kwargs
         )
+
     else:
         raise ge_exceptions.DataContextError(
             "Datasource {0:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {1:s}".format(
@@ -1303,6 +1335,68 @@ Enter an SQL query
     batch_kwargs["data_asset_name"] = data_asset_name
 
     return data_asset_name, batch_kwargs
+
+
+def _verify_sqlalchemy_dependent_modules() -> bool:
+    return verify_library_dependent_modules(
+        python_import_name="sqlalchemy", pip_library_name="sqlalchemy"
+    )
+
+
+def _verify_mysql_dependent_modules() -> bool:
+    return verify_library_dependent_modules(
+        python_import_name="pymysql",
+        pip_library_name="pymysql",
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+    )
+
+
+def _verify_postgresql_dependent_modules() -> bool:
+    psycopg2_success: bool = verify_library_dependent_modules(
+        python_import_name="psycopg2",
+        pip_library_name="psycopg2-binary",
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+    )
+    # noinspection SpellCheckingInspection
+    postgresql_psycopg2_success: bool = verify_library_dependent_modules(
+        python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
+        pip_library_name="psycopg2-binary",
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+    )
+    return psycopg2_success and postgresql_psycopg2_success
+
+
+def _verify_redshift_dependent_modules() -> bool:
+    # noinspection SpellCheckingInspection
+    postgresql_success: bool = _verify_postgresql_dependent_modules()
+    redshift_success: bool = verify_library_dependent_modules(
+        python_import_name="sqlalchemy_redshift.dialect",
+        pip_library_name="sqlalchemy-redshift",
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+    )
+    return redshift_success or postgresql_success
+
+
+def _verify_snowflake_dependent_modules() -> bool:
+    return verify_library_dependent_modules(
+        python_import_name="snowflake.sqlalchemy.snowdialect",
+        pip_library_name="snowflake-sqlalchemy",
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+    )
+
+
+def _verify_bigquery_dependent_modules() -> bool:
+    return verify_library_dependent_modules(
+        python_import_name="pybigquery.sqlalchemy_bigquery",
+        pip_library_name="pybigquery",
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+    )
+
+
+def _verify_pyspark_dependent_modules() -> bool:
+    return verify_library_dependent_modules(
+        python_import_name="pyspark", pip_library_name="pyspark"
+    )
 
 
 def profile_datasource(

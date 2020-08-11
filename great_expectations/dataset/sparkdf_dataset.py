@@ -33,6 +33,9 @@ try:
         count,
         countDistinct,
         monotonically_increasing_id,
+        isnan,
+        datediff,
+        lag,
     )
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
@@ -53,7 +56,7 @@ class MetaSparkDFDataset(Dataset):
     """
 
     def __init__(self, *args, **kwargs):
-        super(MetaSparkDFDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @classmethod
     def column_map_expectation(cls, func):
@@ -488,7 +491,75 @@ class MetaSparkDFDataset(Dataset):
 
 class SparkDFDataset(MetaSparkDFDataset):
     """
-    This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
+This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
+
+--ge-feature-maturity-info--
+
+    id: validation_engine_pyspark_self_managed
+    title: Validation Engine - pyspark - Self-Managed
+    icon:
+    short_description: Use Spark DataFrame to validate data
+    description: Use Spark DataFrame to validate data
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+    maturity: Production
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: Moderate
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A -> see relevant Datasource evaluation
+        documentation_completeness: Complete
+        bug_risk: Low/Moderate
+        expectation_completeness: Moderate
+
+    id: validation_engine_databricks
+    title: Validation Engine - Databricks
+    icon:
+    short_description: Use Spark DataFrame in a Databricks cluster to validate data
+    description: Use Spark DataFrame in a Databricks cluster to validate data
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+    maturity: Beta
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: Low (dbfs-specific handling)
+        unit_test_coverage: N/A -> implementation not different
+        integration_infrastructure_test_coverage: Minimal (we've tested a bit, know others have used it)
+        documentation_completeness: Moderate (need docs on managing project configuration via dbfs/etc.)
+        bug_risk: Low/Moderate
+        expectation_completeness: Moderate
+
+    id: validation_engine_emr_spark
+    title: Validation Engine - EMR - Spark
+    icon:
+    short_description: Use Spark DataFrame in an EMR cluster to validate data
+    description: Use Spark DataFrame in an EMR cluster to validate data
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+    maturity: Experimental
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: Low (need to provide guidance on "known good" paths, and we know there are many "knobs" to tune that we have not explored/tested)
+        unit_test_coverage: N/A -> implementation not different
+        integration_infrastructure_test_coverage: Unknown
+        documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
+        bug_risk: Low/Moderate
+        expectation_completeness: Moderate
+
+    id: validation_engine_spark_other
+    title: Validation Engine - Spark - Other
+    icon:
+    short_description: Use Spark DataFrame to validate data
+    description: Use Spark DataFrame to validate data
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+    maturity: Experimental
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: Other (we haven't tested possibility, known glue deployment)
+        unit_test_coverage: N/A -> implementation not different
+        integration_infrastructure_test_coverage: Unknown
+        documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
+        bug_risk: Low/Moderate
+        expectation_completeness: Moderate
+
+--ge-feature-maturity-info--
     """
 
     @classmethod
@@ -504,7 +575,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         self._persist = kwargs.pop("persist", True)
         if self._persist:
             self.spark_df.persist()
-        super(SparkDFDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def head(self, n=5):
         """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
@@ -1252,3 +1323,127 @@ class SparkDFDataset(MetaSparkDFDataset):
         return column_list.withColumn(
             "__success", reduce(lambda a, b: a & b, conditions)
         )
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_be_increasing(
+        self,
+        column,  # pyspark.sql.DataFrame
+        strictly=False,
+        mostly=None,
+        parse_strings_as_datetimes=None,
+        output_strftime_format=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # string column name
+        column_name = column.schema.names[0]
+        # check if column is any type that could have na (numeric types)
+        na_types = [
+            isinstance(column.schema[column_name].dataType, typ)
+            for typ in [
+                sparktypes.LongType,
+                sparktypes.DoubleType,
+                sparktypes.IntegerType,
+            ]
+        ]
+
+        # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
+        if any(na_types):
+            column = column.filter(~isnan(column[0]))
+
+        if parse_strings_as_datetimes:
+            # convert column to timestamp format
+            column = self._apply_dateutil_parse(column)
+            # create constant column to order by in window function to preserve order of original df
+            column = column.withColumn("constant", lit("constant")).withColumn(
+                "lag", lag(column[0]).over(Window.orderBy(col("constant")))
+            )
+
+            column = column.withColumn("diff", datediff(col(column_name), col("lag")))
+
+        else:
+            column = (
+                column.withColumn("constant", lit("constant"))
+                .withColumn("lag", lag(column[0]).over(Window.orderBy(col("constant"))))
+                .withColumn("diff", column[0] - col("lag"))
+            )
+
+        # replace lag first row null with 1 so that it is not flagged as fail
+        column = column.withColumn(
+            "diff", when(col("diff").isNull(), 1).otherwise(col("diff"))
+        )
+
+        if strictly:
+            return column.withColumn(
+                "__success", when(col("diff") >= 1, lit(True)).otherwise(lit(False))
+            )
+
+        else:
+            return column.withColumn(
+                "__success", when(col("diff") >= 0, lit(True)).otherwise(lit(False))
+            )
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_be_decreasing(
+        self,
+        column,  # pyspark.sql.DataFrame
+        strictly=False,
+        mostly=None,
+        parse_strings_as_datetimes=None,
+        output_strftime_format=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # string column name
+        column_name = column.schema.names[0]
+        # check if column is any type that could have na (numeric types)
+        na_types = [
+            isinstance(column.schema[column_name].dataType, typ)
+            for typ in [
+                sparktypes.LongType,
+                sparktypes.DoubleType,
+                sparktypes.IntegerType,
+            ]
+        ]
+
+        # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
+        if any(na_types):
+            column = column.filter(~isnan(column[0]))
+
+        if parse_strings_as_datetimes:
+            # convert column to timestamp format
+            column = self._apply_dateutil_parse(column)
+            # create constant column to order by in window function to preserve order of original df
+            column = column.withColumn("constant", lit("constant")).withColumn(
+                "lag", lag(column[0]).over(Window.orderBy(col("constant")))
+            )
+
+            column = column.withColumn("diff", datediff(col(column_name), col("lag")))
+
+        else:
+            column = (
+                column.withColumn("constant", lit("constant"))
+                .withColumn("lag", lag(column[0]).over(Window.orderBy(col("constant"))))
+                .withColumn("diff", column[0] - col("lag"))
+            )
+
+        # replace lag first row null with -1 so that it is not flagged as fail
+        column = column.withColumn(
+            "diff", when(col("diff").isNull(), -1).otherwise(col("diff"))
+        )
+
+        if strictly:
+            return column.withColumn(
+                "__success", when(col("diff") <= -1, lit(True)).otherwise(lit(False))
+            )
+
+        else:
+            return column.withColumn(
+                "__success", when(col("diff") <= 0, lit(True)).otherwise(lit(False))
+            )

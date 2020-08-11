@@ -156,8 +156,7 @@ def test_cli_init_on_new_project(
 """
     )
 
-    # data_context.build_docs is twice (once in dry run mode) and two events are fired
-    assert mock_emit.call_count == 8
+    assert mock_emit.call_count == 9
     assert mock_emit.call_args_list[1] == mock.call(
         {"event_payload": {}, "event": "cli.init.create", "success": True}
     )

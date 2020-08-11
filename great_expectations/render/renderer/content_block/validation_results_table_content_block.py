@@ -41,7 +41,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
-                        "params": {"icon": ""},
+                        "params": {"icon": "", "markdown_status_icon": "❗"},
                         "styling": {
                             "params": {
                                 "icon": {
@@ -64,7 +64,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
-                        "params": {"icon": ""},
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
                         "styling": {
                             "params": {
                                 "icon": {
@@ -91,7 +91,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
-                        "params": {"icon": ""},
+                        "params": {"icon": "", "markdown_status_icon": "❌"},
                         "styling": {
                             "params": {
                                 "icon": {
@@ -122,31 +122,48 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         table_rows = []
 
         if result.get("partial_unexpected_counts"):
-            header_row = ["Unexpected Value", "Count"]
-            for unexpected_count in result.get("partial_unexpected_counts"):
-                if unexpected_count.get("value"):
-                    table_rows.append(
-                        [unexpected_count.get("value"), unexpected_count.get("count")]
-                    )
-                elif unexpected_count.get("value") == "":
-                    table_rows.append(["EMPTY", unexpected_count.get("count")])
-                elif unexpected_count.get("value") is not None:
-                    table_rows.append(
-                        [unexpected_count.get("value"), unexpected_count.get("count")]
-                    )
+            # We will check to see whether we have *all* of the unexpected values
+            # accounted for in our count, and include counts if we do. If we do not,
+            # we will use this as simply a better (non-repeating) source of
+            # "sampled" unexpected values
+            total_count = 0
+            for unexpected_count_dict in result.get("partial_unexpected_counts"):
+                if not isinstance(unexpected_count_dict, dict):
+                    # handles case: "partial_exception_counts requires a hashable type"
+                    # this case is also now deprecated (because the error is moved to an errors key
+                    # the error also *should have* been updated to "partial_unexpected_counts ..." long ago.
+                    # NOTE: JPC 20200724 - Consequently, this codepath should be removed by approximately Q1 2021
+                    continue
+                value = unexpected_count_dict.get("value")
+                count = unexpected_count_dict.get("count")
+                total_count += count
+                if value is not None and value != "":
+                    table_rows.append([value, count])
+                elif value == "":
+                    table_rows.append(["EMPTY", count])
                 else:
-                    table_rows.append(["null", unexpected_count.get("count")])
+                    table_rows.append(["null", count])
+
+            # Check to see if we have *all* of the unexpected values accounted for. If so,
+            # we show counts. If not, we only show "sampled" unexpected values.
+            if total_count == result.get("unexpected_count"):
+                header_row = ["Unexpected Value", "Count"]
+            else:
+                header_row = ["Sampled Unexpected Values"]
+                table_rows = [[row[0]] for row in table_rows]
         else:
-            header_row = ["Unexpected Value"]
+            header_row = ["Sampled Unexpected Values"]
+            sampled_values_set = set()
             for unexpected_value in result.get("partial_unexpected_list"):
                 if unexpected_value:
-                    table_rows.append([unexpected_value])
+                    string_unexpected_value = unexpected_value
                 elif unexpected_value == "":
-                    table_rows.append(["EMPTY"])
-                elif unexpected_value is not None:
-                    table_rows.append([unexpected_value])
+                    string_unexpected_value = "EMPTY"
                 else:
-                    table_rows.append(["null"])
+                    string_unexpected_value = "null"
+                if string_unexpected_value not in sampled_values_set:
+                    table_rows.append([string_unexpected_value])
+                    sampled_values_set.add(string_unexpected_value)
 
         unexpected_table_content_block = RenderedTableContent(
             **{
@@ -259,9 +276,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return "--"
 
         observed_partition_object = evr.result["details"]["observed_partition"]
-        observed_distribution = super(
-            ValidationResultsTableContentBlockRenderer, cls
-        )._get_kl_divergence_chart(observed_partition_object)
+        observed_distribution = super()._get_kl_divergence_chart(
+            observed_partition_object
+        )
 
         observed_value = (
             num_to_str(evr.result.get("observed_value"))
@@ -327,6 +344,28 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         )
 
     @classmethod
+    def _get_expect_table_row_count_to_equal_other_table_observed_value(cls, evr):
+        if not evr.result.get("observed_value"):
+            return "--"
+
+        self_table_row_count = num_to_str(evr.result["observed_value"]["self"])
+        other_table_row_count = num_to_str(evr.result["observed_value"]["other"])
+
+        return RenderedStringTemplateContent(
+            **{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Row Count: $self_table_row_count<br>Other Table Row Count: $other_table_row_count",
+                    "params": {
+                        "self_table_row_count": self_table_row_count,
+                        "other_table_row_count": other_table_row_count,
+                    },
+                    "styling": {"classes": ["mb-2"]},
+                },
+            }
+        )
+
+    @classmethod
     def _get_observed_value(cls, evr):
         result = evr.result
         if result is None:
@@ -338,6 +377,10 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return cls._get_kl_divergence_observed_value(evr)
         elif expectation_type == "expect_column_quantile_values_to_be_between":
             return cls._get_quantile_values_observed_value(evr)
+        elif expectation_type == "expect_table_row_count_to_equal_other_table":
+            return cls._get_expect_table_row_count_to_equal_other_table_observed_value(
+                evr
+            )
 
         if result.get("observed_value"):
             observed_value = result.get("observed_value")
@@ -355,6 +398,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 )
             except KeyError:
                 return "unknown % null"
+            except TypeError:
+                return "NaN% null"
         elif expectation_type == "expect_column_values_to_not_be_null":
             try:
                 null_percent = result["unexpected_percent"]
@@ -364,6 +409,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 )
             except KeyError:
                 return "unknown % not null"
+            except TypeError:
+                return "NaN% not null"
         elif result.get("unexpected_percent") is not None:
             return (
                 num_to_str(result.get("unexpected_percent"), precision=5)
@@ -374,9 +421,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _process_content_block(cls, content_block, has_failed_evr):
-        super(ValidationResultsTableContentBlockRenderer, cls)._process_content_block(
-            content_block, has_failed_evr
-        )
+        super()._process_content_block(content_block, has_failed_evr)
         content_block.header_row = ["Status", "Expectation", "Observed Value"]
         content_block.header_row_options = {"Status": {"sortable": True}}
 

@@ -15,6 +15,13 @@
           "z": "IntegerType",
           "n": "IntegerType",
           "b": "BooleanType"
+        },
+        "mssql": {
+          "x": "FLOAT",
+          "y": "INTEGER",
+          "z": "INTEGER",
+          "n": "INTEGER",
+          "b": "BIT"
         }
       },
       "tests": [{
@@ -158,8 +165,8 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql", "spark"],
-          "_comment": "postgresql will not allow coercing the boolean type to an average"
+          "suppress_test_for": ["postgresql", "mssql", "spark"],
+          "_comment": "postgresql, mssql, and spark will not allow coercing the boolean type to an average"
         },
         {
           "title": "coerced types: true/false and null",
@@ -173,8 +180,8 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql", "spark"],
-          "_comment": "postgresql will not allow coercing the boolean type to an average"
+          "suppress_test_for": ["postgresql", "mssql", "spark"],
+          "_comment": "postgresql, mssql, and spark will not allow coercing the boolean type to an average"
         },
         {
           "title": "TypeError: catch exceptions. Non-number min-value",

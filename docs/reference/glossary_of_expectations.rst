@@ -6,7 +6,7 @@ Glossary of Expectations
 
 This is a list of all built-in Expectations. Expectations are extendable so you
 can create custom expectations for your data domain! To do so see this article:
-:ref:`custom_expectations_reference`.
+:ref:`how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations`.
 
 *******
 Dataset
@@ -24,6 +24,7 @@ Table shape
 * :func:`expect_table_columns_to_match_ordered_list <great_expectations.dataset.dataset.Dataset.expect_table_columns_to_match_ordered_list>`
 * :func:`expect_table_row_count_to_be_between <great_expectations.dataset.dataset.Dataset.expect_table_row_count_to_be_between>`
 * :func:`expect_table_row_count_to_equal <great_expectations.dataset.dataset.Dataset.expect_table_row_count_to_equal>`
+* :func:`expect_table_row_count_to_equal_other_table <great_expectations.dataset.sqlalchemy_dataset.SqlAlchemyDataset.expect_table_row_count_to_equal_other_table>`
 
 Missing values, unique values, and types
 ========================================
@@ -53,6 +54,10 @@ String matching
 * :func:`expect_column_values_to_not_match_regex <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_match_regex>`
 * :func:`expect_column_values_to_match_regex_list <great_expectations.dataset.dataset.Dataset.expect_column_values_to_match_regex_list>`
 * :func:`expect_column_values_to_not_match_regex_list <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_match_regex_list>`
+* :func:`expect_column_values_to_match_like_pattern <great_expectations.dataset.dataset.Dataset.expect_column_values_to_match_like_pattern>`
+* :func:`expect_column_values_to_not_match_like_pattern <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_match_like_pattern>`
+* :func:`expect_column_values_to_match_like_pattern_list <great_expectations.dataset.dataset.Dataset.expect_column_values_to_match_like_pattern_list>`
+* :func:`expect_column_values_to_not_match_like_pattern_list <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_match_like_pattern_list>`
 
 Datetime and JSON parsing
 =========================

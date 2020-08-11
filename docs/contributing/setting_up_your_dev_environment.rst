@@ -58,6 +58,9 @@ Install python dependencies
 
     * ``pip install -r requirements-dev.txt``
     *  This will ensure that sure you have the right libraries installed in your python environment.
+      * Note that you can also substitute ``requirements-dev-test.txt`` to only install requirements required for testing all backends, and ``requirements-dev-spark.txt`` or ``requirements-dev-sqlalchemy.txt`` if you would like to add support for spark or sqlalchemy tests, respectively. For some database backends, such as MSSQL additional driver installation may required in your environment; see below for more information.
+      * `Installing Microsoft ODBC driver for MacOS <https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos>`__
+      * `Installing Microsoft ODBC driver for Linux <https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server>`__
 
 
 **7. Install great_expectations from your cloned repo**
@@ -103,6 +106,24 @@ Depending on which features of Great Expectations you want to work on, you may w
             sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) FATAL:  database "test_ci" does not exist
             (Background on this error at: http://sqlalche.me/e/e3q8)
 
+
+**If you want to develop against local mysql:**
+
+    * To simplify setup, the repository includes a docker-compose file that can stand up a local mysqldb container. To use it, you'll need to have `docker installed <https://docs.docker.com/install/>`__.
+    * Navigate to ``assets/docker/mysql`` in  your ``great_expectations`` repo and run ``docker-compose up -d``
+    * Within the same directory, you can run ``docker-compose ps`` to verify that the container is running. You should see something like:
+
+        .. code-block::
+
+                  Name                   Command             State                 Ports
+            ------------------------------------------------------------------------------------------
+            mysql_mysql_db_1   docker-entrypoint.sh mysqld   Up      0.0.0.0:3306->3306/tcp, 33060/tcp
+
+..
+
+    * Once you’re done testing, you can shut down your mysql container by running ``docker-compose down`` from the same directory.
+    * Caution: If another service is using port 3306, docker may start the container but silently fail to set up the port.
+
 **If you want to develop against local Spark:**
 
     * In most cases, ``pip install requirements-dev.txt`` should set up pyspark for you.
@@ -114,6 +135,7 @@ Depending on which features of Great Expectations you want to work on, you may w
     * ``pip install -r docs/requirements.txt``
     * To build documentation, the command is ``cd docs; make html``
     * Documentation will be generated in ``docs/build/html/`` with the ``index.html`` as the index page.
+    * Note: we use ``autoapi`` to generate API reference docs, but it's not compatible with pandas 1.1.0. You'll need to have pandas 1.0.5 (or a previous version) installed in order to successfully build docs.
 
 Run tests to confirm that everything is working
 -----------------------------------------------
@@ -124,4 +146,3 @@ Start coding!
 -----------------------------------------
 
 At this point, you have everything you need to start coding!
-

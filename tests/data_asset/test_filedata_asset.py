@@ -5,7 +5,6 @@ import pytest
 import great_expectations as ge
 from great_expectations.core import (
     ExpectationConfiguration,
-    ExpectationKwargs,
     ExpectationValidationResult,
 )
 from great_expectations.data_context.util import file_relative_path
@@ -58,7 +57,7 @@ def test_expectation_suite_filedata_asset():
     assert [
         ExpectationConfiguration(
             expectation_type="expect_file_line_regex_match_count_to_equal",
-            kwargs=ExpectationKwargs(expected_count=3, regex=",\\S", skip=1),
+            kwargs={"expected_count": 3, "regex": ",\\S", "skip": 1},
         )
     ] == complete_config.expectations
 

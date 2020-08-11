@@ -10,6 +10,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.util import (
     file_relative_path,
+    substitute_all_config_variables,
     substitute_config_variable,
 )
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
@@ -150,7 +151,8 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     assert context_config_dict == expected_config_dict
 
 
-def test_runtime_environment_are_used_preferentially(tmp_path_factory):
+def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypatch):
+    monkeypatch.setenv("FOO", "BAR")
     value_from_environment = "from_environment"
     os.environ["replace_me"] = value_from_environment
 
@@ -220,3 +222,22 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
         == config_variables_dict["arg2"]
     )
     assert exc.value.missing_config_variable == "arg1"
+
+
+def test_substitute_env_var_in_config_variable_file(
+    monkeypatch, empty_data_context_with_config_variables
+):
+    monkeypatch.setenv("FOO", "correct_val_of_replace_me")
+    context = empty_data_context_with_config_variables
+    context_config = context.get_config_with_variables_substituted()
+    assert (
+        context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
+            "mygenerator"
+        ]["reader_options"]["test_variable_sub3"]
+        == "correct_val_of_replace_me"
+    )
+    assert context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
+        "mygenerator"
+    ]["reader_options"]["test_variable_sub4"] == {
+        "inner_env_sub": "correct_val_of_replace_me"
+    }

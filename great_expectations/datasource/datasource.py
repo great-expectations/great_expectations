@@ -20,30 +20,94 @@ yaml.default_flow_style = False
 
 
 class Datasource(object):
-    """A Datasource connects to a compute environment and one or more storage environments and produces batches of data
-    that Great Expectations can validate in that compute environment.
+    """
+A Datasource connects to a compute environment and one or more storage environments and produces batches of data
+that Great Expectations can validate in that compute environment.
 
-    Each Datasource provides Batches connected to a specific compute environment, such as a
-    SQL database, a Spark cluster, or a local in-memory Pandas DataFrame.
+Each Datasource provides Batches connected to a specific compute environment, such as a
+SQL database, a Spark cluster, or a local in-memory Pandas DataFrame.
 
-    Datasources use Batch Kwargs to specify instructions for how to access data from
-    relevant sources such as an existing object from a DAG runner, a SQL database, S3 bucket, or local filesystem.
+Datasources use Batch Kwargs to specify instructions for how to access data from
+relevant sources such as an existing object from a DAG runner, a SQL database, S3 bucket, or local filesystem.
 
-    To bridge the gap between those worlds, Datasources interact closely with *generators* which
-    are aware of a source of data and can produce produce identifying information, called
-    "batch_kwargs" that datasources can use to get individual batches of data. They add flexibility
-    in how to obtain data such as with time-based partitioning, downsampling, or other techniques
-    appropriate for the datasource.
+To bridge the gap between those worlds, Datasources interact closely with *generators* which
+are aware of a source of data and can produce produce identifying information, called
+"batch_kwargs" that datasources can use to get individual batches of data. They add flexibility
+in how to obtain data such as with time-based partitioning, downsampling, or other techniques
+appropriate for the datasource.
 
-    For example, a batch kwargs generator could produce a SQL query that logically represents "rows in the Events
-    table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource could use to materialize
-    a SqlAlchemyDataset corresponding to that batch of data and ready for validation.
+For example, a batch kwargs generator could produce a SQL query that logically represents "rows in the Events
+table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource could use to materialize
+a SqlAlchemyDataset corresponding to that batch of data and ready for validation.
 
-    Since opinionated DAG managers such as airflow, dbt, prefect.io, dagster can also act as datasources
-    and/or batch kwargs generators for a more generic datasource.
+Since opinionated DAG managers such as airflow, dbt, prefect.io, dagster can also act as datasources
+and/or batch kwargs generators for a more generic datasource.
 
-    When adding custom expectations by subclassing an existing DataAsset type, use the data_asset_type parameter
-    to configure the datasource to load and return DataAssets of the custom type.
+When adding custom expectations by subclassing an existing DataAsset type, use the data_asset_type parameter
+to configure the datasource to load and return DataAssets of the custom type.
+
+--ge-feature-maturity-info--
+
+    id: datasource_s3
+    title: Datasource - S3
+    icon:
+    short_description: S3
+    description: Support for connecting to Amazon Web Services S3 as an external datasource.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_pandas_s3_datasource.html
+    maturity: Production
+    maturity_details:
+        api_stability: medium
+        implementation_completeness: Complete
+        unit_test_coverage:: Complete
+        integration_infrastructure_test_coverage: None
+        documentation_completeness: Minimal/Spotty
+        bug_risk: Low
+
+    id: datasource_filesystem
+    title: Datasource - Filesystem
+    icon:
+    short_description: File-based datsource
+    description: Support for using a mounted filesystem as an external datasource.
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_pandas_filesystem_datasource.html
+    maturity: Production
+    maturity_details:
+        api_stability: Medium
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: Partial
+        documentation_completeness: Partial
+        bug_risk: Low (Moderate for Windows users because of path issues)
+
+    id: datasource_gcs
+    title: Datasource - GCS
+    icon:
+    short_description: GCS
+    description: Support for Google Cloud Storage as an external datasource
+    how_to_guide_url:
+    maturity: Experimental
+    maturity_details:
+        api_stability: Medium (supported via native ‘gs://' syntax in Pandas and Pyspark; medium because we expect configuration to evolve)
+        implementation_completeness: Medium (works via passthrough, not via CLI)
+        unit_test_coverage: Minimal
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Minimal
+        bug_risk: Moderate
+
+    id: datasource_azure_blob_storage
+    title: Datasource - Azure Blob Storage
+    icon:
+    short_description: Azure Blob Storage
+    description: Support for Microsoft Azure Blob Storage as an external datasource
+    how_to_guide_url:
+    maturity: In Roadmap (Sub-Experimental - "Not Impossible")
+    maturity_details:
+        api_stability: N/A (Supported on Databricks Spark via ‘wasb://' / ‘wasps://' url; requires local download first for Pandas)
+        implementation_completeness: Minimal
+        unit_test_coverage: N/A
+        integration_infrastructure_test_coverage: N/A
+        documentation_completeness: Minimal
+        bug_risk: Unknown
+--ge-feature-maturity-info--
     """
 
     recognized_batch_parameters = {"limit"}

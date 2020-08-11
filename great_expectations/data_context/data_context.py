@@ -13,9 +13,10 @@ import warnings
 import webbrowser
 from typing import Dict, List, Optional, Union
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import (
@@ -27,6 +28,7 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
+    add_datasource_usage_statistics,
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
     usage_statistics_enabled_method,
@@ -88,6 +90,100 @@ class BaseDataContext(object):
         into DataContext class.
 
     Together, these changes make BaseDataContext class more testable.
+
+--ge-feature-maturity-info--
+
+    id: os_linux
+    title: OS - Linux
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Production
+    maturity_details:
+        api_stability: N/A
+        implementation_completeness: N/A
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: Complete
+        documentation_completeness: Complete
+        bug_risk: Low
+
+    id: os_macos
+    title: OS - MacOS
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Production
+    maturity_details:
+        api_stability: N/A
+        implementation_completeness: N/A
+        unit_test_coverage: Complete (local only)
+        integration_infrastructure_test_coverage: Complete (local only)
+        documentation_completeness: Complete
+        bug_risk: Low
+
+    id: os_windows
+    title: OS - Windows
+    icon:
+    short_description:
+    description:
+    how_to_guide_url:
+    maturity: Beta
+    maturity_details:
+        api_stability: N/A
+        implementation_completeness: N/A
+        unit_test_coverage: Minimal
+        integration_infrastructure_test_coverage: Minimal
+        documentation_completeness: Complete
+        bug_risk: Moderate
+------------------------------------------------------------
+    id: workflow_create_edit_expectations_cli_scaffold
+    title: Create and Edit Expectations - suite scaffold
+    icon:
+    short_description: Creating a new Expectation Suite using suite scaffold
+    description: Creating Expectation Suites through an interactive development loop using suite scaffold
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_suite_scaffold.html
+    maturity: Experimental (expect exciting changes to Profiler capability)
+    maturity_details:
+        api_stability: N/A
+        implementation_completeness: N/A
+        unit_test_coverage: N/A
+        integration_infrastructure_test_coverage: Partial
+        documentation_completeness: Complete
+        bug_risk: Low
+
+    id: workflow_create_edit_expectations_cli_edit
+    title: Create and Edit Expectations - CLI
+    icon:
+    short_description: Creating a new Expectation Suite using the CLI
+    description: Creating a Expectation Suite great_expectations suite new command
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_the_cli.html
+    maturity: Experimental (expect exciting changes to Profiler and Suite Renderer capability)
+    maturity_details:
+        api_stability: N/A
+        implementation_completeness: N/A
+        unit_test_coverage: N/A
+        integration_infrastructure_test_coverage: Partial
+        documentation_completeness: Complete
+        bug_risk: Low
+
+    id: workflow_create_edit_expectations_json_schema
+    title: Create and Edit Expectations - Json schema
+    icon:
+    short_description: Creating a new Expectation Suite from a json schema file
+    description: Creating a new Expectation Suite using JsonSchemaProfiler function and json schema file
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_suite_from_a_json_schema_file.html
+    maturity: Experimental (expect exciting changes to Profiler capability)
+    maturity_details:
+        api_stability: N/A
+        implementation_completeness: N/A
+        unit_test_coverage: N/A
+        integration_infrastructure_test_coverage: Partial
+        documentation_completeness: Complete
+        bug_risk: Low
+
+--ge-feature-maturity-info--
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
@@ -183,11 +279,17 @@ class BaseDataContext(object):
 
     def _build_store(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
-        new_store = instantiate_class_from_config(
-            config=store_config,
-            runtime_environment={"root_directory": self.root_directory,},
-            config_defaults={"module_name": module_name},
-        )
+        try:
+            new_store = instantiate_class_from_config(
+                config=store_config,
+                runtime_environment={"root_directory": self.root_directory,},
+                config_defaults={"module_name": module_name},
+            )
+        except ge_exceptions.DataContextError as e:
+            new_store = None
+            logger.critical(
+                f"While attempting to instantiate the store named {store_name} an error occurred: {e}"
+            )
         if not new_store:
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,
@@ -527,6 +629,10 @@ class BaseDataContext(object):
         )
 
     @property
+    def notebooks(self):
+        return self._project_config_with_variables_substituted.notebooks
+
+    @property
     def stores(self):
         """A single holder for all Stores in this context"""
         return self._stores
@@ -596,8 +702,12 @@ class BaseDataContext(object):
         if not config:
             config = self._project_config
 
+        substituted_config_variables = substitute_all_config_variables(
+            dict(self._load_config_variables_file()), dict(os.environ)
+        )
+
         substitutions = {
-            **dict(self._load_config_variables_file()),
+            **substituted_config_variables,
             **dict(os.environ),
             **self.runtime_environment,
         }
@@ -912,6 +1022,10 @@ class BaseDataContext(object):
             return []
         return list(self.validation_operators.keys())
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.add_datasource",
+        args_payload_fn=add_datasource_usage_statistics,
+    )
     def add_datasource(self, name, initialize=True, **kwargs):
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
@@ -1790,7 +1904,7 @@ class BaseDataContext(object):
             )
             try:
                 run_time = parse(run_id)
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):
@@ -2138,9 +2252,7 @@ class DataContext(BaseDataContext):
 
         project_config = self._load_project_config()
         project_config_dict = dataContextConfigSchema.dump(project_config)
-        super(DataContext, self).__init__(
-            project_config, context_root_directory, runtime_environment
-        )
+        super().__init__(project_config, context_root_directory, runtime_environment)
 
         # save project config if data_context_id auto-generated or global config values applied
         if (
@@ -2167,6 +2279,10 @@ class DataContext(BaseDataContext):
                 "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
                     err
                 )
+            )
+        except DuplicateKeyError:
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Error: duplicate key found in project YAML file."
             )
         except IOError:
             raise ge_exceptions.ConfigNotFoundError()
@@ -2220,14 +2336,14 @@ class DataContext(BaseDataContext):
     def add_store(self, store_name, store_config):
         logger.debug("Starting DataContext.add_store for store %s" % store_name)
 
-        new_store = super(DataContext, self).add_store(store_name, store_config)
+        new_store = super().add_store(store_name, store_config)
         self._save_project_config()
         return new_store
 
     def add_datasource(self, name, **kwargs):
         logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
 
-        new_datasource = super(DataContext, self).add_datasource(name, **kwargs)
+        new_datasource = super().add_datasource(name, **kwargs)
         self._save_project_config()
 
         return new_datasource
@@ -2421,7 +2537,7 @@ class ExplorerDataContext(DataContext):
             to include ipython notebook widgets.
         """
 
-        super(ExplorerDataContext, self).__init__(context_root_dir)
+        super().__init__(context_root_dir)
 
         self._expectation_explorer = expectation_explorer
         if expectation_explorer:

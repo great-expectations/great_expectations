@@ -2,40 +2,124 @@ import importlib
 import json
 import logging
 import os
+import time
+from functools import wraps
+from inspect import getcallargs
+from pathlib import Path
+from types import ModuleType
+from typing import Callable, Union
 
 import black
+from pkg_resources import Distribution
 
 from great_expectations.core import expectationSuiteSchema
+from great_expectations.exceptions import (
+    PluginClassNotFoundError,
+    PluginModuleNotFoundError,
+)
+
+try:
+    # This library moved in python 3.8
+    import importlib.metadata as importlib_metadata
+except ModuleNotFoundError:
+    # Fallback for python < 3.8
+    import importlib_metadata
+
 
 logger = logging.getLogger(__name__)
 
 
-def verify_dynamic_loading_support(module_name, package_name=None):
+def measure_execution_time(func) -> Callable:
+    @wraps(func)
+    def compute_delta_t(*args, **kwargs) -> Callable:
+        time_begin: int = int(round(time.time() * 1000))
+        try:
+            return func(*args, **kwargs)
+        finally:
+            time_end: int = int(round(time.time() * 1000))
+            delta_t: int = time_end - time_begin
+            call_args: dict = getcallargs(func, *args, **kwargs)
+            print(
+                f"Total execution time of function {func.__name__}({call_args}): {delta_t} ms."
+            )
+
+    return compute_delta_t
+
+
+# noinspection SpellCheckingInspection
+def get_project_distribution() -> Union[Distribution, None]:
+    ditr: Distribution
+    for distr in importlib_metadata.distributions():
+        relative_path: Path
+        try:
+            relative_path = Path(__file__).relative_to(distr.locate_file(""))
+        except ValueError:
+            pass
+        else:
+            if relative_path in distr.files:
+                return distr
+    return None
+
+
+def verify_dynamic_loading_support(module_name: str, package_name: str = None) -> None:
+    """
+    :param module_name: a possibly-relative name of a module
+    :param package_name: the name of a package, to which the given module belongs
+    """
     try:
-        module_spec = importlib.util.find_spec(module_name, package=package_name)
+        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(
+            module_name, package=package_name
+        )
     except ModuleNotFoundError:
         module_spec = None
     if not module_spec:
         if not package_name:
             package_name = ""
-        message = f"""No module named "{package_name + module_name}" could be found in the repository. Please \
+        message: str = f"""No module named "{package_name + module_name}" could be found in the repository. Please \
 make sure that the file, corresponding to this package and module, exists and that dynamic loading of code modules, \
 templates, and assets is supported in your execution environment.  This error is unrecoverable.
         """
         raise FileNotFoundError(message)
 
 
-def load_class(class_name, module_name):
-    verify_dynamic_loading_support(module_name=module_name)
-    # Get the class object itself from strings.
-    loaded_module = importlib.import_module(module_name)
+def import_library_module(module_name: str) -> Union[ModuleType, None]:
+    """
+    :param module_name: a fully-qualified name of a module (e.g., "great_expectations.dataset.sqlalchemy_dataset")
+    :return: raw source code of the module (if can be retrieved)
+    """
+    module_obj: Union[ModuleType, None]
+
     try:
-        class_ = getattr(loaded_module, class_name)
+        module_obj = importlib.import_module(module_name)
+    except ImportError:
+        module_obj = None
+
+    return module_obj
+
+
+def is_library_loadable(library_name: str) -> bool:
+    module_obj: Union[ModuleType, None] = import_library_module(
+        module_name=library_name
+    )
+    return module_obj is not None
+
+
+def load_class(class_name, module_name):
+    try:
+        verify_dynamic_loading_support(module_name=module_name)
+    except FileNotFoundError:
+        raise PluginModuleNotFoundError(module_name)
+
+    module_obj: Union[ModuleType, None] = import_library_module(module_name=module_name)
+
+    if module_obj is None:
+        raise PluginModuleNotFoundError(module_name)
+    try:
+        klass_ = getattr(module_obj, class_name)
     except AttributeError:
-        raise AttributeError(
-            "Module : {} has no class named : {}".format(module_name, class_name,)
-        )
-    return class_
+        raise PluginClassNotFoundError(module_name=module_name, class_name=class_name)
+
+    return klass_
 
 
 def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, profiler=None):
@@ -260,6 +344,50 @@ def read_table(
     import pandas as pd
 
     df = pd.read_table(filename, *args, **kwargs)
+    if dataset_class is not None:
+        return _convert_to_dataset_class(
+            df=df,
+            dataset_class=dataset_class,
+            expectation_suite=expectation_suite,
+            profiler=profiler,
+        )
+    else:
+        return _load_and_convert_to_dataset_class(
+            df=df,
+            class_name=class_name,
+            module_name=module_name,
+            expectation_suite=expectation_suite,
+            profiler=profiler,
+        )
+
+
+def read_feather(
+    filename,
+    class_name="PandasDataset",
+    module_name="great_expectations.dataset",
+    dataset_class=None,
+    expectation_suite=None,
+    profiler=None,
+    *args,
+    **kwargs,
+):
+    """Read a file using Pandas read_feather and return a great_expectations dataset.
+
+    Args:
+        filename (string): path to file to read
+        class_name (str): class to which to convert resulting Pandas df
+        module_name (str): dataset module from which to try to dynamically load the relevant module
+        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
+            if not specified, try to load the class named via the class_name and module_name parameters
+        expectation_suite (string): path to great_expectations expectation suite file
+        profiler (Profiler class): profiler to use when creating the dataset (default is None)
+
+    Returns:
+        great_expectations dataset
+    """
+    import pandas as pd
+
+    df = pd.read_feather(filename, *args, **kwargs)
     if dataset_class is not None:
         return _convert_to_dataset_class(
             df=df,

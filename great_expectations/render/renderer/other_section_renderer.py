@@ -1,7 +1,7 @@
 import warnings
 from collections import Counter, defaultdict
 
-from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
+from great_expectations.profile.base import ProfilerTypeMapping
 from great_expectations.render.types import (
     CollapseContent,
     RenderedBulletListContent,
@@ -123,7 +123,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         column_type_counter = Counter(column_types.values())
         table_rows = [
             [type, str(column_type_counter[type])]
-            for type in ["int", "float", "string", "unknown"]
+            for type in ["int", "float", "string", "datetime", "bool", "unknown"]
         ]
 
         content_blocks.append(
@@ -334,17 +334,17 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                 else:
                     expected_types = set(evr.expectation_config.kwargs["type_list"])
             else:  # assuming expect_column_values_to_be_of_type
-                expected_types = set([evr.expectation_config.kwargs["type_"]])
+                expected_types = {evr.expectation_config.kwargs["type_"]}
 
-            if expected_types.issubset(BasicDatasetProfiler.INT_TYPE_NAMES):
+            if expected_types.issubset(ProfilerTypeMapping.INT_TYPE_NAMES):
                 column_types[column] = "int"
-            elif expected_types.issubset(BasicDatasetProfiler.FLOAT_TYPE_NAMES):
+            elif expected_types.issubset(ProfilerTypeMapping.FLOAT_TYPE_NAMES):
                 column_types[column] = "float"
-            elif expected_types.issubset(BasicDatasetProfiler.STRING_TYPE_NAMES):
+            elif expected_types.issubset(ProfilerTypeMapping.STRING_TYPE_NAMES):
                 column_types[column] = "string"
-            elif expected_types.issubset(BasicDatasetProfiler.DATETIME_TYPE_NAMES):
+            elif expected_types.issubset(ProfilerTypeMapping.DATETIME_TYPE_NAMES):
                 column_types[column] = "datetime"
-            elif expected_types.issubset(BasicDatasetProfiler.BOOLEAN_TYPE_NAMES):
+            elif expected_types.issubset(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES):
                 column_types[column] = "bool"
             else:
                 warnings.warn(

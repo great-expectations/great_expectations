@@ -36,7 +36,7 @@ class MetaPandasDataset(Dataset):
     """
 
     def __init__(self, *args, **kwargs):
-        super(MetaPandasDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @classmethod
     def column_map_expectation(cls, func):
@@ -314,16 +314,36 @@ class MetaPandasDataset(Dataset):
 
 class PandasDataset(MetaPandasDataset, pd.DataFrame):
     """
-    PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
+PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
 
-    For the full API reference, please see :func:`Dataset <great_expectations.data_asset.dataset.Dataset>`
+For the full API reference, please see :func:`Dataset <great_expectations.data_asset.dataset.Dataset>`
 
-    Notes:
-        1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
-           data frame unless the user specifies the ``discard_subset_failing_expectations = True`` \
-           property on the original data frame.
-        2. Concatenations, joins, and merges of PandaDataSets contain NO expectations (since no autoinspection
-           is performed by default).
+Notes:
+    1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
+       data frame unless the user specifies the ``discard_subset_failing_expectations = True`` \
+       property on the original data frame.
+    2. Concatenations, joins, and merges of PandaDataSets contain NO expectations (since no autoinspection
+       is performed by default).
+
+--ge-feature-maturity-info--
+
+    id: validation_engine_pandas
+    title: Validation Engine - Pandas
+    icon:
+    short_description: Use Pandas DataFrame to validate data
+    description: Use Pandas DataFrame to validate data
+    how_to_guide_url:
+    maturity: Production
+    maturity_details:
+        api_stability: Stable
+        implementation_completeness: Complete
+        unit_test_coverage: Complete
+        integration_infrastructure_test_coverage: N/A -> see relevant Datasource evaluation
+        documentation_completeness: Complete
+        bug_risk: Low
+        expectation_completeness: Complete
+
+--ge-feature-maturity-info--
     """
 
     # this is necessary to subclass pandas in a proper way.
@@ -364,11 +384,11 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             )
             if self.discard_subset_failing_expectations:
                 self.discard_failing_expectations()
-        super(PandasDataset, self).__finalize__(other, method, **kwargs)
+        super().__finalize__(other, method, **kwargs)
         return self
 
     def __init__(self, *args, **kwargs):
-        super(PandasDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
         )
@@ -566,16 +586,21 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
             # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
             # of the proper expectation_type
-            existing_expectations = self.find_expectation_indexes(
-                "expect_column_values_to_be_of_type", column
+            existing_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_of_type",
+                    kwargs={"column": column},
+                )
             )
             if len(existing_expectations) == 1:
                 self._expectation_suite.expectations.pop(existing_expectations[0])
 
             # Now, rename the expectation we just added
-
-            new_expectations = self.find_expectation_indexes(
-                "_expect_column_values_to_be_of_type__aggregate", column
+            new_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="_expect_column_values_to_be_of_type__aggregate",
+                    kwargs={"column": column},
+                )
             )
             assert len(new_expectations) == 1
             old_config = self._expectation_suite.expectations[new_expectations[0]]
@@ -597,15 +622,21 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
             # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
             # of the proper expectation_type
-            existing_expectations = self.find_expectation_indexes(
-                "expect_column_values_to_be_of_type", column
+            existing_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_of_type",
+                    kwargs={"column": column},
+                )
             )
             if len(existing_expectations) == 1:
                 self._expectation_suite.expectations.pop(existing_expectations[0])
 
             # Now, rename the expectation we just added
-            new_expectations = self.find_expectation_indexes(
-                "_expect_column_values_to_be_of_type__map", column
+            new_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="_expect_column_values_to_be_of_type__map",
+                    kwargs={"column": column},
+                )
             )
             assert len(new_expectations) == 1
             old_config = self._expectation_suite.expectations[new_expectations[0]]
@@ -774,14 +805,20 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
             # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
             # of the proper expectation_type
-            existing_expectations = self.find_expectation_indexes(
-                "expect_column_values_to_be_in_type_list", column
+            existing_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_in_type_list",
+                    kwargs={"column": column},
+                )
             )
             if len(existing_expectations) == 1:
                 self._expectation_suite.expectations.pop(existing_expectations[0])
 
-            new_expectations = self.find_expectation_indexes(
-                "_expect_column_values_to_be_in_type_list__aggregate", column
+            new_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="_expect_column_values_to_be_in_type_list__aggregate",
+                    kwargs={"column": column},
+                )
             )
             assert len(new_expectations) == 1
             old_config = self._expectation_suite.expectations[new_expectations[0]]
@@ -805,15 +842,21 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
             # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
             # of the proper expectation_type
-            existing_expectations = self.find_expectation_indexes(
-                "expect_column_values_to_be_in_type_list", column
+            existing_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_in_type_list",
+                    kwargs={"column": column},
+                )
             )
             if len(existing_expectations) == 1:
                 self._expectation_suite.expectations.pop(existing_expectations[0])
 
             # Now, rename the expectation we just added
-            new_expectations = self.find_expectation_indexes(
-                "_expect_column_values_to_be_in_type_list__map", column
+            new_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="_expect_column_values_to_be_in_type_list__map",
+                    kwargs={"column": column},
+                )
             )
             assert len(new_expectations) == 1
             old_config = self._expectation_suite.expectations[new_expectations[0]]
@@ -1098,6 +1141,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         column,
         strictly=None,
         parse_strings_as_datetimes=None,
+        output_strftime_format=None,
         mostly=None,
         result_format=None,
         include_config=True,
@@ -1134,6 +1178,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         column,
         strictly=None,
         parse_strings_as_datetimes=None,
+        output_strftime_format=None,
         mostly=None,
         result_format=None,
         include_config=True,
