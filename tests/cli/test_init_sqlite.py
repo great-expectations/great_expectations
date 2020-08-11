@@ -5,7 +5,6 @@ import shutil
 import pytest
 from click.testing import CliRunner
 from freezegun import freeze_time
-from sqlalchemy import create_engine
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
