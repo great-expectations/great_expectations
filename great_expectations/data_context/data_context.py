@@ -1325,7 +1325,7 @@ class BaseDataContext(object):
         """
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
-        if not self.stores[self.expectations_store_name].has_key(key):
+        if self.stores[self.expectations_store_name].has_key(key):
             return self.stores[self.expectations_store_name].get(key)
         else:
             raise ge_exceptions.DataContextError(
