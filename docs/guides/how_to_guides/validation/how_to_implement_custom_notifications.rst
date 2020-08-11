@@ -3,16 +3,17 @@
 How to implement custom notifications
 =====================================
 
-.. admonition:: Admonition from Mr. Dickens
+If you would like to implement custom notifications that include a link to Data Docs, you can access the Data Docs URL from your Data Context after a validation run following the steps below.
 
-    "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
+.. admonition:: Prerequisites: This how-to guide assumes you have already:
 
+  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
 
-This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
+First, this is the standard boilerplate to load a Data Context and run validation on a Batch:
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
+    .. code-block:: python
 
-If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
+        context.expect_table_row_count_to_be_between(min_value=1000, max_value=4000)
 
 .. discourse::
     :topic_identifier: 222
