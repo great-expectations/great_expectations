@@ -15,7 +15,7 @@ def test_project_check_on_missing_ge_dir_guides_user_to_fix(caplog, tmp_path_fac
     stdout = result.output
     assert "Checking your config files for validity" in stdout
     assert "Unfortunately, your config appears to be invalid" in stdout
-    assert "Error: No great_expectations directory was found here!" in stdout
+    assert "Error: No great_expectations configuration was found!" in stdout
     assert result.exit_code == 1
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
