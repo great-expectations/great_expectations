@@ -2,7 +2,7 @@ import logging
 import warnings
 from typing import Union
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 from marshmallow import Schema, fields, post_load
 
 from great_expectations.core import IDDict, RunIdentifier, RunIdentifierSchema
@@ -118,7 +118,7 @@ class ValidationResultIdentifier(DataContextKey):
             )
             try:
                 run_time = parse(run_id)
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 run_time = None
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):

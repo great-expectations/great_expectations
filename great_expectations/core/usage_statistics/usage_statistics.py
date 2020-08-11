@@ -199,7 +199,6 @@ class UsageStatisticsHandler(object):
                 message, schema=usage_statistics_record_schema
             ):
                 return
-
             self._message_queue.put(message)
         # noinspection PyBroadException
         except Exception as e:

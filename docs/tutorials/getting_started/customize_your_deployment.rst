@@ -43,9 +43,9 @@ The simplest way to manage your Great Expectations configuration is usually by c
 
 Here's how to handle each of those cases:
 
-* :ref:`How to use environment variables to populate credentials`
-* :ref:`How to populate credentials from a secrets store`
-* :ref:`How to instantiate a Data Context without a yml file`
+* :ref:`how_to_guides__configuring_data_contexts__how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials`
+* :ref:`how_to_guides__configuring_data_contexts__how_to_populate_credentials_from_a_secrets_store`
+* :ref:`how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file`
 
 
 Options for storing Expectations
@@ -111,16 +111,13 @@ Additional Validation Operators and Actions
 
 Most teams will want to configure various :ref:`Validation Actions` as part of their deployment.
 
-* :ref:`How to re-render Data Docs as a Validation Action`
+* :ref:`how_to_guides__validation__how_to_update_data_docs_as_a_validation_action`
 * :ref:`How to store Validation Results as a Validation Action`
 * :ref:`How to trigger slack notifications as a Validation Action`
 
-Modifying :ref:`Validation Operators` themselves is more advanced work. You can learn how here.
+If you also want to modify your :ref:`Validation Operators`, you can learn how here:
 
 * :ref:`How to configure a Validation Operator`
-* :ref:`How to configure a WarningAndFailureExpectationSuitesValidationOperator`
-* :ref:`How to configure an ActionListValidationOperator`
-* :ref:`How to implement a custom Validation Operator`
 
 .. Creating and editing Expectations
 .. ---------------------------------

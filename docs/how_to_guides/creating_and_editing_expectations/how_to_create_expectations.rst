@@ -3,9 +3,11 @@
 How to create Expectations
 ==========================
 
+.. warning:: This doc has been partially migrated from old documentation. It's potentially helpful, but may be incomplete, incorrect, or confusing.
+
 This tutorial covers the workflow of creating and editing expectations.
 
-The tutorial assumes that you have created a new Data Context (project), as covered here: :ref:`tutorial_init`.
+The tutorial assumes that you have created a new Data Context (project), as covered here: :ref:`tutorials__getting_started`.
 
 Creating expectations is an opportunity to blend contextual knowledge from subject-matter experts and insights from
 profiling and performing exploratory analysis on your dataset.
@@ -15,8 +17,6 @@ Once the initial setup of Great Expectations is complete, the workflow looks lik
 1. Data team members capture and document their shared understanding of their data as expectations.
 2. As new data arrives in the pipeline, Great Expectations evaluates it against these expectations.
 3. If the observed properties of the data are found to be different from the expected ones, the team responds by rejecting (or fixing) the data, updating the expectations, or both.
-
-For a broader understanding of the typical workflow read this article: :ref:`typical_workflow`.
 
 
 Expectations are grouped into Expectations Suites. An Expectation Suite combines multiple expectations into an overall description of a dataset. For example, a team can group all the expectations about the ``rating`` table in the movie ratings database into an Expectation Suite and call it "movieratings.table.expectations".
