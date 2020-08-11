@@ -14,7 +14,7 @@ from great_expectations.exceptions import DatasourceKeyPairAuthBadPassphraseErro
 def test_snowflake_user_password_credentials_exit(empty_data_context):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    context = DataContext(context_root_dir=project_root_dir)
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
