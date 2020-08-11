@@ -55,15 +55,34 @@ class MetaPandasDataset(Dataset):
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
-            self, column, mostly=None, result_format=None, *args, **kwargs
+            self,
+            column,
+            mostly=None,
+            result_format=None,
+            row_condition=None,
+            condition_parser=None,
+            *args,
+            **kwargs
         ):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
             result_format = parse_result_format(result_format)
+            if row_condition:
+                if condition_parser not in ["python", "pandas"]:
+                    raise ValueError(
+                        "condition_parser is required when setting a row_condition,"
+                        " and must be 'python' or 'pandas'"
+                    )
+                else:
+                    data = self.query(
+                        row_condition, parser=condition_parser
+                    ).reset_index(drop=True)
+            else:
+                data = self
 
-            series = self[column]
+            series = data[column]
             if func.__name__ in [
                 "expect_column_values_to_not_be_null",
                 "expect_column_values_to_be_null",
@@ -161,12 +180,17 @@ class MetaPandasDataset(Dataset):
             mostly=None,
             ignore_row_if="both_values_are_missing",
             result_format=None,
+            row_condition=None,
+            condition_parser=None,
             *args,
             **kwargs
         ):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
+
+            if row_condition:
+                self = self.query(row_condition).reset_index(drop=True)
 
             series_A = self[column_A]
             series_B = self[column_B]
@@ -260,12 +284,17 @@ class MetaPandasDataset(Dataset):
             mostly=None,
             ignore_row_if="all_values_are_missing",
             result_format=None,
+            row_condition=None,
+            condition_parser=None,
             *args,
             **kwargs
         ):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
+
+            if row_condition:
+                self = self.query(row_condition).reset_index(drop=True)
 
             test_df = self[column_list]
 
@@ -501,6 +530,8 @@ Notes:
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -515,6 +546,8 @@ Notes:
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -530,6 +563,8 @@ Notes:
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -546,7 +581,8 @@ Notes:
         # Since we've now received the default arguments *before* the expectation decorator, we need to
         # ensure we only pass what we actually received. Hence, we'll use kwargs
         # mostly=None,
-        # result_format=None, include_config=None, catch_exceptions=None, meta=None
+        # result_format=None,
+        # row_condition=None, condition_parser=None, include_config=None, catch_exceptions=None, meta=None
     ):
         """
         The pandas implementation of this expectation takes kwargs mostly, result_format, include_config,
@@ -657,6 +693,8 @@ Notes:
         type_,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -728,6 +766,8 @@ Notes:
         type_,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -769,7 +809,8 @@ Notes:
         # Since we've now received the default arguments *before* the expectation decorator, we need to
         # ensure we only pass what we actually received. Hence, we'll use kwargs
         # mostly=None,
-        # result_format=None, include_config=None, catch_exceptions=None, meta=None
+        # result_format = None,
+        # row_condition=None, condition_parser=None, include_config=None, catch_exceptions=None, meta=None
     ):
         """
         The pandas implementation of this expectation takes kwargs mostly, result_format, include_config,
@@ -877,6 +918,8 @@ Notes:
         type_list,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -926,6 +969,8 @@ Notes:
         type_list,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -968,6 +1013,8 @@ Notes:
         mostly=None,
         parse_strings_as_datetimes=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -975,6 +1022,7 @@ Notes:
         if value_set is None:
             # Vacuously true
             return np.ones(len(column), dtype=np.bool_)
+
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
         else:
@@ -991,6 +1039,8 @@ Notes:
         mostly=None,
         parse_strings_as_datetimes=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1015,6 +1065,8 @@ Notes:
         output_strftime_format=None,
         allow_cross_type_comparisons=None,
         mostly=None,
+        row_condition=None,
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1143,6 +1195,8 @@ Notes:
         parse_strings_as_datetimes=None,
         output_strftime_format=None,
         mostly=None,
+        row_condition=None,
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1180,6 +1234,8 @@ Notes:
         parse_strings_as_datetimes=None,
         output_strftime_format=None,
         mostly=None,
+        row_condition=None,
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1216,6 +1272,8 @@ Notes:
         min_value=None,
         max_value=None,
         mostly=None,
+        row_condition=None,
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1258,6 +1316,8 @@ Notes:
         value,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1272,6 +1332,8 @@ Notes:
         regex,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1286,6 +1348,8 @@ Notes:
         regex,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1301,6 +1365,8 @@ Notes:
         match_on="any",
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1326,6 +1392,8 @@ Notes:
         regex_list,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1345,6 +1413,8 @@ Notes:
         strftime_format,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1356,7 +1426,7 @@ Notes:
                 datetime.strftime(datetime.now(), strftime_format), strftime_format
             )
         except ValueError as e:
-            raise ValueError("Unable to use provided strftime_format. " + e.message)
+            raise ValueError("Unable to use provided strftime_format. " + str(e))
 
         def is_parseable_by_format(val):
             try:
@@ -1378,6 +1448,8 @@ Notes:
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1404,6 +1476,8 @@ Notes:
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1425,6 +1499,8 @@ Notes:
         json_schema,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1454,6 +1530,8 @@ Notes:
         p_value=0.05,
         params=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1501,6 +1579,8 @@ Notes:
         bootstrap_samples=None,
         bootstrap_sample_size=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1610,6 +1690,8 @@ Notes:
         column_B,
         ignore_row_if="both_values_are_missing",
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1627,6 +1709,8 @@ Notes:
         allow_cross_type_comparisons=None,
         ignore_row_if="both_values_are_missing",
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1657,6 +1741,8 @@ Notes:
         value_pairs_set,
         ignore_row_if="both_values_are_missing",
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1691,6 +1777,8 @@ Notes:
         column_list,
         ignore_row_if="all_values_are_missing",
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
