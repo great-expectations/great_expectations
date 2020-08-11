@@ -7,5 +7,5 @@ Validation
    :maxdepth: 1
    :glob:
 
-   /how_to_guides/validation/*
+   /guides/how_to_guides/validation/*
 

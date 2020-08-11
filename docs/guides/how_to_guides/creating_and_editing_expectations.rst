@@ -7,4 +7,4 @@ Creating and editing Expectations
    :maxdepth: 1
    :glob:
 
-   /how_to_guides/creating_and_editing_expectations/*
+   /guides/how_to_guides/creating_and_editing_expectations/*

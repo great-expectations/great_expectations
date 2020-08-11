@@ -9,4 +9,4 @@ Miscellaneous
    :maxdepth: 2
    :glob:
 
-   /how_to_guides/miscellaneous/*
+   /guides/how_to_guides/miscellaneous/*
