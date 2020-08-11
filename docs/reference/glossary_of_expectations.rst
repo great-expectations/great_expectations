@@ -90,6 +90,7 @@ Multi-column
 * :func:`expect_column_pair_values_to_be_equal <great_expectations.dataset.dataset.Dataset.expect_column_pair_values_to_be_equal>`
 * :func:`expect_column_pair_values_to_be_in_set <great_expectations.dataset.dataset.Dataset.expect_column_pair_values_to_be_in_set>`
 * :func:`expect_multicolumn_values_to_be_unique <great_expectations.dataset.dataset.Dataset.expect_multicolumn_values_to_be_unique>`
+* :func:`expect_sum_of_columns_to_be_equal <great_expectations.dataset.dataset.Dataset.expect_sum_of_columns_to_be_equal>`
 
 
 Distributional functions
