@@ -37,7 +37,7 @@ If you would like to implement custom notifications that include a link to Data 
         validation_ids = [res for res in results['run_results']]
         validation_id = validation_ids[0]
 
-3. Finally, use the ``validation_id`` as an argument to the Data Context's ``get_docs_sites_urls()`` method, and get the right element from the resulting list:
+3. Finally, use the ``validation_id`` as an argument to the Data Context's ``get_docs_sites_urls()`` method, and get the right element from the resulting list to access its ``site_url``:
 
     .. code-block:: python
 
