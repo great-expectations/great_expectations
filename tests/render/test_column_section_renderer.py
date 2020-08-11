@@ -724,21 +724,6 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
                 },
             },
             {
-                "content_block_type": "header",
-                "styling": {
-                    "classes": ["col-12"],
-                    "header": {"classes": ["alert", "alert-secondary"]},
-                },
-                "header": {
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "Car Insurance Premiums ($$)",
-                        "tag": "h5",
-                        "styling": {"classes": ["m-0"]},
-                    },
-                },
-            },
-            {
                 "content_block_type": "bullet_list",
                 "styling": {"classes": ["col-12"]},
                 "bullet_list": [
@@ -875,21 +860,6 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
     expectations = [expectation_with_string_list_note]
     expected_result_json = {
         "content_blocks": [
-            {
-                "content_block_type": "header",
-                "styling": {
-                    "classes": ["col-12"],
-                    "header": {"classes": ["alert", "alert-secondary"]},
-                },
-                "header": {
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "Car Insurance Premiums ($$)",
-                        "tag": "h5",
-                        "styling": {"classes": ["m-0"]},
-                    },
-                },
-            },
             {
                 "content_block_type": "header",
                 "styling": {
@@ -1045,21 +1015,6 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
     expectations = [expectation_with_single_string_note]
     expected_result_json = {
         "content_blocks": [
-            {
-                "content_block_type": "header",
-                "styling": {
-                    "classes": ["col-12"],
-                    "header": {"classes": ["alert", "alert-secondary"]},
-                },
-                "header": {
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "Car Insurance Premiums ($$)",
-                        "tag": "h5",
-                        "styling": {"classes": ["m-0"]},
-                    },
-                },
-            },
             {
                 "content_block_type": "header",
                 "styling": {
