@@ -35,7 +35,6 @@ This command will return posix status codes and print messages as follows:
 | one or more validation failed | 1               | Validation Failed!    |
 +-------------------------------+-----------------+-----------------------+
 
-If you want to be a real hero, we'd welcome a pull request. Please see :ref:`the Contributing tutorial <tutorials__contributing>` and :ref:`How to write a how to guide` to get started.
 
 .. discourse::
     :topic_identifier: 226
