@@ -7,4 +7,4 @@ Configuring metadata stores
    :maxdepth: 1
    :glob:
 
-   /how_to_guides/configuring_metadata_stores/*
+   /guides/how_to_guides/configuring_metadata_stores/*
