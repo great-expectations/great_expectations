@@ -550,7 +550,7 @@ class BaseDataContext(object):
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        sites = self._project_config_with_variables_substituted.get_data_docs_sites()
+        sites = self._project_config_with_variables_substituted.data_docs_sites
         if not sites:
             logger.debug("Found no data_docs_sites.")
             return []
@@ -1606,7 +1606,7 @@ class BaseDataContext(object):
 
         index_page_locator_infos = {}
 
-        sites = self._project_config_with_variables_substituted.get_data_docs_sites()
+        sites = self._project_config_with_variables_substituted.data_docs_sites
         if sites:
             logger.debug("Found data_docs_sites. Building sites...")
 
@@ -1650,7 +1650,7 @@ class BaseDataContext(object):
         return index_page_locator_infos
 
     def clean_data_docs(self, site_name=None):
-        sites123 = self._project_config_with_variables_substituted.get_data_docs_sites()
+        sites123 = self._project_config_with_variables_substituted.data_docs_sites
         cleaned = False
         for sname, site_config in sites123.items():
             if site_name is None:
