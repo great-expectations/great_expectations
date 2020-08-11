@@ -1,12 +1,24 @@
 import hashlib
+import logging
 import pickle
 from urllib.parse import urlparse
 
 import pandas as pd
-from pyspark import SparkContext
-from pyspark.sql import SparkSession
 
-from great_expectations.datasource.sparkdf_datasource import SparkDFDatasource
+logger = logging.getLogger(__name__)
+
+try:
+    from pyspark import SparkContext
+    from pyspark.sql import SparkSession
+    from great_expectations.datasource.sparkdf_datasource import SparkDFDatasource
+except ImportError:
+    SparkContext = None
+    SparkSession = None
+    SparkDFDatasource = None
+    # TODO: review logging more detail here
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency for support."
+    )
 
 
 # S3Url class courtesy: https://stackoverflow.com/questions/42641315/s3-urls-get-bucket-name-and-path
