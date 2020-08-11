@@ -2239,19 +2239,24 @@ Invalid "config_store_backend_name" specified (supported values are: "s3", ...).
 
     # This "create" style" method builds the data context for the following typical configuration:
     # Spark Data Frame is the format of data sets that is being validated;
-    # Expectation Suites, Validation Results, and Data Docs are stored in (different, if desired) AWS S3 buckets;
+    # Expectation Suites, Validations Results, and Data Docs are stored in (different, if desired) AWS S3 buckets;
     # Slack alert can be optionally sent upon the completion of the data validation operation.
     # Convenient default parameter settings, used in this sample implementation, include:
-    # An in-memory Evaluation Parameter store, whose name is a constant (set in BaseDataContext);
+    # An In-Memory Evaluation Parameter store, whose name is a constant (set in BaseDataContext);
     # The name of the Data Docs site is "data_docs_site";
     # The name of the Spark Data Frame data source is "s3_files_spark_datasource";
     # The general-purpose "action_list_operator" is used to perform data validation (https://docs.greatexpectations.io/en/latest/reference/core_concepts/validation_operators_and_actions.html#validation-operators-and-actions).
     # All of these default parameters can be changed to matches the user's particular needs.
     # Furthermore, this method serves as a template for developing other similar methods for building the data context
-    # that fits different custom requirements.  For example, Expectation Suites, Validation Results, and Data Docs can
+    # that fits different custom requirements.  For example, Expectation Suites, Validations Results, and Data Docs can
     # use different backend stores (filesystem, AWS S3, and other cloud services as Great Expectations supports them).
     # The granular API -- as used in this AWS S3 centric example -- enables considerable flexibility in building the
     # data context that fits a wide range of computing and storage environments (AWS EMR, Databricks, GCP, Azure, etc.).
+    # Note: In fully distributed environments (i.e., without a local filesystem), such as AWS, EMR, Databricks, etc.,
+    # the data context is built and configured entirely via Python code, using API and/or convenience "create" methods.
+    # Hence, the same method(s) for creating data context must be present in both types of Great Expectations use cases:
+    # in the authoring of Expectation Suites; and in running the data validation (e.g., as part of a data pipeline).
+    # Note: Once the data context has been created, "ge_context._project_config.to_yaml_str()" gives its configuration.
     @classmethod
     def create_standard_spark_df_s3_backend_data_context(
         cls,
@@ -2273,6 +2278,7 @@ Invalid "config_store_backend_name" specified (supported values are: "s3", ...).
         overwrite_existing: bool = False,
         allow_anonymous_usage_statistics: bool = True,
     ) -> DataContext:
+        # Creates the blank data context (or loads it, if its anonymous ID already exists in the AWS S3 backend store).
         ge_context: DataContext = cls.create(
             config_store_backend_name="s3",
             bucket=expectations_store_bucket,
@@ -2283,35 +2289,45 @@ Invalid "config_store_backend_name" specified (supported values are: "s3", ...).
             allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
         )
 
+        # Add the Data Source (Spark Dataframe and Pandas Dataframe data sources types are currently implemented).
         # noinspection PyUnusedLocal
         spark_df_datasource: Datasource = ge_context.add_spark_df_datasource(
             name=spark_df_datasource_name
         )
 
+        # Create the Validations Store:
+        # First, allocated the backend store (to be used for storing Validations in the JSON format);
         s3_store_backend_obj: StoreBackend = ge_context.add_tuple_s3_store_backend(
             bucket=validations_store_bucket, prefix=validations_store_prefix
         )
+        # Second, add the Validations Store that will use the AWS S3 backend store, allocated in the previous step.
         # noinspection PyUnusedLocal
         validations_store_obj: Store = ge_context.add_validation_store(
             name=validations_store_name, store_backend=s3_store_backend_obj
         )
+        # Third, set the name of the Validations Store just added to be the one used by Great Expectations (required).
         ge_context.set_validations_store_name(
             validations_store_name=validations_store_name
         )
 
+        # Create the Evaluation Parameters Store (no arguments means an In-Memory backend store and the default name).
         # noinspection PyUnusedLocal
         evaluation_parameters_store_obj: Store = ge_context.add_evaluation_parameters_store()
+        # Set the default Evaluation Parameters Store just added to be the one used by Great Expectations (required).
         ge_context.set_evaluation_parameter_store_name()
 
+        # Add the Action List Operator for data validation (satisfies the needs of a wide variety of applications).
         # noinspection PyUnusedLocal
         action_list_validation_operator: ValidationOperator = ge_context.add_action_list_validation_operator(
             name="action_list_operator", slack_webhook=slack_webhook
         )
 
+        # Create the Data Docs Site:
+        # First, allocated the backend store (to be used for storing Data Docs in the HTML/CSS format);
         s3_store_backend_obj: StoreBackend = ge_context.add_tuple_s3_store_backend(
             bucket=data_docs_store_bucket, prefix=data_docs_store_prefix
         )
-
+        # Second, add the Data Docs Site that will use the AWS S3 backend store, allocated in the previous step.
         # noinspection PyUnusedLocal
         data_docs_site_dict: dict = ge_context.add_data_docs_site(
             name=data_docs_site_name,
