@@ -137,7 +137,7 @@ For example, an existing validation result json with ``run_id="my_run"`` should 
 
   {
   "meta": {
-    "great_expectations.__version__": "0.10.8",
+    "great_expectations_version": "0.10.8",
     "expectation_suite_name": "diabetic_data.warning",
     "run_id": {
       "run_name": "my_run",

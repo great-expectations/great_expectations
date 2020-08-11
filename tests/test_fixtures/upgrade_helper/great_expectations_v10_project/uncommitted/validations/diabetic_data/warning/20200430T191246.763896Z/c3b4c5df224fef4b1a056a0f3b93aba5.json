@@ -2,7 +2,7 @@
   "evaluation_parameters": {},
   "success": true,
   "meta": {
-    "great_expectations.__version__": "0.10.5",
+    "great_expectations_version": "0.10.5",
     "expectation_suite_name": "diabetic_data.warning",
     "run_id": "20200430T191246.763896Z",
     "batch_kwargs": {
