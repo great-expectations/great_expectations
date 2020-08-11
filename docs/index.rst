@@ -18,10 +18,22 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
    :maxdepth: 2
 
    intro
-   guides
-   reference
-   community
-   contributing
+
+.. toctree::
+   :maxdepth: 2
+
+   /guides/tutorials
+   /guides/workflows_patterns
+   /guides/how_to_guides
+
+
+.. toctree::
+   :maxdepth: 2
+
+   /reference/glossary_of_expectations
+   /reference/core_concepts
+   /reference/supporting_resources
+   API Reference <autoapi/great_expectations/index>
 
 .. toctree::
    :maxdepth: 1
