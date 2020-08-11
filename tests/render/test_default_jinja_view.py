@@ -46,7 +46,7 @@ def test_render_DefaultJinjaPageView_meta_info():
                 "success_percent": 89.1025641025641,
             },
             "meta": {
-                "great_expectations.__version__": "0.7.0-beta",
+                "great_expectations_version": "0.7.0-beta",
                 "data_asset_name": "datasource/generator/tetanusvaricella",
                 "expectation_suite_name": "my_suite",
                 "run_id": "2019-06-25T14:58:09.960521",
