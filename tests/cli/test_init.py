@@ -85,7 +85,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     assert os.path.isdir(uncommitted_dir)
     config_var_path = os.path.join(uncommitted_dir, "config_variables.yml")
     assert os.path.isfile(config_var_path)
-    config_variables_yml: str = get_project_config_yml(
+    config_variables_yml: str = get_project_config_yaml(
         j2_template_name="config_variables_template.j2", instance_id=INSTANCE_ID
     )
     with open(config_var_path, "r") as f:

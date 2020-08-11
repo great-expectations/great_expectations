@@ -81,7 +81,7 @@ class DataContextConfig(DictDot):
         self.notebooks = notebooks
         if data_docs_sites is None:
             data_docs_sites = {}
-        self._data_docs_sites = data_docs_sites
+        self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
         if anonymous_usage_statistics is None:
             anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
@@ -122,10 +122,6 @@ class DataContextConfig(DictDot):
         )
         commented_map.update(schema_validated_dump)
         return object_to_yaml_str(commented_map)
-
-    @property
-    def data_docs_sites(self):
-        return self._data_docs_sites
 
 
 class DatasourceConfig(DictDot):
