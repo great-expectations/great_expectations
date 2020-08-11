@@ -76,6 +76,7 @@ def test_expectation_decorator_summary_mode():
             min_value=1,
             max_value=5,
             result_format="SUMMARY",
+            condition_parser="pandas",
             row_condition="group=='a'",
         )
         == exp_output
@@ -140,12 +141,12 @@ def test_positional_arguments():
     )
 
     assert (
-        df.expect_column_mean_to_be_between("x", 4, 6, row_condition='group=="a"')
+        df.expect_column_mean_to_be_between("x", 4, 6,  condition_parser="pandas", row_condition='group=="a"')
         == exp_output
     )
     assert df.expect_column_mean_to_be_between("x", 4, 6) != exp_output
 
-    out = df.expect_column_values_to_be_between("y", 1, 6, row_condition='group=="a"')
+    out = df.expect_column_values_to_be_between("y", 1, 6,  condition_parser="pandas", row_condition='group=="a"')
     t = {
         "out": {
             "success": False,
@@ -163,7 +164,7 @@ def test_positional_arguments():
             assert t["out"]["unexpected_list"] == out.result["unexpected_list"]
 
     out = df.expect_column_values_to_be_between(
-        "y", 1, 6, mostly=0.5, row_condition='group=="a"'
+        "y", 1, 6, mostly=0.5,  condition_parser="pandas", row_condition='group=="a"'
     )
     t = {
         "out": {
@@ -182,7 +183,7 @@ def test_positional_arguments():
             assert t["out"]["unexpected_list"] == out.result["unexpected_list"]
 
     out = df.expect_column_values_to_be_in_set(
-        "z", ["a", "b", "c"], row_condition='group=="a"'
+        "z", ["a", "b", "c"],  condition_parser="pandas", row_condition='group=="a"'
     )
     t = {
         "out": {
@@ -201,7 +202,7 @@ def test_positional_arguments():
             assert t["out"]["unexpected_list"] == out.result["unexpected_list"]
 
     out = df.expect_column_values_to_be_in_set(
-        "z", ["a", "b", "c"], mostly=0.5, row_condition='group=="a"'
+        "z", ["a", "b", "c"], mostly=0.5,  condition_parser="pandas", row_condition='group=="a"'
     )
     t = {
         "out": {
@@ -248,7 +249,7 @@ def test_result_format_argument_in_decorators():
 
     assert (
         df.expect_column_mean_to_be_between(
-            "x", 4, 6, result_format=None, row_condition="group=='a'"
+            "x", 4, 6, result_format=None,  condition_parser="pandas", row_condition="group=='a'"
         )
         == exp_output
     )
@@ -281,27 +282,27 @@ def test_result_format_argument_in_decorators():
 
     assert (
         df.expect_column_values_to_be_between(
-            "y", 1, 6, result_format=None, row_condition="group=='a'"
+            "y", 1, 6, result_format=None, condition_parser="pandas", row_condition="group=='a'"
         )
         == exp_output
     )
 
     assert df.expect_column_values_to_be_between(
-        "y", 1, 6, result_format=None, row_condition="group=='a'"
+        "y", 1, 6, result_format=None, condition_parser="pandas", row_condition="group=='a'"
     ) != df.expect_column_values_to_be_between("y", 1, 6, result_format=None)
     # Test unknown output format
     with pytest.raises(ValueError):
         df.expect_column_values_to_be_between(
-            "y", 1, 6, result_format="QUACK", row_condition="group=='a'"
+            "y", 1, 6, result_format="QUACK", condition_parser="pandas", row_condition="group=='a'"
         )
 
     with pytest.raises(ValueError):
         df.expect_column_mean_to_be_between(
-            "x", 4, 6, result_format="QUACK", row_condition="group=='a'"
+            "x", 4, 6, result_format="QUACK", condition_parser="pandas", row_condition="group=='a'"
         )
 
 
-def test_ge_pandas_subsetting():
+def test_ge_pandas_subsetting_with_conditionals():
     df = duplicate_and_obfuscuate(
         ge.dataset.PandasDataset(
             {
@@ -314,13 +315,13 @@ def test_ge_pandas_subsetting():
     )
 
     # Put some simple expectations on the data frame
-    df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4], row_condition="group=='a'")
-    df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8], row_condition="group=='a'")
+    df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4], condition_parser="pandas", row_condition="group=='a'")
+    df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8], condition_parser="pandas", row_condition="group=='a'")
     df.expect_column_values_to_be_in_set(
-        "C", ["a", "b", "c", "d"], row_condition="group=='a'"
+        "C", ["a", "b", "c", "d"], condition_parser="pandas", row_condition="group=='a'"
     )
     df.expect_column_values_to_be_in_set(
-        "D", ["e", "f", "g", "h"], row_condition="group=='a'"
+        "D", ["e", "f", "g", "h"], condition_parser="pandas", row_condition="group=='a'"
     )
 
     # The subsetted data frame should:
@@ -328,39 +329,39 @@ def test_ge_pandas_subsetting():
     #   1. Be a ge.dataset.PandaDataSet
     #   2. Inherit ALL the expectations of the parent data frame
 
-    exp1 = df.find_expectations()
+    exp1 = df.get_expectation_suite().expectations
 
     sub1 = df[["A", "D"]]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[["A"]]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[:3]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[1:2]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[:-1]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[-1:]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df.iloc[:3, 1:4]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df.loc[0:, "A":"B"]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
 
 def test_row_condition_in_expectation_config():
@@ -392,6 +393,7 @@ def test_row_condition_in_expectation_config():
             min_value=1,
             max_value=5,
             result_format="SUMMARY",
+            condition_parser="pandas",
             row_condition="group=='a'",
         ).expectation_config["kwargs"]
     )
@@ -403,6 +405,7 @@ def test_row_condition_in_expectation_config():
             min_value=1,
             max_value=5,
             result_format="SUMMARY",
+            condition_parser="pandas",
             row_condition="group=='a'",
         ).expectation_config["kwargs"]["row_condition"]
     )
@@ -412,6 +415,7 @@ def test_row_condition_in_expectation_config():
         min_value=1,
         max_value=5,
         result_format="SUMMARY",
+        condition_parser="pandas",
         row_condition="group=='a'",
     ).expectation_config.isEquivalentTo(exp_expectation_config)
 
