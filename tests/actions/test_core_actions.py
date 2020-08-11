@@ -98,7 +98,7 @@ def test_SlackNotificationAction(data_context_parameterized_expectation_suite):
             "success_percent": None,
         },
         meta={
-            "great_expectations.__version__": "v0.8.0__develop",
+            "great_expectations_version": "v0.8.0__develop",
             "expectation_suite_name": "asset.default",
             "run_id": "test_100",
         },
