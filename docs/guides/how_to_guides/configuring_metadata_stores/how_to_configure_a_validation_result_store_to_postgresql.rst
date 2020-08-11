@@ -17,7 +17,7 @@ Steps
 
 1. **Configure the** ``config_variables.yml`` **file with your database credentials**
 
-    We recommend that database credentials be stored in the  ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control.  The following lines add database credentials under the key ``db_creds``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found `here. <https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html>`_
+    We recommend that database credentials be stored in the  ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control.  The following lines add database credentials under the key ``db_creds``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found `here. <https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html>`_
 
     .. code-block:: yaml
 

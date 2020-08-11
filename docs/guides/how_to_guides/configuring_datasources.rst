@@ -7,4 +7,4 @@ Configuring Datasources
    :maxdepth: 1
    :glob:
 
-   /how_to_guides/configuring_datasources/*
+   /guides/how_to_guides/configuring_datasources/*
