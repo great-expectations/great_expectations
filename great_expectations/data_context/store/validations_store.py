@@ -8,7 +8,11 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import load_class
-from great_expectations.util import verify_dynamic_loading_support
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+    verify_dynamic_loading_support,
+)
 
 
 class ValidationsStore(Store):
@@ -123,8 +127,17 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
             store_backend=store_backend, runtime_environment=runtime_environment
         )
 
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True, **{"class_name": self.__class__.__name__,}
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
+
     def serialize(self, key, value):
         return self._expectationSuiteValidationResultSchema.dumps(value)
 
     def deserialize(self, key, value):
         return self._expectationSuiteValidationResultSchema.loads(value)
+
+    @property
+    def config(self):
+        return self._config

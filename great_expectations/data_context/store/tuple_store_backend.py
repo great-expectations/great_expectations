@@ -8,6 +8,10 @@ from abc import ABCMeta
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -229,6 +233,11 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         os.makedirs(str(os.path.dirname(self.full_base_directory)), exist_ok=True)
 
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True, **{"class_name": self.__class__.__name__,}
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
+
     def _get(self, key):
         contents = ""
         filepath = os.path.join(
@@ -347,6 +356,10 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             os.path.join(self.full_base_directory, self._convert_key_to_filepath(key))
         )
 
+    @property
+    def config(self):
+        return self._config
+
 
 class TupleS3StoreBackend(TupleStoreBackend):
     """
@@ -385,6 +398,11 @@ class TupleS3StoreBackend(TupleStoreBackend):
             # whether the rest of the key is built with platform-specific separators or not
             prefix = prefix.strip("/")
         self.prefix = prefix
+
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True, **{"class_name": self.__class__.__name__,}
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def _build_s3_object_key(self, key):
         if self.platform_specific_separator:
@@ -561,6 +579,10 @@ class TupleS3StoreBackend(TupleStoreBackend):
         all_keys = self.list_keys()
         return key in all_keys
 
+    @property
+    def config(self):
+        return self._config
+
 
 class TupleGCSStoreBackend(TupleStoreBackend):
     """
@@ -597,6 +619,11 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         self.prefix = prefix
         self.project = project
         self._public_urls = public_urls
+
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True, **{"class_name": self.__class__.__name__,}
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def _move(self, source_key, dest_key, **kwargs):
         pass
@@ -706,3 +733,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def _has_key(self, key):
         all_keys = self.list_keys()
         return key in all_keys
+
+    @property
+    def config(self):
+        return self._config

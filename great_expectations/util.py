@@ -1,3 +1,4 @@
+import copy
 import importlib
 import json
 import logging
@@ -6,7 +7,16 @@ import time
 from collections import OrderedDict
 from functools import wraps
 from gc import get_referrers
-from inspect import BoundArguments, currentframe, getclosurevars, signature
+from inspect import (
+    ArgInfo,
+    BoundArguments,
+    Signature,
+    currentframe,
+    getargvalues,
+    getclosurevars,
+    getmodule,
+    signature,
+)
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Callable, Union
@@ -76,6 +86,40 @@ def get_currently_executing_function() -> Callable:
         and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
     ][0]
     return func_obj
+
+
+# noinspection SpellCheckingInspection
+def get_currently_executing_function_call_arguments(
+    include_module_name: bool = False, include_caller_names: bool = False, **kwargs
+) -> dict:
+    cf: FrameType = currentframe()
+    fb: FrameType = cf.f_back
+    argvs: ArgInfo = getargvalues(fb)
+    fc: CodeType = fb.f_code
+    cur_func_obj: Callable = [
+        referer
+        for referer in get_referrers(fc)
+        if getattr(referer, "__code__", None) is fc
+        and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
+    ][0]
+    cur_mod = getmodule(cur_func_obj)
+    sig: Signature = signature(cur_func_obj)
+    params: list = {k: argvs.locals[k] for k in sig.parameters.keys()}
+    bound_args: BoundArguments = sig.bind(**params)
+    call_args: OrderedDict = bound_args.arguments
+
+    call_args_dict: dict = dict(call_args)
+
+    if include_module_name:
+        call_args_dict.update({"module_name": cur_mod.__name__})
+
+    if not include_caller_names:
+        call_args_dict.pop("cls", None)
+        call_args_dict.pop("self", None)
+
+    call_args_dict.update(**kwargs)
+
+    return call_args_dict
 
 
 def verify_dynamic_loading_support(module_name: str, package_name: str = None) -> None:
@@ -703,3 +747,46 @@ def lint_code(code):
         return linted_code
     except (black.NothingChanged, RuntimeError):
         return code
+
+
+def filter_properties_dict(
+    properties: dict,
+    keep_fields: list = None,
+    delete_fields: list = None,
+    clean_empty: bool = True,
+    inplace: bool = False,
+) -> Union[dict, None]:
+    if keep_fields and delete_fields:
+        raise ValueError(
+            "Only one of keep_fields and delete_fields filtering directives can be specified."
+        )
+
+    if not inplace:
+        properties = copy.deepcopy(properties)
+
+    keys_for_deletion: list = []
+
+    if keep_fields:
+        keys_for_deletion.extend(
+            [key for key, value in properties.items() if key not in keep_fields]
+        )
+
+    if delete_fields:
+        keys_for_deletion.extend(
+            [key for key, value in properties.items() if key in delete_fields]
+        )
+
+    if clean_empty:
+        keys_for_deletion.extend(
+            [key for key, value in properties.items() if not value]
+        )
+
+    keys_for_deletion = list(set(keys_for_deletion))
+
+    for key in keys_for_deletion:
+        del properties[key]
+
+    if inplace:
+        return None
+
+    return properties

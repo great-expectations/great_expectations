@@ -2,6 +2,10 @@ import logging
 from abc import ABCMeta, abstractmethod
 
 from great_expectations.exceptions import StoreBackendError, StoreError
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +110,10 @@ class StoreBackend(object, metaclass=ABCMeta):
 
         return False
 
+    @property
+    def config(self):
+        raise NotImplementedError
+
 
 class InMemoryStoreBackend(StoreBackend):
     """Uses an in-memory dictionary as a store backend.
@@ -114,7 +122,13 @@ class InMemoryStoreBackend(StoreBackend):
     # noinspection PyUnusedLocal
     def __init__(self, runtime_environment=None, fixed_length_key=False):
         super().__init__(fixed_length_key=fixed_length_key)
+
         self._store = {}
+
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True, **{"class_name": self.__class__.__name__,}
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def _get(self, key):
         return self._store[key]
@@ -134,3 +148,7 @@ class InMemoryStoreBackend(StoreBackend):
 
     def remove_key(self, key):
         del self._store[key]
+
+    @property
+    def config(self):
+        return self._config

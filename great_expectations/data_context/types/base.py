@@ -1,6 +1,7 @@
 import logging
 import uuid
 from copy import deepcopy
+from io import StringIO
 
 from marshmallow import (
     INCLUDE,
@@ -17,10 +18,20 @@ from ruamel.yaml.comments import CommentedMap
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.types import DictDot
 from great_expectations.types.configurations import ClassConfigSchema
+from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
 yaml = YAML()
+
+
+def object_to_yaml_str(obj):
+    output_str: str
+    with StringIO() as string_stream:
+        yaml.dump(obj, string_stream)
+        output_str = string_stream.getvalue()
+    return output_str
+
 
 CURRENT_CONFIG_VERSION = 2
 MINIMUM_SUPPORTED_CONFIG_VERSION = 2
@@ -33,14 +44,14 @@ class DataContextConfig(DictDot):
     def __init__(
         self,
         config_version,
-        datasources,
-        expectations_store_name,
-        validations_store_name,
-        evaluation_parameter_store_name,
-        plugins_directory,
-        validation_operators,
-        stores,
-        data_docs_sites,
+        datasources=None,
+        expectations_store_name=None,
+        validations_store_name=None,
+        evaluation_parameter_store_name=None,
+        plugins_directory=None,
+        validation_operators=None,
+        stores=None,
+        data_docs_sites=None,
         notebooks=None,
         config_variables_file_path=None,
         anonymous_usage_statistics=None,
@@ -57,14 +68,20 @@ class DataContextConfig(DictDot):
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.plugins_directory = plugins_directory
-        if not isinstance(validation_operators, dict):
+        if validation_operators is None:
+            validation_operators = {}
+        elif not isinstance(validation_operators, dict):
             raise ValueError(
                 "validation_operators must be configured with a dictionary"
             )
         self.validation_operators = validation_operators
+        if stores is None:
+            stores = {}
         self.stores = stores
         self.notebooks = notebooks
-        self.data_docs_sites = data_docs_sites
+        if data_docs_sites is None:
+            data_docs_sites = {}
+        self._data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
         if anonymous_usage_statistics is None:
             anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
@@ -97,6 +114,18 @@ class DataContextConfig(DictDot):
         commented_map = deepcopy(self.commented_map)
         commented_map.update(dataContextConfigSchema.dump(self))
         yaml.dump(commented_map, outfile)
+
+    def to_yaml_str(self, filtering_directives={}):
+        commented_map = deepcopy(self.commented_map)
+        schema_validated_dump = filter_properties_dict(
+            properties=dataContextConfigSchema.dump(self), **filtering_directives
+        )
+        commented_map.update(schema_validated_dump)
+        return object_to_yaml_str(commented_map)
+
+    @property
+    def data_docs_sites(self):
+        return self._data_docs_sites
 
 
 class DatasourceConfig(DictDot):
@@ -373,9 +402,9 @@ class DataContextConfigSchema(Schema):
     datasources = fields.Dict(
         keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema)
     )
-    expectations_store_name = fields.Str()
-    validations_store_name = fields.Str()
-    evaluation_parameter_store_name = fields.Str()
+    expectations_store_name = fields.Str(allow_none=True)
+    validations_store_name = fields.Str(allow_none=True)
+    evaluation_parameter_store_name = fields.Str(allow_none=True)
     plugins_directory = fields.Str(allow_none=True)
     validation_operators = fields.Dict(keys=fields.Str(), values=fields.Dict())
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())

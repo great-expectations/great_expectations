@@ -52,8 +52,12 @@ class Store(object):
             )
 
     @property
-    def store_backend(self):
+    def store_backend(self) -> StoreBackend:
         return self._store_backend
+
+    @store_backend.setter
+    def store_backend(self, store_backend: StoreBackend):
+        self._store_backend = store_backend
 
     # noinspection PyMethodMayBeStatic
     def serialize(self, key, value):
@@ -91,5 +95,9 @@ class Store(object):
 
     def has_key(self, key):
         if self._use_fixed_length_key:
-            return self._store_backend.has_key(key.to_fixed_length_tuple())
-        return self._store_backend.has_key(key.to_tuple())
+            return key.to_fixed_length_tuple() in self._store_backend
+        return key.to_tuple() in self._store_backend
+
+    @property
+    def config(self):
+        raise NotImplementedError

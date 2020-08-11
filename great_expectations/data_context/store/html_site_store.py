@@ -1,4 +1,3 @@
-import inspect
 import logging
 import os
 from mimetypes import guess_type
@@ -14,7 +13,11 @@ from great_expectations.data_context.util import (
     load_class,
 )
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
-from great_expectations.util import verify_dynamic_loading_support
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+    verify_dynamic_loading_support,
+)
 
 from ...core.data_context_key import DataContextKey
 from .tuple_store_backend import TupleStoreBackend
@@ -108,9 +111,10 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
             raise DataContextError(
                 "Invalid configuration: HtmlSiteStore needs a TupleStoreBackend"
             )
-        if "filepath_template" in store_backend or (
-            "fixed_length_key" in store_backend
-            and store_backend["fixed_length_key"] is True
+        if (
+            "filepath_template" in store_backend and store_backend["filepath_template"]
+        ) or (
+            "fixed_length_key" in store_backend and store_backend["fixed_length_key"]
         ):
             logger.warning(
                 "Configuring a filepath_template or using fixed_length_key is not supported in SiteBuilder: "
@@ -203,6 +207,11 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
         # It's a pretty reasonable way for HtmlSiteStore to do its job---you just ahve to remember that it
         # can't necessarily set and list_keys like most other Stores.
         self.keys = set()
+
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True, **{"class_name": self.__class__.__name__,}
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def get(self, key):
         self._validate_key(key)
@@ -358,3 +367,11 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
                         content_encoding=content_encoding,
                         content_type=content_type,
                     )
+
+    @property
+    def store_backend(self):
+        return self._store_backend
+
+    @property
+    def config(self):
+        return self._config

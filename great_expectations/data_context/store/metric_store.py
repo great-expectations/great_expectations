@@ -6,7 +6,12 @@ from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
 from great_expectations.data_context.store.store import Store
-from great_expectations.util import load_class, verify_dynamic_loading_support
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+    load_class,
+    verify_dynamic_loading_support,
+)
 
 
 class MetricStore(Store):
@@ -85,9 +90,18 @@ class EvaluationParameterStore(MetricStore):
                 )
         super().__init__(store_backend=store_backend)
 
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True, **{"class_name": self.__class__.__name__,}
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
+
     def get_bind_params(self, run_id):
         params = {}
         for k in self._store_backend.list_keys(run_id.to_tuple()):
             key = self.tuple_to_key(k)
             params[key.to_evaluation_parameter_urn()] = self.get(key)
         return params
+
+    @property
+    def config(self):
+        return self._config
