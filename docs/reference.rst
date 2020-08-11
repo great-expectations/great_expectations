@@ -15,8 +15,3 @@ the thinking behind the tools.
    /reference/supporting_resources
    API Reference <autoapi/great_expectations/index>
 
-
-.. toctree::
-   :maxdepth: 2
-
-   /reference/spare_parts
