@@ -2237,6 +2237,21 @@ Invalid "config_store_backend_name" specified (supported values are: "s3", ...).
 
             return cls(context_root_dir=ge_dir, runtime_environment=runtime_environment)
 
+    # This "create" style" method builds the data context for the following typical configuration:
+    # Spark Data Frame is the format of data sets that is being validated;
+    # Expectation Suites, Validation Results, and Data Docs are stored in (different, if desired) AWS S3 buckets;
+    # Slack alert can be optionally sent upon the completion of the data validation operation.
+    # Convenient default parameter settings, used in this sample implementation, include:
+    # An in-memory Evaluation Parameter store, whose name is a constant (set in BaseDataContext);
+    # The name of the Data Docs site is "data_docs_site";
+    # The name of the Spark Data Frame data source is "s3_files_spark_datasource";
+    # The general-purpose "action_list_operator" is used to perform data validation (https://docs.greatexpectations.io/en/latest/reference/core_concepts/validation_operators_and_actions.html#validation-operators-and-actions).
+    # All of these default parameters can be changed to matches the user's particular needs.
+    # Furthermore, this method serves as a template for developing other similar methods for building the data context
+    # that fits different custom requirements.  For example, Expectation Suites, Validation Results, and Data Docs can
+    # use different backend stores (filesystem, AWS S3, and other cloud services as Great Expectations supports them).
+    # The granular API -- as used in this AWS S3 centric example -- enables considerable flexibility in building the
+    # data context that fits a wide range of computing and storage environments (AWS EMR, Databricks, GCP, Azure, etc.).
     @classmethod
     def create_standard_spark_df_s3_backend_data_context(
         cls,
