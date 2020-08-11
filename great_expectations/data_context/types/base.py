@@ -123,8 +123,7 @@ class DataContextConfig(DictDot):
         commented_map.update(schema_validated_dump)
         return object_to_yaml_str(commented_map)
 
-    @property
-    def data_docs_sites(self):
+    def get_data_docs_sites(self):
         return self._data_docs_sites
 
 

@@ -250,7 +250,6 @@ class BaseDataContext(object):
             raise ge_exceptions.InvalidConfigError(
                 "Your project_config is not valid. Try using the CLI check-config command."
             )
-        self._context_config_in_backend_store = context_config_in_backend_store
         self._project_config = project_config
         self._apply_global_config_overrides()
         if context_config_in_backend_store:
@@ -551,7 +550,7 @@ class BaseDataContext(object):
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        sites = self._project_config_with_variables_substituted.data_docs_sites
+        sites = self._project_config_with_variables_substituted.get_data_docs_sites()
         if not sites:
             logger.debug("Found no data_docs_sites.")
             return []
@@ -1282,7 +1281,10 @@ class BaseDataContext(object):
         )
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
-        if key in self.stores[self.expectations_store_name] and not overwrite_existing:
+        if (
+            self.stores[self.expectations_store_name].has_key(key)
+            and not overwrite_existing
+        ):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True.".format(
@@ -1304,7 +1306,7 @@ class BaseDataContext(object):
             True for Success and False for Failure.
         """
         key = ExpectationSuiteIdentifier(expectation_suite_name)
-        if not (key in self.stores[self.expectations_store_name]):
+        if not self.stores[self.expectations_store_name].has_key(key):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
             )
@@ -1323,7 +1325,7 @@ class BaseDataContext(object):
         """
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
-        if self.stores[self.expectations_store_name].has_key(key):
+        if not self.stores[self.expectations_store_name].has_key(key):
             return self.stores[self.expectations_store_name].get(key)
         else:
             raise ge_exceptions.DataContextError(
@@ -1604,7 +1606,7 @@ class BaseDataContext(object):
 
         index_page_locator_infos = {}
 
-        sites = self._project_config_with_variables_substituted.data_docs_sites
+        sites = self._project_config_with_variables_substituted.get_data_docs_sites()
         if sites:
             logger.debug("Found data_docs_sites. Building sites...")
 
@@ -1648,7 +1650,7 @@ class BaseDataContext(object):
         return index_page_locator_infos
 
     def clean_data_docs(self, site_name=None):
-        sites123 = self._project_config_with_variables_substituted.data_docs_sites
+        sites123 = self._project_config_with_variables_substituted.get_data_docs_sites()
         cleaned = False
         for sname, site_config in sites123.items():
             if site_name is None:
@@ -2199,7 +2201,7 @@ Invalid "config_store_backend_name" specified (supported values are: "s3", ...).
                     "to initialize a new DataContext"
                 )
 
-            ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
+            ge_dir: str = os.path.join(project_root_dir, cls.GE_DIR)
             os.makedirs(ge_dir, exist_ok=True)
             cls.scaffold_directories(ge_dir)
 
@@ -2583,8 +2585,9 @@ A DataContext configuration already exists.  If you would like to overwrite it, 
         context_config_in_backend_store: bool = False,
         configuration_store: Store = None,
     ):
+        self._context_config_in_backend_store = context_config_in_backend_store
         self._configuration_store = configuration_store
-        if context_config_in_backend_store:
+        if self.context_config_in_backend_store:
             self._context_root_directory = context_root_dir
         else:
             # Determine the "context root directory" - this is the parent of "great_expectations" dir
