@@ -1,5 +1,7 @@
-from __future__ import annotations
-
+# For Python 3.7 and higher, using "from __future__ import annotations" will make the work-around below unnecessary.
+# Internal support for annotations is planned for Python 4.0 and future versions, also obviating this work-around.
+# Use DataContext as "create" return type if can run "from __future__ import annotations" (or starting with Python 4.0).
+# from __future__ import annotations
 import configparser
 import copy
 import datetime
@@ -228,13 +230,7 @@ class BaseDataContext(object):
         return True
 
     @usage_statistics_enabled_method(event_name="data_context.__init__",)
-    def __init__(
-        self,
-        project_config,
-        context_root_dir=None,
-        runtime_environment=None,
-        context_config_in_backend_store: bool = False,
-    ):
+    def __init__(self, project_config, context_root_dir=None, runtime_environment=None):
         """DataContext constructor
 
         Args:
@@ -252,9 +248,7 @@ class BaseDataContext(object):
             )
         self._project_config = project_config
         self._apply_global_config_overrides()
-        if context_config_in_backend_store:
-            self._context_root_directory = None
-        elif context_root_dir is not None:
+        if context_root_dir is not None:
             self._context_root_directory = os.path.abspath(context_root_dir)
         else:
             self._context_root_directory = context_root_dir
@@ -625,10 +619,6 @@ class BaseDataContext(object):
             if url is not None:
                 logger.debug(f"Opening Data Docs found here: {url}")
                 webbrowser.open(url)
-
-    @property
-    def context_config_in_backend_store(self):
-        return self._context_config_in_backend_store
 
     @property
     def root_directory(self):
@@ -2277,7 +2267,7 @@ Invalid "config_store_backend_name" specified (supported values are: "s3", ...).
         runtime_environment: Union[dict, None] = None,
         overwrite_existing: bool = False,
         allow_anonymous_usage_statistics: bool = True,
-    ) -> DataContext:
+    ):
         # Creates the blank data context (or loads it, if its anonymous ID already exists in the AWS S3 backend store).
         ge_context: DataContext = cls.create(
             config_store_backend_name="s3",
@@ -2348,7 +2338,7 @@ Invalid "config_store_backend_name" specified (supported values are: "s3", ...).
         overwrite_existing: bool = False,
         runtime_environment: Union[dict, None] = None,
         **kwargs,
-    ) -> DataContext:
+    ):
         working_data_context: Union[
             DataContext, None
         ] = cls.load_or_create_data_context_using_configuration_store_with_s3_backend(
@@ -2379,7 +2369,7 @@ Invalid "config_store_backend_name" specified (supported values are: "s3", ...).
         overwrite_existing: bool = False,
         runtime_environment: Union[dict, None] = None,
         **kwargs,
-    ) -> DataContext:
+    ):
         working_data_context: Union[DataContext, None]
         try:
             working_data_context = cls.load_data_context_using_configuration_store_with_s3_backend(
@@ -2407,7 +2397,7 @@ Invalid "config_store_backend_name" specified (supported values are: "s3", ...).
         allow_anonymous_usage_statistics: bool = True,
         runtime_environment: Union[dict, None] = None,
         **kwargs,
-    ) -> DataContext:
+    ):
         working_data_context: Union[DataContext, None] = cls.create_blank_data_context(
             allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
             runtime_environment=runtime_environment,
@@ -2440,7 +2430,7 @@ Invalid "config_store_backend_name" specified (supported values are: "s3", ...).
         overwrite_existing: bool = False,
         runtime_environment: Union[dict, None] = None,
         **kwargs,
-    ) -> DataContext:
+    ):
         working_data_context: Union[DataContext, None] = cls.create_blank_data_context(
             allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
             runtime_environment=runtime_environment,
@@ -2481,7 +2471,7 @@ A DataContext configuration already exists.  If you would like to overwrite it, 
         cls,
         allow_anonymous_usage_statistics: bool = True,
         runtime_environment: Union[dict, None] = None,
-    ) -> DataContext:
+    ):
         project_yaml: str = get_project_config_yaml(
             j2_template_name="data_context_unique_id_project_template.j2",
             allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
@@ -2636,7 +2626,6 @@ A DataContext configuration already exists.  If you would like to overwrite it, 
             project_config=project_config,
             context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
-            context_config_in_backend_store=context_config_in_backend_store,
         )
 
         # save project config if data_context_id auto-generated or global config values applied
@@ -2645,7 +2634,7 @@ A DataContext configuration already exists.  If you would like to overwrite it, 
             project_config.anonymous_usage_statistics.explicit_id is False
             or project_config_dict != dataContextConfigSchema.dump(self._project_config)
         ):
-            if not context_config_in_backend_store or configuration_store:
+            if not self.context_config_in_backend_store or self.configuration_store:
                 self._save_project_config()
 
     def _load_project_config(self) -> Union[DataContextConfig]:
@@ -3260,6 +3249,10 @@ project configuration.
                     )
 
         return checkpoint
+
+    @property
+    def context_config_in_backend_store(self):
+        return self._context_config_in_backend_store
 
     @property
     def configuration_store(self):
