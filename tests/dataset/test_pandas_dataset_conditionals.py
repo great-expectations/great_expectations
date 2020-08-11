@@ -141,12 +141,16 @@ def test_positional_arguments():
     )
 
     assert (
-        df.expect_column_mean_to_be_between("x", 4, 6,  condition_parser="pandas", row_condition='group=="a"')
+        df.expect_column_mean_to_be_between(
+            "x", 4, 6, condition_parser="pandas", row_condition='group=="a"'
+        )
         == exp_output
     )
     assert df.expect_column_mean_to_be_between("x", 4, 6) != exp_output
 
-    out = df.expect_column_values_to_be_between("y", 1, 6,  condition_parser="pandas", row_condition='group=="a"')
+    out = df.expect_column_values_to_be_between(
+        "y", 1, 6, condition_parser="pandas", row_condition='group=="a"'
+    )
     t = {
         "out": {
             "success": False,
@@ -164,7 +168,7 @@ def test_positional_arguments():
             assert t["out"]["unexpected_list"] == out.result["unexpected_list"]
 
     out = df.expect_column_values_to_be_between(
-        "y", 1, 6, mostly=0.5,  condition_parser="pandas", row_condition='group=="a"'
+        "y", 1, 6, mostly=0.5, condition_parser="pandas", row_condition='group=="a"'
     )
     t = {
         "out": {
@@ -183,7 +187,7 @@ def test_positional_arguments():
             assert t["out"]["unexpected_list"] == out.result["unexpected_list"]
 
     out = df.expect_column_values_to_be_in_set(
-        "z", ["a", "b", "c"],  condition_parser="pandas", row_condition='group=="a"'
+        "z", ["a", "b", "c"], condition_parser="pandas", row_condition='group=="a"'
     )
     t = {
         "out": {
@@ -202,7 +206,11 @@ def test_positional_arguments():
             assert t["out"]["unexpected_list"] == out.result["unexpected_list"]
 
     out = df.expect_column_values_to_be_in_set(
-        "z", ["a", "b", "c"], mostly=0.5,  condition_parser="pandas", row_condition='group=="a"'
+        "z",
+        ["a", "b", "c"],
+        mostly=0.5,
+        condition_parser="pandas",
+        row_condition='group=="a"',
     )
     t = {
         "out": {
@@ -249,7 +257,12 @@ def test_result_format_argument_in_decorators():
 
     assert (
         df.expect_column_mean_to_be_between(
-            "x", 4, 6, result_format=None,  condition_parser="pandas", row_condition="group=='a'"
+            "x",
+            4,
+            6,
+            result_format=None,
+            condition_parser="pandas",
+            row_condition="group=='a'",
         )
         == exp_output
     )
@@ -282,23 +295,43 @@ def test_result_format_argument_in_decorators():
 
     assert (
         df.expect_column_values_to_be_between(
-            "y", 1, 6, result_format=None, condition_parser="pandas", row_condition="group=='a'"
+            "y",
+            1,
+            6,
+            result_format=None,
+            condition_parser="pandas",
+            row_condition="group=='a'",
         )
         == exp_output
     )
 
     assert df.expect_column_values_to_be_between(
-        "y", 1, 6, result_format=None, condition_parser="pandas", row_condition="group=='a'"
+        "y",
+        1,
+        6,
+        result_format=None,
+        condition_parser="pandas",
+        row_condition="group=='a'",
     ) != df.expect_column_values_to_be_between("y", 1, 6, result_format=None)
     # Test unknown output format
     with pytest.raises(ValueError):
         df.expect_column_values_to_be_between(
-            "y", 1, 6, result_format="QUACK", condition_parser="pandas", row_condition="group=='a'"
+            "y",
+            1,
+            6,
+            result_format="QUACK",
+            condition_parser="pandas",
+            row_condition="group=='a'",
         )
 
     with pytest.raises(ValueError):
         df.expect_column_mean_to_be_between(
-            "x", 4, 6, result_format="QUACK", condition_parser="pandas", row_condition="group=='a'"
+            "x",
+            4,
+            6,
+            result_format="QUACK",
+            condition_parser="pandas",
+            row_condition="group=='a'",
         )
 
 
@@ -315,8 +348,12 @@ def test_ge_pandas_subsetting_with_conditionals():
     )
 
     # Put some simple expectations on the data frame
-    df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4], condition_parser="pandas", row_condition="group=='a'")
-    df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8], condition_parser="pandas", row_condition="group=='a'")
+    df.expect_column_values_to_be_in_set(
+        "A", [1, 2, 3, 4], condition_parser="pandas", row_condition="group=='a'"
+    )
+    df.expect_column_values_to_be_in_set(
+        "B", [5, 6, 7, 8], condition_parser="pandas", row_condition="group=='a'"
+    )
     df.expect_column_values_to_be_in_set(
         "C", ["a", "b", "c", "d"], condition_parser="pandas", row_condition="group=='a'"
     )
@@ -428,17 +465,15 @@ def test_condition_parser_in_expectation_config():
 
     df.set_default_expectation_argument("include_config", True)
 
-    observe = df.expect_column_values_to_be_between("x",
-                                                    min_value=1,
-                                                    max_value=5,
-                                                    result_format="SUMMARY",
-                                                    condition_parser="pandas",
-                                                    row_condition="group=='a'"
-                                                    )
-    assert (
-        "pandas"
-        == observe.expectation_config["kwargs"]["condition_parser"]
+    observe = df.expect_column_values_to_be_between(
+        "x",
+        min_value=1,
+        max_value=5,
+        result_format="SUMMARY",
+        condition_parser="pandas",
+        row_condition="group=='a'",
     )
+    assert "pandas" == observe.expectation_config["kwargs"]["condition_parser"]
 
     with pytest.raises(ValueError):
         df.expect_column_values_to_be_between(

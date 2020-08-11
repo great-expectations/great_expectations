@@ -71,12 +71,14 @@ class MetaPandasDataset(Dataset):
             result_format = parse_result_format(result_format)
             if row_condition:
                 if condition_parser not in ["python", "pandas"]:
-                    raise ValueError("condition_parser is required when setting a row_condition,"
-                                     " and must be 'python' or 'pandas'")
-                else:
-                    data = self.query(row_condition, parser=condition_parser).reset_index(
-                        drop=True
+                    raise ValueError(
+                        "condition_parser is required when setting a row_condition,"
+                        " and must be 'python' or 'pandas'"
                     )
+                else:
+                    data = self.query(
+                        row_condition, parser=condition_parser
+                    ).reset_index(drop=True)
             else:
                 data = self
 
