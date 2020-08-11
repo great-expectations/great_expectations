@@ -12,6 +12,7 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as ge
+from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -1952,6 +1953,21 @@ def empty_data_context(tmp_path_factory):
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
     return context
+
+
+@pytest.fixture
+def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
+    monkeypatch.setenv("FOO", "BAR")
+    root_dir = empty_data_context.root_directory
+    ge_config_path = file_relative_path(
+        __file__, "./test_fixtures/great_expectations_basic_with_variables.yml",
+    )
+    shutil.copy(ge_config_path, os.path.join(root_dir, "great_expectations.yml"))
+    config_variables_path = file_relative_path(
+        __file__, "./test_fixtures/config_variables.yml",
+    )
+    shutil.copy(config_variables_path, os.path.join(root_dir, "uncommitted"))
+    return DataContext(context_root_dir=root_dir)
 
 
 @pytest.fixture

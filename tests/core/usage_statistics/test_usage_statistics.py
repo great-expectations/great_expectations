@@ -3,10 +3,19 @@ import os
 import shutil
 from copy import deepcopy
 
+import jsonschema
 import mock
 import pytest
 
+from great_expectations.core.usage_statistics.schemas import (
+    anonymized_datasource_schema,
+    cli_new_ds_choice_payload,
+    init_payload_schema,
+    save_or_edit_expectation_suite_payload_schema,
+    usage_statistics_record_schema,
+)
 from great_expectations.core.usage_statistics.usage_statistics import (
+    add_datasource_usage_statistics,
     run_validation_operator_usage_statistics,
 )
 from great_expectations.data_context import BaseDataContext, DataContext

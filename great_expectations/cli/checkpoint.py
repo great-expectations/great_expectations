@@ -239,7 +239,6 @@ def _load_checkpoint_yml_template() -> dict:
 def checkpoint_list(directory):
     """List configured checkpoints. (Experimental)"""
     context = toolkit.load_data_context_with_error_handling(directory)
-
     checkpoints = context.list_checkpoints()
     if not checkpoints:
         cli_message(
