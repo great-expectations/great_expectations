@@ -9,7 +9,7 @@ This guide shows how to create a new how-to guide in Great Expectations. By writ
 Steps
 -----
 
-#. Copy the :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>` to the appropriate subdirectory of ``docs/how_to_guides/``, and rename it.
+#. Copy the :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>` to the appropriate subdirectory of ``docs/guides/how_to_guides/``, and rename it.
 #. Write a title and purpose paragraph.
 #. Decide whether you're writing a :ref:`code-heavy or process-heavy <Code-heavy vs process-heavy guides>` guide, and :ref:`adjust your formatting <Indentation, bolding, and code blocks>` appropriately.
 #. Fill out the Prerequisites info box (see :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>`). The header of the info box says: "This how-to guide assumes you have already:". Place each prerequisite under its own bullet and phrase it using the style in the template: "done something".

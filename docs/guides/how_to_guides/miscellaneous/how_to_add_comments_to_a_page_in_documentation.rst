@@ -20,7 +20,7 @@ Steps
 
     .. code-block::
 
-        This article is for comments to: https://docs.greatexpectations.io/en/latest/how_to_guides/{some_path}/{your_guide_name}.html
+        This article is for comments to: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/{some_path}/{your_guide_name}.html
         
         Please comment +1 if this How-to Guide is important to you.
 	

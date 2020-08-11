@@ -7,4 +7,4 @@ Creating Batches
    :maxdepth: 1
    :glob:
 
-   /how_to_guides/creating_batches/*
+   /guides/how_to_guides/creating_batches/*
