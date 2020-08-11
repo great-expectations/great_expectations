@@ -1798,4 +1798,14 @@ Notes:
         catch_exceptions=None,
         meta=None,
     ):
+        """ Multi-Column Map Expectation
+
+        Expects that sum of all rows for a set of columns is equal to a specific value
+
+        Args:
+            column_list (List[str]): \
+                Set of columns to be checked
+            sum_total (int): \
+                expected sum of columns
+        """
         return column_list.sum(axis=1) == sum_total
