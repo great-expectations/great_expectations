@@ -7,4 +7,4 @@ Configuring Data Docs
    :maxdepth: 1
    :glob:
 
-   /how_to_guides/configuring_data_docs/*
+   /guides/how_to_guides/configuring_data_docs/*
