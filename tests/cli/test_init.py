@@ -9,7 +9,7 @@ from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.templates import (
     INSTANCE_ID,
-    get_project_config_yml,
+    get_project_config_yaml,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
