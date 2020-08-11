@@ -2287,7 +2287,7 @@ def data_context_with_bad_notebooks(tmp_path_factory):
         os.path.join(fixture_dir, custom_notebook_assets_dir),
         str(os.path.join(context_path, "plugins", custom_notebook_assets_dir)),
     )
-    return ge.data_context.DataContext(context_path)
+    return ge.data_context.DataContext(context_root_dir=context_path)
 
 
 @pytest.fixture
@@ -2317,7 +2317,7 @@ def data_context_custom_notebooks(tmp_path_factory):
 
     os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
 
-    return ge.data_context.DataContext(context_path)
+    return ge.data_context.DataContext(context_root_dir=context_path)
 
 
 @pytest.fixture
