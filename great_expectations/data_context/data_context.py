@@ -2352,9 +2352,12 @@ Invalid "config_store_backend_name" specified (supported values are: "s3", ...).
             expectations_store_name
         )
         if expectations_store_obj is None:
+            s3_store_backend_obj: StoreBackend = working_data_context.add_tuple_s3_store_backend(
+                bucket=bucket, **kwargs,
+            )
             # noinspection PyUnusedLocal
-            expectations_store: Store = working_data_context.add_expectations_store(
-                name=expectations_store_name
+            expectations_store_obj: Store = working_data_context.add_expectations_store(
+                name=expectations_store_name, store_backend=s3_store_backend_obj
             )
         working_data_context.set_expectations_store_name(
             expectations_store_name=expectations_store_name
@@ -2819,14 +2822,11 @@ project configuration.
         self,
         name: str,
         store_backend: StoreBackend = None,
-        use_configuration_store_backend: bool = True,
         *,
         module_name: str = "great_expectations.data_context.store",
         class_name: str = "ExpectationsStore",
         **kwargs,
     ) -> Union[Store, None]:
-        if use_configuration_store_backend:
-            store_backend = self.configuration_store.store_backend
         if store_backend is not None:
             store_backend = store_backend.config
         store_config: dict = {
