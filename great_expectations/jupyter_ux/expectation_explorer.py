@@ -1940,7 +1940,9 @@ class ExpectationExplorer(object):
         data_asset_expectations = data_asset_state.get("expectations", {})
 
         # TODO: Deprecate "great_expectations.__version__"
-        ge_version = expectation_suite.get("meta").get("great_expectations_version") or expectation_suite.get("meta").get("great_expectations.__version__")
+        ge_version = expectation_suite.get("meta").get(
+            "great_expectations_version"
+        ) or expectation_suite.get("meta").get("great_expectations.__version__")
         column_count = len(column_names)
         expectation_count = len(expectation_suite["expectations"])
 

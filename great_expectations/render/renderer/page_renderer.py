@@ -286,7 +286,9 @@ class ValidationResultsPageRenderer(Renderer):
             run_name = run_id.run_name or "__none__"
             run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         # TODO: Deprecate "great_expectations.__version__"
-        ge_version = validation_results.meta.get("great_expectations_version") or validation_results.meta.get("great_expectations.__version__")
+        ge_version = validation_results.meta.get(
+            "great_expectations_version"
+        ) or validation_results.meta.get("great_expectations.__version__")
 
         return RenderedTableContent(
             **{
@@ -576,7 +578,9 @@ class ExpectationSuitePageRenderer(Renderer):
     def _render_expectation_suite_info(cls, expectations):
         expectation_suite_name = expectations.expectation_suite_name
         # TODO: Deprecate "great_expectations.__version__"
-        ge_version = expectations.meta.get("great_expectations_version") or expectations.meta.get("great_expectations.__version__")
+        ge_version = expectations.meta.get(
+            "great_expectations_version"
+        ) or expectations.meta.get("great_expectations.__version__")
 
         return RenderedTableContent(
             **{

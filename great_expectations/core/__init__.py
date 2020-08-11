@@ -1475,7 +1475,10 @@ class ExpectationSuite(object):
         self.data_asset_type = data_asset_type
         if meta is None:
             meta = {"great_expectations_version": ge_version}
-        if "great_expectations.__version__" not in meta.keys() and "great_expectations_version" not in meta.keys():
+        if (
+            "great_expectations.__version__" not in meta.keys()
+            and "great_expectations_version" not in meta.keys()
+        ):
             meta["great_expectations_version"] = ge_version
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)

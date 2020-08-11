@@ -868,17 +868,16 @@ class DataAsset(object):
 
             # Warn if our version is different from the version in the configuration
             # TODO: Deprecate "great_expectations.__version__"
-            suite_ge_version = expectation_suite.meta.get("great_expectations_version") or expectation_suite.meta.get("great_expectations.__version__")
-            
+            suite_ge_version = expectation_suite.meta.get(
+                "great_expectations_version"
+            ) or expectation_suite.meta.get("great_expectations.__version__")
+
             if suite_ge_version:
                 if suite_ge_version != ge_version:
                     warnings.warn(
                         "WARNING: This configuration object was built using version %s of great_expectations, but "
                         "is currently being validated by version %s."
-                        % (
-                            suite_ge_version,
-                            ge_version,
-                        )
+                        % (suite_ge_version, ge_version,)
                     )
             else:
                 warnings.warn(
