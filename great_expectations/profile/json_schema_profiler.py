@@ -152,11 +152,17 @@ class JsonSchemaProfiler(Profiler):
     def _create_type_expectation(
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
-        type_ = details.get("type", None)
-        if type_ is None:
+        object_types = self._get_object_types(details=details)
+        object_types = list(filter(lambda object_type: object_type != JsonSchemaTypes.NULL.value, object_types))
+
+        if len(object_types) == 0:
             return None
 
-        type_list = self.PROFILER_TYPE_LIST_BY_JSON_SCHEMA_TYPE[type_]
+        type_list = []
+
+        for type_ in object_types:
+            type_list.extend(self.PROFILER_TYPE_LIST_BY_JSON_SCHEMA_TYPE[type_])
+
         kwargs = {"column": key, "type_list": type_list}
         return ExpectationConfiguration(
             "expect_column_values_to_be_in_type_list", kwargs
