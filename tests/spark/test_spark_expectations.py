@@ -1,8 +1,6 @@
 import importlib.util
 
 import pytest
-from pyspark.sql.types import IntegerType, StringType, StructField, StructType
-from pyspark.sql.utils import AnalysisException
 
 from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
 
@@ -12,6 +10,8 @@ from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
 )
 @pytest.fixture
 def test_dataframe(spark_session):
+    from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+
     schema = StructType(
         [
             StructField("name", StringType(), True),
@@ -50,6 +50,8 @@ def test_expect_column_values_to_be_of_type(spark_session, test_dataframe):
     """
     data asset expectation
     """
+    from pyspark.sql.utils import AnalysisException
+
     assert test_dataframe.expect_column_values_to_be_of_type(
         "address.street", "StringType"
     ).success
@@ -70,6 +72,8 @@ def test_expect_column_pair_values_to_be_equal(spark_session, test_dataframe):
     """
     column_pair_map_expectation
     """
+    from pyspark.sql.utils import AnalysisException
+
     assert test_dataframe.expect_column_pair_values_to_be_equal(
         "name", "name_duplicate"
     ).success
@@ -109,6 +113,8 @@ def test_expect_multicolumn_values_to_be_unique(spark_session, test_dataframe):
     """
     multicolumn_map_expectation
     """
+    from pyspark.sql.utils import AnalysisException
+
     assert test_dataframe.expect_multicolumn_values_to_be_unique(
         ["name", "age"]
     ).success
@@ -133,6 +139,8 @@ def test_expect_column_values_to_be_unique(spark_session, test_dataframe):
     """
     column_map_expectation
     """
+    from pyspark.sql.utils import AnalysisException
+
     assert test_dataframe.expect_column_values_to_be_unique("name").success
     assert not test_dataframe.expect_column_values_to_be_unique("address.city").success
     assert test_dataframe.expect_column_values_to_be_unique("`non.nested`").success
