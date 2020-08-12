@@ -1,3 +1,5 @@
+import importlib.util
+
 import pytest
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
@@ -5,6 +7,9 @@ from pyspark.sql.utils import AnalysisException
 from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
 
 
+@pytest.mark.skipif(
+    importlib.util.find_spec("xdsag") is None, reason="requires the Spark library"
+)
 @pytest.fixture
 def test_dataframe(spark_session):
     schema = StructType(
@@ -38,6 +43,9 @@ def test_dataframe(spark_session):
     return SparkDFDataset(df, persist=True)
 
 
+@pytest.mark.skipif(
+    importlib.util.find_spec("xdsag") is None, reason="requires the Spark library"
+)
 def test_expect_column_values_to_be_of_type(spark_session, test_dataframe):
     """
     data asset expectation
@@ -55,6 +63,9 @@ def test_expect_column_values_to_be_of_type(spark_session, test_dataframe):
         test_dataframe.expect_column_values_to_be_of_type("non.nested", "StringType")
 
 
+@pytest.mark.skipif(
+    importlib.util.find_spec("xdsag") is None, reason="requires the Spark library"
+)
 def test_expect_column_pair_values_to_be_equal(spark_session, test_dataframe):
     """
     column_pair_map_expectation
@@ -72,6 +83,9 @@ def test_expect_column_pair_values_to_be_equal(spark_session, test_dataframe):
         test_dataframe.expect_column_pair_values_to_be_equal("name", "non.nested")
 
 
+@pytest.mark.skipif(
+    importlib.util.find_spec("xdsag") is None, reason="requires the Spark library"
+)
 def test_expect_column_pair_values_A_to_be_greater_than_B(
     spark_session, test_dataframe
 ):
@@ -86,6 +100,9 @@ def test_expect_column_pair_values_A_to_be_greater_than_B(
     ).success
 
 
+@pytest.mark.skipif(
+    importlib.util.find_spec("xdsag") is None, reason="requires the Spark library"
+)
 def test_expect_multicolumn_values_to_be_unique(spark_session, test_dataframe):
     """
     multicolumn_map_expectation
@@ -105,6 +122,9 @@ def test_expect_multicolumn_values_to_be_unique(spark_session, test_dataframe):
         )
 
 
+@pytest.mark.skipif(
+    importlib.util.find_spec("xdsag") is None, reason="requires the Spark library"
+)
 def test_expect_column_values_to_be_unique(spark_session, test_dataframe):
     """
     column_map_expectation
@@ -118,6 +138,9 @@ def test_expect_column_values_to_be_unique(spark_session, test_dataframe):
         test_dataframe.expect_column_values_to_be_unique("non.nested")
 
 
+@pytest.mark.skipif(
+    importlib.util.find_spec("xdsag") is None, reason="requires the Spark library"
+)
 def test_expect_column_value_lengths_to_be_between(spark_session, test_dataframe):
     """
     column_map_expectation
@@ -130,6 +153,9 @@ def test_expect_column_value_lengths_to_be_between(spark_session, test_dataframe
     ).success
 
 
+@pytest.mark.skipif(
+    importlib.util.find_spec("xdsag") is None, reason="requires the Spark library"
+)
 def test_expect_column_value_lengths_to_equal(spark_session, test_dataframe):
     """
     column_map_expectation
