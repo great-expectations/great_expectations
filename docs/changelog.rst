@@ -23,6 +23,8 @@ Develop
 * [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 * [DOCS] Add information about issue tags to contributing docs
 * [DEPRECATION] Deprecate demo suite behavior in `suite new`
+* [BUGFIX] Fixes a bug that was causing exceptions to occur if user had a Data Docs config excluding a particular site section
+* [ENHANCEMENT] Add a `skip_and_clean_missing` flag to `DefaultSiteIndexBuilder.build` (default True). If True, when an index page is being built and an existing HTML page does not have corresponding source data (i.e. an expectation suite or validation result was removed from source store), the HTML page is automatically deleted and will not appear in the index. This ensures that the expectations store and validations store are the source of truth for Data Docs.
 * [FEATURE] Slack Messages sent as ValidationActions now have link to DataDocs, if available.
 * [FEATURE] ValidationActions can now consume and return "payload", which can be used to share information across ValidationActions
 
