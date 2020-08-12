@@ -214,6 +214,13 @@ def test_profile_simple_schema(empty_data_context, simple_schema):
             "meta": {},
         },
         {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "kwargs": {
+            "column": "first_name"
+          },
+          "meta": {}
+        },
+            {
             "kwargs": {"column": "age"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
@@ -225,6 +232,13 @@ def test_profile_simple_schema(empty_data_context, simple_schema):
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "meta": {},
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "kwargs": {
+            "column": "age"
+          },
+          "meta": {}
         },
     ]
     context = empty_data_context
@@ -255,6 +269,13 @@ def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
             "kwargs": {"column": "active", "value_set": [True, False]},
             "expectation_type": "expect_column_values_to_be_in_set",
         },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "active"
+            },
+            "meta": {}
+        },
     ]
     context = empty_data_context
     context.save_expectation_suite(obs)
@@ -278,6 +299,13 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
                 "column": "shirt-size",
                 "value_set": ["XS", "S", "M", "XL", "XXL"],
             },
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "shirt-size"
+            },
+            "meta": {}
         },
     ]
     context = empty_data_context
@@ -304,6 +332,13 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             "meta": {},
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "comments-no-constraints"
+            },
+            "meta": {}
+        },
+        {
             "kwargs": {"column": "state-abbreviation-equal-min-max"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
@@ -320,6 +355,13 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             "kwargs": {"column": "state-abbreviation-equal-min-max", "value": 2},
             "expectation_type": "expect_column_value_lengths_to_equal",
             "meta": {},
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "state-abbreviation-equal-min-max"
+            },
+            "meta": {}
         },
         {
             "kwargs": {"column": "ICD10-code-3-7"},
@@ -340,6 +382,13 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             "meta": {},
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "ICD10-code-3-7"
+            },
+            "meta": {}
+        },
+        {
             "kwargs": {"column": "name-no-max"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
@@ -358,6 +407,13 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             "meta": {},
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "name-no-max"
+            },
+            "meta": {}
+        },
+        {
             "kwargs": {"column": "password-max-33"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
@@ -374,6 +430,13 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             "kwargs": {"column": "password-max-33", "max_value": 33},
             "expectation_type": "expect_column_value_lengths_to_be_between",
             "meta": {},
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "password-max-33"
+            },
+            "meta": {}
         },
     ]
     context = empty_data_context
@@ -400,6 +463,13 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             },
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "favorite-number"
+            },
+            "meta": {}
+        },
+        {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "age-0-130"},
@@ -416,6 +486,13 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "age-0-130", "min_value": 0, "max_value": 130},
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "age-0-130"
+            },
+            "meta": {}
         },
         {
             "meta": {},
@@ -436,6 +513,13 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "kwargs": {"column": "wheel-count-0-plus", "min_value": 0},
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "wheel-count-0-plus"
+            },
+            "meta": {}
+        },
+        {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "rpm-max-7000"},
@@ -454,6 +538,13 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "kwargs": {"column": "rpm-max-7000", "max_value": 7000},
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "rpm-max-7000"
+            },
+            "meta": {}
+        },
+        {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "lake-depth-max-minus-100"},
@@ -470,6 +561,13 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "lake-depth-max-minus-100", "max_value": -100},
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "lake-depth-max-minus-100"
+            },
+            "meta": {}
         },
         {
             "meta": {},
@@ -494,6 +592,13 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             },
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "floor-exclusive-min-0"
+            },
+            "meta": {}
+        },
+        {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "floor-exclusive-max-100"},
@@ -514,6 +619,13 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                 "max_value": 100,
                 "strict_max": True,
             },
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "floor-exclusive-max-100"
+            },
+            "meta": {}
         },
         {
             "kwargs": {"column": "gear-exclusive-0-6"},
@@ -538,6 +650,13 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             },
             "expectation_type": "expect_column_values_to_be_between",
             "meta": {},
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "gear-exclusive-0-6"
+            },
+            "meta": {}
         },
     ]
     context = empty_data_context
@@ -564,6 +683,13 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             },
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "favorite-number"
+            },
+            "meta": {}
+        },
+        {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "age-0-130"},
@@ -580,6 +706,13 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "age-0-130", "min_value": 0.5, "max_value": 130.5},
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "age-0-130"
+            },
+            "meta": {}
         },
         {
             "meta": {},
@@ -600,6 +733,13 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "kwargs": {"column": "wheel-count-0-plus", "min_value": 0.5},
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "wheel-count-0-plus"
+            },
+            "meta": {}
+        },
+        {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "rpm-max-7000"},
@@ -618,6 +758,13 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "kwargs": {"column": "rpm-max-7000", "max_value": 7000.5},
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "rpm-max-7000"
+            },
+            "meta": {}
+        },
+        {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "lake-depth-max-minus-100"},
@@ -634,6 +781,13 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "lake-depth-max-minus-100", "max_value": -100.5},
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "lake-depth-max-minus-100"
+            },
+            "meta": {}
         },
         {
             "meta": {},
@@ -658,6 +812,13 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             },
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "floor-exclusive-min-0"
+            },
+            "meta": {}
+        },
+        {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "floor-exclusive-max-100"},
@@ -678,6 +839,13 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                 "max_value": 100.5,
                 "strict_max": True,
             },
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "floor-exclusive-max-100"
+            },
+            "meta": {}
         },
         {
             "kwargs": {"column": "gear-exclusive-0-6"},
@@ -702,6 +870,13 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             },
             "expectation_type": "expect_column_values_to_be_between",
             "meta": {},
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "gear-exclusive-0-6"
+            },
+            "meta": {}
         },
     ]
     context = empty_data_context
@@ -735,6 +910,13 @@ def test_has_profile_create_expectations_from_complex_schema(
             "meta": {},
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "post-office-box"
+            },
+            "meta": {}
+        },
+        {
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "street-name"},
             "meta": {},
@@ -746,6 +928,13 @@ def test_has_profile_create_expectations_from_complex_schema(
                 "type_list": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
             },
             "meta": {},
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "street-name"
+            },
+            "meta": {}
         },
         {
             "expectation_type": "expect_column_to_exist",
@@ -766,6 +955,13 @@ def test_has_profile_create_expectations_from_complex_schema(
             "meta": {},
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "street-number"
+            },
+            "meta": {}
+        },
+        {
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "locality"},
             "meta": {},
@@ -777,6 +973,13 @@ def test_has_profile_create_expectations_from_complex_schema(
                 "type_list": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
             },
             "meta": {},
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "locality"
+            },
+            "meta": {}
         },
         {
             "expectation_type": "expect_column_to_exist",
@@ -792,6 +995,13 @@ def test_has_profile_create_expectations_from_complex_schema(
             "meta": {},
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "region"
+            },
+            "meta": {}
+        },
+        {
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "postal-code"},
             "meta": {},
@@ -805,6 +1015,13 @@ def test_has_profile_create_expectations_from_complex_schema(
             "meta": {},
         },
         {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "postal-code"
+            },
+            "meta": {}
+        },
+        {
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "country-name"},
             "meta": {},
@@ -816,6 +1033,13 @@ def test_has_profile_create_expectations_from_complex_schema(
                 "type_list": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
             },
             "meta": {},
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "country-name"
+            },
+            "meta": {}
         },
     ]
     context = empty_data_context
