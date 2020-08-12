@@ -10,16 +10,13 @@ Develop
 * [FEATURE] Expectations now define “domain,” “success,” and “runtime” kwargs to allow them to determine expectation equivalence for updating expectations. Fixes column pair expectation update logic.
 * [FEATURE] add support for `expect_column_values_to_be_increasing` to `Spark`.
 * [FEATURE] add support for `expect_column_values_to_be_decreasing` to `Spark`.
-* [FEATURE] Add support for conditional expectations using pandas execution engine (#1217 HUGE thanks @arsenii!)
 * [ENHANCEMENT] Include datetime and bool column types in descriptive documentation results
 * [ENHANCEMENT] Improve data docs page breadcrumbs to have clearer run information
 * [ENHANCEMENT] Data Docs Validation Results only shows unexpected value counts if all unexpected values are available
-* [ENHANCEMENT] Convert GE version key from great_expectations.__version__ to great_expectations_version (thanks, @cwerner!) (#1606)
 * [BUGFIX] Add guard for checking Redshift Dialect in match_like_pattern expectation
-* [BUGFIX] Fix content_block build failure for dictionary content - (thanks @jliew!) #1722
-* [BUGFIX] Fix bug that was preventing env var substitution in `config_variables.yml` when not at the top level
 * [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 * [DOCS] Add information about issue tags to contributing docs
+* [BUGFIX] Fix bug that was preventing env var substitution in `config_variables.yml` when not at the top level
 * [DEPRECATION] Deprecate demo suite behavior in `suite new`
 
 0.11.9
