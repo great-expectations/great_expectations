@@ -1161,24 +1161,29 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             raise ValueError("Unrecognized spark type: %s" % type_)
 
     @DocInherit
-    @DataAsset.expectation(["column", "type_", "mostly"])
+    @DataAsset.expectation(["column", "type_list", "mostly"])
     def expect_column_values_to_be_in_type_list(
         self,
         column,
-        type_list,
+        type_list: List[str],
         mostly=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
     ):
+        # Rename column so we only have to handle dot notation here
+        target_col = "__target_col"
+        self.spark_df = self.spark_df.withColumn(target_col, col(column))
+
         if mostly is not None:
             raise ValueError(
                 "SparkDFDataset does not support column map semantics for column types"
             )
 
         try:
-            col_data = self.spark_df.select(column)
+            col_df = self.spark_df.select(target_col)
+            col_data = [f for f in col_df.schema.fields if f.name == target_col][0]
             col_type = type(col_data.dataType)
         except IndexError:
             raise ValueError("Unrecognized column: %s" % column)
