@@ -20,9 +20,18 @@ from great_expectations.types import DictDot
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import filter_properties_dict
 
-logger = logging.getLogger(__name__)
-
 yaml = YAML()
+
+
+CURRENT_CONFIG_VERSION = 2
+MINIMUM_SUPPORTED_CONFIG_VERSION = 2
+DEFAULT_USAGE_STATISTICS_URL = (
+    "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+)
+DATA_CONTEXT_ID: str = str(uuid.uuid4())
+
+
+logger = logging.getLogger(__name__)
 
 
 def object_to_yaml_str(obj):
@@ -31,13 +40,6 @@ def object_to_yaml_str(obj):
         yaml.dump(obj, string_stream)
         output_str = string_stream.getvalue()
     return output_str
-
-
-CURRENT_CONFIG_VERSION = 2
-MINIMUM_SUPPORTED_CONFIG_VERSION = 2
-DEFAULT_USAGE_STATISTICS_URL = (
-    "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-)
 
 
 class DataContextConfig(DictDot):
@@ -164,7 +166,7 @@ class AnonymizedUsageStatisticsConfig(DictDot):
     def __init__(self, enabled=True, data_context_id=None, usage_statistics_url=None):
         self._enabled = enabled
         if data_context_id is None:
-            data_context_id = str(uuid.uuid4())
+            data_context_id = DATA_CONTEXT_ID
             self._explicit_id = False
         else:
             self._explicit_id = True

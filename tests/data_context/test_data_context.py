@@ -805,7 +805,7 @@ def empty_context(tmp_path_factory):
 
 def test_data_context_does_ge_yml_exist_returns_true_when_it_does_exist(empty_context):
     ge_dir = empty_context.root_directory
-    assert DataContext.does_config_exist_on_disk(ge_dir) == True
+    assert DataContext.does_config_exist_on_disk(ge_dir)
 
 
 def test_data_context_does_ge_yml_exist_returns_false_when_it_does_not_exist(
@@ -814,7 +814,7 @@ def test_data_context_does_ge_yml_exist_returns_false_when_it_does_not_exist(
     ge_dir = empty_context.root_directory
     # mangle project
     safe_remove(os.path.join(ge_dir, empty_context.GE_YML))
-    assert DataContext.does_config_exist_on_disk(ge_dir) == False
+    assert not DataContext.does_config_exist_on_disk(ge_dir)
 
 
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_true_when_it_has_a_datasource_configured_in_yml_file_on_disk(
@@ -822,14 +822,14 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_true
 ):
     ge_dir = empty_context.root_directory
     empty_context.add_datasource("arthur", **{"class_name": "PandasDatasource"})
-    assert DataContext.does_project_have_a_datasource_in_config_file(ge_dir) == True
+    assert DataContext.does_project_have_a_datasource_in_config_file(ge_dir)
 
 
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_datasource_configured_in_yml_file_on_disk(
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    assert DataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
+    assert not DataContext.does_project_have_a_datasource_in_config_file(ge_dir)
 
 
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_ge_yml_file(
@@ -837,7 +837,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
 ):
     ge_dir = empty_context.root_directory
     safe_remove(os.path.join(ge_dir, empty_context.GE_YML))
-    assert DataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
+    assert not DataContext.does_project_have_a_datasource_in_config_file(ge_dir)
 
 
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_ge_dir(
@@ -845,7 +845,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
 ):
     ge_dir = empty_context.root_directory
     safe_remove(os.path.join(ge_dir))
-    assert DataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
+    assert not DataContext.does_project_have_a_datasource_in_config_file(ge_dir)
 
 
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_the_project_has_an_invalid_config_file(
@@ -854,7 +854,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     ge_dir = empty_context.root_directory
     with open(os.path.join(ge_dir, DataContext.GE_YML), "w") as yml:
         yml.write("this file: is not a valid ge config")
-    assert DataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
+    assert not DataContext.does_project_have_a_datasource_in_config_file(ge_dir)
 
 
 def test_data_context_is_project_initialized_returns_true_when_its_valid_context_has_one_datasource_and_one_suite(
@@ -867,7 +867,7 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     context.create_expectation_suite("dent")
     assert len(context.list_expectation_suites()) == 1
 
-    assert DataContext.is_project_initialized(ge_dir) == True
+    assert DataContext.is_project_initialized(ge_dir)
 
 
 def test_data_context_is_project_initialized_returns_true_when_its_valid_context_has_one_datasource_and_no_suites(
@@ -878,14 +878,14 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     context.add_datasource("arthur", class_name="PandasDatasource")
     assert len(context.list_expectation_suites()) == 0
 
-    assert DataContext.is_project_initialized(ge_dir) == False
+    assert not DataContext.is_project_initialized(ge_dir)
 
 
 def test_data_context_is_project_initialized_returns_false_when_its_valid_context_has_no_datasource(
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    assert DataContext.is_project_initialized(ge_dir) == False
+    assert not DataContext.is_project_initialized(ge_dir)
 
 
 def test_data_context_is_project_initialized_returns_false_when_config_yml_is_missing(
@@ -895,7 +895,7 @@ def test_data_context_is_project_initialized_returns_false_when_config_yml_is_mi
     # mangle project
     safe_remove(os.path.join(ge_dir, empty_context.GE_YML))
 
-    assert DataContext.is_project_initialized(ge_dir) == False
+    assert not DataContext.is_project_initialized(ge_dir)
 
 
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_is_missing(
@@ -905,7 +905,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_
     # mangle project
     shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR))
 
-    assert DataContext.is_project_initialized(ge_dir) == False
+    assert not DataContext.is_project_initialized(ge_dir)
 
 
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_data_docs_dir_is_missing(
@@ -915,7 +915,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_data
     # mangle project
     shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "data_docs"))
 
-    assert DataContext.is_project_initialized(ge_dir) == False
+    assert not DataContext.is_project_initialized(ge_dir)
 
 
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_validations_dir_is_missing(
@@ -925,7 +925,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_vali
     # mangle project
     shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "validations"))
 
-    assert DataContext.is_project_initialized(ge_dir) == False
+    assert not DataContext.is_project_initialized(ge_dir)
 
 
 def test_data_context_is_project_initialized_returns_false_when_config_variable_yml_is_missing(
@@ -937,7 +937,7 @@ def test_data_context_is_project_initialized_returns_false_when_config_variable_
         os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "config_variables.yml")
     )
 
-    assert DataContext.is_project_initialized(ge_dir) == False
+    assert not DataContext.is_project_initialized(ge_dir)
 
 
 def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(

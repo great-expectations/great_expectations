@@ -3,9 +3,9 @@ import locale
 import os
 import random
 import string
+from contextlib import contextmanager
 from functools import wraps
-from types import ModuleType
-from typing import Union
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -896,3 +896,25 @@ def safe_remove(path):
             os.remove(path)
         except OSError as e:
             print(e)
+
+
+@contextmanager
+def not_raises(unexpected_exception: Any, handle_exception: bool = False) -> bool:
+    # noinspection PyBroadException
+    try:
+        yield
+    except unexpected_exception as e:
+        error_message: str = f"ERROR: The exception {repr(unexpected_exception)} was raised unexpectedly."
+        if handle_exception:
+            print(error_message)
+            return False
+        else:
+            raise AssertionError(error_message)
+    except Exception as e:
+        error_message: str = f"ERROR: An unexpected exception {repr(e)} occurred."
+        if handle_exception:
+            print(error_message)
+            return False
+        else:
+            raise AssertionError(error_message)
+    return True
