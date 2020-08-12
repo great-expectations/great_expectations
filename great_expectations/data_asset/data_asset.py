@@ -867,20 +867,19 @@ class DataAsset(object):
             )
 
             # Warn if our version is different from the version in the configuration
-            try:
-                if (
-                    expectation_suite.meta["great_expectations.__version__"]
-                    != ge_version
-                ):
+            # TODO: Deprecate "great_expectations.__version__"
+            suite_ge_version = expectation_suite.meta.get(
+                "great_expectations_version"
+            ) or expectation_suite.meta.get("great_expectations.__version__")
+
+            if suite_ge_version:
+                if suite_ge_version != ge_version:
                     warnings.warn(
                         "WARNING: This configuration object was built using version %s of great_expectations, but "
                         "is currently being validated by version %s."
-                        % (
-                            expectation_suite.meta["great_expectations.__version__"],
-                            ge_version,
-                        )
+                        % (suite_ge_version, ge_version,)
                     )
-            except KeyError:
+            else:
                 warnings.warn(
                     "WARNING: No great_expectations version found in configuration object."
                 )
@@ -989,7 +988,7 @@ class DataAsset(object):
                 },
                 evaluation_parameters=runtime_evaluation_parameters,
                 meta={
-                    "great_expectations.__version__": ge_version,
+                    "great_expectations_version": ge_version,
                     "expectation_suite_name": expectation_suite_name,
                     "run_id": run_id,
                     "batch_kwargs": self.batch_kwargs,
