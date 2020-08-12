@@ -452,7 +452,10 @@ class MetaSparkDFDataset(Dataset):
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
-                    OrderedDict((c, row[c]) for c in eval_cols)
+                    OrderedDict(
+                        (col_name, row[eval_col_name])
+                        for (col_name, eval_col_name) in zip(column_list, eval_cols)
+                    )
                     for row in unexpected_df.collect()
                 ]
 
