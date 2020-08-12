@@ -15,7 +15,7 @@ These tutorials will teach you the basics of what you need to know to get up and
 
 * If you already have a working deployment of Great Expectations and want a deep dive into how to create and edit Expectations, go to the :ref:`tutorials__create_expectations` tutorial.
 
-* Finally, if you're interested in contributing to the open source project, thank you! Please check out :ref:`the Contributing section <contributing` to learn how.
+* Finally, if you're interested in contributing to the open source project, thank you! Please check out :ref:`the Contributing section <contributing>` to learn how.
 
 .. toctree::
    :hidden:
