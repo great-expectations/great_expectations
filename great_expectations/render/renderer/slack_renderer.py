@@ -8,7 +8,7 @@ class SlackRenderer(Renderer):
     def __init__(self):
         super().__init__()
 
-    def render(self, validation_result=None, data_docs_index_pages=None):
+    def render(self, validation_result=None, data_docs_pages=None):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )
@@ -41,7 +41,7 @@ class SlackRenderer(Renderer):
             )
 
             if validation_result.success:
-                status = "Success :white_check_mark:"
+                status = "Success :tada:"
 
             summary_text = """*Batch Validation Status*: {}
 *Expectation suite name*: `{}`
@@ -54,9 +54,11 @@ class SlackRenderer(Renderer):
             # this abbreviated root level "text" will show up in the notification and not the message
             query["text"] = "{}: {}".format(expectation_suite_name, status)
 
-            if data_docs_index_pages:
-                for docs_link_key in data_docs_index_pages.keys():
-                    docs_link = data_docs_index_pages[docs_link_key]
+            if data_docs_pages:
+                for docs_link_key in data_docs_pages.keys():
+                    if docs_link_key == "class":
+                        pass
+                    docs_link = data_docs_pages[docs_link_key]
                     report_element = None
                     if "file:///" in docs_link:
                         # handle special case since Slack does not render these links

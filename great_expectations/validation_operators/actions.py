@@ -144,14 +144,14 @@ SlackNotificationAction sends a Slack notification to a given webhook.
             )
 
         validation_success = validation_result_suite.success
-        data_docs_index_pages = None
+        data_docs_pages = None
+
         # process the payload
         for action_names in payload.keys():
             if payload[action_names]["class"] == "UpdateDataDocsAction":
-                data_docs_index_pages = payload[action_names]
-                data_docs_index_pages.pop("class")  # keep only the index pages
+                data_docs_pages = payload[action_names]
             else:
-                data_docs_index_pages = None
+                data_docs_pages = None
 
         if (
             self.notify_on == "all"
@@ -160,7 +160,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
             or self.notify_on == "failure"
             and not validation_success
         ):
-            query = self.renderer.render(validation_result_suite, data_docs_index_pages)
+            query = self.renderer.render(validation_result_suite, data_docs_pages)
             # this will actually sent the POST request to the Slack webapp server
             slack_notif_result = send_slack_notification(
                 query, slack_webhook=self.slack_webhook
@@ -433,11 +433,19 @@ list of sites to update:
                 )
             )
 
-        # index pages of all data_docs that were rendered.
-        # will be passed along as payload
+        # build_data_docs will return the index page for the validation results, but we want to return the url for the valiation result using the code below
         data_docs_index_pages = self.data_context.build_data_docs(
             site_names=self._site_names,
             resource_identifiers=[validation_result_suite_identifier],
         )
 
-        return data_docs_index_pages
+        # get the URL for the validation result
+        docs_site_urls_list = self.data_context.get_docs_sites_urls(
+            resource_identifier=validation_result_suite_identifier
+        )
+        # process payload
+        data_docs_validation_results = {}
+        for sites in docs_site_urls_list:
+            data_docs_validation_results[sites["site_name"]] = sites["site_url"]
+
+        return data_docs_validation_results
