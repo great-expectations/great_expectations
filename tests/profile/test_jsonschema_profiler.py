@@ -156,6 +156,7 @@ def number_ranges_schema():
         },
     }
 
+
 @pytest.fixture
 def null_fields_schema():
     """
@@ -173,7 +174,6 @@ def null_fields_schema():
             "number-or-null": {"type": ["number", "null"]},
         },
     }
-
 
 
 def test_instantiable():
