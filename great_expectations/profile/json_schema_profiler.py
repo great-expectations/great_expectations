@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List, Optional
 
 import jsonschema
 
@@ -112,9 +112,7 @@ class JsonSchemaProfiler(Profiler):
         )
         return suite
 
-    def _get_object_types(
-        self, details: dict
-    ) -> List[str]:
+    def _get_object_types(self, details: dict) -> List[str]:
         type_ = details.get("type", None)
         enum = details.get("enum", None)
         any_of = details.get("anyOf", None)
@@ -159,7 +157,13 @@ class JsonSchemaProfiler(Profiler):
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
         object_types = self._get_object_types(details=details)
-        object_types = list(filter(lambda object_type: object_type not in [JsonSchemaTypes.NULL.value, JsonSchemaTypes.ENUM.value], object_types))
+        object_types = list(
+            filter(
+                lambda object_type: object_type
+                not in [JsonSchemaTypes.NULL.value, JsonSchemaTypes.ENUM.value],
+                object_types,
+            )
+        )
 
         if len(object_types) == 0:
             return None
@@ -192,7 +196,9 @@ class JsonSchemaProfiler(Profiler):
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/numeric.html#range"""
         object_types = self._get_object_types(details=details)
-        object_types = filter(lambda object_type: object_type != JsonSchemaTypes.NULL.value, object_types)
+        object_types = filter(
+            lambda object_type: object_type != JsonSchemaTypes.NULL.value, object_types
+        )
         range_types = [JsonSchemaTypes.INTEGER.value, JsonSchemaTypes.NUMBER.value]
 
         if set(object_types).issubset(set(range_types)) is False:
@@ -302,9 +308,7 @@ class JsonSchemaProfiler(Profiler):
         enum = details.get("enum", None)
         any_of = details.get("anyOf", None)
 
-        kwargs = {
-            "column": key
-        }
+        kwargs = {"column": key}
 
         if enum:
             kwargs["value_set"] = enum
@@ -333,8 +337,12 @@ class JsonSchemaProfiler(Profiler):
         enum_ = details.get("enum", None)
 
         kwargs = {"column": key}
-        null_expectation = ExpectationConfiguration("expect_column_values_to_be_null", kwargs)
-        not_null_expectation = ExpectationConfiguration("expect_column_values_to_not_be_null", kwargs)
+        null_expectation = ExpectationConfiguration(
+            "expect_column_values_to_be_null", kwargs
+        )
+        not_null_expectation = ExpectationConfiguration(
+            "expect_column_values_to_not_be_null", kwargs
+        )
 
         if JsonSchemaTypes.NULL.value in object_types:
             if len(object_types) == 1:
