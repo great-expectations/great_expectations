@@ -21,6 +21,7 @@ Develop
 * [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 * [DOCS] Add information about issue tags to contributing docs
 * [DEPRECATION] Deprecate demo suite behavior in `suite new`
+* [ENHANCEMENT] Add support for combining schema with anyOf key in JSON Schema profiler
 
 0.11.9
 -----------------
