@@ -285,7 +285,10 @@ class ValidationResultsPageRenderer(Renderer):
         elif isinstance(run_id, RunIdentifier):
             run_name = run_id.run_name or "__none__"
             run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-        ge_version = validation_results.meta["great_expectations.__version__"]
+        # TODO: Deprecate "great_expectations.__version__"
+        ge_version = validation_results.meta.get(
+            "great_expectations_version"
+        ) or validation_results.meta.get("great_expectations.__version__")
 
         return RenderedTableContent(
             **{
@@ -574,7 +577,10 @@ class ExpectationSuitePageRenderer(Renderer):
     @classmethod
     def _render_expectation_suite_info(cls, expectations):
         expectation_suite_name = expectations.expectation_suite_name
-        ge_version = expectations.meta["great_expectations.__version__"]
+        # TODO: Deprecate "great_expectations.__version__"
+        ge_version = expectations.meta.get(
+            "great_expectations_version"
+        ) or expectations.meta.get("great_expectations.__version__")
 
         return RenderedTableContent(
             **{

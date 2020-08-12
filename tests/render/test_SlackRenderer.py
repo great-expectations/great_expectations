@@ -19,7 +19,7 @@ def test_SlackRenderer():
             "success_percent": None,
         },
         meta={
-            "great_expectations.__version__": "v0.8.0__develop",
+            "great_expectations_version": "v0.8.0__develop",
             "data_asset_name": {
                 "datasource": "x",
                 "generator": "y",
