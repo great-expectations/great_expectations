@@ -8,11 +8,7 @@ class SlackRenderer(Renderer):
     def __init__(self):
         super().__init__()
 
-    def render(self, validation_result=None):
-        # Defaults
-        timestamp = datetime.datetime.strftime(
-            datetime.datetime.now(datetime.timezone.utc), "%x %X %Z"
-        )
+    def render(self, validation_result=None, data_docs_pages=None):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )
@@ -29,7 +25,6 @@ class SlackRenderer(Renderer):
             "text": default_text,
         }
 
-        # TODO improve this nested logic
         if validation_result:
             expectation_suite_name = validation_result.meta.get(
                 "expectation_suite_name", "__no_expectation_suite_name__"
@@ -46,24 +41,49 @@ class SlackRenderer(Renderer):
             )
 
             if validation_result.success:
-                status = "Success :white_check_mark:"
+                status = "Success :tada:"
 
             summary_text = """*Batch Validation Status*: {}
 *Expectation suite name*: `{}`
 *Run ID*: `{}`
 *Batch ID*: `{}`
-*Timestamp*: `{}`
 *Summary*: {}""".format(
-                status,
-                expectation_suite_name,
-                run_id,
-                batch_id,
-                timestamp,
-                check_details_text,
+                status, expectation_suite_name, run_id, batch_id, check_details_text,
             )
             query["blocks"][0]["text"]["text"] = summary_text
             # this abbreviated root level "text" will show up in the notification and not the message
             query["text"] = "{}: {}".format(expectation_suite_name, status)
+
+            if data_docs_pages:
+                for docs_link_key in data_docs_pages.keys():
+                    if docs_link_key == "class":
+                        pass
+                    docs_link = data_docs_pages[docs_link_key]
+                    report_element = None
+                    if "file:///" in docs_link:
+                        # handle special case since Slack does not render these links
+                        report_element = {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": "*DataDocs* can be found here: `{}` \n (Please copy and paste link into a browser to view)\n".format(
+                                    docs_link
+                                ),
+                            },
+                        }
+                    elif "s3.amazonaws.com" in docs_link or "s3://" in docs_link:
+                        report_element = {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": "*DataDocs* can be found here: <{}|{}>".format(
+                                    docs_link, docs_link
+                                ),
+                            },
+                        }
+
+                    if report_element:
+                        query["blocks"].append(report_element)
 
             if "result_reference" in validation_result.meta:
                 report_element = {

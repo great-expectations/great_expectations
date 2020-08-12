@@ -105,6 +105,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
                }
             slack_webhook: incoming Slack webhook to which to send notification
             notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
+            payload: *Optional* payload from other ValidationActions
         """
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
@@ -126,6 +127,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset=None,
+        payload=None,
     ):
         logger.debug("SlackNotificationAction.run")
 
@@ -142,6 +144,13 @@ SlackNotificationAction sends a Slack notification to a given webhook.
             )
 
         validation_success = validation_result_suite.success
+        data_docs_pages = None
+
+        if payload:
+            # process the payload
+            for action_names in payload.keys():
+                if payload[action_names]["class"] == "UpdateDataDocsAction":
+                    data_docs_pages = payload[action_names]
 
         if (
             self.notify_on == "all"
@@ -150,10 +159,16 @@ SlackNotificationAction sends a Slack notification to a given webhook.
             or self.notify_on == "failure"
             and not validation_success
         ):
-            query = self.renderer.render(validation_result_suite)
-            return send_slack_notification(query, slack_webhook=self.slack_webhook)
+            query = self.renderer.render(validation_result_suite, data_docs_pages)
+            # this will actually sent the POST request to the Slack webapp server
+            slack_notif_result = send_slack_notification(
+                query, slack_webhook=self.slack_webhook
+            )
+
+            # sending payload back as dictionary
+            return {"slack_notification_result": slack_notif_result}
         else:
-            return
+            return {"slack_notification_result": ""}
 
 
 class StoreValidationResultAction(ValidationAction):
@@ -190,7 +205,11 @@ class StoreValidationResultAction(ValidationAction):
             self.target_store = data_context.stores[target_store_name]
 
     def _run(
-        self, validation_result_suite, validation_result_suite_identifier, data_asset
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset,
+        payload=None,
     ):
         logger.debug("StoreValidationResultAction.run")
 
@@ -248,7 +267,11 @@ in the process of validating other prior expectations.
             self.target_store = data_context.stores[target_store_name]
 
     def _run(
-        self, validation_result_suite, validation_result_suite_identifier, data_asset
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset,
+        payload=None,
     ):
         logger.debug("StoreEvaluationParametersAction.run")
 
@@ -319,7 +342,11 @@ in a metrics store.
             )
 
     def _run(
-        self, validation_result_suite, validation_result_suite_identifier, data_asset
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset,
+        payload=None,
     ):
         logger.debug("StoreMetricsAction.run")
 
@@ -385,7 +412,11 @@ list of sites to update:
         self._site_names = site_names
 
     def _run(
-        self, validation_result_suite, validation_result_suite_identifier, data_asset
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset,
+        payload=None,
     ):
         logger.debug("UpdateDataDocsAction.run")
 
@@ -401,7 +432,19 @@ list of sites to update:
                 )
             )
 
-        self.data_context.build_data_docs(
+        # build_data_docs will return the index page for the validation results, but we want to return the url for the valiation result using the code below
+        data_docs_index_pages = self.data_context.build_data_docs(
             site_names=self._site_names,
             resource_identifiers=[validation_result_suite_identifier],
         )
+
+        # get the URL for the validation result
+        docs_site_urls_list = self.data_context.get_docs_sites_urls(
+            resource_identifier=validation_result_suite_identifier
+        )
+        # process payload
+        data_docs_validation_results = {}
+        for sites in docs_site_urls_list:
+            data_docs_validation_results[sites["site_name"]] = sites["site_url"]
+
+        return data_docs_validation_results
