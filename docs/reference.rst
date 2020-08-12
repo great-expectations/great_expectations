@@ -13,13 +13,5 @@ the thinking behind the tools.
    /reference/glossary_of_expectations
    /reference/core_concepts
    /reference/supporting_resources
+   API Reference <autoapi/great_expectations/index>
 
-.. toctree::
-   :maxdepth: 1
-
-   /reference/changelog
-
-.. toctree::
-   :maxdepth: 2
-
-   /reference/spare_parts

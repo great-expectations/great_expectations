@@ -11,7 +11,7 @@ def test_data_asset_expectation_suite():
     default_suite = ExpectationSuite(
         expectation_suite_name="default",
         data_asset_type="DataAsset",
-        meta={"great_expectations.__version__": ge_version},
+        meta={"great_expectations_version": ge_version},
         expectations=[],
     )
 

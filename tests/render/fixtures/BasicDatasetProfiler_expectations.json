@@ -1,7 +1,7 @@
 {
   "expectation_suite_name": "default",
   "meta": {
-    "great_expectations.__version__": "0.7.0-beta"
+    "great_expectations_version": "0.7.0-beta"
   },
   "expectations": [
     {
