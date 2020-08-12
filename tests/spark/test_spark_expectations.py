@@ -54,7 +54,7 @@ def test_expect_column_values_to_be_of_type(spark_session, test_dataframe):
         "address.street", "StringType"
     ).success
     assert test_dataframe.expect_column_values_to_be_of_type(
-        "non.nested", "StringType", non_nested=True
+        "`non.nested`", "StringType"
     ).success
     assert test_dataframe.expect_column_values_to_be_of_type(
         "name", "StringType"
@@ -77,8 +77,10 @@ def test_expect_column_pair_values_to_be_equal(spark_session, test_dataframe):
         "name", "address.street"
     ).success
     assert not test_dataframe.expect_column_pair_values_to_be_equal(
-        "name", "non.nested", non_nested_B=True
+        "name", "`non.nested`"
     ).success
+
+    # Expectation should fail when no `` surround a non-nested column with dot notation
     with pytest.raises(AnalysisException):
         test_dataframe.expect_column_pair_values_to_be_equal("name", "non.nested")
 
@@ -114,8 +116,10 @@ def test_expect_multicolumn_values_to_be_unique(spark_session, test_dataframe):
         ["address.street", "name"]
     ).success
     assert test_dataframe.expect_multicolumn_values_to_be_unique(
-        ["address.street", "non.nested"], non_nested_column_list=["non.nested"]
+        ["address.street", "`non.nested`"]
     ).success
+
+    # Expectation should fail when no `` surround a non-nested column with dot notation
     with pytest.raises(AnalysisException):
         test_dataframe.expect_multicolumn_values_to_be_unique(
             ["address.street", "non.nested"]
@@ -131,9 +135,9 @@ def test_expect_column_values_to_be_unique(spark_session, test_dataframe):
     """
     assert test_dataframe.expect_column_values_to_be_unique("name").success
     assert not test_dataframe.expect_column_values_to_be_unique("address.city").success
-    assert test_dataframe.expect_column_values_to_be_unique(
-        "non.nested", non_nested=True
-    ).success
+    assert test_dataframe.expect_column_values_to_be_unique("`non.nested`").success
+
+    # Expectation should fail when no `` surround a non-nested column with dot notation
     with pytest.raises(AnalysisException):
         test_dataframe.expect_column_values_to_be_unique("non.nested")
 

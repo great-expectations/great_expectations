@@ -72,13 +72,7 @@ class MetaSparkDFDataset(Dataset):
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
-            self,
-            column,
-            mostly=None,
-            result_format=None,
-            non_nested=False,
-            *args,
-            **kwargs,
+            self, column, mostly=None, result_format=None, *args, **kwargs,
         ):
             """
             This whole decorator is pending a re-write. Currently there is are huge performance issues
@@ -89,10 +83,7 @@ class MetaSparkDFDataset(Dataset):
 
             # Rename column so we only have to handle dot notation here
             target_col = "__target_col"
-            if non_nested:
-                self.spark_df = self.spark_df.withColumn(target_col, col(f"`{column}`"))
-            else:
-                self.spark_df = self.spark_df.withColumn(target_col, col(column))
+            self.spark_df = self.spark_df.withColumn(target_col, col(column))
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -222,8 +213,6 @@ class MetaSparkDFDataset(Dataset):
             mostly=None,
             ignore_row_if="both_values_are_missing",
             result_format=None,
-            non_nested_A=False,
-            non_nested_B=False,
             *args,
             **kwargs,
         ):
@@ -231,18 +220,9 @@ class MetaSparkDFDataset(Dataset):
             target_col_A = "__target_col_A"
             target_col_B = "__target_col_B"
 
-            if non_nested_A:
-                self.spark_df = self.spark_df.withColumn(
-                    target_col_A, col(f"`{column_A}`")
-                )
-            if non_nested_B:
-                self.spark_df = self.spark_df.withColumn(
-                    target_col_B, col(f"`{column_B}`")
-                )
-            if not non_nested_A:
-                self.spark_df = self.spark_df.withColumn(target_col_A, col(column_A))
-            if not non_nested_B:
-                self.spark_df = self.spark_df.withColumn(target_col_B, col(column_B))
+            self.spark_df = self.spark_df.withColumn(
+                target_col_A, col(column_A)
+            ).withColumn(target_col_B, col(column_B))
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -401,7 +381,6 @@ class MetaSparkDFDataset(Dataset):
             mostly=None,
             ignore_row_if="all_values_are_missing",
             result_format=None,
-            non_nested_column_list=[],
             *args,
             **kwargs,
         ):
@@ -410,10 +389,7 @@ class MetaSparkDFDataset(Dataset):
             for i, c in enumerate(column_list):
                 target_col = f"target_col_{i}"
                 target_cols.append(target_col)
-                if c in non_nested_column_list:
-                    self.spark_df = self.spark_df.withColumn(target_col, col(f"`{c}`"))
-                else:
-                    self.spark_df = self.spark_df.withColumn(target_col, col(c))
+                self.spark_df = self.spark_df.withColumn(target_col, col(c))
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
@@ -1027,7 +1003,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         include_config=True,
         catch_exceptions=None,
         meta=None,
-        non_nested=False,
     ):
         return column.withColumn(
             "__success", count(lit(1)).over(Window.partitionBy(column[0])) <= 1
@@ -1152,14 +1127,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         include_config=True,
         catch_exceptions=None,
         meta=None,
-        non_nested=False,
     ):
         # Rename column so we only have to handle dot notation here
         target_col = "__target_col"
-        if non_nested:
-            self.spark_df = self.spark_df.withColumn(target_col, col(f"`{column}`"))
-        else:
-            self.spark_df = self.spark_df.withColumn(target_col, col(column))
+        self.spark_df = self.spark_df.withColumn(target_col, col(column))
         if mostly is not None:
             raise ValueError(
                 "SparkDFDataset does not support column map semantics for column types"
@@ -1289,8 +1260,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         include_config=True,
         catch_exceptions=None,
         meta=None,
-        non_nested_A=False,
-        non_nested_B=False,
     ):
         column_A_name = column_A.schema.names[1]
         column_B_name = column_B.schema.names[1]
@@ -1365,7 +1334,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         include_config=True,
         catch_exceptions=None,
         meta=None,
-        non_nested_column_list=[],
     ):
         # Might want to throw an exception if only 1 column is passed
         column_names = column_list.schema.names[:]
