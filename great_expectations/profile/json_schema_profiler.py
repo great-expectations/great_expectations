@@ -282,7 +282,7 @@ class JsonSchemaProfiler(Profiler):
         """https://json-schema.org/understanding-json-schema/reference/null.html"""
         object_types = self._get_object_types(details=details)
 
-        kwargs = ExpectationKwargs(column=key)
+        kwargs = {"column": key}
         null_expectation = ExpectationConfiguration("expect_column_values_to_be_null", kwargs)
         not_null_expectation = ExpectationConfiguration("expect_column_values_to_not_be_null", kwargs)
 
