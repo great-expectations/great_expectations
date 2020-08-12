@@ -156,6 +156,25 @@ def number_ranges_schema():
         },
     }
 
+@pytest.fixture
+def null_fields_schema():
+    """
+    This fixture has null fields.
+    https://json-schema.org/understanding-json-schema/reference/string.html#length
+    """
+    return {
+        "$id": "https://example.com/null.schema.json",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+            "null": {"type": "null"},
+            "string-or-null": {"type": ["string", "null"]},
+            "int-or-null": {"type": ["integer", "null"]},
+            "number-or-null": {"type": ["number", "null"]},
+        },
+    }
+
+
 
 def test_instantiable():
     profiler = JsonSchemaProfiler()
@@ -1078,6 +1097,66 @@ def test_has_profile_create_expectations_from_complex_schema(
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "country-name"},
             "meta": {},
+        },
+    ]
+    context = empty_data_context
+    context.save_expectation_suite(obs)
+
+
+def test_null_fields_schema(empty_data_context, null_fields_schema):
+    profiler = JsonSchemaProfiler()
+    obs = profiler.profile(null_fields_schema, "null_fields")
+    assert isinstance(obs, ExpectationSuite)
+    assert obs.expectation_suite_name == "null_fields"
+    assert [e.to_json_dict() for e in obs.expectations] == [
+        {
+            "meta": {},
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {"column": "null"},
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_null",
+            "kwargs": {"column": "null"},
+            "meta": {},
+        },
+        {
+            "meta": {},
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {"column": "string-or-null"},
+        },
+        {
+            "meta": {},
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "string-or-null",
+                "type_list": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
+            },
+        },
+        {
+            "meta": {},
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {"column": "int-or-null"},
+        },
+        {
+            "meta": {},
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "int-or-null",
+                "type_list": list(ProfilerTypeMapping.INT_TYPE_NAMES),
+            },
+        },
+        {
+            "meta": {},
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {"column": "number-or-null"},
+        },
+        {
+            "meta": {},
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "number-or-null",
+                "type_list": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
+            },
         },
     ]
     context = empty_data_context
