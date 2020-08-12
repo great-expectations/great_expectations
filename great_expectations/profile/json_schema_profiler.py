@@ -184,14 +184,32 @@ class JsonSchemaProfiler(Profiler):
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/numeric.html#range"""
-        type_ = details.get("type", None)
-        if type_ not in [JsonSchemaTypes.INTEGER.value, JsonSchemaTypes.NUMBER.value]:
+        object_types = self._get_object_types(details=details)
+        object_types = filter(lambda object_type: object_type != JsonSchemaTypes.NULL.value, object_types)
+        range_types = [JsonSchemaTypes.INTEGER.value, JsonSchemaTypes.NUMBER.value]
+
+        if set(object_types).issubset(set(range_types)) is False:
             return None
 
-        minimum = details.get("minimum", None)
-        maximum = details.get("maximum", None)
-        exclusive_minimum = details.get("exclusiveMinimum", None)
-        exclusive_maximum = details.get("exclusiveMaximum", None)
+        type_ = details.get("type", None)
+        any_of = details.get("anyOf", None)
+
+        if type_:
+            minimum = details.get("minimum", None)
+            maximum = details.get("maximum", None)
+            exclusive_minimum = details.get("exclusiveMinimum", None)
+            exclusive_maximum = details.get("exclusiveMaximum", None)
+        elif any_of:
+            for item in any_of:
+                item_type = item.get("type", None)
+                if item_type in range_types:
+                    minimum = item.get("minimum", None)
+                    maximum = item.get("maximum", None)
+                    exclusive_minimum = item.get("exclusiveMinimum", None)
+                    exclusive_maximum = item.get("exclusiveMaximum", None)
+                    break
+        else:
+            return None
 
         if (
             minimum is None
