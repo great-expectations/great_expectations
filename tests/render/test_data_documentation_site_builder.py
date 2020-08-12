@@ -353,6 +353,136 @@ def test_configuration_driven_site_builder(
     res = site_builder.build()
 
 
+@freeze_time("09/26/2019 13:42:41")
+@pytest.mark.rendered_output
+def test_configuration_driven_site_builder_skip_and_clean_missing(
+    site_builder_data_context_with_html_store_titanic_random,
+):
+    # tests auto-cleaning functionality of DefaultSiteIndexBuilder
+    # when index page is built, if an HTML page is present without corresponding suite or validation result,
+    # the HTML page should be removed and not appear on index page
+    context = site_builder_data_context_with_html_store_titanic_random
+
+    context.add_validation_operator(
+        "validate_and_store",
+        {
+            "class_name": "ActionListValidationOperator",
+            "action_list": [
+                {
+                    "name": "store_validation_result",
+                    "action": {
+                        "class_name": "StoreValidationResultAction",
+                        "target_store_name": "validations_store",
+                    },
+                },
+                {
+                    "name": "extract_and_store_eval_parameters",
+                    "action": {
+                        "class_name": "StoreEvaluationParametersAction",
+                        "target_store_name": "evaluation_parameter_store",
+                    },
+                },
+            ],
+        },
+    )
+
+    # profiling the Titanic datasource will generate one expectation suite and one validation
+    # that is a profiling result
+    datasource_name = "titanic"
+    data_asset_name = "Titanic"
+    profiler_name = "BasicDatasetProfiler"
+    generator_name = "subdir_reader"
+    context.profile_datasource(datasource_name)
+
+    # creating another validation result using the profiler's suite (no need to use a new expectation suite
+    # for this test). having two validation results - one with run id "profiling" - allows us to test
+    # the logic of run_name_filter that helps filtering validation results to be included in
+    # the profiling and the validation sections.
+    batch_kwargs = context.build_batch_kwargs(
+        datasource=datasource_name,
+        batch_kwargs_generator=generator_name,
+        data_asset_name=data_asset_name,
+    )
+
+    expectation_suite_name = "{}.{}.{}.{}".format(
+        datasource_name, generator_name, data_asset_name, profiler_name
+    )
+
+    batch = context.get_batch(
+        batch_kwargs=batch_kwargs, expectation_suite_name=expectation_suite_name,
+    )
+    run_id = RunIdentifier(run_name="test_run_id_12345")
+    context.run_validation_operator(
+        assets_to_validate=[batch],
+        run_id=run_id,
+        validation_operator_name="validate_and_store",
+    )
+
+    data_docs_config = context._project_config.data_docs_sites
+    local_site_config = data_docs_config["local_site"]
+
+    validations_set = set(context.stores["validations_store"].list_keys())
+    assert len(validations_set) == 6
+
+    expectation_suite_set = set(context.stores["expectations_store"].list_keys())
+    assert len(expectation_suite_set) == 5
+
+    site_builder = SiteBuilder(
+        data_context=context,
+        runtime_environment={"root_directory": context.root_directory},
+        **local_site_config
+    )
+    site_builder.build()
+
+    # test expectation suite pages
+    expectation_suite_html_pages = set([
+        ExpectationSuiteIdentifier.from_tuple(suite_tuple) for suite_tuple in site_builder.target_store.store_backends[
+            ExpectationSuiteIdentifier].list_keys()
+    ])
+    # suites in expectations store should match html pages
+    assert expectation_suite_set == expectation_suite_html_pages
+
+    # remove suites from expectations store
+    for i in range(2):
+        context.stores["expectations_store"].remove_key(list(expectation_suite_set)[i])
+
+    # re-build data docs, which should remove suite HTML pages that no longer have corresponding suite in
+    # expectations store
+    site_builder.build()
+
+    expectation_suite_set = set(context.stores["expectations_store"].list_keys())
+    expectation_suite_html_pages = set([
+        ExpectationSuiteIdentifier.from_tuple(suite_tuple) for suite_tuple in site_builder.target_store.store_backends[
+            ExpectationSuiteIdentifier].list_keys()
+    ])
+    assert expectation_suite_set == expectation_suite_html_pages
+
+    # test validation result pages
+    validation_html_pages = set([
+        ValidationResultIdentifier.from_tuple(result_tuple) for result_tuple in
+        site_builder.target_store.store_backends[
+            ValidationResultIdentifier].list_keys()
+    ])
+    # validations in store should match html pages
+    assert validations_set == validation_html_pages
+
+    # remove validations from store
+    for i in range(2):
+        context.stores["validations_store"].store_backend.remove_key(list(validations_set)[i])
+
+    # re-build data docs, which should remove validation HTML pages that no longer have corresponding validation in
+    # validations store
+    site_builder.build()
+
+    validations_set = set(context.stores["validations_store"].list_keys())
+    validation_html_pages = set([
+        ValidationResultIdentifier.from_tuple(result_tuple) for result_tuple in
+        site_builder.target_store.store_backends[
+            ValidationResultIdentifier].list_keys()
+    ])
+    assert validations_set == validation_html_pages
+
+
 @pytest.mark.rendered_output
 def test_configuration_driven_site_builder_without_how_to_buttons(
     site_builder_data_context_with_html_store_titanic_random,
