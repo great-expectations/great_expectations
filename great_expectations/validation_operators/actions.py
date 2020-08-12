@@ -146,12 +146,11 @@ SlackNotificationAction sends a Slack notification to a given webhook.
         validation_success = validation_result_suite.success
         data_docs_pages = None
 
-        # process the payload
-        for action_names in payload.keys():
-            if payload[action_names]["class"] == "UpdateDataDocsAction":
-                data_docs_pages = payload[action_names]
-            else:
-                data_docs_pages = None
+        if payload:
+            # process the payload
+            for action_names in payload.keys():
+                if payload[action_names]["class"] == "UpdateDataDocsAction":
+                    data_docs_pages = payload[action_names]
 
         if (
             self.notify_on == "all"
