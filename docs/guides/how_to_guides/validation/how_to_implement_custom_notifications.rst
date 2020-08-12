@@ -3,7 +3,7 @@
 How to implement custom notifications
 =====================================
 
-If you would like to implement custom notifications that include a link to Data Docs, you can access the Data Docs URL for the respective validation results page from your Data Context after a validation run following the steps below. This will works to get the URLs for any type of Data Docs site setup, e.g. S3 or local setup.
+If you would like to implement custom notifications that include a link to Data Docs, you can access the Data Docs URL for the respective validation results page from your Data Context after a validation run following the steps below. This will work to get the URLs for any type of Data Docs site setup, e.g. S3 or local setup.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
