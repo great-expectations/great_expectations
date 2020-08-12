@@ -1129,7 +1129,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         meta=None,
     ):
         # Rename column so we only have to handle dot notation here
-        eval_col = "__eval_col" + column
+        eval_col = "__eval_col_" + column.replace(".", "__").replace("`", "_")
         self.spark_df = self.spark_df.withColumn(eval_col, col(column))
         if mostly is not None:
             raise ValueError(
@@ -1170,7 +1170,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         meta=None,
     ):
         # Rename column so we only have to handle dot notation here
-        eval_col = "__eval_col" + column
+        eval_col = "__eval_col_" + column.replace(".", "__").replace("`", "_")
         self.spark_df = self.spark_df.withColumn(eval_col, col(column))
 
         if mostly is not None:
