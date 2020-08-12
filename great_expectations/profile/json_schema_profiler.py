@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 import jsonschema
 
@@ -91,6 +91,12 @@ class JsonSchemaProfiler(Profiler):
                 )
                 if string_len_expectation:
                     expectations.append(string_len_expectation)
+
+                null_or_not_null_expectation = self._create_null_or_not_null_column_expectation(
+                    key, details
+                )
+                if null_or_not_null_expectation:
+                    expectations.append(null_or_not_null_expectation)
         description = schema.get("description", None)
         meta = None
         if description:
@@ -105,6 +111,28 @@ class JsonSchemaProfiler(Profiler):
             comment=f"This suite was built by the {self.__class__.__name__}",
         )
         return suite
+
+    def _get_object_types(
+        self, details: dict
+    ) -> List[str]:
+        type_ = details.get("type", None)
+        any_of = details.get("anyOf", None)
+
+        types_list = []
+
+        if isinstance(type_, list):
+            types_list.extend(type_)
+        elif type_:
+            types_list.append(type_)
+        elif any_of:
+            for schema in any_of:
+                schema_type = schema.get("type", None)
+                if isinstance(schema_type, list):
+                    types_list.extend(schema_type)
+                else:
+                    types_list.append(schema_type)
+
+        return types_list
 
     def _create_existence_expectation(
         self, key: str, details: dict
@@ -223,6 +251,24 @@ class JsonSchemaProfiler(Profiler):
 
         kwargs = {"column": key, "value_set": enum}
         return ExpectationConfiguration("expect_column_values_to_be_in_set", kwargs)
+
+    def _create_null_or_not_null_column_expectation(
+        self, key: str, details: dict
+    ) -> Optional[ExpectationConfiguration]:
+        """https://json-schema.org/understanding-json-schema/reference/null.html"""
+        object_types = self._get_object_types(details=details)
+
+        kwargs = ExpectationKwargs(column=key)
+        null_expectation = ExpectationConfiguration("expect_column_values_to_be_null", kwargs)
+        not_null_expectation = ExpectationConfiguration("expect_column_values_to_not_be_null", kwargs)
+
+        if JsonSchemaTypes.NULL.value in object_types:
+            if len(object_types) == 1:
+                return null_expectation
+            else:
+                return None
+        else:
+            return not_null_expectation
 
     def _create_regex_expectation(
         self, key: str, details: dict
