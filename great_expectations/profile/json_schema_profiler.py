@@ -116,6 +116,7 @@ class JsonSchemaProfiler(Profiler):
         self, details: dict
     ) -> List[str]:
         type_ = details.get("type", None)
+        enum = details.get("enum", None)
         any_of = details.get("anyOf", None)
 
         types_list = []
@@ -124,13 +125,18 @@ class JsonSchemaProfiler(Profiler):
             types_list.extend(type_)
         elif type_:
             types_list.append(type_)
+        elif enum:
+            types_list.append(JsonSchemaTypes.ENUM.value)
         elif any_of:
             for schema in any_of:
                 schema_type = schema.get("type", None)
+                enum_type = schema.get("enum", None)
                 if isinstance(schema_type, list):
                     types_list.extend(schema_type)
-                else:
+                elif schema_type:
                     types_list.append(schema_type)
+                elif enum_type:
+                    types_list.append(JsonSchemaTypes.ENUM.value)
 
         return types_list
 
@@ -153,7 +159,7 @@ class JsonSchemaProfiler(Profiler):
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
         object_types = self._get_object_types(details=details)
-        object_types = list(filter(lambda object_type: object_type != JsonSchemaTypes.NULL.value, object_types))
+        object_types = list(filter(lambda object_type: object_type not in [JsonSchemaTypes.NULL.value, JsonSchemaTypes.ENUM.value], object_types))
 
         if len(object_types) == 0:
             return None
@@ -172,8 +178,9 @@ class JsonSchemaProfiler(Profiler):
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/boolean.html"""
-        type_ = details.get("type", None)
-        if type_ != JsonSchemaTypes.BOOLEAN.value:
+        object_types = self._get_object_types(details=details)
+
+        if JsonSchemaTypes.BOOLEAN.value not in object_types:
             return None
 
         # TODO map JSONSchema types to which type backend? Pandas? Should this value set be parameterized per back end?
@@ -193,6 +200,11 @@ class JsonSchemaProfiler(Profiler):
 
         type_ = details.get("type", None)
         any_of = details.get("anyOf", None)
+
+        minimum = None
+        maximum = None
+        exclusive_minimum = None
+        exclusive_maximum = None
 
         if type_:
             minimum = details.get("minimum", None)
@@ -237,12 +249,27 @@ class JsonSchemaProfiler(Profiler):
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/string.html#length"""
-        type_ = details.get("type", None)
-        minimum = details.get("minLength", None)
-        maximum = details.get("maxLength", None)
+        object_types = self._get_object_types(details=details)
 
-        if type_ != JsonSchemaTypes.STRING.value:
+        if JsonSchemaTypes.STRING.value not in object_types:
             return None
+
+        type_ = details.get("type", None)
+        any_of = details.get("anyOf", None)
+
+        if type_:
+            minimum = details.get("minLength", None)
+            maximum = details.get("maxLength", None)
+        elif any_of:
+            for item in any_of:
+                item_type = item.get("type", None)
+                if item_type == JsonSchemaTypes.STRING.value:
+                    minimum = item.get("minLength", None)
+                    maximum = item.get("maxLength", None)
+                    break
+        else:
+            return None
+
         if minimum is None and maximum is None:
             return None
 
@@ -267,13 +294,35 @@ class JsonSchemaProfiler(Profiler):
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/generic.html#enumerated-values"""
-        if JsonSchemaTypes.ENUM.value not in details.keys():
-            return None
-        enum = details.get("enum", None)
-        if not isinstance(enum, list):
+        object_types = self._get_object_types(details=details)
+
+        if JsonSchemaTypes.ENUM.value not in object_types:
             return None
 
-        kwargs = {"column": key, "value_set": enum}
+        enum = details.get("enum", None)
+        any_of = details.get("anyOf", None)
+
+        kwargs = {
+            "column": key
+        }
+
+        if enum:
+            kwargs["value_set"] = enum
+        elif any_of:
+            for item in any_of:
+                item_type = item.get("enum", None)
+                if item_type:
+                    kwargs["value_set"] = item_type
+                    break
+        else:
+            return None
+
+        if "value_set" not in kwargs:
+            return None
+
+        if not isinstance(kwargs["value_set"], list):
+            return None
+
         return ExpectationConfiguration("expect_column_values_to_be_in_set", kwargs)
 
     def _create_null_or_not_null_column_expectation(
@@ -281,6 +330,7 @@ class JsonSchemaProfiler(Profiler):
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/null.html"""
         object_types = self._get_object_types(details=details)
+        enum_ = details.get("enum", None)
 
         kwargs = {"column": key}
         null_expectation = ExpectationConfiguration("expect_column_values_to_be_null", kwargs)
@@ -288,6 +338,8 @@ class JsonSchemaProfiler(Profiler):
 
         if JsonSchemaTypes.NULL.value in object_types:
             if len(object_types) == 1:
+                if enum_:
+                    return None
                 return null_expectation
             else:
                 return None

@@ -46,7 +46,19 @@ def boolean_types_schema():
         "$id": "https://example.com/address.schema.json",
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
-        "properties": {"active": {"type": "boolean"}},
+        "properties": {
+            "active": {"type": "boolean"},
+            "optional": {
+                "anyOf": [
+                    {
+                        "type": "boolean",
+                    },
+                    {
+                        "type": "null",
+                    }
+                ]
+            }
+        },
     }
 
 
@@ -56,7 +68,19 @@ def enum_types_schema():
         "$id": "https://example.com/address.schema.json",
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
-        "properties": {"shirt-size": {"enum": ["XS", "S", "M", "XL", "XXL"]}},
+        "properties": {
+            "shirt-size": {"enum": ["XS", "S", "M", "XL", "XXL"]},
+            "optional-color": {
+                "anyOf": [
+                    {
+                        "enum": ["red", "green", "blue"],
+                    },
+                    {
+                        "type": "null"
+                    }
+                ],
+            },
+        },
     }
 
 
@@ -80,6 +104,17 @@ def string_lengths_schema():
             "ICD10-code-3-7": {"type": "string", "minLength": 3, "maxLength": 7},
             "name-no-max": {"type": "string", "minLength": 1},
             "password-max-33": {"type": "string", "maxLength": 33},
+            "optional-min-1": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "minLength": 1,
+                    },
+                    {
+                        "type": "null",
+                    }
+                ]
+            }
         },
     }
 
@@ -108,6 +143,17 @@ def integer_ranges_schema():
                 "exclusiveMinimum": 0,
                 "exclusiveMaximum": 6,
             },
+            "optional-min-1": {
+                "anyOf": [
+                    {
+                        "type": "integer",
+                        "minimum": 1,
+                    },
+                    {
+                        "type": "null",
+                    }
+                ]
+            }
         },
     }
 
@@ -136,6 +182,17 @@ def number_ranges_schema():
                 "exclusiveMinimum": 0.5,
                 "exclusiveMaximum": 6.5,
             },
+            "optional-min-half": {
+                "anyOf": [
+                    {
+                        "type": "number",
+                        "minimum": 0.5,
+                    },
+                    {
+                        "type": "null",
+                    }
+                ]
+            }
         },
     }
 
@@ -276,6 +333,24 @@ def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
             },
             "meta": {}
         },
+        {
+            "meta": {},
+            "kwargs": {"column": "optional"},
+            "expectation_type": "expect_column_to_exist",
+        },
+        {
+            "meta": {},
+            "kwargs": {
+                "column": "optional",
+                "type_list": list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES),
+            },
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+        },
+        {
+            "meta": {},
+            "kwargs": {"column": "optional", "value_set": [True, False]},
+            "expectation_type": "expect_column_values_to_be_in_set",
+        },
     ]
     context = empty_data_context
     context.save_expectation_suite(obs)
@@ -306,6 +381,19 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
                 "column": "shirt-size"
             },
             "meta": {}
+        },
+        {
+            "meta": {},
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {"column": "optional-color"},
+        },
+        {
+            "meta": {},
+            "expectation_type": "expect_column_values_to_be_in_set",
+            "kwargs": {
+                "column": "optional-color",
+                "value_set": ["red", "green", "blue"],
+            },
         },
     ]
     context = empty_data_context
@@ -437,6 +525,24 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
                 "column": "password-max-33"
             },
             "meta": {}
+        },
+        {
+            "kwargs": {"column": "optional-min-1"},
+            "expectation_type": "expect_column_to_exist",
+            "meta": {},
+        },
+        {
+            "kwargs": {
+                "column": "optional-min-1",
+                "type_list": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
+            },
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "meta": {},
+        },
+        {
+            "kwargs": {"column": "optional-min-1", "min_value": 1},
+            "expectation_type": "expect_column_value_lengths_to_be_between",
+            "meta": {},
         },
     ]
     context = empty_data_context
@@ -658,6 +764,27 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             },
             "meta": {}
         },
+        {
+            "kwargs": {"column": "optional-min-1"},
+            "expectation_type": "expect_column_to_exist",
+            "meta": {},
+        },
+        {
+            "kwargs": {
+                "column": "optional-min-1",
+                "type_list": list(ProfilerTypeMapping.INT_TYPE_NAMES),
+            },
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "meta": {},
+        },
+        {
+            "kwargs": {
+                "column": "optional-min-1",
+                "min_value": 1,
+            },
+            "expectation_type": "expect_column_values_to_be_between",
+            "meta": {},
+        },
     ]
     context = empty_data_context
     context.save_expectation_suite(obs)
@@ -877,6 +1004,27 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                 "column": "gear-exclusive-0-6"
             },
             "meta": {}
+        },
+        {
+            "kwargs": {"column": "optional-min-half"},
+            "expectation_type": "expect_column_to_exist",
+            "meta": {},
+        },
+        {
+            "kwargs": {
+                "column": "optional-min-half",
+                "type_list": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
+            },
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "meta": {},
+        },
+        {
+            "kwargs": {
+                "column": "optional-min-half",
+                "min_value": 0.5,
+            },
+            "expectation_type": "expect_column_values_to_be_between",
+            "meta": {},
         },
     ]
     context = empty_data_context
