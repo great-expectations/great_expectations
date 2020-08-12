@@ -284,6 +284,7 @@ The ``run`` method returns a ValidationOperatorResult object:
         run_time=None,
         result_format=None,
     ):
+
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
@@ -331,6 +332,7 @@ The ``run`` method returns a ValidationOperatorResult object:
                 batch_validation_result,
                 run_id,
             )
+
             run_result_obj["actions_results"] = batch_actions_results
             run_results[validation_result_id] = run_result_obj
 
@@ -378,11 +380,17 @@ The ``run`` method returns a ValidationOperatorResult object:
                     validation_result_suite_identifier=validation_result_id,
                     validation_result_suite=batch_validation_result,
                     data_asset=batch,
+                    payload=batch_actions_results,
                 )
 
+                # add action_result
                 batch_actions_results[action["name"]] = (
                     {} if action_result is None else action_result
                 )
+                batch_actions_results[action["name"]]["class"] = action["action"][
+                    "class_name"
+                ]
+
             except Exception as e:
                 logger.exception(
                     "Error running action with name {}".format(action["name"])
