@@ -218,6 +218,9 @@ class JsonSchemaProfiler(Profiler):
         type_ = details.get("type", None)
         any_of = details.get("anyOf", None)
 
+        if not type_ and not any_of:
+            return None
+
         minimum = None
         maximum = None
         exclusive_minimum = None
@@ -237,8 +240,6 @@ class JsonSchemaProfiler(Profiler):
                     exclusive_minimum = item.get("exclusiveMinimum", None)
                     exclusive_maximum = item.get("exclusiveMaximum", None)
                     break
-        else:
-            return None
 
         if (
             minimum is None
@@ -274,6 +275,9 @@ class JsonSchemaProfiler(Profiler):
         type_ = details.get("type", None)
         any_of = details.get("anyOf", None)
 
+        if not type_ and not any_of:
+            return None
+
         if type_:
             minimum = details.get("minLength", None)
             maximum = details.get("maxLength", None)
@@ -284,8 +288,6 @@ class JsonSchemaProfiler(Profiler):
                     minimum = item.get("minLength", None)
                     maximum = item.get("maxLength", None)
                     break
-        else:
-            return None
 
         if minimum is None and maximum is None:
             return None
