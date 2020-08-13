@@ -68,7 +68,7 @@ def enum_types_schema():
                 "type": ["string", "null"],
                 "enum": ["red", "green", "blue"],
             },
-            "optional-answer": {"enum": ["yes", "no", "null"],},
+            "optional-answer": {"enum": ["yes", "no", None],},
         },
     }
 

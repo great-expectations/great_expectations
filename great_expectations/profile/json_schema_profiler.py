@@ -148,6 +148,8 @@ class JsonSchemaProfiler(Profiler):
         else:
             return None
 
+        enum_list = ["null" if item is None else item for item in enum_list]
+
         return enum_list
 
     def _create_existence_expectation(
