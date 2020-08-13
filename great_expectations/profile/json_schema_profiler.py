@@ -337,15 +337,7 @@ class JsonSchemaProfiler(Profiler):
         )
 
         if enum_list:
-            type_set = set(enum_list).union(set(object_types))
-
-            if JsonSchemaTypes.NULL.value not in type_set:
-                return not_null_expectation
-
-            if len(type_set) == 1:
-                return null_expectation
-            else:
-                return None
+            object_types = set(enum_list).union(set(object_types))
 
         if JsonSchemaTypes.NULL.value not in object_types:
             return not_null_expectation
