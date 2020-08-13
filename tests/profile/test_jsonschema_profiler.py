@@ -401,10 +401,7 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
         {
             "meta": {},
             "expectation_type": "expect_column_values_to_be_in_set",
-            "kwargs": {
-                "column": "optional-answer",
-                "value_set": ["yes", "no", "null"],
-            },
+            "kwargs": {"column": "optional-answer", "value_set": ["yes", "no"],},
         },
     ]
     context = empty_data_context

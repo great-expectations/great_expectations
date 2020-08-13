@@ -148,7 +148,9 @@ class JsonSchemaProfiler(Profiler):
         else:
             return None
 
-        enum_list = ["null" if item is None else item for item in enum_list]
+        enum_list = [
+            JsonSchemaTypes.NULL.value if item is None else item for item in enum_list
+        ]
 
         return enum_list
 
@@ -319,6 +321,10 @@ class JsonSchemaProfiler(Profiler):
 
         if not enum_list:
             return None
+
+        enum_list = list(
+            filter(lambda item: item is not JsonSchemaTypes.NULL.value, enum_list)
+        )
 
         kwargs = {"column": key, "value_set": enum_list}
         return ExpectationConfiguration("expect_column_values_to_be_in_set", kwargs)
