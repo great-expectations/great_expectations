@@ -18,9 +18,25 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
    :maxdepth: 2
 
    intro
+
+.. toctree::
+   :maxdepth: 2
+
    guides
+
+.. toctree::
+   :maxdepth: 2
+
    reference
+
+.. toctree::
+   :maxdepth: 2
+
    community
+
+.. toctree::
+   :maxdepth: 2
+
    contributing
 
 .. toctree::
