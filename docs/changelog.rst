@@ -23,7 +23,7 @@ Develop
 * [DEPRECATION] Deprecate demo suite behavior in `suite new`
 * [FEATURE] Slack Messages sent as ValidationActions now have link to DataDocs, if available.
 * [FEATURE] ValidationActions can now consume and return "payload", which can be used to share information across ValidationActions
-* [ENHANCEMENT] Add support for combining schema with anyOf key in JSON Schema profiler
+* [ENHANCEMENT] Add support in JSON Schema profiler for combining schema with anyOf key and creating nullability expectations
 
 0.11.9
 -----------------
