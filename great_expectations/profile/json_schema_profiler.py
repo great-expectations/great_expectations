@@ -329,21 +329,16 @@ class JsonSchemaProfiler(Profiler):
         enum_list = self._get_enum_list(details=details)
         kwargs = {"column": key}
 
-        not_null_expectation = ExpectationConfiguration(
-            "expect_column_values_to_not_be_null", kwargs
-        )
-        null_expectation = ExpectationConfiguration(
-            "expect_column_values_to_be_null", kwargs
-        )
-
         if enum_list:
             object_types = set(enum_list).union(set(object_types))
 
         if JsonSchemaTypes.NULL.value not in object_types:
-            return not_null_expectation
+            return ExpectationConfiguration(
+                "expect_column_values_to_not_be_null", kwargs
+            )
 
         if len(object_types) == 1:
-            return null_expectation
+            return ExpectationConfiguration("expect_column_values_to_be_null", kwargs)
 
         return None
 
