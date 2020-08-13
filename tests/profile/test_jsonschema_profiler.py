@@ -64,6 +64,11 @@ def enum_types_schema():
             "optional-color": {
                 "anyOf": [{"enum": ["red", "green", "blue"],}, {"type": "null"}],
             },
+            "optional-hat": {
+                "type": ["string", "null"],
+                "enum": ["red", "green", "blue"],
+            },
+            "optional-answer": {"enum": ["yes", "no", "null"],},
         },
     }
 
@@ -161,7 +166,7 @@ def number_ranges_schema():
 def null_fields_schema():
     """
     This fixture has null fields.
-    https://json-schema.org/understanding-json-schema/reference/string.html#length
+    https://json-schema.org/understanding-json-schema/reference/null.html
     """
     return {
         "$id": "https://example.com/null.schema.json",
@@ -172,6 +177,7 @@ def null_fields_schema():
             "string-or-null": {"type": ["string", "null"]},
             "int-or-null": {"type": ["integer", "null"]},
             "number-or-null": {"type": ["number", "null"]},
+            "enum-or-null": {"anyOf": [{"enum": ["a", "b", "c"]}, {"type": "null"}]},
         },
     }
 
@@ -364,6 +370,40 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
             "kwargs": {
                 "column": "optional-color",
                 "value_set": ["red", "green", "blue"],
+            },
+        },
+        {
+            "meta": {},
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {"column": "optional-hat"},
+        },
+        {
+            "kwargs": {
+                "column": "optional-hat",
+                "type_list": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
+            },
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "meta": {},
+        },
+        {
+            "meta": {},
+            "expectation_type": "expect_column_values_to_be_in_set",
+            "kwargs": {
+                "column": "optional-hat",
+                "value_set": ["red", "green", "blue"],
+            },
+        },
+        {
+            "meta": {},
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {"column": "optional-answer"},
+        },
+        {
+            "meta": {},
+            "expectation_type": "expect_column_values_to_be_in_set",
+            "kwargs": {
+                "column": "optional-answer",
+                "value_set": ["yes", "no", "null"],
             },
         },
     ]
@@ -1157,6 +1197,16 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
                 "column": "number-or-null",
                 "type_list": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
             },
+        },
+        {
+            "meta": {},
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {"column": "enum-or-null"},
+        },
+        {
+            "meta": {},
+            "expectation_type": "expect_column_values_to_be_in_set",
+            "kwargs": {"column": "enum-or-null", "value_set": ["a", "b", "c"],},
         },
     ]
     context = empty_data_context

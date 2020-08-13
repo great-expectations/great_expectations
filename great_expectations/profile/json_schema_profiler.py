@@ -114,7 +114,6 @@ class JsonSchemaProfiler(Profiler):
 
     def _get_object_types(self, details: dict) -> List[str]:
         type_ = details.get("type", None)
-        enum = details.get("enum", None)
         any_of = details.get("anyOf", None)
 
         types_list = []
@@ -123,20 +122,33 @@ class JsonSchemaProfiler(Profiler):
             types_list.extend(type_)
         elif type_:
             types_list.append(type_)
-        elif enum:
-            types_list.append(JsonSchemaTypes.ENUM.value)
         elif any_of:
             for schema in any_of:
                 schema_type = schema.get("type", None)
-                enum_type = schema.get("enum", None)
                 if isinstance(schema_type, list):
                     types_list.extend(schema_type)
                 elif schema_type:
                     types_list.append(schema_type)
-                elif enum_type:
-                    types_list.append(JsonSchemaTypes.ENUM.value)
 
         return types_list
+
+    def _get_enum_list(self, details: dict) -> Optional[List[str]]:
+        enum = details.get("enum", None)
+        any_of = details.get("anyOf", None)
+
+        enum_list = []
+
+        if enum:
+            enum_list.extend(enum)
+        elif any_of:
+            for schema in any_of:
+                enum_options = schema.get("enum", None)
+                if enum_options:
+                    enum_list.extend(enum_options)
+        else:
+            return None
+
+        return enum_list
 
     def _create_existence_expectation(
         self, key: str, details: dict
@@ -159,8 +171,7 @@ class JsonSchemaProfiler(Profiler):
         object_types = self._get_object_types(details=details)
         object_types = list(
             filter(
-                lambda object_type: object_type
-                not in [JsonSchemaTypes.NULL.value, JsonSchemaTypes.ENUM.value],
+                lambda object_type: object_type not in [JsonSchemaTypes.NULL.value],
                 object_types,
             )
         )
@@ -300,33 +311,12 @@ class JsonSchemaProfiler(Profiler):
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/generic.html#enumerated-values"""
-        object_types = self._get_object_types(details=details)
+        enum_list = self._get_enum_list(details=details)
 
-        if JsonSchemaTypes.ENUM.value not in object_types:
+        if not enum_list:
             return None
 
-        enum = details.get("enum", None)
-        any_of = details.get("anyOf", None)
-
-        kwargs = {"column": key}
-
-        if enum:
-            kwargs["value_set"] = enum
-        elif any_of:
-            for item in any_of:
-                item_type = item.get("enum", None)
-                if item_type:
-                    kwargs["value_set"] = item_type
-                    break
-        else:
-            return None
-
-        if "value_set" not in kwargs:
-            return None
-
-        if not isinstance(kwargs["value_set"], list):
-            return None
-
+        kwargs = {"column": key, "value_set": enum_list}
         return ExpectationConfiguration("expect_column_values_to_be_in_set", kwargs)
 
     def _create_null_or_not_null_column_expectation(
@@ -334,25 +324,34 @@ class JsonSchemaProfiler(Profiler):
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/null.html"""
         object_types = self._get_object_types(details=details)
-        enum_ = details.get("enum", None)
-
+        enum_list = self._get_enum_list(details=details)
         kwargs = {"column": key}
-        null_expectation = ExpectationConfiguration(
-            "expect_column_values_to_be_null", kwargs
-        )
+
         not_null_expectation = ExpectationConfiguration(
             "expect_column_values_to_not_be_null", kwargs
         )
+        null_expectation = ExpectationConfiguration(
+            "expect_column_values_to_be_null", kwargs
+        )
 
-        if JsonSchemaTypes.NULL.value in object_types:
-            if len(object_types) == 1:
-                if enum_:
-                    return None
+        if enum_list:
+            type_set = set(enum_list).union(set(object_types))
+
+            if JsonSchemaTypes.NULL.value not in type_set:
+                return not_null_expectation
+
+            if len(type_set) == 1:
                 return null_expectation
             else:
                 return None
-        else:
+
+        if JsonSchemaTypes.NULL.value not in object_types:
             return not_null_expectation
+
+        if len(object_types) == 1:
+            return null_expectation
+
+        return None
 
     def _create_regex_expectation(
         self, key: str, details: dict
