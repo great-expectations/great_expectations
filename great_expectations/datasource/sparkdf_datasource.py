@@ -65,7 +65,7 @@ class SparkDFDatasource(Datasource):
         data_asset_type=None,
         batch_kwargs_generators=None,
         spark_config=None,
-        enable_hive_support=None,
+        enable_hive_support=False,
         **kwargs
     ):
         """
