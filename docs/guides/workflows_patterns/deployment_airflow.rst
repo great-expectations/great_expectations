@@ -10,14 +10,14 @@ This guide will help you deploy Great Expectations within an Airflow pipeline. Y
     - Configured a :ref:`Data Context <tutorials__getting_started__initialize_a_data_context>`.
     - Configured an :ref:`Expectations Suite <tutorials__getting_started__create_your_first_expectations>`.
     - Optional: Configured a :ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>`.
-    - Configured an airflow pipeline (DAG) with access to your data sources.
+    - Configured an Airflow pipeline (DAG).
 
-There are two supported methods: using an Airflow ``PythonOperator`` to run validations using python code or invoking the Great Expectations CLI to run a Checkpoint using an Airflow ``BashOperator``.
+There are two supported methods: using an Airflow ``PythonOperator`` to run Validations using python code or invoking the Great Expectations CLI to run a Checkpoint using an Airflow ``BashOperator``.
 
 ``PythonOperator``
 ------------------
 
-1. **Create validation methods**
+1. **Create Validation Methods**
 
     Create the methods to validate data that will be called in your DAG. In this example our data is contained in a file.
 
@@ -54,7 +54,7 @@ There are two supported methods: using an Airflow ``PythonOperator`` to run vali
             raise AirflowException("Validation of the data is not successful ")
 
 
-2. **Add validation methods to DAG**
+2. **Add Validation Methods to DAG**
 
     Validation steps can be added after pipeline steps to ensure that the steps were completed successfully.
 
@@ -79,6 +79,14 @@ There are two supported methods: using an Airflow ``PythonOperator`` to run vali
 
 Please see this how-to guide for :ref:`How to run a Checkpoint in Airflow <how_to_guides__validation__how_to_run_a_checkpoint_in_airflow>`.
 
+Additional resources
+--------------------
+
+- `Great Expectations Pipeline Tutorial <https://github.com/superconductive/ge_tutorials>`_ showing Great Expectations implemented in an airflow pipeline.
+- `Great Expectations / Airflow Demo <https://github.com/superconductive/airflow_meetup_demo>`_.
+
+Comments
+--------
 
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on `Slack <greatexpectations.io/slack>`_ if you would like to learn more, or have any questions.
 
