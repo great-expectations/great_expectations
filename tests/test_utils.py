@@ -644,7 +644,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
             # "expect_table_row_count_to_equal_other_table",
-            "expect_sum_of_columns_to_be_equal",
+            "expect_multicolumn_sum_to_equal",
         ]
     if context == "SparkDFDataset":
         return expectation_type in [
@@ -694,7 +694,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_pair_values_to_be_in_set",
             # "expect_multicolumn_values_to_be_unique",
             "expect_table_row_count_to_equal_other_table",
-            "expect_sum_of_columns_to_be_equal",
+            "expect_multicolumn_sum_to_equal",
         ]
     if context == "PandasDataset":
         return expectation_type in [

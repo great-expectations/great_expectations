@@ -1789,7 +1789,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.multicolumn_map_expectation
-    def expect_sum_of_columns_to_be_equal(
+    def expect_multicolumn_sum_to_equal(
         self,
         column_list,
         sum_total,
