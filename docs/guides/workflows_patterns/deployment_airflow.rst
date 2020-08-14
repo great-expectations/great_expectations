@@ -14,6 +14,20 @@ This guide will help you deploy Great Expectations within an Airflow pipeline. Y
 
 There are two supported methods: using an Airflow ``PythonOperator`` to run Validations using python code or invoking the Great Expectations CLI to run a Checkpoint using an Airflow ``BashOperator``.
 
+.. note::
+    There is not currently a Great Expectations custom Airflow operator, however we have heard from users who have implemented their own. We love community contributions so please share your operators!
+
+Check out these links for some examples of Airflow pipelines with Great Expectations Validations ensuring that downstream tasks are protected from upstream issues:
+
+- `Great Expectations Pipeline Tutorial <https://github.com/superconductive/ge_tutorials>`_
+- `Great Expectations / Airflow Demo <https://github.com/superconductive/airflow_meetup_demo>`_
+
+In the first link and the diagram below, you can see a common pattern of using Validation tasks to ensure that the data flowing from one task to the next is correct, and alert the team if it is not. Another common pattern is to branch and change your DAG based on a Validation (e.g. send data for more cleaning before moving to the next task, store it for a postmortem, etc.).
+
+.. image:: ge_tutorials_pipeline.png
+    :width: 800
+    :alt: Airflow pipeline from Great Expectations tutorials repository.
+
 ``PythonOperator``
 ------------------
 
@@ -83,12 +97,10 @@ Additional resources
 --------------------
 
 - `Great Expectations Pipeline Tutorial <https://github.com/superconductive/ge_tutorials>`_ showing Great Expectations implemented in an airflow pipeline.
-- `Great Expectations / Airflow Demo <https://github.com/superconductive/airflow_meetup_demo>`_.
+- `Great Expectations / Airflow Demo <https://github.com/superconductive/airflow_meetup_demo>`_
 
 Comments
 --------
-
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on `Slack <greatexpectations.io/slack>`_ if you would like to learn more, or have any questions.
 
 .. discourse::
     :topic_identifier: 34
