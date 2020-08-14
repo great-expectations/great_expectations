@@ -140,6 +140,7 @@ class PandasDatasource(Datasource):
         self._reader_options = configuration_with_defaults.get("reader_options", None)
         self._limit = configuration_with_defaults.get("limit", None)
 
+    # TODO: move to data connector
     def process_batch_parameters(
         self, reader_method=None, reader_options=None, limit=None, dataset_options=None,
     ):
@@ -177,6 +178,7 @@ class PandasDatasource(Datasource):
 
         return batch_kwargs
 
+    # TODO: move to execution engine or make a wrapper
     def get_batch(self, batch_kwargs, batch_parameters=None):
         # We will use and manipulate reader_options along the way
         reader_options = batch_kwargs.get("reader_options", {})
