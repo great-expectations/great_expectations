@@ -1,8 +1,7 @@
 .. _deloyment_airflow:
 
-#########################################
 Deploying Great Expectations with Airflow
-#########################################
+=========================================
 
 This guide will help you deploy Great Expectations within an Airflow pipeline. You can use Great Expectations to automate validation of data integrity and navigate your DAG based on the output of validations.
 
@@ -15,16 +14,15 @@ This guide will help you deploy Great Expectations within an Airflow pipeline. Y
 
 There are two supported methods: using an Airflow ``PythonOperator`` to run validations using python code or invoking the Great Expectations CLI to run a Checkpoint using an Airflow ``BashOperator``.
 
-Steps
------
+``PythonOperator``
+------------------
 
-Great Expectations via ``PythonOperator``
-
-#. **Create validation methods**
+1. **Create validation methods**
 
     Create the methods to validate data that will be called in your DAG. In this example our data is contained in a file.
 
-    .. code-block:: python
+.. code-block:: python
+
     from airflow import AirflowException
     from airflow.operators.python_operator import PythonOperator
     import great_expectations as ge
@@ -56,11 +54,11 @@ Great Expectations via ``PythonOperator``
             raise AirflowException("Validation of the data is not successful ")
 
 
-#. Add validation methods to DAG
+2. **Add validation methods to DAG**
 
     Validation steps can be added after pipeline steps to ensure that the steps were completed successfully.
 
-    .. code-block:: python
+.. code-block:: python
 
     # Create validation task
     task_validate_data = PythonOperator(
@@ -70,10 +68,14 @@ Great Expectations via ``PythonOperator``
         dag=dag)
 
     # Add to DAG
-    task_retrieve_data >> task_validate_data >> task_load_data >> task_transform_data >> task_validate_transformed_data
+    task_retrieve_data.set_downstream(task_validate_data)
+    task_validate_data.set_downstream(task_load_data)
+    task_load_data.set_downstream(task_transform_data)
+    task_transform_data.set_downstream(task_validate_transformed_data)
 
 
-Great Expectations via Checkpoints & ``BashOperator``
+:ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>` & ``BashOperator``
+------------------------------
 
 Please see this how-to guide for :ref:`How to run a Checkpoint in Airflow <how_to_guides__validation__how_to_run_a_checkpoint_in_airflow>`.
 
