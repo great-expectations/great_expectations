@@ -65,6 +65,7 @@ class SparkDFDatasource(Datasource):
         data_asset_type=None,
         batch_kwargs_generators=None,
         spark_config=None,
+        enable_hive_support=None,
         **kwargs
     ):
         """
@@ -74,6 +75,7 @@ class SparkDFDatasource(Datasource):
             data_asset_type: A ClassConfig dictionary
             batch_kwargs_generators: Generator configuration dictionary
             spark_config: dictionary of key-value pairs to pass to the spark builder
+            enable_hive_support: whether to enable Hive support to connect to persistent metastore
             **kwargs: Additional kwargs to be part of the datasource constructor's initialization
 
         Returns:
@@ -94,7 +96,7 @@ class SparkDFDatasource(Datasource):
 
         configuration = kwargs
         configuration.update(
-            {"data_asset_type": data_asset_type, "spark_config": spark_config}
+            {"data_asset_type": data_asset_type, "spark_config": spark_config, "enable_hive_support": enable_hive_support}
         )
         if batch_kwargs_generators:
             configuration["batch_kwargs_generators"] = batch_kwargs_generators
@@ -108,6 +110,7 @@ class SparkDFDatasource(Datasource):
         data_asset_type=None,
         batch_kwargs_generators=None,
         spark_config=None,
+        enable_hive_support=False,
         **kwargs
     ):
         """Build a new SparkDFDatasource instance.
@@ -118,10 +121,11 @@ class SparkDFDatasource(Datasource):
             data_asset_type: ClassConfig describing the data_asset type to be constructed by this datasource
             batch_kwargs_generators: generator configuration
             spark_config: dictionary of key-value pairs to be set on the spark session builder
+            enable_hive_support: whether to enable Hive support to connect to persistent metastore
             **kwargs: Additional
         """
         configuration_with_defaults = SparkDFDatasource.build_configuration(
-            data_asset_type, batch_kwargs_generators, spark_config, **kwargs
+            data_asset_type, batch_kwargs_generators, spark_config, enable_hive_support, **kwargs
         )
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
         batch_kwargs_generators = configuration_with_defaults.pop(
@@ -139,6 +143,8 @@ class SparkDFDatasource(Datasource):
             builder = SparkSession.builder
             for k, v in configuration_with_defaults["spark_config"].items():
                 builder.config(k, v)
+            if enable_hive_support:
+                builder.enableHiveSupport()
             self.spark = builder.getOrCreate()
         except AttributeError:
             logger.error(
