@@ -96,7 +96,11 @@ class SparkDFDatasource(Datasource):
 
         configuration = kwargs
         configuration.update(
-            {"data_asset_type": data_asset_type, "spark_config": spark_config, "enable_hive_support": enable_hive_support}
+            {
+                "data_asset_type": data_asset_type,
+                "spark_config": spark_config,
+                "enable_hive_support": enable_hive_support,
+            }
         )
         if batch_kwargs_generators:
             configuration["batch_kwargs_generators"] = batch_kwargs_generators
@@ -125,7 +129,11 @@ class SparkDFDatasource(Datasource):
             **kwargs: Additional
         """
         configuration_with_defaults = SparkDFDatasource.build_configuration(
-            data_asset_type, batch_kwargs_generators, spark_config, enable_hive_support, **kwargs
+            data_asset_type,
+            batch_kwargs_generators,
+            spark_config,
+            enable_hive_support,
+            **kwargs
         )
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
         batch_kwargs_generators = configuration_with_defaults.pop(
