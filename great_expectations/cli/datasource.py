@@ -1416,7 +1416,7 @@ def profile_datasource(
     max_data_assets=20,
     additional_batch_kwargs=None,
     open_docs=False,
-    assume_yes=False
+    assume_yes=False,
 ):
     """"Profile a named datasource using the specified context"""
     # Note we are explicitly not using a logger in all CLI output to have
