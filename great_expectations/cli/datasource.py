@@ -193,6 +193,12 @@ def _build_datasource_intro_string(datasource_count):
     default=True,
 )
 @click.option(
+    "--assume-yes/--yes",
+    "-y",
+    help="By default request confirmation to build docs unless you specify -y/--yes/--assume-yes flag to skip dialog",
+    default=False,
+)
+@click.option(
     "--additional-batch-kwargs",
     default=None,
     help="Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary",
@@ -206,6 +212,7 @@ def datasource_profile(
     directory,
     view,
     additional_batch_kwargs,
+    assume_yes,
 ):
     """
     Profile a datasource (Experimental)
@@ -264,6 +271,7 @@ def datasource_profile(
                 profile_all_data_assets=profile_all_data_assets,
                 open_docs=view,
                 additional_batch_kwargs=additional_batch_kwargs,
+                assume_yes=assume_yes,
             )
             send_usage_message(
                 data_context=context, event="cli.datasource.profile", success=True
@@ -1408,6 +1416,7 @@ def profile_datasource(
     max_data_assets=20,
     additional_batch_kwargs=None,
     open_docs=False,
+    assume_yes=False
 ):
     """"Profile a named datasource using the specified context"""
     # Note we are explicitly not using a logger in all CLI output to have
@@ -1574,7 +1583,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 break
 
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
-    build_docs(context, view=open_docs)
+    build_docs(context, view=open_docs, assume_yes=assume_yes)
     if open_docs:  # This is mostly to keep tests from spawning windows
         context.open_data_docs()
 
