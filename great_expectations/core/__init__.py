@@ -16,6 +16,7 @@ from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.evaluation_parameters import (
     find_evaluation_parameter_dependencies,
 )
+from great_expectations.core.id_dict import IDDict
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
@@ -29,6 +30,8 @@ from great_expectations.exceptions import (
 from great_expectations.types import DictDot
 
 logger = logging.getLogger(__name__)
+
+IDDict = IDDict
 
 RESULT_FORMATS = ["BOOLEAN_ONLY", "BASIC", "COMPLETE", "SUMMARY"]
 
