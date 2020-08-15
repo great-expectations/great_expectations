@@ -51,7 +51,7 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install  isort[requirements]==4.3.21 black==19.10b0
+              pip install  isort[requirements]==5.4.2 flake8==3.8.3 black==19.10b0
               isort --check-only --skip docs/
               black --check --exclude docs/ .
               flake8 great_expectations/core
