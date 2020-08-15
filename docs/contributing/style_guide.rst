@@ -40,7 +40,7 @@ code
 
         black .
         isort . --check-only --skip docs
-        flake8 great_expectations.core
+        flake8 great_expectations/core
 
 **Expectations**
 
