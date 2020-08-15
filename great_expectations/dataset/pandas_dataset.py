@@ -550,21 +550,15 @@ Notes:
             n_bins = 10
 
         if series.dtype in ["int", "float"]:
-            if n_bins is None:
-                bins = np.histogram_bin_edges(series[series.notnull()], bins="auto")
-            else:
+            if bins is None:
                 bins = np.histogram_bin_edges(series[series.notnull()], bins=n_bins)
-
-            # Make sure max of series is included in rightmost bin
-            bins[-1] = np.nextafter(bins[-1], bins[-1] + 1)
+                # Make sure max of series is included in rightmost bin
+                bins[-1] = np.nextafter(bins[-1], bins[-1] + 1)
 
             # Missings get digitized into bin = n_bins+1
             return np.digitize(series, bins=bins)
 
         else:
-            if n_bins is None:
-                n_bins = 10
-
             if bins is None:
                 value_counts = series.value_counts(sort=True)
                 if len(value_counts) < n_bins + 1:
