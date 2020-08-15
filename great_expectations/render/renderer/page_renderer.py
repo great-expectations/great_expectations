@@ -2,14 +2,13 @@ import logging
 import os
 from collections import OrderedDict
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 
 from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.util import num_to_str
 
-from ...core.id_dict import BatchKwargs
 from ..types import (
     CollapseContent,
     RenderedDocumentContent,
@@ -58,8 +57,8 @@ class ValidationResultsPageRenderer(Renderer):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
-                run_time = parse(run_id).strftime("%Y%m%dT%H%M%S.%fZ")
-            except (ParserError, TypeError):
+                run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            except (ValueError, TypeError):
                 run_time = "__none__"
             run_name = run_id
         elif isinstance(run_id, dict):
@@ -67,8 +66,8 @@ class ValidationResultsPageRenderer(Renderer):
             run_time = run_id.get("run_time") or "__none__"
         elif isinstance(run_id, RunIdentifier):
             run_name = run_id.run_name or "__none__"
-            run_time = run_id.run_time.strftime("%Y%m%dT%H%M%S.%fZ")
-        batch_id = BatchKwargs(validation_results.meta["batch_kwargs"]).to_id()
+            run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         batch_kwargs = validation_results.meta.get("batch_kwargs")
 
@@ -170,16 +169,32 @@ class ValidationResultsPageRenderer(Renderer):
                 )
             ]
 
+        data_asset_name = batch_kwargs.get("data_asset_name")
+        # Determine whether we have a custom run_name
+        try:
+            run_name_as_time = parse(run_name)
+        except ValueError:
+            run_name_as_time = None
+        try:
+            run_time_datetime = parse(run_time)
+        except ValueError:
+            run_time_datetime = None
+
+        include_run_name: bool = False
+        if run_name_as_time != run_time_datetime and run_name_as_time != "__none__":
+            include_run_name = True
+
+        page_title = "Validations / " + expectation_suite_name
+        if data_asset_name:
+            page_title += " / " + data_asset_name
+        if include_run_name:
+            page_title += " / " + run_name
+        page_title += " / " + run_time
+
         return RenderedDocumentContent(
             **{
                 "renderer_type": "ValidationResultsPageRenderer",
-                "page_title": expectation_suite_name
-                + " / "
-                + run_name
-                + " / "
-                + run_time
-                + " / "
-                + batch_id,
+                "page_title": page_title,
                 "batch_kwargs": batch_kwargs,
                 "expectation_suite_name": expectation_suite_name,
                 "sections": sections,
@@ -260,8 +275,8 @@ class ValidationResultsPageRenderer(Renderer):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
-                run_time = parse(run_id).strftime("%Y%m%dT%H%M%S.%fZ")
-            except (ParserError, TypeError):
+                run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            except (ValueError, TypeError):
                 run_time = "__none__"
             run_name = run_id
         elif isinstance(run_id, dict):
@@ -269,8 +284,11 @@ class ValidationResultsPageRenderer(Renderer):
             run_time = run_id.get("run_time") or "__none__"
         elif isinstance(run_id, RunIdentifier):
             run_name = run_id.run_name or "__none__"
-            run_time = run_id.run_time.strftime("%Y%m%dT%H%M%S.%fZ")
-        ge_version = validation_results.meta["great_expectations.__version__"]
+            run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        # TODO: Deprecate "great_expectations.__version__"
+        ge_version = validation_results.meta.get(
+            "great_expectations_version"
+        ) or validation_results.meta.get("great_expectations.__version__")
 
         return RenderedTableContent(
             **{
@@ -507,7 +525,7 @@ class ExpectationSuitePageRenderer(Renderer):
         return RenderedDocumentContent(
             **{
                 "renderer_type": "ExpectationSuitePageRenderer",
-                "page_title": expectation_suite_name,
+                "page_title": "Expectations / " + expectation_suite_name,
                 "expectation_suite_name": expectation_suite_name,
                 "utm_medium": "expectation-suite-page",
                 "sections": sections,
@@ -559,7 +577,10 @@ class ExpectationSuitePageRenderer(Renderer):
     @classmethod
     def _render_expectation_suite_info(cls, expectations):
         expectation_suite_name = expectations.expectation_suite_name
-        ge_version = expectations.meta["great_expectations.__version__"]
+        # TODO: Deprecate "great_expectations.__version__"
+        ge_version = expectations.meta.get(
+            "great_expectations_version"
+        ) or expectations.meta.get("great_expectations.__version__")
 
         return RenderedTableContent(
             **{
@@ -734,8 +755,8 @@ class ProfilingResultsPageRenderer(Renderer):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
-                run_time = parse(run_id).strftime("%Y%m%dT%H%M%S.%fZ")
-            except (ParserError, TypeError):
+                run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            except (ValueError, TypeError):
                 run_time = "__none__"
             run_name = run_id
         elif isinstance(run_id, dict):
@@ -743,7 +764,7 @@ class ProfilingResultsPageRenderer(Renderer):
             run_time = run_id.get("run_time") or "__none__"
         elif isinstance(run_id, RunIdentifier):
             run_name = run_id.run_name or "__none__"
-            run_time = run_id.run_time.strftime("%Y%m%dT%H%M%S.%fZ")
+            run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         batch_kwargs = validation_results.meta.get("batch_kwargs")
@@ -763,15 +784,32 @@ class ProfilingResultsPageRenderer(Renderer):
             validation_results
         )
 
+        data_asset_name = batch_kwargs.get("data_asset_name")
+        # Determine whether we have a custom run_name
+        try:
+            run_name_as_time = parse(run_name)
+        except ValueError:
+            run_name_as_time = None
+        try:
+            run_time_datetime = parse(run_time)
+        except ValueError:
+            run_time_datetime = None
+
+        include_run_name: bool = False
+        if run_name_as_time != run_time_datetime and run_name_as_time != "__none__":
+            include_run_name = True
+
+        page_title = "Profiling Results / " + expectation_suite_name
+        if data_asset_name:
+            page_title += " / " + data_asset_name
+        if include_run_name:
+            page_title += " / " + run_name
+        page_title += " / " + run_time
+
         return RenderedDocumentContent(
             **{
                 "renderer_type": "ProfilingResultsPageRenderer",
-                "page_title": run_time
-                + "-"
-                + run_name
-                + "-"
-                + expectation_suite_name
-                + "-ProfilingResults",
+                "page_title": page_title,
                 "expectation_suite_name": expectation_suite_name,
                 "utm_medium": "profiling-results-page",
                 "batch_kwargs": batch_kwargs,

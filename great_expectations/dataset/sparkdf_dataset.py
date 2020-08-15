@@ -33,6 +33,9 @@ try:
         count,
         countDistinct,
         monotonically_increasing_id,
+        isnan,
+        datediff,
+        lag,
     )
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
@@ -72,7 +75,7 @@ class MetaSparkDFDataset(Dataset):
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
-            self, column, mostly=None, result_format=None, *args, **kwargs
+            self, column, mostly=None, result_format=None, *args, **kwargs,
         ):
             """
             This whole decorator is pending a re-write. Currently there is are huge performance issues
@@ -80,6 +83,10 @@ class MetaSparkDFDataset(Dataset):
             easy optimization opportunities by coupling result_format with how many different transformations
             are done on the dataset, as is done in sqlalchemy_dataset.
             """
+
+            # Rename column so we only have to handle dot notation here
+            eval_col = "__eval_col_" + column.replace(".", "__").replace("`", "_")
+            self.spark_df = self.spark_df.withColumn(eval_col, col(column))
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -94,10 +101,10 @@ class MetaSparkDFDataset(Dataset):
             else:
                 unexpected_count_limit = result_format["partial_unexpected_count"]
 
-            col_df = self.spark_df.select(column)  # pyspark.sql.DataFrame
+            col_df = self.spark_df.select(col(eval_col))  # pyspark.sql.DataFrame
 
             # a couple of tests indicate that caching here helps performance
-            col_df.cache()
+            col_df.persist()
             element_count = self.get_row_count()
 
             # FIXME temporary fix for missing/ignored value
@@ -107,7 +114,7 @@ class MetaSparkDFDataset(Dataset):
             ]:
                 col_df = col_df.filter(col_df[0].isNotNull())
                 # these nonnull_counts are cached by SparkDFDataset
-                nonnull_count = self.get_column_nonnull_count(column)
+                nonnull_count = self.get_column_nonnull_count(eval_col)
             else:
                 nonnull_count = element_count
 
@@ -117,6 +124,7 @@ class MetaSparkDFDataset(Dataset):
             success_count = success_df.filter("__success = True").count()
 
             unexpected_count = nonnull_count - success_count
+
             if unexpected_count == 0:
                 # save some computation time if no unexpected items
                 maybe_limited_unexpected_list = []
@@ -127,7 +135,7 @@ class MetaSparkDFDataset(Dataset):
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
-                    row[column] for row in unexpected_df.collect()
+                    row[eval_col] for row in unexpected_df.collect()
                 ]
 
                 if "output_strftime_format" in kwargs:
@@ -209,8 +217,16 @@ class MetaSparkDFDataset(Dataset):
             ignore_row_if="both_values_are_missing",
             result_format=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
+            # Rename column so we only have to handle dot notation here
+            eval_col_A = "__eval_col_A_" + column_A.replace(".", "__").replace("`", "_")
+            eval_col_B = "__eval_col_B_" + column_B.replace(".", "__").replace("`", "_")
+
+            self.spark_df = self.spark_df.withColumn(
+                eval_col_A, col(column_A)
+            ).withColumn(eval_col_B, col(column_B))
+
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
@@ -224,7 +240,7 @@ class MetaSparkDFDataset(Dataset):
             else:
                 unexpected_count_limit = result_format["partial_unexpected_count"]
 
-            cols_df = self.spark_df.select(column_A, column_B).withColumn(
+            cols_df = self.spark_df.select(eval_col_A, eval_col_B).withColumn(
                 "__row", monotonically_increasing_id()
             )  # pyspark.sql.DataFrame
 
@@ -235,26 +251,26 @@ class MetaSparkDFDataset(Dataset):
             if ignore_row_if == "both_values_are_missing":
                 boolean_mapped_null_values = cols_df.selectExpr(
                     "`__row`",
-                    "`{0}` AS `A_{0}`".format(column_A),
-                    "`{0}` AS `B_{0}`".format(column_B),
+                    "`{0}` AS `A_{0}`".format(eval_col_A),
+                    "`{0}` AS `B_{0}`".format(eval_col_B),
                     "ISNULL(`{0}`) AND ISNULL(`{1}`) AS `__null_val`".format(
-                        column_A, column_B
+                        eval_col_A, eval_col_B
                     ),
                 )
             elif ignore_row_if == "either_value_is_missing":
                 boolean_mapped_null_values = cols_df.selectExpr(
                     "`__row`",
-                    "`{0}` AS `A_{0}`".format(column_A),
-                    "`{0}` AS `B_{0}`".format(column_B),
+                    "`{0}` AS `A_{0}`".format(eval_col_A),
+                    "`{0}` AS `B_{0}`".format(eval_col_B),
                     "ISNULL(`{0}`) OR ISNULL(`{1}`) AS `__null_val`".format(
-                        column_A, column_B
+                        eval_col_A, eval_col_B
                     ),
                 )
             elif ignore_row_if == "never":
                 boolean_mapped_null_values = cols_df.selectExpr(
                     "`__row`",
-                    "`{0}` AS `A_{0}`".format(column_A),
-                    "`{0}` AS `B_{0}`".format(column_B),
+                    "`{0}` AS `A_{0}`".format(eval_col_A),
+                    "`{0}` AS `B_{0}`".format(eval_col_B),
                     lit(False).alias("__null_val"),
                 )
             else:
@@ -267,8 +283,8 @@ class MetaSparkDFDataset(Dataset):
             nonnull_df = boolean_mapped_null_values.filter("__null_val = False")
             nonnull_count = nonnull_df.count()
 
-            col_A_df = nonnull_df.select("__row", "`A_{0}`".format(column_A))
-            col_B_df = nonnull_df.select("__row", "`B_{0}`".format(column_B))
+            col_A_df = nonnull_df.select("__row", "`A_{0}`".format(eval_col_A))
+            col_B_df = nonnull_df.select("__row", "`B_{0}`".format(eval_col_B))
 
             success_df = func(self, col_A_df, col_B_df, *args, **kwargs)
             success_count = success_df.filter("__success = True").count()
@@ -284,7 +300,7 @@ class MetaSparkDFDataset(Dataset):
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
-                    (row["A_{0}".format(column_A)], row["B_{0}".format(column_B)])
+                    (row["A_{0}".format(eval_col_A)], row["B_{0}".format(eval_col_B)],)
                     for row in unexpected_df.collect()
                 ]
 
@@ -366,8 +382,14 @@ class MetaSparkDFDataset(Dataset):
             ignore_row_if="all_values_are_missing",
             result_format=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
+            # Rename column so we only have to handle dot notation here
+            eval_cols = []
+            for col_name in column_list:
+                eval_col = "__eval_col_" + col_name.replace(".", "__").replace("`", "_")
+                eval_cols.append(eval_col)
+                self.spark_df = self.spark_df.withColumn(eval_col, col(col_name))
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
@@ -381,7 +403,7 @@ class MetaSparkDFDataset(Dataset):
             else:
                 unexpected_count_limit = result_format["partial_unexpected_count"]
 
-            temp_df = self.spark_df.select(*column_list)  # pyspark.sql.DataFrame
+            temp_df = self.spark_df.select(*eval_cols)  # pyspark.sql.DataFrame
 
             # a couple of tests indicate that caching here helps performance
             temp_df.cache()
@@ -390,24 +412,24 @@ class MetaSparkDFDataset(Dataset):
             if ignore_row_if == "all_values_are_missing":
                 boolean_mapped_skip_values = temp_df.select(
                     [
-                        *column_list,
+                        *eval_cols,
                         reduce(
-                            lambda a, b: a & b, [col(c).isNull() for c in column_list]
+                            lambda a, b: a & b, [col(c).isNull() for c in eval_cols]
                         ).alias("__null_val"),
                     ]
                 )
             elif ignore_row_if == "any_value_is_missing":
                 boolean_mapped_skip_values = temp_df.select(
                     [
-                        *column_list,
+                        *eval_cols,
                         reduce(
-                            lambda a, b: a | b, [col(c).isNull() for c in column_list]
+                            lambda a, b: a | b, [col(c).isNull() for c in eval_cols]
                         ).alias("__null_val"),
                     ]
                 )
             elif ignore_row_if == "never":
                 boolean_mapped_skip_values = temp_df.select(
-                    [*column_list, lit(False).alias("__null_val")]
+                    [*eval_cols, lit(False).alias("__null_val")]
                 )
             else:
                 raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
@@ -415,7 +437,7 @@ class MetaSparkDFDataset(Dataset):
             nonnull_df = boolean_mapped_skip_values.filter("__null_val = False")
             nonnull_count = nonnull_df.count()
 
-            cols_df = nonnull_df.select(*column_list)
+            cols_df = nonnull_df.select(*eval_cols)
 
             success_df = func(self, cols_df, *args, **kwargs)
             success_count = success_df.filter("__success = True").count()
@@ -430,7 +452,10 @@ class MetaSparkDFDataset(Dataset):
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
-                    OrderedDict((c, row[c]) for c in column_list)
+                    OrderedDict(
+                        (col_name, row[eval_col_name])
+                        for (col_name, eval_col_name) in zip(column_list, eval_cols)
+                    )
                     for row in unexpected_df.collect()
                 ]
 
@@ -1106,13 +1131,17 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         catch_exceptions=None,
         meta=None,
     ):
+        # Rename column so we only have to handle dot notation here
+        eval_col = "__eval_col_" + column.replace(".", "__").replace("`", "_")
+        self.spark_df = self.spark_df.withColumn(eval_col, col(column))
         if mostly is not None:
             raise ValueError(
                 "SparkDFDataset does not support column map semantics for column types"
             )
 
         try:
-            col_data = [f for f in self.spark_df.schema.fields if f.name == column][0]
+            col_df = self.spark_df.select(eval_col)
+            col_data = [f for f in col_df.schema.fields if f.name == eval_col][0]
             col_type = type(col_data.dataType)
         except IndexError:
             raise ValueError("Unrecognized column: %s" % column)
@@ -1132,24 +1161,29 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             raise ValueError("Unrecognized spark type: %s" % type_)
 
     @DocInherit
-    @DataAsset.expectation(["column", "type_", "mostly"])
+    @DataAsset.expectation(["column", "type_list", "mostly"])
     def expect_column_values_to_be_in_type_list(
         self,
         column,
-        type_list,
+        type_list: List[str],
         mostly=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
     ):
+        # Rename column so we only have to handle dot notation here
+        eval_col = "__eval_col_" + column.replace(".", "__").replace("`", "_")
+        self.spark_df = self.spark_df.withColumn(eval_col, col(column))
+
         if mostly is not None:
             raise ValueError(
                 "SparkDFDataset does not support column map semantics for column types"
             )
 
         try:
-            col_data = [f for f in self.spark_df.schema.fields if f.name == column][0]
+            col_df = self.spark_df.select(eval_col)
+            col_data = [f for f in col_df.schema.fields if f.name == eval_col][0]
             col_type = type(col_data.dataType)
         except IndexError:
             raise ValueError("Unrecognized column: %s" % column)
@@ -1309,6 +1343,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         catch_exceptions=None,
         meta=None,
     ):
+        # Might want to throw an exception if only 1 column is passed
         column_names = column_list.schema.names[:]
         conditions = []
         for i in range(0, len(column_names) - 1):
@@ -1320,3 +1355,127 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return column_list.withColumn(
             "__success", reduce(lambda a, b: a & b, conditions)
         )
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_be_increasing(
+        self,
+        column,  # pyspark.sql.DataFrame
+        strictly=False,
+        mostly=None,
+        parse_strings_as_datetimes=None,
+        output_strftime_format=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # string column name
+        column_name = column.schema.names[0]
+        # check if column is any type that could have na (numeric types)
+        na_types = [
+            isinstance(column.schema[column_name].dataType, typ)
+            for typ in [
+                sparktypes.LongType,
+                sparktypes.DoubleType,
+                sparktypes.IntegerType,
+            ]
+        ]
+
+        # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
+        if any(na_types):
+            column = column.filter(~isnan(column[0]))
+
+        if parse_strings_as_datetimes:
+            # convert column to timestamp format
+            column = self._apply_dateutil_parse(column)
+            # create constant column to order by in window function to preserve order of original df
+            column = column.withColumn("constant", lit("constant")).withColumn(
+                "lag", lag(column[0]).over(Window.orderBy(col("constant")))
+            )
+
+            column = column.withColumn("diff", datediff(col(column_name), col("lag")))
+
+        else:
+            column = (
+                column.withColumn("constant", lit("constant"))
+                .withColumn("lag", lag(column[0]).over(Window.orderBy(col("constant"))))
+                .withColumn("diff", column[0] - col("lag"))
+            )
+
+        # replace lag first row null with 1 so that it is not flagged as fail
+        column = column.withColumn(
+            "diff", when(col("diff").isNull(), 1).otherwise(col("diff"))
+        )
+
+        if strictly:
+            return column.withColumn(
+                "__success", when(col("diff") >= 1, lit(True)).otherwise(lit(False))
+            )
+
+        else:
+            return column.withColumn(
+                "__success", when(col("diff") >= 0, lit(True)).otherwise(lit(False))
+            )
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_be_decreasing(
+        self,
+        column,  # pyspark.sql.DataFrame
+        strictly=False,
+        mostly=None,
+        parse_strings_as_datetimes=None,
+        output_strftime_format=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # string column name
+        column_name = column.schema.names[0]
+        # check if column is any type that could have na (numeric types)
+        na_types = [
+            isinstance(column.schema[column_name].dataType, typ)
+            for typ in [
+                sparktypes.LongType,
+                sparktypes.DoubleType,
+                sparktypes.IntegerType,
+            ]
+        ]
+
+        # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
+        if any(na_types):
+            column = column.filter(~isnan(column[0]))
+
+        if parse_strings_as_datetimes:
+            # convert column to timestamp format
+            column = self._apply_dateutil_parse(column)
+            # create constant column to order by in window function to preserve order of original df
+            column = column.withColumn("constant", lit("constant")).withColumn(
+                "lag", lag(column[0]).over(Window.orderBy(col("constant")))
+            )
+
+            column = column.withColumn("diff", datediff(col(column_name), col("lag")))
+
+        else:
+            column = (
+                column.withColumn("constant", lit("constant"))
+                .withColumn("lag", lag(column[0]).over(Window.orderBy(col("constant"))))
+                .withColumn("diff", column[0] - col("lag"))
+            )
+
+        # replace lag first row null with -1 so that it is not flagged as fail
+        column = column.withColumn(
+            "diff", when(col("diff").isNull(), -1).otherwise(col("diff"))
+        )
+
+        if strictly:
+            return column.withColumn(
+                "__success", when(col("diff") <= -1, lit(True)).otherwise(lit(False))
+            )
+
+        else:
+            return column.withColumn(
+                "__success", when(col("diff") <= 0, lit(True)).otherwise(lit(False))
+            )

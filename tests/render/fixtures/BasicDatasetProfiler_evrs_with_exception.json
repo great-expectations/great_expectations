@@ -2023,7 +2023,7 @@
     "success_percent": 82.35294117647058
   },
   "meta": {
-    "great_expectations.__version__": "__fixture__",
+    "great_expectations_version": "__fixture__",
     "data_asset_name": "my_datasource/my_generator/titanic_data",
     "expectation_suite_name": "default",
     "run_id": "__run_id_fixture__",

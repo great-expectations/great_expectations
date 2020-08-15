@@ -135,6 +135,7 @@ Depending on which features of Great Expectations you want to work on, you may w
     * ``pip install -r docs/requirements.txt``
     * To build documentation, the command is ``cd docs; make html``
     * Documentation will be generated in ``docs/build/html/`` with the ``index.html`` as the index page.
+    * Note: we use ``autoapi`` to generate API reference docs, but it's not compatible with pandas 1.1.0. You'll need to have pandas 1.0.5 (or a previous version) installed in order to successfully build docs.
 
 Run tests to confirm that everything is working
 -----------------------------------------------

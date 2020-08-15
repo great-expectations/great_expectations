@@ -82,12 +82,21 @@ class MetaDataset(DataAsset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(self, result_format=None, *args, **kwargs):
-
+        def inner_wrapper(
+            self,
+            result_format=None,
+            row_condition=None,
+            condition_parser=None,
+            *args,
+            **kwargs
+        ):
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
             # Retain support for string-only output formats:
             result_format = parse_result_format(result_format)
+
+            if row_condition:
+                self = self.query(row_condition).reset_index(drop=True)
 
             element_count = self.get_row_count()
 
@@ -362,7 +371,7 @@ class Dataset(MetaDataset):
             define custom classes, etc. To use developed expectations from the command-line tool, you'll still need to \
             define custom classes, etc.
 
-            Check out :ref:`custom_expectations_reference` for more information.
+            Check out :ref:`how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations` for more information.
         """
 
         new_function = self.column_map_expectation(function)
@@ -384,7 +393,7 @@ class Dataset(MetaDataset):
             define custom classes, etc. To use developed expectations from the command-line tool, you'll still need to \
             define custom classes, etc.
 
-            Check out :ref:`custom_expectations_reference` for more information.
+            Check out :ref:`how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations` for more information.
         """
 
         new_function = self.column_aggregate_expectation(function)
@@ -808,6 +817,8 @@ class Dataset(MetaDataset):
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -858,6 +869,8 @@ class Dataset(MetaDataset):
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -911,6 +924,8 @@ class Dataset(MetaDataset):
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -962,6 +977,8 @@ class Dataset(MetaDataset):
         type_,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1027,6 +1044,8 @@ class Dataset(MetaDataset):
         type_list,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1096,6 +1115,8 @@ class Dataset(MetaDataset):
         mostly=None,
         parse_strings_as_datetimes=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1173,6 +1194,8 @@ class Dataset(MetaDataset):
         mostly=None,
         parse_strings_as_datetimes=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1253,6 +1276,8 @@ class Dataset(MetaDataset):
         parse_strings_as_datetimes=False,
         output_strftime_format=None,
         mostly=None,
+        row_condition=None,
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1323,6 +1348,8 @@ class Dataset(MetaDataset):
         strictly=None,
         parse_strings_as_datetimes=False,
         mostly=None,
+        row_condition=None,
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1385,6 +1412,8 @@ class Dataset(MetaDataset):
         strictly=None,
         parse_strings_as_datetimes=False,
         mostly=None,
+        row_condition=None,
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1453,6 +1482,8 @@ class Dataset(MetaDataset):
         min_value=None,
         max_value=None,
         mostly=None,
+        row_condition=None,
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1518,6 +1549,8 @@ class Dataset(MetaDataset):
         value,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1573,6 +1606,8 @@ class Dataset(MetaDataset):
         regex,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1631,6 +1666,8 @@ class Dataset(MetaDataset):
         regex,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1690,6 +1727,8 @@ class Dataset(MetaDataset):
         match_on="any",
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1751,6 +1790,8 @@ class Dataset(MetaDataset):
         regex_list,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1811,6 +1852,8 @@ class Dataset(MetaDataset):
         strftime_format,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1859,6 +1902,8 @@ class Dataset(MetaDataset):
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1905,6 +1950,8 @@ class Dataset(MetaDataset):
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1956,6 +2003,8 @@ class Dataset(MetaDataset):
         json_schema,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -2016,6 +2065,8 @@ class Dataset(MetaDataset):
         p_value=0.05,
         params=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,

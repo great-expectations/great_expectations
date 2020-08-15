@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "great_expectations.__version__": "__fixture__",
+    "expectation_suite_name": "default",
+    "test_fixture": "20200322T170247.671855Z",
+    "run_time": "20200322T170247.671855Z",
+    "batch_kwargs": {
+      "ge_batch_id": "f499679e-6c5e-11ea-8d20-acde48010122"
+    },
+    "batch_markers": {},
+    "batch_parameters": {}
+  },
+  "success": true,
+  "evaluation_parameters": {},
+  "results": [
+    {
+      "result": {
+        "observed_value": "DATETIME"
+      },
+      "meta": {},
+      "expectation_config": {
+        "meta": {},
+        "expectation_type": "expect_column_values_to_be_of_type",
+        "kwargs": {
+          "column": "ts",
+          "type_": "DATETIME",
+          "result_format": "SUMMARY"
+        }
+      },
+      "success": true,
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      }
+    },
+    {
+      "result": {
+        "observed_value": "DATETIME"
+      },
+      "meta": {},
+      "expectation_config": {
+        "meta": {},
+        "expectation_type": "expect_column_values_to_be_in_type_list",
+        "kwargs": {
+          "column": "received_ts",
+          "type_list": ["DATETIME", "TIMESTAMP"],
+          "result_format": "SUMMARY"
+        }
+      },
+      "success": true,
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      }
+    }
+  ],
+  "statistics": {
+    "evaluated_expectations": 2,
+    "successful_expectations": 2,
+    "unsuccessful_expectations": 0,
+    "success_percent": 100
+  }
+}
