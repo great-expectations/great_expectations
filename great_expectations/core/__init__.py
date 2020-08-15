@@ -85,11 +85,12 @@ def convert_to_json_serializable(data):
         test_obj may also be converted in place.
 
     """
-    import numpy as np
-    import pandas as pd
     import datetime
     import decimal
     import sys
+
+    import numpy as np
+    import pandas as pd
 
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
@@ -206,10 +207,11 @@ def ensure_json_serializable(data):
         test_obj may also be converted in place.
 
     """
-    import numpy as np
-    import pandas as pd
     import datetime
     import decimal
+
+    import numpy as np
+    import pandas as pd
 
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down

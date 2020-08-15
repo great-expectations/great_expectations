@@ -21,25 +21,27 @@ from .pandas_dataset import PandasDataset
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import (
-        udf,
-        col,
-        lit,
-        desc,
-        stddev_samp,
-        length as length_,
-        when,
-        year,
-        count,
-        countDistinct,
-        monotonically_increasing_id,
-        isnan,
-        datediff,
-        lag,
-    )
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
     from pyspark.sql import Window
+    from pyspark.sql.functions import (
+        col,
+        count,
+        countDistinct,
+        datediff,
+        desc,
+        isnan,
+        lag,
+    )
+    from pyspark.sql.functions import length as length_
+    from pyspark.sql.functions import (
+        lit,
+        monotonically_increasing_id,
+        stddev_samp,
+        udf,
+        when,
+        year,
+    )
 except ImportError as e:
     logger.debug(str(e))
     logger.debug(
