@@ -4,9 +4,6 @@
 Introduction
 ############
 
-.. toctree::
-   :maxdepth: 2
-
 *Always know what to expect from your data.*
 
 ***************************

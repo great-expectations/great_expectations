@@ -98,7 +98,7 @@ def test_SlackNotificationAction(data_context_parameterized_expectation_suite):
             "success_percent": None,
         },
         meta={
-            "great_expectations.__version__": "v0.8.0__develop",
+            "great_expectations_version": "v0.8.0__develop",
             "expectation_suite_name": "asset.default",
             "run_id": "test_100",
         },
@@ -110,15 +110,12 @@ def test_SlackNotificationAction(data_context_parameterized_expectation_suite):
         batch_identifier="1234",
     )
 
-    # TODO: improve this test - currently it is verifying a failed call to Slack
-    assert (
-        slack_action.run(
-            validation_result_suite_identifier=validation_result_suite_id,
-            validation_result_suite=validation_result_suite,
-            data_asset=None,
-        )
-        == None
-    )
+    # TODO: improve this test - currently it is verifying a failed call to Slack. It returns a "empty" payload
+    assert slack_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"slack_notification_result": None}
 
 
 # def test_ExtractAndStoreEvaluationParamsAction():

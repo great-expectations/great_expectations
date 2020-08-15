@@ -28,7 +28,7 @@ ActionListValidationOperator
 
 ActionListValidationOperator validates each batch in the list that is passed as `assets_to_validate` argument to its `run` method against the expectation suite included within that batch and then invokes a list of configured actions on every validation result.
 
-Actions are Python classes with a `run` method that takes a result of validating a batch against an expectation suite and does something with it (e.g., save validation results to the disk or send a Slack notification). Classes that implement this API can be configured to be added to the list of actions for this operator (and other operators that use actions). Read more about actions here: :ref:`actions`.
+Actions are Python classes with a `run` method that takes a result of validating a batch against an expectation suite and does something with it (e.g., save validation results to the disk or send a Slack notification). Classes that implement this API can be configured to be added to the list of actions for this operator (and other operators that use actions). Read more about actions here: :ref:`validation_actions`.
 
 An instance of this operator is included in the default configuration file `great_expectations.yml` that `great_expectations init` command creates.
 
@@ -60,6 +60,6 @@ The Validation Operator implementations above invoke actions.
 
 An action is a way to take an arbitrary method and make it configurable and runnable within a data context.
 
-The only requirement from an action is for it to have a take_action method.
+The only requirement from an action is for it to have a `run` method.  The `run` method will consume and return a `payload`, which can be used to pass information from one ValidationAction to another. The `payload` is a dictionary that will have the name of the ValidationAction as a key, and a nested dictionary containing the `class` of the ValidationAction and any additional parameters returned by the ValidationAction as its value.
 
 GE comes with a list of actions that we consider useful and you can reuse in your pipelines. Most of them take in validation results and do something with them.

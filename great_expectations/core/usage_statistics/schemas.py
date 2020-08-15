@@ -298,6 +298,7 @@ cli_new_ds_choice_payload = {
     "additionalProperties": False,
 }
 
+
 datasource_sqlalchemy_connect_payload = {
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
@@ -350,7 +351,7 @@ usage_statistics_record_schema = {
             "type": "object",
             "properties": {
                 "event": {
-                    "enum": ["data_context.save_expectation_suite", "cli.suite.edit",]
+                    "enum": ["data_context.save_expectation_suite", "cli.suite.edit"]
                 },
                 "event_payload": {
                     "$ref": "#/definitions/save_or_edit_expectation_suite_payload"
@@ -401,20 +402,23 @@ usage_statistics_record_schema = {
             "properties": {
                 "event": {
                     "enum": [
+                        "data_context.build_data_docs",
+                        "data_context.open_data_docs",
+                        "cli.suite.demo",
                         "cli.suite.list",
                         "cli.suite.new",
+                        "cli.suite.scaffold",
                         "cli.store.list",
                         "cli.project.check_config",
-                        "cli.validation_operator.run",
-                        "cli.validation_operator.list",
-                        "cli.tap.new",
-                        "cli.docs.list",
-                        "cli.docs.build",
-                        "cli.datasource.profile",
+                        "cli.checkpoint.list",
                         "cli.datasource.list",
                         "cli.datasource.new",
-                        "data_context.open_data_docs",
-                        "data_context.build_data_docs",
+                        "cli.datasource.profile",
+                        "cli.validation_operator.list",
+                        "cli.validation_operator.run",
+                        "cli.docs.build",
+                        "cli.docs.clean",
+                        "cli.docs.list",
                         "cli.init.create",
                     ],
                 },

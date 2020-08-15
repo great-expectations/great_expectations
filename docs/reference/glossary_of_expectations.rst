@@ -6,7 +6,7 @@ Glossary of Expectations
 
 This is a list of all built-in Expectations. Expectations are extendable so you
 can create custom expectations for your data domain! To do so see this article:
-:ref:`custom_expectations_reference`.
+:ref:`how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations`.
 
 *******
 Dataset
