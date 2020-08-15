@@ -24,7 +24,7 @@ code
 * **Experimental methods should log an experimental warning when called**: "Warning: some_method is experimental. Methods, APIs, and core behavior may change in the future."
 * **Experimental classes should log an experimental warning when initialized**: "Warning: great_expectations.some_module.SomeClass is experimental. Methods, APIs, and core behavior may change in the future."
 * **Docstrings are highly recommended**. We use the Sphinx's `Napoleon extension <http://www.sphinx-doc.org/en/master/ext/napoleon.html>`__ to build documentation from Google-style docstrings.
-* **Lint your code**. Our CI system will check using ``black`` and ``isort``.
+* **Lint your code**. Our CI system will check using ``black``, ``isort`` and ``flake8``.
   - Linting with ``isort`` *MUST* occur from a virtual environment that has all required packages installed, and pre-commit uses the virtual environment from which it was installed, whether or not that environment is active when making the commit. So, **before running ``pre-commit install`` ensure you have activated a virtual environment that has all development requirements installed**.
 
     .. code-block:: bash
@@ -39,7 +39,8 @@ code
     .. code-block:: bash
 
         black .
-        isort --atomic -rc .
+        isort --skip docs/
+        flake8 great_expectations.core
 
 **Expectations**
 
