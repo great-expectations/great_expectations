@@ -1740,7 +1740,7 @@ Notes:
         return return_obj
 
     @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_pair_values_to_be_independent(
+    def expect_column_pair_cramers_phi_value_to_be_less_than(
         self,
         column_A,
         column_B,

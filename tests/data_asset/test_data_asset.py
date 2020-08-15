@@ -107,7 +107,7 @@ def test_valid_expectation_types(dataset, pandas_dataset):
         "expect_column_pair_values_A_to_be_greater_than_B",
         "expect_column_pair_values_to_be_equal",
         "expect_column_pair_values_to_be_in_set",
-        "expect_column_pair_values_to_be_independent",
+        "expect_column_pair_cramers_phi_value_to_be_less_than",
         "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
         "expect_column_proportion_of_unique_values_to_be_between",
         "expect_column_quantile_values_to_be_between",

@@ -434,7 +434,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         ]
 
     @classmethod
-    def expect_column_pair_values_to_be_independent(
+    def expect_column_pair_cramers_phi_value_to_be_less_than(
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
@@ -442,7 +442,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         )
 
         if (params["column_A"] is None) or (params["column_B"] is None):
-            template_str = " unrecognized kwargs for expect_column_pair_values_to_be_independent: missing column."
+            template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
 
         template_str = "Values in $column_A and $column_B must be independent."
 
