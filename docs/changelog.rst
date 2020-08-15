@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+* [FEATURE] Add ``expect_column_pair_cramers_phi_value_to_be_less_than`` expectation to ``PandasDatasource`` to check for the independence of two columns by computing their Cramers Phi.
 
 
 0.12.0

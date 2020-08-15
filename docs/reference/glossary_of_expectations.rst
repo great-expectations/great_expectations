@@ -83,6 +83,7 @@ Aggregate functions
 * :func:`expect_column_max_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_max_to_be_between>`
 * :func:`expect_column_min_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_min_to_be_between>`
 * :func:`expect_column_sum_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_sum_to_be_between>`
+* :func:`expeexpect_column_pair_cramers_phi_value_to_be_less_than <great_expectations.dataset.dataset.Dataset.expect_column_pair_cramers_phi_value_to_be_less_than>`
 
 Multi-column
 ============
