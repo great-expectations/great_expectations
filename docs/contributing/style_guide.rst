@@ -39,7 +39,7 @@ code
     .. code-block:: bash
 
         black .
-        isort --skip docs/
+        isort --check-only --skip docs/
         flake8 great_expectations.core
 
 **Expectations**
