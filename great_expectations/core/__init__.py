@@ -16,7 +16,6 @@ from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.evaluation_parameters import (
     find_evaluation_parameter_dependencies,
 )
-from great_expectations.core.id_dict import IDDict
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
@@ -1618,7 +1617,7 @@ class ExpectationSuite(object):
     def _sort_citations(citations):
         return sorted(citations, key=lambda x: x["citation_date"])
 
-    ### CRUD methods ###
+    # CRUD methods #
 
     def append_expectation(self, expectation_config):
         """Appends an expectation.
@@ -1661,7 +1660,7 @@ class ExpectationSuite(object):
             raise ValueError("No matching expectation was found.")
 
         elif len(found_expectation_indexes) > 1:
-            if remove_multiple_matches == True:
+            if remove_multiple_matches:
                 removed_expectations = []
                 for index in sorted(found_expectation_indexes, reverse=True):
                     removed_expectations.append(self.expectations.pop(index))

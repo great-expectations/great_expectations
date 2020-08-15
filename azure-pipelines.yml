@@ -54,6 +54,7 @@ stages:
               pip install  isort[requirements]==4.3.21 black==19.10b0
               isort --check-only --skip docs/
               black --check --exclude docs/ .
+              flake8 great_expectations/core
 
   - stage: required
     pool:
