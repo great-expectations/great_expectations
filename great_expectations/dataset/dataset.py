@@ -84,6 +84,7 @@ class MetaDataset(DataAsset):
         @wraps(func)
         def inner_wrapper(
             self,
+            column=None,
             result_format=None,
             row_condition=None,
             condition_parser=None,
@@ -100,7 +101,7 @@ class MetaDataset(DataAsset):
 
             element_count = self.get_row_count()
 
-            if kwargs.get("column"):
+            if column is not None:
                 nonnull_count = self.get_column_nonnull_count(kwargs.get("column"))
             elif kwargs.get("column_A") and kwargs.get("column_B"):
                 nonnull_count = (
