@@ -2146,6 +2146,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return profiling_results
 
 
+# noinspection SpellCheckingInspection
 class DataContext(BaseDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for
     expectation suites, datasources, notification settings, and data fixtures.
@@ -2249,9 +2250,11 @@ class DataContext(BaseDataContext):
 
         return cls(context_root_dir=ge_dir, runtime_environment=runtime_environment)
 
-    def create_using_s3_backend(func: Callable = None,) -> Callable:
+    # noinspection PyMethodMayBeStatic
+    def create_using_s3_backend(self, func: Callable = None,) -> Callable:
         """
-        A decorator for loading or creating data context with S3 serving as the backend store for all application-level stores (Expectation Suites, Validations, Evaluation Parameters, and Data Docs).
+        A decorator for loading or creating data context with S3 serving as the backend store for all
+        application-level stores (Expectation Suites, Validations, Evaluation Parameters, and Data Docs).
         """
 
         @wraps(func)
@@ -2259,12 +2262,11 @@ class DataContext(BaseDataContext):
             kwargs_callee: dict
 
             func_callee: Callable = cls.create_s3_backend_data_context
+            # noinspection SpellCheckingInspection
             argspec: list = getfullargspec(func_callee)[0][1:]
-
             kwargs_callee = filter_properties_dict(
                 properties=kwargs, keep_fields=argspec, clean_empty=False, inplace=False
             )
-
             working_data_context_info: dict = cls.create_s3_backend_data_context(
                 **kwargs_callee
             )
@@ -2276,11 +2278,11 @@ class DataContext(BaseDataContext):
                 "found_existing_project_config"
             ]
 
-            kwargs_callee = copy.deepcopy(kwargs)
-            kwargs_callee.update({"cls": cls, "data_context": working_data_context})
-
             if found_existing_project_config:
                 return working_data_context
+
+            kwargs_callee = copy.deepcopy(kwargs)
+            kwargs_callee.update({"cls": cls, "data_context": working_data_context})
 
             return func(**kwargs_callee)
 
@@ -2292,6 +2294,7 @@ class DataContext(BaseDataContext):
         cls, **kwargs,
     ):
         func_callee: Callable = cls.build_s3_backend_data_context
+        # noinspection SpellCheckingInspection
         argspec: list = getfullargspec(func_callee)[0][1:]
         filter_properties_dict(
             properties=kwargs, keep_fields=argspec, clean_empty=False, inplace=True
