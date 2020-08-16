@@ -41,7 +41,7 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 
-def measure_execution_time(func) -> Callable:
+def measure_execution_time(func: Callable = None) -> Callable:
     @wraps(func)
     def compute_delta_t(*args, **kwargs) -> Callable:
         time_begin: int = int(round(time.time() * 1000))

@@ -58,7 +58,15 @@ class MissingTopLevelConfigKeyError(GreatExpectationsValidationError):
     pass
 
 
-class InvalidDataContextConfigError(GreatExpectationsValidationError):
+class InvalidBaseConfigError(GreatExpectationsValidationError):
+    pass
+
+
+class InvalidDataContextConfigError(InvalidBaseConfigError):
+    pass
+
+
+class InvalidDataContextIdentificationConfigError(InvalidBaseConfigError):
     pass
 
 

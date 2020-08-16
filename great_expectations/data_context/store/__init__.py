@@ -1,6 +1,6 @@
 from great_expectations.util import verify_dynamic_loading_support
 
-from .configuration_store import ConfigurationStore
+from .configuration_store import ConfigurationPersistenceManager, ConfigurationStore
 from .database_store_backend import DatabaseStoreBackend
 from .expectations_store import ExpectationsStore
 from .html_site_store import HtmlSiteStore

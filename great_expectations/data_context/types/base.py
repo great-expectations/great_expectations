@@ -18,9 +18,11 @@ from ruamel.yaml.comments import CommentedMap
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.types import DictDot
 from great_expectations.types.configurations import ClassConfigSchema
-from great_expectations.util import filter_properties_dict
 
 yaml = YAML()
+
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 
 CURRENT_CONFIG_VERSION = 2
@@ -42,7 +44,36 @@ def object_to_yaml_str(obj):
     return output_str
 
 
-class DataContextConfig(DictDot):
+class BaseConfig(DictDot):
+    def __init__(
+        self, commented_map: CommentedMap = None,
+    ):
+        if commented_map is None:
+            commented_map = CommentedMap()
+        self._commented_map = commented_map
+
+    @classmethod
+    def from_commented_map(cls, commented_map: CommentedMap):
+        raise NotImplementedError
+
+    @property
+    def commented_map(self) -> CommentedMap:
+        return self._commented_map
+
+    def get_schema_validated_updated_commented_map(self) -> CommentedMap:
+        raise NotImplementedError
+
+    def to_yaml(self, outfile):
+        yaml.dump(self.get_schema_validated_updated_commented_map(), outfile)
+
+    def to_yaml_str(self) -> str:
+        return object_to_yaml_str(self.get_schema_validated_updated_commented_map())
+
+    def to_dict(self) -> dict:
+        return dict(self.get_schema_validated_updated_commented_map())
+
+
+class DataContextConfig(BaseConfig):
     def __init__(
         self,
         config_version,
@@ -59,9 +90,6 @@ class DataContextConfig(DictDot):
         anonymous_usage_statistics=None,
         commented_map=None,
     ):
-        if commented_map is None:
-            commented_map = CommentedMap()
-        self._commented_map = commented_map
         self._config_version = config_version
         if datasources is None:
             datasources = {}
@@ -93,18 +121,16 @@ class DataContextConfig(DictDot):
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
 
-    @property
-    def commented_map(self):
-        return self._commented_map
+        super().__init__(commented_map=commented_map)
 
     @property
     def config_version(self):
         return self._config_version
 
     @classmethod
-    def from_commented_map(cls, commented_map):
+    def from_commented_map(cls, commented_map: CommentedMap) -> BaseConfig:
         try:
-            config = dataContextConfigSchema.load(commented_map)
+            config: dict = dataContextConfigSchema.load(commented_map)
             return cls(commented_map=commented_map, **config)
         except ValidationError:
             logger.error(
@@ -112,18 +138,10 @@ class DataContextConfig(DictDot):
             )
             raise
 
-    def to_yaml(self, outfile):
-        commented_map = deepcopy(self.commented_map)
+    def get_schema_validated_updated_commented_map(self) -> CommentedMap:
+        commented_map: CommentedMap = deepcopy(self.commented_map)
         commented_map.update(dataContextConfigSchema.dump(self))
-        yaml.dump(commented_map, outfile)
-
-    def to_yaml_str(self, filtering_directives={}):
-        commented_map = deepcopy(self.commented_map)
-        schema_validated_dump = filter_properties_dict(
-            properties=dataContextConfigSchema.dump(self), **filtering_directives
-        )
-        commented_map.update(schema_validated_dump)
-        return object_to_yaml_str(commented_map)
+        return commented_map
 
 
 class DatasourceConfig(DictDot):
@@ -163,15 +181,9 @@ class DatasourceConfig(DictDot):
 
 
 class AnonymizedUsageStatisticsConfig(DictDot):
-    def __init__(self, enabled=True, data_context_id=None, usage_statistics_url=None):
+    def __init__(self, enabled=True, usage_statistics_url=None):
         self._enabled = enabled
-        if data_context_id is None:
-            data_context_id = DATA_CONTEXT_ID
-            self._explicit_id = False
-        else:
-            self._explicit_id = True
 
-        self._data_context_id = data_context_id
         if usage_statistics_url is None:
             usage_statistics_url = DEFAULT_USAGE_STATISTICS_URL
             self._explicit_url = False
@@ -190,11 +202,50 @@ class AnonymizedUsageStatisticsConfig(DictDot):
         self._enabled = enabled
 
     @property
-    def data_context_id(self):
+    def usage_statistics_url(self):
+        return self._usage_statistics_url
+
+    @usage_statistics_url.setter
+    def usage_statistics_url(self, usage_statistics_url):
+        self._usage_statistics_url = usage_statistics_url
+        self._explicit_url = True
+
+
+class AnonymizedUsageStatisticsConfigSchema(Schema):
+    enabled = fields.Boolean(default=True)
+    usage_statistics_url = fields.URL(allow_none=True)
+    _explicit_url = fields.Boolean(required=False)
+
+    # noinspection PyUnusedLocal
+    @post_dump()
+    def filter_implicit(self, data, **kwargs):
+        if not data.get("_explicit_url") and "usage_statistics_url" in data:
+            del data["usage_statistics_url"]
+        if "_explicit_url" in data:
+            del data["_explicit_url"]
+        return data
+
+
+class DataContextIdentificationConfig(BaseConfig):
+    def __init__(
+        self, data_context_id: str = None, commented_map: CommentedMap = None,
+    ):
+        if data_context_id is None:
+            data_context_id = DATA_CONTEXT_ID
+            self._explicit_id = False
+        else:
+            self._explicit_id = True
+
+        self._data_context_id = data_context_id
+
+        super().__init__(commented_map=commented_map)
+
+    @property
+    def data_context_id(self) -> str:
         return self._data_context_id
 
     @data_context_id.setter
-    def data_context_id(self, data_context_id):
+    def data_context_id(self, data_context_id: str):
         try:
             uuid.UUID(data_context_id)
         except ValueError:
@@ -208,37 +259,31 @@ class AnonymizedUsageStatisticsConfig(DictDot):
     def explicit_id(self):
         return self._explicit_id
 
-    @property
-    def usage_statistics_url(self):
-        return self._usage_statistics_url
+    @classmethod
+    def from_commented_map(cls, commented_map: CommentedMap) -> BaseConfig:
+        try:
+            config: dict = dataContextIdentificationConfigSchema.load(commented_map)
+            return cls(commented_map=commented_map, **config)
+        except ValidationError:
+            logger.error(
+                "Encountered errors during loading data context config. See ValidationError for more details."
+            )
+            raise
 
-    @usage_statistics_url.setter
-    def usage_statistics_url(self, usage_statistics_url):
-        self._usage_statistics_url = usage_statistics_url
-        self._explicit_url = True
+    def get_schema_validated_updated_commented_map(self) -> CommentedMap:
+        commented_map: CommentedMap = deepcopy(self.commented_map)
+        commented_map.update(dataContextIdentificationConfigSchema.dump(self))
+        return commented_map
 
 
-class AnonymizedUsageStatisticsConfigSchema(Schema):
+class DataContextIdentificationConfigSchema(Schema):
     data_context_id = fields.UUID()
-    enabled = fields.Boolean(default=True)
-    usage_statistics_url = fields.URL(allow_none=True)
-    _explicit_url = fields.Boolean(required=False)
 
-    # noinspection PyUnusedLocal
     @post_load()
-    def make_usage_statistics_config(self, data, **kwargs):
+    def make_data_context_identification_config(self, data, **kwargs) -> dict:
         if "data_context_id" in data:
             data["data_context_id"] = str(data["data_context_id"])
-        return AnonymizedUsageStatisticsConfig(**data)
-
-    # noinspection PyUnusedLocal
-    @post_dump()
-    def filter_implicit(self, data, **kwargs):
-        if not data.get("_explicit_url") and "usage_statistics_url" in data:
-            del data["usage_statistics_url"]
-        if "_explicit_url" in data:
-            del data["_explicit_url"]
-        return data
+        return DataContextIdentificationConfig(**data).to_dict()
 
 
 class DatasourceConfigSchema(Schema):
@@ -463,4 +508,5 @@ class DataContextConfigSchema(Schema):
 dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
+dataContextIdentificationConfigSchema = DataContextIdentificationConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()

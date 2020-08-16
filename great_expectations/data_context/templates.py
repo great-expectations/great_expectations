@@ -20,7 +20,7 @@ anonymous_usage_statistics:
   enabled: {{ allow_anonymous_usage_statistics }}
 """
 
-DATA_CONTEXT_UNIQUE_ID_PROJECT_TEMPLATE: str = """
+DATA_CONTEXT_INIT_PROJECT_TEMPLATE: str = """
 {% include 'config_version_template.j2' %}
 {% include 'anonymized_usage_statistics_template.j2' %}
 """
@@ -162,7 +162,7 @@ J2_ENV: Environment = Environment(
         {
             "config_version_template.j2": CONFIG_VERSION_TEMPLATE,
             "anonymized_usage_statistics_template.j2": ANONYMIZED_USAGE_STATISTICS_TEMPLATE,
-            "data_context_unique_id_project_template.j2": DATA_CONTEXT_UNIQUE_ID_PROJECT_TEMPLATE,
+            "data_context_init_project_template.j2": DATA_CONTEXT_INIT_PROJECT_TEMPLATE,
             "project_help_comment_template.j2": PROJECT_HELP_COMMENT_TEMPLATE,
             "config_variables_intro_template.j2": CONFIG_VARIABLES_INTRO_TEMPLATE,
             "config_variables_template.j2": CONFIG_VARIABLES_TEMPLATE,
@@ -173,7 +173,8 @@ J2_ENV: Environment = Environment(
 )
 
 
-def get_project_config_yaml(j2_template_name: str, **kwargs) -> Union[str, None]:
+# noinspection SpellCheckingInspection
+def get_templated_yaml(j2_template_name: str, **kwargs) -> Union[str, None]:
     if j2_template_name is None or len(j2_template_name) < 4:
         return None
     return J2_ENV.get_template(j2_template_name).render(kwargs)
