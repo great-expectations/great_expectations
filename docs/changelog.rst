@@ -6,27 +6,33 @@ Changelog
 
 Develop
 -----------------
+
+
+
+0.12.0
+-----------------
 * [BREAKING] This release includes a breaking change that *only* affects users who directly call `add_expectation`, `remove_expectation`, or `find_expectations`. (Most users do not use these APIs but add Expectations by stating them directly on Datasets). Those methods have been updated to take an ExpectationConfiguration object and `match_type` object. The change provides more flexibility in determining which expectations should be modified and allows us provide substantially improved support for two major features that we have frequently heard requested: conditional Expectations and more flexible multi-column custom expectations. See :ref:`expectation_suite_operations`_ and :ref:`migrating_versions`_ for more information.
-* [FEATURE] Expectations now define “domain,” “success,” and “runtime” kwargs to allow them to determine expectation equivalence for updating expectations. Fixes column pair expectation update logic.
+* [FEATURE] Add support for conditional expectations using pandas execution engine (#1217 HUGE thanks @arsenii!)
+* [FEATURE] ValidationActions can now consume and return "payload", which can be used to share information across ValidationActions
 * [FEATURE] Add support for nested columns in the PySpark expectations (thanks @bramelfrink)!
 * [FEATURE] add support for `expect_column_values_to_be_increasing` to `Spark` (thanks @mikaylaedwards)!
 * [FEATURE] add support for `expect_column_values_to_be_decreasing` to `Spark` (thanks @mikaylaedwards)!
-* [FEATURE] Add support for conditional expectations using pandas execution engine (#1217 HUGE thanks @arsenii!)
+* [FEATURE] Slack Messages sent as ValidationActions now have link to DataDocs, if available.
+* [FEATURE] Expectations now define “domain,” “success,” and “runtime” kwargs to allow them to determine expectation equivalence for updating expectations. Fixes column pair expectation update logic.
+* [ENHANCEMENT] Add a `skip_and_clean_missing` flag to `DefaultSiteIndexBuilder.build` (default True). If True, when an index page is being built and an existing HTML page does not have corresponding source data (i.e. an expectation suite or validation result was removed from source store), the HTML page is automatically deleted and will not appear in the index. This ensures that the expectations store and validations store are the source of truth for Data Docs.
 * [ENHANCEMENT] Include datetime and bool column types in descriptive documentation results
 * [ENHANCEMENT] Improve data docs page breadcrumbs to have clearer run information
 * [ENHANCEMENT] Data Docs Validation Results only shows unexpected value counts if all unexpected values are available
 * [ENHANCEMENT] Convert GE version key from great_expectations.__version__ to great_expectations_version (thanks, @cwerner!) (#1606)
+* [ENHANCEMENT] Add support in JSON Schema profiler for combining schema with anyOf key and creating nullability expectations
 * [BUGFIX] Add guard for checking Redshift Dialect in match_like_pattern expectation
 * [BUGFIX] Fix content_block build failure for dictionary content - (thanks @jliew!) #1722
 * [BUGFIX] Fix bug that was preventing env var substitution in `config_variables.yml` when not at the top level
 * [BUGFIX] Fix issue where expect_column_values_to_be_in_type_list did not work with positional type_list argument in SqlAlchemyDataset or SparkDFDataset
+* [BUGFIX] Fixes a bug that was causing exceptions to occur if user had a Data Docs config excluding a particular site section
 * [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 * [DOCS] Add information about issue tags to contributing docs
 * [DEPRECATION] Deprecate demo suite behavior in `suite new`
-* [BUGFIX] Fixes a bug that was causing exceptions to occur if user had a Data Docs config excluding a particular site section
-* [ENHANCEMENT] Add a `skip_and_clean_missing` flag to `DefaultSiteIndexBuilder.build` (default True). If True, when an index page is being built and an existing HTML page does not have corresponding source data (i.e. an expectation suite or validation result was removed from source store), the HTML page is automatically deleted and will not appear in the index. This ensures that the expectations store and validations store are the source of truth for Data Docs.
-* [FEATURE] Slack Messages sent as ValidationActions now have link to DataDocs, if available.
-* [FEATURE] ValidationActions can now consume and return "payload", which can be used to share information across ValidationActions
 
 0.11.9
 -----------------
