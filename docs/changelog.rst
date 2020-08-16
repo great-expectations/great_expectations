@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [FEATURE] add support for `expect_column_pair_values_to_be_in_set` to `Spark`
 
 
 

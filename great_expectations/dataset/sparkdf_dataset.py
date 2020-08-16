@@ -36,7 +36,7 @@ try:
         isnan,
         datediff,
         lag,
-        array
+        array,
     )
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
@@ -1332,13 +1332,14 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 "__success",
                 when(col(column_A_name) > col(column_B_name), True).otherwise(False),
             )
+
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
     def expect_column_pair_values_to_be_in_set(
         self,
         column_A,
         column_B,
-        value_pairs_set, # List[List]
+        value_pairs_set,  # List[List]
         ignore_row_if="both_values_are_missing",
         result_format=None,
         include_config=True,
@@ -1352,19 +1353,21 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             column_B, column_A["__row"] == column_B["__row"], how="inner"
         )
 
-        join_df = join_df\
-            .withColumn('combine_AB',array(col(column_A_name),col(column_B_name)))
-            
+        join_df = join_df.withColumn(
+            "combine_AB", array(col(column_A_name), col(column_B_name))
+        )
 
+        value_set_df = (
+            SQLContext(self.spark_df._sc)
+            .createDataFrame(value_pairs_set, ["col_A", "col_B"])
+            .select(array("col_A", "col_B").alias("set_AB"))
+        )
 
-        value_set_df = SQLContext(self.spark_df._sc) \
-                .createDataFrame(value_pairs_set,['col_A','col_B'])\
-                .select(array('col_A','col_B').alias('set_AB'))
-                
-        return join_df\
-                .join(value_set_df,join_df['combine_AB']==value_set_df['set_AB'],'left')\
-                .withColumn('__success',when(col('set_AB').isNull(),lit(False)).otherwise(lit(True)))
-                
+        return join_df.join(
+            value_set_df, join_df["combine_AB"] == value_set_df["set_AB"], "left"
+        ).withColumn(
+            "__success", when(col("set_AB").isNull(), lit(False)).otherwise(lit(True))
+        )
 
     @DocInherit
     @MetaSparkDFDataset.multicolumn_map_expectation
