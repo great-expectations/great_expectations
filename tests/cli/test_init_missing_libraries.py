@@ -72,6 +72,7 @@ but the package `{library_name}` containing this library is not installed.
         == """\
 great_expectations/
     .gitignore
+    anon_data_context_id.yml
     great_expectations.yml
     checkpoints/
     expectations/
@@ -254,6 +255,7 @@ but the package `pyspark` containing this library is not installed.
         == """\
 great_expectations/
     .gitignore
+    anon_data_context_id.yml
     great_expectations.yml
     checkpoints/
     expectations/
