@@ -15,9 +15,12 @@ The guide demonstrates the recommended path for instantiating a Data Context wit
 Steps
 -----
 
-The snippet below shows Python code that instantiates and configures a Data Context. Copy this snippet into a cell in your Databricks Spark notebook.
+- The snippet below shows Python code that instantiates and configures a Data Context. Copy this snippet into a cell in your Databricks Spark notebook.
 
-Follow the steps below to update the configuration with values that are specific for your environment. If you are planning on storing the file in Databricks File Store (DBFS) the directories can be accessed in the same way that paths on a local Filesystem (add link to DBFS).
+- This how-to-guide assumes that you are using the Databricks File store (DBFS) as the the Datasource, Metadata Store, and DataDocs store. The DBFS is the file store that is native to Databricks clusters and Notebooks. Files on DBFs can be written and read similar to a local filesystem, just by adding the `/dbfs/FileStore/` prefix.
+- GreatExpectations classes that work with a local Filesystem, like the `TupleFilesystemStoreBackend` will work out of the box in Databricks DBFS.
+- For information on how to configure Databricks for filesystems on Azure and AWS, please see the associated documentation in the *Additional Notes* and *Additional Resources* section below.
+
 
 .. code-block:: python
    :linenos:
@@ -32,8 +35,6 @@ Follow the steps below to update the configuration with values that are specific
        plugins_directory=None,
        config_variables_file_path=None,
 
-       # not sure how to deal with this yet
-       #
        datasources={
            "my_spark_datasource": {
                "data_asset_type": {
@@ -50,14 +51,15 @@ Follow the steps below to update the configuration with values that are specific
            "class_name": "ExpectationsStore",
            "store_backend": {
                "class_name": "TupleFilesystemStoreBackend",
-               "base_directory": "/dbfs/FileStore/testing/expectations/"
+               "base_directory": "REPLACE ME",  # TODO: replace with your value
+               # "/dbfs/FileStore/testing/expectations/"
            },
        },
        "validations_store": {
            "class_name": "ValidationsStore",
            "store_backend": {
                "class_name": "TupleFilesystemStoreBackend",
-               "base_directory": "/dbfs/FileStore/testing/validations/"
+               "base_directory": "REPLACE ME",  # TODO: replace with your value
            },
        },
        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
@@ -70,7 +72,7 @@ Follow the steps below to update the configuration with values that are specific
            "class_name": "SiteBuilder",
            "store_backend": {
                "class_name": "TupleFilesystemStoreBackend",
-               "base_directory": "/dbfs/FileStore/testing/data_docs/"
+               "base_directory": "REPLACE ME",  # TODO: replace with your value
            },
            "site_index_builder": {
                "class_name": "DefaultSiteIndexBuilder",
@@ -115,28 +117,28 @@ Follow the steps below to update the configuration with values that are specific
 
 #. **Configure an Expectation store in DBFS**
 
-   Replace the "REPLACE ME" on lines 26-27 of the code snippet with the path to
+   Replace the "REPLACE ME" on lines 26-27 of the code snippet with the path to your Expectation Store on DBFS.
 
    .. code-block:: python
 
-      path_to_expectation_store =  "/dbfs/FileStore/testing/expectations/"
+      path_to_expectation_store =  "/dbfs/FileStore/expectations/"
 
 #. **Configure an Validation Result store in DBFS.**
 
-   Replace the "REPLACE ME" on lines 34-35 of the code snippet.
+   Replace the "REPLACE ME" on lines 34-35 of the code snippet with the path to your Validation Store on DBFS.
 
    .. code-block:: python
 
-      path_to_validation_store =  "/dbfs/FileStore/testing/validations/"
+      path_to_validation_store =  "/dbfs/FileStore/validations/"
 
 
 #. **Configure an Data Docs website in DBFS.**
 
-   Replace the "REPLACE ME" on line 48 of the code snippet.
+   Replace the "REPLACE ME" on line 48 of the code snippet with the path to your DataDocs Store on DBFS.
 
    .. code-block:: python
 
-      path_to_datadocs_store =  "/dbfs/FileStore/testing/docs/"
+      path_to_datadocs_store =  "/dbfs/FileStore/docs/"
 
 
 #. **Test your configuration.**
@@ -181,18 +183,14 @@ Additional notes
    GE_spark_df = SparkDFDataset(df, data_context=context)
 
 
+
+
 Additional resources
 --------------------
 
-#. [TODO] - add link to Databrocks DBFS
+- More information about DataBricks DBFS can be found at the following link:
+- https://docs.databricks.com/data/databricks-file-system.html
 
-#. [TODO] - add link to Databrocks DBFS
-
-#. [TODO] - add link to Databrocks DBFS
-
-
-
-#. More about DataBricks can be
 
 .. discourse::
     :topic_identifier: 291
