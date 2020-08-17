@@ -432,6 +432,7 @@ project_path/
             Titanic.csv
     great_expectations/
         .gitignore
+        anon_data_context_id.yml
         great_expectations.yml
         checkpoints/
         expectations/
@@ -980,6 +981,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
         == """\
 great_expectations/
     .gitignore
+    anon_data_context_id.yml
     great_expectations.yml
     checkpoints/
     expectations/
@@ -1010,6 +1012,7 @@ def test_data_context_create_does_nothing_if_all_uncommitted_dirs_exist(
     expected = """\
 great_expectations/
     .gitignore
+    anon_data_context_id.yml
     great_expectations.yml
     checkpoints/
     expectations/
