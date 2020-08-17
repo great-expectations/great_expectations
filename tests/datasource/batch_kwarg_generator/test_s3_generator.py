@@ -72,8 +72,8 @@ def s3_generator(mock_s3_bucket, basic_sparkdf_datasource):
                 "reader_options": {"sep": "\t"},
                 "max_keys": 1,
             },
-            "dir": {"prefix": "data/", "directory_assets": True, },
-            "dir_misconfigured": {"prefix": "data/", "directory_assets": False, },
+            "dir": {"prefix": "data/", "directory_assets": True,},
+            "dir_misconfigured": {"prefix": "data/", "directory_assets": False,},
         },
     )
     yield generator
@@ -199,5 +199,7 @@ def test_s3_generator_misconfigured_directory_asset(s3_generator):
 
 
 def test_s3_get_available_partition_ids(s3_generator):
-    assert s3_generator.get_available_partition_ids(
-        data_asset_name="data") == ["me", "you"]
+    assert s3_generator.get_available_partition_ids(data_asset_name="data") == [
+        "me",
+        "you",
+    ]
