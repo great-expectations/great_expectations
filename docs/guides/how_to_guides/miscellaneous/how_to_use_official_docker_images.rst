@@ -36,23 +36,15 @@ Steps
 Additional notes
 ----------------
 
-If you need to run interactive ``great_expectations`` commands, this is best done from inside the container by running Docker in interactive mode and changing the entrypoint as follows:
+If you need to run interactive ``great_expectations`` commands, you can simply add the `-it` flags for interactive mode.
 
     .. code-block:: bash
 
         docker run -it \
-        --entrypoint /bin/bash \
         -v /full/path/to/your/project/great_expectations:/usr/app/great_expectations \
         greatexpectations/great_expectations:python-3.7-buster-ge-0.12.0
 
 
-You'll now be inside a bash shell in the Docker container where you can run any ``great_expectations`` command and provide terminal input:
-
-    .. code-block:: bash
-
-        $ docker run -it --entrypoint /bin/bash -v full/path/to/your/project/great_expectations:/usr/app/great_expectations greatexpectations/great_expectations:python-3.7-buster-ge-0.12.0
-        root@02d6f438181f:/usr/app/great_expectations# great_expectations suite new
-        ...
 
 Comments
 --------
