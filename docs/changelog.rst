@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+* [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
 
 
 0.12.0
