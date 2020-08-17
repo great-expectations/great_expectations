@@ -2729,14 +2729,10 @@ class DataContext(BaseDataContext):
             )
             self._context_root_directory = context_root_directory
 
-            store_config: dict = {
-                "base_directory": context_root_directory,
-            }
-            filesystem_store_backend_obj: StoreBackend = self.add_tuple_filesystem_store_backend(
-                **store_config
-            )
-            data_context_id: str = self.find_or_create_data_context_id(
-                store_backend=filesystem_store_backend_obj,
+            data_context_id = self.find_or_create_data_context_id(
+                store_backend=self.add_tuple_filesystem_store_backend(
+                    **{"base_directory": context_root_directory}
+                ),
                 runtime_environment=runtime_environment,
                 allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
             )
