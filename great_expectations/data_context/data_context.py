@@ -2250,8 +2250,8 @@ class DataContext(BaseDataContext):
 
         return cls(context_root_dir=ge_dir, runtime_environment=runtime_environment)
 
-    # noinspection PyMethodMayBeStatic
-    def create_using_s3_backend(self, func: Callable = None,) -> Callable:
+    # noinspection PyMethodParameters
+    def create_using_s3_backend(func: Callable = None,) -> Callable:
         """
         A decorator for loading or creating data context with S3 serving as the backend store for all
         application-level stores (Expectation Suites, Validations, Evaluation Parameters, and Data Docs).
@@ -2332,6 +2332,7 @@ class DataContext(BaseDataContext):
             runtime_environment=runtime_environment,
             allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
         )
+
         store_config: dict = {
             "bucket": ge_id_config_bucket,
             "prefix": ge_id_config_prefix,
@@ -2340,34 +2341,13 @@ class DataContext(BaseDataContext):
         s3_store_backend_obj: StoreBackend = working_data_context.add_tuple_s3_store_backend(
             **store_config
         )
-        ge_id_config_store: ConfigurationStore = working_data_context.build_configuration_store(
-            store_name=BaseDataContext.GE_IDENTIFICATION_CONFIGURATION_STORE_NAME,
+
+        data_context_id: str = cls.find_or_create_data_context_id(
+            data_context=working_data_context,
             store_backend=s3_store_backend_obj,
+            runtime_environment=runtime_environment,
+            allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
         )
-        # noinspection PyTypeChecker
-        ge_id_config_persistence_manager: ConfigurationPersistenceManager = ConfigurationPersistenceManager(
-            configuration_class=DataContextIdentificationConfig,
-            configuration_store=ge_id_config_store,
-            overwrite_existing=False,
-        )
-
-        ge_id_config: Union[BaseConfig, None]
-        try:
-            ge_id_config = ge_id_config_persistence_manager.load_configuration()
-        except ge_exceptions.ConfigNotFoundError:
-            ge_id_config = None
-
-        found_existing_ge_id_config: bool
-
-        if ge_id_config is None:
-            ge_id_config = DataContextIdentificationConfig()
-            ge_id_config_persistence_manager.save_configuration(
-                configuration=ge_id_config
-            )
-
-        cls.validate_identification_config(identification_config=ge_id_config)
-
-        data_context_id: str = ge_id_config.data_context_id
 
         store_config: dict = {
             "bucket": ge_project_config_bucket,
@@ -2445,6 +2425,55 @@ class DataContext(BaseDataContext):
             "data_context": working_data_context,
             "found_existing_project_config": found_existing_ge_project_config,
         }
+
+    @classmethod
+    def find_or_create_data_context_id(
+        cls,
+        data_context=None,
+        store_backend: StoreBackend = None,
+        runtime_environment: dict = None,
+        allow_anonymous_usage_statistics: bool = True,
+    ):
+        if data_context is None:
+            data_context = cls.create_blank_data_context(
+                runtime_environment=runtime_environment,
+                allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
+            )
+        if store_backend is None:
+            raise ge_exceptions.DataContextError(
+                f"""The find_or_create_data_context_id method requires a valid store_backend reference.
+                """
+            )
+        ge_id_config_store: ConfigurationStore = data_context.build_configuration_store(
+            store_name=BaseDataContext.GE_IDENTIFICATION_CONFIGURATION_STORE_NAME,
+            store_backend=store_backend,
+        )
+        # noinspection PyTypeChecker
+        ge_id_config_persistence_manager: ConfigurationPersistenceManager = ConfigurationPersistenceManager(
+            configuration_class=DataContextIdentificationConfig,
+            configuration_store=ge_id_config_store,
+            overwrite_existing=False,
+        )
+
+        ge_id_config: Union[BaseConfig, None]
+        try:
+            ge_id_config = ge_id_config_persistence_manager.load_configuration()
+        except ge_exceptions.ConfigNotFoundError:
+            ge_id_config = None
+
+        found_existing_ge_id_config: bool
+
+        if ge_id_config is None:
+            ge_id_config = DataContextIdentificationConfig()
+            ge_id_config_persistence_manager.save_configuration(
+                configuration=ge_id_config
+            )
+
+        cls.validate_identification_config(identification_config=ge_id_config)
+
+        data_context_id: str = ge_id_config.data_context_id
+
+        return data_context_id
 
     @classmethod
     def create_blank_data_context(
