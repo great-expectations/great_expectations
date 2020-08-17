@@ -87,7 +87,9 @@ def test_create_pandas_datasource(
         },
     )
 
-    data_context_config = data_context_parameterized_expectation_suite.get_config()
+    data_context_config = (
+        data_context_parameterized_expectation_suite.get_project_config()
+    )
 
     assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["class_name"] == class_name

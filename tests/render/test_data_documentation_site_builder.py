@@ -630,6 +630,7 @@ def test_site_builder_usage_statistics_enabled(
     site_builder_data_context_with_html_store_titanic_random,
 ):
     context = site_builder_data_context_with_html_store_titanic_random
+    context.data_context_id = "f43d4897-385f-4366-82b0-1a8eda2bf79c"
 
     sites = (
         site_builder_data_context_with_html_store_titanic_random._project_config_with_variables_substituted.data_docs_sites
@@ -675,11 +676,11 @@ def test_site_builder_usage_statistics_disabled(
     site_builder_data_context_with_html_store_titanic_random,
 ):
     context = site_builder_data_context_with_html_store_titanic_random
+    context.data_context_id = "f43d4897-385f-4366-82b0-1a8eda2bf79c"
     context._project_config.anonymous_usage_statistics = {
         "enabled": False,
-        "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c",
     }
-    data_context_id = context.anonymous_usage_statistics["data_context_id"]
+    data_context_id = context.data_context_id
 
     sites = (
         site_builder_data_context_with_html_store_titanic_random._project_config_with_variables_substituted.data_docs_sites

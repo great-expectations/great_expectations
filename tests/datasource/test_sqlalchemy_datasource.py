@@ -125,7 +125,9 @@ def test_create_sqlalchemy_datasource(data_context_parameterized_expectation_sui
     data_context_parameterized_expectation_suite.add_datasource(
         name, class_name=class_name, **connection_kwargs
     )
-    data_context_config = data_context_parameterized_expectation_suite.get_config()
+    data_context_config = (
+        data_context_parameterized_expectation_suite.get_project_config()
+    )
     assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["class_name"] == class_name
 
@@ -145,7 +147,9 @@ def test_create_sqlalchemy_datasource(data_context_parameterized_expectation_sui
         name, class_name=class_name, credentials="${" + var_name + "}"
     )
 
-    data_context_config = data_context_parameterized_expectation_suite.get_config()
+    data_context_config = (
+        data_context_parameterized_expectation_suite.get_project_config()
+    )
     assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["class_name"] == class_name
     assert (

@@ -97,5 +97,4 @@ data_docs_sites:
 
 anonymous_usage_statistics:
   enabled: true
-  data_context_id: ffe293f3-516a-4e20-a55d-e7eefabb3bb3
   usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics

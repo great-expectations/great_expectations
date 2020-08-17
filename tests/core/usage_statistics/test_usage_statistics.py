@@ -54,7 +54,6 @@ def in_memory_data_context_config_usage_stats_enabled():
             },
             "anonymous_usage_statistics": {
                 "enabled": True,
-                "data_context_id": "00000000-0000-0000-0000-000000000001",
                 "usage_statistics_url": USAGE_STATISTICS_QA_URL,
             },
         }
@@ -67,8 +66,10 @@ def test_consistent_name_anonymization(
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
-    context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
-    assert context.data_context_id == "00000000-0000-0000-0000-000000000001"
+    context = BaseDataContext(
+        project_config=in_memory_data_context_config_usage_stats_enabled
+    )
+    context.data_context_id = "00000000-0000-0000-0000-000000000001"
     payload = run_validation_operator_usage_statistics(
         context,
         "action_list_operator",
@@ -90,7 +91,9 @@ def test_opt_out_environment_variable(
         in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled
         is True
     )
-    context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
+    context = BaseDataContext(
+        project_config=in_memory_data_context_config_usage_stats_enabled
+    )
     project_config = context._project_config
     assert project_config.anonymous_usage_statistics.enabled is False
 
@@ -129,7 +132,9 @@ def test_opt_out_etc(
                 is True
             )
             context = BaseDataContext(
-                deepcopy(in_memory_data_context_config_usage_stats_enabled)
+                project_config=deepcopy(
+                    in_memory_data_context_config_usage_stats_enabled
+                )
             )
             project_config = context._project_config
             assert project_config.anonymous_usage_statistics.enabled is False
@@ -172,7 +177,9 @@ def test_opt_out_home_folder(
                 is True
             )
             context = BaseDataContext(
-                deepcopy(in_memory_data_context_config_usage_stats_enabled)
+                project_config=deepcopy(
+                    in_memory_data_context_config_usage_stats_enabled
+                )
             )
             project_config = context._project_config
             assert project_config.anonymous_usage_statistics.enabled is False
@@ -237,7 +244,9 @@ def test_opt_out_env_var_overrides_home_folder(
             in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled
             is True
         )
-        context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
+        context = BaseDataContext(
+            project_config=in_memory_data_context_config_usage_stats_enabled
+        )
         project_config = context._project_config
         assert project_config.anonymous_usage_statistics.enabled is False
 
@@ -276,7 +285,9 @@ def test_opt_out_env_var_overrides_etc(
             in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled
             is True
         )
-        context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
+        context = BaseDataContext(
+            project_config=in_memory_data_context_config_usage_stats_enabled
+        )
         project_config = context._project_config
         assert project_config.anonymous_usage_statistics.enabled is False
 
@@ -349,7 +360,9 @@ def test_opt_out_home_folder_overrides_etc(
             in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled
             is True
         )
-        context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
+        context = BaseDataContext(
+            project_config=in_memory_data_context_config_usage_stats_enabled
+        )
         project_config = context._project_config
         assert project_config.anonymous_usage_statistics.enabled is False
 

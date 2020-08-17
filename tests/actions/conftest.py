@@ -67,4 +67,6 @@ def basic_data_context_config_for_validation_operator():
 def basic_in_memory_data_context_for_validation_operator(
     basic_data_context_config_for_validation_operator,
 ):
-    return BaseDataContext(basic_data_context_config_for_validation_operator)
+    return BaseDataContext(
+        project_config=basic_data_context_config_for_validation_operator
+    )

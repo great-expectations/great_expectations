@@ -2,6 +2,7 @@ import os
 import sys
 
 import click
+
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
@@ -80,7 +81,8 @@ def init(target_directory, view, usage_stats):
 
         try:
             _ = DataContext.create(
-                project_root_dir=target_directory, usage_statistics_enabled=usage_stats
+                project_root_dir=target_directory,
+                allow_anonymous_usage_statistics=usage_stats,
             )
             cli_message(ONBOARDING_COMPLETE)
             # TODO if this is correct, ensure this is covered by a test
@@ -98,7 +100,8 @@ def init(target_directory, view, usage_stats):
 
         try:
             context = DataContext.create(
-                project_root_dir=target_directory, usage_statistics_enabled=usage_stats
+                project_root_dir=target_directory,
+                allow_anonymous_usage_statistics=usage_stats,
             )
             send_usage_message(
                 data_context=context, event="cli.init.create", success=True

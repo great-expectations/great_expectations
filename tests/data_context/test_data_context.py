@@ -573,7 +573,7 @@ data_docs/
 
 def test_add_store(empty_data_context):
     assert "my_new_store" not in empty_data_context.stores.keys()
-    assert "my_new_store" not in empty_data_context.get_config()["stores"]
+    assert "my_new_store" not in empty_data_context.get_project_config()["stores"]
     new_store = empty_data_context.add_store(
         "my_new_store",
         {
@@ -582,7 +582,7 @@ def test_add_store(empty_data_context):
         },
     )
     assert "my_new_store" in empty_data_context.stores.keys()
-    assert "my_new_store" in empty_data_context.get_config()["stores"]
+    assert "my_new_store" in empty_data_context.get_project_config()["stores"]
 
     assert isinstance(new_store, ExpectationsStore)
 
@@ -621,7 +621,6 @@ def basic_data_context_config():
             },
             "anonymous_usage_statistics": {
                 "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
                 "usage_statistics_url": USAGE_STATISTICS_QA_URL,
             },
         }

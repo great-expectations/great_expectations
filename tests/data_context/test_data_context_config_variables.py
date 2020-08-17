@@ -47,7 +47,9 @@ def test_setting_config_variables_is_visible_immediately(
 ):
     context = data_context_with_variables_in_config
 
-    config_variables_file_path = context.get_config()["config_variables_file_path"]
+    config_variables_file_path = context.get_project_config()[
+        "config_variables_file_path"
+    ]
 
     assert config_variables_file_path == "uncommitted/config_variables.yml"
 
@@ -58,15 +60,15 @@ def test_setting_config_variables_is_visible_immediately(
 
     # the context's config has two config variables - one using the ${} syntax and the other - $.
     assert (
-        context.get_config()["datasources"]["mydatasource"]["batch_kwargs_generators"][
-            "mygenerator"
-        ]["reader_options"]["test_variable_sub1"]
+        context.get_project_config()["datasources"]["mydatasource"][
+            "batch_kwargs_generators"
+        ]["mygenerator"]["reader_options"]["test_variable_sub1"]
         == "${replace_me}"
     )
     assert (
-        context.get_config()["datasources"]["mydatasource"]["batch_kwargs_generators"][
-            "mygenerator"
-        ]["reader_options"]["test_variable_sub2"]
+        context.get_project_config()["datasources"]["mydatasource"][
+            "batch_kwargs_generators"
+        ]["mygenerator"]["reader_options"]["test_variable_sub2"]
         == "$replace_me"
     )
 
