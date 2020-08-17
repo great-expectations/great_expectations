@@ -630,7 +630,7 @@ def basic_data_context_config():
 
 def test_ExplorerDataContext(titanic_data_context):
     context_root_directory = titanic_data_context.root_directory
-    explorer_data_context = ExplorerDataContext(context_root_directory)
+    explorer_data_context = ExplorerDataContext(context_root_dir=context_root_directory)
     assert explorer_data_context._expectation_explorer_manager
 
 
