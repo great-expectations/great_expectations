@@ -2341,9 +2341,7 @@ class DataContext(BaseDataContext):
         s3_store_backend_obj: StoreBackend = working_data_context.add_tuple_s3_store_backend(
             **store_config
         )
-
         data_context_id: str = cls.find_or_create_data_context_id(
-            data_context=working_data_context,
             store_backend=s3_store_backend_obj,
             runtime_environment=runtime_environment,
             allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
@@ -2429,22 +2427,19 @@ class DataContext(BaseDataContext):
     @classmethod
     def find_or_create_data_context_id(
         cls,
-        data_context=None,
         store_backend: StoreBackend = None,
         runtime_environment: dict = None,
         allow_anonymous_usage_statistics: bool = True,
     ):
-        if data_context is None:
-            data_context = cls.create_blank_data_context(
-                runtime_environment=runtime_environment,
-                allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
-            )
         if store_backend is None:
             raise ge_exceptions.DataContextError(
                 f"""The find_or_create_data_context_id method requires a valid store_backend reference.
                 """
             )
-        ge_id_config_store: ConfigurationStore = data_context.build_configuration_store(
+        ge_id_config_store: ConfigurationStore = cls.create_blank_data_context(
+            runtime_environment=runtime_environment,
+            allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
+        ).build_configuration_store(
             store_name=BaseDataContext.GE_IDENTIFICATION_CONFIGURATION_STORE_NAME,
             store_backend=store_backend,
         )
@@ -2733,6 +2728,18 @@ class DataContext(BaseDataContext):
                 os.path.expanduser(context_root_dir)
             )
             self._context_root_directory = context_root_directory
+
+            store_config: dict = {
+                "base_directory": context_root_directory,
+            }
+            filesystem_store_backend_obj: StoreBackend = self.add_tuple_filesystem_store_backend(
+                **store_config
+            )
+            data_context_id: str = self.find_or_create_data_context_id(
+                store_backend=filesystem_store_backend_obj,
+                runtime_environment=runtime_environment,
+                allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
+            )
 
             project_config = self._load_project_config()
 
