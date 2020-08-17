@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+* [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
 
 
 0.12.0
@@ -24,6 +24,7 @@ Develop
 * [ENHANCEMENT] Improve data docs page breadcrumbs to have clearer run information
 * [ENHANCEMENT] Data Docs Validation Results only shows unexpected value counts if all unexpected values are available
 * [ENHANCEMENT] Convert GE version key from great_expectations.__version__ to great_expectations_version (thanks, @cwerner!) (#1606)
+* [ENHANCEMENT] Add support in JSON Schema profiler for combining schema with anyOf key and creating nullability expectations
 * [BUGFIX] Add guard for checking Redshift Dialect in match_like_pattern expectation
 * [BUGFIX] Fix content_block build failure for dictionary content - (thanks @jliew!) #1722
 * [BUGFIX] Fix bug that was preventing env var substitution in `config_variables.yml` when not at the top level
