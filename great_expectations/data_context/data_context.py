@@ -2482,9 +2482,10 @@ class DataContext(BaseDataContext):
             allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
         )
         project_config_dict_from_yaml: CommentedMap = yaml.load(project_yaml)
+        project_config: DataContextConfig
         try:
             # noinspection PyTypeChecker
-            project_config: DataContextConfig = DataContextConfig.from_commented_map(
+            project_config = DataContextConfig.from_commented_map(
                 project_config_dict_from_yaml
             )
         except ge_exceptions.InvalidDataContextConfigError:
@@ -2730,7 +2731,7 @@ class DataContext(BaseDataContext):
             )
             self._context_root_directory = context_root_directory
 
-            data_context_id = self.find_or_create_data_context_id(
+            data_context_id = DataContext.find_or_create_data_context_id(
                 store_backend=self.add_tuple_filesystem_store_backend(
                     **{"base_directory": context_root_directory}
                 ),
