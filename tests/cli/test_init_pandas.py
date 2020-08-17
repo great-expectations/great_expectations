@@ -90,6 +90,7 @@ def test_cli_init_on_new_project(
         guid_safe_obs_tree
         == """great_expectations/
     .gitignore
+    anon_data_context_id.yml
     great_expectations.yml
     checkpoints/
     expectations/
