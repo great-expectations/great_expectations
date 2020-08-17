@@ -7,7 +7,9 @@ Changelog
 Develop
 -----------------
 * [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
-
+* [FEATURE] Store Backend Configurations for maintaining Expectations Store, Validations Store, Data Docs Store, and Project Configuration in flexible locations (filesystem, AWS S3, GCP, and other cloud platforms).
+* [ENHANCEMENT] Splitting the Project and the Anonymous Data Context ID configurations (i.e., instead of a single monolithic configuration), with the flexibility to persist them in different locations (filesystem, AWS S3, GCP, and other cloud platforms).
+* [ENHANCEMENT] Canonical API for creating, loading, and building out the Data Context programmatically, with a convenience method for managing a standard DataContext configuration, comprised of a Spark Dataframe Datasource and the Action List Validation Operator, while persisting all artifacts (Expectation Suites, Validation Results, and Data Docs) in AWS S3, provided as a reference implementation.
 
 0.12.0
 -----------------

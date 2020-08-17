@@ -21,6 +21,7 @@ from typing import Callable, Dict, List, Optional, Union
 from dateutil.parser import parse
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
@@ -2480,7 +2481,7 @@ class DataContext(BaseDataContext):
             j2_template_name="data_context_init_project_template.j2",
             allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
         )
-        project_config_dict_from_yaml: dict = yaml.load(project_yaml)
+        project_config_dict_from_yaml: CommentedMap = yaml.load(project_yaml)
         try:
             # noinspection PyTypeChecker
             project_config: DataContextConfig = DataContextConfig.from_commented_map(
