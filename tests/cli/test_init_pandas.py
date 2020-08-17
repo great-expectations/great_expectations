@@ -568,6 +568,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
         guid_safe_obs_tree
         == """great_expectations/
     .gitignore
+    anon_data_context_id.yml
     great_expectations.yml
     checkpoints/
     expectations/
