@@ -28,8 +28,11 @@ In the first link and the diagram below, you can see a common pattern of using V
     :width: 800
     :alt: Airflow pipeline from Great Expectations tutorials repository.
 
-``PythonOperator``
-------------------
+
+We will now explain the two supported methods for using Great Expectations within an Airflow pipeline.
+
+Running a Validation using a ``PythonOperator``
+-----------------------------------------------
 
 1. **Create Validation Methods**
 
@@ -70,7 +73,7 @@ In the first link and the diagram below, you can see a common pattern of using V
 
 2. **Add Validation Methods to DAG**
 
-    Validation steps can be added after pipeline steps to ensure that the steps were completed successfully.
+    Validation steps can be added after data retrieval, transformation or loading steps to ensure that the steps were completed successfully.
 
 .. code-block:: python
 
@@ -88,8 +91,8 @@ In the first link and the diagram below, you can see a common pattern of using V
     task_transform_data.set_downstream(task_validate_transformed_data)
 
 
-:ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>` & ``BashOperator``
-------------------------------
+Running a Validation using a Checkpoint & ``BashOperator``
+----------------------------------------------------------
 
 Please see this how-to guide for :ref:`How to run a Checkpoint in Airflow <how_to_guides__validation__how_to_run_a_checkpoint_in_airflow>`.
 
