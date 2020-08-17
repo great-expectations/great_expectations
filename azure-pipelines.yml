@@ -5,7 +5,7 @@ trigger:
 pr:
   paths:
     exclude:
-      - docs/*
+    - docs/*
 
 resources:
   containers:
