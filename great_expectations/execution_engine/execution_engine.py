@@ -4540,4 +4540,3 @@ class ExecutionEngine(MetaExecutionEngine):
         allowed.
         """
         return False
-
