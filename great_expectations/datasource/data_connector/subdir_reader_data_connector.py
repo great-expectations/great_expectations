@@ -2,9 +2,7 @@ import logging
 import os
 import warnings
 
-from great_expectations.datasource.data_connector.data_connector import (
-    DataConnector,
-)
+from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
