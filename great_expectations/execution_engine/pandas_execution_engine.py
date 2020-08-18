@@ -461,7 +461,9 @@ Notes:
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
         if collate is not None:
-            raise ValueError("collate parameter is not supported in PandasExecutionEngine")
+            raise ValueError(
+                "collate parameter is not supported in PandasExecutionEngine"
+            )
         counts = self[column].value_counts()
         if sort == "value":
             try:
