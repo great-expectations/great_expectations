@@ -27,7 +27,7 @@ This how-to-guide assumes that you are using a Databricks Notebook, and using th
 
 #. **Configure a Data Context in Memory.**
 
-The following snippet shows Python code that instantiates and configures a Data Context in memory. Copy this snippet into a cell in your Databricks Spark notebook.
+The following snippet shows Python code that instantiates and configures a Data Context in memory. Copy this snippet into a cell in your Databricks Spark notebook, replace the ``TODO`` stubs with paths to your stores, and run.
 
 .. code-block:: python
    :linenos:
@@ -57,14 +57,14 @@ The following snippet shows Python code that instantiates and configures a Data 
            "class_name": "ExpectationsStore",
            "store_backend": {
                "class_name": "TupleFilesystemStoreBackend",
-               "base_directory": "REPLACE ME",  # TODO: replace with your value
+               "base_directory": "/FileStore/expectations/",  # TODO: replace with the path to your Expectations Store on DBFS
            },
        },
        "validations_store": {
            "class_name": "ValidationsStore",
            "store_backend": {
                "class_name": "TupleFilesystemStoreBackend",
-               "base_directory": "REPLACE ME",  # TODO: replace with your value
+               "base_directory": "/FileStore/validations/",  # TODO: replace with the path to your Validations Store on DBFS
            },
        },
        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
@@ -77,7 +77,7 @@ The following snippet shows Python code that instantiates and configures a Data 
            "class_name": "SiteBuilder",
            "store_backend": {
                "class_name": "TupleFilesystemStoreBackend",
-               "base_directory": "REPLACE ME",  # TODO: replace with your value
+               "base_directory": "/FileStore/docs/",  # TODO: replace with the path to your DataDocs Store on DBFS
            },
            "site_index_builder": {
                "class_name": "DefaultSiteIndexBuilder",
@@ -111,34 +111,6 @@ The following snippet shows Python code that instantiates and configures a Data 
 
    context = BaseDataContext(project_config=project_config)
 
-
-
-#. **Configure an Expectation store in DBFS**
-
-   Replace the "REPLACE ME" on lines 27 of the code snippet with the path to your Expectation Store on DBFS.
-
-   .. code-block:: python
-
-      path_to_expectation_store =  "/FileStore/expectations/"
-
-#. **Configure a Validation Result store in DBFS.**
-
-   Replace the "REPLACE ME" on lines 34 of the code snippet with the path to your Validation Store on DBFS.
-
-   .. code-block:: python
-
-      path_to_validation_store =  "/FileStore/validations/"
-
-
-#. **Configure a Data Docs website in DBFS.**
-
-   Replace the "REPLACE ME" on line 47 of the code snippet with the path to your DataDocs Store on DBFS.
-
-   .. code-block:: python
-
-      path_to_datadocs_store =  "/FileStore/docs/"
-
-
 #. **Test your configuration.**
 
    Execute the cell with the snippet above.
@@ -157,7 +129,6 @@ Additional notes
 
 
 .. code-block:: python
-   :linenos:
 
    from great_expectations.data_context import BaseDataContext
 
