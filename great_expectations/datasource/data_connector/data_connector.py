@@ -99,7 +99,7 @@ class DataConnector(object):
             self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
             return self._data_asset_iterators[data_asset_name][0]
 
-    def build_batch_kwargs(self, data_asset_name=None, partition_id=None, **kwargs):
+    def build_batch_kwargs(self, data_asset_name=None, batch_parameters=None):
         # TODO: The logic before raised an error here, but we also check for this below - which should it be?
         if not data_asset_name:
             raise ValueError("Please provide a data_asset_name.")
@@ -109,9 +109,6 @@ class DataConnector(object):
             batch_parameters = {"data_asset_name": data_asset_name}
         else:
             batch_parameters = dict()
-        if partition_id is not None:
-            batch_parameters["partition_id"] = partition_id
-        batch_parameters.update(kwargs)
         param_keys = set(batch_parameters.keys())
         recognized_params = (
             self.recognized_batch_parameters
