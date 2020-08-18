@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/great-expectations/great_expectations.svg?branch=develop)](https://travis-ci.org/great-expectations/great_expectations)
-[![Coverage Status](https://coveralls.io/repos/github/great-expectations/great_expectations/badge.svg?branch=develop)](https://coveralls.io/github/great-expectations/great_expectations?branch=develop)
+[![Build Status](https://dev.azure.com/great-expectations/great_expectations/_apis/build/status/great_expectations?branchName=develop&stageName=required)](https://dev.azure.com/great-expectations/great_expectations/_build/latest?definitionId=1&branchName=develop)
+![Coverage](https://img.shields.io/azure-devops/coverage/great-expectations/great_expectations/1/main)
 [![Documentation Status](https://readthedocs.org/projects/great-expectations/badge/?version=latest)](http://great-expectations.readthedocs.io/en/latest/?badge=latest)
 
 <!-- <<<Super-quickstart links go here>>> -->

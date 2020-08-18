@@ -338,6 +338,8 @@ class SuiteEditNotebookRenderer(Renderer):
             batch_kwargs = dict(batch_kwargs)
         if batch_kwargs and "path" in batch_kwargs.keys():
             base_dir = batch_kwargs["path"]
+            if base_dir[0:5] in ["s3://", "gs://"]:
+                return batch_kwargs
             if not os.path.isabs(base_dir):
                 batch_kwargs["path"] = os.path.join("..", "..", base_dir)
 
