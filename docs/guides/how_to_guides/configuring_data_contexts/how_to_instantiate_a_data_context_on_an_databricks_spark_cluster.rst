@@ -14,7 +14,7 @@ The guide demonstrates the recommended path for instantiating a Data Context wit
 Steps
 -----
 
-This how-to-guide assumes that you are using the Databricks File Store (DBFS) as the Datasource, Metadata Store, and DataDocs store. The `DBFS is a file store <https://docs.databricks.com/data/databricks-file-system.html>`_ that is native to Databricks clusters and Notebooks. Files on DBFS can be written and read as if they were on a local filesystem, just by adding the `/dbfs/FileStore/` prefix to the path. For information on how to configure Databricks for filesystems on Azure and AWS, please see the associated documentation in the Additional Notes section below.
+This how-to-guide assumes that you are using the Databricks File Store (DBFS) as the Metadata Store, and DataDocs store. The `DBFS is a file store <https://docs.databricks.com/data/databricks-file-system.html>`_ that is native to Databricks clusters and Notebooks. Files on DBFS can be written and read as if they were on a local filesystem, just by adding the `/FileStore/` prefix to the path. For information on how to configure Databricks for filesystems on Azure and AWS, please see the associated documentation in the Additional Notes section below.
 
 The following snippet shows Python code that instantiates and configures a Data Context. Copy this snippet into a cell in your Databricks Spark notebook.
 
@@ -25,7 +25,6 @@ The following snippet shows Python code that instantiates and configures a Data 
    import great_expectations.exceptions as ge_exceptions
    from great_expectations.data_context.types.base import DataContextConfig
    from great_expectations.data_context import BaseDataContext
-
 
    project_config = DataContextConfig(
        config_version=2,
@@ -117,7 +116,7 @@ The following snippet shows Python code that instantiates and configures a Data 
 
    .. code-block:: python
 
-      path_to_expectation_store =  "/dbfs/FileStore/expectations/"
+      path_to_expectation_store =  "/FileStore/expectations/"
 
 #. **Configure an Validation Result store in DBFS.**
 
@@ -125,7 +124,7 @@ The following snippet shows Python code that instantiates and configures a Data 
 
    .. code-block:: python
 
-      path_to_validation_store =  "/dbfs/FileStore/validations/"
+      path_to_validation_store =  "/FileStore/validations/"
 
 
 #. **Configure an Data Docs website in DBFS.**
@@ -134,7 +133,7 @@ The following snippet shows Python code that instantiates and configures a Data 
 
    .. code-block:: python
 
-      path_to_datadocs_store =  "/dbfs/FileStore/docs/"
+      path_to_datadocs_store =  "/FileStore/docs/"
 
 
 #. **Test your configuration.**
@@ -151,6 +150,38 @@ The following snippet shows Python code that instantiates and configures a Data 
 Additional notes
 ----------------
 
+- If you're continuing to work in a Databricks notebook, the following code-snippet could be used to load and run Expectations on a `csv` file that lives in DBFS.
+
+
+.. code-block:: python
+   :linenos:
+
+   from great_expectations.data_context import BaseDataContext
+
+   file_location = "/FileStore/tables/dc_wikia_data.csv"
+   file_type = "csv"
+
+   # CSV options
+   infer_schema = "false"
+   first_row_is_header = "false"
+   delimiter = ","
+
+   # The applied options are for CSV files. For other file types, these will be ignored.
+   df = spark.read.format(file_type) \
+     .option("inferSchema", infer_schema) \
+     .option("header", first_row_is_header) \
+     .option("sep", delimiter) \
+     .load(file_location)
+
+   context = BaseDataContext(project_config=project_config)
+   context.create_expectation_suite("my_new_suite")
+
+   my_batch = context.get_batch({
+      "dataset": df,
+      "datasource": "my_local_datasource",
+   }, "my_new_suite")
+
+   my_batch.expect_table_row_count_to_equal(140)
 
 
 Additional resources
