@@ -1789,6 +1789,29 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.multicolumn_map_expectation
+    def expect_multicolumn_sum_to_equal(
+        self,
+        column_list,
+        sum_total,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        """ Multi-Column Map Expectation
+
+        Expects that sum of all rows for a set of columns is equal to a specific value
+
+        Args:
+            column_list (List[str]): \
+                Set of columns to be checked
+            sum_total (int): \
+                expected sum of columns
+        """
+        return column_list.sum(axis=1) == sum_total
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
     def expect_multicolumn_values_to_be_unique_together(
         self,
         column_list,
@@ -1800,6 +1823,15 @@ Notes:
         catch_exceptions=None,
         meta=None,
     ):
+        """ Multi-Column Map Expectation
+
+        Expect that the columns are unique together, e.g. a multi-column primary key
+
+        Args:
+            self:
+            column_list: (List[str]): \
+                Set of columns to be checked
+        """
         # Do not dropna here, since we have separately dealt with na in decorator
         # Invert boolean so that duplicates are False and non-duplicates are True
         return ~column_list.duplicated(keep=False)
