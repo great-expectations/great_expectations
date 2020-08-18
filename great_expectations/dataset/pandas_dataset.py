@@ -1786,3 +1786,20 @@ Notes:
         threshold = len(column_list.columns)
         # Do not dropna here, since we have separately dealt with na in decorator
         return column_list.nunique(dropna=False, axis=1) >= threshold
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_multicolumn_values_to_be_unique_together(
+        self,
+        column_list,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        row_condition=None,
+        condition_parser=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # Do not dropna here, since we have separately dealt with na in decorator
+        # Invert boolean so that duplicates are False and non-duplicates are True
+        return ~column_list.duplicated(keep=False)
