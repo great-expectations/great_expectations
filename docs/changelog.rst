@@ -7,7 +7,7 @@ Changelog
 Develop
 -----------------
 * [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
-
+* [FEATURE] Add new exception: expect_multicolumn_sum_to_equal for `pandas` and `Spark` (thanks @chipmyersjr)!
 
 0.12.0
 -----------------
@@ -33,7 +33,6 @@ Develop
 * [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 * [DOCS] Add information about issue tags to contributing docs
 * [DEPRECATION] Deprecate demo suite behavior in `suite new`
-* [FEATURE] Add new exception: expect_multicolumn_sum_to_equal (pandas)
 
 0.11.9
 -----------------
