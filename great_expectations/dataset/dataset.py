@@ -356,6 +356,18 @@ class Dataset(MetaDataset):
         """Returns: int"""
         raise NotImplementedError
 
+    def get_crosstab(
+        self,
+        column_A,
+        column_B,
+        bins_A=None,
+        bins_B=None,
+        n_bins_A=None,
+        n_bins_B=None,
+    ):
+        """Get crosstab of column_A and column_B, binning values if necessary"""
+        raise NotImplementedError
+
     def test_column_map_expectation_function(self, function, *args, **kwargs):
         """Test a column map expectation function
 
@@ -4264,7 +4276,21 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
-        raise NotImplementedError
+        crosstab = self.get_crosstab(
+            column_A, column_B, bins_A, bins_B, n_bins_A, n_bins_B
+        )
+        chi2_result = stats.chi2_contingency(crosstab)
+        # See e.g. https://en.wikipedia.org/wiki/Cram%C3%A9r%27s_V
+        cramers_V = np.sqrt(chi2_result[0] / self.get_row_count() / min(crosstab.shape))
+        return_obj = {
+            "success": cramers_V <= threshold,
+            "result": {
+                "observed_value": cramers_V,
+                "unexpected_list": crosstab,
+                "details": {"crosstab": crosstab},
+            },
+        }
+        return return_obj
 
     ###
     #
