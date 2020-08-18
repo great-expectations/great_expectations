@@ -7,7 +7,7 @@ Changelog
 Develop
 -----------------
 * [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
-
+* [FEATURE] Add new exception: expect_multicolumn_sum_to_equal for `pandas` and `Spark` (thanks @chipmyersjr)!
 
 0.12.0
 -----------------
