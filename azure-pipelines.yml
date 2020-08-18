@@ -2,11 +2,6 @@ trigger:
   - develop
   - main
 
-pr:
-  paths:
-    exclude:
-    - docs/*
-
 resources:
   containers:
   - container: postgres
