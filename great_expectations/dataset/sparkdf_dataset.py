@@ -32,6 +32,7 @@ try:
         desc,
         isnan,
         lag,
+        expr,
     )
     from pyspark.sql.functions import length as length_
     from pyspark.sql.functions import (
@@ -1481,3 +1482,33 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             return column.withColumn(
                 "__success", when(col("diff") <= 0, lit(True)).otherwise(lit(False))
             )
+
+    @DocInherit
+    @MetaSparkDFDataset.multicolumn_map_expectation
+    def expect_multicolumn_sum_to_equal(
+        self,
+        column_list,
+        sum_total,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        """ Multi-Column Map Expectation
+
+        Expects that sum of all rows for a set of columns is equal to a specific value
+
+        Args:
+            column_list (List[str]): \
+                Set of columns to be checked
+            sum_total (int): \
+                expected sum of columns
+        """
+        expression = "+".join(
+            ["COALESCE({}, 0)".format(col) for col in column_list.columns]
+        )
+        column_list = column_list.withColumn("actual_total", expr(expression))
+        return column_list.withColumn(
+            "__success",
+            when(col("actual_total") == sum_total, lit(True)).otherwise(lit(False)),
+        )
