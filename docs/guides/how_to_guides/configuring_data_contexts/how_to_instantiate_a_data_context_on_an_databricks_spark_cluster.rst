@@ -14,10 +14,20 @@ The guide demonstrates the recommended path for instantiating a Data Context wit
 Steps
 -----
 
-This how-to-guide assumes that you are using the Databricks File Store (DBFS) as the Metadata Store, and DataDocs store. The `DBFS is a file store <https://docs.databricks.com/data/databricks-file-system.html>`_ that is native to Databricks clusters and Notebooks. Files on DBFS can be written and read as if they were on a local filesystem, just by adding the `/FileStore/` prefix to the path. For information on how to configure Databricks for filesystems on Azure and AWS, please see the associated documentation in the Additional Notes section below.
+This how-to-guide assumes that you are using a Databricks Notebook, and using the Databricks File Store (DBFS) as the Metadata Store and DataDocs store. The `DBFS is a file store <https://docs.databricks.com/data/databricks-file-system.html>`_ that is native to Databricks clusters and Notebooks. Files on DBFS can be written and read as if they were on a local filesystem, just by adding the `/FileStore/` prefix to the path. For information on how to configure Databricks for filesystems on Azure and AWS, please see the associated documentation in the Additional Notes section below.
 
-The following snippet shows Python code that instantiates and configures a Data Context. Copy this snippet into a cell in your Databricks Spark notebook.
+#. **Install Great Expectations on your Databricks Spark cluster.**
 
+   Copy this code snippet into a cell in your Databricks Spark notebook and run it:
+
+   .. code-block:: python
+
+      dbutils.library.installPyPI("great_expectations")
+
+
+#. **Configure a Data Context in Memory.**
+
+The following snippet shows Python code that instantiates and configures a Data Context in memory. Copy this snippet into a cell in your Databricks Spark notebook.
 
 .. code-block:: python
    :linenos:
@@ -101,13 +111,6 @@ The following snippet shows Python code that instantiates and configures a Data 
 
    context = BaseDataContext(project_config=project_config)
 
-#. **Install Great Expectations on your Databricks Spark cluster.**
-
-   Copy this code snippet into a cell in your Databricks Spark notebook and run it:
-
-   .. code-block:: python
-
-      dbutils.library.installPyPI("great_expectations")
 
 
 #. **Configure an Expectation store in DBFS**
