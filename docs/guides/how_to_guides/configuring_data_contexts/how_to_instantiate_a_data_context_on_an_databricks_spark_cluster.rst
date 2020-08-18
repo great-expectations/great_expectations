@@ -118,7 +118,7 @@ The following snippet shows Python code that instantiates and configures a Data 
 
       path_to_expectation_store =  "/FileStore/expectations/"
 
-#. **Configure an Validation Result store in DBFS.**
+#. **Configure a Validation Result store in DBFS.**
 
    Replace the "REPLACE ME" on lines 34 of the code snippet with the path to your Validation Store on DBFS.
 
@@ -127,7 +127,7 @@ The following snippet shows Python code that instantiates and configures a Data 
       path_to_validation_store =  "/FileStore/validations/"
 
 
-#. **Configure an Data Docs website in DBFS.**
+#. **Configure a Data Docs website in DBFS.**
 
    Replace the "REPLACE ME" on line 47 of the code snippet with the path to your DataDocs Store on DBFS.
 
@@ -190,9 +190,6 @@ Additional resources
 
 - How to create a Data Source in :ref:`Databricks Azure <_how_to_guides__configuring_datasources__how_to_configure_a_databricks_azure_datasource>`
 
-
-
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on `Slack <greatexpectations.io/slack>`_ if you would like to learn more, or have any questions.
 
 .. discourse::
     :topic_identifier: 320
