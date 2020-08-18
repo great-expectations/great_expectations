@@ -3,7 +3,7 @@
 Initialize a Data Context
 ===============================================
 
-In Great Expectations, your :ref:`Data Context` manages boilerplate configuration. Using a Data Context is almost always the fastest way to get up and running, even though some teams don't need every component of a Data Context.
+In Great Expectations, your :ref:`Data Context` manages your project configuration. Using a Data Context is almost always the fastest way to get up and running, even though some teams don't need every component of a Data Context.
 
 
 Install Great Expectations
@@ -24,64 +24,41 @@ or git, you may want to check out the :ref:`supporting_resources` section before
 
     pip install great_expectations
 
-To install from a git branch, use the following command (replace ``develop`` below with the name of the branch you want to use):
 
-.. code-block:: bash
+If you intend to develop within Great Expectations (e.g. to contribute back to the project), and would like to install it from a git branch or a fork, check out :ref:`contributing_setting_up_your_dev_environment` in the contributor documentation.
 
-    git clone https://github.com/great-expectations/great_expectations.git
-    cd great_expectations/
-    git checkout develop
-    pip install -e .
-
-To install from a git fork, use the following command (replace ``great-expectations`` below with the name of the fork, which is usually your github username):
-
-.. code-block:: bash
-
-    pip install -e .
-    git clone https://github.com/great-expectations/great_expectations.git
-    pip install great_expectations/
-
-If you intend to develop within the Great Expectations (e.g. to contribute back to the project), check out :ref:`contributing_setting_up_your_dev_environment` in the contributor documentation.
-
-Download example data
+Preparation instructions
 ---------------------
 
-For this tutorial, we will use a simplified version of the National Provider Identifier (NPI) database. It's a public dataset released by the `Centers of Medicare and Medicaid Services <https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/DataDissemination>`_, intended as an authoritative list of health care providers in the United States. NPI data is famously messy---a great place to see the value of data testing and documentation in action.
+For this tutorial, we will use a simplified version of the NYC taxi ride data. We prepared a Docker image that contains a local Postgres database with the data pre-loaded, so you can easily get up and running without any local dependencies.
 
-To avoid confusion during the tutorial, we recommend you set up the following directory structure before you download the data:
+To avoid confusion during the tutorial, we recommend you follow these steps:
 
-.. code-block:: bash
+#. Make sure you have [Docker](https://www.docker.com/) installed
 
-   mkdir example_project
-   mkdir example_project/my_data
-   cd example_project
-
-To download the NPI data using wget, please run:
+#. Clone the ge_tutorials repository and start up the Postgres database containing the data:
 
 .. code-block:: bash
 
-    wget https://superconductive-public.s3.amazonaws.com/data/npi/weekly/npidata_pfile_20200511-20200517.csv.gz -P my_data
+   git clone https://github.com/superconductive/ge_tutorials
+   cd ge_tutorials/ge_getting_started_tutorial
+   docker-compose up
 
-Alternatively, you can use curl:
-
-.. code-block:: bash
-
-    curl https://superconductive-public.s3.amazonaws.com/data/npi/weekly/npidata_pfile_20200511-20200517.csv.gz -o my_data/npidata_pfile_20200511-20200517.csv.gz
-
-Finally, to unzip the data, please run:
+#. Create a new project directory ``ge_example/`` for your tutorial project:
 
 .. code-block:: bash
 
-    gunzip my_data/npidata_pfile_20200511-20200517.csv.gz
+    cd ..
+    mkdir ge_example
+    cd ge_example
 
-Once unzipped, the data should be 22MB on disk.
 
-Run ``great_expectations init``
+Run ``great_expectations init`` to initialize a Data Context
 -----------------------------------------------
 
 When you installed Great Expectations, you also installed the Great Expectations :ref:`command line interface (CLI) <command_line>`. It provides helpful utilities for deploying and configuring DataContexts, plus a few other convenience methods.
 
-To initialize your Great Expectations deployment for the project, run this command in the terminal from the ``example_dickens_data_project/`` directory.
+To initialize your Great Expectations deployment for the project, run this command in the terminal from the ``ge_example/`` directory.
 
 .. code-block:: bash
 
