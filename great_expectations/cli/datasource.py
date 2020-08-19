@@ -193,9 +193,9 @@ def _build_datasource_intro_string(datasource_count):
     default=True,
 )
 @click.option(
-    "--assume-yes/--yes",
+    "--assume-yes",
     "-y",
-    help="By default request confirmation to build docs unless you specify -y/--yes/--assume-yes flag to skip dialog",
+    help="By default request confirmation to build docs unless you specify -y/--assume-yes flag to skip dialog",
     default=False,
 )
 @click.option(
