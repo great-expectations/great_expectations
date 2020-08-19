@@ -1,6 +1,6 @@
 .. _tutorials__getting_started__initialize_a_data_context:
 
-Initialize a Data Context
+Set up the tutorial data and initialize a Data Context
 ===============================================
 
 In Great Expectations, your :ref:`Data Context` manages your project configuration. Using a Data Context is almost always the fastest way to get up and running, even though some teams don't need every component of a Data Context.
@@ -34,9 +34,9 @@ For this tutorial, we will use a simplified version of the NYC taxi ride data. W
 
 To avoid confusion during the tutorial, we recommend you follow these steps:
 
-#. Make sure you have [Docker](https://www.docker.com/) installed
+#. Make sure you have `Docker<https://www.docker.com/>`_ installed
 
-#. Clone the ge_tutorials repository and start up the Postgres database containing the data:
+#. Clone the ``ge_tutorials`` repository and start up the container with the Postgres database containing the data:
 
 .. code-block:: bash
 
@@ -44,7 +44,29 @@ To avoid confusion during the tutorial, we recommend you follow these steps:
    cd ge_tutorials/ge_getting_started_tutorial
    docker-compose up
 
-#. Create a new project directory ``ge_example/`` for your tutorial project:
+You will now have a Postgres database running with some pre-loaded data! In case you're looking to connect to the database, you'll find instructions in the ``README`` in the repository.
+
+About the data
+-----------------------------------------------
+
+The NYC taxi data is an open data set which is updated every month. Each record corresponds to one taxi ride and contains information such as the pick up and drop-off location, the payment amount, and the number of passengers, among others.
+
+In this tutorial, we provide two tables with a 10,000 row sample each of the taxi data:
+
+* **yellow_tripdata_sample_2019_01**: a sample of the January 2019 taxi data
+* **yellow_tripdata_staging**: a sample of the February 2019 taxi data, loaded to a "staging" table so we can validate it before promoting it to a permanent table
+
+If we compare the ``passenger_count`` column in the January and February data, we find a significant difference: The February data contains a large proportion of rides with 0 passengers, which seems unexpected.
+
+.. admonition:: The data problem we're solving in this tutorial
+
+    In this tutorial, we will be creating an Expectation Suite for this example data set that allows us to assert that we generally expect at least 1 passenger per taxi ride based on what we see in the January 2019 data. We will then use that Expectation Suite to catch the data quality issue in the February 2019 staging data.
+
+
+Run ``great_expectations init``
+-----------------------------------------------
+
+First, we want to create a separate project directory ``ge_example/`` for our tutorial project. The ``ge_tutorials`` repo contains the final version of this tutorial, but we want to start from scratch here!
 
 .. code-block:: bash
 
@@ -52,11 +74,7 @@ To avoid confusion during the tutorial, we recommend you follow these steps:
     mkdir ge_example
     cd ge_example
 
-
-Run ``great_expectations init`` to initialize a Data Context
------------------------------------------------
-
-When you installed Great Expectations, you also installed the Great Expectations :ref:`command line interface (CLI) <command_line>`. It provides helpful utilities for deploying and configuring DataContexts, plus a few other convenience methods.
+When you installed Great Expectations, you also installed the Great Expectations :ref:`command line interface (CLI) <command_line>`. It provides helpful utilities for deploying and configuring Data Contexts, plus a few other convenience methods.
 
 To initialize your Great Expectations deployment for the project, run this command in the terminal from the ``ge_example/`` directory.
 
@@ -94,7 +112,10 @@ You should see this:
 
     OK to proceed? [Y/n]: 
 
-Let's pause there for a moment.
+**Let's pause there for a moment and take a look under the hood.**
+
+The ``great_expectations/`` directory structure
+-----------------------------------------------
 
 Once you finish going through ``init``, your ``great_expectations/`` directory will contains all of the important components of a Great Expectations deployment, in miniature:
 
