@@ -6,7 +6,7 @@ Glossary of Expectations
 
 This is a list of all built-in Expectations. Expectations are extendable so you
 can create custom expectations for your data domain! To do so see this article:
-:ref:`custom_expectations_reference`.
+:ref:`how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations`.
 
 *******
 Dataset
@@ -90,7 +90,7 @@ Multi-column
 * :func:`expect_column_pair_values_to_be_equal <great_expectations.dataset.dataset.Dataset.expect_column_pair_values_to_be_equal>`
 * :func:`expect_column_pair_values_to_be_in_set <great_expectations.dataset.dataset.Dataset.expect_column_pair_values_to_be_in_set>`
 * :func:`expect_multicolumn_values_to_be_unique <great_expectations.dataset.dataset.Dataset.expect_multicolumn_values_to_be_unique>`
-
+* :func:`expect_multicolumn_sum_to_equal <great_expectations.dataset.dataset.Dataset.expect_multicolumn_sum_to_equal>`
 
 Distributional functions
 ========================

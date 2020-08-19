@@ -768,7 +768,7 @@ def test_validate():
     ) as f:
         expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
-    del results.meta["great_expectations.__version__"]
+    del results.meta["great_expectations_version"]
 
     assert results.to_json_dict() == expected_results.to_json_dict()
 
@@ -779,7 +779,7 @@ def test_validate():
     # Finally, confirm that only_return_failures works
     # and does not affect the "statistics" field.
     validation_results = my_df.validate(only_return_failures=True)
-    del validation_results.meta["great_expectations.__version__"]
+    del validation_results.meta["great_expectations_version"]
 
     expected_results = ExpectationSuiteValidationResult(
         meta={
@@ -875,7 +875,7 @@ def test_validate_with_invalid_result(validate_result_dict):
     ) as f:
         expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
-    del results.meta["great_expectations.__version__"]
+    del results.meta["great_expectations_version"]
 
     for result in results.results:
         result.exception_info.pop("exception_traceback")
@@ -888,7 +888,7 @@ def test_validate_catch_non_existent_expectation():
 
     validation_config_non_existent_expectation = ExpectationSuite(
         expectation_suite_name="default",
-        meta={"great_expectations.__version__": ge.__version__},
+        meta={"great_expectations_version": ge.__version__},
         expectations=[
             ExpectationConfiguration(
                 expectation_type="non_existent_expectation", kwargs={"column": "x"}
@@ -909,7 +909,7 @@ def test_validate_catch_invalid_parameter():
 
     validation_config_invalid_parameter = ExpectationSuite(
         expectation_suite_name="default",
-        meta={"great_expectations.__version__": ge.__version__},
+        meta={"great_expectations_version": ge.__version__},
         expectations=[
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_between",

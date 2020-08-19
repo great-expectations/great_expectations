@@ -52,6 +52,28 @@ def config5():
     )
 
 
+@pytest.fixture
+def config6():
+    return ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "a",
+            "value_set": [1, 2, 3, 4],  # differs from others
+            "result_format": "COMPLETE",
+        },
+        meta={"notes": "This is another expectation."},
+    )
+
+
+@pytest.fixture
+def config7():
+    return ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={"column": "a", "value_set": [1, 2, 3, 4],},  # differs from others
+        meta={"notes": "This is another expectation."},
+    )
+
+
 def test_expectation_configuration_equality(config1, config2, config3, config4):
     """Equality should depend on all defined properties of a configuration object, but not on whether the *instances*
     are the same."""
@@ -68,11 +90,18 @@ def test_expectation_configuration_equivalence(
     config1, config2, config3, config4, config5
 ):
     """Equivalence should depend only on properties that affect the result of the expectation."""
-    assert config1.isEquivalentTo(config2)  # no difference
-    assert config2.isEquivalentTo(config1)
-    assert config1.isEquivalentTo(config3)  # different meta
-    assert config1.isEquivalentTo(config4)  # different result format
-    assert not config1.isEquivalentTo(config5)  # different value_set
+    assert config1.isEquivalentTo(config2, match_type="runtime")  # no difference
+    assert config2.isEquivalentTo(config1, match_type="runtime")
+    assert config1.isEquivalentTo(config3, match_type="runtime")  # different meta
+    assert config1.isEquivalentTo(
+        config4, match_type="success"
+    )  # different result format
+    assert not config1.isEquivalentTo(
+        config5, match_type="success"
+    )  # different value_set
+    assert config1.isEquivalentTo(
+        config5, match_type="domain"
+    )  # different result format
 
 
 def test_expectation_configuration_get_evaluation_parameter_dependencies():
@@ -117,3 +146,29 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies():
             }
         ]
     } == dependencies
+
+
+def test_expectation_configuration_patch(config4, config5, config6, config7):
+    assert not config5.isEquivalentTo(config4, match_type="runtime")
+    assert config5.patch("replace", "/value_set", [1, 2, 3]).isEquivalentTo(
+        config4, match_type="runtime"
+    )
+
+    assert not config5.isEquivalentTo(config6, match_type="runtime")
+    assert config5.patch("add", "/value_set/-", 4).isEquivalentTo(
+        config6, match_type="runtime"
+    )
+
+    assert not config6.isEquivalentTo(config7, match_type="runtime")
+    assert config6.patch("remove", "/result_format", 4).isEquivalentTo(
+        config7, match_type="runtime"
+    )
+
+    with pytest.raises(ValueError):
+        config5.patch("move", "/value_set/-", 4)
+
+    with pytest.raises(IndexError):
+        config5.patch("add", "value_set", 4)
+
+    with pytest.raises(ValueError):
+        config5.patch("add", "/foo/-", 4)

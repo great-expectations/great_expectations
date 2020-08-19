@@ -1,11 +1,7 @@
 import pytest
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationKwargs,
-    ExpectationSuite,
-)
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.data_asset import DataAsset, FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
 
@@ -15,7 +11,7 @@ def test_data_asset_expectation_suite():
     default_suite = ExpectationSuite(
         expectation_suite_name="default",
         data_asset_type="DataAsset",
-        meta={"great_expectations.__version__": ge_version},
+        meta={"great_expectations_version": ge_version},
         expectations=[],
     )
 
@@ -71,7 +67,7 @@ def test_data_asset_name_inheritance(dataset):
 def test_catch_exceptions_with_bad_expectation_type():
     # We want to catch degenerate cases where an expectation suite is incompatible with
     my_df = PandasDataset({"x": range(10)})
-    my_df._append_expectation(
+    my_df._expectation_suite.append_expectation(
         ExpectationConfiguration(expectation_type="foobar", kwargs={})
     )
     result = my_df.validate(catch_exceptions=True)
@@ -84,7 +80,7 @@ def test_catch_exceptions_with_bad_expectation_type():
 
     assert result.results[idx].success is False
     assert result.results[idx].expectation_config.expectation_type == "foobar"
-    assert result.results[idx].expectation_config.kwargs == ExpectationKwargs()
+    assert result.results[idx].expectation_config.kwargs == {}
     assert result.results[idx].exception_info["raised_exception"] is True
     assert (
         "AttributeError: 'PandasDataset' object has no attribute 'foobar'"
@@ -138,6 +134,7 @@ def test_valid_expectation_types(dataset, pandas_dataset):
         "expect_column_values_to_not_be_null",
         "expect_column_values_to_not_match_regex",
         "expect_column_values_to_not_match_regex_list",
+        "expect_multicolumn_sum_to_equal",
         "expect_multicolumn_values_to_be_unique",
         "expect_table_column_count_to_be_between",
         "expect_table_column_count_to_equal",

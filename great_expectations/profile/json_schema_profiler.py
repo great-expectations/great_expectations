@@ -1,14 +1,10 @@
 import logging
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import jsonschema
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationKwargs,
-    ExpectationSuite,
-)
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.profile.base import Profiler, ProfilerTypeMapping
 
 logger = logging.getLogger(__name__)
@@ -95,6 +91,12 @@ class JsonSchemaProfiler(Profiler):
                 )
                 if string_len_expectation:
                     expectations.append(string_len_expectation)
+
+                null_or_not_null_expectation = self._create_null_or_not_null_column_expectation(
+                    key, details
+                )
+                if null_or_not_null_expectation:
+                    expectations.append(null_or_not_null_expectation)
         description = schema.get("description", None)
         meta = None
         if description:
@@ -110,10 +112,52 @@ class JsonSchemaProfiler(Profiler):
         )
         return suite
 
+    def _get_object_types(self, details: dict) -> List[str]:
+        type_ = details.get("type", None)
+        any_of = details.get("anyOf", None)
+
+        types_list = []
+
+        if isinstance(type_, list):
+            types_list.extend(type_)
+        elif type_:
+            types_list.append(type_)
+        elif any_of:
+            for schema in any_of:
+                schema_type = schema.get("type", None)
+                if isinstance(schema_type, list):
+                    types_list.extend(schema_type)
+                elif schema_type:
+                    types_list.append(schema_type)
+
+        return types_list
+
+    def _get_enum_list(self, details: dict) -> Optional[List[str]]:
+        enum = details.get("enum", None)
+        any_of = details.get("anyOf", None)
+
+        enum_list = []
+
+        if enum:
+            enum_list.extend(enum)
+        elif any_of:
+            for schema in any_of:
+                enum_options = schema.get("enum", None)
+                if enum_options:
+                    enum_list.extend(enum_options)
+        else:
+            return None
+
+        enum_list = [
+            JsonSchemaTypes.NULL.value if item is None else item for item in enum_list
+        ]
+
+        return enum_list
+
     def _create_existence_expectation(
         self, key: str, details: dict
     ) -> ExpectationConfiguration:
-        kwargs = ExpectationKwargs(column=key)
+        kwargs = {"column": key}
         description = details.get("description", None)
         meta = None
         if description:
@@ -128,12 +172,23 @@ class JsonSchemaProfiler(Profiler):
     def _create_type_expectation(
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
-        type_ = details.get("type", None)
-        if type_ is None:
+        object_types = self._get_object_types(details=details)
+        object_types = list(
+            filter(
+                lambda object_type: object_type not in [JsonSchemaTypes.NULL.value],
+                object_types,
+            )
+        )
+
+        if len(object_types) == 0:
             return None
 
-        type_list = self.PROFILER_TYPE_LIST_BY_JSON_SCHEMA_TYPE[type_]
-        kwargs = ExpectationKwargs(column=key, type_list=type_list)
+        type_list = []
+
+        for type_ in object_types:
+            type_list.extend(self.PROFILER_TYPE_LIST_BY_JSON_SCHEMA_TYPE[type_])
+
+        kwargs = {"column": key, "type_list": type_list}
         return ExpectationConfiguration(
             "expect_column_values_to_be_in_type_list", kwargs
         )
@@ -142,26 +197,53 @@ class JsonSchemaProfiler(Profiler):
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/boolean.html"""
-        type_ = details.get("type", None)
-        if type_ != JsonSchemaTypes.BOOLEAN.value:
+        object_types = self._get_object_types(details=details)
+
+        if JsonSchemaTypes.BOOLEAN.value not in object_types:
             return None
 
         # TODO map JSONSchema types to which type backend? Pandas? Should this value set be parameterized per back end?
-        kwargs = ExpectationKwargs(column=key, value_set=[True, False])
+        kwargs = {"column": key, "value_set": [True, False]}
         return ExpectationConfiguration("expect_column_values_to_be_in_set", kwargs)
 
     def _create_range_expectation(
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/numeric.html#range"""
-        type_ = details.get("type", None)
-        if type_ not in [JsonSchemaTypes.INTEGER.value, JsonSchemaTypes.NUMBER.value]:
+        object_types = self._get_object_types(details=details)
+        object_types = filter(
+            lambda object_type: object_type != JsonSchemaTypes.NULL.value, object_types
+        )
+        range_types = [JsonSchemaTypes.INTEGER.value, JsonSchemaTypes.NUMBER.value]
+
+        if set(object_types).issubset(set(range_types)) is False:
             return None
 
-        minimum = details.get("minimum", None)
-        maximum = details.get("maximum", None)
-        exclusive_minimum = details.get("exclusiveMinimum", None)
-        exclusive_maximum = details.get("exclusiveMaximum", None)
+        type_ = details.get("type", None)
+        any_of = details.get("anyOf", None)
+
+        if not type_ and not any_of:
+            return None
+
+        minimum = None
+        maximum = None
+        exclusive_minimum = None
+        exclusive_maximum = None
+
+        if type_:
+            minimum = details.get("minimum", None)
+            maximum = details.get("maximum", None)
+            exclusive_minimum = details.get("exclusiveMinimum", None)
+            exclusive_maximum = details.get("exclusiveMaximum", None)
+        elif any_of:
+            for item in any_of:
+                item_type = item.get("type", None)
+                if item_type in range_types:
+                    minimum = item.get("minimum", None)
+                    maximum = item.get("maximum", None)
+                    exclusive_minimum = item.get("exclusiveMinimum", None)
+                    exclusive_maximum = item.get("exclusiveMaximum", None)
+                    break
 
         if (
             minimum is None
@@ -183,20 +265,34 @@ class JsonSchemaProfiler(Profiler):
             kwargs["max_value"] = exclusive_maximum
             kwargs["strict_max"] = True
 
-        return ExpectationConfiguration(
-            "expect_column_values_to_be_between", ExpectationKwargs(kwargs)
-        )
+        return ExpectationConfiguration("expect_column_values_to_be_between", kwargs)
 
     def _create_string_length_expectation(
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/string.html#length"""
-        type_ = details.get("type", None)
-        minimum = details.get("minLength", None)
-        maximum = details.get("maxLength", None)
+        object_types = self._get_object_types(details=details)
 
-        if type_ != JsonSchemaTypes.STRING.value:
+        if JsonSchemaTypes.STRING.value not in object_types:
             return None
+
+        type_ = details.get("type", None)
+        any_of = details.get("anyOf", None)
+
+        if not type_ and not any_of:
+            return None
+
+        if type_:
+            minimum = details.get("minLength", None)
+            maximum = details.get("maxLength", None)
+        elif any_of:
+            for item in any_of:
+                item_type = item.get("type", None)
+                if item_type == JsonSchemaTypes.STRING.value:
+                    minimum = item.get("minLength", None)
+                    maximum = item.get("maxLength", None)
+                    break
+
         if minimum is None and maximum is None:
             return None
 
@@ -206,7 +302,7 @@ class JsonSchemaProfiler(Profiler):
         if minimum == maximum:
             kwargs["value"] = minimum
             return ExpectationConfiguration(
-                "expect_column_value_lengths_to_equal", ExpectationKwargs(kwargs)
+                "expect_column_value_lengths_to_equal", kwargs
             )
         if minimum is not None:
             kwargs["min_value"] = minimum
@@ -214,21 +310,45 @@ class JsonSchemaProfiler(Profiler):
             kwargs["max_value"] = maximum
 
         return ExpectationConfiguration(
-            "expect_column_value_lengths_to_be_between", ExpectationKwargs(kwargs)
+            "expect_column_value_lengths_to_be_between", kwargs
         )
 
     def _create_set_expectation(
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/generic.html#enumerated-values"""
-        if JsonSchemaTypes.ENUM.value not in details.keys():
-            return None
-        enum = details.get("enum", None)
-        if not isinstance(enum, list):
+        enum_list = self._get_enum_list(details=details)
+
+        if not enum_list:
             return None
 
-        kwargs = ExpectationKwargs(column=key, value_set=enum)
+        enum_list = list(
+            filter(lambda item: item is not JsonSchemaTypes.NULL.value, enum_list)
+        )
+
+        kwargs = {"column": key, "value_set": enum_list}
         return ExpectationConfiguration("expect_column_values_to_be_in_set", kwargs)
+
+    def _create_null_or_not_null_column_expectation(
+        self, key: str, details: dict
+    ) -> Optional[ExpectationConfiguration]:
+        """https://json-schema.org/understanding-json-schema/reference/null.html"""
+        object_types = self._get_object_types(details=details)
+        enum_list = self._get_enum_list(details=details)
+        kwargs = {"column": key}
+
+        if enum_list:
+            object_types = set(enum_list).union(set(object_types))
+
+        if JsonSchemaTypes.NULL.value not in object_types:
+            return ExpectationConfiguration(
+                "expect_column_values_to_not_be_null", kwargs
+            )
+
+        if len(object_types) == 1:
+            return ExpectationConfiguration("expect_column_values_to_be_null", kwargs)
+
+        return None
 
     def _create_regex_expectation(
         self, key: str, details: dict

@@ -18,6 +18,16 @@ from great_expectations.render.util import resource_key_passes_run_name_filter
 
 logger = logging.getLogger(__name__)
 
+FALSEY_YAML_STRINGS = [
+    "0",
+    "None",
+    "False",
+    "false",
+    "FALSE",
+    "none",
+    "NONE",
+]
+
 
 class SiteBuilder(object):
     """SiteBuilder builds data documentation for the project defined by a
@@ -181,26 +191,20 @@ class SiteBuilder(object):
             )
 
         # set default run_name_filter
-        if site_section_builders["validations"].get("run_name_filter") is None:
-            site_section_builders["validations"]["run_name_filter"] = {
-                "not_includes": "profiling"
-            }
-        if site_section_builders["profiling"].get("run_name_filter") is None:
-            site_section_builders["profiling"]["run_name_filter"] = {
-                "includes": "profiling"
-            }
+        if site_section_builders.get("validations", "None") not in FALSEY_YAML_STRINGS:
+            if site_section_builders["validations"].get("run_name_filter") is None:
+                site_section_builders["validations"]["run_name_filter"] = {
+                    "not_includes": "profiling"
+                }
+        if site_section_builders.get("profiling", "None") not in FALSEY_YAML_STRINGS:
+            if site_section_builders["profiling"].get("run_name_filter") is None:
+                site_section_builders["profiling"]["run_name_filter"] = {
+                    "includes": "profiling"
+                }
 
         self.site_section_builders = {}
         for site_section_name, site_section_config in site_section_builders.items():
-            if not site_section_config or site_section_config in [
-                "0",
-                "None",
-                "False",
-                "false",
-                "FALSE",
-                "none",
-                "NONE",
-            ]:
+            if not site_section_config or site_section_config in FALSEY_YAML_STRINGS:
                 continue
             module_name = (
                 site_section_config.get("module_name")
@@ -245,13 +249,9 @@ class SiteBuilder(object):
                 "source_stores": {
                     section_name: section_config.get("source_store_name")
                     for (section_name, section_config) in site_section_builders.items()
+                    if section_config not in FALSEY_YAML_STRINGS
                 },
-                "validations_run_name_filter": site_section_builders["validations"][
-                    "run_name_filter"
-                ],
-                "profiling_run_name_filter": site_section_builders["profiling"][
-                    "run_name_filter"
-                ],
+                "site_section_builders_config": site_section_builders,
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -474,6 +474,7 @@ class DefaultSiteIndexBuilder(object):
         site_name,
         data_context,
         target_store,
+        site_section_builders_config,
         custom_styles_directory=None,
         custom_views_directory=None,
         show_how_to_buttons=True,
@@ -482,8 +483,6 @@ class DefaultSiteIndexBuilder(object):
         view=None,
         data_context_id=None,
         source_stores=None,
-        validations_run_name_filter=None,
-        profiling_run_name_filter=None,
         **kwargs,
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
@@ -495,8 +494,7 @@ class DefaultSiteIndexBuilder(object):
         self.data_context_id = data_context_id
         self.show_how_to_buttons = show_how_to_buttons
         self.source_stores = source_stores or {}
-        self.validations_run_name_filter = validations_run_name_filter
-        self.profiling_run_name_filter = profiling_run_name_filter
+        self.site_section_builders_config = site_section_builders_config or {}
 
         if renderer is None:
             renderer = {
@@ -682,43 +680,15 @@ class DefaultSiteIndexBuilder(object):
 
         return results
 
-    def build(self):
+    def build(self, skip_and_clean_missing=True):
+        """
+        :param skip_and_clean_missing: if True, target html store keys without corresponding source store keys will
+        be skipped and removed from the target store
+        :return: tuple(index_page_url, index_links_dict)
+        """
+
         # Loop over sections in the HtmlStore
         logger.debug("DefaultSiteIndexBuilder.build")
-
-        expectation_suite_keys = [
-            ExpectationSuiteIdentifier.from_tuple(expectation_suite_tuple)
-            for expectation_suite_tuple in self.target_store.store_backends[
-                ExpectationSuiteIdentifier
-            ].list_keys()
-        ]
-        validation_and_profiling_result_keys = [
-            ValidationResultIdentifier.from_tuple(validation_result_tuple)
-            for validation_result_tuple in self.target_store.store_backends[
-                ValidationResultIdentifier
-            ].list_keys()
-        ]
-        profiling_result_keys = [
-            validation_result_key
-            for validation_result_key in validation_and_profiling_result_keys
-            if resource_key_passes_run_name_filter(
-                validation_result_key, self.profiling_run_name_filter
-            )
-        ]
-        validation_result_keys = [
-            validation_result_key
-            for validation_result_key in validation_and_profiling_result_keys
-            if resource_key_passes_run_name_filter(
-                validation_result_key, self.validations_run_name_filter
-            )
-        ]
-        validation_result_keys = sorted(
-            validation_result_keys, key=lambda x: x.run_id.run_time, reverse=True
-        )
-        if self.validation_results_limit:
-            validation_result_keys = validation_result_keys[
-                : self.validation_results_limit
-            ]
 
         index_links_dict = OrderedDict()
         index_links_dict["site_name"] = self.site_name
@@ -726,70 +696,177 @@ class DefaultSiteIndexBuilder(object):
         if self.show_how_to_buttons:
             index_links_dict["cta_object"] = self.get_calls_to_action()
 
-        for expectation_suite_key in expectation_suite_keys:
-            self.add_resource_info_to_index_links_dict(
-                index_links_dict=index_links_dict,
-                expectation_suite_name=expectation_suite_key.expectation_suite_name,
-                section_name="expectations",
+        if (
+            self.site_section_builders_config.get("expectations", "None")
+            and self.site_section_builders_config.get("expectations", "None")
+            not in FALSEY_YAML_STRINGS
+        ):
+            expectation_suite_source_keys = self.data_context.stores[
+                self.site_section_builders_config["expectations"].get(
+                    "source_store_name"
+                )
+            ].list_keys()
+            expectation_suite_site_keys = [
+                ExpectationSuiteIdentifier.from_tuple(expectation_suite_tuple)
+                for expectation_suite_tuple in self.target_store.store_backends[
+                    ExpectationSuiteIdentifier
+                ].list_keys()
+            ]
+            if skip_and_clean_missing:
+                cleaned_keys = []
+                for expectation_suite_site_key in expectation_suite_site_keys:
+                    if expectation_suite_site_key not in expectation_suite_source_keys:
+                        self.target_store.store_backends[
+                            ExpectationSuiteIdentifier
+                        ].remove_key(expectation_suite_site_key)
+                    else:
+                        cleaned_keys.append(expectation_suite_site_key)
+                expectation_suite_site_keys = cleaned_keys
+
+            for expectation_suite_key in expectation_suite_site_keys:
+                self.add_resource_info_to_index_links_dict(
+                    index_links_dict=index_links_dict,
+                    expectation_suite_name=expectation_suite_key.expectation_suite_name,
+                    section_name="expectations",
+                )
+
+        validation_and_profiling_result_site_keys = []
+        if (
+            self.site_section_builders_config.get("validations", "None")
+            and self.site_section_builders_config.get("validations", "None")
+            not in FALSEY_YAML_STRINGS
+            or self.site_section_builders_config.get("profiling", "None")
+            and self.site_section_builders_config.get("profiling", "None")
+            not in FALSEY_YAML_STRINGS
+        ):
+            source_store = (
+                "validations"
+                if self.site_section_builders_config.get("validations", "None")
+                and self.site_section_builders_config.get("validations", "None")
+                not in FALSEY_YAML_STRINGS
+                else "profiling"
             )
+            validation_and_profiling_result_source_keys = self.data_context.stores[
+                self.site_section_builders_config[source_store].get("source_store_name")
+            ].list_keys()
+            validation_and_profiling_result_site_keys = [
+                ValidationResultIdentifier.from_tuple(validation_result_tuple)
+                for validation_result_tuple in self.target_store.store_backends[
+                    ValidationResultIdentifier
+                ].list_keys()
+            ]
+            if skip_and_clean_missing:
+                cleaned_keys = []
+                for (
+                    validation_result_site_key
+                ) in validation_and_profiling_result_site_keys:
+                    if (
+                        validation_result_site_key
+                        not in validation_and_profiling_result_source_keys
+                    ):
+                        self.target_store.store_backends[
+                            ValidationResultIdentifier
+                        ].remove_key(validation_result_site_key)
+                    else:
+                        cleaned_keys.append(validation_result_site_key)
+                validation_and_profiling_result_site_keys = cleaned_keys
 
-        for profiling_result_key in profiling_result_keys:
-            try:
-                validation = self.data_context.get_validation_result(
-                    batch_identifier=profiling_result_key.batch_identifier,
-                    expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
-                    run_id=profiling_result_key.run_id,
-                    validations_store_name=self.source_stores.get("profiling"),
+        if (
+            self.site_section_builders_config.get("profiling", "None")
+            and self.site_section_builders_config.get("profiling", "None")
+            not in FALSEY_YAML_STRINGS
+        ):
+            profiling_run_name_filter = self.site_section_builders_config["profiling"][
+                "run_name_filter"
+            ]
+            profiling_result_site_keys = [
+                validation_result_key
+                for validation_result_key in validation_and_profiling_result_site_keys
+                if resource_key_passes_run_name_filter(
+                    validation_result_key, profiling_run_name_filter
                 )
+            ]
+            for profiling_result_key in profiling_result_site_keys:
+                try:
+                    validation = self.data_context.get_validation_result(
+                        batch_identifier=profiling_result_key.batch_identifier,
+                        expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
+                        run_id=profiling_result_key.run_id,
+                        validations_store_name=self.source_stores.get("profiling"),
+                    )
 
-                batch_kwargs = validation.meta.get("batch_kwargs", {})
+                    batch_kwargs = validation.meta.get("batch_kwargs", {})
 
-                self.add_resource_info_to_index_links_dict(
-                    index_links_dict=index_links_dict,
-                    expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
-                    section_name="profiling",
-                    batch_identifier=profiling_result_key.batch_identifier,
-                    run_id=profiling_result_key.run_id,
-                    run_time=profiling_result_key.run_id.run_time,
-                    run_name=profiling_result_key.run_id.run_name,
-                    asset_name=batch_kwargs.get("data_asset_name"),
-                    batch_kwargs=batch_kwargs,
-                )
-            except Exception:
-                error_msg = "Profiling result not found: {0:s} - skipping".format(
-                    str(profiling_result_key.to_tuple())
-                )
-                logger.warning(error_msg)
+                    self.add_resource_info_to_index_links_dict(
+                        index_links_dict=index_links_dict,
+                        expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
+                        section_name="profiling",
+                        batch_identifier=profiling_result_key.batch_identifier,
+                        run_id=profiling_result_key.run_id,
+                        run_time=profiling_result_key.run_id.run_time,
+                        run_name=profiling_result_key.run_id.run_name,
+                        asset_name=batch_kwargs.get("data_asset_name"),
+                        batch_kwargs=batch_kwargs,
+                    )
+                except Exception:
+                    error_msg = "Profiling result not found: {0:s} - skipping".format(
+                        str(profiling_result_key.to_tuple())
+                    )
+                    logger.warning(error_msg)
 
-        for validation_result_key in validation_result_keys:
-            try:
-                validation = self.data_context.get_validation_result(
-                    batch_identifier=validation_result_key.batch_identifier,
-                    expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
-                    run_id=validation_result_key.run_id,
-                    validations_store_name=self.source_stores.get("validations"),
+        if (
+            self.site_section_builders_config.get("validations", "None")
+            and self.site_section_builders_config.get("validations", "None")
+            not in FALSEY_YAML_STRINGS
+        ):
+            validations_run_name_filter = self.site_section_builders_config[
+                "validations"
+            ]["run_name_filter"]
+            validation_result_site_keys = [
+                validation_result_key
+                for validation_result_key in validation_and_profiling_result_site_keys
+                if resource_key_passes_run_name_filter(
+                    validation_result_key, validations_run_name_filter
                 )
+            ]
+            validation_result_site_keys = sorted(
+                validation_result_site_keys,
+                key=lambda x: x.run_id.run_time,
+                reverse=True,
+            )
+            if self.validation_results_limit:
+                validation_result_site_keys = validation_result_site_keys[
+                    : self.validation_results_limit
+                ]
+            for validation_result_key in validation_result_site_keys:
+                try:
+                    validation = self.data_context.get_validation_result(
+                        batch_identifier=validation_result_key.batch_identifier,
+                        expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
+                        run_id=validation_result_key.run_id,
+                        validations_store_name=self.source_stores.get("validations"),
+                    )
 
-                validation_success = validation.success
-                batch_kwargs = validation.meta.get("batch_kwargs", {})
+                    validation_success = validation.success
+                    batch_kwargs = validation.meta.get("batch_kwargs", {})
 
-                self.add_resource_info_to_index_links_dict(
-                    index_links_dict=index_links_dict,
-                    expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
-                    section_name="validations",
-                    batch_identifier=validation_result_key.batch_identifier,
-                    run_id=validation_result_key.run_id,
-                    validation_success=validation_success,
-                    run_time=validation_result_key.run_id.run_time,
-                    run_name=validation_result_key.run_id.run_name,
-                    asset_name=batch_kwargs.get("data_asset_name"),
-                    batch_kwargs=batch_kwargs,
-                )
-            except Exception:
-                error_msg = "Validation result not found: {0:s} - skipping".format(
-                    str(validation_result_key.to_tuple())
-                )
-                logger.warning(error_msg)
+                    self.add_resource_info_to_index_links_dict(
+                        index_links_dict=index_links_dict,
+                        expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
+                        section_name="validations",
+                        batch_identifier=validation_result_key.batch_identifier,
+                        run_id=validation_result_key.run_id,
+                        validation_success=validation_success,
+                        run_time=validation_result_key.run_id.run_time,
+                        run_name=validation_result_key.run_id.run_name,
+                        asset_name=batch_kwargs.get("data_asset_name"),
+                        batch_kwargs=batch_kwargs,
+                    )
+                except Exception:
+                    error_msg = "Validation result not found: {0:s} - skipping".format(
+                        str(validation_result_key.to_tuple())
+                    )
+                    logger.warning(error_msg)
 
         try:
             rendered_content = self.renderer_class.render(index_links_dict)

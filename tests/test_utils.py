@@ -13,6 +13,7 @@ import pytest
 from dateutil.parser import parse
 
 from great_expectations.core import (
+    ExpectationConfigurationSchema,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
 )
@@ -24,6 +25,7 @@ from great_expectations.profile import ColumnsExistProfiler
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
+expectationConfigurationSchema = ExpectationConfigurationSchema()
 
 try:
     from sqlalchemy import create_engine
@@ -642,6 +644,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
             # "expect_table_row_count_to_equal_other_table",
+            "expect_multicolumn_sum_to_equal",
         ]
     if context == "SparkDFDataset":
         return expectation_type in [
@@ -660,8 +663,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_distinct_values_to_equal_set",
             # "expect_column_distinct_values_to_contain_set",
             # "expect_column_values_to_be_between",
-            "expect_column_values_to_be_increasing",
-            "expect_column_values_to_be_decreasing",
+            # "expect_column_values_to_be_increasing",
+            # "expect_column_values_to_be_decreasing",
             # "expect_column_value_lengths_to_be_between",
             # "expect_column_value_lengths_to_equal",
             # "expect_column_values_to_match_regex",
@@ -691,6 +694,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_pair_values_to_be_in_set",
             # "expect_multicolumn_values_to_be_unique",
             "expect_table_row_count_to_equal_other_table",
+            # "expect_multicolumn_sum_to_equal",
         ]
     if context == "PandasDataset":
         return expectation_type in [

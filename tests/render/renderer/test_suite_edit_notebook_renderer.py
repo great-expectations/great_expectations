@@ -26,7 +26,7 @@ def critical_suite_with_citations():
     critical_suite = {
         "expectation_suite_name": "critical",
         "meta": {
-            "great_expectations.__version__": "0.9.1+9.gf17eff1f.dirty",
+            "great_expectations_version": "0.9.1+9.gf17eff1f.dirty",
             "columns": {
                 "npi": {"description": ""},
                 "nppes_provider_last_org_name": {"description": ""},
@@ -100,7 +100,7 @@ def suite_with_multiple_citations():
     critical_suite = {
         "expectation_suite_name": "critical",
         "meta": {
-            "great_expectations.__version__": "0.9.1+9.gf17eff1f.dirty",
+            "great_expectations_version": "0.9.1+9.gf17eff1f.dirty",
             "citations": [
                 {
                     "citation_date": "2001-01-01T00:00:01.000001",
@@ -143,7 +143,7 @@ def warning_suite():
     warning_suite = {
         "expectation_suite_name": "warning",
         "meta": {
-            "great_expectations.__version__": "0.8.4.post0",
+            "great_expectations_version": "0.8.4.post0",
             "citations": [
                 {
                     "citation_date": "2020-02-28T17:34:31.307271",
@@ -856,6 +856,27 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
         assert obs_cell == expected_cell
     assert obs == expected
+
+
+def test_render_path_fixes_relative_paths():
+    batch_kwargs = {"path": "data.csv"}
+    notebook_renderer = SuiteEditNotebookRenderer()
+    expected = {"path": "../../data.csv"}
+    assert notebook_renderer._fix_path_in_batch_kwargs(batch_kwargs) == expected
+
+
+def test_render_path_ignores_gcs_urls():
+    batch_kwargs = {"path": "gs://a-bucket/data.csv"}
+    notebook_renderer = SuiteEditNotebookRenderer()
+    expected = {"path": "gs://a-bucket/data.csv"}
+    assert notebook_renderer._fix_path_in_batch_kwargs(batch_kwargs) == expected
+
+
+def test_render_path_ignores_s3_urls():
+    batch_kwargs = {"path": "s3://a-bucket/data.csv"}
+    notebook_renderer = SuiteEditNotebookRenderer()
+    expected = {"path": "s3://a-bucket/data.csv"}
+    assert notebook_renderer._fix_path_in_batch_kwargs(batch_kwargs) == expected
 
 
 def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(

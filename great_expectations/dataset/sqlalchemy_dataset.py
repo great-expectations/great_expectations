@@ -1559,7 +1559,7 @@ WHERE
             raise ValueError("Type not recognized by current driver: %s" % type_)
 
     @DocInherit
-    @DataAsset.expectation(["column", "type_", "mostly"])
+    @DataAsset.expectation(["column", "type_list", "mostly"])
     def expect_column_values_to_be_in_type_list(
         self,
         column,
@@ -2010,12 +2010,19 @@ WHERE
             (
                 sa.dialects.sqlite.dialect,
                 sa.dialects.postgresql.dialect,
-                sqlalchemy_redshift.dialect.RedshiftDialect,
                 sa.dialects.mysql.dialect,
                 sa.dialects.mssql.dialect,
             ),
         ):
             dialect_supported = True
+
+        try:
+            if isinstance(
+                self.sql_engine_dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+            ):
+                dialect_supported = True
+        except (AttributeError, TypeError):
+            pass
 
         if dialect_supported:
             try:

@@ -18,13 +18,31 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
    :maxdepth: 2
 
    intro
-   tutorials
-   how_to_guides
-   features
+
+.. toctree::
+   :maxdepth: 2
+
+   guides
+
+.. toctree::
+   :maxdepth: 2
+
    reference
+
+.. toctree::
+   :maxdepth: 2
+
    community
+
+.. toctree::
+   :maxdepth: 2
+
    contributing
-   module_docs
+
+.. toctree::
+   :maxdepth: 1
+
+   changelog
 
 *****
 Index
@@ -32,9 +50,3 @@ Index
 
 * :ref:`genindex`
 * :ref:`modindex`
-
-
-.. toctree::
-   :maxdepth: 2
-
-   autoapi/index
