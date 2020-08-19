@@ -7,7 +7,8 @@ Changelog
 Develop
 -----------------
 * [FEATURE] Add ``expect_column_pair_cramers_phi_value_to_be_less_than`` expectation to ``PandasDatasource`` to check for the independence of two columns by computing their Cramers Phi.
-
+* [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
+* [FEATURE] Add new exception: expect_multicolumn_sum_to_equal for `pandas` and `Spark` (thanks @chipmyersjr)!
 
 0.12.0
 -----------------
