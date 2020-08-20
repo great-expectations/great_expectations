@@ -45,7 +45,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         cls,
         class_name,
         module_name="great_expectations.datasource",  # TODO: should this live in a new directory?
-        data_asset_type=None,
+        execution_engine=None,
         data_connectors=None,
         **kwargs
     ):
@@ -56,7 +56,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         Args:
             class_name: The name of the class for which to build the config
             module_name: The name of the module in which the datasource class is located
-            data_asset_type: A ClassConfig dictionary
+            execution_engine: A ClassConfig dictionary
             data_connectors: DataConnector configuration dictionary
             **kwargs: Additional kwargs to be part of the datasource constructor's initialization
 
@@ -67,7 +67,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         verify_dynamic_loading_support(module_name=module_name)
         class_ = load_class(class_name=class_name, module_name=module_name)
         configuration = class_.build_configuration(
-            data_asset_type=data_asset_type, data_connectors=data_connectors, **kwargs
+            execution_engine=execution_engine, data_connectors=data_connectors, **kwargs
         )
         return configuration
 
@@ -75,7 +75,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         self,
         name,
         data_context=None,
-        data_asset_type=None,
+        execution_engine=None,
         data_connectors=None,
         **kwargs
     ):
@@ -85,23 +85,27 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         Args:
             name: the name for the datasource
             data_context: data context to which to connect
-            data_asset_type (ClassConfig): the type of DataAsset to produce
-            batch_kwargs_generators: BatchKwargGenerators to add to the datasource
+            execution_engine (ClassConfig): the type of DataAsset to produce
+            data_connectors: DataConnectors to add to the datasource
         """
         self._data_context = data_context
         self._name = name
-        if isinstance(data_asset_type, str):
+        if isinstance(execution_engine, str):
             warnings.warn(
-                "String-only configuration for data_asset_type is deprecated. Use module_name and class_name instead.",
+                "String-only configuration for execution_engine is deprecated. Use module_name and class_name instead.",
                 DeprecationWarning,
             )
-        self._data_asset_type = data_asset_type
+        self._execution_engine = execution_engine
         self._execution_environment_config = kwargs
         self._data_connectors = {}
 
-        self._execution_environment_config["data_asset_type"] = data_asset_type
+        self._execution_environment_config["execution_engine"] = execution_engine
         if data_connectors is not None:
             self._execution_environment_config["data_connectors"] = data_connectors
+
+    @property
+    def execution_engine(self):
+        return self._execution_engine
 
     @property
     def name(self):
@@ -136,13 +140,13 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         except KeyError:
             pass
 
-    def add_batch_kwargs_generator(self, name, class_name, **kwargs):
+    def add_data_connector(self, name, class_name, **kwargs):
         """Add a DataConnector to the ExecutionEnvironment.
 
         Args:
-            name (str): the name of the new BatchKwargGenerator to add
-            class_name: class of the BatchKwargGenerator to add
-            kwargs: additional keyword arguments will be passed directly to the new BatchKwargGenerator's constructor
+            name (str): the name of the new DataConnector to add
+            class_name: class of the DataConnector to add
+            kwargs: additional keyword arguments will be passed directly to the new DataConnector's constructor
 
         Returns:
              DataConnector (DataConnector)
