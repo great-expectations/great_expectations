@@ -69,11 +69,6 @@ class ValidationResultsPageRenderer(Renderer):
         Returns:
             List[RenderedDocumentContent]
         """
-        # rendered_document_content_list = []
-        # for validation_result in validation_operator_result.list_validation_results():
-        #     rendered_document_content_list.append(self.render(validation_result))
-        # return rendered_document_content_list
-
         return [
             self.render(validation_result)
             for validation_result in validation_operator_result.list_validation_results()
