@@ -99,6 +99,73 @@ class DataContextConfig(DictDot):
         yaml.dump(commented_map, outfile)
 
 
+class ExecutionEnvironmentConfig(DictDot):
+    def __init__(
+        self,
+        class_name,
+        module_name=None,
+        execution_engine=None,
+        data_connectors=None,
+        credentials=None,
+        reader_method=None,
+        limit=None,
+        **kwargs
+    ):
+        # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
+        self._class_name = class_name
+        self._module_name = module_name
+        self.execution_engine = execution_engine
+        if data_connectors is not None:
+            self.data_connectors = data_connectors
+        if credentials is not None:
+            self.credentials = credentials
+        if reader_method is not None:
+            self.reader_method = reader_method
+        if limit is not None:
+            self.limit = limit
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+
+class ExecutionEnvironmentConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    class_name = fields.String(required=True)
+    module_name = fields.String(missing="great_expectations.datasource")
+    execution_engine = fields.Nested(ClassConfigSchema)
+    # TODO: Update to data_connector-specific
+    # data_connectors = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.DataConnectorSchema))
+    data_connectors = fields.Dict(
+        keys=fields.Str(), values=fields.Dict(), allow_none=True
+    )
+    credentials = fields.Raw(allow_none=True)
+    spark_context = fields.Raw(allow_none=True)
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+        # if "generators" in data:
+        #     raise ge_exceptions.InvalidConfigError(
+        #         "Your current configuration uses the 'generators' key in a datasource, but in version 0.10 of "
+        #         "GE, that key is renamed to 'batch_kwargs_generators'. Please update your config to continue."
+        #     )
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_execution_environment_config(self, data, **kwargs):
+        return ExecutionEnvironmentConfig(**data)
+
+
+# TODO: deprecate? keep for backwards compatibility?
 class DatasourceConfig(DictDot):
     def __init__(
         self,
@@ -214,6 +281,7 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
         return data
 
 
+# TODO: deprecate? keep for backwards compatibility?
 class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
@@ -372,6 +440,9 @@ class DataContextConfigSchema(Schema):
     )
     datasources = fields.Dict(
         keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema)
+    )
+    execution_environments = fields.Dict(
+        keys=fields.Str(), values=fields.Nested(ExecutionEnvironmentConfigSchema), allow_none=True
     )
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
