@@ -45,6 +45,7 @@ class DataContextConfig(DictDot):
         config_variables_file_path=None,
         anonymous_usage_statistics=None,
         commented_map=None,
+        execution_environments=None
     ):
         if commented_map is None:
             commented_map = CommentedMap()
@@ -53,6 +54,7 @@ class DataContextConfig(DictDot):
         if datasources is None:
             datasources = {}
         self.datasources = datasources
+        self.execution_environments = execution_environments
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name

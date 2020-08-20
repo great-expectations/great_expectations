@@ -8,7 +8,7 @@ import warnings
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
 )
-from great_expectations.datasource.types import PathBatchKwargs
+from great_expectations.execution_environment.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
