@@ -886,6 +886,14 @@ class BaseDataContext(object):
         )
         return batch_kwargs
 
+    # WIP new get_batch
+    def _get_batch(
+            self,
+            execution_environment,
+
+    ):
+        pass
+
     def get_batch(
         self,
         batch_kwargs: Union[dict, BatchKwargs],
