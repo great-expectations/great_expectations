@@ -4,7 +4,7 @@ from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.batch_kwargs_generator import (
     TableBatchKwargsGenerator,
 )
-from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
+from great_expectations.execution_environment.types import SqlAlchemyDatasourceTableBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
 

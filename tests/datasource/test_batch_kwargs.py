@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.datasource.types import *
+from great_expectations.execution_environment.types import *
 
 try:
     from unittest import mock

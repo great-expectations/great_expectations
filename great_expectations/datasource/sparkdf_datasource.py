@@ -2,7 +2,7 @@ import datetime
 import logging
 import uuid
 
-from great_expectations.datasource.types import BatchMarkers
+from great_expectations.execution_environment.types import BatchMarkers
 from great_expectations.types import ClassConfig
 
 from ..core.batch import Batch
