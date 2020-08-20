@@ -395,6 +395,13 @@ Notes:
     ]
     _internal_names_set = set(_internal_names)
 
+    recognized_batch_parameters = {
+        "reader_method",
+        "reader_options",
+        "limit",
+        "dataset_options",
+    }
+
     # We may want to expand or alter support for subclassing dataframes in the future:
     # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
 
