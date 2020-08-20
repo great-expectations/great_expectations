@@ -147,7 +147,7 @@ class DataConnector(object):
             ]
         try:
             batch_kwargs = next(data_asset_iterator)
-            batch_kwargs["datasource"] = self._datasource.name
+            batch_kwargs["execution_environment"] = self._execution_environment.name
             return batch_kwargs
         except StopIteration:
             self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
@@ -165,7 +165,7 @@ class DataConnector(object):
                 ]
             try:
                 batch_kwargs = next(data_asset_iterator)
-                batch_kwargs["datasource"] = self._datasource.name
+                batch_kwargs["execution_environment"] = self._execution_environment.name
                 return batch_kwargs
             except StopIteration:
                 # This is a degenerate case in which no kwargs are actually being generated
