@@ -1,6 +1,6 @@
 import pandas as pd
 
-from great_expectations.datasource.util import hash_pandas_dataframe
+from great_expectations.execution_environment.util import hash_pandas_dataframe
 
 
 def test_hash_pandas_dataframe_hashable_df():
