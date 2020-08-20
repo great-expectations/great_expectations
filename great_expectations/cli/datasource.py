@@ -1483,6 +1483,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         if (
             data_assets
             or profile_all_data_assets
+            or assume_yes
             or click.confirm(
                 msg_confirm_ok_to_proceed.format(datasource_name), default=True
             )
