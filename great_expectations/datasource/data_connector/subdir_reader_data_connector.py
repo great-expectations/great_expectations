@@ -132,7 +132,7 @@ class SubdirReaderDataConnector(DataConnector):
             data_asset_name = batch_parameters.pop("data_asset_name")
         except KeyError:
             raise BatchKwargsError(
-                "Unable to build BatchKwargs: no name provided in batch_parameters.",
+                "Unable to build BatchKwargs: no data_asset_name provided in batch_parameters.",
                 batch_kwargs=batch_parameters,
             )
 
