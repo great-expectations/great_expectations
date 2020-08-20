@@ -144,6 +144,15 @@ class SqlAlchemyBatchReference(object):
 
 
 class MetaSqlAlchemyExecutionEngine(ExecutionEngine):
+    """MetaSqlAlchemyExecutionEngine is a thin layer between Dataset and SqlAlchemyExecutionEngine.
+
+    This two-layer inheritance is required to make @classmethod decorators work.
+
+    Practically speaking, that means that MetaSqlAlchemyExecutionEngine implements \
+    expectation decorators, like `column_map_expectation` and `column_aggregate_expectation`, \
+    and SqlAlchemyExecutionEngine implements the expectation methods themselves.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -429,6 +438,8 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
 
 --ge-feature-maturity-info--
 """
+
+    recognized_batch_parameters = {"query_parameters", "limit", "dataset_options"}
 
     @classmethod
     def from_execution_engine(cls, execution_engine=None):
@@ -1188,12 +1199,12 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
             stmt = "CREATE OR REPLACE TRANSIENT TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif self.sql_engine_dialect.name == "mysql":
+        elif self.sql_engine_dialect.name.lower() == "mysql":
             # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the generic case.
             stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif self.sql_engine_dialect.name == "mssql":
+        elif self.sql_engine_dialect.name.lower() == "mssql":
             # Insert "into #{table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
             # Note: transforming custom_sql to uppercase/lowercase has uninteded consequences (i.e., changing column names), so this is not an option!
@@ -1255,7 +1266,7 @@ WHERE
 
     # noinspection PyUnusedLocal
     @DocInherit
-    @MetaSqlAlchemyDataset.expectation(["other_table_name"])
+    @MetaSqlAlchemyExecutionEngine.expectation(["other_table_name"])
     def expect_table_row_count_to_equal_other_table(
         self,
         other_table_name,
@@ -1318,7 +1329,7 @@ WHERE
     ###
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_values_to_be_null(
         self,
         column,
@@ -1332,7 +1343,7 @@ WHERE
         return sa.column(column) == None
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_values_to_not_be_null(
         self,
         column,
@@ -1389,7 +1400,7 @@ WHERE
     ):
         if mostly is not None:
             raise ValueError(
-                "SqlAlchemyDataset does not support column map semantics for column types"
+                "SqlAlchemyExecutionEngine does not support column map semantics for column types"
             )
 
         try:
@@ -1436,7 +1447,7 @@ WHERE
     ):
         if mostly is not None:
             raise ValueError(
-                "SqlAlchemyDataset does not support column map semantics for column types"
+                "SqlAlchemyExecutionEngine does not support column map semantics for column types"
             )
 
         try:
@@ -1477,7 +1488,7 @@ WHERE
         return {"success": success, "result": {"observed_value": col_type.__name__}}
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_values_to_be_in_set(
         self,
         column,
@@ -1500,7 +1511,7 @@ WHERE
         return sa.column(column).in_(tuple(parsed_value_set))
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_values_to_not_be_in_set(
         self,
         column,
@@ -1519,7 +1530,7 @@ WHERE
         return sa.column(column).notin_(tuple(parsed_value_set))
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_values_to_be_between(
         self,
         column,
@@ -1580,7 +1591,7 @@ WHERE
                 )
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_value_lengths_to_equal(
         self,
         column,
@@ -1594,7 +1605,7 @@ WHERE
         return sa.func.length(sa.column(column)) == value
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_value_lengths_to_be_between(
         self,
         column,
@@ -1633,7 +1644,7 @@ WHERE
         elif min_value is not None and max_value is None:
             return sa.func.length(sa.column(column)) >= min_value
 
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_values_to_be_unique(
         self,
         column,
@@ -1740,7 +1751,7 @@ WHERE
 
         return None
 
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_values_to_match_regex(
         self,
         column,
@@ -1760,7 +1771,7 @@ WHERE
 
         return regex_expression
 
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_values_to_not_match_regex(
         self,
         column,
@@ -1782,7 +1793,7 @@ WHERE
 
         return regex_expression
 
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_values_to_match_regex_list(
         self,
         column,
@@ -1824,7 +1835,7 @@ WHERE
             )
         return condition
 
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_values_to_not_match_regex_list(
         self,
         column,
@@ -1899,7 +1910,7 @@ WHERE
 
         return None
 
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_values_to_match_like_pattern(
         self,
         column,
@@ -1922,7 +1933,7 @@ WHERE
 
         return like_pattern_expression
 
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_values_to_not_match_like_pattern(
         self,
         column,
@@ -1945,7 +1956,7 @@ WHERE
 
         return like_pattern_expression
 
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_values_to_match_like_pattern_list(
         self,
         column,
@@ -1992,7 +2003,7 @@ WHERE
             )
         return condition
 
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyExecutionEngine.column_map_expectation
     def expect_column_values_to_not_match_like_pattern_list(
         self,
         column,
