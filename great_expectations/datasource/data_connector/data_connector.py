@@ -10,13 +10,13 @@ logger = logging.getLogger(__name__)
 
 class DataConnector(object):
     r"""
-    DataConnectors produce identifying information, called "batch_kwargs" that ExecutionEnvironments
+    DataConnectors produce identifying information, called "batch_kwargs" that ExecutionEngines
     can use to get individual batches of data. They add flexibility in how to obtain data
     such as with time-based partitioning, downsampling, or other techniques appropriate
-    for the datasource.
+    for the ExecutionEnvironment.
 
     For example, a DataConnector could produce a SQL query that logically represents "rows in
-    the Events table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource
+    the Events table with a timestamp on February 7, 2012," which a SqlAlchemyExecutionEnvironment
     could use to materialize a SqlAlchemyDataset corresponding to that batch of data and
     ready for validation.
 
@@ -25,7 +25,7 @@ class DataConnector(object):
 
     A Batch is the primary unit of validation in the Great Expectations DataContext.
     Batches include metadata that identifies how they were constructed--the same “batch_kwargs”
-    assembled by the batch kwargs generator, While not every datasource will enable re-fetching a
+    assembled by the batch kwargs generator, While not every ExecutionEnvironment will enable re-fetching a
     specific batch of data, GE can store snapshots of batches or store metadata from an
     external data version control system.
     """
@@ -33,13 +33,13 @@ class DataConnector(object):
     _batch_kwargs_type = BatchKwargs
     recognized_batch_parameters = set()
 
-    def __init__(self, name, execution_engine):
+    def __init__(self, name, execution_environment):
         self._name = name
         self._data_connector_config = {"class_name": self.__class__.__name__}
         self._data_asset_iterators = {}
-        if execution_engine is None:
+        if execution_environment is None:
             raise ValueError("execution engine must be provided for a DataConnector")
-        self._execution_engine = execution_engine
+        self._execution_environment = execution_environment
 
     @property
     def name(self):
@@ -70,7 +70,7 @@ class DataConnector(object):
         raise NotImplementedError
 
     def get_config(self):
-        return self._generator_config
+        return self._data_connector_config
 
     def reset_iterator(self, data_asset_name=None, **kwargs):
         if not data_asset_name:
