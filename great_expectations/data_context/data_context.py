@@ -14,6 +14,7 @@ import webbrowser
 from typing import Dict, List, Optional, Union
 
 from dateutil.parser import parse
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment import ExecutionEnvironment
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
@@ -998,10 +999,11 @@ class BaseDataContext(object):
     # WIP new get_batch
     def _get_batch(
             self,
-            execution_environment,
-
-    ):
-        pass
+            batch_parameters: dict,
+            expectation_suite_name: Union[str, ExpectationSuite],
+    ) -> ExecutionEngine:
+        execution_environment = self.get_execution_environment(batch_parameters.get("execution_environment"))
+        return execution_environment.get_batch(batch_parameters, expectation_suite_name)
 
     def get_batch(
         self,
