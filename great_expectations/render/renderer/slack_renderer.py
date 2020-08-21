@@ -113,7 +113,7 @@ class SlackRenderer(Renderer):
         if custom_blocks:
             query["blocks"].append(custom_blocks)
 
-        documentation_url = "https://docs.greatexpectations.io/en/latest/tutorials/getting_started/set_up_data_docs.html#_getting_started__set_up_data_docs"
+        documentation_url = "https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html#set-up-data-docs"
         footer_section = {
             "type": "context",
             "elements": [
