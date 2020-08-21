@@ -220,6 +220,44 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
 
         return data_connectors
 
+    def get_available_data_asset_names(self, data_connector_names=None):
+        """
+        Returns a dictionary of data_asset_names that the specified data
+        connector can provide. Note that some data_connectors may not be
+        capable of describing specific named data assets, and some (such as
+        filesystem glob data_connectors) require the user to configure
+        data asset names.
+
+        Args:
+            data_connector_names: the DataConnector for which to get available data asset names.
+
+        Returns:
+            dictionary consisting of sets of data assets available for the specified data connectors:
+            ::
+
+                {
+                  data_connector_name: {
+                    names: [ (data_asset_1, data_asset_1_type), (data_asset_2, data_asset_2_type) ... ]
+                  }
+                  ...
+                }
+
+        """
+        available_data_asset_names = {}
+        if data_connector_names is None:
+            data_connector_names = [
+                data_connector["name"] for data_connector in self.list_data_connectors()
+            ]
+        elif isinstance(data_connector_names, str):
+            data_connector_names = [data_connector_names]
+
+        for data_connector_name in data_connector_names:
+            data_connector = self.get_data_connector(data_connector_name)
+            available_data_asset_names[
+                data_connector_name
+            ] = data_connector.get_available_data_asset_names()
+        return available_data_asset_names
+
     # def build_batch_kwargs(
     #     self, batch_kwargs_generator, data_asset_name=None, partition_id=None, **kwargs
     # ):
