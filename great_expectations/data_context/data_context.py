@@ -16,6 +16,7 @@ from typing import Dict, List, Optional, Union
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
+from great_expectations.execution_environment import ExecutionEnvironment
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import (
@@ -27,7 +28,7 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
-    add_datasource_usage_statistics,
+    add_datasource_usage_statistics,  # TODO: deprecate
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
     usage_statistics_enabled_method,
@@ -44,10 +45,12 @@ from great_expectations.data_context.types.base import (
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
-    DatasourceConfig,
+    DatasourceConfig,  # TODO: deprecate
+    executionEnvironmentConfigSchema,
+    ExecutionEnvironmentConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
-    datasourceConfigSchema,
+    datasourceConfigSchema,  # TODO: deprecate
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -61,7 +64,7 @@ from great_expectations.data_context.util import (
     substitute_config_variable,
 )
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import Datasource
+from great_expectations.datasource import Datasource  # TODO: deprecate
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -256,7 +259,10 @@ class BaseDataContext(object):
         self._initialize_usage_statistics(project_config.anonymous_usage_statistics)
 
         # Store cached datasources but don't init them
-        self._cached_datasources = {}
+        self._cached_datasources = {}  # TODO: deprecate
+
+        # Store cached execution_environments but don't init them
+        self._cached_execution_environments = {}
 
         # Init stores
         self._stores = dict()
@@ -264,7 +270,8 @@ class BaseDataContext(object):
 
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
-        # the way that datasources, validation operators, site builders and other plugins are built.
+        # the way that execution environments (AKA datasources), validation operators, site builders and other
+        # plugins are built.
         self.validation_operators = {}
         for (
             validation_operator_name,
@@ -637,12 +644,21 @@ class BaseDataContext(object):
         """A single holder for all Stores in this context"""
         return self._stores
 
+    # TODO: deprecate
     @property
     def datasources(self):
         """A single holder for all Datasources in this context"""
         return {
             datasource: self.get_datasource(datasource)
             for datasource in self._project_config_with_variables_substituted.datasources
+        }
+
+    @property
+    def execution_environments(self):
+        """A single holder for all Datasources in this context"""
+        return {
+            execution_environment: self.get_execution_environment(execution_environment)
+            for execution_environment in self._project_config_with_variables_substituted.execution_environments
         }
 
     @property
@@ -751,6 +767,7 @@ class BaseDataContext(object):
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
+    # TODO: deprecate
     def delete_datasource(self, datasource_name=None):
         """Delete a data source
         Args:
@@ -771,15 +788,50 @@ class BaseDataContext(object):
             else:
                 raise ValueError("Datasource {} not found".format(datasource_name))
 
+    def delete_execution_environment(self, execution_environment_name=None):
+        """Delete a data source
+        Args:
+            execution_environment_name: The name of the execution_environment to delete.
+
+        Raises:
+            ValueError: If the execution_environment name isn't provided or cannot be found.
+        """
+        if execution_environment_name is None:
+            raise ValueError("ExecutionEnvironment names must be a execution_environment name")
+        else:
+            execution_environment = self.get_execution_environment(execution_environment_name)
+            if execution_environment:
+                # remove key until we have a delete method on project_config
+                # self._project_config_with_variables_substituted.execution_environments[
+                # execution_environment_name].remove()
+                # del self._project_config["execution_environments"][execution_environment_name]
+                del self._cached_execution_environments[execution_environment_name]
+            else:
+                raise ValueError("ExecutionEnvironment {} not found".format(execution_environment_name))
+
+    # TODO: deprecate "datasource" in favor of "execution_environment"
     def get_available_data_asset_names(
-        self, datasource_names=None, batch_kwargs_generator_names=None
+        self,
+        datasource_names=None,
+        batch_kwargs_generator_names=None,
+        execution_environment_names=None,
+        data_connector_names=None
     ):
-        """Inspect datasource and batch kwargs generators to provide available data_asset objects.
+        """Inspect execution environment (AKA datasource) and data connectors (AKA batch kwargs generators) to provide
+        available
+        data_asset
+        objects.
 
         Args:
             datasource_names: list of datasources for which to provide available data_asset_name objects. If None, \
             return available data assets for all datasources.
             batch_kwargs_generator_names: list of batch kwargs generators for which to provide available
+            data_asset_name objects.
+            execution_environment_names: list of execution_environments for which to provide available data_asset_name
+            objects. If
+            None, \
+            return available data assets for all execution_environments.
+            data_connector_names: list of batch kwargs generators for which to provide available
             data_asset_name objects.
 
         Returns:
@@ -787,86 +839,143 @@ class BaseDataContext(object):
             ::
 
                 {
-                  datasource_name: {
-                    batch_kwargs_generator_name: [ data_asset_1, data_asset_2, ... ]
+                  execution_environment_name: {
+                    data_connector_name: [ data_asset_1, data_asset_2, ... ]
                     ...
                   }
                   ...
                 }
 
         """
+        assert (datasource_names and not execution_environment_names) or (
+                not datasource_names and execution_environment_names
+        ), "Please provide either datasource_names or execution_environment_names."
+        if datasource_names:
+            warnings.warn(
+                "The 'datasource_names' argument will be deprecated and renamed to 'execution_environment_names'. "
+                "Please update code accordingly.",
+                DeprecationWarning,
+            )
+            execution_environment_names = datasource_names
+
+        assert (batch_kwargs_generator_names and not data_connector_names) or (
+                not batch_kwargs_generator_names and data_connector_names
+        ), "Please provide either batch_kwargs_generator_names or data_connector_names."
+        if batch_kwargs_generator_names:
+            warnings.warn(
+                "The 'batch_kwargs_generator_names' argument will be deprecated and renamed to 'data_connector_names'. "
+                "Please update code accordingly.",
+                DeprecationWarning,
+            )
+            data_connector_names = batch_kwargs_generator_names
+
         data_asset_names = {}
-        if datasource_names is None:
-            datasource_names = [
-                datasource["name"] for datasource in self.list_datasources()
+        if execution_environment_names is None:
+            execution_environment_names = [
+                execution_environment["name"] for execution_environment in self.list_execution_environments()
             ]
-        elif isinstance(datasource_names, str):
-            datasource_names = [datasource_names]
-        elif not isinstance(datasource_names, list):
+        elif isinstance(execution_environment_names, str):
+            execution_environment_names = [execution_environment_names]
+        elif not isinstance(execution_environment_names, list):
             raise ValueError(
-                "Datasource names must be a datasource name, list of datasource names or None (to list all datasources)"
+                "Execution environment names must be a execution_environment name, list of execution_environment names "
+                "or None ("
+                "to "
+                "list "
+                "all "
+                "execution_environments)"
             )
 
-        if batch_kwargs_generator_names is not None:
-            if isinstance(batch_kwargs_generator_names, str):
-                batch_kwargs_generator_names = [batch_kwargs_generator_names]
-            if len(batch_kwargs_generator_names) == len(
-                datasource_names
+        if data_connector_names is not None:
+            if isinstance(data_connector_names, str):
+                data_connector_names = [data_connector_names]
+            if len(data_connector_names) == len(
+                execution_environment_names
             ):  # Iterate over both together
-                for idx, datasource_name in enumerate(datasource_names):
-                    datasource = self.get_datasource(datasource_name)
+                for idx, execution_environment_name in enumerate(execution_environment_names):
+                    execution_environment = self.get_execution_environment(execution_environment_name)
                     data_asset_names[
-                        datasource_name
-                    ] = datasource.get_available_data_asset_names(
-                        batch_kwargs_generator_names[idx]
+                        execution_environment_name
+                    ] = execution_environment.get_available_data_asset_names(
+                        data_connector_names[idx]
                     )
 
-            elif len(batch_kwargs_generator_names) == 1:
-                datasource = self.get_datasource(datasource_names[0])
-                datasource_names[
-                    datasource_names[0]
-                ] = datasource.get_available_data_asset_names(
-                    batch_kwargs_generator_names
+            elif len(data_connector_names) == 1:
+                execution_environment = self.get_execution_environment(execution_environment_names[0])
+                execution_environment_names[
+                    execution_environment_names[0]
+                ] = execution_environment.get_available_data_asset_names(
+                    data_connector_names
                 )
 
             else:
                 raise ValueError(
-                    "If providing batch kwargs generator, you must either specify one for each datasource or only "
-                    "one datasource."
+                    "If providing data connector, you must either specify one for each execution_environment "
+                    "or "
+                    "only "
+                    "one execution_environment."
                 )
-        else:  # generator_names is None
-            for datasource_name in datasource_names:
+        else:  # data_connector_names is None
+            for execution_environment_name in execution_environment_names:
                 try:
-                    datasource = self.get_datasource(datasource_name)
+                    execution_environment = self.get_execution_environment(execution_environment_name)
                     data_asset_names[
-                        datasource_name
-                    ] = datasource.get_available_data_asset_names()
+                        execution_environment_name
+                    ] = execution_environment.get_available_data_asset_names()
                 except ValueError:
-                    # handle the edge case of a non-existent datasource
-                    data_asset_names[datasource_name] = {}
+                    # handle the edge case of a non-existent execution_environment
+                    data_asset_names[execution_environment_name] = {}
 
         return data_asset_names
 
+    # TODO: deprecate "datasource" and "batch_kwargs_generator"
     def build_batch_kwargs(
         self,
-        datasource,
-        batch_kwargs_generator,
+        datasource=None,
+        batch_kwargs_generator=None,
         data_asset_name=None,
         partition_id=None,
+        execution_environment=None,
+        data_connector=None,
         **kwargs,
     ):
-        """Builds batch kwargs using the provided datasource, batch kwargs generator, and batch_parameters.
+        """Builds batch kwargs using the provided execution environment (AKA datasource), data_connector (AKA batch
+        kwargs generator), and batch_parameters.
 
         Args:
             datasource (str): the name of the datasource for which to build batch_kwargs
             batch_kwargs_generator (str): the name of the batch kwargs generator to use to build batch_kwargs
             data_asset_name (str): an optional name batch_parameter
+            execution_environment (str): the name of the execution environment for which to build batch_kwargs
+            data_connector (str): the name of the data connector to use to build batch_kwargs
             **kwargs: additional batch_parameters
 
         Returns:
             BatchKwargs
 
         """
+        assert (datasource and not execution_environment) or (
+                not datasource and execution_environment
+        ), "Please provide either datasource or execution_environment."
+        if datasource:
+            warnings.warn(
+                "The 'datasource' argument will be deprecated and renamed to 'execution_environment'. "
+                "Please update code accordingly.",
+                DeprecationWarning,
+            )
+            execution_environment = datasource
+
+        assert (batch_kwargs_generator and not data_connector) or (
+                not batch_kwargs_generator and data_connector
+        ), "Please provide either batch_kwargs_generator or data_connector."
+        if batch_kwargs_generator:
+            warnings.warn(
+                "The 'batch_kwargs_generator' argument will be deprecated and renamed to 'data_connector'. "
+                "Please update code accordingly.",
+                DeprecationWarning,
+            )
+            data_connector = batch_kwargs_generator
+
         if kwargs.get("name"):
             if data_asset_name:
                 raise ValueError(
@@ -877,8 +986,8 @@ class BaseDataContext(object):
                 DeprecationWarning,
             )
             data_asset_name = kwargs.pop("name")
-        datasource_obj = self.get_datasource(datasource)
-        batch_kwargs = datasource_obj.build_batch_kwargs(
+        execution_environment_obj = self.get_execution_environment(execution_environment)
+        batch_kwargs = execution_environment_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
             data_asset_name=data_asset_name,
             partition_id=partition_id,
@@ -1030,6 +1139,7 @@ class BaseDataContext(object):
             return []
         return list(self.validation_operators.keys())
 
+    # TODO: deprecate
     @usage_statistics_enabled_method(
         event_name="data_context.add_datasource",
         args_payload_fn=add_datasource_usage_statistics,
@@ -1074,6 +1184,52 @@ class BaseDataContext(object):
 
         return datasource
 
+    # TODO: update usage statistics
+    # @usage_statistics_enabled_method(
+    #     event_name="data_context.add_execution_environment",
+    #     args_payload_fn=add_execution_environment_usage_statistics,
+    # )
+    def add_execution_environment(self, name, initialize=True, **kwargs):
+        """Add a new execution_environment to the data context, with configuration provided as kwargs.
+        Args:
+            name: the name for the new execution_environment to add
+            initialize: if False, add the execution_environment to the config, but do not
+                initialize it, for example if a user needs to debug database connectivity.
+            kwargs (keyword arguments): the configuration for the new execution_environment
+
+        Returns:
+            execution_environment (ExecutionEnvironment)
+        """
+        logger.debug("Starting BaseDataContext.add_execution_environment for %s" % name)
+        module_name = kwargs.get("module_name", "great_expectations.execution_environment")
+        verify_dynamic_loading_support(module_name=module_name)
+        class_name = kwargs.get("class_name")
+        execution_environment_class = load_class(module_name=module_name, class_name=class_name)
+
+        # For any class that should be loaded, it may control its configuration construction
+        # by implementing a classmethod called build_configuration
+        if hasattr(execution_environment_class, "build_configuration"):
+            config = execution_environment_class.build_configuration(**kwargs)
+        else:
+            config = kwargs
+
+        config = executionEnvironmentConfigSchema.load(config)
+        self._project_config["execution_environments"][name] = config
+
+        # We perform variable substitution in the execution_environment's config here before using the config
+        # to instantiate the execution_environment object. Variable substitution is a service that the data
+        # context provides. ExecutionEnvironments should not see unsubstituted variables in their config.
+        if initialize:
+            execution_environment = self._build_execution_environment_from_config(
+                name, self._project_config_with_variables_substituted.execution_environments[name]
+            )
+            self._cached_execution_environments[name] = execution_environment
+        else:
+            execution_environment = None
+
+        return execution_environment
+
+    # TODO: deprecate
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
     ):
@@ -1096,9 +1252,32 @@ class BaseDataContext(object):
         )
         return generator
 
+    def add_data_connector(
+        self, execution_environment_name, data_connector_name, class_name, **kwargs
+    ):
+        """
+        Add a data connector to the named execution_environment, using the provided
+        configuration.
+
+        Args:
+            execution_environment_name: name of execution_environment to which to add the new data connector
+            data_connector_name: name of the data_connector to add
+            class_name: class of the data connector to add
+            **kwargs: data connector configuration, provided as kwargs
+
+        Returns:
+
+        """
+        execution_environment_obj = self.get_execution_environment(execution_environment_name)
+        data_connector = execution_environment_obj.add_data_connector(
+            name=data_connector_name, class_name=class_name, **kwargs
+        )
+        return data_connector
+
     def get_config(self):
         return self._project_config
 
+    # TODO: deprecate
     def _build_datasource_from_config(self, name, config):
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, DatasourceConfig):
@@ -1118,6 +1297,26 @@ class BaseDataContext(object):
             )
         return datasource
 
+    def _build_execution_environment_from_config(self, name, config):
+        # We convert from the type back to a dictionary for purposes of instantiation
+        if isinstance(config, ExecutionEnvironmentConfig):
+            config = executionEnvironmentConfigSchema.dump(config)
+        config.update({"name": name})
+        module_name = "great_expectations.execution_environment"
+        execution_environment = instantiate_class_from_config(
+            config=config,
+            runtime_environment={"data_context": self},
+            config_defaults={"module_name": module_name},
+        )
+        if not execution_environment:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=config["class_name"],
+            )
+        return execution_environment
+
+    # TODO: deprecate
     def get_datasource(self, datasource_name: str = "default") -> Datasource:
         """Get the named datasource
 
@@ -1149,6 +1348,39 @@ class BaseDataContext(object):
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
+    def get_execution_environment(self, execution_environment_name: str = "default") -> ExecutionEnvironment:
+        """Get the named execution_environment
+
+        Args:
+            execution_environment_name (str): the name of the execution_environment from the configuration
+
+        Returns:
+            execution_environment (ExecutionEnvironment)
+        """
+        if execution_environment_name in self._cached_execution_environments:
+            return self._cached_execution_environments[execution_environment_name]
+        if (
+            execution_environment_name
+            in self._project_config_with_variables_substituted.execution_environments
+        ):
+            execution_environment_config = copy.deepcopy(
+                self._project_config_with_variables_substituted.execution_environments[
+                    execution_environment_name
+                ]
+            )
+        else:
+            raise ValueError(
+                f"Unable to load execution_environment `{execution_environment_name}` -- no configuration found or "
+                f"invalid "
+                f"configuration."
+            )
+        execution_environment_config = executionEnvironmentConfigSchema.load(execution_environment_config)
+        execution_environment = self._build_execution_environment_from_config(
+            execution_environment_name, execution_environment_config
+        )
+        self._cached_execution_environments[execution_environment_name] = execution_environment
+        return execution_environment
+
     def list_expectation_suites(self):
         """Return a list of available expectation suite names."""
         try:
@@ -1159,6 +1391,7 @@ class BaseDataContext(object):
             )
         return keys
 
+    # TODO: deprecate
     def list_datasources(self):
         """List currently-configured datasources on this context.
 
@@ -1173,6 +1406,21 @@ class BaseDataContext(object):
             value["name"] = key
             datasources.append(value)
         return datasources
+
+    def list_execution_environments(self):
+        """List currently-configured execution_environments on this context.
+
+        Returns:
+            List(dict): each dictionary includes "name", "class_name", and "module_name" keys
+        """
+        execution_environments = []
+        for (
+            key,
+            value,
+        ) in self._project_config_with_variables_substituted.execution_environments.items():
+            value["name"] = key
+            execution_environments.append(value)
+        return execution_environments
 
     def list_stores(self):
         """List currently-configured Stores on this context"""
@@ -1522,7 +1770,7 @@ class BaseDataContext(object):
 
         These make it simple to visualize data quality in your project. These
         include Expectations, Validations & Profiles. The are built for all
-        Datasources from JSON artifacts in the local repo including validations
+        ExecutionEnvironments from JSON artifacts in the local repo including validations
         & profiles from the uncommitted directory.
 
         :param site_names: if specified, build data docs only for these sites, otherwise,
