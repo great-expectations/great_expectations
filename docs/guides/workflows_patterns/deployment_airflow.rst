@@ -17,10 +17,9 @@ There are two supported methods: using an Airflow ``PythonOperator`` to run Vali
 .. note::
     There is not currently a Great Expectations custom Airflow operator, however we have heard from users who have implemented their own. We love community contributions so please share your operators!
 
-Check out these links for some examples of Airflow pipelines with Great Expectations Validations ensuring that downstream tasks are protected from upstream issues:
+Check out this link for an example of Airflow pipelines with Great Expectations Validations ensuring that downstream tasks are protected from upstream issues:
 
 - `Great Expectations Pipeline Tutorial <https://github.com/superconductive/ge_tutorials>`_
-- `Great Expectations / Airflow Demo <https://github.com/superconductive/airflow_meetup_demo>`_
 
 In the first link and the diagram below, you can see a common pattern of using Validation tasks to ensure that the data flowing from one task to the next is correct, and alert the team if it is not. Another common pattern is to branch and change your DAG based on a Validation (e.g. send data for more cleaning before moving to the next task, store it for a postmortem, etc.).
 
@@ -100,7 +99,6 @@ Additional resources
 --------------------
 
 - `Great Expectations Pipeline Tutorial <https://github.com/superconductive/ge_tutorials>`_ showing Great Expectations implemented in an airflow pipeline.
-- `Great Expectations / Airflow Demo <https://github.com/superconductive/airflow_meetup_demo>`_
 
 Comments
 --------
