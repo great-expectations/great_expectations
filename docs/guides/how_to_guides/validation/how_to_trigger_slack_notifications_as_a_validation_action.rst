@@ -53,7 +53,7 @@ Steps
 
   If successful, you should receive a Slack message that looks like this:
 
-    .. image:: ../../images/slack_notification_example.png
+    .. image:: ../../../images/slack_notification_example.png
 
 
 Additional resources

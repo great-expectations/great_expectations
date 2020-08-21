@@ -1,6 +1,6 @@
-.. _how_to_guides__creating_and_editing_expectations__how_to_quickly_explore_data_using_expectations_in_a_notebook:
+.. _tutorials__explore_expectations_in_a_notebook:
 
-How to quickly explore data using Expectations in a notebook
+How to quickly explore Expectations in a notebook
 ============================================================
 
 Building :ref:`Expectations` as you conduct exploratory data analysis is a great way to ensure that your insights about data processes and pipelines remain part of your team's knowledge.
@@ -16,7 +16,7 @@ This guide will help you quickly get a taste of Great Expectations, without even
 
 .. note:: 
 
-    Unlike most how-to guides, these instructions do *not* assume that you have already configured a Data Context by running ``great_expectations init``. Once you're comfortable with these basic concepts, you will almost certainly want to unlock the full power of Great Expectations by configuring a Data Context. Please check out the instructions in the :ref:`Getting started` tutorial when you're ready to start.
+    Unlike most how-to guides, these instructions do *not* assume that you have already configured a Data Context by running ``great_expectations init``. Once you're comfortable with these basic concepts, you will almost certainly want to unlock the full power of Great Expectations by configuring a Data Context. Please check out the instructions in the :ref:`tutorials__getting_started` tutorial when you're ready to start.
 
 Steps
 -----
