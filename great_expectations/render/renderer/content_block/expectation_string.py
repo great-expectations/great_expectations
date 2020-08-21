@@ -249,10 +249,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     )
 
                 elif params["min_value"] is None:
-                    template_str += "values must always be less than $max_value."
+                    template_str += "values must always be at most $max_value."
 
                 elif params["max_value"] is None:
-                    template_str += "values must always be more than $min_value."
+                    template_str += "values must always be at least $min_value."
 
         if include_column_name:
             template_str = "$column " + template_str
@@ -540,9 +540,9 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             if params["min_value"] is not None and params["max_value"] is not None:
                 template_str = "Must have between $min_value and $max_value rows."
             elif params["min_value"] is None:
-                template_str = "Must have less than than $max_value rows."
+                template_str = "Must have at most $max_value rows."
             elif params["max_value"] is None:
-                template_str = "Must have more than $min_value rows."
+                template_str = "Must have at least $min_value rows."
 
         if params["row_condition"] is not None:
             (
