@@ -179,19 +179,19 @@ def test_expect_multicolumn_values_to_be_unique(spark_session, test_dataframe):
     """
     from pyspark.sql.utils import AnalysisException
 
-    assert test_dataframe.expect_multicolumn_values_to_be_unique(
+    assert test_dataframe.expect_select_column_values_to_be_unique_within_record(
         ["name", "age"]
     ).success
-    assert test_dataframe.expect_multicolumn_values_to_be_unique(
+    assert test_dataframe.expect_select_column_values_to_be_unique_within_record(
         ["address.street", "name"]
     ).success
-    assert test_dataframe.expect_multicolumn_values_to_be_unique(
+    assert test_dataframe.expect_select_column_values_to_be_unique_within_record(
         ["address.street", "`non.nested`"]
     ).success
 
     # Expectation should fail when no `` surround a non-nested column with dot notation
     with pytest.raises(AnalysisException):
-        test_dataframe.expect_multicolumn_values_to_be_unique(
+        test_dataframe.expect_select_column_values_to_be_unique_within_record(
             ["address.street", "non.nested"]
         )
 

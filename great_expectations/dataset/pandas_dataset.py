@@ -1772,7 +1772,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.multicolumn_map_expectation
-    def expect_multicolumn_values_to_be_unique(
+    def expect_select_column_values_to_be_unique_within_record(
         self,
         column_list,
         ignore_row_if="all_values_are_missing",
@@ -1812,7 +1812,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.multicolumn_map_expectation
-    def expect_multicolumn_values_to_be_unique_together(
+    def expect_compound_columns_to_be_unique(
         self,
         column_list,
         ignore_row_if="all_values_are_missing",
@@ -1823,15 +1823,6 @@ Notes:
         catch_exceptions=None,
         meta=None,
     ):
-        """ Multi-Column Map Expectation
-
-        Expect that the columns are unique together, e.g. a multi-column primary key
-
-        Args:
-            self:
-            column_list: (List[str]): \
-                Set of columns to be checked
-        """
         # Do not dropna here, since we have separately dealt with na in decorator
         # Invert boolean so that duplicates are False and non-duplicates are True
         return ~column_list.duplicated(keep=False)

@@ -1335,7 +1335,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     @DocInherit
     @MetaSparkDFDataset.multicolumn_map_expectation
-    def expect_multicolumn_values_to_be_unique(
+    def expect_select_column_values_to_be_unique_within_record(
         self,
         column_list,  # pyspark.sql.DataFrame
         ignore_row_if="all_values_are_missing",

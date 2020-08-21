@@ -124,7 +124,7 @@ class ExpectationExplorer(object):
                 "value_pairs_set",
                 "ignore_row_if",
             ],
-            "expect_multicolumn_values_to_be_unique": ["ignore_row_if"],
+            "expect_select_column_values_to_be_unique_within_record": ["ignore_row_if"],
             "expect_column_values_to_be_of_type": ["type_", "mostly"],
             "expect_column_values_to_be_in_type_list": ["type_list", "mostly"],
             "expect_column_kl_divergence_to_be_less_than": [

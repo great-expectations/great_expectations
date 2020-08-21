@@ -9,6 +9,9 @@ Develop
 * [FEATURE] Add new exception: expect_multicolumn_sum_to_equal for `pandas` and `Spark` (thanks @chipmyersjr)!
 * [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
 * [BUGFIX] Fix bug preventing the use of get_available_partition_ids in s3 generator
+* [DOCS] Deploying Great Expectations with Airflow
+* [FEATURE] Add new expectation: expect_compound_columns_to_be_unique for `pandas`
+* [BREAKING] Rename expectation `expect_multicolumn_values_to_be_unique` to `expect_select_column_values_to_be_unique_within_record`
 
 0.12.0
 -----------------
@@ -171,7 +174,7 @@ Develop
 -----------------
 * [DOCS] Improved help for CLI `checkpoint` command
 * [BUGFIX] BasicSuiteBuilderProfiler could include extra expectations when only some expectations were selected (#1422)
-* [FEATURE] add support for `expect_multicolumn_values_to_be_unique` and `expect_column_pair_values_A_to_be_greater_than_B`
+* [FEATURE] add support for `expect_select_column_values_to_be_unique_within_record` and `expect_column_pair_values_A_to_be_greater_than_B`
   to `Spark`. Thanks @WilliamWsyHK!
 * [ENHANCEMENT] Allow a dictionary of variables can be passed to the DataContext constructor to allow override
   config variables at runtime. Thanks @balexander!
@@ -885,7 +888,7 @@ to top-level names.
   0 in the result_format argument, and we do not compute it when it would not be returned. (#431, thanks @eugmandel)
 * **Fix**: Correct error in unexpected_percent computations for sqlalchemy when unexpected values exceed limit (#424)
 * **Fix**: Pass meta object to expectation result (#415, thanks @jseeman)
-* Add support for multicolumn expectations, with `expect_multicolumn_values_to_be_unique` as an example (#406)
+* Add support for multicolumn expectations, with `expect_select_column_values_to_be_unique_within_record` as an example (#406)
 * Add dataset class to from_pandas to simplify using custom datasets (#404, thanks @jtilly)
 * Add schema support for sqlalchemy data context (#410, thanks @rahulj51)
 * Minor documentation, warning, and testing improvements (thanks @zdog).
