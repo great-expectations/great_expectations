@@ -2253,7 +2253,6 @@ class DataContext(BaseDataContext):
     ) -> DataContextConfig:
         kwargs_callee: dict = filter_properties_dict(
             properties=get_currently_executing_function_call_arguments(),
-            delete_fields=["backend_ecosystem"],
             clean_empty=False,
             inplace=False,
         )
