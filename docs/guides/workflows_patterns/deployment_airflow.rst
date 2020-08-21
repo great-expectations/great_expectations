@@ -53,7 +53,7 @@ Running a Validation using a ``PythonOperator``
         # Create your batch_kwargs
         batch_kwargs_file = {
             "path": <insert path to your data file>,
-            "datasource": "input_files"}
+            "datasource": "my_pandas_datasource"}
 
         # Create your batch (batch_kwargs + expectation suite)
         batch_file = context.get_batch(batch_kwargs_file, <insert name of your expectation suite>)
