@@ -74,4 +74,5 @@ validation_operators:
           target_store_name: evaluation_parameter_store
 
 anonymous_usage_statistics:
+  data_context_id: 7f76b3c9-330c-4307-b882-7ad9186adf0c
   enabled: true

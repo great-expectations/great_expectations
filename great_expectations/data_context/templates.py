@@ -15,12 +15,14 @@ config_version: 2
 """
 
 # noinspection SpellCheckingInspection
+# Note: The blank line at the bottom of this template is required by tests that add comments to YAML configuration.
 ANONYMIZED_USAGE_STATISTICS_TEMPLATE: str = """
 anonymous_usage_statistics:
-  enabled: {{ allow_anonymous_usage_statistics }}
+  enabled: {{ usage_statistics_enabled }}
+
 """
 
-DATA_CONTEXT_INIT_PROJECT_TEMPLATE: str = """
+DATA_CONTEXT_MINIMAL_PROJECT_TEMPLATE: str = """
 {% include 'config_version_template.j2' %}
 {% include 'anonymized_usage_statistics_template.j2' %}
 """
@@ -162,7 +164,7 @@ J2_ENV: Environment = Environment(
         {
             "config_version_template.j2": CONFIG_VERSION_TEMPLATE,
             "anonymized_usage_statistics_template.j2": ANONYMIZED_USAGE_STATISTICS_TEMPLATE,
-            "data_context_init_project_template.j2": DATA_CONTEXT_INIT_PROJECT_TEMPLATE,
+            "data_context_minimal_project_template.j2": DATA_CONTEXT_MINIMAL_PROJECT_TEMPLATE,
             "project_help_comment_template.j2": PROJECT_HELP_COMMENT_TEMPLATE,
             "config_variables_intro_template.j2": CONFIG_VARIABLES_INTRO_TEMPLATE,
             "config_variables_template.j2": CONFIG_VARIABLES_TEMPLATE,

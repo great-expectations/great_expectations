@@ -5,11 +5,11 @@ import os
 import re
 from collections import OrderedDict
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigSchema,
 )
-from great_expectations.exceptions import MissingConfigVariableError
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
 logger = logging.getLogger(__name__)
@@ -138,7 +138,7 @@ def substitute_config_variable(template_str, config_variables_dict):
                     + template_str[match.end() :]
                 )
 
-        raise MissingConfigVariableError(
+        raise ge_exceptions.MissingConfigVariableError(
             f"""\n\nUnable to find a match for config substitution variable: `{match.group(1)}`.
 Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
 See https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets""",
@@ -187,14 +187,3 @@ def file_relative_path(dunderfile, relative_path):
     H/T https://github.com/dagster-io/dagster/blob/8a250e9619a49e8bff8e9aa7435df89c2d2ea039/python_modules/dagster/dagster/utils/__init__.py#L34
     """
     return os.path.join(os.path.dirname(dunderfile), relative_path)
-
-
-def is_aws_detected(**kwargs) -> bool:
-    return (
-        kwargs["json_s3_bucket"] is not None
-        and kwargs["expectations_suites_store_prefix"] is not None
-        and kwargs["validations_store_prefix"] is not None
-        and kwargs["site_name"] is not None
-        and kwargs["html_docs_s3_bucket"] is not None
-        and kwargs["data_docs_prefix"] is not None
-    )

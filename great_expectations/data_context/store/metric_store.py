@@ -103,5 +103,5 @@ class EvaluationParameterStore(MetricStore):
         return params
 
     @property
-    def config(self):
+    def config(self) -> dict:
         return self._config

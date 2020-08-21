@@ -8,6 +8,7 @@ from datetime import datetime
 import tzlocal
 from IPython.core.display import HTML, display
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ProfilingResultsColumnSectionRenderer,
@@ -189,7 +190,11 @@ def show_available_data_asset_names(context, data_source_name=None):
     """
 
     print("Inspecting your data sources. This may take a moment...")
-    expectation_suite_keys = context.list_expectation_suites()
+    expectation_suite_keys = []
+    try:
+        expectation_suite_keys = context.list_expectation_suites()
+    except ge_exceptions.InvalidConfigError:
+        pass
     datasources = context.list_datasources()
     html = ""
     for datasource in datasources:

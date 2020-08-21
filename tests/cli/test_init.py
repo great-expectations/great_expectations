@@ -213,7 +213,6 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
         == """\
 great_expectations/
     .gitignore
-    anon_data_context_id.yml
     great_expectations.yml
     checkpoints/
     expectations/

@@ -14,14 +14,10 @@ import shutil
 import sys
 import warnings
 import webbrowser
-from functools import wraps
-from inspect import getfullargspec
 from typing import Callable, Dict, List, Optional, Union
 
 from dateutil.parser import parse
-from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
-from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
@@ -41,24 +37,26 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.config_utils import (
+    compute_and_persist_to_filesystem_data_context_id,
+    create_standard_s3_backend_data_context,
+    validate_project_config,
+)
 from great_expectations.data_context.store import (
-    ConfigurationPersistenceManager,
     ConfigurationStore,
     Store,
     StoreBackend,
 )
+from great_expectations.data_context.store.util import build_store_from_config
 from great_expectations.data_context.templates import INSTANCE_ID, get_templated_yaml
 from great_expectations.data_context.types.base import (
     CURRENT_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
-    BaseConfig,
     DataContextConfig,
-    DataContextIdentificationConfig,
     DatasourceConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
-    dataContextIdentificationConfigSchema,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
@@ -78,6 +76,7 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import (
     filter_properties_dict,
+    get_currently_executing_function_call_arguments,
     verify_dynamic_loading_support,
 )
 from great_expectations.validation_operators import ValidationOperator
@@ -91,6 +90,7 @@ except ImportError:
     SQLAlchemyError = ge_exceptions.ProfilerError
 
 logger = logging.getLogger(__name__)
+
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
@@ -218,46 +218,21 @@ class BaseDataContext(object):
     NOTEBOOK_SUBDIRECTORIES = ["pandas", "spark", "sql"]
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
-    GE_DATA_CONTEXT_ANONYMOUS_ID_FILE_NAME_ROOT = "anon_data_context_id"
-    GE_DATA_CONTEXT_PROJECT_CONFIG_FILE_NAME_ROOT = GE_DIR
     GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
     GLOBAL_CONFIG_PATHS = [
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf",
     ]
-    GE_IDENTIFICATION_CONFIGURATION_STORE_NAME: str = GE_DATA_CONTEXT_ANONYMOUS_ID_FILE_NAME_ROOT
-    GE_PROJECT_CONFIGURATION_STORE_NAME: str = GE_DIR
     GE_EVALUATION_PARAMETER_STORE_NAME: str = "evaluation_parameter_store"
-
-    @classmethod
-    def validate_identification_config(cls, identification_config):
-        if isinstance(identification_config, DataContextIdentificationConfig):
-            return True
-        try:
-            dataContextIdentificationConfigSchema.load(identification_config)
-        except ValidationError:
-            raise
-        return True
-
-    @classmethod
-    def validate_project_config(cls, project_config):
-        if isinstance(project_config, DataContextConfig):
-            return True
-        try:
-            dataContextConfigSchema.load(project_config)
-        except ValidationError:
-            raise
-        return True
 
     @usage_statistics_enabled_method(event_name="data_context.__init__",)
     def __init__(
         self,
-        data_context_id: str = None,
         project_config: Union[DataContextConfig, None] = None,
         context_root_dir: str = None,
         runtime_environment: dict = None,
-        allow_anonymous_usage_statistics: bool = False,
+        usage_statistics_enabled: bool = False,
     ):
         """DataContext constructor
 
@@ -270,19 +245,19 @@ class BaseDataContext(object):
         Returns:
             None
         """
-        if not BaseDataContext.validate_project_config(project_config):
+        if not validate_project_config(project_config):
             raise ge_exceptions.InvalidConfigError(
                 "Your project_config is not valid. Try using the CLI check-config command."
             )
-        self._data_context_id = data_context_id
         self._project_config = project_config
         self._apply_global_config_overrides(
-            allow_anonymous_usage_statistics=allow_anonymous_usage_statistics
+            usage_statistics_enabled=usage_statistics_enabled
         )
-        if context_root_dir is not None:
-            self._context_root_directory = os.path.abspath(context_root_dir)
-        else:
+
+        if context_root_dir is None:
             self._context_root_directory = context_root_dir
+        else:
+            self._context_root_directory = os.path.abspath(context_root_dir)
         self.runtime_environment = runtime_environment or {}
 
         # Init plugin support
@@ -294,7 +269,6 @@ class BaseDataContext(object):
             None  # This variable *may* be used in case we cannot save an instance id
         )
         self._initialize_usage_statistics(
-            data_context_id=self.data_context_id,
             usage_statistics_config=project_config.anonymous_usage_statistics,
         )
 
@@ -320,27 +294,27 @@ class BaseDataContext(object):
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
 
-    def _build_store(self, store_name, store_config):
-        module_name = "great_expectations.data_context.store"
+    def _build_store(
+        self,
+        store_name=None,
+        store_config=None,
+        module_name="great_expectations.data_context.store",
+    ):
+        runtime_environment: dict = {"root_directory": self.root_directory}
+        new_store: Union[StoreBackend, Store, None]
         try:
-            new_store = instantiate_class_from_config(
-                config=store_config,
-                runtime_environment={"root_directory": self.root_directory},
-                config_defaults={"module_name": module_name},
+            new_store = build_store_from_config(
+                store_config=store_config,
+                module_name=module_name,
+                runtime_environment=runtime_environment,
             )
-        except ge_exceptions.DataContextError as e:
-            new_store = None
+        except ge_exceptions.ClassInstantiationError as e:
             if store_name is None:
                 store_name = "Unnamed"
             logger.critical(
-                f'While attempting to instantiate the store named "{store_name}" an error occurred: {e}'
+                f'Error {e} occurred while attempting to instantiate the store named "{store_name}".'
             )
-        if not new_store:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=store_config["class_name"],
-            )
+            raise e
         if store_name is not None:
             self._stores[store_name] = new_store
         return new_store
@@ -366,12 +340,12 @@ class BaseDataContext(object):
         for store_name, store_config in store_configs.items():
             self._build_store(store_name, store_config)
 
-    def _apply_global_config_overrides(self, allow_anonymous_usage_statistics: bool):
+    def _apply_global_config_overrides(self, usage_statistics_enabled: bool):
         # check for global usage statistics opt out
         validation_errors = {}
 
         if self._check_global_usage_statistics_opt_out(
-            allow_anonymous_usage_statistics=allow_anonymous_usage_statistics
+            usage_statistics_enabled=usage_statistics_enabled
         ):
             logger.info(
                 "Usage statistics is disabled globally. Applying override to project_config."
@@ -392,7 +366,7 @@ class BaseDataContext(object):
                 logger.info(
                     "data_context_id is defined globally. Applying override to project_config."
                 )
-                self._project_config.anonymous_usage_statistics.data_context_id = (
+                self.get_project_config().anonymous_usage_statistics.data_context_id = (
                     global_data_context_id
                 )
             else:
@@ -445,10 +419,8 @@ class BaseDataContext(object):
         return None
 
     @staticmethod
-    def _check_global_usage_statistics_opt_out(
-        allow_anonymous_usage_statistics: bool = False,
-    ):
-        if allow_anonymous_usage_statistics:
+    def _check_global_usage_statistics_opt_out(usage_statistics_enabled: bool = False,):
+        if usage_statistics_enabled:
             return False
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
@@ -478,9 +450,7 @@ class BaseDataContext(object):
         return False
 
     def _initialize_usage_statistics(
-        self,
-        data_context_id: str,
-        usage_statistics_config: AnonymizedUsageStatisticsConfig,
+        self, usage_statistics_config: AnonymizedUsageStatisticsConfig,
     ):
         """Initialize the usage statistics system."""
         if not usage_statistics_config.enabled:
@@ -490,7 +460,7 @@ class BaseDataContext(object):
 
         self._usage_statistics_handler = UsageStatisticsHandler(
             data_context=self,
-            data_context_id=data_context_id,
+            data_context_id=usage_statistics_config.data_context_id,
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
         )
 
@@ -711,11 +681,9 @@ class BaseDataContext(object):
 
     @property
     def data_context_id(self):
-        return self._data_context_id
-
-    @data_context_id.setter
-    def data_context_id(self, data_context_id: str):
-        self._data_context_id = data_context_id
+        return (
+            self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+        )
 
     @property
     def instance_id(self):
@@ -1152,12 +1120,12 @@ class BaseDataContext(object):
     def add_data_docs_site(
         self,
         name: str,
-        store_backend: StoreBackend,
+        store_backend: dict,
         *,
         show_how_to_buttons: bool = True,
         show_cta_footer: bool = True,
         **kwargs,
-    ) -> dict:
+    ) -> Union[dict, None]:
         data_docs_site_config: dict = {
             "class_name": "SiteBuilder",
             "show_how_to_buttons": show_how_to_buttons,
@@ -2191,8 +2159,8 @@ class DataContext(BaseDataContext):
         cls,
         *,
         project_root_dir: str = None,
+        usage_statistics_enabled: bool = True,
         runtime_environment: Union[dict, None] = None,
-        allow_anonymous_usage_statistics: bool = True,
     ):
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
@@ -2204,7 +2172,7 @@ class DataContext(BaseDataContext):
             project_root_dir: path to the root directory in which to create a new great_expectations directory
             runtime_environment: a dictionary of config variables that override both those set in config_variables.yml
             and the environment
-            allow_anonymous_usage_statistics: allow anonymous data collection to improve Great Expectations
+            usage_statistics_enabled: allow anonymous data collection to improve Great Expectations
             (set to True by default)
 
         Returns:
@@ -2228,7 +2196,7 @@ class DataContext(BaseDataContext):
             )
             warnings.warn(message)
         else:
-            cls.write_project_template_to_disk(ge_dir, allow_anonymous_usage_statistics)
+            cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
 
         if os.path.isfile(os.path.join(ge_dir, "notebooks")):
             message = """Warning. An existing `notebooks` directory was found here: {}.
@@ -2251,354 +2219,95 @@ class DataContext(BaseDataContext):
 
         return cls(context_root_dir=ge_dir, runtime_environment=runtime_environment)
 
-    # noinspection PyMethodParameters
-    def create_using_s3_backend(func: Callable = None,) -> Callable:
-        """
-        A decorator for loading or creating data context with S3 serving as the backend store for all
-        application-level stores (Expectation Suites, Validations, Evaluation Parameters, and Data Docs).
-        """
-
-        @wraps(func)
-        def initialize_using_s3_backend_wrapped_method(cls, **kwargs):
-            kwargs_callee: dict
-
-            func_callee: Callable = cls.create_s3_backend_data_context
-            # noinspection SpellCheckingInspection
-            argspec: list = getfullargspec(func_callee)[0][1:]
-            kwargs_callee = filter_properties_dict(
-                properties=kwargs, keep_fields=argspec, clean_empty=False, inplace=False
-            )
-            working_data_context_info: dict = cls.create_s3_backend_data_context(
-                **kwargs_callee
-            )
-
-            working_data_context: DataContext = working_data_context_info[
-                "data_context"
-            ]
-            found_existing_project_config: bool = working_data_context_info[
-                "found_existing_project_config"
-            ]
-
-            if found_existing_project_config:
-                return working_data_context
-
-            kwargs_callee = copy.deepcopy(kwargs)
-            kwargs_callee.update({"cls": cls, "data_context": working_data_context})
-
-            return func(**kwargs_callee)
-
-        return initialize_using_s3_backend_wrapped_method
-
+    # noinspection PyUnusedLocal
+    # noinspection SpellCheckingInspection
     @classmethod
-    @create_using_s3_backend
-    def create_standard_spark_df_s3_backend_data_context(
-        cls, **kwargs,
-    ):
-        func_callee: Callable = cls.build_s3_backend_data_context
-        # noinspection SpellCheckingInspection
-        argspec: list = getfullargspec(func_callee)[0][1:]
-        filter_properties_dict(
-            properties=kwargs, keep_fields=argspec, clean_empty=False, inplace=True
-        )
-
-        return cls.build_s3_backend_data_context(**kwargs)
-
-    @classmethod
-    def create_s3_backend_data_context(
+    def build_project_config(
         cls,
-        expectations_store_bucket: str,
-        expectations_store_prefix: str,
-        expectations_store_name: str,
-        expectations_store_kwargs: dict = None,
-        ge_project_config_bucket: str = None,
-        ge_project_config_prefix: str = None,
-        ge_project_config_kwargs: dict = None,
-        runtime_environment: Union[dict, None] = None,
-        overwrite_existing: bool = False,
-        allow_anonymous_usage_statistics: bool = True,
-    ):
-        if expectations_store_kwargs is None:
-            expectations_store_kwargs = {}
-        ge_id_config_bucket: str = expectations_store_bucket
-        ge_id_config_prefix: str = expectations_store_prefix
-        ge_id_config_kwargs: dict = expectations_store_kwargs
-        if ge_project_config_bucket is None:
-            ge_project_config_bucket = expectations_store_bucket
-        if ge_project_config_prefix is None:
-            ge_project_config_prefix = expectations_store_prefix
-        if ge_project_config_kwargs is None:
-            ge_project_config_kwargs = expectations_store_kwargs
-
-        working_data_context: Union[DataContext, None] = cls.create_blank_data_context(
-            runtime_environment=runtime_environment,
-            allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
-        )
-
-        store_config: dict = {
-            "bucket": ge_id_config_bucket,
-            "prefix": ge_id_config_prefix,
-        }
-        store_config.update(**ge_id_config_kwargs)
-        s3_store_backend_obj: StoreBackend = working_data_context.add_tuple_s3_store_backend(
-            **store_config
-        )
-        data_context_id: str = cls.find_or_create_data_context_id(
-            store_backend=s3_store_backend_obj,
-            runtime_environment=runtime_environment,
-            allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
-        )
-
-        store_config: dict = {
-            "bucket": ge_project_config_bucket,
-            "prefix": ge_project_config_prefix,
-        }
-        store_config.update(**ge_project_config_kwargs)
-        s3_store_backend_obj: StoreBackend = working_data_context.add_tuple_s3_store_backend(
-            **store_config
-        )
-        ge_project_config_store: ConfigurationStore = working_data_context.build_configuration_store(
-            store_name=BaseDataContext.GE_PROJECT_CONFIGURATION_STORE_NAME,
-            store_backend=s3_store_backend_obj,
-        )
-        # noinspection PyTypeChecker
-        ge_project_config_persistence_manager: ConfigurationPersistenceManager = ConfigurationPersistenceManager(
-            configuration_class=DataContextConfig,
-            configuration_store=ge_project_config_store,
-            overwrite_existing=True,
-        )
-
-        ge_project_config: Union[BaseConfig, None]
-        try:
-            ge_project_config = (
-                ge_project_config_persistence_manager.load_configuration()
-            )
-        except ge_exceptions.ConfigNotFoundError:
-            ge_project_config = None
-
-        found_existing_ge_project_config: bool
-
-        if ge_project_config is None:
-            found_existing_ge_project_config = False
-            ge_project_config = working_data_context.get_project_config()
-            ge_project_config_persistence_manager.save_configuration(
-                configuration=ge_project_config
-            )
-        else:
-            found_existing_ge_project_config = True
-
-        cls.validate_project_config(project_config=ge_project_config)
-
-        if not overwrite_existing and found_existing_ge_project_config:
-            working_data_context = cls(
-                data_context_id=None,
-                project_config_in_backend_store=True,
-                ge_project_config_persistence_manager=None,
-                project_config=ge_project_config,
-                context_root_dir=None,
-                runtime_environment=runtime_environment,
-                allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
-            )
-
-        working_data_context.data_context_id = data_context_id
-        working_data_context.ge_project_config_persistence_manager = (
-            ge_project_config_persistence_manager
-        )
-
-        store_config: dict = {
-            "bucket": expectations_store_bucket,
-            "prefix": expectations_store_prefix,
-        }
-        store_config.update(**expectations_store_kwargs)
-        s3_store_backend_obj: StoreBackend = working_data_context.add_tuple_s3_store_backend(
-            **store_config
-        )
-        # noinspection PyUnusedLocal
-        expectations_store_obj: Store = working_data_context.add_expectations_store(
-            name=expectations_store_name, store_backend=s3_store_backend_obj
-        )
-        working_data_context.set_expectations_store_name(
-            expectations_store_name=expectations_store_name
-        )
-
-        return {
-            "data_context": working_data_context,
-            "found_existing_project_config": found_existing_ge_project_config,
-        }
-
-    @classmethod
-    def find_or_create_data_context_id(
-        cls,
-        store_backend: StoreBackend = None,
-        runtime_environment: dict = None,
-        allow_anonymous_usage_statistics: bool = True,
-    ):
-        if store_backend is None:
-            raise ge_exceptions.DataContextError(
-                f"""The find_or_create_data_context_id method requires a valid store_backend reference.
-                """
-            )
-        ge_id_config_store: ConfigurationStore = cls.create_blank_data_context(
-            runtime_environment=runtime_environment,
-            allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
-        ).build_configuration_store(
-            store_name=BaseDataContext.GE_IDENTIFICATION_CONFIGURATION_STORE_NAME,
-            store_backend=store_backend,
-        )
-        # noinspection PyTypeChecker
-        ge_id_config_persistence_manager: ConfigurationPersistenceManager = ConfigurationPersistenceManager(
-            configuration_class=DataContextIdentificationConfig,
-            configuration_store=ge_id_config_store,
-            overwrite_existing=False,
-        )
-
-        ge_id_config: Union[BaseConfig, None]
-        try:
-            ge_id_config = ge_id_config_persistence_manager.load_configuration()
-        except ge_exceptions.ConfigNotFoundError:
-            ge_id_config = None
-
-        found_existing_ge_id_config: bool
-
-        if ge_id_config is None:
-            ge_id_config = DataContextIdentificationConfig()
-            ge_id_config_persistence_manager.save_configuration(
-                configuration=ge_id_config
-            )
-
-        cls.validate_identification_config(identification_config=ge_id_config)
-
-        data_context_id: str = ge_id_config.data_context_id
-
-        return data_context_id
-
-    @classmethod
-    def create_blank_data_context(
-        cls,
-        runtime_environment: Union[dict, None] = None,
-        allow_anonymous_usage_statistics: bool = True,
-    ):
-        project_yaml: str = get_templated_yaml(
-            j2_template_name="data_context_init_project_template.j2",
-            allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
-        )
-        project_config_dict_from_yaml: CommentedMap = yaml.load(project_yaml)
-        project_config: DataContextConfig
-        try:
-            # noinspection PyTypeChecker
-            project_config = DataContextConfig.from_commented_map(
-                project_config_dict_from_yaml
-            )
-        except ge_exceptions.InvalidDataContextConfigError:
-            # Just to be explicit about what we intended to catch
-            raise
-
-        return cls(
-            data_context_id=None,
-            project_config_in_backend_store=True,
-            ge_project_config_persistence_manager=None,
-            project_config=project_config,
-            context_root_dir=None,
-            runtime_environment=runtime_environment,
-            allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
-        )
-
-    @classmethod
-    def build_s3_backend_data_context(
-        cls,
+        backend_ecosystem: str,
+        datasource_type: str,
+        *,
+        expectations_store_bucket: str = None,
+        expectations_store_prefix: str = None,
         validations_store_bucket: str = None,
         validations_store_prefix: str = None,
         data_docs_store_bucket: str = None,
         data_docs_store_prefix: str = None,
+        expectations_store_name: str = None,
         validations_store_name: str = None,
-        data_docs_site_name: str = "data_docs_site",
-        validations_store_kwargs: dict = None,
-        data_docs_store_kwargs: dict = None,
-        spark_df_datasource_name: str = "s3_files_spark_datasource",
+        data_docs_site_name: str = None,
+        expectations_store_kwargs: str = None,
+        validations_store_kwargs: str = None,
+        data_docs_store_kwargs: str = None,
+        project_config_bucket: str = None,
+        project_config_prefix: str = None,
+        project_config_kwargs: str = None,
+        spark_df_datasource_name: str = None,
         slack_webhook: str = None,
-        show_how_to_buttons: bool = True,
-        show_cta_footer: bool = True,
-        include_profiling: bool = True,
-        data_context=None,
+        show_how_to_buttons: str = None,
+        show_cta_footer: str = None,
+        include_profiling: str = None,
+        runtime_environment: str = None,
+        overwrite_existing: str = None,
+        usage_statistics_enabled: str = None,
+    ) -> DataContextConfig:
+        kwargs_callee: dict = filter_properties_dict(
+            properties=get_currently_executing_function_call_arguments(),
+            delete_fields=["backend_ecosystem"],
+            clean_empty=False,
+            inplace=False,
+        )
+        return cls.build_data_context(**kwargs_callee).get_project_config()
+
+    # noinspection PyUnusedLocal
+    # noinspection SpellCheckingInspection
+    @classmethod
+    def build_data_context(
+        cls,
+        backend_ecosystem: str,
+        datasource_type: str,
+        *,
+        expectations_store_bucket: str = None,
+        expectations_store_prefix: str = None,
+        validations_store_bucket: str = None,
+        validations_store_prefix: str = None,
+        data_docs_store_bucket: str = None,
+        data_docs_store_prefix: str = None,
+        expectations_store_name: str = None,
+        validations_store_name: str = None,
+        data_docs_site_name: str = None,
+        expectations_store_kwargs: str = None,
+        validations_store_kwargs: str = None,
+        data_docs_store_kwargs: str = None,
+        project_config_bucket: str = None,
+        project_config_prefix: str = None,
+        project_config_kwargs: str = None,
+        spark_df_datasource_name: str = None,
+        slack_webhook: str = None,
+        show_how_to_buttons: str = None,
+        show_cta_footer: str = None,
+        include_profiling: str = None,
+        runtime_environment: str = None,
+        overwrite_existing: str = None,
+        usage_statistics_enabled: str = None,
     ):
-        if data_context is None:
+        kwargs_callee: dict
+
+        if backend_ecosystem == "aws":
+            func_callee: Callable = create_standard_s3_backend_data_context
+            kwargs_callee = filter_properties_dict(
+                properties=get_currently_executing_function_call_arguments(),
+                delete_fields=["backend_ecosystem"],
+                clean_empty=False,
+                inplace=False,
+            )
+            return func_callee(**kwargs_callee)
+        else:
             raise ge_exceptions.DataContextError(
-                f"""The build_s3_backend_data_context method requires a valid data_context reference.
+                f"""
+Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}" is not currently supported).
                 """
             )
-        if validations_store_bucket is None:
-            validations_store_bucket = ""
-        if validations_store_prefix is None:
-            validations_store_prefix = ""
-        if validations_store_kwargs is None:
-            validations_store_kwargs = {}
-        if data_docs_store_bucket is None:
-            data_docs_store_bucket = ""
-        if data_docs_store_prefix is None:
-            data_docs_store_prefix = ""
-        if data_docs_store_kwargs is None:
-            data_docs_store_kwargs = {}
-
-        # Add the Data Source (Spark Dataframe and Pandas Dataframe data sources types are currently implemented).
-        # noinspection PyUnusedLocal
-        spark_df_datasource: Datasource = data_context.add_spark_df_datasource(
-            name=spark_df_datasource_name
-        )
-
-        # Create the Validations Store:
-        # First, allocated the backend store (to be used for storing Validations in the JSON format);
-        if validations_store_bucket:
-            store_config: dict = {
-                "bucket": validations_store_bucket,
-                "prefix": validations_store_prefix,
-            }
-            store_config.update(**validations_store_kwargs)
-            s3_store_backend_obj: StoreBackend = data_context.add_tuple_s3_store_backend(
-                **store_config
-            )
-            # Second, add the Validations Store that will use the AWS S3 backend store, allocated in the previous step.
-            # noinspection PyUnusedLocal
-            validations_store_obj: Store = data_context.add_validation_store(
-                name=validations_store_name, store_backend=s3_store_backend_obj
-            )
-            # Third, set the name of the Validations Store added to be the one used by Great Expectations (required).
-            data_context.set_validations_store_name(
-                validations_store_name=validations_store_name
-            )
-
-        # Create the Evaluation Parameters Store (no arguments means an In-Memory backend store and the default name).
-        # noinspection PyUnusedLocal
-        evaluation_parameters_store_obj: Store = data_context.add_evaluation_parameters_store()
-        # Set the default Evaluation Parameters Store just added to be the one used by Great Expectations (required).
-        data_context.set_evaluation_parameter_store_name()
-
-        # Add the Action List Operator for data validation (satisfies the needs of a wide variety of applications).
-        # noinspection PyUnusedLocal
-        action_list_validation_operator: ValidationOperator = data_context.add_action_list_validation_operator(
-            name="action_list_operator", slack_webhook=slack_webhook
-        )
-
-        if data_docs_store_bucket:
-            # Create the Data Docs Site:
-            # First, allocated the backend store (to be used for storing Data Docs in the HTML/CSS format);
-            store_config: dict = {
-                "bucket": data_docs_store_bucket,
-                "prefix": data_docs_store_prefix,
-            }
-            store_config.update(**data_docs_store_kwargs)
-            s3_store_backend_obj: StoreBackend = data_context.add_tuple_s3_store_backend(
-                **store_config
-            )
-            # Second, add the Data Docs Site that will use the AWS S3 backend store, allocated in the previous step.
-            # noinspection PyUnusedLocal
-            data_docs_site_dict: dict = data_context.add_data_docs_site(
-                name=data_docs_site_name,
-                store_backend=s3_store_backend_obj,
-                show_how_to_buttons=show_how_to_buttons,
-                show_cta_footer=show_cta_footer,
-                include_profiling=include_profiling,
-            )
-
-        return data_context
 
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir):
@@ -2633,13 +2342,11 @@ class DataContext(BaseDataContext):
             template.write(config_variables_yaml)
 
     @classmethod
-    def write_project_template_to_disk(
-        cls, ge_dir, allow_anonymous_usage_statistics=True
-    ):
+    def write_project_template_to_disk(cls, ge_dir, usage_statistics_enabled=True):
         file_path = os.path.join(ge_dir, cls.GE_YML)
         project_yaml: str = get_templated_yaml(
             j2_template_name="project_template_with_usage_statistics_template.j2",
-            allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
+            usage_statistics_enabled=usage_statistics_enabled,
         )
         with open(file_path, "w") as template:
             template.write(project_yaml)
@@ -2709,18 +2416,15 @@ class DataContext(BaseDataContext):
 
     def __init__(
         self,
-        data_context_id: str = None,
         project_config_in_backend_store: bool = False,
-        ge_project_config_persistence_manager: ConfigurationPersistenceManager = None,
+        project_config_store: ConfigurationStore = None,
         project_config: Union[DataContextConfig, None] = None,
         context_root_dir: str = None,
         runtime_environment: dict = None,
-        allow_anonymous_usage_statistics: bool = False,
+        usage_statistics_enabled: bool = False,
     ):
         self._project_config_in_backend_store = project_config_in_backend_store
-        self._ge_project_config_persistence_manager = (
-            ge_project_config_persistence_manager
-        )
+        self._project_config_store = project_config_store
 
         if not self.project_config_in_backend_store:
             # Determine the "context root directory" - this is the parent of "great_expectations" dir
@@ -2731,37 +2435,31 @@ class DataContext(BaseDataContext):
             )
             self._context_root_directory = context_root_directory
 
-            data_context_id = DataContext.find_or_create_data_context_id(
-                store_backend=self.add_tuple_filesystem_store_backend(
-                    **{"base_directory": context_root_directory}
-                ),
-                runtime_environment=runtime_environment,
-                allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
-            )
-
-            project_config = self._load_project_config()
-
-        project_config_dict: dict = dataContextConfigSchema.dump(project_config)
+            if project_config is None:
+                project_config = self._load_project_config()
+                compute_and_persist_to_filesystem_data_context_id(
+                    project_config=project_config,
+                    base_directory=self.root_directory,
+                    runtime_environment={"root_directory": self.root_directory},
+                )
 
         super().__init__(
-            data_context_id=data_context_id,
             project_config=project_config,
             context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
-            allow_anonymous_usage_statistics=allow_anonymous_usage_statistics,
+            usage_statistics_enabled=usage_statistics_enabled,
         )
-
         # save project config if global project config values applied
-        if project_config_dict != dataContextConfigSchema.dump(
-            self.get_project_config()
+        project_config_dict: dict = dataContextConfigSchema.dump(project_config)
+        if (
+            not project_config.anonymous_usage_statistics.explicit_id
+            or project_config_dict
+            != dataContextConfigSchema.dump(self.get_project_config())
         ):
             # When project configuration is in a backend store then persist it using the project_configuration_store
-            # (if is is set); if project configuration is not in a backend store, save it to the local filesystem.
-            # Otherwise, do not save the project configuration -- it can be maintained in code (i.e., via API calls).
-            if (
-                not self.project_config_in_backend_store
-                or self.ge_project_config_persistence_manager
-            ):
+            # (if it is set); if project configuration is not in a backend store, save it to the local filesystem.
+            # if not self.project_config_in_backend_store or self.project_config_store:
+            if not self.project_config_in_backend_store:
                 self._save_project_config()
 
     def _load_project_config(self) -> Union[DataContextConfig, None]:
@@ -2774,18 +2472,16 @@ class DataContext(BaseDataContext):
         """
         logger.debug("Starting DataContext._load_project_config")
         if self.project_config_in_backend_store:
-            if self.ge_project_config_persistence_manager is None:
+            if self.project_config_store is None:
                 raise ge_exceptions.DataContextError(
-                    f"""The ge_project_config_persistence_manager property must be set in order to load the data context
+                    f"""The project_config_store property must be set in order to load the data context
 project configuration from a backend store.
                     """
                 )
             else:
                 try:
                     # noinspection PyTypeChecker
-                    return (
-                        self.ge_project_config_persistence_manager.load_configuration()
-                    )
+                    return self.project_config_store.load_configuration()
                 except ge_exceptions.InvalidKeyError:
                     raise ge_exceptions.ConfigNotFoundError()
 
@@ -2808,6 +2504,7 @@ project configuration from a backend store.
             raise ge_exceptions.ConfigNotFoundError()
 
         try:
+            # noinspection PyTypeChecker
             return DataContextConfig.from_commented_map(config_dict)
         except ge_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
@@ -2817,9 +2514,11 @@ project configuration from a backend store.
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
 
+        # If project_configuration_store is not set, do not save the project configuration, because it could be
+        # maintained in code (i.e., via API calls).
         if self.project_config_in_backend_store:
-            if self.ge_project_config_persistence_manager is not None:
-                self.ge_project_config_persistence_manager.save_configuration(
+            if self.project_config_store is not None:
+                self.project_config_store.save_configuration(
                     configuration=self.get_project_config()
                 )
         else:
@@ -2872,61 +2571,6 @@ project configuration from a backend store.
             self._save_project_config()
 
         return new_store
-
-    def add_in_memory_store_backend(
-        self,
-        *,
-        name: str = None,
-        module_name: str = "great_expectations.data_context.store",
-        class_name: str = "InMemoryStoreBackend",
-        **kwargs,
-    ) -> Union[StoreBackend, None]:
-        logger.debug(
-            f"Starting DataContext.add_in_memory_store_backend for store_name {name}"
-        )
-        store_config: dict = {"module_name": module_name, "class_name": class_name}
-        store_config.update(**kwargs)
-        return self.add_store(store_name=name, store_config=store_config)
-
-    def add_tuple_filesystem_store_backend(
-        self,
-        base_directory: str,
-        *,
-        name: str = None,
-        module_name: str = "great_expectations.data_context.store",
-        class_name: str = "TupleFilesystemStoreBackend",
-        **kwargs,
-    ) -> Union[StoreBackend, None]:
-        logger.debug(
-            f"Starting DataContext.add_tuple_filesystem_store_backend for store_name {name}"
-        )
-        store_config: dict = {
-            "module_name": module_name,
-            "class_name": class_name,
-            "base_directory": base_directory,
-        }
-        store_config.update(**kwargs)
-        return self.add_store(store_name=name, store_config=store_config)
-
-    def add_tuple_s3_store_backend(
-        self,
-        bucket: str,
-        *,
-        name: str = None,
-        module_name: str = "great_expectations.data_context.store",
-        class_name: str = "TupleS3StoreBackend",
-        **kwargs,
-    ) -> Union[StoreBackend, None]:
-        logger.debug(
-            f"Starting DataContext.add_tuple_s3_store_backend for store_name {name}"
-        )
-        store_config: dict = {
-            "module_name": module_name,
-            "class_name": class_name,
-            "bucket": bucket,
-        }
-        store_config.update(**kwargs)
-        return self.add_store(store_name=name, store_config=store_config)
 
     def add_expectations_store(
         self,
@@ -2984,32 +2628,6 @@ project configuration from a backend store.
         }
         store_config.update(**kwargs)
         return self.add_store(store_name=name, store_config=store_config)
-
-    def build_configuration_store(
-        self,
-        store_name: str,
-        store_backend: StoreBackend,
-        *,
-        module_name: str = "great_expectations.data_context.store",
-        class_name: str = "ConfigurationStore",
-        **kwargs,
-    ) -> Union[ConfigurationStore]:
-        logger.debug(
-            f"Starting DataContext.build_configuration_store for store_name {store_name}"
-        )
-        if store_backend is not None:
-            store_backend = store_backend.config
-        store_config: dict = {
-            "store_name": store_name,
-            "module_name": module_name,
-            "class_name": class_name,
-            "store_backend": store_backend,
-        }
-        store_config.update(**kwargs)
-        configuration_store: Union[ConfigurationStore] = self._build_store(
-            store_name=store_name, store_config=store_config,
-        )
-        return configuration_store
 
     def set_expectations_store_name(self, expectations_store_name: str) -> None:
         logger.debug(
@@ -3369,16 +2987,12 @@ project configuration from a backend store.
         return self._project_config_in_backend_store
 
     @property
-    def ge_project_config_persistence_manager(self):
-        return self._ge_project_config_persistence_manager
+    def project_config_store(self):
+        return self._project_config_store
 
-    @ge_project_config_persistence_manager.setter
-    def ge_project_config_persistence_manager(
-        self, ge_project_config_persistence_manager: ConfigurationPersistenceManager
-    ):
-        self._ge_project_config_persistence_manager = (
-            ge_project_config_persistence_manager
-        )
+    @project_config_store.setter
+    def project_config_store(self, project_config_store: ConfigurationStore):
+        self._project_config_store = project_config_store
 
 
 class ExplorerDataContext(DataContext):

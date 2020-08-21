@@ -99,5 +99,5 @@ class Store(object):
         return self._store_backend.has_key(key.to_tuple())
 
     @property
-    def config(self):
+    def config(self) -> dict:
         raise NotImplementedError

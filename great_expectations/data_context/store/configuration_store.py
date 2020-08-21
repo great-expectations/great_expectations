@@ -29,17 +29,21 @@ logger = logging.getLogger(__name__)
 
 class ConfigurationStore(Store):
     """
-A Configuration Store provides a way to store GreatExpectations Configuration accessible to a Data Context.
+    A Configuration Store provides a way to store GreatExpectations Configuration accessible to a Data Context.
     """
 
     _key_class = ConfigurationIdentifier
 
     def __init__(
         self,
+        configuration_class: BaseConfig,
         store_name: str,
         store_backend: dict = None,
+        overwrite_existing: bool = False,
         runtime_environment: dict = None,
     ):
+        self._configuration_class = configuration_class
+
         self._store_name = store_name
 
         if store_backend is not None:
@@ -60,6 +64,7 @@ A Configuration Store provides a way to store GreatExpectations Configuration ac
                 store_backend["filepath_suffix"] = store_backend.get(
                     "filepath_suffix", ".yml"
                 )
+
         super().__init__(
             store_backend=store_backend, runtime_environment=runtime_environment
         )
@@ -69,71 +74,43 @@ A Configuration Store provides a way to store GreatExpectations Configuration ac
         )
         filter_properties_dict(properties=self._config, inplace=True)
 
-    def remove_key(self, key):
-        return self.store_backend.remove_key(key)
-
-    @property
-    def store_name(self):
-        return self._store_name
-
-    @property
-    def config(self):
-        return self._config
-
-
-class ConfigurationPersistenceManager(object):
-    def __init__(
-        self,
-        configuration_class: BaseConfig,
-        configuration_store: Union[ConfigurationStore, None] = None,
-        overwrite_existing: bool = False,
-    ):
-        self._configuration_class = configuration_class
-        self._configuration_store = configuration_store
         self._overwrite_existing = overwrite_existing
 
     def load_configuration(self) -> BaseConfig:
-        logger.debug("Starting ConfigurationPersistenceManager.load_configuration")
+        logger.debug("Starting ConfigurationStore.load_configuration")
 
-        if self.configuration_store is None:
-            raise ge_exceptions.StoreError(
-                f"""The identification_configuration_store property must be set in order to load the data context
-identification configuration from a backend store.
-                """
+        try:
+            key: ConfigurationIdentifier = ConfigurationIdentifier(
+                configuration_name=self.store_name
             )
-        else:
+            config_yaml: str = self.get(key)
+            config_commented_map_from_yaml: CommentedMap = yaml.load(config_yaml)
             try:
-                key: ConfigurationIdentifier = ConfigurationIdentifier(
-                    configuration_name=self.configuration_store.store_name
+                return self.configuration_class.from_commented_map(
+                    config_commented_map_from_yaml
                 )
-                config_yaml: str = self.configuration_store.get(key)
-                config_commented_map_from_yaml: CommentedMap = yaml.load(config_yaml)
-                try:
-                    return self.configuration_class.from_commented_map(
-                        config_commented_map_from_yaml
-                    )
-                except ge_exceptions.InvalidBaseConfigError:
-                    # Just to be explicit about what we intended to catch
-                    raise
-            except ge_exceptions.InvalidKeyError:
-                raise ge_exceptions.ConfigNotFoundError()
+            except ge_exceptions.InvalidBaseConfigError:
+                # Just to be explicit about what we intended to catch
+                raise
+        except ge_exceptions.InvalidKeyError:
+            raise ge_exceptions.ConfigNotFoundError()
 
-    def save_configuration(self, configuration: BaseConfig,) -> None:
-        logger.debug("Starting ConfigurationPersistenceManager.save_configuration")
+    def save_configuration(self, configuration: BaseConfig) -> None:
+        logger.debug("Starting ConfigurationStore.save_configuration")
 
+        # noinspection PyUnusedLocal
         do_store: bool = False
-        if self.configuration_store is not None:
-            if self.overwrite_existing:
+        if self.overwrite_existing:
+            do_store = True
+        else:
+            if self._retrieve_configuration() is None:
                 do_store = True
             else:
-                if self._retrieve_configuration() is None:
-                    do_store = True
-                else:
-                    raise ge_exceptions.InvalidBaseConfigError(
-                        f"""Configuration named "{self.configuration_store.store_name}" already exists.
+                raise ge_exceptions.InvalidBaseConfigError(
+                    f"""Configuration named "{self.store_name}" already exists.
 Set the property "overwrite_existing" to True in order to overwrite the previously saved configuration.
-                        """
-                    )
+                    """
+                )
 
         if do_store:
             self._store_configuration(configuration=configuration)
@@ -150,25 +127,22 @@ Set the property "overwrite_existing" to True in order to overwrite the previous
         config: BaseConfig = copy.deepcopy(configuration)
         config_yaml: str = config.to_yaml_str()
         key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_name=self.configuration_store.store_name
+            configuration_name=self.store_name
         )
-        self.configuration_store.set(key, config_yaml)
+        self.set(key, config_yaml)
+
+    def delete_configuration(self):
+        key: ConfigurationIdentifier = ConfigurationIdentifier(
+            configuration_name=self.store_name
+        )
+        self.remove_key(key)
+
+    def remove_key(self, key):
+        return self.store_backend.remove_key(key)
 
     @property
     def configuration_class(self) -> BaseConfig:
         return self._configuration_class
-
-    @property
-    def configuration_store(self) -> ConfigurationStore:
-        return self._configuration_store
-
-    @configuration_store.setter
-    def configuration_store(self, configuration_store: Store):
-        if not isinstance(configuration_store, Store):
-            raise ge_exceptions.StoreError(
-                'Configuration Store must be of type "Store".'
-            )
-        self._configuration_store = configuration_store
 
     @property
     def overwrite_existing(self) -> bool:
@@ -177,3 +151,11 @@ Set the property "overwrite_existing" to True in order to overwrite the previous
     @overwrite_existing.setter
     def overwrite_existing(self, overwrite_existing: bool):
         self._overwrite_existing = overwrite_existing
+
+    @property
+    def store_name(self):
+        return self._store_name
+
+    @property
+    def config(self) -> dict:
+        return self._config

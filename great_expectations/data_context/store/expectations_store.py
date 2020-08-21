@@ -149,5 +149,5 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
         return self._expectationSuiteSchema.loads(value)
 
     @property
-    def config(self):
+    def config(self) -> dict:
         return self._config

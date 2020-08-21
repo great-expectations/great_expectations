@@ -2159,6 +2159,7 @@ def site_builder_data_context_with_html_store_titanic_random(
 
     context._project_config.anonymous_usage_statistics = {
         "enabled": True,
+        "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c",
     }
 
     return context

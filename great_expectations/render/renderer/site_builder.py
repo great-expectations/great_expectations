@@ -126,9 +126,9 @@ class SiteBuilder(object):
         if (
             usage_statistics_config
             and usage_statistics_config.enabled
-            and data_context.data_context_id
+            and usage_statistics_config.data_context_id
         ):
-            data_context_id = data_context.data_context_id
+            data_context_id = usage_statistics_config.data_context_id
 
         self.data_context_id = data_context_id
 

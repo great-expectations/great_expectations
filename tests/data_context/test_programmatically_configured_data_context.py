@@ -5,6 +5,7 @@ from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context import DataContext
+from great_expectations.data_context.config_utils import create_minimal_data_context
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.util import filter_properties_dict
 from tests.test_utils import not_raises
@@ -14,16 +15,16 @@ yaml.default_flow_style = False
 
 
 @pytest.fixture()
-def blank_in_memory_data_context() -> DataContext:
-    context: DataContext = DataContext.create_blank_data_context(
-        runtime_environment=None, allow_anonymous_usage_statistics=True,
+def minimal_in_memory_data_context() -> DataContext:
+    context: DataContext = create_minimal_data_context(
+        runtime_environment=None, usage_statistics_enabled=True,
     )
     assert isinstance(context, DataContext)
     return context
 
 
-def test_blank_context_structure_and_values(blank_in_memory_data_context):
-    context: DataContext = blank_in_memory_data_context
+def test_minimal_context_structure_and_values(minimal_in_memory_data_context):
+    context: DataContext = minimal_in_memory_data_context
 
     assert not set(context.list_datasources())
 
@@ -45,20 +46,12 @@ def test_blank_context_structure_and_values(blank_in_memory_data_context):
     assert len(project_config_dict_from_yaml.keys()) == 12
 
     assert (
-        len(
-            filter_properties_dict(
-                properties=project_config_dict_from_yaml,
-                clean_empty=True,
-                inplace=False,
-            ).keys()
-        )
+        len(filter_properties_dict(properties=project_config_dict_from_yaml).keys())
         == 2
     )
 
     assert set(
-        filter_properties_dict(
-            properties=project_config_dict_from_yaml, clean_empty=True, inplace=False
-        ).keys()
+        filter_properties_dict(properties=project_config_dict_from_yaml).keys()
     ) == {"config_version", "anonymous_usage_statistics"}
 
     data_context_config: DataContextConfig
@@ -75,7 +68,7 @@ def test_blank_context_structure_and_values(blank_in_memory_data_context):
         # noinspection PyUnusedLocal
         value: str = project_config_dict_from_yaml["anonymous_usage_statistics"]
 
-    with pytest.raises(KeyError):
+    with not_raises(KeyError):
         # noinspection PyUnusedLocal
         value: str = project_config_dict_from_yaml["anonymous_usage_statistics"][
             "data_context_id"

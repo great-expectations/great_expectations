@@ -357,7 +357,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         )
 
     @property
-    def config(self):
+    def config(self) -> dict:
         return self._config
 
 
@@ -580,7 +580,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return key in all_keys
 
     @property
-    def config(self):
+    def config(self) -> dict:
         return self._config
 
 
@@ -735,5 +735,5 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         return key in all_keys
 
     @property
-    def config(self):
+    def config(self) -> dict:
         return self._config

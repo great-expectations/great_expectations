@@ -111,7 +111,7 @@ class StoreBackend(object, metaclass=ABCMeta):
         return False
 
     @property
-    def config(self):
+    def config(self) -> dict:
         raise NotImplementedError
 
 

@@ -139,5 +139,5 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
         return self._expectationSuiteValidationResultSchema.loads(value)
 
     @property
-    def config(self):
+    def config(self) -> dict:
         return self._config

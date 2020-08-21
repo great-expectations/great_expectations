@@ -85,7 +85,6 @@ def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplo
     expected_project_tree_str = """\
 great_expectations/
     .gitignore
-    anon_data_context_id.yml
     great_expectations.yml
     checkpoints/
         .gitkeep
@@ -148,12 +147,12 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
     expected_project_tree_str = """\
 great_expectations/
     .gitignore
-    anon_data_context_id.yml
     great_expectations.yml
     checkpoints/
         .gitkeep
     expectations/
         .gitkeep
+        anon_data_context_id.yml
     notebooks/
         .gitkeep
     plugins/
@@ -254,12 +253,12 @@ def test_project_upgrade_with_manual_steps(
     expected_project_tree_str = """\
 great_expectations/
     .gitignore
-    anon_data_context_id.yml
     great_expectations.yml
     checkpoints/
         .gitkeep
     expectations/
         .gitkeep
+        anon_data_context_id.yml
     notebooks/
         .gitkeep
     plugins/
@@ -357,12 +356,12 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
     expected_project_tree_str = """\
 great_expectations/
     .gitignore
-    anon_data_context_id.yml
     great_expectations.yml
     checkpoints/
         .gitkeep
     expectations/
         .gitkeep
+        anon_data_context_id.yml
     notebooks/
         .gitkeep
     plugins/

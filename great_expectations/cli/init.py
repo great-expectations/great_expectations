@@ -25,10 +25,6 @@ from great_expectations.cli.datasource import add_datasource as add_datasource_i
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.util import cli_message, is_sane_slack_webhook
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
-from great_expectations.exceptions import (
-    DataContextError,
-    DatasourceInitializationError,
-)
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -75,20 +71,22 @@ def init(target_directory, view, usage_stats):
             if DataContext.is_project_initialized(ge_dir):
                 # Ensure the context can be instantiated
                 cli_message(PROJECT_IS_COMPLETE)
-        except (DataContextError, DatasourceInitializationError) as e:
+        except (
+            ge_exceptions.DataContextError,
+            ge_exceptions.DatasourceInitializationError,
+        ) as e:
             cli_message("<red>{}</red>".format(e.message))
             sys.exit(1)
 
         try:
             _ = DataContext.create(
-                project_root_dir=target_directory,
-                allow_anonymous_usage_statistics=usage_stats,
+                project_root_dir=target_directory, usage_statistics_enabled=usage_stats,
             )
             cli_message(ONBOARDING_COMPLETE)
             # TODO if this is correct, ensure this is covered by a test
             # cli_message(SETUP_SUCCESS)
             # exit(0)
-        except DataContextError as e:
+        except ge_exceptions.DataContextError as e:
             cli_message("<red>{}</red>".format(e.message))
             # TODO ensure this is covered by a test
             exit(5)
@@ -100,23 +98,26 @@ def init(target_directory, view, usage_stats):
 
         try:
             context = DataContext.create(
-                project_root_dir=target_directory,
-                allow_anonymous_usage_statistics=usage_stats,
+                project_root_dir=target_directory, usage_statistics_enabled=usage_stats,
             )
             send_usage_message(
                 data_context=context, event="cli.init.create", success=True
             )
-        except DataContextError as e:
+        except ge_exceptions.DataContextError as e:
             # TODO ensure this is covered by a test
             cli_message("<red>{}</red>".format(e))
 
     try:
         # if expectations exist, offer to build docs
         context = DataContext(context_root_dir=ge_dir)
-        if context.list_expectation_suites():
+        expectation_suites = None
+        try:
+            expectation_suites = context.list_expectation_suites()
+        except ge_exceptions.InvalidConfigError:
+            pass
+        if expectation_suites:
             if click.confirm(BUILD_DOCS_PROMPT, default=True):
                 build_docs(context, view=view)
-
         else:
             datasources = context.list_datasources()
             if len(datasources) == 0:
@@ -185,7 +186,7 @@ def init(target_directory, view, usage_stats):
                 cli_message(SETUP_SUCCESS)
                 sys.exit(0)
     except (
-        DataContextError,
+        ge_exceptions.DataContextError,
         ge_exceptions.ProfilerError,
         IOError,
         SQLAlchemyError,

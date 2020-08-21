@@ -54,6 +54,7 @@ def in_memory_data_context_config_usage_stats_enabled():
             },
             "anonymous_usage_statistics": {
                 "enabled": True,
+                "data_context_id": "00000000-0000-0000-0000-000000000001",
                 "usage_statistics_url": USAGE_STATISTICS_QA_URL,
             },
         }
@@ -69,7 +70,7 @@ def test_consistent_name_anonymization(
     context = BaseDataContext(
         project_config=in_memory_data_context_config_usage_stats_enabled
     )
-    context.data_context_id = "00000000-0000-0000-0000-000000000001"
+    assert context.data_context_id == "00000000-0000-0000-0000-000000000001"
     payload = run_validation_operator_usage_statistics(
         context,
         "action_list_operator",

@@ -432,10 +432,10 @@ project_path/
             Titanic.csv
     great_expectations/
         .gitignore
-        anon_data_context_id.yml
         great_expectations.yml
         checkpoints/
         expectations/
+            anon_data_context_id.yml
             titanic/
                 subdir_reader/
                     Titanic/
@@ -622,6 +622,7 @@ def basic_data_context_config():
             },
             "anonymous_usage_statistics": {
                 "enabled": True,
+                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
                 "usage_statistics_url": USAGE_STATISTICS_QA_URL,
             },
         }
@@ -981,10 +982,10 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
         == """\
 great_expectations/
     .gitignore
-    anon_data_context_id.yml
     great_expectations.yml
     checkpoints/
     expectations/
+        anon_data_context_id.yml
     notebooks/
         pandas/
             validation_playground.ipynb
@@ -1012,10 +1013,10 @@ def test_data_context_create_does_nothing_if_all_uncommitted_dirs_exist(
     expected = """\
 great_expectations/
     .gitignore
-    anon_data_context_id.yml
     great_expectations.yml
     checkpoints/
     expectations/
+        anon_data_context_id.yml
     notebooks/
         pandas/
             validation_playground.ipynb

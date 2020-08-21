@@ -373,5 +373,5 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
         return self._store_backend
 
     @property
-    def config(self):
+    def config(self) -> dict:
         return self._config

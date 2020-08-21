@@ -19,6 +19,8 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.types import DictDot
 from great_expectations.types.configurations import ClassConfigSchema
 
+logger = logging.getLogger(__name__)
+
 yaml = YAML()
 
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -31,9 +33,6 @@ DEFAULT_USAGE_STATISTICS_URL = (
     "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 )
 DATA_CONTEXT_ID: str = str(uuid.uuid4())
-
-
-logger = logging.getLogger(__name__)
 
 
 def object_to_yaml_str(obj):
@@ -94,7 +93,7 @@ class DataContextConfig(BaseConfig):
         if datasources is None:
             datasources = {}
         self.datasources = datasources
-        self.expectations_store_name = expectations_store_name
+        self._expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.plugins_directory = plugins_directory
@@ -107,7 +106,7 @@ class DataContextConfig(BaseConfig):
         self.validation_operators = validation_operators
         if stores is None:
             stores = {}
-        self.stores = stores
+        self._stores = stores
         self.notebooks = notebooks
         if data_docs_sites is None:
             data_docs_sites = {}
@@ -119,13 +118,9 @@ class DataContextConfig(BaseConfig):
             anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
                 **anonymous_usage_statistics
             )
-        self.anonymous_usage_statistics = anonymous_usage_statistics
+        self._anonymous_usage_statistics = anonymous_usage_statistics
 
         super().__init__(commented_map=commented_map)
-
-    @property
-    def config_version(self):
-        return self._config_version
 
     @classmethod
     def from_commented_map(cls, commented_map: CommentedMap) -> BaseConfig:
@@ -142,6 +137,34 @@ class DataContextConfig(BaseConfig):
         commented_map: CommentedMap = deepcopy(self.commented_map)
         commented_map.update(dataContextConfigSchema.dump(self))
         return commented_map
+
+    @property
+    def config_version(self):
+        return self._config_version
+
+    @property
+    def expectations_store_name(self):
+        return self._expectations_store_name
+
+    @expectations_store_name.setter
+    def expectations_store_name(self, expectations_store_name):
+        self._expectations_store_name = expectations_store_name
+
+    @property
+    def anonymous_usage_statistics(self):
+        return self._anonymous_usage_statistics
+
+    @anonymous_usage_statistics.setter
+    def anonymous_usage_statistics(self, anonymous_usage_statistics):
+        self._anonymous_usage_statistics = anonymous_usage_statistics
+
+    @property
+    def stores(self):
+        return self._stores
+
+    @stores.setter
+    def stores(self, stores):
+        self._stores = stores
 
 
 class DatasourceConfig(DictDot):
@@ -181,9 +204,15 @@ class DatasourceConfig(DictDot):
 
 
 class AnonymizedUsageStatisticsConfig(DictDot):
-    def __init__(self, enabled=True, usage_statistics_url=None):
+    def __init__(self, enabled=True, data_context_id=None, usage_statistics_url=None):
         self._enabled = enabled
+        if data_context_id is None:
+            data_context_id = DATA_CONTEXT_ID
+            self._explicit_id = False
+        else:
+            self._explicit_id = True
 
+        self._data_context_id = data_context_id
         if usage_statistics_url is None:
             usage_statistics_url = DEFAULT_USAGE_STATISTICS_URL
             self._explicit_url = False
@@ -202,6 +231,25 @@ class AnonymizedUsageStatisticsConfig(DictDot):
         self._enabled = enabled
 
     @property
+    def data_context_id(self):
+        return self._data_context_id
+
+    @data_context_id.setter
+    def data_context_id(self, data_context_id):
+        try:
+            uuid.UUID(data_context_id)
+        except ValueError:
+            raise ge_exceptions.InvalidConfigError(
+                "data_context_id must be a valid uuid"
+            )
+        self._data_context_id = data_context_id
+        self._explicit_id = True
+
+    @property
+    def explicit_id(self):
+        return self._explicit_id
+
+    @property
     def usage_statistics_url(self):
         return self._usage_statistics_url
 
@@ -212,9 +260,17 @@ class AnonymizedUsageStatisticsConfig(DictDot):
 
 
 class AnonymizedUsageStatisticsConfigSchema(Schema):
+    data_context_id = fields.UUID()
     enabled = fields.Boolean(default=True)
     usage_statistics_url = fields.URL(allow_none=True)
     _explicit_url = fields.Boolean(required=False)
+
+    # noinspection PyUnusedLocal
+    @post_load()
+    def make_usage_statistics_config(self, data, **kwargs):
+        if "data_context_id" in data:
+            data["data_context_id"] = str(data["data_context_id"])
+        return AnonymizedUsageStatisticsConfig(**data)
 
     # noinspection PyUnusedLocal
     @post_dump()

@@ -104,7 +104,7 @@ def get_currently_executing_function_call_arguments(
     ][0]
     cur_mod = getmodule(cur_func_obj)
     sig: Signature = signature(cur_func_obj)
-    params: list = {k: argvs.locals[k] for k in sig.parameters.keys()}
+    params: dict = {k: argvs.locals[k] for k in sig.parameters.keys()}
     bound_args: BoundArguments = sig.bind(**params)
     call_args: OrderedDict = bound_args.arguments
 
@@ -114,8 +114,10 @@ def get_currently_executing_function_call_arguments(
         call_args_dict.update({"module_name": cur_mod.__name__})
 
     if not include_caller_names:
-        call_args_dict.pop("cls", None)
-        call_args_dict.pop("self", None)
+        if call_args.get("cls"):
+            call_args_dict.pop("cls", None)
+        if call_args.get("self"):
+            call_args_dict.pop("self", None)
 
     call_args_dict.update(**kwargs)
 
