@@ -104,7 +104,7 @@ class DataContextConfig(DictDot):
 class ExecutionEnvironmentConfig(DictDot):
     def __init__(
         self,
-        class_name,
+        class_name=None,
         module_name=None,
         execution_engine=None,
         data_connectors=None,
@@ -141,8 +141,8 @@ class ExecutionEnvironmentConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.datasource")
+    class_name = fields.String(missing="ExecutionEnvironment")
+    module_name = fields.String(missing="great_expectations.execution_environment")
     execution_engine = fields.Nested(ClassConfigSchema)
     # TODO: Update to data_connector-specific
     # data_connectors = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.DataConnectorSchema))
@@ -508,5 +508,6 @@ class DataContextConfigSchema(Schema):
 
 dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
+executionEnvironmentConfigSchema = ExecutionEnvironmentConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()

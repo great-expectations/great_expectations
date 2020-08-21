@@ -3,7 +3,9 @@
 import copy
 import logging
 import warnings
+from typing import Union
 
+from great_expectations.core import ExpectationSuite
 from ruamel.yaml import YAML
 
 from great_expectations.data_context.util import (
@@ -25,6 +27,45 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
     """
 
     recognized_batch_parameters = {"limit"}
+
+    def __init__(
+        self,
+        name,
+        data_context=None,
+        execution_engine=None,
+        data_connectors=None,
+        **kwargs
+    ):
+        """
+        Build a new ExecutionEnvironment.
+
+        Args:
+            name: the name for the datasource
+            data_context: data context to which to connect
+            execution_engine (ClassConfig): the type of DataAsset to produce
+            data_connectors: DataConnectors to add to the datasource
+        """
+        self._data_context = data_context
+        self._name = name
+        if isinstance(execution_engine, str):
+            warnings.warn(
+                "String-only configuration for execution_engine is deprecated. Use module_name and class_name instead.",
+                DeprecationWarning,
+            )
+        self._execution_engine = execution_engine
+        self._execution_environment_config = kwargs
+        self._data_connectors = {}
+
+        self._execution_environment_config["execution_engine"] = execution_engine
+        if data_connectors is not None:
+            self._execution_environment_config["data_connectors"] = data_connectors
+
+    def get_batch(
+        self,
+        batch_parameters: dict,
+        expectation_suite_name: Union[str, ExpectationSuite],
+    ):
+        pass
 
     @classmethod
     def from_configuration(cls, **kwargs):
@@ -70,38 +111,6 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
             execution_engine=execution_engine, data_connectors=data_connectors, **kwargs
         )
         return configuration
-
-    def __init__(
-        self,
-        name,
-        data_context=None,
-        execution_engine=None,
-        data_connectors=None,
-        **kwargs
-    ):
-        """
-        Build a new ExecutionEnvironment.
-
-        Args:
-            name: the name for the datasource
-            data_context: data context to which to connect
-            execution_engine (ClassConfig): the type of DataAsset to produce
-            data_connectors: DataConnectors to add to the datasource
-        """
-        self._data_context = data_context
-        self._name = name
-        if isinstance(execution_engine, str):
-            warnings.warn(
-                "String-only configuration for execution_engine is deprecated. Use module_name and class_name instead.",
-                DeprecationWarning,
-            )
-        self._execution_engine = execution_engine
-        self._execution_environment_config = kwargs
-        self._data_connectors = {}
-
-        self._execution_environment_config["execution_engine"] = execution_engine
-        if data_connectors is not None:
-            self._execution_environment_config["data_connectors"] = data_connectors
 
     @property
     def execution_engine(self):
@@ -219,6 +228,44 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
                 data_connectors.append({"name": key, "class_name": value["class_name"]})
 
         return data_connectors
+
+    def get_available_data_asset_names(self, data_connector_names=None):
+        """
+        Returns a dictionary of data_asset_names that the specified data
+        connector can provide. Note that some data_connectors may not be
+        capable of describing specific named data assets, and some (such as
+        filesystem glob data_connectors) require the user to configure
+        data asset names.
+
+        Args:
+            data_connector_names: the DataConnector for which to get available data asset names.
+
+        Returns:
+            dictionary consisting of sets of data assets available for the specified data connectors:
+            ::
+
+                {
+                  data_connector_name: {
+                    names: [ (data_asset_1, data_asset_1_type), (data_asset_2, data_asset_2_type) ... ]
+                  }
+                  ...
+                }
+
+        """
+        available_data_asset_names = {}
+        if data_connector_names is None:
+            data_connector_names = [
+                data_connector["name"] for data_connector in self.list_data_connectors()
+            ]
+        elif isinstance(data_connector_names, str):
+            data_connector_names = [data_connector_names]
+
+        for data_connector_name in data_connector_names:
+            data_connector = self.get_data_connector(data_connector_name)
+            available_data_asset_names[
+                data_connector_name
+            ] = data_connector.get_available_data_asset_names()
+        return available_data_asset_names
 
     # def build_batch_kwargs(
     #     self, batch_kwargs_generator, data_asset_name=None, partition_id=None, **kwargs
