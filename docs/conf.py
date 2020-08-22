@@ -51,7 +51,7 @@ extensions = [
     "autoapi.extension",
     #'nbsphinx',
     #'sphinx.ext.mathjax',
-    'sphinx_copybutton'
+    #'sphinx_copybutton'
 ]
 
 autoapi_type = "python"
