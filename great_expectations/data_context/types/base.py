@@ -1,7 +1,11 @@
 import logging
 import uuid
+from collections import OrderedDict
 from copy import deepcopy
+from functools import wraps
+from inspect import getfullargspec
 from io import StringIO
+from typing import Callable, Union
 
 from marshmallow import (
     INCLUDE,
@@ -16,8 +20,23 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.data_context.store.util import (
+    build_configuration_store,
+    build_store_from_config,
+    build_tuple_filesystem_store_backend,
+    build_tuple_s3_store_backend,
+)
+from great_expectations.data_context.templates import get_templated_yaml
+from great_expectations.data_context.util import substitute_config_variable
 from great_expectations.types import DictDot
 from great_expectations.types.configurations import ClassConfigSchema
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+    load_class,
+    verify_dynamic_loading_support,
+)
+from great_expectations.validation_operators import ValidationOperator
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +52,57 @@ DEFAULT_USAGE_STATISTICS_URL = (
     "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 )
 DATA_CONTEXT_ID: str = str(uuid.uuid4())
+
+GE_IDENTIFICATION_CONFIGURATION_STORE_NAME: str = "anon_data_context_id"
+GE_PROJECT_CONFIGURATION_STORE_NAME: str = "great_expectations"
+
+GE_EVALUATION_PARAMETER_STORE_NAME: str = "evaluation_parameter_store"
+
+
+def validate_identification_config(identification_config):
+    if isinstance(identification_config, DataContextIdentificationConfig):
+        return True
+    try:
+        dataContextIdentificationConfigSchema.load(identification_config)
+    except ValidationError:
+        raise
+    return True
+
+
+def validate_project_config(project_config):
+    if isinstance(project_config, DataContextConfig):
+        return True
+    try:
+        dataContextConfigSchema.load(project_config)
+    except ValidationError:
+        raise
+    return True
+
+
+def substitute_all_config_variables(data, replace_variables_dict):
+    """
+    Substitute all config variables of the form ${SOME_VARIABLE} in a dictionary-like
+    config object for their values.
+
+    The method traverses the dictionary recursively.
+
+    :param data:
+    :param replace_variables_dict:
+    :return: a dictionary with all the variables replaced with their values
+    """
+    if isinstance(data, DataContextConfig):
+        data = DataContextConfigSchema().dump(data)
+
+    if isinstance(data, dict) or isinstance(data, OrderedDict):
+        return {
+            k: substitute_all_config_variables(v, replace_variables_dict)
+            for k, v in data.items()
+        }
+    elif isinstance(data, list):
+        return [
+            substitute_all_config_variables(v, replace_variables_dict) for v in data
+        ]
+    return substitute_config_variable(data, replace_variables_dict)
 
 
 def object_to_yaml_str(obj):
@@ -92,10 +162,10 @@ class DataContextConfig(BaseConfig):
         self._config_version = config_version
         if datasources is None:
             datasources = {}
-        self.datasources = datasources
+        self._datasources = datasources
         self._expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
-        self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self._validations_store_name = validations_store_name
+        self._evaluation_parameter_store_name = evaluation_parameter_store_name
         self.plugins_directory = plugins_directory
         if validation_operators is None:
             validation_operators = {}
@@ -103,14 +173,14 @@ class DataContextConfig(BaseConfig):
             raise ValueError(
                 "validation_operators must be configured with a dictionary"
             )
-        self.validation_operators = validation_operators
+        self._validation_operators = validation_operators
         if stores is None:
             stores = {}
         self._stores = stores
         self.notebooks = notebooks
         if data_docs_sites is None:
             data_docs_sites = {}
-        self.data_docs_sites = data_docs_sites
+        self._data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
         if anonymous_usage_statistics is None:
             anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
@@ -138,17 +208,349 @@ class DataContextConfig(BaseConfig):
         commented_map.update(dataContextConfigSchema.dump(self))
         return commented_map
 
+    # noinspection PyUnusedLocal
+    # noinspection SpellCheckingInspection
+    @classmethod
+    def build(
+        cls,
+        backend_ecosystem: str,
+        datasource_type: str,
+        *,
+        expectations_store_bucket: str = None,
+        expectations_store_prefix: str = None,
+        validations_store_bucket: str = None,
+        validations_store_prefix: str = None,
+        data_docs_store_bucket: str = None,
+        data_docs_store_prefix: str = None,
+        expectations_store_name: str = None,
+        validations_store_name: str = None,
+        data_docs_site_name: str = None,
+        expectations_store_kwargs: dict = None,
+        validations_store_kwargs: dict = None,
+        data_docs_store_kwargs: dict = None,
+        project_config_bucket: str = None,
+        project_config_prefix: str = None,
+        project_config_kwargs: dict = None,
+        slack_webhook: str = None,
+        show_how_to_buttons: bool = None,
+        show_cta_footer: bool = None,
+        include_profiling: bool = None,
+        runtime_environment: dict = None,
+        overwrite_existing: bool = None,
+        usage_statistics_enabled: bool = None,
+    ):
+        kwargs_callee: dict
+
+        if backend_ecosystem == "aws":
+            func_callee: Callable = create_standard_s3_backend_project_config
+            kwargs_callee = filter_properties_dict(
+                properties=get_currently_executing_function_call_arguments(),
+                delete_fields=["backend_ecosystem"],
+                clean_empty=False,
+                inplace=False,
+            )
+            return func_callee(**kwargs_callee)
+        else:
+            raise ge_exceptions.DataContextError(
+                f"""
+Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}" is not currently supported).
+                """
+            )
+
+    def add_store(
+        self,
+        store_name: str = None,
+        store_config: dict = None,
+        module_name="great_expectations.data_context.store",
+        runtime_environment: dict = None,
+    ):
+        try:
+            store_obj = build_store_from_config(
+                store_config=store_config,
+                module_name=module_name,
+                runtime_environment=runtime_environment,
+            )
+            if store_name is not None:
+                self.stores[store_name] = store_config
+        except ge_exceptions.ClassInstantiationError as e:
+            raise e
+
+        if store_name is not None:
+            self.stores[store_name] = store_config
+        return store_obj
+
+    def add_expectations_store(
+        self,
+        name: str,
+        store_backend=None,
+        *,
+        module_name: str = "great_expectations.data_context.store",
+        class_name: str = "ExpectationsStore",
+        **kwargs,
+    ):
+        if store_backend is not None:
+            store_backend = store_backend.config
+        store_config: dict = {
+            "module_name": module_name,
+            "class_name": class_name,
+            "store_backend": store_backend,
+        }
+        store_config.update(**kwargs)
+        return self.add_store(store_name=name, store_config=store_config)
+
+    def add_validation_store(
+        self,
+        name: str,
+        store_backend,
+        *,
+        module_name: str = "great_expectations.data_context.store",
+        class_name: str = "ValidationsStore",
+        **kwargs,
+    ):
+        if store_backend is not None:
+            store_backend = store_backend.config
+        store_config: dict = {
+            "module_name": module_name,
+            "class_name": class_name,
+            "store_backend": store_backend,
+        }
+        store_config.update(**kwargs)
+        return self.add_store(store_name=name, store_config=store_config)
+
+    def add_evaluation_parameters_store(
+        self,
+        name: str = GE_EVALUATION_PARAMETER_STORE_NAME,
+        store_backend=None,
+        *,
+        module_name: str = "great_expectations.data_context.store.metric_store",
+        class_name: str = "EvaluationParameterStore",
+        **kwargs,
+    ):
+        if store_backend is not None:
+            store_backend = store_backend.config
+        store_config: dict = {
+            "module_name": module_name,
+            "class_name": class_name,
+            "store_backend": store_backend,
+        }
+        store_config.update(**kwargs)
+        return self.add_store(store_name=name, store_config=store_config)
+
+    def add_data_docs_site(
+        self,
+        name: str,
+        store_backend,
+        *,
+        show_how_to_buttons: bool = True,
+        show_cta_footer: bool = True,
+        **kwargs,
+    ) -> Union[dict, None]:
+        if name is None:
+            return None
+
+        logger.debug(
+            f"Starting DataContextConfig.add_data_docs_site for data_docs_site {name}"
+        )
+
+        if store_backend is not None:
+            store_backend = store_backend.config
+
+        data_docs_site_config: dict = {
+            "class_name": "SiteBuilder",
+            "show_how_to_buttons": show_how_to_buttons,
+            "store_backend": store_backend,
+            "site_index_builder": {
+                "class_name": "DefaultSiteIndexBuilder",
+                "show_cta_footer": show_cta_footer,
+            },
+        }
+        data_docs_site_config.update(**kwargs)
+
+        self.data_docs_sites[name] = data_docs_site_config
+        return self.data_docs_sites[name]
+
+    def add_datasource(self, name, **kwargs) -> Union[dict, None]:
+        logger.debug("Starting DataContextConfig.add_datasource for %s" % name)
+        module_name = kwargs.get("module_name", "great_expectations.datasource")
+        verify_dynamic_loading_support(module_name=module_name)
+        class_name = kwargs.get("class_name")
+        datasource_class = load_class(module_name=module_name, class_name=class_name)
+
+        # For any class that should be loaded, it may control its configuration construction
+        # by implementing a classmethod called build_configuration
+        if hasattr(datasource_class, "build_configuration"):
+            config = datasource_class.build_configuration(**kwargs)
+        else:
+            config = kwargs
+
+        config = datasourceConfigSchema.load(config)
+        self.datasources[name] = config
+        return self.datasources[name]
+
+    def add_pandas_datasource(
+        self,
+        name: str,
+        *,
+        module_name: str = "great_expectations.datasource",
+        class_name: str = "PandasDatasource",
+        **kwargs,
+    ) -> Union[dict, None]:
+        logger.debug(
+            f"Starting DataContextConfig.add_pandas_datasource for datasource_name {name}"
+        )
+        datasource_config: dict = {
+            "module_name": module_name,
+            "class_name": class_name,
+            "data_asset_type": {
+                "class_name": "PandasDataset",
+                "module_name": "great_expectations.dataset",
+            },
+        }
+        datasource_config.update(**kwargs)
+        return self.add_datasource(name=name, **datasource_config)
+
+    def add_spark_df_datasource(
+        self,
+        name: str,
+        *,
+        module_name: str = "great_expectations.datasource",
+        class_name: str = "SparkDFDatasource",
+        **kwargs,
+    ) -> Union[dict, None]:
+        logger.debug(
+            f"Starting DataContextConfig.add_spark_df_datasource for datasource_name {name}"
+        )
+        datasource_config: dict = {
+            "module_name": module_name,
+            "class_name": class_name,
+            "data_asset_type": {
+                "class_name": "SparkDFDataset",
+                "module_name": "great_expectations.dataset",
+            },
+        }
+        datasource_config.update(**kwargs)
+        return self.add_datasource(name=name, **datasource_config)
+
+    def add_validation_operator(
+        self, validation_operator_name: str, validation_operator_config: dict
+    ) -> Union[dict, None]:
+        self.validation_operators[validation_operator_name] = validation_operator_config
+        return self.validation_operators[validation_operator_name]
+
+    def add_action_list_validation_operator(
+        self, name: str, slack_webhook: str = None, slack_notify_on: str = "all"
+    ) -> dict:
+        logger.debug(
+            f"Starting DataContextConfig.add_action_list_validation_operator for validation_operator_name {name}"
+        )
+        action_list: list = [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "module_name": "great_expectations.validation_operators.actions",
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "module_name": "great_expectations.validation_operators.actions",
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "module_name": "great_expectations.validation_operators.actions",
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ]
+
+        notify_slack_action_dict: dict = {
+            "name": "notify_slack",
+            "action": {
+                "module_name": "great_expectations.validation_operators.actions",
+                "class_name": "SlackNotificationAction",
+                "slack_webhook": slack_webhook,
+                "notify_on": slack_notify_on,
+                "renderer": {
+                    "module_name": "great_expectations.render.renderer.slack_renderer",
+                    "class_name": "SlackRenderer",
+                },
+            },
+        }
+
+        if slack_webhook is not None:
+            action_list.append(notify_slack_action_dict)
+
+        validation_operator_config: dict = {
+            "module_name": "great_expectations.validation_operators.validation_operators",
+            "class_name": "ActionListValidationOperator",
+            "action_list": action_list,
+        }
+
+        return self.add_validation_operator(
+            validation_operator_name=name,
+            validation_operator_config=validation_operator_config,
+        )
+
     @property
     def config_version(self):
         return self._config_version
 
     @property
-    def expectations_store_name(self):
+    def expectations_store_name(self) -> str:
         return self._expectations_store_name
 
     @expectations_store_name.setter
-    def expectations_store_name(self, expectations_store_name):
+    def expectations_store_name(self, expectations_store_name: str):
         self._expectations_store_name = expectations_store_name
+
+    @property
+    def validations_store_name(self) -> str:
+        return self._validations_store_name
+
+    @validations_store_name.setter
+    def validations_store_name(self, validations_store_name: str):
+        self._validations_store_name = validations_store_name
+
+    @property
+    def evaluation_parameter_store_name(self) -> str:
+        return self._evaluation_parameter_store_name
+
+    @evaluation_parameter_store_name.setter
+    def evaluation_parameter_store_name(self, evaluation_parameter_store_name: str):
+        self._evaluation_parameter_store_name = evaluation_parameter_store_name
+
+    def set_evaluation_parameter_store_name(
+        self, evaluation_parameter_store_name: str = GE_EVALUATION_PARAMETER_STORE_NAME
+    ):
+        self.evaluation_parameter_store_name = evaluation_parameter_store_name
+
+    @property
+    def datasources(self) -> dict:
+        return self._datasources
+
+    @datasources.setter
+    def datasources(self, datasources: dict):
+        self._datasources = datasources
+
+    @property
+    def validation_operators(self) -> dict:
+        return self._validation_operators
+
+    @validation_operators.setter
+    def validation_operators(self, validation_operators: dict):
+        self._validation_operators = validation_operators
+
+    @property
+    def data_docs_sites(self) -> dict:
+        return self._data_docs_sites
+
+    @data_docs_sites.setter
+    def data_docs_sites(self, data_docs_sites: dict):
+        self._data_docs_sites = data_docs_sites
 
     @property
     def anonymous_usage_statistics(self):
@@ -177,7 +579,7 @@ class DatasourceConfig(DictDot):
         credentials=None,
         reader_method=None,
         limit=None,
-        **kwargs
+        **kwargs,
     ):
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
@@ -566,3 +968,447 @@ datasourceConfigSchema = DatasourceConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 dataContextIdentificationConfigSchema = DataContextIdentificationConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
+
+
+# noinspection PyMethodParameters
+def create_using_s3_backend(func: Callable = None,) -> Callable:
+    """
+    A decorator for loading or creating data context with S3 serving as the backend store for all
+    application-level stores (Expectation Suites, Validations, Evaluation Parameters, and Data Docs).
+    """
+
+    @wraps(func)
+    def initialize_using_s3_backend_wrapped_method(**kwargs):
+        kwargs_callee: dict
+
+        func_callee: Callable = create_s3_backend_project_config
+        # noinspection SpellCheckingInspection
+        argspec: list = getfullargspec(func_callee)[0]
+        kwargs_callee = filter_properties_dict(
+            properties=kwargs, keep_fields=argspec, clean_empty=False, inplace=False
+        )
+        working_project_config_info: dict = func_callee(**kwargs_callee)
+
+        project_config_store = working_project_config_info["project_config_store"]
+        new_project_config_created: bool = working_project_config_info[
+            "new_project_config_created"
+        ]
+
+        if new_project_config_created:
+            kwargs_callee = deepcopy(kwargs)
+            kwargs_callee.update({"project_config_store": project_config_store})
+            return func(**kwargs_callee)
+
+        return project_config_store.load_configuration()
+
+    return initialize_using_s3_backend_wrapped_method
+
+
+def create_s3_backend_project_config(
+    expectations_store_bucket: str,
+    expectations_store_prefix: str,
+    expectations_store_name: str,
+    expectations_store_kwargs: dict = None,
+    project_config_bucket: str = None,
+    project_config_prefix: str = None,
+    project_config_kwargs: dict = None,
+    overwrite_existing: bool = False,
+    usage_statistics_enabled: bool = True,
+):
+    if expectations_store_kwargs is None:
+        expectations_store_kwargs = {}
+    ge_id_config_bucket: str = expectations_store_bucket
+    ge_id_config_prefix: str = expectations_store_prefix
+    ge_id_config_kwargs: dict = expectations_store_kwargs
+    if project_config_bucket is None:
+        project_config_bucket = expectations_store_bucket
+    if project_config_prefix is None:
+        project_config_prefix = expectations_store_prefix
+    if project_config_kwargs is None:
+        project_config_kwargs = expectations_store_kwargs
+
+    store_config: dict = {
+        "bucket": project_config_bucket,
+        "prefix": project_config_prefix,
+    }
+    store_config.update(**project_config_kwargs)
+    s3_store_backend_obj = build_tuple_s3_store_backend(**store_config)
+    project_config_store = build_configuration_store(
+        configuration_class=DataContextConfig,
+        store_name=GE_PROJECT_CONFIGURATION_STORE_NAME,
+        store_backend=s3_store_backend_obj,
+        overwrite_existing=True,
+    )
+
+    project_config: Union[DataContextConfig, None]
+
+    try:
+        # noinspection PyTypeChecker
+        project_config = project_config_store.load_configuration()
+    except ge_exceptions.ConfigNotFoundError:
+        project_config = None
+
+    new_project_config_created: bool = False
+
+    if overwrite_existing or project_config is None:
+        project_config = create_minimal_project_config(
+            usage_statistics_enabled=usage_statistics_enabled
+        )
+        new_project_config_created = True
+
+    validate_project_config(project_config=project_config)
+
+    compute_and_persist_to_s3_data_context_id(
+        project_config=project_config,
+        bucket=ge_id_config_bucket,
+        prefix=ge_id_config_prefix,
+        runtime_environment=None,
+        **ge_id_config_kwargs,
+    )
+
+    store_config: dict = {
+        "bucket": expectations_store_bucket,
+        "prefix": expectations_store_prefix,
+    }
+    store_config.update(**expectations_store_kwargs)
+    s3_store_backend_obj = build_tuple_s3_store_backend(**store_config)
+    # noinspection PyUnusedLocal
+    expectations_store_obj = project_config.add_expectations_store(
+        name=expectations_store_name, store_backend=s3_store_backend_obj
+    )
+    project_config.expectations_store_name = expectations_store_name
+
+    project_config_store.save_configuration(configuration=project_config)
+
+    return {
+        "project_config_store": project_config_store,
+        "new_project_config_created": new_project_config_created,
+    }
+
+
+# noinspection pyargumentlist
+@create_using_s3_backend
+def create_standard_s3_backend_project_config(**kwargs,):
+    func_callee: Callable = build_s3_backend_project_config
+    # noinspection SpellCheckingInspection
+    argspec: list = getfullargspec(func_callee)[0]
+    filter_properties_dict(
+        properties=kwargs, keep_fields=argspec, clean_empty=False, inplace=True
+    )
+    return func_callee(**kwargs)
+
+
+# noinspection SpellCheckingInspection
+def build_s3_backend_project_config(
+    datasource_type: str,
+    validations_store_bucket: str = None,
+    validations_store_prefix: str = None,
+    data_docs_store_bucket: str = None,
+    data_docs_store_prefix: str = None,
+    validations_store_name: str = None,
+    data_docs_site_name: str = "data_docs_site",
+    validations_store_kwargs: dict = None,
+    data_docs_store_kwargs: dict = None,
+    slack_webhook: str = None,
+    show_how_to_buttons: bool = True,
+    show_cta_footer: bool = True,
+    include_profiling: bool = True,
+    project_config_store=None,
+):
+    if project_config_store is None:
+        raise ge_exceptions.DataContextError(
+            f"""The build_s3_backend_project_config method requires a valid project_config_store reference.
+            """
+        )
+    if validations_store_bucket is None:
+        validations_store_bucket = ""
+    if validations_store_prefix is None:
+        validations_store_prefix = ""
+    if validations_store_kwargs is None:
+        validations_store_kwargs = {}
+    if data_docs_store_bucket is None:
+        data_docs_store_bucket = ""
+    if data_docs_store_prefix is None:
+        data_docs_store_prefix = ""
+    if data_docs_store_kwargs is None:
+        data_docs_store_kwargs = {}
+
+    project_config = project_config_store.load_configuration()
+
+    # Add the Data Source (Spark Dataframe and Pandas Dataframe data sources types are currently implemented).
+    if datasource_type == "spark":
+        spark_df_datasource_name: str = "s3_files_spark_datasource"
+        # noinspection PyUnusedLocal
+        spark_df_datasource: Datasource = project_config.add_spark_df_datasource(
+            name=spark_df_datasource_name
+        )
+    elif datasource_type == "pandas":
+        pandas_datasource_name: str = "s3_files_pandas_datasource"
+        # noinspection PyUnusedLocal
+        pandas_datasource: Datasource = project_config.add_pandas_datasource(
+            name=pandas_datasource_name
+        )
+    else:
+        raise ge_exceptions.DataContextError(
+            f"""
+Only "spark" and "pandas" are currently supported as datasource types when "aws" is the specified backend ecosystem
+("{datasource_type}" is not currently supported).
+            """
+        )
+
+    # Create the Validations Store:
+    # First, allocated the backend store (to be used for storing Validations in the JSON format);
+    if validations_store_bucket:
+        store_config: dict = {
+            "bucket": validations_store_bucket,
+            "prefix": validations_store_prefix,
+        }
+        store_config.update(**validations_store_kwargs)
+        s3_store_backend_obj = build_tuple_s3_store_backend(**store_config)
+        # Second, add the Validations Store that will use the AWS S3 backend store, allocated in the previous step.
+        # noinspection PyUnusedLocal
+        validations_store_obj = project_config.add_validation_store(
+            name=validations_store_name, store_backend=s3_store_backend_obj
+        )
+        # Third, set the name of the Validations Store added to be the one used by Great Expectations (required).
+        project_config.validations_store_name = validations_store_name
+
+    # Create the Evaluation Parameters Store (no arguments means an In-Memory backend store and the default name).
+    # noinspection PyUnusedLocal
+    evaluation_parameters_store_obj = project_config.add_evaluation_parameters_store()
+    # Set the default Evaluation Parameters Store just added to be the one used by Great Expectations (required).
+    project_config.set_evaluation_parameter_store_name()
+
+    # Add the Action List Operator for data validation (satisfies the needs of a wide variety of applications).
+    # noinspection PyUnusedLocal
+    action_list_validation_operator: ValidationOperator = project_config.add_action_list_validation_operator(
+        name="action_list_operator", slack_webhook=slack_webhook
+    )
+
+    if data_docs_store_bucket:
+        # Create the Data Docs Site:
+        # First, allocated the backend store (to be used for storing Data Docs in the HTML/CSS format);
+        store_config: dict = {
+            "bucket": data_docs_store_bucket,
+            "prefix": data_docs_store_prefix,
+        }
+        store_config.update(**data_docs_store_kwargs)
+        s3_store_backend_obj = build_tuple_s3_store_backend(**store_config)
+        # Second, add the Data Docs Site that will use the AWS S3 backend store, allocated in the previous step.
+        # noinspection PyUnusedLocal
+        data_docs_site_dict: dict = project_config.add_data_docs_site(
+            name=data_docs_site_name,
+            store_backend=s3_store_backend_obj,
+            show_how_to_buttons=show_how_to_buttons,
+            show_cta_footer=show_cta_footer,
+            include_profiling=include_profiling,
+        )
+
+    project_config_store.save_configuration(configuration=project_config)
+
+    return project_config
+
+
+def compute_and_persist_to_filesystem_data_context_id(
+    project_config: DataContextConfig,
+    base_directory: str,
+    runtime_environment: dict = None,
+):
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj = build_tuple_filesystem_store_backend(**store_config)
+    project_config.anonymous_usage_statistics.data_context_id = compute_and_persist_data_context_id(
+        store_backend=store_backend_obj,
+        project_config=project_config,
+        runtime_environment=runtime_environment,
+    )
+
+
+def compute_and_persist_to_s3_data_context_id(
+    project_config: DataContextConfig,
+    bucket: str = None,
+    prefix: str = None,
+    runtime_environment: dict = None,
+    **kwargs,
+):
+    store_config: dict = {
+        "bucket": bucket,
+        "prefix": prefix,
+    }
+    store_config.update(**kwargs)
+    s3_store_backend_obj = build_tuple_s3_store_backend(**store_config)
+    project_config.anonymous_usage_statistics.data_context_id = compute_and_persist_data_context_id(
+        store_backend=s3_store_backend_obj,
+        project_config=project_config,
+        runtime_environment=runtime_environment,
+    )
+
+
+def compute_and_persist_data_context_id(
+    store_backend,
+    project_config: Union[DataContextConfig, None] = None,
+    runtime_environment: dict = None,
+) -> Union[str, None]:
+    if project_config is None:
+        return None
+
+    store_config: dict
+    expectations_store_backend_obj = None
+
+    expectations_store_exists: bool = False
+
+    data_context_id_from_expectations_store: Union[str, None] = None
+
+    data_context_id_from_id_store: Union[str, None] = find_data_context_id(
+        store_backend=store_backend, overwrite_existing=False,
+    )
+
+    if project_config.expectations_store_name is not None:
+        if (
+            project_config.stores.get(project_config.expectations_store_name)
+            is not None
+        ):
+            expectations_store_exists = True
+            store_config = project_config.stores[
+                project_config.expectations_store_name
+            ]["store_backend"]
+            expectations_store_backend_obj = build_store_from_config(
+                store_config=store_config, runtime_environment=runtime_environment
+            )
+            data_context_id_from_expectations_store = find_data_context_id(
+                store_backend=expectations_store_backend_obj, overwrite_existing=False,
+            )
+
+    data_context_id: Union[str, None]
+
+    if expectations_store_exists:
+        if data_context_id_from_expectations_store is None:
+            if data_context_id_from_id_store is None:
+                data_context_id = (
+                    project_config.anonymous_usage_statistics.data_context_id
+                )
+            else:
+                data_context_id = data_context_id_from_id_store
+            # noinspection PyUnusedLocal
+            data_context_id_stored_into_expectations_store_backend: str = find_or_create_data_context_id(
+                store_backend=expectations_store_backend_obj,
+                data_context_id=data_context_id,
+                overwrite_existing=True,
+            )
+        else:
+            if data_context_id_from_id_store is None:
+                data_context_id = data_context_id_from_expectations_store
+            else:
+                data_context_id = data_context_id_from_id_store
+                if not (data_context_id_from_expectations_store == data_context_id):
+                    # noinspection PyUnusedLocal
+                    data_context_id_stored_into_expectations_store_backend: str = find_or_create_data_context_id(
+                        store_backend=expectations_store_backend_obj,
+                        data_context_id=data_context_id,
+                        overwrite_existing=True,
+                    )
+        if not (
+            data_context_id_from_id_store is None
+            or store_backend.config == expectations_store_backend_obj.config
+        ):
+            delete_data_context_id(store_backend=store_backend,)
+    else:
+        if data_context_id_from_id_store is None:
+            data_context_id = project_config.anonymous_usage_statistics.data_context_id
+            # noinspection PyUnusedLocal
+            data_context_id_stored_into_store_backend: str = find_or_create_data_context_id(
+                store_backend=store_backend,
+                data_context_id=data_context_id,
+                overwrite_existing=True,
+            )
+        else:
+            data_context_id = data_context_id_from_id_store
+
+    return data_context_id
+
+
+def find_or_create_data_context_id(
+    store_backend=None, data_context_id: str = None, overwrite_existing: bool = False,
+) -> Union[str, None]:
+    if store_backend is None:
+        raise ge_exceptions.DataContextError(
+            f"""The find_or_create_data_context_id method requires a valid store_backend reference.
+            """
+        )
+
+    stored_data_context_id: Union[str, None] = find_data_context_id(
+        store_backend=store_backend, overwrite_existing=overwrite_existing,
+    )
+    if overwrite_existing or stored_data_context_id is None:
+        ge_id_config_store = build_configuration_store(
+            configuration_class=DataContextIdentificationConfig,
+            store_name=GE_IDENTIFICATION_CONFIGURATION_STORE_NAME,
+            store_backend=store_backend,
+            overwrite_existing=True,
+        )
+        ge_id_config = DataContextIdentificationConfig(data_context_id=data_context_id)
+        ge_id_config_store.save_configuration(configuration=ge_id_config)
+        stored_data_context_id = ge_id_config.data_context_id
+        validate_identification_config(identification_config=ge_id_config)
+
+    return stored_data_context_id
+
+
+def find_data_context_id(
+    store_backend=None, overwrite_existing: bool = False,
+) -> Union[str, None]:
+    if store_backend is None:
+        raise ge_exceptions.DataContextError(
+            f"""The find_data_context_id method requires a valid store_backend reference.
+              """
+        )
+    ge_id_config_store = build_configuration_store(
+        configuration_class=DataContextIdentificationConfig,
+        store_name=GE_IDENTIFICATION_CONFIGURATION_STORE_NAME,
+        store_backend=store_backend,
+        overwrite_existing=overwrite_existing,
+    )
+
+    ge_id_config: Union[DataContextIdentificationConfig, None]
+    try:
+        # noinspection PyTypeChecker
+        ge_id_config = ge_id_config_store.load_configuration()
+    except ge_exceptions.ConfigNotFoundError:
+        ge_id_config = None
+
+    if ge_id_config is None:
+        return None
+
+    validate_identification_config(identification_config=ge_id_config)
+
+    return ge_id_config.data_context_id
+
+
+def delete_data_context_id(store_backend=None):
+    if store_backend is None:
+        raise ge_exceptions.DataContextError(
+            f"""The delete_data_context_id method requires a valid store_backend reference.
+            """
+        )
+    ge_id_config_store = build_configuration_store(
+        configuration_class=DataContextIdentificationConfig,
+        store_name=GE_IDENTIFICATION_CONFIGURATION_STORE_NAME,
+        store_backend=store_backend,
+        overwrite_existing=True,
+    )
+    ge_id_config_store.delete_configuration()
+
+
+def create_minimal_project_config(
+    usage_statistics_enabled: bool = True,
+) -> DataContextConfig:
+    project_yaml: str = get_templated_yaml(
+        j2_template_name="data_context_minimal_project_template.j2",
+        usage_statistics_enabled=usage_statistics_enabled,
+    )
+    project_config_dict_from_yaml: CommentedMap = yaml.load(project_yaml)
+    try:
+        # noinspection PyTypeChecker
+        return DataContextConfig.from_commented_map(project_config_dict_from_yaml)
+    except ge_exceptions.InvalidDataContextConfigError:
+        # Just to be explicit about what we intended to catch
+        raise

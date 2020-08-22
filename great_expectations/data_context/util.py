@@ -3,13 +3,8 @@ import inspect
 import logging
 import os
 import re
-from collections import OrderedDict
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    DataContextConfigSchema,
-)
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
 logger = logging.getLogger(__name__)
@@ -93,6 +88,32 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     return class_instance
 
 
+def build_store_from_config(
+    store_config: dict = None,
+    module_name: str = "great_expectations.data_context.store",
+    runtime_environment: dict = None,
+):
+    if store_config is None or module_name is None:
+        return None
+
+    try:
+        config_defaults: dict = {"module_name": module_name}
+        new_store = instantiate_class_from_config(
+            config=store_config,
+            runtime_environment=runtime_environment,
+            config_defaults=config_defaults,
+        )
+    except ge_exceptions.DataContextError as e:
+        new_store = None
+        logger.critical(f"Error {e} occurred while attempting to instantiate a store.")
+    if not new_store:
+        class_name: str = store_config.get("class_name")
+        raise ge_exceptions.ClassInstantiationError(
+            module_name=module_name, package_name=None, class_name=class_name,
+        )
+    return new_store
+
+
 def format_dict_for_error_message(dict_):
     # TODO : Tidy this up a bit. Indentation isn't fully consistent.
 
@@ -146,32 +167,6 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
         )
 
     return template_str
-
-
-def substitute_all_config_variables(data, replace_variables_dict):
-    """
-    Substitute all config variables of the form ${SOME_VARIABLE} in a dictionary-like
-    config object for their values.
-
-    The method traverses the dictionary recursively.
-
-    :param data:
-    :param replace_variables_dict:
-    :return: a dictionary with all the variables replaced with their values
-    """
-    if isinstance(data, DataContextConfig):
-        data = DataContextConfigSchema().dump(data)
-
-    if isinstance(data, dict) or isinstance(data, OrderedDict):
-        return {
-            k: substitute_all_config_variables(v, replace_variables_dict)
-            for k, v in data.items()
-        }
-    elif isinstance(data, list):
-        return [
-            substitute_all_config_variables(v, replace_variables_dict) for v in data
-        ]
-    return substitute_config_variable(data, replace_variables_dict)
 
 
 def file_relative_path(dunderfile, relative_path):

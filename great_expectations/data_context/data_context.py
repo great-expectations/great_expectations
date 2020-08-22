@@ -1,7 +1,3 @@
-# For Python 3.7 and higher, using "from __future__ import annotations" will enable type hints for constructor methods.
-# Internal support for type hints (and annotations in general) is planned for Python 4.0 and subsequent versions.
-# Use DataContext as "create" return type if can run "from __future__ import annotations" (or starting with Python 4.0).
-# from __future__ import annotations
 import configparser
 import copy
 import datetime
@@ -14,7 +10,7 @@ import shutil
 import sys
 import warnings
 import webbrowser
-from typing import Callable, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
@@ -37,17 +33,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.config_utils import (
-    compute_and_persist_to_filesystem_data_context_id,
-    create_standard_s3_backend_data_context,
-    validate_project_config,
-)
-from great_expectations.data_context.store import (
-    ConfigurationStore,
-    Store,
-    StoreBackend,
-)
-from great_expectations.data_context.store.util import build_store_from_config
+from great_expectations.data_context.store import Store, StoreBackend
 from great_expectations.data_context.templates import INSTANCE_ID, get_templated_yaml
 from great_expectations.data_context.types.base import (
     CURRENT_CONFIG_VERSION,
@@ -56,8 +42,11 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     anonymizedUsageStatisticsSchema,
+    compute_and_persist_to_filesystem_data_context_id,
     dataContextConfigSchema,
     datasourceConfigSchema,
+    substitute_all_config_variables,
+    validate_project_config,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -66,19 +55,12 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
-    load_class,
-    substitute_all_config_variables,
     substitute_config_variable,
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.util import (
-    filter_properties_dict,
-    get_currently_executing_function_call_arguments,
-    verify_dynamic_loading_support,
-)
 from great_expectations.validation_operators import ValidationOperator
 from great_expectations.validator.validator import Validator
 
@@ -224,7 +206,7 @@ class BaseDataContext(object):
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf",
     ]
-    GE_EVALUATION_PARAMETER_STORE_NAME: str = "evaluation_parameter_store"
+    # GE_EVALUATION_PARAMETER_STORE_NAME: str = "evaluation_parameter_store"
 
     @usage_statistics_enabled_method(event_name="data_context.__init__",)
     def __init__(
@@ -303,7 +285,8 @@ class BaseDataContext(object):
         runtime_environment: dict = {"root_directory": self.root_directory}
         new_store: Union[StoreBackend, Store, None]
         try:
-            new_store = build_store_from_config(
+            new_store = self.get_project_config().add_store(
+                store_name=store_name,
                 store_config=store_config,
                 module_name=module_name,
                 runtime_environment=runtime_environment,
@@ -477,8 +460,6 @@ class BaseDataContext(object):
         store_obj: Union[StoreBackend, Store] = self._build_store(
             store_name, store_config
         )
-        if store_name is not None:
-            self.get_project_config()["stores"][store_name] = store_config
         return store_obj
 
     def add_validation_operator(
@@ -494,9 +475,11 @@ class BaseDataContext(object):
             validation_operator (ValidationOperator)
         """
 
-        self.get_project_config()["validation_operators"][
-            validation_operator_name
-        ] = validation_operator_config
+        self.get_project_config().add_validation_operator(
+            validation_operator_name=validation_operator_name,
+            validation_operator_config=validation_operator_config,
+        )
+
         config = self._project_config_with_variables_substituted.validation_operators[
             validation_operator_name
         ]
@@ -1075,21 +1058,7 @@ class BaseDataContext(object):
         Returns:
             datasource (Datasource)
         """
-        logger.debug("Starting BaseDataContext.add_datasource for %s" % name)
-        module_name = kwargs.get("module_name", "great_expectations.datasource")
-        verify_dynamic_loading_support(module_name=module_name)
-        class_name = kwargs.get("class_name")
-        datasource_class = load_class(module_name=module_name, class_name=class_name)
-
-        # For any class that should be loaded, it may control its configuration construction
-        # by implementing a classmethod called build_configuration
-        if hasattr(datasource_class, "build_configuration"):
-            config = datasource_class.build_configuration(**kwargs)
-        else:
-            config = kwargs
-
-        config = datasourceConfigSchema.load(config)
-        self.get_project_config()["datasources"][name] = config
+        self.get_project_config().add_datasource(name=name, **kwargs)
 
         # We perform variable substitution in the datasource's config here before using the config
         # to instantiate the datasource object. Variable substitution is a service that the data
@@ -1103,19 +1072,6 @@ class BaseDataContext(object):
             datasource = None
 
         return datasource
-
-    def set_expectations_store_name(self, expectations_store_name: str) -> None:
-        self.get_project_config()["expectations_store_name"] = expectations_store_name
-
-    def set_validations_store_name(self, validations_store_name: str) -> None:
-        self.get_project_config()["validations_store_name"] = validations_store_name
-
-    def set_evaluation_parameter_store_name(
-        self, evaluation_parameter_store_name: str
-    ) -> None:
-        self.get_project_config()[
-            "evaluation_parameter_store_name"
-        ] = evaluation_parameter_store_name
 
     def add_data_docs_site(
         self,
@@ -2219,93 +2175,6 @@ class DataContext(BaseDataContext):
 
         return cls(context_root_dir=ge_dir, runtime_environment=runtime_environment)
 
-    # noinspection PyUnusedLocal
-    # noinspection SpellCheckingInspection
-    @classmethod
-    def build_project_config(
-        cls,
-        backend_ecosystem: str,
-        datasource_type: str,
-        *,
-        expectations_store_bucket: str = None,
-        expectations_store_prefix: str = None,
-        validations_store_bucket: str = None,
-        validations_store_prefix: str = None,
-        data_docs_store_bucket: str = None,
-        data_docs_store_prefix: str = None,
-        expectations_store_name: str = None,
-        validations_store_name: str = None,
-        data_docs_site_name: str = None,
-        expectations_store_kwargs: dict = None,
-        validations_store_kwargs: dict = None,
-        data_docs_store_kwargs: dict = None,
-        project_config_bucket: str = None,
-        project_config_prefix: str = None,
-        project_config_kwargs: dict = None,
-        slack_webhook: str = None,
-        show_how_to_buttons: bool = None,
-        show_cta_footer: bool = None,
-        include_profiling: bool = None,
-        runtime_environment: dict = None,
-        overwrite_existing: bool = None,
-        usage_statistics_enabled: bool = None,
-    ) -> DataContextConfig:
-        kwargs_callee: dict = filter_properties_dict(
-            properties=get_currently_executing_function_call_arguments(),
-            clean_empty=False,
-            inplace=False,
-        )
-        return cls.build_data_context(**kwargs_callee).get_project_config()
-
-    # noinspection PyUnusedLocal
-    # noinspection SpellCheckingInspection
-    @classmethod
-    def build_data_context(
-        cls,
-        backend_ecosystem: str,
-        datasource_type: str,
-        *,
-        expectations_store_bucket: str = None,
-        expectations_store_prefix: str = None,
-        validations_store_bucket: str = None,
-        validations_store_prefix: str = None,
-        data_docs_store_bucket: str = None,
-        data_docs_store_prefix: str = None,
-        expectations_store_name: str = None,
-        validations_store_name: str = None,
-        data_docs_site_name: str = None,
-        expectations_store_kwargs: dict = None,
-        validations_store_kwargs: dict = None,
-        data_docs_store_kwargs: dict = None,
-        project_config_bucket: str = None,
-        project_config_prefix: str = None,
-        project_config_kwargs: dict = None,
-        slack_webhook: str = None,
-        show_how_to_buttons: bool = None,
-        show_cta_footer: bool = None,
-        include_profiling: bool = None,
-        runtime_environment: dict = None,
-        overwrite_existing: bool = None,
-        usage_statistics_enabled: bool = None,
-    ):
-        kwargs_callee: dict
-
-        if backend_ecosystem == "aws":
-            func_callee: Callable = create_standard_s3_backend_data_context
-            kwargs_callee = filter_properties_dict(
-                properties=get_currently_executing_function_call_arguments(),
-                delete_fields=["backend_ecosystem"],
-                clean_empty=False,
-                inplace=False,
-            )
-            return func_callee(**kwargs_callee)
-        else:
-            raise ge_exceptions.DataContextError(
-                f"""
-Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}" is not currently supported).
-                """
-            )
-
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir):
         """Check if all uncommitted direcotries exist."""
@@ -2413,17 +2282,12 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
 
     def __init__(
         self,
-        project_config_in_backend_store: bool = False,
-        project_config_store: ConfigurationStore = None,
-        project_config: Union[DataContextConfig, None] = None,
         context_root_dir: str = None,
+        project_config: DataContextConfig = None,
         runtime_environment: dict = None,
         usage_statistics_enabled: bool = False,
     ):
-        self._project_config_in_backend_store = project_config_in_backend_store
-        self._project_config_store = project_config_store
-
-        if not self.project_config_in_backend_store:
+        if project_config is None:
             # Determine the "context root directory" - this is the parent of "great_expectations" dir
             if context_root_dir is None:
                 context_root_dir = self.find_context_root_dir()
@@ -2432,32 +2296,35 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
             )
             self._context_root_directory = context_root_directory
 
-            if project_config is None:
-                project_config = self._load_project_config()
-                compute_and_persist_to_filesystem_data_context_id(
-                    project_config=project_config,
-                    base_directory=self.root_directory,
-                    runtime_environment={"root_directory": self.root_directory},
-                )
+            project_config = self._load_project_config()
+            compute_and_persist_to_filesystem_data_context_id(
+                project_config=project_config,
+                base_directory=self.root_directory,
+                runtime_environment={"root_directory": self.root_directory},
+            )
 
-        super().__init__(
-            project_config=project_config,
-            context_root_dir=context_root_dir,
-            runtime_environment=runtime_environment,
-            usage_statistics_enabled=usage_statistics_enabled,
-        )
-        # save project config if global project config values applied
-        project_config_dict: dict = dataContextConfigSchema.dump(project_config)
-        if (
-            not project_config.anonymous_usage_statistics.explicit_id
-            or project_config_dict
-            != dataContextConfigSchema.dump(self.get_project_config())
-        ):
-            # When project configuration is in a backend store then persist it using the project_configuration_store
-            # (if it is set); if project configuration is not in a backend store, save it to the local filesystem.
-            # if not self.project_config_in_backend_store or self.project_config_store:
-            if not self.project_config_in_backend_store:
+            super().__init__(
+                project_config=project_config,
+                context_root_dir=context_root_dir,
+                runtime_environment=runtime_environment,
+                usage_statistics_enabled=usage_statistics_enabled,
+            )
+
+            # save project config if global project config values applied
+            project_config_dict: dict = dataContextConfigSchema.dump(project_config)
+            if (
+                not project_config.anonymous_usage_statistics.explicit_id
+                or project_config_dict
+                != dataContextConfigSchema.dump(self.get_project_config())
+            ):
                 self._save_project_config()
+        else:
+            super().__init__(
+                project_config=project_config,
+                context_root_dir=None,
+                runtime_environment=runtime_environment,
+                usage_statistics_enabled=usage_statistics_enabled,
+            )
 
     def _load_project_config(self) -> Union[DataContextConfig, None]:
         """
@@ -2468,20 +2335,6 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
         :return: the configuration object read from the file
         """
         logger.debug("Starting DataContext._load_project_config")
-        if self.project_config_in_backend_store:
-            if self.project_config_store is None:
-                raise ge_exceptions.DataContextError(
-                    f"""The project_config_store property must be set in order to load the data context
-project configuration from a backend store.
-                    """
-                )
-            else:
-                try:
-                    # noinspection PyTypeChecker
-                    return self.project_config_store.load_configuration()
-                except ge_exceptions.InvalidKeyError:
-                    raise ge_exceptions.ConfigNotFoundError()
-
         path_to_yml: str = os.path.join(self.root_directory, self.GE_YML)
         try:
             with open(path_to_yml) as data:
@@ -2511,17 +2364,9 @@ project configuration from a backend store.
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
 
-        # If project_configuration_store is not set, do not save the project configuration, because it could be
-        # maintained in code (i.e., via API calls).
-        if self.project_config_in_backend_store:
-            if self.project_config_store is not None:
-                self.project_config_store.save_configuration(
-                    configuration=self.get_project_config()
-                )
-        else:
-            config_filepath: str = os.path.join(self.root_directory, self.GE_YML)
-            with open(config_filepath, "w") as outfile:
-                self.get_project_config().to_yaml(outfile)
+        config_filepath: str = os.path.join(self.root_directory, self.GE_YML)
+        with open(config_filepath, "w") as outfile:
+            self.get_project_config().to_yaml(outfile)
 
     def list_checkpoints(self) -> List[str]:
         """List checkpoints. (Experimental)"""
@@ -2569,121 +2414,6 @@ project configuration from a backend store.
 
         return new_store
 
-    def add_expectations_store(
-        self,
-        name: str,
-        store_backend: StoreBackend = None,
-        *,
-        module_name: str = "great_expectations.data_context.store",
-        class_name: str = "ExpectationsStore",
-        **kwargs,
-    ) -> Union[Store, None]:
-        if store_backend is not None:
-            store_backend = store_backend.config
-        store_config: dict = {
-            "module_name": module_name,
-            "class_name": class_name,
-            "store_backend": store_backend,
-        }
-        store_config.update(**kwargs)
-        return self.add_store(store_name=name, store_config=store_config)
-
-    def add_validation_store(
-        self,
-        name: str,
-        store_backend: StoreBackend,
-        *,
-        module_name: str = "great_expectations.data_context.store",
-        class_name: str = "ValidationsStore",
-        **kwargs,
-    ) -> Union[Store, None]:
-        if store_backend is not None:
-            store_backend = store_backend.config
-        store_config: dict = {
-            "module_name": module_name,
-            "class_name": class_name,
-            "store_backend": store_backend,
-        }
-        store_config.update(**kwargs)
-        return self.add_store(store_name=name, store_config=store_config)
-
-    def add_evaluation_parameters_store(
-        self,
-        name: str = BaseDataContext.GE_EVALUATION_PARAMETER_STORE_NAME,
-        store_backend: StoreBackend = None,
-        *,
-        module_name: str = "great_expectations.data_context.store.metric_store",
-        class_name: str = "EvaluationParameterStore",
-        **kwargs,
-    ) -> Union[Store, None]:
-        if store_backend is not None:
-            store_backend = store_backend.config
-        store_config: dict = {
-            "module_name": module_name,
-            "class_name": class_name,
-            "store_backend": store_backend,
-        }
-        store_config.update(**kwargs)
-        return self.add_store(store_name=name, store_config=store_config)
-
-    def set_expectations_store_name(self, expectations_store_name: str) -> None:
-        logger.debug(
-            f"Starting DataContext.set_expectations_store_name for expectations_store_name {expectations_store_name}"
-        )
-        super().set_expectations_store_name(
-            expectations_store_name=expectations_store_name
-        )
-        if expectations_store_name is not None:
-            self._save_project_config()
-
-    def set_validations_store_name(self, validations_store_name: str) -> None:
-        logger.debug(
-            f"Starting DataContext.set_validations_store_name for validations_store_name {validations_store_name}"
-        )
-        super().set_validations_store_name(
-            validations_store_name=validations_store_name
-        )
-        if validations_store_name is not None:
-            self._save_project_config()
-
-    def set_evaluation_parameter_store_name(
-        self,
-        evaluation_parameter_store_name: str = BaseDataContext.GE_EVALUATION_PARAMETER_STORE_NAME,
-    ) -> None:
-        logger.debug(
-            f"Starting DataContext.set_evaluation_parameter_store_name for evaluation_parameter_store_name {evaluation_parameter_store_name}"
-        )
-        super().set_evaluation_parameter_store_name(
-            evaluation_parameter_store_name=evaluation_parameter_store_name
-        )
-        if evaluation_parameter_store_name is not None:
-            self._save_project_config()
-
-    def add_data_docs_site(
-        self,
-        name: str,
-        store_backend: StoreBackend,
-        *,
-        show_how_to_buttons: bool = True,
-        show_cta_footer: bool = True,
-        **kwargs,
-    ) -> dict:
-        logger.debug(
-            f"Starting DataContext.add_data_docs_site for data_docs_site {name}"
-        )
-        if store_backend is not None:
-            store_backend = store_backend.config
-        new_data_docs_set_config: dict = super().add_data_docs_site(
-            name=name,
-            store_backend=store_backend,
-            show_how_to_buttons=show_how_to_buttons,
-            show_cta_footer=show_cta_footer,
-            **kwargs,
-        )
-        if name is not None:
-            self._save_project_config()
-        return new_data_docs_set_config
-
     def add_datasource(self, name: str, **kwargs) -> Datasource:
         logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
 
@@ -2693,110 +2423,6 @@ project configuration from a backend store.
             self._save_project_config()
 
         return new_datasource
-
-    def add_pandas_datasource(
-        self,
-        name: str,
-        *,
-        module_name: str = "great_expectations.datasource",
-        class_name: str = "PandasDatasource",
-        **kwargs,
-    ) -> Datasource:
-        logger.debug(
-            f"Starting DataContext.add_pandas_datasource for datasource_name {name}"
-        )
-        datasource_config: dict = {
-            "module_name": module_name,
-            "class_name": class_name,
-            "data_asset_type": {
-                "class_name": "PandasDataset",
-                "module_name": "great_expectations.dataset",
-            },
-        }
-        datasource_config.update(**kwargs)
-        return self.add_datasource(name=name, **datasource_config)
-
-    def add_spark_df_datasource(
-        self,
-        name: str,
-        *,
-        module_name: str = "great_expectations.datasource",
-        class_name: str = "SparkDFDatasource",
-        **kwargs,
-    ) -> Datasource:
-        logger.debug(
-            f"Starting DataContext.add_spark_df_datasource for datasource_name {name}"
-        )
-        datasource_config: dict = {
-            "module_name": module_name,
-            "class_name": class_name,
-            "data_asset_type": {
-                "class_name": "SparkDFDataset",
-                "module_name": "great_expectations.dataset",
-            },
-        }
-        datasource_config.update(**kwargs)
-        return self.add_datasource(name=name, **datasource_config)
-
-    def add_action_list_validation_operator(
-        self, name: str, slack_webhook: str = None, slack_notify_on: str = "all"
-    ) -> ValidationOperator:
-        logger.debug(
-            f"Starting DataContext.add_action_list_validation_operator for validation_operator_name {name}"
-        )
-        action_list: list = [
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "module_name": "great_expectations.validation_operators.actions",
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "module_name": "great_expectations.validation_operators.actions",
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "module_name": "great_expectations.validation_operators.actions",
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ]
-
-        notify_slack_action_dict: dict = {
-            "name": "notify_slack",
-            "action": {
-                "module_name": "great_expectations.validation_operators.actions",
-                "class_name": "SlackNotificationAction",
-                "slack_webhook": slack_webhook,
-                "notify_on": slack_notify_on,
-                "renderer": {
-                    "module_name": "great_expectations.render.renderer.slack_renderer",
-                    "class_name": "SlackRenderer",
-                },
-            },
-        }
-
-        if slack_webhook is not None:
-            action_list.append(notify_slack_action_dict)
-
-        validation_operator_config: dict = {
-            "module_name": "great_expectations.validation_operators.validation_operators",
-            "class_name": "ActionListValidationOperator",
-            "action_list": action_list,
-        }
-
-        self._save_project_config()
-
-        return self.add_validation_operator(
-            validation_operator_name=name,
-            validation_operator_config=validation_operator_config,
-        )
 
     @classmethod
     def find_context_root_dir(cls):
@@ -2978,18 +2604,6 @@ project configuration from a backend store.
                     )
 
         return checkpoint
-
-    @property
-    def project_config_in_backend_store(self):
-        return self._project_config_in_backend_store
-
-    @property
-    def project_config_store(self):
-        return self._project_config_store
-
-    @project_config_store.setter
-    def project_config_store(self, project_config_store: ConfigurationStore):
-        self._project_config_store = project_config_store
 
 
 class ExplorerDataContext(DataContext):

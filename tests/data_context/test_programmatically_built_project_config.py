@@ -5,8 +5,10 @@ from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.config_utils import create_minimal_data_context
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    create_minimal_project_config,
+)
 from great_expectations.util import filter_properties_dict
 from tests.test_utils import not_raises
 
@@ -15,12 +17,21 @@ yaml.default_flow_style = False
 
 
 @pytest.fixture()
-def minimal_in_memory_data_context() -> DataContext:
-    context: DataContext = create_minimal_data_context(
-        runtime_environment=None, usage_statistics_enabled=True,
+def minimal_in_memory_project_config() -> DataContextConfig:
+    project_config: DataContextConfig = create_minimal_project_config(
+        usage_statistics_enabled=True
     )
-    assert isinstance(context, DataContext)
-    return context
+    assert isinstance(project_config, DataContextConfig)
+    return project_config
+
+
+@pytest.fixture()
+def minimal_in_memory_data_context(minimal_in_memory_project_config) -> DataContext:
+    data_context: DataContext = DataContext(
+        project_config=minimal_in_memory_project_config
+    )
+    assert isinstance(data_context, DataContextConfig)
+    return data_context
 
 
 def test_minimal_context_structure_and_values(minimal_in_memory_data_context):
