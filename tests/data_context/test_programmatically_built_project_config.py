@@ -30,7 +30,7 @@ def minimal_in_memory_data_context(minimal_in_memory_project_config) -> DataCont
     data_context: DataContext = DataContext(
         project_config=minimal_in_memory_project_config
     )
-    assert isinstance(data_context, DataContextConfig)
+    assert isinstance(data_context, DataContext)
     return data_context
 
 

@@ -258,26 +258,12 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
             )
 
     def add_store(
-        self,
-        store_name: str = None,
-        store_config: dict = None,
-        module_name="great_expectations.data_context.store",
-        runtime_environment: dict = None,
+        self, store_name: str = None, store_config: dict = None,
     ):
-        try:
-            store_obj = build_store_from_config(
-                store_config=store_config,
-                module_name=module_name,
-                runtime_environment=runtime_environment,
-            )
-            if store_name is not None:
-                self.stores[store_name] = store_config
-        except ge_exceptions.ClassInstantiationError as e:
-            raise e
-
         if store_name is not None:
             self.stores[store_name] = store_config
-        return store_obj
+            return self.stores[store_name]
+        return None
 
     def add_expectations_store(
         self,

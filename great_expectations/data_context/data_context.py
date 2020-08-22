@@ -34,6 +34,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.store import Store, StoreBackend
+from great_expectations.data_context.store.util import build_store_from_config
 from great_expectations.data_context.templates import INSTANCE_ID, get_templated_yaml
 from great_expectations.data_context.types.base import (
     CURRENT_CONFIG_VERSION,
@@ -285,8 +286,8 @@ class BaseDataContext(object):
         runtime_environment: dict = {"root_directory": self.root_directory}
         new_store: Union[StoreBackend, Store, None]
         try:
-            new_store = self.get_project_config().add_store(
-                store_name=store_name,
+            # new_store = self.get_project_config().add_store(
+            new_store = build_store_from_config(
                 store_config=store_config,
                 module_name=module_name,
                 runtime_environment=runtime_environment,
@@ -457,6 +458,7 @@ class BaseDataContext(object):
         Returns:
             store (Store)
         """
+        self.get_project_config().add_store()
         store_obj: Union[StoreBackend, Store] = self._build_store(
             store_name, store_config
         )
@@ -686,20 +688,16 @@ class BaseDataContext(object):
 
     def _load_config_variables_file(self):
         """Get all config variables from the default location."""
-        config_variables_file_path: Union[str, None]
-        try:
-            config_variables_file_path = (
-                self.get_project_config().config_variables_file_path
-            )
-        except AttributeError:
-            config_variables_file_path = None
+        config_variables_file_path = (
+            self.get_project_config().config_variables_file_path
+        )
         if config_variables_file_path:
             try:
                 # If the user specifies the config variable path with an environment variable, we want to substitute it
                 defined_path = substitute_config_variable(
                     config_variables_file_path, dict(os.environ)
                 )
-                if not os.path.isabs(defined_path) and self.root_directory is not None:
+                if not os.path.isabs(defined_path):
                     # A BaseDataContext will not have a root directory; in that case use the current directory
                     # for any non-absolute path
                     root_directory = self.root_directory or os.curdir()
