@@ -1072,30 +1072,6 @@ class BaseDataContext(object):
 
         return datasource
 
-    def add_data_docs_site(
-        self,
-        name: str,
-        store_backend: dict,
-        *,
-        show_how_to_buttons: bool = True,
-        show_cta_footer: bool = True,
-        **kwargs,
-    ) -> Union[dict, None]:
-        data_docs_site_config: dict = {
-            "class_name": "SiteBuilder",
-            "show_how_to_buttons": show_how_to_buttons,
-            "store_backend": store_backend,
-            "site_index_builder": {
-                "class_name": "DefaultSiteIndexBuilder",
-                "show_cta_footer": show_cta_footer,
-            },
-        }
-        data_docs_site_config.update(**kwargs)
-        if name is None:
-            return None
-        self.get_project_config()["data_docs_sites"][name] = data_docs_site_config
-        return self.get_project_config()["data_docs_sites"][name]
-
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
     ):

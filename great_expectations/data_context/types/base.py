@@ -143,6 +143,7 @@ class BaseConfig(DictDot):
 
 
 class DataContextConfig(BaseConfig):
+    # noinspection SpellCheckingInspection
     def __init__(
         self,
         config_version,
@@ -262,8 +263,6 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
     ):
         if store_name is not None:
             self.stores[store_name] = store_config
-            return self.stores[store_name]
-        return None
 
     def add_expectations_store(
         self,
@@ -282,7 +281,7 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
             "store_backend": store_backend,
         }
         store_config.update(**kwargs)
-        return self.add_store(store_name=name, store_config=store_config)
+        self.add_store(store_name=name, store_config=store_config)
 
     def add_validation_store(
         self,
@@ -301,7 +300,7 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
             "store_backend": store_backend,
         }
         store_config.update(**kwargs)
-        return self.add_store(store_name=name, store_config=store_config)
+        self.add_store(store_name=name, store_config=store_config)
 
     def add_evaluation_parameters_store(
         self,
@@ -320,7 +319,7 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
             "store_backend": store_backend,
         }
         store_config.update(**kwargs)
-        return self.add_store(store_name=name, store_config=store_config)
+        self.add_store(store_name=name, store_config=store_config)
 
     def add_data_docs_site(
         self,
@@ -330,14 +329,10 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
         show_how_to_buttons: bool = True,
         show_cta_footer: bool = True,
         **kwargs,
-    ) -> Union[dict, None]:
-        if name is None:
-            return None
-
+    ):
         logger.debug(
             f"Starting DataContextConfig.add_data_docs_site for data_docs_site {name}"
         )
-
         if store_backend is not None:
             store_backend = store_backend.config
 
@@ -351,11 +346,10 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
             },
         }
         data_docs_site_config.update(**kwargs)
-
         self.data_docs_sites[name] = data_docs_site_config
-        return self.data_docs_sites[name]
 
-    def add_datasource(self, name, **kwargs) -> Union[dict, None]:
+    # noinspection SpellCheckingInspection
+    def add_datasource(self, name, **kwargs):
         logger.debug("Starting DataContextConfig.add_datasource for %s" % name)
         module_name = kwargs.get("module_name", "great_expectations.datasource")
         verify_dynamic_loading_support(module_name=module_name)
@@ -371,8 +365,8 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
 
         config = datasourceConfigSchema.load(config)
         self.datasources[name] = config
-        return self.datasources[name]
 
+    # noinspection SpellCheckingInspection
     def add_pandas_datasource(
         self,
         name: str,
@@ -380,7 +374,7 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
         module_name: str = "great_expectations.datasource",
         class_name: str = "PandasDatasource",
         **kwargs,
-    ) -> Union[dict, None]:
+    ):
         logger.debug(
             f"Starting DataContextConfig.add_pandas_datasource for datasource_name {name}"
         )
@@ -393,8 +387,9 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
             },
         }
         datasource_config.update(**kwargs)
-        return self.add_datasource(name=name, **datasource_config)
+        self.add_datasource(name=name, **datasource_config)
 
+    # noinspection SpellCheckingInspection
     def add_spark_df_datasource(
         self,
         name: str,
@@ -402,7 +397,7 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
         module_name: str = "great_expectations.datasource",
         class_name: str = "SparkDFDatasource",
         **kwargs,
-    ) -> Union[dict, None]:
+    ):
         logger.debug(
             f"Starting DataContextConfig.add_spark_df_datasource for datasource_name {name}"
         )
@@ -415,17 +410,16 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
             },
         }
         datasource_config.update(**kwargs)
-        return self.add_datasource(name=name, **datasource_config)
+        self.add_datasource(name=name, **datasource_config)
 
     def add_validation_operator(
         self, validation_operator_name: str, validation_operator_config: dict
-    ) -> Union[dict, None]:
+    ):
         self.validation_operators[validation_operator_name] = validation_operator_config
-        return self.validation_operators[validation_operator_name]
 
     def add_action_list_validation_operator(
         self, name: str, slack_webhook: str = None, slack_notify_on: str = "all"
-    ) -> dict:
+    ):
         logger.debug(
             f"Starting DataContextConfig.add_action_list_validation_operator for validation_operator_name {name}"
         )
@@ -453,6 +447,7 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
             },
         ]
 
+        # noinspection SpellCheckingInspection
         notify_slack_action_dict: dict = {
             "name": "notify_slack",
             "action": {
@@ -476,7 +471,7 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
             "action_list": action_list,
         }
 
-        return self.add_validation_operator(
+        self.add_validation_operator(
             validation_operator_name=name,
             validation_operator_config=validation_operator_config,
         )
@@ -514,10 +509,12 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
     ):
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
 
+    # noinspection SpellCheckingInspection
     @property
     def datasources(self) -> dict:
         return self._datasources
 
+    # noinspection SpellCheckingInspection
     @datasources.setter
     def datasources(self, datasources: dict):
         self._datasources = datasources
@@ -591,6 +588,7 @@ class DatasourceConfig(DictDot):
         return self._module_name
 
 
+# noinspection SpellCheckingInspection
 class AnonymizedUsageStatisticsConfig(DictDot):
     def __init__(self, enabled=True, data_context_id=None, usage_statistics_url=None):
         self._enabled = enabled
@@ -647,6 +645,7 @@ class AnonymizedUsageStatisticsConfig(DictDot):
         self._explicit_url = True
 
 
+# noinspection SpellCheckingInspection
 class AnonymizedUsageStatisticsConfigSchema(Schema):
     data_context_id = fields.UUID()
     enabled = fields.Boolean(default=True)
@@ -730,6 +729,7 @@ class DataContextIdentificationConfigSchema(Schema):
         return DataContextIdentificationConfig(**data).to_dict()
 
 
+# noinspection SpellCheckingInspection
 class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
@@ -886,6 +886,7 @@ class DataContextConfigSchema(Schema):
         validate=lambda x: 0 < x < 100,
         error_messages={"invalid": "config version must " "be a number."},
     )
+    # noinspection SpellCheckingInspection
     datasources = fields.Dict(
         keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema)
     )
@@ -950,7 +951,9 @@ class DataContextConfigSchema(Schema):
 
 
 dataContextConfigSchema = DataContextConfigSchema()
+# noinspection SpellCheckingInspection
 datasourceConfigSchema = DatasourceConfigSchema()
+# noinspection SpellCheckingInspection
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 dataContextIdentificationConfigSchema = DataContextIdentificationConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
@@ -1058,8 +1061,7 @@ def create_s3_backend_project_config(
     }
     store_config.update(**expectations_store_kwargs)
     s3_store_backend_obj = build_tuple_s3_store_backend(**store_config)
-    # noinspection PyUnusedLocal
-    expectations_store_obj = project_config.add_expectations_store(
+    project_config.add_expectations_store(
         name=expectations_store_name, store_backend=s3_store_backend_obj
     )
     project_config.expectations_store_name = expectations_store_name
@@ -1124,16 +1126,10 @@ def build_s3_backend_project_config(
     # Add the Data Source (Spark Dataframe and Pandas Dataframe data sources types are currently implemented).
     if datasource_type == "spark":
         spark_df_datasource_name: str = "s3_files_spark_datasource"
-        # noinspection PyUnusedLocal
-        spark_df_datasource: Datasource = project_config.add_spark_df_datasource(
-            name=spark_df_datasource_name
-        )
+        project_config.add_spark_df_datasource(name=spark_df_datasource_name)
     elif datasource_type == "pandas":
         pandas_datasource_name: str = "s3_files_pandas_datasource"
-        # noinspection PyUnusedLocal
-        pandas_datasource: Datasource = project_config.add_pandas_datasource(
-            name=pandas_datasource_name
-        )
+        project_config.add_pandas_datasource(name=pandas_datasource_name)
     else:
         raise ge_exceptions.DataContextError(
             f"""
@@ -1152,22 +1148,19 @@ Only "spark" and "pandas" are currently supported as datasource types when "aws"
         store_config.update(**validations_store_kwargs)
         s3_store_backend_obj = build_tuple_s3_store_backend(**store_config)
         # Second, add the Validations Store that will use the AWS S3 backend store, allocated in the previous step.
-        # noinspection PyUnusedLocal
-        validations_store_obj = project_config.add_validation_store(
+        project_config.add_validation_store(
             name=validations_store_name, store_backend=s3_store_backend_obj
         )
         # Third, set the name of the Validations Store added to be the one used by Great Expectations (required).
         project_config.validations_store_name = validations_store_name
 
     # Create the Evaluation Parameters Store (no arguments means an In-Memory backend store and the default name).
-    # noinspection PyUnusedLocal
-    evaluation_parameters_store_obj = project_config.add_evaluation_parameters_store()
+    project_config.add_evaluation_parameters_store()
     # Set the default Evaluation Parameters Store just added to be the one used by Great Expectations (required).
     project_config.set_evaluation_parameter_store_name()
 
     # Add the Action List Operator for data validation (satisfies the needs of a wide variety of applications).
-    # noinspection PyUnusedLocal
-    action_list_validation_operator: ValidationOperator = project_config.add_action_list_validation_operator(
+    project_config.add_action_list_validation_operator(
         name="action_list_operator", slack_webhook=slack_webhook
     )
 
@@ -1181,8 +1174,7 @@ Only "spark" and "pandas" are currently supported as datasource types when "aws"
         store_config.update(**data_docs_store_kwargs)
         s3_store_backend_obj = build_tuple_s3_store_backend(**store_config)
         # Second, add the Data Docs Site that will use the AWS S3 backend store, allocated in the previous step.
-        # noinspection PyUnusedLocal
-        data_docs_site_dict: dict = project_config.add_data_docs_site(
+        project_config.add_data_docs_site(
             name=data_docs_site_name,
             store_backend=s3_store_backend_obj,
             show_how_to_buttons=show_how_to_buttons,
