@@ -19,7 +19,7 @@ def guard(*args, **kwargs):
 
 
 def main(
-    nap_duration=1, block_network=False, usage_statistics_enabled=True,
+    nap_duration=1, block_network=False, enable_usage_statistics=True,
 ):
     if block_network:
         socket.socket = guard
@@ -51,7 +51,7 @@ def main(
         data_docs_sites={},
         config_variables_file_path=None,
         anonymous_usage_statistics={
-            "enabled": usage_statistics_enabled,
+            "enabled": enable_usage_statistics,
             # Leaving data_context_id as none would cause a new id to be generated
             # This will be overridden when tests set an environment variable
             "usage_statistics_url": "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics",
@@ -102,19 +102,19 @@ if __name__ == "__main__":
     try:
         res = sys.argv[4]
         if res in ["y", "yes", "True", "true", "t", "T"]:
-            usage_statistics_enabled = True
+            enable_usage_statistics = True
         else:
-            usage_statistics_enabled = False
+            enable_usage_statistics = False
     except IndexError:
-        usage_statistics_enabled = True
+        enable_usage_statistics = True
     except ValueError:
-        print("Unrecognized value for usage_statistics_enabled. Setting to True.")
-        usage_statistics_enabled = True
+        print("Unrecognized value for enable_usage_statistics. Setting to True.")
+        enable_usage_statistics = True
 
     ge_logger = logging.getLogger("great_expectations")
     ge_logger.setLevel(logging.DEBUG)
     main(
         nap_duration,
         block_network=block_network,
-        usage_statistics_enabled=usage_statistics_enabled,
+        enable_usage_statistics=enable_usage_statistics,
     )
