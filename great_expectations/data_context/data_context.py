@@ -286,7 +286,6 @@ class BaseDataContext(object):
         runtime_environment: dict = {"root_directory": self.root_directory}
         new_store: Union[StoreBackend, Store, None]
         try:
-            # new_store = self.get_project_config().add_store(
             new_store = build_store_from_config(
                 store_config=store_config,
                 module_name=module_name,
@@ -458,7 +457,9 @@ class BaseDataContext(object):
         Returns:
             store (Store)
         """
-        self.get_project_config().add_store()
+        self.get_project_config().add_store(
+            store_name=store_name, store_config=store_config
+        )
         store_obj: Union[StoreBackend, Store] = self._build_store(
             store_name, store_config
         )
