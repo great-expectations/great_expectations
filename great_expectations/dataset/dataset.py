@@ -4232,7 +4232,6 @@ class Dataset(MetaDataset):
         n_bins_A=None,
         n_bins_B=None,
         threshold=0.05,
-        ignore_missings=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -4251,9 +4250,6 @@ class Dataset(MetaDataset):
             bins_B (list of float): Bins for column_B if numeric.
             n_bins_A (int): Number of bins for column_A if numeric. Ignored if bins_A is not None.
             n_bins_B (int): Number of bins for column_B if numeric. Ignored if bins_B is not None.
-            ignore_missings (bool): \
-                If True, ignore columns where either column has missing. If False, treat missing values as
-                another category (only for methods ...).
 
         Other Parameters:
             result_format (str or None): \
@@ -4281,7 +4277,9 @@ class Dataset(MetaDataset):
         )
         chi2_result = stats.chi2_contingency(crosstab)
         # See e.g. https://en.wikipedia.org/wiki/Cram%C3%A9r%27s_V
-        cramers_V = np.sqrt(chi2_result[0] / self.get_row_count() / min(crosstab.shape))
+        cramers_V = np.sqrt(
+            chi2_result[0] / self.get_row_count() / (min(crosstab.shape) - 1)
+        )
         return_obj = {
             "success": cramers_V <= threshold,
             "result": {
