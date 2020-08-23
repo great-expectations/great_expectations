@@ -75,6 +75,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
+        anon_data_context_id.yml
     notebooks/
         pandas/
             validation_playground.ipynb
@@ -257,6 +258,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
+        anon_data_context_id.yml
     notebooks/
         pandas/
             validation_playground.ipynb
