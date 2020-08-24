@@ -3,8 +3,10 @@ from string import Template
 
 from marshmallow import Schema, ValidationError, fields, post_load
 
-from great_expectations.execution_environment.types import SqlAlchemyDatasourceTableBatchKwargs
 from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
+from great_expectations.execution_environment.types import (
+    SqlAlchemyDatasourceTableBatchKwargs,
+)
 
 from .data_connector import DataConnector
 
@@ -93,7 +95,7 @@ class TableDataConnector(DataConnector):
             )
 
         if execution_environment is not None:
-            self.engine = execution_environment.engine
+            self.engine = execution_environment.execution_engine.engine
             try:
                 self.inspector = sqlalchemy.inspect(self.engine)
 
