@@ -52,7 +52,10 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
                 "String-only configuration for execution_engine is deprecated. Use module_name and class_name instead.",
                 DeprecationWarning,
             )
-        self._execution_engine = instantiate_class_from_config(execution_engine)
+        self._execution_engine = instantiate_class_from_config(
+            config=execution_engine,
+            runtime_environment={}
+        )
         self._execution_environment_config = kwargs
         self._data_connectors = {}
 
@@ -183,12 +186,13 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
             config=kwargs,
             runtime_environment={"execution_environment": self},
             config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"  # TODO: confirm directory location
+                "module_name": "great_expectations.execution_environment.data_connector"  # TODO: confirm directory
+                # location
             },
         )
         if not data_connector:
             raise ClassInstantiationError(
-                module_name="great_expectations.datasource.data_connector",
+                module_name="great_expectations.execution_environment.data_connector",
                 package_name=None,
                 class_name=kwargs["class_name"],
             )
