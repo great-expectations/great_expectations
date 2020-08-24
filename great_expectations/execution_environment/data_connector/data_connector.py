@@ -101,37 +101,37 @@ class DataConnector(object):
             self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
             return self._data_asset_iterators[data_asset_name][0]
 
-    # def build_batch_kwargs(self, data_asset_name=None, partition_id=None, **kwargs):
-    #     # TODO: The logic before raised an error here, but we also check for this below - which should it be?
-    #     if not data_asset_name:
-    #         raise ValueError("Please provide a data_asset_name.")
-    #
-    #     """The key workhorse. Docs forthcoming."""
-    #     if data_asset_name is not None:
-    #         batch_parameters = {"data_asset_name": data_asset_name}
-    #     else:
-    #         batch_parameters = dict()
-    #     if partition_id is not None:
-    #         batch_parameters["partition_id"] = partition_id
-    #     batch_parameters.update(kwargs)
-    #     param_keys = set(batch_parameters.keys())
-    #     recognized_params = (
-    #         self.recognized_batch_parameters
-    #         | self._execution_environment.execution_engine.recognized_batch_parameters
-    #     )
-    #     if not param_keys <= recognized_params:
-    #         logger.warning(
-    #             "Unrecognized batch_parameter(s): %s"
-    #             % str(param_keys - recognized_params)
-    #         )
-    #
-    #     batch_kwargs = self._build_batch_kwargs(batch_parameters)
-    #     batch_kwargs["data_asset_name"] = data_asset_name
-    #     # Track the execution_environment *in batch_kwargs* when building from a context so that the context can easily
-    #     # reuse
-    #     # them.
-    #     batch_kwargs["execution_environment"] = self._execution_environment.name
-    #     return batch_kwargs
+    def build_batch_kwargs(self, data_asset_name=None, partition_id=None, **kwargs):
+        # TODO: The logic before raised an error here, but we also check for this below - which should it be?
+        if not data_asset_name:
+            raise ValueError("Please provide a data_asset_name.")
+
+        """The key workhorse. Docs forthcoming."""
+        if data_asset_name is not None:
+            batch_parameters = {"data_asset_name": data_asset_name}
+        else:
+            batch_parameters = dict()
+        if partition_id is not None:
+            batch_parameters["partition_id"] = partition_id
+        batch_parameters.update(kwargs)
+        param_keys = set(batch_parameters.keys())
+        recognized_params = (
+            self.recognized_batch_parameters
+            | self._execution_environment.execution_engine.recognized_batch_parameters
+        )
+        if not param_keys <= recognized_params:
+            logger.warning(
+                "Unrecognized batch_parameter(s): %s"
+                % str(param_keys - recognized_params)
+            )
+
+        batch_kwargs = self._build_batch_kwargs(batch_parameters)
+        batch_kwargs["data_asset_name"] = data_asset_name
+        # Track the execution_environment *in batch_kwargs* when building from a context so that the context can easily
+        # reuse
+        # them.
+        batch_kwargs["execution_environment"] = self._execution_environment.name
+        return batch_kwargs
 
     def _build_batch_kwargs(self, batch_parameters):
         raise NotImplementedError
