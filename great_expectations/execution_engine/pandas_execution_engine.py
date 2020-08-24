@@ -2,7 +2,7 @@ import inspect
 import json
 import logging
 import uuid
-from datetime import datetime
+import datetime
 from functools import wraps, partial
 from io import StringIO
 from typing import List
@@ -132,7 +132,7 @@ class MetaPandasExecutionEngine(ExecutionEngine):
                         if isinstance(val, str):
                             val = parse(val)
                         parsed_unexpected_list.append(
-                            datetime.strftime(val, output_strftime_format)
+                            datetime.datetime.strftime(val, output_strftime_format)
                         )
                 unexpected_list = parsed_unexpected_list
 
@@ -1606,15 +1606,15 @@ Notes:
         # Below is a simple validation that the provided format can both format and parse a datetime object.
         # %D is an example of a format that can format but not parse, e.g.
         try:
-            datetime.strptime(
-                datetime.strftime(datetime.now(), strftime_format), strftime_format
+            datetime.datetime.strptime(
+                datetime.datetime.strftime(datetime.datetime.now(), strftime_format), strftime_format
             )
         except ValueError as e:
             raise ValueError("Unable to use provided strftime_format. " + str(e))
 
         def is_parseable_by_format(val):
             try:
-                datetime.strptime(val, strftime_format)
+                datetime.datetime.strptime(val, strftime_format)
                 return True
             except TypeError:
                 raise TypeError(
