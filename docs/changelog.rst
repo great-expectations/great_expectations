@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [FEATURE] add support for `expect_column_pair_values_to_be_in_set` to `Spark` (thanks @mikaylaedwards)!
 * [FEATURE] Add new exception: expect_multicolumn_sum_to_equal for `pandas` and `Spark` (thanks @chipmyersjr)!
 * [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
 * [BUGFIX] Fix bug preventing the use of get_available_partition_ids in s3 generator
