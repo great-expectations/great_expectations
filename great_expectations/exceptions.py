@@ -160,8 +160,10 @@ Result: {}
 class ConfigNotFoundError(DataContextError):
     """The great_expectations configuration could not be found."""
 
-    def __init__(self):
-        self.message = """Error: No great_expectations configuration was found!"""
+    def __init__(
+        self, message: str = "Error: No great_expectations configuration was found!"
+    ):
+        self.message = message
         super().__init__(self.message)
 
 

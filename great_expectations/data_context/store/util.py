@@ -10,7 +10,7 @@ def build_in_memory_store_backend(
     class_name: str = "InMemoryStoreBackend",
     **kwargs,
 ):
-    logger.debug(f"Starting data_context/store/util.py#build_in_memory_store_backend")
+    logger.debug("Starting data_context/store/util.py#build_in_memory_store_backend")
     store_config: dict = {"module_name": module_name, "class_name": class_name}
     store_config.update(**kwargs)
     return build_store_from_config(
@@ -26,7 +26,8 @@ def build_tuple_filesystem_store_backend(
     **kwargs,
 ):
     logger.debug(
-        f"Starting data_context/store/util.py#build_tuple_filesystem_store_backend"
+        f"""Starting data_context/store/util.py#build_tuple_filesystem_store_backend using base_directory:
+"{base_directory}"""
     )
     store_config: dict = {
         "module_name": module_name,
@@ -46,7 +47,10 @@ def build_tuple_s3_store_backend(
     class_name: str = "TupleS3StoreBackend",
     **kwargs,
 ):
-    logger.debug(f"Starting data_context/store/util.py#build_tuple_s3_store_backend")
+    logger.debug(
+        f"""Starting data_context/store/util.py#build_tuple_s3_store_backend using bucket: {bucket}
+        """
+    )
     store_config: dict = {
         "module_name": module_name,
         "class_name": class_name,

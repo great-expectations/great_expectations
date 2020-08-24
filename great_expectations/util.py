@@ -758,6 +758,18 @@ def filter_properties_dict(
     clean_empty: bool = True,
     inplace: bool = False,
 ) -> Union[dict, None]:
+    """Filter the entries of the source dictionary according to directives concerning the existing keys and values.
+
+    Args:
+        properties: source dictionary to be filtered according to the supplied filtering directives
+        keep_fields: list of keys that must be retained, with the understanding that all other entries will be deleted
+        delete_fields: list of keys that must be deleted, with the understanding that all other entries will be retained
+        clean_empty: If True, then in addition to other filtering directives, delete entries, whose values are Falsy
+        inplace: If True, then modify the source properties dictionary; otherwise, make a copy for filtering purposes
+
+    Returns:
+        The (possibly) filtered properties dictionary (or None if no entries remain after filtering is performed)
+    """
     if keep_fields and delete_fields:
         raise ValueError(
             "Only one of keep_fields and delete_fields filtering directives can be specified."

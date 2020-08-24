@@ -233,6 +233,8 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         os.makedirs(str(os.path.dirname(self.full_base_directory)), exist_ok=True)
 
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
         self._config = get_currently_executing_function_call_arguments(
             include_module_name=True, **{"class_name": self.__class__.__name__,}
         )
@@ -399,6 +401,8 @@ class TupleS3StoreBackend(TupleStoreBackend):
             prefix = prefix.strip("/")
         self.prefix = prefix
 
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
         self._config = get_currently_executing_function_call_arguments(
             include_module_name=True, **{"class_name": self.__class__.__name__,}
         )
@@ -620,6 +624,8 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         self.project = project
         self._public_urls = public_urls
 
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
         self._config = get_currently_executing_function_call_arguments(
             include_module_name=True, **{"class_name": self.__class__.__name__,}
         )

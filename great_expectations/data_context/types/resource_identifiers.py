@@ -295,7 +295,7 @@ class ConfigurationIdentifier(DataContextKey):
         return tuple(self.configuration_name.split("."))
 
     def to_fixed_length_tuple(self):
-        return (self.configuration_name,)
+        return self.configuration_name
 
     @classmethod
     def from_tuple(cls, tuple_):

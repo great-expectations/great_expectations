@@ -19,8 +19,11 @@ config_version: 2
 ANONYMIZED_USAGE_STATISTICS_TEMPLATE: str = """
 anonymous_usage_statistics:
   enabled: {{ usage_statistics_enabled }}
-
 """
+# noinspection SpellCheckingInspection
+ANONYMIZED_USAGE_STATISTICS_TEMPLATE = (
+    f"{ANONYMIZED_USAGE_STATISTICS_TEMPLATE}{os.linesep}"
+)
 
 DATA_CONTEXT_MINIMAL_PROJECT_TEMPLATE: str = """
 {% include 'config_version_template.j2' %}

@@ -56,7 +56,7 @@ class Store(object):
         return self._store_backend
 
     @store_backend.setter
-    def store_backend(self, store_backend: StoreBackend):
+    def store_backend(self, store_backend: StoreBackend) -> None:
         self._store_backend = store_backend
 
     # noinspection PyMethodMayBeStatic

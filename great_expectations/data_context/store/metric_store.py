@@ -90,6 +90,8 @@ class EvaluationParameterStore(MetricStore):
                 )
         super().__init__(store_backend=store_backend)
 
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
         self._config = get_currently_executing_function_call_arguments(
             include_module_name=True, **{"class_name": self.__class__.__name__,}
         )

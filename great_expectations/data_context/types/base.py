@@ -244,6 +244,9 @@ class DataContextConfig(BaseConfig):
 
         if backend_ecosystem == "aws":
             func_callee: Callable = create_standard_s3_backend_project_config
+            # Gather the call arguments of the present function and package the subset thereof as call arguments for the
+            # downstream ("func_callee") function (by taking out the "backend_ecosystem" argument).
+            # Leave the "None" values in the call arguments.
             kwargs_callee = filter_properties_dict(
                 properties=get_currently_executing_function_call_arguments(),
                 delete_fields=["backend_ecosystem"],
@@ -258,12 +261,14 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
                 """
             )
 
+    # Repeated operation with the same "store_name" overwrites the previous value.
     def add_store(
         self, store_name: str = None, store_config: dict = None,
     ):
         if store_name is not None:
             self.stores[store_name] = store_config
 
+    # Repeated operation with the same "name" overwrites the previous value.
     def add_expectations_store(
         self,
         name: str,
@@ -283,6 +288,7 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
         store_config.update(**kwargs)
         self.add_store(store_name=name, store_config=store_config)
 
+    # Repeated operation with the same "name" overwrites the previous value.
     def add_validation_store(
         self,
         name: str,
@@ -302,6 +308,7 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
         store_config.update(**kwargs)
         self.add_store(store_name=name, store_config=store_config)
 
+    # Repeated operation with the same "name" overwrites the previous value.
     def add_evaluation_parameters_store(
         self,
         name: str = GE_EVALUATION_PARAMETER_STORE_NAME,
@@ -321,6 +328,7 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
         store_config.update(**kwargs)
         self.add_store(store_name=name, store_config=store_config)
 
+    # Repeated operation with the same "name" overwrites the previous value.
     def add_data_docs_site(
         self,
         name: str,
@@ -349,6 +357,7 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
         self.data_docs_sites[name] = data_docs_site_config
 
     # noinspection SpellCheckingInspection
+    # Repeated operation with the same "name" overwrites the previous value.
     def add_datasource(self, name, **kwargs):
         logger.debug("Starting DataContextConfig.add_datasource for %s" % name)
         module_name = kwargs.get("module_name", "great_expectations.datasource")
@@ -367,6 +376,7 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
         self.datasources[name] = config
 
     # noinspection SpellCheckingInspection
+    # Repeated operation with the same "name" overwrites the previous value.
     def add_pandas_datasource(
         self,
         name: str,
@@ -390,6 +400,7 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
         self.add_datasource(name=name, **datasource_config)
 
     # noinspection SpellCheckingInspection
+    # Repeated operation with the same "name" overwrites the previous value.
     def add_spark_df_datasource(
         self,
         name: str,
@@ -412,11 +423,13 @@ Only "aws" is currently supported as the backend ecosystem ("{backend_ecosystem}
         datasource_config.update(**kwargs)
         self.add_datasource(name=name, **datasource_config)
 
+    # Repeated operation with the same "validation_operator_name" overwrites the previous value.
     def add_validation_operator(
         self, validation_operator_name: str, validation_operator_config: dict
     ):
         self.validation_operators[validation_operator_name] = validation_operator_config
 
+    # Repeated operation with the same "name" overwrites the previous value.
     def add_action_list_validation_operator(
         self, name: str, slack_webhook: str = None, slack_notify_on: str = "all"
     ):
@@ -679,7 +692,7 @@ class DataContextIdentificationConfig(BaseConfig):
         else:
             self._explicit_id = True
 
-        self._data_context_id = data_context_id
+        self.data_context_id = data_context_id
 
         super().__init__(commented_map=commented_map)
 
@@ -964,8 +977,13 @@ def create_using_s3_backend(func: Callable = None,) -> Callable:
     """
     A decorator for loading or creating data context with S3 serving as the backend store for all
     application-level stores (Expectation Suites, Validations, Evaluation Parameters, and Data Docs).
+
+    The decorator serves two key purposes:
+    1) Insures that the required essential parts of the project configuration are set up properly; and
+    2) Enables the user (developer) to focus on customizing the project configuration to their respective requirements.
     """
 
+    # noinspection SpellCheckingInspection
     @wraps(func)
     def initialize_using_s3_backend_wrapped_method(**kwargs):
         kwargs_callee: dict
@@ -973,6 +991,9 @@ def create_using_s3_backend(func: Callable = None,) -> Callable:
         func_callee: Callable = create_s3_backend_project_config
         # noinspection SpellCheckingInspection
         argspec: list = getfullargspec(func_callee)[0]
+        # Gather the call arguments of the present function and package the subset thereof as call arguments for the
+        # downstream ("func_callee") function (as defined by its own, "argspec", call arguments).
+        # Leave the "None" values in the call arguments.
         kwargs_callee = filter_properties_dict(
             properties=kwargs, keep_fields=argspec, clean_empty=False, inplace=False
         )
@@ -1074,12 +1095,15 @@ def create_s3_backend_project_config(
     }
 
 
-# noinspection pyargumentlist
+# noinspection pyargumentlist,SpellCheckingInspection
 @create_using_s3_backend
 def create_standard_s3_backend_project_config(**kwargs,):
     func_callee: Callable = build_s3_backend_project_config
     # noinspection SpellCheckingInspection
     argspec: list = getfullargspec(func_callee)[0]
+    # Starting with the call arguments of the present function ("kwargs"), package the subset thereof as call arguments
+    # for the downstream ("func_callee") function (as defined by its own, "argspec", call arguments).
+    # Leave the "None" values in the call arguments.
     filter_properties_dict(
         properties=kwargs, keep_fields=argspec, clean_empty=False, inplace=True
     )
