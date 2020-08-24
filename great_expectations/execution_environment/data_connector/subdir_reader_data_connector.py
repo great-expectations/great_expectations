@@ -41,13 +41,13 @@ class SubdirReaderDataConnector(DataConnector):
     def __init__(
         self,
         name="default",
-        datasource=None,
+        execution_environment=None,
         base_directory="/data",
         reader_options=None,
         known_extensions=None,
         reader_method=None,
     ):
-        super().__init__(name, datasource=datasource)
+        super().__init__(name, execution_environment=execution_environment)
         if reader_options is None:
             reader_options = self._default_reader_options
 
@@ -75,11 +75,11 @@ class SubdirReaderDataConnector(DataConnector):
     def base_directory(self):
         # If base directory is a relative path, interpret it as relative to the data context's
         # context root directory (parent directory of great_expectation dir)
-        if os.path.isabs(self._base_directory) or self._datasource.data_context is None:
+        if os.path.isabs(self._base_directory) or self._execution_environment.data_context is None:
             return self._base_directory
         else:
             return os.path.join(
-                self._datasource.data_context.root_directory, self._base_directory
+                self._execution_environment.data_context.root_directory, self._base_directory
             )
 
     def get_available_data_asset_names(self):
@@ -205,7 +205,7 @@ class SubdirReaderDataConnector(DataConnector):
                         valid_options.append((file_option, "directory"))
         return valid_options
 
-    def _get_iterator(self, data_asset_name, reader_options=None, limit=None):
+    def _get_iterator(self, data_asset_name, reader_options=None, limit=None, **kwargs):
         logger.debug(
             "Beginning SubdirReaderDataConnector _get_iterator for data_asset_name: %s"
             % data_asset_name
@@ -263,11 +263,11 @@ class SubdirReaderDataConnector(DataConnector):
     def _build_batch_kwargs_from_path(
         self, path, reader_method=None, reader_options=None, limit=None
     ):
-        batch_kwargs = self._datasource.process_batch_parameters(
+        batch_kwargs = self._execution_environment.execution_engine.process_batch_parameters(
             reader_method=reader_method or self.reader_method,
             reader_options=reader_options or self.reader_options,
             limit=limit,
         )
         batch_kwargs["path"] = path
-        batch_kwargs["datasource"] = self._datasource.name
+        batch_kwargs["execution_environment"] = self._execution_environment.name
         return PathBatchKwargs(batch_kwargs)
