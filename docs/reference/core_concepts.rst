@@ -60,6 +60,7 @@ Validation
 **********
 
 An **Execution Engine** provides the computing resources that will be used to actually perform validation. Great Expectations can take advantage of many different Execution Engines, such as Pandas, Spark, or SqlAlchemy, and even translate the same expectations to validate data using different engines.
+A **Data Connectn** provides configuration details for accessing an external data store, such as a database, filesystem, or cloud storage. A Batch can use information from a Data Connection, such as the connection string to a database or bucket name for a cloud storage provider, to support core operations such as Validation.
 
 A **Validator** uses an Execution Engine and Expectation Suite to validate whether data meets expectations. An **Interactive Validator** can store and update an Expectation Suite while conducting Exploratory Data Analysis to build up and modify a suite.
 
@@ -92,16 +93,11 @@ Data Access
 
    The DataAsset class will be refactored and renamed in an upcoming release of Great Expectations to make it easier to create custom expectations and ensure Expectation Implementations are consistent across different validation engines. Some current functionality from the Data Asset class will move into new Expectation classes and some will move to the new Batch class.
 
-A **Data Asset** is a Great Expectations object that can create and validate Expectations against specific data. Data Assets are connected to data and can evaluate Expectations wherever you access your data.
-
 A **Batch** is reference to a collection of data, an Execution Engine, and metadata. The Batch is a fundamental building block for accessing data using Great Expectations, but is not the data itself. Instantiating a Batch does not necessarily "fetch" the data by immediately running a query or pulling data into memory. Instead, think of a Batch as a cache that includes the information that you will need to fetch the right data when it’s time to validate.
-
-A **Data Connection** provides configuration details for accessing an external data store, such as a database, filesystem, or cloud storage. A Batch can use information from a Data Connection, such as the connection string to a database or bucket name for a cloud storage provider, to support core operations such as Validation.
 
 A **Batch Spec** (still often referred to as **Batch Kwargs**) provides specific instructions *for an Execution Engine and Data Connection* about how to access data referred to by a Batch. The Batch Spec could reference a specific database table, the most recent log file delivered to S3, or a subset of one of those objects, for example just the first 10,000 rows.
 
-
-A **Batch Spec Generator** produces Batch Specs. The most basic Batch Spec Generator simply stores Batch Specs by name to make it easy to retrieve them. But Batch Spec Generators can also intelligently build Batch Specs that offer stronger guarantees about reproducibility, sampling, and compatibility with other tools. Batch Spec Generators can even help inspect data to identify and propose available Batches. When customized and/or fully configured, Batch Spec Generators can:
+A **Data Connector** provides configuration details for accessing an external data store, and can be configured to understand how to partition a logical Dataset into Batches. The most basic Data Connector simply stores Batch Specs by name to make it easy to retrieve them, for example to use in connection with a SqlAlchemy Execution Engine. Batch Spec Generators can also intelligently build Batch Specs that offer stronger guarantees about reproducibility, sampling, and compatibility with other tools. Batch Spec Generators can even help inspect data to identify and propose available Batches. When customized and/or fully configured, Batch Spec Generators can:
 
   - support a list operation over available Data Assets with the Data Connection;
   - define logic for partitioning or "slicing" Data Assets into useful Batches, including the ability to generate parsimonious, sortable, and/or temporal descriptions of Batches; and
@@ -115,14 +111,7 @@ A **Batch Spec Generator** produces Batch Specs. The most basic Batch Spec Gener
 
     As a best practice, a Batch Spec *should be as explicit as possible*. For example, if using a database, rather than choosing a Batch Spec that defines a generic query relying on a function such as ``NOW()``, choose a query that is fully parameterized ``$start < date AND date <= $end``. More specific Batch Specs make it easier to track the data that was validated and may help take advantage of reproducibility guarantees of external data systems. Batch Spec Generators help make this process easy by allowing stable Batch Parameters to be translated into specific Batch Specs.
 
-.. attention::
-
-   Datasource configuration will be changing soon to make it easier to:
-
-   - adjust configuration for where data is stored and validated independently.
-   - understand the roles of Batch Kwargs, Batch Kwargs Generators, Batch Parameters, and Batch Markers.
-
-A **Datasource** facilitates Great Expectations' access to data to explore, profile, or validate. A Datasource includes an Execution Engine, one or more Data Connections, and any desired Batch Spec Generators. The Datasource provides a common API for configuring and extending the way that Great Expectations produces Batches of data.
+A **Execution Environment** facilitates Great Expectations' access to data to explore, profile, or validate. An Execution Environment includes an Execution Engine, and one or more Data Connectors.
 
 .. toctree::
    :maxdepth: 2
