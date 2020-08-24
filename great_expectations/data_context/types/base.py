@@ -53,7 +53,7 @@ DEFAULT_USAGE_STATISTICS_URL = (
 )
 DATA_CONTEXT_ID: str = str(uuid.uuid4())
 
-GE_IDENTIFICATION_CONFIGURATION_STORE_NAME: str = "anon_data_context_id"
+GE_IDENTIFICATION_CONFIGURATION_STORE_NAME: str = "data_context_id"
 GE_PROJECT_CONFIGURATION_STORE_NAME: str = "great_expectations"
 
 GE_EVALUATION_PARAMETER_STORE_NAME: str = "evaluation_parameter_store"
@@ -1245,6 +1245,7 @@ def compute_and_persist_to_s3_data_context_id(
     )
 
 
+# TODO: Write automatic tests for this function.
 def compute_and_persist_data_context_id(
     store_backend,
     project_config: Union[DataContextConfig, None] = None,

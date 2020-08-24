@@ -93,7 +93,7 @@ def test_cli_init_on_new_project(
     great_expectations.yml
     checkpoints/
     expectations/
-        anon_data_context_id.yml
+        data_context_id.yml
         Titanic/
             warning.json
     notebooks/
@@ -571,7 +571,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     great_expectations.yml
     checkpoints/
     expectations/
-        anon_data_context_id.yml
+        data_context_id.yml
         Titanic/
             warning.json
     notebooks/

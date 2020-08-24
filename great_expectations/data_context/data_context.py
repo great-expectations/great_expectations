@@ -207,7 +207,6 @@ class BaseDataContext(object):
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf",
     ]
-    # GE_EVALUATION_PARAMETER_STORE_NAME: str = "evaluation_parameter_store"
 
     @usage_statistics_enabled_method(event_name="data_context.__init__",)
     def __init__(
@@ -2088,7 +2087,6 @@ class DataContext(BaseDataContext):
     @classmethod
     def create(
         cls,
-        *,
         project_root_dir: str = None,
         usage_statistics_enabled: bool = True,
         runtime_environment: Union[dict, None] = None,

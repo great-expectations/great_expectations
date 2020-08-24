@@ -108,7 +108,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
-        anon_data_context_id.yml
+        data_context_id.yml
         warning.json
     notebooks/
         pandas/

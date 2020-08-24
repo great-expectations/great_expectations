@@ -435,7 +435,7 @@ project_path/
         great_expectations.yml
         checkpoints/
         expectations/
-            anon_data_context_id.yml
+            data_context_id.yml
             titanic/
                 subdir_reader/
                     Titanic/
@@ -985,7 +985,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
-        anon_data_context_id.yml
+        data_context_id.yml
     notebooks/
         pandas/
             validation_playground.ipynb
@@ -1016,7 +1016,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
-        anon_data_context_id.yml
+        data_context_id.yml
     notebooks/
         pandas/
             validation_playground.ipynb

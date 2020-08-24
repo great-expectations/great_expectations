@@ -152,7 +152,7 @@ great_expectations/
         .gitkeep
     expectations/
         .gitkeep
-        anon_data_context_id.yml
+        data_context_id.yml
     notebooks/
         .gitkeep
     plugins/
@@ -258,7 +258,7 @@ great_expectations/
         .gitkeep
     expectations/
         .gitkeep
-        anon_data_context_id.yml
+        data_context_id.yml
     notebooks/
         .gitkeep
     plugins/
@@ -361,7 +361,7 @@ great_expectations/
         .gitkeep
     expectations/
         .gitkeep
-        anon_data_context_id.yml
+        data_context_id.yml
     notebooks/
         .gitkeep
     plugins/
