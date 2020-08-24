@@ -52,20 +52,29 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
                 "String-only configuration for execution_engine is deprecated. Use module_name and class_name instead.",
                 DeprecationWarning,
             )
-        self._execution_engine = execution_engine
+        self._execution_engine = instantiate_class_from_config(execution_engine)
         self._execution_environment_config = kwargs
         self._data_connectors = {}
 
         self._execution_environment_config["execution_engine"] = execution_engine
         if data_connectors is not None:
             self._execution_environment_config["data_connectors"] = data_connectors
+        self._build_data_connectors()
 
     def get_batch(
         self,
         batch_parameters: dict,
         expectation_suite_name: Union[str, ExpectationSuite],
     ):
-        pass
+        self.execution_engine._initialize_expectations(expectation_suite_name=expectation_suite_name)
+        data_connector_name = batch_parameters.get("data_connector")
+        assert data_connector_name
+        data_connector = self.get_data_connector(data_connector_name)
+        self.execution_engine.load_batch(
+            data_connector=data_connector,
+            batch_parameters=batch_parameters
+        )
+        return self.execution_engine
 
     @classmethod
     def from_configuration(cls, **kwargs):
