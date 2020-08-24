@@ -4,12 +4,12 @@ from great_expectations.types import DictDot
 class Batch(DictDot):
     def __init__(
         self,
-        datasource_name,
         batch_kwargs,
         data,
         batch_parameters,
         batch_markers,
         data_context,
+        datasource_name=None,
         execution_environment_name=None
     ):
         self._datasource_name = datasource_name
