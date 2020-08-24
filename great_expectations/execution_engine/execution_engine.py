@@ -23,13 +23,13 @@ from great_expectations.data_context.util import (
     load_class,
     verify_dynamic_loading_support,
 )
+from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.execution_engine.util import (
     build_categorical_partition_object,
     build_continuous_partition_object,
     is_valid_categorical_partition_object,
     is_valid_partition_object,
 )
-from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.types import ClassConfig
 
 logger = logging.getLogger(__name__)
@@ -246,23 +246,21 @@ class ExecutionEngine(MetaExecutionEngine):
         """
         raise NotImplementedError
 
-    def get_available_data_asset_names(self, batch_kwargs_generator_names=None):
+    def get_available_data_asset_names(self, data_connector_names=None):
         """
-        Returns a dictionary of data_asset_names that the specified batch kwarg
-        generator can provide. Note that some batch kwargs generators may not be
-        capable of describing specific named data assets, and some (such as
-        filesystem glob batch kwargs generators) require the user to configure
-        data asset names.
+        Returns a dictionary of data_asset_names that the specified data connector can provide. Note that some data
+        connectors may not be capable of describing specific named data assets, and some (such as filesystem glob data
+        connectors) require the user to configure data asset names.
 
         Args:
-            batch_kwargs_generator_names: the BatchKwargGenerator for which to get available data asset names.
+            data_connector_names: the DataConnector for which to get available data asset names.
 
         Returns:
-            dictionary consisting of sets of generator assets available for the specified generators:
+            dictionary consisting of sets of data_connector assets available for the specified data_connectors:
             ::
 
                 {
-                  generator_name: {
+                  data_connector_name: {
                     names: [ (data_asset_1, data_asset_1_type), (data_asset_2, data_asset_2_type) ... ]
                   }
                   ...
@@ -270,18 +268,18 @@ class ExecutionEngine(MetaExecutionEngine):
 
         """
         available_data_asset_names = {}
-        if batch_kwargs_generator_names is None:
-            batch_kwargs_generator_names = [
-                generator["name"] for generator in self.list_batch_kwargs_generators()
+        if data_connector_names is None:
+            data_connector_names = [
+                data_connector["name"] for data_connector in self.list_data_connectors()
             ]
-        elif isinstance(batch_kwargs_generator_names, str):
-            batch_kwargs_generator_names = [batch_kwargs_generator_names]
+        elif isinstance(data_connector_names, str):
+            data_connector_names = [data_connector_names]
 
-        for generator_name in batch_kwargs_generator_names:
-            generator = self.get_batch_kwargs_generator(generator_name)
+        for data_connector_name in data_connector_names:
+            data_connector = self.get_data_connector(data_connector_name)
             available_data_asset_names[
-                generator_name
-            ] = generator.get_available_data_asset_names()
+                data_connector_name
+            ] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
 
     @classmethod

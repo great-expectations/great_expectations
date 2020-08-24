@@ -1,9 +1,9 @@
+import datetime
 import inspect
 import logging
 import traceback
 import uuid
 import warnings
-from datetime import datetime
 from functools import wraps
 from typing import Dict, Iterable, List
 
@@ -21,6 +21,8 @@ from great_expectations.dataset.util import (
 from great_expectations.util import import_library_module
 
 from ..core import convert_to_json_serializable
+from ..core.batch import Batch
+from ..execution_environment.types import BatchMarkers
 from . import ExecutionEngine
 from .pandas_execution_engine import PandasExecutionEngine
 
@@ -144,7 +146,7 @@ class SqlAlchemyBatchReference(object):
 
 
 class MetaSqlAlchemyExecutionEngine(ExecutionEngine):
-    """MetaSqlAlchemyExecutionEngine is a thin layer between Dataset and SqlAlchemyExecutionEngine.
+    """MetaSqlAlchemyExecutionEngine is a thin layer between ExecutionEngine and SqlAlchemyExecutionEngine.
 
     This two-layer inheritance is required to make @classmethod decorators work.
 
@@ -455,6 +457,7 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
 
     def __init__(
         self,
+        datasource_name=None,
         table_name=None,
         engine=None,
         connection_string=None,
@@ -463,6 +466,11 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
         *args,
         **kwargs,
     ):
+        if not datasource_name:
+            raise ValueError("A datasource name is required")
+
+        else:
+            self.datasource_name = datasource_name
 
         if custom_sql and not table_name:
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
@@ -587,6 +595,92 @@ class SqlAlchemyExecutionEngine(MetaSqlAlchemyExecutionEngine):
     @property
     def sql_engine_dialect(self) -> DefaultDialect:
         return self.engine.dialect
+
+    def get_batch(self, batch_kwargs, batch_parameters=None):
+        # We need to build a batch_id to be used in the dataframe
+        batch_markers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+
+        if "bigquery_temp_table" in batch_kwargs:
+            query_support_table_name = batch_kwargs.get("bigquery_temp_table")
+        elif "snowflake_transient_table" in batch_kwargs:
+            # Snowflake uses a transient table, so we expect a table_name to be provided
+            query_support_table_name = batch_kwargs.get("snowflake_transient_table")
+        else:
+            query_support_table_name = None
+
+        if "query" in batch_kwargs:
+            if "limit" in batch_kwargs or "offset" in batch_kwargs:
+                logger.warning(
+                    "Limit and offset parameters are ignored when using query-based batch_kwargs; consider "
+                    "adding limit and offset directly to the generated query."
+                )
+            if "query_parameters" in batch_kwargs:
+                query = Template(batch_kwargs["query"]).safe_substitute(
+                    batch_kwargs["query_parameters"]
+                )
+            else:
+                query = batch_kwargs["query"]
+            batch_reference = SqlAlchemyBatchReference(
+                engine=self.engine,
+                query=query,
+                table_name=query_support_table_name,
+                schema=batch_kwargs.get("schema"),
+            )
+        elif "table" in batch_kwargs:
+            table = batch_kwargs["table"]
+            limit = batch_kwargs.get("limit")
+            offset = batch_kwargs.get("offset")
+            if limit is not None or offset is not None:
+                logger.info(
+                    "Generating query from table batch_kwargs based on limit and offset"
+                )
+                # In BigQuery the table name is already qualified with its schema name
+                if self.engine.dialect.name.lower() == "bigquery":
+                    schema = None
+                else:
+                    schema = batch_kwargs.get("schema")
+                raw_query = (
+                    sa.select([sa.text("*")])
+                    .select_from(sa.schema.Table(table, sa.MetaData(), schema=schema))
+                    .offset(offset)
+                    .limit(limit)
+                )
+                query = str(
+                    raw_query.compile(
+                        self.engine, compile_kwargs={"literal_binds": True}
+                    )
+                )
+                batch_reference = SqlAlchemyBatchReference(
+                    engine=self.engine,
+                    query=query,
+                    table_name=query_support_table_name,
+                    schema=batch_kwargs.get("schema"),
+                )
+            else:
+                batch_reference = SqlAlchemyBatchReference(
+                    engine=self.engine,
+                    table_name=table,
+                    schema=batch_kwargs.get("schema"),
+                )
+        else:
+            raise ValueError(
+                "Invalid batch_kwargs: exactly one of 'table' or 'query' must be specified"
+            )
+
+        return Batch(
+            datasource_name=self.datasource_name,
+            batch_kwargs=batch_kwargs,
+            data=batch_reference,
+            batch_parameters=batch_parameters,
+            batch_markers=batch_markers,
+            data_context=self._data_context,
+        )
 
     def attempt_allowing_relative_error(self):
         detected_redshift: bool = (
