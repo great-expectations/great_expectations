@@ -196,12 +196,26 @@ class ExecutionEngine(MetaExecutionEngine):
         # (e.g. self.spark_df) over the lifetime of the dataset instance
         self.caching = kwargs.pop("caching", True)
 
+        global_batch_parameters = kwargs.pop("global_batch_parameters", {})
+        self._global_batch_parameters = global_batch_parameters
+
+        batch = kwargs.pop("batch", None)
+        self._batch = batch
+
         super().__init__(*args, **kwargs)
 
         if self.caching:
             for func in self.hashable_getters:
                 caching_func = lru_cache(maxsize=None)(getattr(self, func))
                 setattr(self, func, caching_func)
+
+    @property
+    def global_batch_parameters(self):
+        return self._global_batch_parameters
+
+    @property
+    def batch(self):
+        return self._batch
 
     # TODO: this was from datasource.py - discuss if still relevant
     def process_batch_parameters(self, limit=None, dataset_options=None):
