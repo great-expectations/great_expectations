@@ -9,6 +9,7 @@ Develop
 * [FEATURE] Store Backend Configurations for maintaining Expectations Store, Validations Store, Data Docs Store, and Project Configuration in flexible locations (filesystem, AWS S3, GCP, and other cloud platforms).
 * [ENHANCEMENT] The flexibility to persist the Project and the Anonymous Data Context ID configurations in different locations (filesystem, AWS S3, GCP, and other cloud platforms).
 * [ENHANCEMENT] Canonical API for creating, loading, and building out the Data Context programmatically, with convenience methods for managing a standard DataContext configuration, comprised of a datasource (Spark Dataframe and Pandas are currently supported) and the Action List Validation Operator, while persisting all artifacts (Expectation Suites, Validation Results, and Data Docs) in AWS S3, provided as reference implementations.
+* [FEATURE] add support for `expect_column_pair_values_to_be_in_set` to `Spark` (thanks @mikaylaedwards)!
 * [FEATURE] Add new exception: expect_multicolumn_sum_to_equal for `pandas` and `Spark` (thanks @chipmyersjr)!
 * [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
 * [BUGFIX] Fix bug preventing the use of get_available_partition_ids in s3 generator
