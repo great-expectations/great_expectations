@@ -10,6 +10,7 @@ class Batch(DictDot):
         batch_parameters,
         batch_markers,
         data_context,
+        execution_environment_name=None
     ):
         self._datasource_name = datasource_name
         self._batch_kwargs = batch_kwargs
@@ -17,10 +18,15 @@ class Batch(DictDot):
         self._batch_parameters = batch_parameters
         self._batch_markers = batch_markers
         self._data_context = data_context
+        self._execution_environment_name = execution_environment_name
 
     @property
     def datasource_name(self):
         return self._datasource_name
+
+    @property
+    def execution_environment_name(self):
+        return self._execution_environment_name
 
     @property
     def batch_kwargs(self):

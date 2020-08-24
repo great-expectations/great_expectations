@@ -1,8 +1,10 @@
 import inspect
 import json
 import logging
+import uuid
 from datetime import datetime
-from functools import wraps
+from functools import wraps, partial
+from io import StringIO
 from typing import List
 
 import jsonschema
@@ -21,6 +23,11 @@ from great_expectations.dataset.util import (
 )
 
 from .execution_engine import ExecutionEngine
+from ..core.batch import Batch
+from ..datasource.pandas_datasource import HASH_THRESHOLD
+from ..exceptions import BatchKwargsError
+from ..execution_environment.types import BatchMarkers
+from ..execution_environment.util import hash_pandas_dataframe, S3Url
 
 logger = logging.getLogger(__name__)
 
@@ -342,7 +349,7 @@ class MetaPandasExecutionEngine(ExecutionEngine):
         return inner_wrapper
 
 
-class PandasExecutionEngine(MetaPandasExecutionEngine, pd.DataFrame):
+class PandasExecutionEngine(MetaPandasExecutionEngine):
     """
 PandasExecutionEngine instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
 
@@ -400,6 +407,7 @@ Notes:
         "reader_options",
         "limit",
         "dataset_options",
+        "data_connector"
     }
 
     # We may want to expand or alter support for subclassing dataframes in the future:
@@ -431,6 +439,171 @@ Notes:
             "discard_subset_failing_expectations", False
         )
 
+    def load_batch(self, data_connector, batch_parameters):
+        batch_kwargs = data_connector.build_batch_kwargs(**batch_parameters)
+
+        # We will use and manipulate reader_options along the way
+        reader_options = batch_kwargs.get("reader_options", {})
+
+        # We need to build a batch_markers to be used in the dataframe
+        batch_markers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+
+        if "path" in batch_kwargs:
+            path = batch_kwargs["path"]
+            reader_method = batch_kwargs.get("reader_method")
+            reader_fn = self._get_reader_fn(reader_method, path)
+            df = reader_fn(path, **reader_options)
+
+        elif "s3" in batch_kwargs:
+            try:
+                import boto3
+
+                s3 = boto3.client("s3", **self._boto3_options)
+            except ImportError:
+                raise BatchKwargsError(
+                    "Unable to load boto3 client to read s3 asset.", batch_kwargs
+                )
+            raw_url = batch_kwargs["s3"]
+            reader_method = batch_kwargs.get("reader_method")
+            url = S3Url(raw_url)
+            logger.debug(
+                "Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key)
+            )
+            s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
+            reader_fn = self._get_reader_fn(reader_method, url.key)
+            df = reader_fn(
+                StringIO(
+                    s3_object["Body"]
+                        .read()
+                        .decode(s3_object.get("ContentEncoding", "utf-8"))
+                ),
+                **reader_options
+            )
+
+        elif "dataset" in batch_kwargs and isinstance(
+                batch_kwargs["dataset"], (pd.DataFrame, pd.Series)
+        ):
+            df = batch_kwargs.get("dataset")
+            # We don't want to store the actual dataframe in kwargs; copy the remaining batch_kwargs
+            batch_kwargs = {k: batch_kwargs[k] for k in batch_kwargs if k != "dataset"}
+            batch_kwargs["PandasInMemoryDF"] = True
+            batch_kwargs["ge_batch_id"] = str(uuid.uuid1())
+
+        else:
+            raise BatchKwargsError(
+                "Invalid batch_kwargs: path, s3, or df is required for a PandasDatasource",
+                batch_kwargs,
+            )
+
+        if df.memory_usage().sum() < HASH_THRESHOLD:
+            batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
+
+        self._batch = Batch(
+            execution_environment_name=batch_kwargs.get("execution_environment_name"),
+            batch_kwargs=batch_kwargs,
+            data=df,
+            batch_parameters=batch_parameters,
+            batch_markers=batch_markers,
+            data_context=self._data_context,
+        )
+        self._batch_kwargs = batch_kwargs
+        self._batch_parameters = batch_parameters
+        self._batch_markers = batch_markers
+
+    def _get_reader_fn(self, reader_method=None, path=None):
+        """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
+        correct reader_method.
+
+        Args:
+            reader_method (str): the name of the reader method to use, if available.
+            path (str): the to use to guess
+
+        Returns:
+            ReaderMethod to use for the filepath
+
+        """
+        if reader_method is None and path is None:
+            raise BatchKwargsError(
+                "Unable to determine pandas reader function without reader_method or path.",
+                {"reader_method": reader_method},
+            )
+
+        reader_options = None
+        if reader_method is None:
+            path_guess = self.guess_reader_method_from_path(path)
+            reader_method = path_guess["reader_method"]
+            reader_options = path_guess.get(
+                "reader_options"
+            )  # This may not be there; use None in that case
+
+        try:
+            reader_fn = getattr(pd, reader_method)
+            if reader_options:
+                reader_fn = partial(reader_fn, **reader_options)
+            return reader_fn
+        except AttributeError:
+            raise BatchKwargsError(
+                "Unable to find reader_method %s in pandas." % reader_method,
+                {"reader_method": reader_method},
+            )
+
+    @staticmethod
+    def guess_reader_method_from_path(path):
+        if path.endswith(".csv") or path.endswith(".tsv"):
+            return {"reader_method": "read_csv"}
+        elif path.endswith(".parquet"):
+            return {"reader_method": "read_parquet"}
+        elif path.endswith(".xlsx") or path.endswith(".xls"):
+            return {"reader_method": "read_excel"}
+        elif path.endswith(".json"):
+            return {"reader_method": "read_json"}
+        elif path.endswith(".pkl"):
+            return {"reader_method": "read_pickle"}
+        elif path.endswith(".feather"):
+            return {"reader_method": "read_feather"}
+        elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
+            return {
+                "reader_method": "read_csv",
+                "reader_options": {"compression": "gzip"},
+            }
+
+        raise BatchKwargsError(
+            "Unable to determine reader method from path: %s" % path, {"path": path}
+        )
+
+    def process_batch_parameters(
+            self, reader_method=None, reader_options=None, limit=None, dataset_options=None,
+    ):
+        batch_parameters = self.global_batch_parameters
+
+        # Then update with any locally-specified reader options
+        if reader_options:
+            if not batch_parameters.get("reader_options"):
+                batch_parameters["reader_options"] = dict()
+            batch_parameters["reader_options"].update(reader_options)
+
+        if limit is not None:
+            if not batch_parameters.get("reader_options"):
+                batch_parameters["reader_options"] = dict()
+            batch_parameters["reader_options"]["nrows"] = limit
+
+        if reader_method is not None:
+            batch_parameters["reader_method"] = reader_method
+
+        if dataset_options is not None:
+            # Then update with any locally-specified reader options
+            if not batch_parameters.get("dataset_options"):
+                batch_parameters["dataset_options"] = dict()
+            batch_parameters["dataset_options"].update(dataset_options)
+
+        return batch_parameters
+
     def get_row_count(self):
         return self.shape[0]
 
@@ -438,7 +611,7 @@ Notes:
         return self.shape[1]
 
     def get_table_columns(self) -> List[str]:
-        return list(self.columns)
+        return list(self.batch.data.columns)
 
     def get_column_sum(self, column):
         return self[column].sum()
