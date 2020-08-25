@@ -56,7 +56,7 @@ It helps to keep your entire team on the same page as data evolves.
 
 Reviewing expectations is best done in Data Docs:
 
-.. image:: ../images/sample_e_s_view.png
+.. image:: /images/sample_e_s_view.png
 
 Edit an Expectation Suite
 -------------------------
@@ -69,11 +69,11 @@ For every expectation type there is a Python method that sets its arguments, eva
 
 Take a look at the screenshot below. It shows the HTML view and the Python method for the same expectation (``expect_column_distinct_values_to_be_in_set``) side by side:
 
-.. image:: ../images/exp_html_python_side_by_side .png
+.. image:: /images/exp_html_python_side_by_side .png
 
 The :ref:`CLI <command_line>` provides a command that, given an Expectation Suite, generates a Jupyter notebook to edit it. It takes care of generating a cell for every expectation in the suite and of getting a sample batch of data. The HTML page for each Expectation Suite has the CLI command syntax in order to make it easier for users.
 
-.. image:: ../images/edit_e_s_popup.png
+.. image:: /images/edit_e_s_popup.png
 
 The generated Jupyter notebook can be discarded, since it is auto-generated.
 
@@ -239,20 +239,20 @@ column.
 
 Here is how we can add an expectation that expresses that knowledge:
 
-.. image:: ../images/expect_column_values_to_be_unique_success.png
+.. image:: /images/expect_column_values_to_be_unique_success.png
 
 Other expectations can be created by examining the data in the batch. For example, suppose you want to protect a pipeline
 against improper values in the "Provider Other Organization Name Type Code" column. Even if you don't know exactly what the
 "improper" values are, you can explore the data by trying some values to check if the data in the batch meets your expectation:
 
-.. image:: ../images/expect_column_values_to_be_in_set_failure.png
+.. image:: /images/expect_column_values_to_be_in_set_failure.png
 
 Validating the expectation against the batch resulted in failure - there are some values in the column that do not meet
 the expectation. The "partial_unexpected_list" key in the result dictionary contains examples of non-conforming values.
 Examining these examples shows that some titles are not in the expected set. Adjust the ``value_set`` and rerun
 the expectation method:
 
-.. image:: ../images/expect_column_values_to_be_in_set_success.png
+.. image:: /images/expect_column_values_to_be_in_set_success.png
 
 This time validation was successful - all values in the column meet the expectation.
 
@@ -269,7 +269,7 @@ How do I know which types of expectations I can add?
 * Visit the :ref:`expectation_glossary` for a complete
   list of expectations that are currently part of the great expectations vocabulary. Here is a short preview of the glossary:
 
-.. image:: ../images/glossary_of_expectations_preview.png
+.. image:: /images/glossary_of_expectations_preview.png
     :width: 400px
 
 
