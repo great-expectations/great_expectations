@@ -11,6 +11,8 @@ import jsonschema
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+
+from great_expectations.execution_environment.types import S3BatchKwargs, PathBatchKwargs
 from scipy import stats
 
 from great_expectations.core import ExpectationConfiguration
@@ -459,29 +461,16 @@ Notes:
             }
         )
 
-        if "path" in batch_kwargs:
+        if isinstance(batch_kwargs, PathBatchKwargs):
             path = batch_kwargs["path"]
             reader_method = batch_kwargs.get("reader_method")
             reader_fn = self._get_reader_fn(reader_method, path)
             df = reader_fn(path, **reader_options)
 
-        elif "s3" in batch_kwargs:
-            try:
-                import boto3
-
-                s3 = boto3.client("s3", **self._boto3_options)
-            except ImportError:
-                raise BatchKwargsError(
-                    "Unable to load boto3 client to read s3 asset.", batch_kwargs
-                )
-            raw_url = batch_kwargs["s3"]
+        elif isinstance(batch_kwargs, S3BatchKwargs):
+            s3_object = data_connector.get_s3_object(batch_kwargs=batch_kwargs)
             reader_method = batch_kwargs.get("reader_method")
-            url = S3Url(raw_url)
-            logger.debug(
-                "Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key)
-            )
-            s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
-            reader_fn = self._get_reader_fn(reader_method, url.key)
+            reader_fn = self._get_reader_fn(reader_method, s3_object.key)
             df = reader_fn(
                 StringIO(
                     s3_object["Body"]
@@ -490,6 +479,31 @@ Notes:
                 ),
                 **reader_options
             )
+
+            # try:
+            #     import boto3
+            #
+            #     s3 = boto3.client("s3", **self._boto3_options)
+            # except ImportError:
+            #     raise BatchKwargsError(
+            #         "Unable to load boto3 client to read s3 asset.", batch_kwargs
+            #     )
+            # raw_url = batch_kwargs["s3"]
+            # reader_method = batch_kwargs.get("reader_method")
+            # url = S3Url(raw_url)
+            # logger.debug(
+            #     "Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key)
+            # )
+            # s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
+            # reader_fn = self._get_reader_fn(reader_method, url.key)
+            # df = reader_fn(
+            #     StringIO(
+            #         s3_object["Body"]
+            #             .read()
+            #             .decode(s3_object.get("ContentEncoding", "utf-8"))
+            #     ),
+            #     **reader_options
+            # )
 
         elif "dataset" in batch_kwargs and isinstance(
                 batch_kwargs["dataset"], (pd.DataFrame, pd.Series)
