@@ -1,3 +1,2 @@
 findspark>=1.4.2  # spark
-pypandoc>=1.5,<2  # pyspark in py 37 packaging
 pyspark>=2.3.2,<3.0.0  # spark
