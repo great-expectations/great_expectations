@@ -8,14 +8,14 @@ from great_expectations.data_context.store.store import Store
 try:
     import sqlalchemy
     from sqlalchemy import (
-        create_engine,
         Column,
-        String,
         MetaData,
+        String,
         Table,
-        select,
         and_,
         column,
+        create_engine,
+        select,
         text,
     )
     from sqlalchemy.engine.url import URL
