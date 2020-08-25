@@ -439,7 +439,12 @@ Notes:
             "discard_subset_failing_expectations", False
         )
 
-    def load_batch(self, data_connector, batch_parameters):
+    def load_batch(self, batch_parameters):
+        execution_environment_name = batch_parameters.get("execution_environment")
+        execution_environment = self._data_context.get_execution_environment(execution_environment_name)
+        data_connector_name = batch_parameters.get("data_connector")
+        data_connector = execution_environment.get_data_connector(data_connector_name)
+
         batch_kwargs = data_connector.build_batch_kwargs(**batch_parameters)
 
         # We will use and manipulate reader_options along the way
