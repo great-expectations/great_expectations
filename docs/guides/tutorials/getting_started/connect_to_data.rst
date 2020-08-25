@@ -56,7 +56,7 @@ Although the concept of data validation is simple, carrying it out can require c
 
 Datasources solve this problem, by conceptually separating *what* you want to validate from *how* you want to validate it. Datasources give you full control over the process of bringing data and Expectations together, then abstract away that underlying complexity when you validate X data against Y Expectations.
 
-.. figure:: ../../images/datasource-conceptual-diagram.png
+.. figure:: /images/datasource-conceptual-diagram.png
     :width: 400px
     :class: with-shadow float-right
 
