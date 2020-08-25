@@ -45,15 +45,15 @@ Additional Notes
 
 The ``sphinxcontrib-discourse`` plugin used for this integration requires a verified domain, in this case ``docs.greatexpectations.io``. During local development and PR review, you will see something like this:
 
-.. image:: ../../images/comments-box-without-confirmed-domain.png
+.. image:: /images/comments-box-without-confirmed-domain.png
 
 Don't be alarmed. This is normal. Your comment box will appear as soon as the page goes live on ``docs.greatexpectations.io``.
 
-.. image:: ../../images/comments-box-with-confirmed-domain.png
+.. image:: /images/comments-box-with-confirmed-domain.png
 
 After at least one comment has been added, it will look like this.
 
-.. image:: ../../images/comments-box-with-comment.png
+.. image:: /images/comments-box-with-comment.png
 
 
 Additional Resources

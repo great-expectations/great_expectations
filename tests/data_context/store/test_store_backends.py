@@ -1,16 +1,21 @@
+import datetime
 import os
 from unittest.mock import patch
 
 import boto3
 import pytest
-from botocore.exceptions import ClientError
 from moto import mock_s3
 
+from great_expectations.core import RunIdentifier
 from great_expectations.data_context.store import (
     InMemoryStoreBackend,
     TupleFilesystemStoreBackend,
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationResultIdentifier,
+    ExpectationSuiteIdentifier,
 )
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.util import gen_directory_tree_str
@@ -568,3 +573,18 @@ def test_TupleGCSStoreBackend():
         mock_gcs_client.side_effect = InvalidKeyError("Hi I am an InvalidKeyError")
         with pytest.raises(InvalidKeyError):
             my_store.get(("non_existent_key",))
+
+    run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())
+    key = ValidationResultIdentifier(
+        ExpectationSuiteIdentifier(expectation_suite_name="my_suite_name"),
+        run_id,
+        "my_batch_id",
+    )
+    run_time_string = run_id.to_tuple()[1]
+
+    url = my_store_with_no_filepath_template.get_url_for_key(key.to_tuple())
+    assert (
+        url
+        == "https://storage.googleapis.com/leakybucket"
+        + f"/this_is_a_test_prefix/my_suite_name/my_run_id/{run_time_string}/my_batch_id"
+    )

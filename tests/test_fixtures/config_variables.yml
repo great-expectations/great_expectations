@@ -5,4 +5,3 @@ replace_me_2:
   inner_env_sub: ${FOO}
 arg1:
   v1: 2
-
