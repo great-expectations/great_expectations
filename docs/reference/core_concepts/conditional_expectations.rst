@@ -87,7 +87,7 @@ Data Docs
 
 Conditional Expectations are displayed differently from standard Expectations in the Data Docs. Each Conditional Expectation is qualified with *if 'row_condition_string', then values must be...*
 
-.. image:: ../images/conditional_data_docs_screenshot.png
+.. image:: /images/conditional_data_docs_screenshot.png
 
 If *'row_condition_string'* is a complex expression, it will be split into several components for better readability.
 

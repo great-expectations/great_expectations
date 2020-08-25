@@ -31,7 +31,7 @@ In the previous step, our data Profiler generated a set of new Expectations. We 
 
 When you open the window, you'll see a static website that looks like this:
 
-.. figure:: ../../images/prescriptive_view.png
+.. figure:: /images/prescriptive_view.png
 
 .. As mentioned in the previous step, our Profiler also generated Validation Results, which you can see here. This page is *descriptive*: it describes how a specific batch of data (in this case, the data we Profiled) actually looked when validated.
 
@@ -41,7 +41,7 @@ When you open the window, you'll see a static website that looks like this:
 
 In addition, your static site includes a set of pages for future data validations. These pages are *diagnostic*: they describe whether and how a specific batch of data differed from the ideal prescribed by a set of Expectations.
 
-.. figure:: ../../images/diagnostic_view.png
+.. figure:: /images/diagnostic_view.png
 
 For now, your static site is built and stored locally. In the last step of the tutorial, we'll explain options for configuring, hosting and sharing it.
 
@@ -51,7 +51,7 @@ The Data Docs build chain
 
 There's quite a bit going on under the hood here, but for the moment the details don't matter. You can think of Data Docs as an elaborate makefile. The steps in the makefile are called :ref:`Renderers`. Their inputs are Expectations, Validation Results, and other metadata. Their collective output is a static website.
 
-.. figure:: ../../images/data_docs_conceptual_diagram.png
+.. figure:: /images/data_docs_conceptual_diagram.png
 
 Possibilities to keep in mind for the future:
 
