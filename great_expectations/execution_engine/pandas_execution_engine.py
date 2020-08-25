@@ -510,7 +510,7 @@ Notes:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
         self._batch = Batch(
-            execution_environment_name=batch_kwargs.get("execution_environment_name"),
+            execution_environment_name=batch_kwargs.get("execution_environment"),
             batch_kwargs=batch_kwargs,
             data=df,
             batch_parameters=batch_parameters,
