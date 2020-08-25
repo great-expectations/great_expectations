@@ -33,15 +33,20 @@ class DataConnector(object):
     _batch_kwargs_type = BatchKwargs
     recognized_batch_parameters = set()
 
-    def __init__(self, name, execution_environment):
+    def __init__(self, name, execution_environment, default_batch_parameters=None):
         self._name = name
         self._data_connector_config = {"class_name": self.__class__.__name__}
         self._data_asset_iterators = {}
+        self._default_batch_parameters = default_batch_parameters or {}
         if execution_environment is None:
             raise ValueError(
                 "execution environment must be provided for a DataConnector"
             )
         self._execution_environment = execution_environment
+
+    @property
+    def default_batch_parameters(self):
+        return self._default_batch_parameters
 
     @property
     def name(self):
