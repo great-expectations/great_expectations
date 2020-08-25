@@ -14,7 +14,7 @@ Off we go! Install Great Expectations:
 
     pip install great_expectations
 
-You can quickly try out Great Expectations using this guide: :ref:`_tutorials__explore_expectations_in_a_notebook`.
+You can quickly try out Great Expectations using this guide: :ref:`tutorials__explore_expectations_in_a_notebook`.
 
     .. figure:: /images/interactive_mostly.gif
 
