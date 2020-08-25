@@ -196,8 +196,8 @@ class ExecutionEngine(MetaExecutionEngine):
         # (e.g. self.spark_df) over the lifetime of the dataset instance
         self.caching = kwargs.pop("caching", True)
 
-        global_batch_parameters = kwargs.pop("global_batch_parameters", {})
-        self._global_batch_parameters = global_batch_parameters
+        default_batch_parameters = kwargs.pop("default_batch_parameters", {})
+        self._default_batch_parameters = default_batch_parameters
 
         batch = kwargs.pop("batch", None)
         self._batch = batch
@@ -210,8 +210,8 @@ class ExecutionEngine(MetaExecutionEngine):
                 setattr(self, func, caching_func)
 
     @property
-    def global_batch_parameters(self):
-        return self._global_batch_parameters
+    def default_batch_parameters(self):
+        return self._default_batch_parameters
 
     @property
     def batch(self):
