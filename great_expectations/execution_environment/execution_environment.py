@@ -54,8 +54,11 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
             )
         self._execution_engine = instantiate_class_from_config(
             config=execution_engine,
-            runtime_environment={}
+            runtime_environment={
+            },
         )
+        self._execution_engine._data_context = data_context  # do this here because data_context not in DataAsset
+        # __init__ argspec, so not added when provided in runtime_environment above
         self._execution_environment_config = kwargs
         self._data_connectors = {}
 
@@ -67,14 +70,19 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
     def get_batch(
         self,
         batch_parameters: dict,
-        expectation_suite_name: Union[str, ExpectationSuite],
+    ):
+        self.execution_engine.load_batch(
+            batch_parameters=batch_parameters
+        )
+        return self.execution_engine.batch
+
+    def get_validator(
+        self,
+        batch_parameters: dict,
+        expectation_suite_name: Union[str, ExpectationSuite]
     ):
         self.execution_engine._initialize_expectations(expectation_suite_name=expectation_suite_name)
-        data_connector_name = batch_parameters.get("data_connector")
-        assert data_connector_name
-        data_connector = self.get_data_connector(data_connector_name)
         self.execution_engine.load_batch(
-            data_connector=data_connector,
             batch_parameters=batch_parameters
         )
         return self.execution_engine
