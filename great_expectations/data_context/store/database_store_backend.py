@@ -6,19 +6,19 @@ from great_expectations.data_context.store.store_backend import StoreBackend
 try:
     import sqlalchemy
     from sqlalchemy import (
-        create_engine,
         Column,
-        String,
         MetaData,
+        String,
         Table,
-        select,
         and_,
         column,
+        create_engine,
+        select,
         text,
     )
-    from sqlalchemy.engine.url import URL
     from sqlalchemy.engine.reflection import Inspector
-    from sqlalchemy.exc import SQLAlchemyError, NoSuchTableError, IntegrityError
+    from sqlalchemy.engine.url import URL
+    from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
 except ImportError:
     sqlalchemy = None
     create_engine = None
