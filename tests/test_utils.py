@@ -477,8 +477,8 @@ def get_dataset(
         )
 
     elif dataset_type == "SparkDFDataset":
-        from pyspark.sql import SparkSession
         import pyspark.sql.types as sparktypes
+        from pyspark.sql import SparkSession
 
         SPARK_TYPES = {
             "StringType": sparktypes.StringType,
@@ -692,9 +692,9 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
             # "expect_column_pair_values_to_be_equal",
             # "expect_column_pair_values_A_to_be_greater_than_B",
-            "expect_column_pair_values_to_be_in_set",
-            # "expect_select_column_values_to_be_unique_within_record",
-            "expect_compound_columns_to_be_unique",
+            # "expect_column_pair_values_to_be_in_set",
+            "expect_select_column_values_to_be_unique_within_record",
+            # "expect_multicolumn_values_to_be_unique",
             "expect_table_row_count_to_equal_other_table",
             # "expect_multicolumn_sum_to_equal",
         ]
@@ -804,6 +804,14 @@ def check_json_test_result(test, result, data_asset=None):
                     assert result["result"]["unexpected_index_list"] == value
 
             elif key == "unexpected_list":
+                # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
+                if (isinstance(value, list)) & (len(value) >= 1):
+                    if type(value[0].__lt__(value[0])) != type(NotImplemented):
+                        value = value.sort()
+                        result["result"]["unexpected_list"] = result["result"][
+                            "unexpected_list"
+                        ].sort()
+
                 assert result["result"]["unexpected_list"] == value, (
                     "expected "
                     + str(value)
