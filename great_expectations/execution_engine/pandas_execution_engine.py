@@ -580,7 +580,7 @@ Notes:
     def process_batch_parameters(
             self, reader_method=None, reader_options=None, limit=None, dataset_options=None,
     ):
-        batch_parameters = self.global_batch_parameters
+        batch_parameters = self.default_batch_parameters
 
         # Then update with any locally-specified reader options
         if reader_options:
