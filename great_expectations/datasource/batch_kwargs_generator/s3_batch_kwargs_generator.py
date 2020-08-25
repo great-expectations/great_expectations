@@ -349,7 +349,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         asset_config = self._assets[data_asset_name]
         available_ids = [
             self._partitioner(key=key, asset_config=asset_config)
-            for key in self._get_asset_options(data_asset_name, iterator_dict)
+            for key in self._get_asset_options(asset_config, iterator_dict)
         ]
         return available_ids
 
