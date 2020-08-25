@@ -1000,10 +1000,22 @@ class BaseDataContext(object):
     def _get_batch(
             self,
             batch_parameters: dict,
-            expectation_suite_name: Union[str, ExpectationSuite],
     ) -> ExecutionEngine:
         execution_environment = self.get_execution_environment(batch_parameters.get("execution_environment"))
-        return execution_environment.get_batch(batch_parameters, expectation_suite_name)
+        return execution_environment.get_batch(
+            batch_parameters,
+        )
+
+    def get_validator(
+        self,
+        batch_parameters,
+        expectation_suite_name: Union[str, ExpectationSuite],
+    ):
+        execution_environment = self.get_execution_environment(batch_parameters.get("execution_environment"))
+        return execution_environment.get_validator(
+            batch_parameters,
+            expectation_suite_name
+        )
 
     def get_batch(
         self,
