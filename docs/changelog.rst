@@ -889,7 +889,7 @@ to top-level names.
   0 in the result_format argument, and we do not compute it when it would not be returned. (#431, thanks @eugmandel)
 * **Fix**: Correct error in unexpected_percent computations for sqlalchemy when unexpected values exceed limit (#424)
 * **Fix**: Pass meta object to expectation result (#415, thanks @jseeman)
-* Add support for multicolumn expectations, with `expect_select_column_values_to_be_unique_within_record` as an example (#406)
+* Add support for multicolumn expectations, with `expect_multicolumn_values_to_be_unique` as an example (#406)
 * Add dataset class to from_pandas to simplify using custom datasets (#404, thanks @jtilly)
 * Add schema support for sqlalchemy data context (#410, thanks @rahulj51)
 * Minor documentation, warning, and testing improvements (thanks @zdog).
