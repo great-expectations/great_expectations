@@ -71,7 +71,7 @@ class SlackRenderer(Renderer):
                                 ),
                             },
                         }
-                    elif "s3.amazonaws.com" in docs_link or "s3://" in docs_link:
+                    elif "amazonaws.com" in docs_link or "s3://" in docs_link:
                         report_element = {
                             "type": "section",
                             "text": {
