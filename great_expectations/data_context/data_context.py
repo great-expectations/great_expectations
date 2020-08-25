@@ -214,7 +214,6 @@ class BaseDataContext(object):
         project_config: Union[DataContextConfig, None] = None,
         context_root_dir: str = None,
         runtime_environment: dict = None,
-        usage_statistics_enabled: bool = False,
     ):
         """DataContext constructor
 
@@ -232,9 +231,7 @@ class BaseDataContext(object):
                 "Your project_config is not valid. Try using the CLI check-config command."
             )
         self._project_config = project_config
-        self._apply_global_config_overrides(
-            usage_statistics_enabled=usage_statistics_enabled
-        )
+        self._apply_global_config_overrides()
 
         if context_root_dir is None:
             self._context_root_directory = context_root_dir
@@ -322,13 +319,11 @@ class BaseDataContext(object):
         for store_name, store_config in store_configs.items():
             self._build_store(store_name, store_config)
 
-    def _apply_global_config_overrides(self, usage_statistics_enabled: bool):
+    def _apply_global_config_overrides(self):
         # check for global usage statistics opt out
         validation_errors = {}
 
-        if self._check_global_usage_statistics_opt_out(
-            usage_statistics_enabled=usage_statistics_enabled
-        ):
+        if self._check_global_usage_statistics_opt_out():
             logger.info(
                 "Usage statistics is disabled globally. Applying override to project_config."
             )
@@ -401,9 +396,7 @@ class BaseDataContext(object):
         return None
 
     @staticmethod
-    def _check_global_usage_statistics_opt_out(usage_statistics_enabled: bool = False,):
-        if usage_statistics_enabled:
-            return False
+    def _check_global_usage_statistics_opt_out():
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in BaseDataContext.FALSEY_STRINGS:
@@ -2258,7 +2251,6 @@ class DataContext(BaseDataContext):
         context_root_dir: str = None,
         project_config: DataContextConfig = None,
         runtime_environment: dict = None,
-        usage_statistics_enabled: bool = False,
     ):
         if project_config is None:
             # Determine the "context root directory" - this is the parent of "great_expectations" dir
@@ -2280,7 +2272,6 @@ class DataContext(BaseDataContext):
                 project_config=project_config,
                 context_root_dir=context_root_dir,
                 runtime_environment=runtime_environment,
-                usage_statistics_enabled=usage_statistics_enabled,
             )
 
             # save project config if global project config values applied
@@ -2296,7 +2287,6 @@ class DataContext(BaseDataContext):
                 project_config=project_config,
                 context_root_dir=None,
                 runtime_environment=runtime_environment,
-                usage_statistics_enabled=usage_statistics_enabled,
             )
 
     def _load_project_config(self) -> Union[DataContextConfig, None]:

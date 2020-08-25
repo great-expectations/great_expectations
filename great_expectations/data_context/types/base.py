@@ -243,7 +243,7 @@ class DataContextConfig(BaseConfig):
         kwargs_callee: dict
 
         if backend_ecosystem == "aws":
-            func_callee: Callable = create_standard_s3_backend_project_config
+            func_callee: Callable = create_standard_s3_backed_project_config
             # Gather the call arguments of the present function and package the subset thereof as call arguments for the
             # downstream ("func_callee") function (by taking out the "backend_ecosystem" argument).
             # Leave the "None" values in the call arguments.
@@ -988,7 +988,7 @@ def create_using_s3_backend(func: Callable = None,) -> Callable:
     def initialize_using_s3_backend_wrapped_method(**kwargs):
         kwargs_callee: dict
 
-        func_callee: Callable = create_s3_backend_project_config
+        func_callee: Callable = create_s3_backed_project_config
         # noinspection SpellCheckingInspection
         argspec: list = getfullargspec(func_callee)[0]
         # Gather the call arguments of the present function and package the subset thereof as call arguments for the
@@ -1014,7 +1014,7 @@ def create_using_s3_backend(func: Callable = None,) -> Callable:
     return initialize_using_s3_backend_wrapped_method
 
 
-def create_s3_backend_project_config(
+def create_s3_backed_project_config(
     expectations_store_bucket: str,
     expectations_store_prefix: str,
     expectations_store_name: str,
@@ -1097,8 +1097,8 @@ def create_s3_backend_project_config(
 
 # noinspection pyargumentlist,SpellCheckingInspection
 @create_using_s3_backend
-def create_standard_s3_backend_project_config(**kwargs,):
-    func_callee: Callable = build_s3_backend_project_config
+def create_standard_s3_backed_project_config(**kwargs,):
+    func_callee: Callable = build_s3_backed_project_config
     # noinspection SpellCheckingInspection
     argspec: list = getfullargspec(func_callee)[0]
     # Starting with the call arguments of the present function ("kwargs"), package the subset thereof as call arguments
@@ -1111,7 +1111,7 @@ def create_standard_s3_backend_project_config(**kwargs,):
 
 
 # noinspection SpellCheckingInspection
-def build_s3_backend_project_config(
+def build_s3_backed_project_config(
     datasource_type: str,
     validations_store_bucket: str = None,
     validations_store_prefix: str = None,
@@ -1129,7 +1129,7 @@ def build_s3_backend_project_config(
 ):
     if project_config_store is None:
         raise ge_exceptions.DataContextError(
-            f"""The build_s3_backend_project_config method requires a valid project_config_store reference.
+            f"""The build_s3_backed_project_config method requires a valid project_config_store reference.
             """
         )
     if validations_store_bucket is None:
