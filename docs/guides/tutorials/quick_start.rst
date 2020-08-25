@@ -16,7 +16,7 @@ Off we go! Install Great Expectations:
 
 You can quickly try out Great Expectations using this guide: :ref:`_tutorials__explore_expectations_in_a_notebook`.
 
-    .. figure:: ../images/interactive_mostly.gif
+    .. figure:: /images/interactive_mostly.gif
 
 To unlock more of the power of Great Expectations, you'll also need to configure a Data Context. From the root of the directory where you want to deploy Great Expectations:
 
