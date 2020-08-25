@@ -9,9 +9,6 @@ Develop
 * [FEATURE] Add new exception: expect_multicolumn_sum_to_equal for `pandas` and `Spark` (thanks @chipmyersjr)!
 * [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
 * [BUGFIX] Fix bug preventing the use of get_available_partition_ids in s3 generator
-* [DOCS] Deploying Great Expectations with Airflow
-* [FEATURE] Add new expectation: expect_compound_columns_to_be_unique for `pandas`
-* [BREAKING] Rename expectation `expect_multicolumn_values_to_be_unique` to `expect_select_column_values_to_be_unique_within_record`
 
 0.12.0
 -----------------
