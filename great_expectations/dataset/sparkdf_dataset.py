@@ -23,19 +23,17 @@ logger = logging.getLogger(__name__)
 try:
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
-    from pyspark.sql import Window
+    from pyspark.sql import Window, SQLContext
     from pyspark.sql.functions import (
+        array,
         col,
         count,
         countDistinct,
         datediff,
         desc,
+        expr,
         isnan,
         lag,
-        expr,
-    )
-    from pyspark.sql.functions import length as length_
-    from pyspark.sql.functions import (
         lit,
         monotonically_increasing_id,
         stddev_samp,
@@ -43,6 +41,7 @@ try:
         when,
         year,
     )
+    from pyspark.sql.functions import length as length_
 except ImportError as e:
     logger.debug(str(e))
     logger.debug(
@@ -1334,6 +1333,42 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 "__success",
                 when(col(column_A_name) > col(column_B_name), True).otherwise(False),
             )
+
+    @DocInherit
+    @MetaSparkDFDataset.column_pair_map_expectation
+    def expect_column_pair_values_to_be_in_set(
+        self,
+        column_A,
+        column_B,
+        value_pairs_set,  # List[List]
+        ignore_row_if="both_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        column_A_name = column_A.schema.names[1]
+        column_B_name = column_B.schema.names[1]
+
+        join_df = column_A.join(
+            column_B, column_A["__row"] == column_B["__row"], how="inner"
+        )
+
+        join_df = join_df.withColumn(
+            "combine_AB", array(col(column_A_name), col(column_B_name))
+        )
+
+        value_set_df = (
+            SQLContext(self.spark_df._sc)
+            .createDataFrame(value_pairs_set, ["col_A", "col_B"])
+            .select(array("col_A", "col_B").alias("set_AB"))
+        )
+
+        return join_df.join(
+            value_set_df, join_df["combine_AB"] == value_set_df["set_AB"], "left"
+        ).withColumn(
+            "__success", when(col("set_AB").isNull(), lit(False)).otherwise(lit(True))
+        )
 
     @DocInherit
     @MetaSparkDFDataset.multicolumn_map_expectation
