@@ -22,7 +22,7 @@
       }
   </style>
 
-.. sidebar:: This guide is :raw-html:`<br/><i class="fas fa-circle text-warning"></i> <a href="asdfasdf.com">Beta: Ready for early adopters</a>`
+.. sidebar:: This guide is :raw-html:`<br/><i class="fas fa-circle text-warning"></i> <a href="TODO.com">Beta: Ready for early adopters</a>`
 
   Find more discussion `here <https://discuss.greatexpectations.io/t/ge-with-databricks-delta/82/3>`_
 
