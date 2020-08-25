@@ -15,7 +15,7 @@ from .datasource import Datasource
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql import SparkSession, DataFrame
+    from pyspark.sql import DataFrame, SparkSession
 except ImportError:
     SparkSession = None
     # TODO: review logging more detail here

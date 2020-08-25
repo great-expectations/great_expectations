@@ -675,6 +675,7 @@ def validate(
         data_asset_class = load_class(data_asset_class_name, data_asset_module_name)
 
     import pandas as pd
+
     from great_expectations.dataset import Dataset, PandasDataset
 
     if data_asset_class is None:

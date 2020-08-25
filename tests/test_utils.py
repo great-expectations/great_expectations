@@ -478,8 +478,8 @@ def get_dataset(
         )
 
     elif dataset_type == "SparkDFDataset":
-        from pyspark.sql import SparkSession
         import pyspark.sql.types as sparktypes
+        from pyspark.sql import SparkSession
 
         SPARK_TYPES = {
             "StringType": sparktypes.StringType,
