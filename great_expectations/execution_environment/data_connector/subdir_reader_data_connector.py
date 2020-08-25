@@ -2,9 +2,11 @@ import logging
 import os
 import warnings
 
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.execution_environment.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
+from great_expectations.execution_environment.data_connector.data_connector import (
+    DataConnector,
+)
+from great_expectations.execution_environment.types import PathBatchKwargs
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +38,11 @@ class SubdirReaderDataConnector(DataConnector):
     """
 
     _default_reader_options = {}
-    recognized_batch_parameters = {"data_asset_name", "partition_id"}
+    recognized_batch_parameters = {
+        "data_asset_name",
+        "partition_id",
+        "execution_environment",
+    }
 
     def __init__(
         self,
@@ -75,11 +81,15 @@ class SubdirReaderDataConnector(DataConnector):
     def base_directory(self):
         # If base directory is a relative path, interpret it as relative to the data context's
         # context root directory (parent directory of great_expectation dir)
-        if os.path.isabs(self._base_directory) or self._execution_environment.data_context is None:
+        if (
+            os.path.isabs(self._base_directory)
+            or self._execution_environment.data_context is None
+        ):
             return self._base_directory
         else:
             return os.path.join(
-                self._execution_environment.data_context.root_directory, self._base_directory
+                self._execution_environment.data_context.root_directory,
+                self._base_directory,
             )
 
     def get_available_data_asset_names(self):
