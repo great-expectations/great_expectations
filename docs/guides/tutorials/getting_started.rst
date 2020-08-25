@@ -32,7 +32,7 @@ The tutorial will walk you throw the following steps - **scroll to the bottom of
 
 .. container:: custom-indented-paragraph
 
-   In Great Expectations, your Data Context manages boilerplate configuration. Using a DataContext is almost always the fastest way to get up and running, even though some teams don't need every component of a DataContext.
+   In Great Expectations, your Data Context manages your project configuration. Using a DataContext is almost always the fastest way to get up and running, even though some teams don't need every component of a DataContext.
    
    In this first step, we will introduce you to the data and help you initialize a Data Context.
 

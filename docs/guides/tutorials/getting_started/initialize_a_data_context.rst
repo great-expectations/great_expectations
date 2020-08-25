@@ -34,9 +34,9 @@ For this tutorial, we will use a simplified version of the NYC taxi ride data. W
 
 To avoid confusion during the tutorial, we recommend you follow these steps:
 
-#. Make sure you have `Docker<https://www.docker.com/>`_ installed
+#. Make sure you have `Docker <https://www.docker.com/>`_ installed
 
-#. Clone the ``ge_tutorials`` repository and start up the container with the Postgres database containing the data:
+#. Clone the `ge_tutorials <https://github.com/superconductive/ge_tutorials>`_ repository and start up the container with the Postgres database containing the data:
 
 .. code-block:: bash
 
@@ -44,14 +44,14 @@ To avoid confusion during the tutorial, we recommend you follow these steps:
    cd ge_tutorials/ge_getting_started_tutorial
    docker-compose up
 
-You will now have a Postgres database running with some pre-loaded data! In case you're looking to connect to the database, you'll find instructions in the ``README`` in the repository.
+You will now have a Postgres database running with some pre-loaded data! In case you're looking to connect to the database, you'll find instructions in the `README <https://github.com/superconductive/ge_tutorials/tree/main/ge_getting_started_tutorial>`_ in the repository.
 
 About the data
 -----------------------------------------------
 
-The NYC taxi data is an open data set which is updated every month. Each record corresponds to one taxi ride and contains information such as the pick up and drop-off location, the payment amount, and the number of passengers, among others.
+The `NYC taxi data <https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page>`_ is an open data set which is updated every month. Each record in the data corresponds to one taxi ride and contains information such as the pick up and drop-off location, the payment amount, and the number of passengers, among others.
 
-In this tutorial, we provide two tables with a 10,000 row sample each of the taxi data:
+In this tutorial, we provide two tables, each with a 10,000 row sample of the Yellow Taxi Trip Records set:
 
 * **yellow_tripdata_sample_2019_01**: a sample of the January 2019 taxi data
 * **yellow_tripdata_staging**: a sample of the February 2019 taxi data, loaded to a "staging" table so we can validate it before promoting it to a permanent table
@@ -117,7 +117,7 @@ You should see this:
 The ``great_expectations/`` directory structure
 -----------------------------------------------
 
-Once you finish going through ``init``, your ``great_expectations/`` directory will contains all of the important components of a Great Expectations deployment, in miniature:
+Once you finish going through ``init``, your ``great_expectations/`` directory will contain all of the important components of a local Great Expectations deployment:
 
 
 * ``great_expectations.yml`` will contain the main configuration your deployment.

@@ -5,7 +5,7 @@ Connect to data
 
 Once you have a DataContext, you'll want to connect to data.  In Great Expectations, :ref:`Datasources` simplify connections, by managing configuration and providing a consistent, cross-platform API for referencing data.
 
-Let's configure your first Datasource, a connection to the local Postgres database we've provided. Follow the next steps in the CLI init flow:
+Let's configure your first Datasource, a connection to the local Postgres database we've provided. Follow the next steps in the CLI init flow (**note** the non-standard port for the Postgres connection!):
     
 .. code-block:: bash
     
@@ -28,7 +28,8 @@ Let's configure your first Datasource, a connection to the local Postgres databa
     Give your new Datasource a short name.
      [my_postgres_db]:
     
-    Next, we will configure database credentials and store them in the `my_postgres_db` section of this config file: great_expectations/uncommitted/config_variables.yml:
+    Next, we will configure database credentials and store them in the `my_postgres_db`
+    section of this config file: great_expectations/uncommitted/config_variables.yml:
 
     Would you like to proceed? [Y/n]:
 
@@ -40,7 +41,8 @@ Let's configure your first Datasource, a connection to the local Postgres databa
 
     ...
 
-    Would you like to profile new Expectations for a single data asset within your new Datasource? [Y/n]: n
+    Would you like to profile new Expectations for a single data asset
+    within your new Datasource? [Y/n]: n
 
 That's it! You just configured your first Datasource! Make sure to choose ``n`` at this prompt to exit the ``init`` flow for now.
 
@@ -53,7 +55,7 @@ Configuring Datasources
 When you completed those last few steps in ``great_expectations init``, you told Great Expectations that:
 
 1. You want to create a new Datasource called ``my_postgres_db``.
-2. You want to use Postgres as your :ref:`Execution Engine <Execution Engines>`, hence ``data_asset_type.class_name = SqlAlchemyDataset``.
+2. You want to use SqlAlchemy to evaluate your Expectations, hence ``data_asset_type.class_name = SqlAlchemyDataset``. Your database configuration tells the SqlAlchemyDataset to use a Postgresql-specific driver.
 
 Based on that information, the CLI added the following entry into your ``great_expectations.yml`` file, under the ``datasources`` header:
 

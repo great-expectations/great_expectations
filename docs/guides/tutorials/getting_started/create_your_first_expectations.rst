@@ -43,23 +43,28 @@ Creating Expectations in Jupyter notebooks
 
 In this section, we will explain how to create and edit Expectations in a Jupyter notebook. Notebooks are a simple way of interacting with the Great Expectations Python API. You could also just write all this in plain Python code, but for convenience, Great Expectations provides you some boilerplate code in notebooks.
 
+Since notebooks are often less permanent, creating Expectations in a notebook also helps reinforce that the source of truth about Expectations is the Expectation Suite, **not** the code that generates the Expectations.
+
+.. figure:: /images/jupyter_scaffold.gif
+
+
 Here's what's happening in the notebook:
 
 #. The first cell does several things: It imports all the relevant libraries, loads a Data Context, and creates what we call a Batch of your data and Expectation Suite.
 
 #. The second cell allows you to specify which columns you want to run the automated profiler on. Remember how we want to add some tests on the ``passenger_count`` column to ensure that its values range between 1 and 6? **Let's uncomment just that one line:**
 
-.. code-block:: python
+    .. code-block:: python
 
-    included_columns = [
-        # 'vendor_id',
-        # 'pickup_datetime',
-        # 'dropoff_datetime',
-        'passenger_count',
-        ...
-    ]
+        included_columns = [
+            # 'vendor_id',
+            # 'pickup_datetime',
+            # 'dropoff_datetime',
+            'passenger_count',
+            ...
+        ]
 
-#. The next cell passes the scaffolder config to the ``BasicSuiteBuilderProfiler``, which will then profile the data and create the relevant Expectations to add to your ``taxi.demo`` suite.
+#. The next cell passes the profiler config to the ``BasicSuiteBuilderProfiler``, which will then profile the data and create the relevant Expectations to add to your ``taxi.demo`` suite.
 
 #. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the validation results.
 
@@ -130,7 +135,7 @@ If you open up the file at ``great_expectations/expectations/taxi/demo.json`` in
 
 There's a lot of information in the JSON file. **We will focus on just the snippet above:**
 
-Every Expectation in the file expresses a test that can be validated against data. You can see that the Profiler generated several Expectations based on our data, including ``expect_column_distinct_values_to_be_in_set``, with the ``value_set`` containing the numbers 1 through 6. This is exactly what we wanted: An assertion that the ``passenger_count`` column contains those values!
+Every Expectation in the file expresses a test that can be validated against data. You can see that the Profiler generated several Expectations based on our data, including ``expect_column_distinct_values_to_be_in_set``, with the ``value_set`` containing the numbers 1 through 6. This is exactly what we wanted: An assertion that the ``passenger_count`` column contains only those values!
 
 **Now we only have two problems left to solve:**
 

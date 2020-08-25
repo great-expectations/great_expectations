@@ -35,7 +35,7 @@ Let’s explain what happened there before continuing.
 How Checkpoints work
 --------------------
 
-Your new checkpoint file is in ``staging.chk``. With comments removed, it looks like this:
+Your new Checkpoint file is in ``staging.chk``. With comments removed, it looks like this:
 
 .. code-block:: yaml
 
@@ -86,7 +86,7 @@ If you click through to the failed validation results page, you will see that th
 Wrap-up and next steps
 ----------------------
 
-**Congratulations!** You have now completed the "Getting started with Great Expectations" tutorial. In this tutorial, we have covered the following basic capabilities of Great Expectations:
+**Congratulations! You have now completed the "Getting started with Great Expectations" tutorial**. In this tutorial, we have covered the following basic capabilities of Great Expectations:
 
 * Setting up a Data Context
 * Connecting a Data Source
