@@ -3,6 +3,7 @@ import json
 import os
 
 from click.testing import CliRunner
+
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
@@ -252,7 +253,7 @@ def test_validation_operator_run_noninteractive_validation_config_file_does_is_m
 
 def test_validation_operator_list_with_one_operator(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
-    context = DataContext(context_root_dir=project_dir)
+    context = DataContext(project_dir)
     context.create_expectation_suite("a.warning")
 
 
@@ -260,7 +261,7 @@ def test_validation_operator_list_with_zero_validation_operators(
     caplog, empty_data_context
 ):
     project_dir = empty_data_context.root_directory
-    context = DataContext(context_root_dir=project_dir)
+    context = DataContext(project_dir)
     context._project_config.validation_operators = {}
     context._save_project_config()
     runner = CliRunner(mix_stderr=False)
@@ -306,7 +307,7 @@ def test_validation_operator_list_with_multiple_validation_operators(
 ):
     project_dir = empty_data_context.root_directory
     runner = CliRunner(mix_stderr=False)
-    context = DataContext(context_root_dir=project_dir)
+    context = DataContext(project_dir)
     context.add_validation_operator(
         "my_validation_operator",
         {

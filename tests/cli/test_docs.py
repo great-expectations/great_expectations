@@ -39,7 +39,7 @@ def test_docs_build_view(
     assert "The following Data Docs sites will be built:" in stdout
     assert "great_expectations/uncommitted/data_docs/local_site/index.html" in stdout
 
-    context = DataContext(context_root_dir=root_dir)
+    context = DataContext(root_dir)
     obs_urls = context.get_docs_sites_urls()
 
     assert len(obs_urls) == 2
@@ -77,7 +77,7 @@ def test_docs_build_no_view(
     assert "The following Data Docs sites will be built:" in stdout
     assert "great_expectations/uncommitted/data_docs/local_site/index.html" in stdout
 
-    context = DataContext(context_root_dir=root_dir)
+    context = DataContext(root_dir)
     obs_urls = context.get_docs_sites_urls()
 
     assert len(obs_urls) == 2

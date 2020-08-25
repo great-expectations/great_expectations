@@ -20,7 +20,7 @@ import great_expectations as ge
 
 # tap configuration
 context = ge.DataContext(
-    context_root_dir="/private/var/folders/_t/psczkmjd69vf9jz0bblzlzww0000gn/T/pytest-of-taylor/pytest-1812/empty_data_context0/great_expectations"
+    "/private/var/folders/_t/psczkmjd69vf9jz0bblzlzww0000gn/T/pytest-of-taylor/pytest-1812/empty_data_context0/great_expectations"
 )
 suite = context.get_expectation_suite("sweet_suite")
 batch_kwargs = {

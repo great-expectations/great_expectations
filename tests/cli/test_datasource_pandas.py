@@ -1,6 +1,7 @@
 import os
 
 from click.testing import CliRunner
+
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from tests.cli.test_cli import yaml
@@ -14,7 +15,7 @@ from tests.cli.utils import (
 def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
-    context = DataContext(context_root_dir=project_root_dir)
+    context = DataContext(project_root_dir)
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -85,7 +86,7 @@ def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
 
 def test_cli_datasorce_new(caplog, empty_data_context, filesystem_csv_2):
     project_root_dir = empty_data_context.root_directory
-    context = DataContext(context_root_dir=project_root_dir)
+    context = DataContext(project_root_dir)
     assert context.list_datasources() == []
 
     runner = CliRunner(mix_stderr=False)
@@ -191,7 +192,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert "Profiling 'my_datasource'" in stdout
     assert result.exit_code == 0
 
-    context = DataContext(context_root_dir=project_root_dir)
+    context = DataContext(project_root_dir)
     assert len(context.list_datasources()) == 1
 
     expectations_store = context.stores["expectations_store"]
@@ -257,7 +258,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
         in stdout
     )
 
-    context = DataContext(context_root_dir=project_root_dir)
+    context = DataContext(project_root_dir)
     assert len(context.list_datasources()) == 1
 
     expectations_store = context.stores["expectations_store"]
@@ -331,7 +332,7 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
         in stdout
     )
 
-    context = DataContext(context_root_dir=project_root_dir)
+    context = DataContext(project_root_dir)
     assert len(context.list_datasources()) == 1
 
     expectations_store = context.stores["expectations_store"]
@@ -403,7 +404,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     assert "The following Data Docs sites will be built:\n" in stdout
     assert "local_site:" in stdout
 
-    context = DataContext(context_root_dir=project_root_dir)
+    context = DataContext(project_root_dir)
     assert len(context.list_datasources()) == 1
 
     expectations_store = context.stores["expectations_store"]
@@ -472,7 +473,7 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
     assert "Choose how to proceed" in stdout
     assert "Skipping profiling for now." in stdout
 
-    context = DataContext(context_root_dir=project_root_dir)
+    context = DataContext(project_root_dir)
     assert len(context.list_datasources()) == 1
 
     expectations_store = context.stores["expectations_store"]

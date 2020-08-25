@@ -55,7 +55,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
 
     assert "Great Expectations is now set up." in stdout
 
-    context = DataContext(context_root_dir=os.path.join(root_dir, DataContext.GE_DIR))
+    context = DataContext(os.path.join(root_dir, DataContext.GE_DIR))
     uncommitted_dir = os.path.join(context.root_directory, "uncommitted")
     shutil.rmtree(uncommitted_dir)
     assert not os.path.isdir(uncommitted_dir)

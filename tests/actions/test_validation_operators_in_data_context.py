@@ -22,9 +22,7 @@ def parameterized_expectation_suite():
 def validation_operators_data_context(
     basic_data_context_config_for_validation_operator, filesystem_csv_4
 ):
-    data_context = BaseDataContext(
-        project_config=basic_data_context_config_for_validation_operator
-    )
+    data_context = BaseDataContext(basic_data_context_config_for_validation_operator)
 
     data_context.add_datasource(
         "my_datasource",

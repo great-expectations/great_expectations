@@ -5,9 +5,10 @@ import subprocess
 import mock
 import pytest
 from click.testing import CliRunner
+from ruamel.yaml import YAML
+
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from ruamel.yaml import YAML
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
@@ -216,7 +217,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
     assert os.path.isfile(expected_checkpoint)
 
     # Newup a context for additional assertions
-    context = DataContext(context_root_dir=root_dir)
+    context = DataContext(root_dir)
     assert context.list_checkpoints() == ["passengers"]
 
     with open(expected_checkpoint, "r") as f:
@@ -297,7 +298,7 @@ def test_checkpoint_new_specify_datasource(
     assert os.path.isfile(expected_checkpoint)
 
     # Newup a context for additional assertions
-    context = DataContext(context_root_dir=root_dir)
+    context = DataContext(root_dir)
     assert context.list_checkpoints() == ["passengers"]
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -346,7 +347,7 @@ def test_checkpoint_new_works_if_checkpoints_directory_is_missing(
     assert os.path.isfile(expected_checkpoint)
 
     # Newup a context for additional assertions
-    context = DataContext(context_root_dir=root_dir)
+    context = DataContext(root_dir)
     assert context.list_checkpoints() == ["passengers"]
 
     assert_no_logging_messages_or_tracebacks(caplog, result)

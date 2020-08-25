@@ -25,8 +25,7 @@ def test_errors_warnings_validation_operator_run_slack_query(
     # Consider converting to a single fixture.
 
     data_context = BaseDataContext(
-        project_config=basic_data_context_config_for_validation_operator,
-        context_root_dir=project_path,
+        basic_data_context_config_for_validation_operator, project_path,
     )
 
     data_context.add_datasource(

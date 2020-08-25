@@ -1,8 +1,9 @@
 import os
 
-import great_expectations as ge
 import pytest
 from ruamel.yaml import YAML
+
+import great_expectations as ge
 
 yaml = YAML()
 yaml.default_flow_style = False
@@ -42,7 +43,7 @@ def totally_empty_data_context(tmp_path_factory):
         yaml.dump(config, config_file)
 
     context = ge.data_context.DataContext(
-        context_root_dir=os.path.join(project_root_dir, "great_expectations")
+        os.path.join(project_root_dir, "great_expectations")
     )
     # print(json.dumps(context._project_config, indent=2))
     return context
@@ -50,7 +51,7 @@ def totally_empty_data_context(tmp_path_factory):
 
 def test_create(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("path_001"))
-    context = ge.data_context.DataContext.create(project_root_dir=project_path)
+    context = ge.data_context.DataContext.create(project_path)
 
     assert isinstance(context, ge.data_context.DataContext)
 
@@ -71,7 +72,7 @@ def test_add_store(totally_empty_data_context):
 
 def test_default_config_yml_stores(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("totally_empty_data_context"))
-    context = ge.data_context.DataContext.create(project_root_dir=project_path)
+    context = ge.data_context.DataContext.create(project_path)
 
     assert set(context.stores.keys()) == {
         "expectations_store",

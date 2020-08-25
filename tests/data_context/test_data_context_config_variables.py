@@ -142,10 +142,10 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     expected_config_dict.pop("anonymous_usage_statistics")
 
     # instantiate data_context twice to go through cycle of loading config from file then saving
-    context = ge.data_context.DataContext(context_root_dir=context_path)
+    context = ge.data_context.DataContext(context_path)
     context._save_project_config()
     context_config_dict = dataContextConfigSchema.dump(
-        ge.data_context.DataContext(context_root_dir=context_path)._project_config
+        ge.data_context.DataContext(context_path)._project_config
     )
     context_config_dict.pop("anonymous_usage_statistics")
 
@@ -171,7 +171,7 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
     )
 
     data_context = ge.data_context.DataContext(
-        context_root_dir=context_path, runtime_environment=runtime_environment
+        context_path, runtime_environment=runtime_environment
     )
     config = data_context.get_config_with_variables_substituted()
 

@@ -381,7 +381,7 @@ project_path/
 """
     )
 
-    context = DataContext.create(project_root_dir=project_dir)
+    context = DataContext.create(project_dir)
     ge_directory = os.path.join(project_dir, "great_expectations")
     context.add_datasource(
         "titanic",
@@ -631,7 +631,7 @@ def basic_data_context_config():
 
 def test_ExplorerDataContext(titanic_data_context):
     context_root_directory = titanic_data_context.root_directory
-    explorer_data_context = ExplorerDataContext(context_root_dir=context_root_directory)
+    explorer_data_context = ExplorerDataContext(context_root_directory)
     assert explorer_data_context._expectation_explorer_manager
 
 
@@ -641,9 +641,7 @@ def test_ConfigOnlyDataContext__initialization(
     config_path = str(
         tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir")
     )
-    context = BaseDataContext(
-        project_config=basic_data_context_config, context_root_dir=config_path
-    )
+    context = BaseDataContext(basic_data_context_config, config_path)
 
     assert (
         context.root_directory.split("/")[-1]
@@ -662,9 +660,7 @@ def test__normalize_absolute_or_relative_path(
     config_path = str(
         tmp_path_factory.mktemp("test__normalize_absolute_or_relative_path__dir")
     )
-    context = BaseDataContext(
-        project_config=basic_data_context_config, context_root_dir=config_path
-    )
+    context = BaseDataContext(basic_data_context_config, config_path)
 
     assert str(
         os.path.join("test__normalize_absolute_or_relative_path__dir0", "yikes")
@@ -789,17 +785,17 @@ def test_data_context_create_does_not_raise_error_or_warning_if_ge_dir_exists(
     tmp_path_factory,
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    DataContext.create(project_root_dir=project_path)
+    DataContext.create(project_path)
 
 
 @pytest.fixture()
 def empty_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    DataContext.create(project_root_dir=project_path)
+    DataContext.create(project_path)
     ge_dir = os.path.join(project_path, "great_expectations")
     assert os.path.isdir(ge_dir)
     assert os.path.isfile(os.path.join(ge_dir, DataContext.GE_YML))
-    context = DataContext(context_root_dir=ge_dir)
+    context = DataContext(ge_dir)
     assert isinstance(context, DataContext)
     return context
 
@@ -945,13 +941,13 @@ def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(
     tmp_path_factory,
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    DataContext.create(project_root_dir=project_path)
+    DataContext.create(project_path)
     ge_yml = os.path.join(project_path, "great_expectations/great_expectations.yml")
     with open(ge_yml, "a") as ff:
         ff.write("# LOOK I WAS MODIFIED")
 
     with pytest.warns(UserWarning):
-        DataContext.create(project_root_dir=project_path)
+        DataContext.create(project_path)
 
     with open(ge_yml, "r") as ff:
         obs = ff.read()
@@ -962,7 +958,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
     tmp_path_factory,
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    DataContext.create(project_root_dir=project_path)
+    DataContext.create(project_path)
 
     # mangle the existing setup
     ge_dir = os.path.join(project_path, "great_expectations")
@@ -973,7 +969,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         # re-run create to simulate onboarding
-        DataContext.create(project_root_dir=project_path)
+        DataContext.create(project_path)
     obs = gen_directory_tree_str(ge_dir)
 
     assert os.path.isdir(uncommitted_dir), "No uncommitted directory created"
@@ -1038,7 +1034,7 @@ great_expectations/
     project_path = str(tmp_path_factory.mktemp("stuff"))
     ge_dir = os.path.join(project_path, "great_expectations")
 
-    DataContext.create(project_root_dir=project_path)
+    DataContext.create(project_path)
     fixture = gen_directory_tree_str(ge_dir)
 
     assert fixture == expected
@@ -1047,7 +1043,7 @@ great_expectations/
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         # re-run create to simulate onboarding
-        DataContext.create(project_root_dir=project_path)
+        DataContext.create(project_path)
 
     obs = gen_directory_tree_str(ge_dir)
     assert obs == expected
@@ -1063,7 +1059,7 @@ uncommitted/
     project_path = str(tmp_path_factory.mktemp("stuff"))
     ge_dir = os.path.join(project_path, "great_expectations")
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
-    DataContext.create(project_root_dir=project_path)
+    DataContext.create(project_path)
     fixture = gen_directory_tree_str(uncommitted_dir)
     assert fixture == expected
 
@@ -1080,7 +1076,7 @@ uncommitted/
 
 def test_data_context_create_builds_base_directories(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context = DataContext.create(project_root_dir=project_path)
+    context = DataContext.create(project_path)
     assert isinstance(context, DataContext)
 
     for directory in [
@@ -1098,7 +1094,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
     tmp_path_factory,
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    DataContext.create(project_root_dir=project_path)
+    DataContext.create(project_path)
     ge_dir = os.path.join(project_path, "great_expectations")
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
     config_vars_yml = os.path.join(uncommitted_dir, "config_variables.yml")
@@ -1109,7 +1105,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
 
     # re-run create to simulate onboarding
     with pytest.warns(UserWarning):
-        DataContext.create(project_root_dir=project_path)
+        DataContext.create(project_path)
 
     with open(config_vars_yml, "r") as ff:
         obs = ff.read()
@@ -1179,10 +1175,8 @@ def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasource
     datasource is not configured, and docs are not built.
     """
     empty_directory = str(tmp_path_factory.mktemp("another_empty_project"))
-    DataContext.create(project_root_dir=empty_directory)
-    context = DataContext(
-        context_root_dir=os.path.join(empty_directory, DataContext.GE_DIR)
-    )
+    DataContext.create(empty_directory)
+    context = DataContext(os.path.join(empty_directory, DataContext.GE_DIR))
 
     obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 1
@@ -1195,9 +1189,9 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     tmp_path_factory,
 ):
     empty_directory = str(tmp_path_factory.mktemp("yo_yo"))
-    DataContext.create(project_root_dir=empty_directory)
+    DataContext.create(empty_directory)
     ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
-    context = DataContext(context_root_dir=ge_dir)
+    context = DataContext(ge_dir)
 
     context._project_config["data_docs_sites"] = {
         "my_rad_site": {
@@ -1212,7 +1206,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     # TODO Workaround project config programmatic config manipulation
     #  statefulness issues by writing to disk and re-upping a new context
     context._save_project_config()
-    context = DataContext(context_root_dir=ge_dir)
+    context = DataContext(ge_dir)
     context.build_data_docs()
 
     expected_path = os.path.join(
@@ -1230,9 +1224,9 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
     tmp_path_factory,
 ):
     empty_directory = str(tmp_path_factory.mktemp("yo_yo_ma"))
-    DataContext.create(project_root_dir=empty_directory)
+    DataContext.create(empty_directory)
     ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
-    context = DataContext(context_root_dir=ge_dir)
+    context = DataContext(ge_dir)
 
     context._project_config["data_docs_sites"] = {
         "my_rad_site": {
@@ -1254,7 +1248,7 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
     # TODO Workaround project config programmatic config manipulation
     #  statefulness issues by writing to disk and re-upping a new context
     context._save_project_config()
-    context = DataContext(context_root_dir=ge_dir)
+    context = DataContext(ge_dir)
     context.build_data_docs()
     data_docs_dir = os.path.join(ge_dir, "uncommitted/data_docs/")
 
@@ -1293,15 +1287,11 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
     try:
         # We should be able to load different files based on an environment variable
         os.environ["TEST_CONFIG_FILE_ENV"] = "dev"
-        context = BaseDataContext(
-            project_config=basic_data_context_config, context_root_dir=base_path
-        )
+        context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
         config_vars = context._load_config_variables_file()
         assert config_vars["env"] == "dev"
         os.environ["TEST_CONFIG_FILE_ENV"] = "prod"
-        context = BaseDataContext(
-            project_config=basic_data_context_config, context_root_dir=base_path
-        )
+        context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
         config_vars = context._load_config_variables_file()
         assert config_vars["env"] == "prod"
     except Exception:
