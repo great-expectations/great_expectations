@@ -87,7 +87,7 @@ Indentation, bolding, and code blocks
 
 	- Use short, complete, imperative sentences: ("Paste the YAML snippet into your config file", "Run great_expectations init")
 	- Header text should be **bold**.
-	- Avoid `links <great_expectations.io>`_ or ``inline code`` in headers, since RST files do not support nesting them within bolded text. If your header must include text that would normally be a link or inline code, please repeat it in the body text, and use a link or code block there.
+	- Avoid `links <https://greatexpectations.io>`_ or ``inline code`` in headers, since RST files do not support nesting them within bolded text. If your header must include text that would normally be a link or inline code, please repeat it in the body text, and use a link or code block there.
 
 - Indent content within steps.
 - Any time the user needs to do something, it should be in a code block.

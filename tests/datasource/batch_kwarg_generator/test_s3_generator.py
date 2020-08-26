@@ -196,3 +196,10 @@ def test_s3_generator_misconfigured_directory_asset(s3_generator):
     with pytest.raises(BatchKwargsError) as exc:
         _ = s3_generator.build_batch_kwargs("dir_misconfigured")
     assert "The asset may not be configured correctly." in str(exc.value)
+
+
+def test_s3_get_available_partition_ids(s3_generator):
+    assert s3_generator.get_available_partition_ids(data_asset_name="data") == [
+        "me",
+        "you",
+    ]
