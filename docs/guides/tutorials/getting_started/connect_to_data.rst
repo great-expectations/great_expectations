@@ -37,7 +37,7 @@ Let's configure your first Datasource, a connection to the local Postgres databa
     What is the port for the postgres connection? [5432]: 65432
     What is the username for the postgres connection? [postgres]: ge_tutorials
     What is the password for the postgres connection?: ge_tutorials
-    What is the username for the postgres connection? [postgres]: ge_tutorials
+    What is the database name for the postgres connection? [postgres]: ge_tutorials
 
     ...
 
