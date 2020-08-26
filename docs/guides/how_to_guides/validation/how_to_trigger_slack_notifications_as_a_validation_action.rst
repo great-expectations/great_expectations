@@ -41,6 +41,7 @@ Steps
                 # put the actual webhook URL in the uncommitted/config_variables.yml file
                 slack_webhook: ${validation_notification_slack_webhook}
                 notify_on: all # possible values: "all", "failure", "success"
+                notify_with: ["all"] # list containing the DataDocs sites to include in the notification. Defaults to `all`, meaning links to all configured sites will be included in the notification
                 renderer:
                   module_name: great_expectations.render.renderer.slack_renderer
                   class_name: SlackRenderer

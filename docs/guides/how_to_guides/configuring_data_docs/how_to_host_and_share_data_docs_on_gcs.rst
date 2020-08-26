@@ -140,6 +140,14 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 
   Issue the following CLI command: ``gcloud app browse``. If successful, the gcloud CLI will provide the URL to your app and launch it in a new browser window. The page displayed should be the index page of your Data Docs site.
 
+
+**Additional notes**
+
+- There may be times, you can route the traffic through a DNS, which means your domain will be something other "storage.googleapis.com"
+- In that case, the user can set the ``base_public_url`` field in the `great_expectations.yml` file, which will then be used.
+
+
+
 **Additional resources**
 
 - `Google App Engine <https://cloud.google.com/appengine/docs/standard/python3>`_

@@ -691,10 +691,15 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         if self.prefix:
             path_url = "/".join((self.bucket, self.prefix, path))
         else:
-            path_url = "/".join((self.bucket, path))
+            if self.base_public_url:
+                # if the user has already defined everything, then keep it
+                if self.base_public_url[-1] != "/":
+                    path_url = "/" + path
+                else:
+                    path_url = path
 
-        print("HELLOO WILL THIS IS GREAT")
-        print(base_url + path_url)
+            else:
+                path_url = "/".join((self.bucket, path))
         return base_url + path_url
 
     def remove_key(self, key):
