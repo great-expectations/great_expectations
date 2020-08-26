@@ -24,7 +24,7 @@ from great_expectations.render.renderer.content_block import (
 @pytest.fixture(scope="module")
 def titanic_expectations():
     with open(
-        file_relative_path(__file__, "../test_sets/titanic_expectations.json"), "r"
+        file_relative_path(__file__, "../test_sets/titanic_expectations.json")
     ) as infile:
         return expectationSuiteSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)

@@ -223,7 +223,7 @@ def _load_checkpoint_yml_template() -> dict:
     template_file = file_relative_path(
         __file__, os.path.join("..", "data_context", "checkpoint_template.yml")
     )
-    with open(template_file, "r") as f:
+    with open(template_file) as f:
         template = yaml.load(f)
     return template
 
@@ -282,7 +282,7 @@ def checkpoint_run(checkpoint, directory):
             suite = toolkit.load_expectation_suite(context, suite_name, usage_event)
             try:
                 batch = toolkit.load_batch(context, suite, batch_kwargs)
-            except (FileNotFoundError, SQLAlchemyError, IOError, DataContextError) as e:
+            except (FileNotFoundError, SQLAlchemyError, OSError, DataContextError) as e:
                 toolkit.exit_with_failure_message_and_stats(
                     context,
                     usage_event,

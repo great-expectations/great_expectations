@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 _anonymizers = dict()
 
 
-class UsageStatisticsHandler(object):
+class UsageStatisticsHandler:
     def __init__(self, data_context, data_context_id, usage_statistics_url):
         self._url = usage_statistics_url
 

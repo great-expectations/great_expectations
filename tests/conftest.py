@@ -2435,7 +2435,6 @@ def titanic_profiled_evrs_1():
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_evrs.json"
         ),
-        "r",
     ) as infile:
         return expectationSuiteValidationResultSchema.loads(infile.read())
 
@@ -2450,7 +2449,6 @@ def titanic_profiled_name_column_evrs():
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_evrs.json"
         ),
-        "r",
     ) as infile:
         titanic_profiled_evrs_1 = expectationSuiteValidationResultSchema.load(
             json.load(infile)
@@ -2468,7 +2466,6 @@ def titanic_profiled_expectations_1():
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"
         ),
-        "r",
     ) as infile:
         return expectationSuiteSchema.load(json.load(infile))
 
@@ -2481,7 +2478,6 @@ def titanic_profiled_name_column_expectations():
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"
         ),
-        "r",
     ) as infile:
         titanic_profiled_expectations = expectationSuiteSchema.load(json.load(infile))
 
@@ -2497,7 +2493,6 @@ def titanic_profiled_name_column_expectations():
 def titanic_validation_results():
     with open(
         file_relative_path(__file__, "./test_sets/expected_cli_results_default.json"),
-        "r",
     ) as infile:
         return expectationSuiteValidationResultSchema.load(json.load(infile))
 

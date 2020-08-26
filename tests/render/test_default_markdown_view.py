@@ -29,7 +29,7 @@ def validation_operator_result():
         os.path.dirname(__file__),
         "fixtures/ValidationOperatorResult_with_multiple_validation_results.json",
     )
-    with open(fixture_filename, "r") as infile:
+    with open(fixture_filename) as infile:
         validation_operator_result = json.load(infile, object_pairs_hook=OrderedDict)
         run_results = validation_operator_result["run_results"]
         for k, validation_result in run_results.items():

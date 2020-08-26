@@ -1,8 +1,8 @@
 import os
 import shutil
 import subprocess
+from unittest import mock
 
-import mock
 import pytest
 from click.testing import CliRunner
 from ruamel.yaml import YAML
@@ -220,7 +220,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
     context = DataContext(root_dir)
     assert context.list_checkpoints() == ["passengers"]
 
-    with open(expected_checkpoint, "r") as f:
+    with open(expected_checkpoint) as f:
         obs_file = f.read()
 
     # This is snapshot-ish to prove that comments remain in place
@@ -741,7 +741,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
     ]
 
     # assert the script has original contents
-    with open(script_path, "r") as f:
+    with open(script_path) as f:
         assert f.read() == "script here"
 
     assert_no_logging_messages_or_tracebacks(caplog, result)

@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields
 
 
-class ClassConfig(object):
+class ClassConfig:
     """Defines information sufficient to identify a class to be (dynamically) loaded for a DataContext."""
 
     def __init__(self, class_name, module_name=None):
