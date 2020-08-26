@@ -434,7 +434,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         ]
 
     @classmethod
-    def expect_multicolumn_values_to_be_unique(
+    def expect_select_column_values_to_be_unique_within_record(
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
