@@ -1,9 +1,9 @@
+import datetime
 import inspect
 import json
 import logging
 import uuid
-import datetime
-from functools import wraps, partial
+from functools import partial, wraps
 from io import StringIO
 from typing import List
 
@@ -11,8 +11,6 @@ import jsonschema
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-
-from great_expectations.execution_environment.types import S3BatchKwargs, PathBatchKwargs
 from scipy import stats
 
 from great_expectations.core import ExpectationConfiguration
@@ -23,13 +21,17 @@ from great_expectations.dataset.util import (
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
 )
+from great_expectations.execution_environment.types import (
+    PathBatchKwargs,
+    S3BatchKwargs,
+)
 
-from .execution_engine import ExecutionEngine
 from ..core.batch import Batch
 from ..datasource.pandas_datasource import HASH_THRESHOLD
 from ..exceptions import BatchKwargsError
 from ..execution_environment.types import BatchMarkers
-from ..execution_environment.util import hash_pandas_dataframe, S3Url
+from ..execution_environment.util import S3Url, hash_pandas_dataframe
+from .execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -409,7 +411,7 @@ Notes:
         "reader_options",
         "limit",
         "dataset_options",
-        "data_connector"
+        "data_connector",
     }
 
     # We may want to expand or alter support for subclassing dataframes in the future:
@@ -443,14 +445,9 @@ Notes:
 
     def load_batch(self, batch_parameters):
         execution_environment_name = batch_parameters.get("execution_environment")
-        execution_environment = self._data_context.get_execution_environment(execution_environment_name)
-        data_connector_name = batch_parameters.get("data_connector")
-        data_connector = execution_environment.get_data_connector(data_connector_name)
-
-        batch_kwargs = data_connector.build_batch_kwargs(**batch_parameters)
-
-        # We will use and manipulate reader_options along the way
-        reader_options = batch_kwargs.get("reader_options", {})
+        execution_environment = self._data_context.get_execution_environment(
+            execution_environment_name
+        )
 
         # We need to build a batch_markers to be used in the dataframe
         batch_markers = BatchMarkers(
@@ -461,70 +458,100 @@ Notes:
             }
         )
 
-        if isinstance(batch_kwargs, PathBatchKwargs):
-            path = batch_kwargs["path"]
-            reader_method = batch_kwargs.get("reader_method")
-            reader_fn = self._get_reader_fn(reader_method, path)
-            df = reader_fn(path, **reader_options)
+        data_connector_name = batch_parameters.get("data_connector")
+        # TODO: Is it ok that this in_memory_dataframe is a batch_parameter and not top level?
+        if batch_parameters.get("in_memory_dataframe") is not None:
+            if batch_parameters.get("data_asset_name") and batch_parameters.get(
+                "partition_id"
+            ):
+                df = batch_parameters.get("in_memory_dataframe")
+                # TODO: when creating an expectation suite directly onto a pandas df with the old API, batch_kwargs
+                #  consist of a blank dictionary. When creating a batch from a directly passed on df, the batch_kwargs
+                #  would look like this {"datasource":"datasource_name", "dataset": df}. Assuming that we don't want to
+                #  include the actual data in the batch_kwargs, we can either maintain a blank dictionary for
+                #  batch_kwargs, or pass in datasource and something generic for dataset like "in_memory_dataframe".
+                batch_kwargs = {}
+            else:
+                raise ValueError(
+                    "To pass an in_memory_dataframe, you must also pass a data_asset_name "
+                    "and partition_id"
+                )
+        else:
+            data_connector = execution_environment.get_data_connector(
+                data_connector_name
+            )
 
-        elif isinstance(batch_kwargs, S3BatchKwargs):
-            s3_object = data_connector.get_s3_object(batch_kwargs=batch_kwargs)
-            reader_method = batch_kwargs.get("reader_method")
-            reader_fn = self._get_reader_fn(reader_method, s3_object.key)
-            df = reader_fn(
-                StringIO(
-                    s3_object["Body"]
+            batch_kwargs = data_connector.build_batch_kwargs(**batch_parameters)
+
+            # We will use and manipulate reader_options along the way
+            reader_options = batch_kwargs.get("reader_options", {})
+
+            if isinstance(batch_kwargs, PathBatchKwargs):
+                path = batch_kwargs["path"]
+                reader_method = batch_kwargs.get("reader_method")
+                reader_fn = self._get_reader_fn(reader_method, path)
+                df = reader_fn(path, **reader_options)
+
+            elif isinstance(batch_kwargs, S3BatchKwargs):
+                s3_object = data_connector.get_s3_object(batch_kwargs=batch_kwargs)
+                reader_method = batch_kwargs.get("reader_method")
+                reader_fn = self._get_reader_fn(reader_method, s3_object.key)
+                df = reader_fn(
+                    StringIO(
+                        s3_object["Body"]
                         .read()
                         .decode(s3_object.get("ContentEncoding", "utf-8"))
-                ),
-                **reader_options
-            )
+                    ),
+                    **reader_options
+                )
 
-            # try:
-            #     import boto3
-            #
-            #     s3 = boto3.client("s3", **self._boto3_options)
-            # except ImportError:
-            #     raise BatchKwargsError(
-            #         "Unable to load boto3 client to read s3 asset.", batch_kwargs
-            #     )
-            # raw_url = batch_kwargs["s3"]
-            # reader_method = batch_kwargs.get("reader_method")
-            # url = S3Url(raw_url)
-            # logger.debug(
-            #     "Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key)
-            # )
-            # s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
-            # reader_fn = self._get_reader_fn(reader_method, url.key)
-            # df = reader_fn(
-            #     StringIO(
-            #         s3_object["Body"]
-            #             .read()
-            #             .decode(s3_object.get("ContentEncoding", "utf-8"))
-            #     ),
-            #     **reader_options
-            # )
+                # try:
+                #     import boto3
+                #
+                #     s3 = boto3.client("s3", **self._boto3_options)
+                # except ImportError:
+                #     raise BatchKwargsError(
+                #         "Unable to load boto3 client to read s3 asset.", batch_kwargs
+                #     )
+                # raw_url = batch_kwargs["s3"]
+                # reader_method = batch_kwargs.get("reader_method")
+                # url = S3Url(raw_url)
+                # logger.debug(
+                #     "Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key)
+                # )
+                # s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
+                # reader_fn = self._get_reader_fn(reader_method, url.key)
+                # df = reader_fn(
+                #     StringIO(
+                #         s3_object["Body"]
+                #             .read()
+                #             .decode(s3_object.get("ContentEncoding", "utf-8"))
+                #     ),
+                #     **reader_options
+                # )
 
-        elif "dataset" in batch_kwargs and isinstance(
+            elif "dataset" in batch_kwargs and isinstance(
                 batch_kwargs["dataset"], (pd.DataFrame, pd.Series)
-        ):
-            df = batch_kwargs.get("dataset")
-            # We don't want to store the actual dataframe in kwargs; copy the remaining batch_kwargs
-            batch_kwargs = {k: batch_kwargs[k] for k in batch_kwargs if k != "dataset"}
-            batch_kwargs["PandasInMemoryDF"] = True
-            batch_kwargs["ge_batch_id"] = str(uuid.uuid1())
+            ):
+                df = batch_kwargs.get("dataset")
+                # We don't want to store the actual dataframe in kwargs; copy the remaining batch_kwargs
+                batch_kwargs = {
+                    k: batch_kwargs[k] for k in batch_kwargs if k != "dataset"
+                }
+                batch_kwargs["PandasInMemoryDF"] = True
+                batch_kwargs["ge_batch_id"] = str(uuid.uuid1())
 
-        else:
-            raise BatchKwargsError(
-                "Invalid batch_kwargs: path, s3, or df is required for a PandasDatasource",
-                batch_kwargs,
-            )
+            else:
+                raise BatchKwargsError(
+                    "Invalid batch_kwargs: path, s3, or df is required for a PandasDatasource",
+                    batch_kwargs,
+                )
 
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
         self._batch = Batch(
-            execution_environment_name=batch_kwargs.get("execution_environment"),
+            execution_environment_name=batch_parameters.get("execution_environment"),
             batch_kwargs=batch_kwargs,
             data=df,
             batch_parameters=batch_parameters,
@@ -597,7 +624,7 @@ Notes:
         )
 
     def process_batch_parameters(
-            self, reader_method=None, reader_options=None, limit=None, dataset_options=None,
+        self, reader_method=None, reader_options=None, limit=None, dataset_options=None,
     ):
         batch_parameters = self.default_batch_parameters
 
@@ -1626,7 +1653,8 @@ Notes:
         # %D is an example of a format that can format but not parse, e.g.
         try:
             datetime.datetime.strptime(
-                datetime.datetime.strftime(datetime.datetime.now(), strftime_format), strftime_format
+                datetime.datetime.strftime(datetime.datetime.now(), strftime_format),
+                strftime_format,
             )
         except ValueError as e:
             raise ValueError("Unable to use provided strftime_format. " + str(e))
