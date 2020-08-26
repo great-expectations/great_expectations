@@ -24,6 +24,12 @@ or git, you may want to check out the :ref:`supporting_resources` section before
 
     pip install great_expectations
 
+You'll also need to install a few other dependencies into your virtual environment:
+
+.. code-block:: bash
+
+   pip install SQLAlchemy psycopg2-binary
+
 
 If you intend to develop within Great Expectations (e.g. to contribute back to the project), and would like to install it from a git branch or a fork, check out :ref:`contributing_setting_up_your_dev_environment` in the contributor documentation.
 
