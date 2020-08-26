@@ -173,7 +173,9 @@ def test_expect_column_pair_values_A_to_be_greater_than_B(
 @pytest.mark.skipif(
     importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
 )
-def test_expect_multicolumn_values_to_be_unique(spark_session, test_dataframe):
+def test_expect_select_column_values_to_be_unique_within_record(
+    spark_session, test_dataframe
+):
     """
     multicolumn_map_expectation
     """
