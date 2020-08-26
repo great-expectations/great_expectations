@@ -434,6 +434,12 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         ]
 
     @classmethod
+    def expect_compound_columns_to_be_unique(
+        cls, expectation, styling=None, include_column_name=True
+    ):
+        pass
+
+    @classmethod
     def expect_select_column_values_to_be_unique_within_record(
         cls, expectation, styling=None, include_column_name=True
     ):
