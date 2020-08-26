@@ -580,6 +580,7 @@ def test_checkpoint_run_on_non_existent_validation_operator(
         f"No validation operator `foo` was found in your project. Please verify this in your great_expectations.yml"
         in stdout
     )
+    usage_emits = mock_emit.call_args_list
 
     assert mock_emit.call_count == 3
     assert usage_emits[0][0][0]["success"] is True
