@@ -24,11 +24,12 @@ def render_multiple_validation_result_pages_markdown(
         "Please use ValidationResultsPageRenderer.render_validation_operator_result() instead."
         "E.g. to replicate the functionality of rendering a ValidationOperatorResult to markdown:"
         "validation_results_page_renderer = ValidationResultsPageRenderer("
-        "    run_info_at_end=run_info_at_end)"
-        "rendered_validations = validation_results_page_renderer.render_validation_operator_result("
-        "   validation_operator_result)"
-        "return "
-        ".join([DefaultMarkdownPageView().render(rv) for rv in rendered_validations])"
+        "    run_info_at_end=run_info_at_end"
+        ")"
+        "rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result("
+        "   validation_operator_result=validation_operator_result"
+        ")"
+        'return " ".join(DefaultMarkdownPageView().render(rendered_document_content_list))'
         "Please update code accordingly.",
         DeprecationWarning,
     )
@@ -36,10 +37,8 @@ def render_multiple_validation_result_pages_markdown(
     validation_results_page_renderer = ValidationResultsPageRenderer(
         run_info_at_end=run_info_at_end
     )
-    rendered_validations = validation_results_page_renderer.render_validation_operator_result(
-        validation_operator_result
+    rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result(
+        validation_operator_result=validation_operator_result
     )
 
-    return " ".join(
-        [DefaultMarkdownPageView().render(rv) for rv in rendered_validations]
-    )
+    return " ".join(DefaultMarkdownPageView().render(rendered_document_content_list))
