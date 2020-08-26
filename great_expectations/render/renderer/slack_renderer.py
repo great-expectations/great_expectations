@@ -8,7 +8,12 @@ class SlackRenderer(Renderer):
     def __init__(self):
         super().__init__()
 
-    def render(self, validation_result=None, data_docs_pages=None):
+    def render(
+        self,
+        validation_result=None,
+        data_docs_pages=None,
+        data_docs_links_to_render=None,
+    ):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )
@@ -55,32 +60,39 @@ class SlackRenderer(Renderer):
             query["text"] = "{}: {}".format(expectation_suite_name, status)
 
             if data_docs_pages:
+
                 for docs_link_key in data_docs_pages.keys():
                     if docs_link_key == "class":
                         pass
                     docs_link = data_docs_pages[docs_link_key]
                     report_element = None
-                    if "file:///" in docs_link:
-                        # handle special case since Slack does not render these links
-                        report_element = {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "*DataDocs* can be found here: `{}` \n (Please copy and paste link into a browser to view)\n".format(
-                                    docs_link
-                                ),
-                            },
-                        }
-                    elif "amazonaws.com" in docs_link or "s3://" in docs_link:
-                        report_element = {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "*DataDocs* can be found here: <{}|{}>".format(
-                                    docs_link, docs_link
-                                ),
-                            },
-                        }
+
+                    if (
+                        docs_link_key == "all"
+                        or docs_link_key in data_docs_links_to_render
+                    ):
+
+                        if "file:///" in docs_link:
+                            # handle special case since Slack does not render these links
+                            report_element = {
+                                "type": "section",
+                                "text": {
+                                    "type": "mrkdwn",
+                                    "text": "*DataDocs* can be found here: `{}` \n (Please copy and paste link into a browser to view)\n".format(
+                                        docs_link
+                                    ),
+                                },
+                            }
+                        else:
+                            report_element = {
+                                "type": "section",
+                                "text": {
+                                    "type": "mrkdwn",
+                                    "text": "*DataDocs* can be found here: <{}|{}>".format(
+                                        docs_link, docs_link
+                                    ),
+                                },
+                            }
 
                     if report_element:
                         query["blocks"].append(report_element)

@@ -276,7 +276,7 @@ class SiteBuilder(object):
         (ExpectationSuiteIdentifier,
                             ValidationResultIdentifier). If specified,
                             rebuild HTML(or other views the data docs
-                            site renders) only forthe resources in this list.
+                            site renders) only for the resources in this list.
                             This supports incremental build of data docs sites
                             (e.g., when a new validation result is created)
                             and avoids full rebuild.

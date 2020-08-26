@@ -584,6 +584,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         platform_specific_separator=False,
         fixed_length_key=False,
         public_urls=True,
+        base_public_url=None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -597,6 +598,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         self.prefix = prefix
         self.project = project
         self._public_urls = public_urls
+        self.base_public_url = base_public_url
 
     def _move(self, source_key, dest_key, **kwargs):
         pass
@@ -678,7 +680,11 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def get_url_for_key(self, key, protocol=None):
         path = self._convert_key_to_filepath(key)
         if self._public_urls:
-            base_url = "https://storage.googleapis.com/"
+            # if user has defined base_public_url for GCS, then use that instead
+            if self.base_public_url:
+                base_url = self.base_public_url
+            else:
+                base_url = "https://storage.googleapis.com/"
         else:
             base_url = "https://storage.cloud.google.com/"
 
@@ -687,6 +693,8 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         else:
             path_url = "/".join((self.bucket, path))
 
+        print("HELLOO WILL THIS IS GREAT")
+        print(base_url + path_url)
         return base_url + path_url
 
     def remove_key(self, key):
