@@ -133,12 +133,21 @@ class BaseConfig(DictDot):
         raise NotImplementedError
 
     def to_yaml(self, outfile):
+        """
+        :returns None (but writes a YAML file containing the project configuration)
+        """
         yaml.dump(self.get_schema_validated_updated_commented_map(), outfile)
 
     def to_yaml_str(self) -> str:
+        """
+        :returns a YAML string containing the project configuration
+        """
         return object_to_yaml_str(self.get_schema_validated_updated_commented_map())
 
     def to_dict(self) -> dict:
+        """
+        :returns a dict containing the project configuration
+        """
         return dict(self.get_schema_validated_updated_commented_map())
 
 
