@@ -78,7 +78,9 @@ class MetaPandasExecutionEngine(ExecutionEngine):
         ):
 
             if result_format is None:
-                result_format = self.default_expectation_args["result_format"]
+                result_format = self.default_expectation_args[
+                    "result_format"
+                ]  # TODO: should this be in batch_params?
 
             result_format = parse_result_format(result_format)
             if row_condition:
@@ -88,11 +90,11 @@ class MetaPandasExecutionEngine(ExecutionEngine):
                         " and must be 'python' or 'pandas'"
                     )
                 else:
-                    data = self.query(
+                    data = self.dataframe.query(
                         row_condition, parser=condition_parser
                     ).reset_index(drop=True)
             else:
-                data = self
+                data = self.dataframe
 
             series = data[column]
             if func.__name__ in [
@@ -199,10 +201,12 @@ class MetaPandasExecutionEngine(ExecutionEngine):
         ):
 
             if result_format is None:
-                result_format = self.default_expectation_args["result_format"]
+                result_format = self.default_expectation_args[
+                    "result_format"
+                ]  # TODO: should this be in batch_params?
 
             if row_condition:
-                self = self.query(row_condition).reset_index(drop=True)
+                self = self.dataframe.query(row_condition).reset_index(drop=True)
 
             series_A = self[column_A]
             series_B = self[column_B]
@@ -303,10 +307,12 @@ class MetaPandasExecutionEngine(ExecutionEngine):
         ):
 
             if result_format is None:
-                result_format = self.default_expectation_args["result_format"]
+                result_format = self.default_expectation_args[
+                    "result_format"
+                ]  # TODO: should this be in batch_params?
 
             if row_condition:
-                self = self.query(row_condition).reset_index(drop=True)
+                self = self.dataframe.query(row_condition).reset_index(drop=True)
 
             test_df = self[column_list]
 
@@ -664,34 +670,34 @@ Notes:
         return batch_parameters
 
     def get_row_count(self):
-        return self.shape[0]
+        return self.dataframe.shape[0]
 
     def get_column_count(self):
-        return self.shape[1]
+        return self.dataframe.shape[1]
 
     def get_table_columns(self) -> List[str]:
-        return list(self.batch.data.columns)
+        return list(self.dataframe.columns)
 
     def get_column_sum(self, column):
-        return self[column].sum()
+        return self.dataframe[column].sum()
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
-        temp_column = self[column].dropna()
+        temp_column = self.dataframe[column].dropna()
         if parse_strings_as_datetimes:
             temp_column = temp_column.map(parse)
         return temp_column.max()
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
-        temp_column = self[column].dropna()
+        temp_column = self.dataframe[column].dropna()
         if parse_strings_as_datetimes:
             temp_column = temp_column.map(parse)
         return temp_column.min()
 
     def get_column_mean(self, column):
-        return self[column].mean()
+        return self.dataframe[column].mean()
 
     def get_column_nonnull_count(self, column):
-        series = self[column]
+        series = self.dataframe[column]
         null_indexes = series.isnull()
         nonnull_values = series[null_indexes == False]
         return len(nonnull_values)
@@ -703,14 +709,14 @@ Notes:
             raise ValueError(
                 "collate parameter is not supported in PandasExecutionEngine"
             )
-        counts = self[column].value_counts()
+        counts = self.dataframe[column].value_counts()
         if sort == "value":
             try:
                 counts.sort_index(inplace=True)
             except TypeError:
                 # Having values of multiple types in a object dtype column (e.g., strings and floats)
                 # raises a TypeError when the sorting method performs comparisons.
-                if self[column].dtype == object:
+                if self.dataframe[column].dtype == object:
                     counts.index = counts.index.astype(str)
                     counts.sort_index(inplace=True)
         elif sort == "counts":
@@ -720,26 +726,28 @@ Notes:
         return counts
 
     def get_column_unique_count(self, column):
-        return self.get_column_value_counts(column).shape[0]
+        return self.dataframe.get_column_value_counts(column).shape[0]
 
     def get_column_modes(self, column):
-        return list(self[column].mode().values)
+        return list(self.dataframe[column].mode().values)
 
     def get_column_median(self, column):
-        return self[column].median()
+        return self.dataframe[column].median()
 
     def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
         if allow_relative_error is not False:
             raise ValueError(
                 "PandasExecutionEngine does not support relative error in column quantiles."
             )
-        return self[column].quantile(quantiles, interpolation="nearest").tolist()
+        return (
+            self.dataframe[column].quantile(quantiles, interpolation="nearest").tolist()
+        )
 
     def get_column_stdev(self, column):
-        return self[column].std()
+        return self.dataframe[column].std()
 
     def get_column_hist(self, column, bins):
-        hist, bin_edges = np.histogram(self[column], bins, density=False)
+        hist, bin_edges = np.histogram(self.dataframe[column], bins, density=False)
         return list(hist)
 
     def get_column_count_in_range(
@@ -751,7 +759,7 @@ Notes:
         if min_val is not None and max_val is not None and min_val > max_val:
             raise ValueError("Min value must be <= to max value")
 
-        result = self[column]
+        result = self.dataframe[column]
         if min_val is not None:
             if strict_min:
                 result = result[result > min_val]

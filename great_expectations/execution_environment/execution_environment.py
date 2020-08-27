@@ -70,7 +70,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
     def get_batch(
         self,
         batch_parameters: dict,
-        in_memory_dataset: any = None,  # should this be any to accommodate the different engines?
+        in_memory_dataset: any = None,  # TODO: should this be any to accommodate the different engines?
     ):
         self.execution_engine.load_batch(
             batch_parameters=batch_parameters, in_memory_dataset=in_memory_dataset
@@ -81,11 +81,14 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         self,
         batch_parameters: dict,
         expectation_suite_name: Union[str, ExpectationSuite],
+        in_memory_dataset: any = None,  # TODO: should this be any to accommodate the different engines?
     ):
         self.execution_engine._initialize_expectations(
             expectation_suite_name=expectation_suite_name
         )
-        self.execution_engine.load_batch(batch_parameters=batch_parameters)
+        self.execution_engine.load_batch(
+            batch_parameters=batch_parameters, in_memory_dataset=in_memory_dataset
+        )
         return self.execution_engine
 
     @classmethod
