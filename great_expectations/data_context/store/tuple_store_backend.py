@@ -29,6 +29,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         forbidden_substrings=None,
         platform_specific_separator=True,
         fixed_length_key=False,
+        base_public_path=None,
     ):
         super().__init__(fixed_length_key=fixed_length_key)
         if forbidden_substrings is None:
@@ -52,6 +53,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 )
         self.filepath_prefix = filepath_prefix
         self.filepath_suffix = filepath_suffix
+        self.base_public_path = base_public_path
 
         if filepath_template is not None:
             # key length is the number of unique values to be substituted in the filepath_template
@@ -202,6 +204,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         platform_specific_separator=True,
         root_directory=None,
         fixed_length_key=False,
+        base_public_path=None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -210,6 +213,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
+            base_public_path=base_public_path,
         )
         if os.path.isabs(base_directory):
             self.full_base_directory = base_directory
@@ -334,12 +338,16 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         return False
 
     def get_url_for_key(self, key, protocol=None):
-        path = self._convert_key_to_filepath(key)
-        full_path = os.path.join(self.full_base_directory, path)
-        if protocol is None:
-            protocol = "file:"
-        url = protocol + "//" + full_path
 
+        path = self._convert_key_to_filepath(key)
+
+        if self.base_public_path:
+            url = self.base_public_path + path
+        else:
+            full_path = os.path.join(self.full_base_directory, path)
+            if protocol is None:
+                protocol = "file:"
+            url = protocol + "//" + full_path
         return url
 
     def _has_key(self, key):
@@ -367,6 +375,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         forbidden_substrings=None,
         platform_specific_separator=False,
         fixed_length_key=False,
+        base_public_path=None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -375,6 +384,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
+            base_public_path=base_public_path,
         )
         self.bucket = bucket
         if prefix:
@@ -525,9 +535,22 @@ class TupleS3StoreBackend(TupleStoreBackend):
         else:
             location = "s3-" + location
         s3_key = self._convert_key_to_filepath(key)
-        if not self.prefix:
-            return f"https://{location}.amazonaws.com/{self.bucket}/{s3_key}"
-        return f"https://{location}.amazonaws.com/{self.bucket}/{self.prefix}/{s3_key}"
+
+        if self.base_public_path:
+            url = os.path.join(self.base_public_path, s3_key)
+        else:
+            location = boto3.client("s3").get_bucket_location(Bucket=self.bucket)[
+                "LocationConstraint"
+            ]
+            if location is None:
+                location = "s3"
+            else:
+                location = "s3-" + location
+            if not self.prefix:
+                url = f"https://{location}.amazonaws.com/{self.bucket}/{s3_key}"
+            else:
+                url = f"https://{location}.amazonaws.com/{self.bucket}/{self.prefix}/{s3_key}"
+        return url
 
     def remove_key(self, key):
         import boto3
@@ -584,7 +607,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         platform_specific_separator=False,
         fixed_length_key=False,
         public_urls=True,
-        base_public_url=None,
+        base_public_path=None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -593,12 +616,12 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
+            base_public_path=base_public_path,
         )
         self.bucket = bucket
         self.prefix = prefix
         self.project = project
         self._public_urls = public_urls
-        self.base_public_url = base_public_url
 
     def _move(self, source_key, dest_key, **kwargs):
         pass
@@ -679,21 +702,22 @@ class TupleGCSStoreBackend(TupleStoreBackend):
 
     def get_url_for_key(self, key, protocol=None):
         path = self._convert_key_to_filepath(key)
+
         if self._public_urls:
-            # if user has defined base_public_url for GCS, then use that instead
-            if self.base_public_url:
-                base_url = self.base_public_url
-            else:
-                base_url = "https://storage.googleapis.com/"
+            base_url = "https://storage.googleapis.com/"
         else:
             base_url = "https://storage.cloud.google.com/"
+
+        # if user has configured their own base_public_url, then just replace
+        if self.base_public_path:
+            base_url = self.base_public_path
 
         if self.prefix:
             path_url = "/".join((self.bucket, self.prefix, path))
         else:
-            if self.base_public_url:
+            if self.base_public_path:
                 # if the user has already defined everything, then keep it
-                if self.base_public_url[-1] != "/":
+                if self.base_public_path[-1] != "/":
                     path_url = "/" + path
                 else:
                     path_url = path

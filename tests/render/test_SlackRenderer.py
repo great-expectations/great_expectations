@@ -31,7 +31,9 @@ def test_SlackRenderer():
     )
 
     rendered_output = SlackRenderer().render(validation_result_suite)
-    print(rendered_output)
+
+    # TODO : Add test for data_docs_pages which is a dictionary containing docs_site as key and index page as value {"local_site": "file:///localsite/index.html"}
+    # TODO : Add test for data_doc_site_names, which is None (default) or a list of data doc sites to include in Slack message
 
     expected_renderer_output = {
         "blocks": [

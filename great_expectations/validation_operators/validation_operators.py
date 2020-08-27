@@ -117,7 +117,7 @@ An instance of ActionListValidationOperator is included in the default configura
           # put the actual webhook URL in the uncommitted/config_variables.yml file
           slack_webhook: ${validation_notification_slack_webhook}
           notify_on: all # possible values: "all", "failure", "success"
-          notify_with: ["all"] # name of data_docs_sites to display in Slack message. Defaults to "all"
+          data_docs_site_names: optional list of DataDocs sites (ie ["local_site", "gcs_site"]) to include in Slack notification. Will default to including all configured DataDocs sites.
           renderer:
             module_name: great_expectations.render.renderer.slack_renderer
             class_name: SlackRenderer
@@ -521,7 +521,7 @@ The value of "success" is True if no critical expectation suites ("failure") fai
                 "stop_on_first_error": ...,
                 "slack_webhook": ...,
                 "notify_on": ...,
-                "notify_with":...,
+                "data_docs_site_names":...,
             },
         },
         "run_results": {
@@ -549,7 +549,7 @@ The value of "success" is True if no critical expectation suites ("failure") fai
         stop_on_first_error=False,
         slack_webhook=None,
         notify_on="all",
-        notify_with=["all"],
+        data_docs_site_names=None,
         result_format={"result_format": "SUMMARY"},
     ):
         super().__init__(data_context, action_list, name)
@@ -567,7 +567,7 @@ The value of "success" is True if no critical expectation suites ("failure") fai
 
         self.slack_webhook = slack_webhook
         self.notify_on = notify_on
-        self.notify_with = notify_with
+        self.data_docs_site_names = data_docs_site_names
         result_format = parse_result_format(result_format)
         assert result_format["result_format"] in [
             "BOOLEAN_ONLY",
@@ -591,7 +591,7 @@ The value of "success" is True if no critical expectation suites ("failure") fai
                     "stop_on_first_error": self.stop_on_first_error,
                     "slack_webhook": self.slack_webhook,
                     "notify_on": self.notify_on,
-                    "notify_with": self.notify_with,
+                    "data_docs_site_names": self.data_docs_site_names,
                     "result_format": self.result_format,
                 },
             }

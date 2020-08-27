@@ -57,6 +57,23 @@ Steps
     .. image:: /images/slack_notification_example.png
 
 
+Additional notes
+--------------------
+- If your ``great_expectations.yml`` contains multiple configurations for Data Docs sites, all of them will be included in the Slack notification by default. If you would like to be more specific, you can configure the ``data_docs_site_names`` variable.
+
+- The following example will include the link to ``local_site`` and ``gcs_site`` as part of the Slack notification.
+
+.. code-block:: yaml
+
+    - name: send_slack_notification_on_validation_result # name can be set to any value
+      action:
+            ...
+        notify_on: all # possible values: "all", "failure", "success"
+        notify_with: ["local_site", "gcs_site"]
+        renderer:
+            ...
+
+
 Additional resources
 --------------------
 

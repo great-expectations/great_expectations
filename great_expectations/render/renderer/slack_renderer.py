@@ -9,10 +9,7 @@ class SlackRenderer(Renderer):
         super().__init__()
 
     def render(
-        self,
-        validation_result=None,
-        data_docs_pages=None,
-        data_docs_links_to_render=None,
+        self, validation_result=None, data_docs_pages=None, data_doc_site_names=None,
     ):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
@@ -59,8 +56,7 @@ class SlackRenderer(Renderer):
             # this abbreviated root level "text" will show up in the notification and not the message
             query["text"] = "{}: {}".format(expectation_suite_name, status)
 
-            if data_docs_pages:
-
+            if data_doc_site_names:
                 for docs_link_key in data_docs_pages.keys():
                     if docs_link_key == "class":
                         pass
@@ -68,8 +64,8 @@ class SlackRenderer(Renderer):
                     report_element = None
 
                     if (
-                        docs_link_key == "all"
-                        or docs_link_key in data_docs_links_to_render
+                        data_doc_site_names == None
+                        or docs_link_key in data_doc_site_names
                     ):
 
                         if "file:///" in docs_link:

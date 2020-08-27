@@ -14,8 +14,8 @@ from great_expectations.data_context.store import (
     TupleS3StoreBackend,
 )
 from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
     ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
 )
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.util import gen_directory_tree_str
@@ -116,6 +116,7 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
 def test_TupleFilesystemStoreBackend(tmp_path_factory):
     path = "dummy_str"
     project_path = str(tmp_path_factory.mktemp("test_TupleFilesystemStoreBackend__dir"))
+    base_public_path = "http://www.test.com/"
 
     my_store = TupleFilesystemStoreBackend(
         root_directory=os.path.abspath(path),
@@ -145,6 +146,16 @@ test_TupleFilesystemStoreBackend__dir0/
     my_store.remove_key(("BBB",))
     with pytest.raises(InvalidKeyError):
         assert my_store.get(("BBB",)) == ""
+
+    my_store_with_base_public_path = TupleFilesystemStoreBackend(
+        root_directory=os.path.abspath(path),
+        base_directory=project_path,
+        filepath_template="my_file_{0}",
+        base_public_path=base_public_path,
+    )
+    my_store_with_base_public_path.set(("CCC",), "ccc")
+    url = my_store_with_base_public_path.get_url_for_key(("CCC",))
+    assert url == "http://www.test.com/my_file_CCC"
 
 
 def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
@@ -194,6 +205,7 @@ def test_TupleS3StoreBackend_with_prefix():
     """
     bucket = "leakybucket"
     prefix = "this_is_a_test_prefix"
+    base_public_path = "http://www.test.com/"
 
     # create a bucket in Moto's mock AWS environment
     conn = boto3.resource("s3", region_name="us-east-1")
@@ -237,6 +249,18 @@ def test_TupleS3StoreBackend_with_prefix():
     my_store.remove_key(("BBB",))
     with pytest.raises(InvalidKeyError):
         my_store.get(("BBB",))
+
+    # testing base_public_path
+    my_new_store = TupleS3StoreBackend(
+        filepath_template="my_file_{0}",
+        bucket=bucket,
+        prefix=prefix,
+        base_public_path=base_public_path,
+    )
+
+    my_new_store.set(("BBB",), "bbb", content_type="text/html; charset=utf-8")
+
+    assert my_new_store.get_url_for_key(("BBB",)) == "http://www.test.com/my_file_BBB"
 
 
 @mock_s3
@@ -479,6 +503,53 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
     )
 
 
+def test_TupleGCSStoreBackend_base_public_path():
+    """
+    What does this test and why?
+
+    the base_public_path parameter allows users to point to a custom DNS when hosting Data docs.
+
+    This test will exercise the get_url_for_key method twice to see that we are getting the expected url,
+    with or without base_public_path
+    """
+    bucket = "leakybucket"
+    prefix = "this_is_a_test_prefix"
+    project = "dummy-project"
+    base_public_path = "http://www.test.com/"
+
+    my_store_with_base_public_path = TupleGCSStoreBackend(
+        filepath_template=None,
+        bucket=bucket,
+        prefix=prefix,
+        project=project,
+        base_public_path=base_public_path,
+    )
+
+    with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
+        mock_client = mock_gcs_client.return_value
+        mock_bucket = mock_client.get_bucket.return_value
+        mock_blob = mock_bucket.blob.return_value
+
+        my_store_with_base_public_path.set(
+            ("BBB",), b"bbb", content_encoding=None, content_type="image/png"
+        )
+
+    run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())
+    key = ValidationResultIdentifier(
+        ExpectationSuiteIdentifier(expectation_suite_name="my_suite_name"),
+        run_id,
+        "my_batch_id",
+    )
+    run_time_string = run_id.to_tuple()[1]
+
+    url = my_store_with_base_public_path.get_url_for_key(key.to_tuple())
+    assert (
+        url
+        == "http://www.test.com/leakybucket"
+        + f"/this_is_a_test_prefix/my_suite_name/my_run_id/{run_time_string}/my_batch_id"
+    )
+
+
 def test_TupleGCSStoreBackend():
     # pytest.importorskip("google-cloud-storage")
     """
@@ -493,6 +564,7 @@ def test_TupleGCSStoreBackend():
     bucket = "leakybucket"
     prefix = "this_is_a_test_prefix"
     project = "dummy-project"
+    base_public_path = "http://www.test.com/"
 
     my_store = TupleGCSStoreBackend(
         filepath_template="my_file_{0}", bucket=bucket, prefix=prefix, project=project
@@ -500,6 +572,14 @@ def test_TupleGCSStoreBackend():
 
     my_store_with_no_filepath_template = TupleGCSStoreBackend(
         filepath_template=None, bucket=bucket, prefix=prefix, project=project
+    )
+
+    my_store_with_base_public_path = TupleGCSStoreBackend(
+        filepath_template=None,
+        bucket=bucket,
+        prefix=prefix,
+        project=project,
+        base_public_path=base_public_path,
     )
 
     with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
