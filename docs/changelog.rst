@@ -13,6 +13,7 @@ Develop
 * [BUGFIX] Fix bug preventing the use of get_available_partition_ids in s3 generator
 * [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
 * [BUGFIX] TupleGCSStoreBackend: remove duplicate prefix for urls (thanks @azban)!
+* [BUGFIX] Fix `TypeError: unhashable type` error in Data Docs rendering
 
 0.12.0
 -----------------
