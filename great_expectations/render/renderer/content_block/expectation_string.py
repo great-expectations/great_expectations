@@ -437,7 +437,45 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     def expect_compound_columns_to_be_unique(
         cls, expectation, styling=None, include_column_name=True
     ):
-        pass
+        params = substitute_none_for_missing(
+            expectation.kwargs,
+            ["column_list", "ignore_row_if", "row_condition", "condition_parser"],
+        )
+
+        template_str = "Values for given compound columns must be unique together: "
+        for idx in range(len(params["column_list"]) - 1):
+            template_str += "$column_list_" + str(idx) + ", "
+            params["column_list_" + str(idx)] = params["column_list"][idx]
+
+        last_idx = len(params["column_list"]) - 1
+        template_str += "$column_list_" + str(last_idx)
+        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
 
     @classmethod
     def expect_select_column_values_to_be_unique_within_record(
