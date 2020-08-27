@@ -1025,7 +1025,7 @@ class BaseDataContext(object):
     def _get_batch(
         self,
         batch_parameters: dict,
-        in_memory_dataset: any = None,  # should this be any?
+        in_memory_dataset: any = None,  # TODO: should this be any to accommodate different engines?
     ) -> ExecutionEngine:
         execution_environment = self.get_execution_environment(
             batch_parameters.get("execution_environment")
@@ -1035,13 +1035,18 @@ class BaseDataContext(object):
         )
 
     def get_validator(
-        self, batch_parameters, expectation_suite_name: Union[str, ExpectationSuite],
+        self,
+        batch_parameters,
+        expectation_suite_name: Union[str, ExpectationSuite],
+        in_memory_dataset: any = None,  # TODO: should this be any to accommodate different engines?
     ):
         execution_environment = self.get_execution_environment(
             batch_parameters.get("execution_environment")
         )
         return execution_environment.get_validator(
-            batch_parameters, expectation_suite_name
+            batch_parameters=batch_parameters,
+            expectation_suite_name=expectation_suite_name,
+            in_memory_dataset=in_memory_dataset,
         )
 
     def get_batch(
