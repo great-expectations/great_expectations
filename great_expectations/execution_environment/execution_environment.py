@@ -5,9 +5,9 @@ import logging
 import warnings
 from typing import Union
 
-from great_expectations.core import ExpectationSuite
 from ruamel.yaml import YAML
 
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     load_class,
@@ -53,11 +53,11 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
                 DeprecationWarning,
             )
         self._execution_engine = instantiate_class_from_config(
-            config=execution_engine,
-            runtime_environment={
-            },
+            config=execution_engine, runtime_environment={},
         )
-        self._execution_engine._data_context = data_context  # do this here because data_context not in DataAsset
+        self._execution_engine._data_context = (
+            data_context  # do this here because data_context not in DataAsset
+        )
         # __init__ argspec, so not added when provided in runtime_environment above
         self._execution_environment_config = kwargs
         self._data_connectors = {}
@@ -70,21 +70,22 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
     def get_batch(
         self,
         batch_parameters: dict,
+        in_memory_dataset: any = None,  # should this be any to accommodate the different engines?
     ):
         self.execution_engine.load_batch(
-            batch_parameters=batch_parameters
+            batch_parameters=batch_parameters, in_memory_dataset=in_memory_dataset
         )
         return self.execution_engine.batch
 
     def get_validator(
         self,
         batch_parameters: dict,
-        expectation_suite_name: Union[str, ExpectationSuite]
+        expectation_suite_name: Union[str, ExpectationSuite],
     ):
-        self.execution_engine._initialize_expectations(expectation_suite_name=expectation_suite_name)
-        self.execution_engine.load_batch(
-            batch_parameters=batch_parameters
+        self.execution_engine._initialize_expectations(
+            expectation_suite_name=expectation_suite_name
         )
+        self.execution_engine.load_batch(batch_parameters=batch_parameters)
         return self.execution_engine
 
     @classmethod
@@ -169,24 +170,24 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         except KeyError:
             pass
 
-    def add_data_connector(self, name, class_name, **kwargs):
-        """Add a DataConnector to the ExecutionEnvironment.
-
-        Args:
-            name (str): the name of the new DataConnector to add
-            class_name: class of the DataConnector to add
-            kwargs: additional keyword arguments will be passed directly to the new DataConnector's constructor
-
-        Returns:
-             DataConnector (DataConnector)
-        """
-        kwargs["class_name"] = class_name
-        data_connector = self._build_data_connector(**kwargs)
-        if "data_connectors" not in self._execution_environment_config:
-            self._execution_environment_config["data_connectors"] = dict()
-        self._execution_environment_config["data_connectors"][name] = kwargs
-
-        return data_connector
+    # def add_data_connector(self, name, class_name, **kwargs):
+    #     """Add a DataConnector to the ExecutionEnvironment.
+    #
+    #     Args:
+    #         name (str): the name of the new DataConnector to add
+    #         class_name: class of the DataConnector to add
+    #         kwargs: additional keyword arguments will be passed directly to the new DataConnector's constructor
+    #
+    #     Returns:
+    #          DataConnector (DataConnector)
+    #     """
+    #     kwargs["class_name"] = class_name
+    #     data_connector = self._build_data_connector(**kwargs)
+    #     if "data_connectors" not in self._execution_environment_config:
+    #         self._execution_environment_config["data_connectors"] = dict()
+    #     self._execution_environment_config["data_connectors"][name] = kwargs
+    #
+    #     return data_connector
 
     def _build_data_connector(self, **kwargs):
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""

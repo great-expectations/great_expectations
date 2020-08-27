@@ -443,7 +443,7 @@ Notes:
             "discard_subset_failing_expectations", False
         )
 
-    def load_batch(self, batch_parameters):
+    def load_batch(self, batch_parameters, in_memory_dataset=None):
         execution_environment_name = batch_parameters.get("execution_environment")
         execution_environment = self._data_context.get_execution_environment(
             execution_environment_name
@@ -459,28 +459,28 @@ Notes:
         )
 
         data_connector_name = batch_parameters.get("data_connector")
-        # TODO: Is it ok that this in_memory_dataframe is a batch_parameter and not top level?
-        if batch_parameters.get("in_memory_dataframe") is not None:
+        # TODO: Is it ok that this in_memory_dataset is a batch_parameter and not top level?
+        if in_memory_dataset is not None:
             if batch_parameters.get("data_asset_name") and batch_parameters.get(
                 "partition_id"
             ):
-                df = batch_parameters.get("in_memory_dataframe")
-                # TODO: when creating an expectation suite directly onto a pandas df with the old API, batch_kwargs
-                #  consist of a blank dictionary. When creating a batch from a directly passed on df, the batch_kwargs
-                #  would look like this {"datasource":"datasource_name", "dataset": df}. Assuming that we don't want to
-                #  include the actual data in the batch_kwargs, we can either maintain a blank dictionary for
-                #  batch_kwargs, or pass in datasource and something generic for dataset like "in_memory_dataframe".
+                df = in_memory_dataset
                 batch_kwargs = {}
+                batch_parameters["data_connector"] = "dummy_data_connector"
             else:
                 raise ValueError(
-                    "To pass an in_memory_dataframe, you must also pass a data_asset_name "
+                    "To pass an in_memory_dataset, you must also pass a data_asset_name "
                     "and partition_id"
                 )
         else:
             data_connector = execution_environment.get_data_connector(
                 data_connector_name
             )
-
+            if data_connector == "dummy_data_connector":
+                raise ValueError(
+                    "No in_memory_dataset found. To use the dummy_data_connector, please ensure that you"
+                    "are passing a dataset to load_batch()"
+                )
             batch_kwargs = data_connector.build_batch_kwargs(**batch_parameters)
 
             # We will use and manipulate reader_options along the way

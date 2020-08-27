@@ -14,8 +14,6 @@ import webbrowser
 from typing import Dict, List, Optional, Union
 
 from dateutil.parser import parse
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment import ExecutionEnvironment
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
@@ -29,8 +27,10 @@ from great_expectations.core import (
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
     add_datasource_usage_statistics,  # TODO: deprecate
+)
+from great_expectations.core.usage_statistics.usage_statistics import (
+    UsageStatisticsHandler,
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
     usage_statistics_enabled_method,
@@ -43,16 +43,20 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
+    DatasourceConfig,  # TODO: deprecate
+)
+from great_expectations.data_context.types.base import (
+    datasourceConfigSchema,  # TODO: deprecate
+)
+from great_expectations.data_context.types.base import (
     CURRENT_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
-    DatasourceConfig,  # TODO: deprecate
-    executionEnvironmentConfigSchema,
     ExecutionEnvironmentConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
-    datasourceConfigSchema,  # TODO: deprecate
+    executionEnvironmentConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -67,6 +71,8 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource  # TODO: deprecate
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment import ExecutionEnvironment
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
@@ -798,9 +804,13 @@ class BaseDataContext(object):
             ValueError: If the execution_environment name isn't provided or cannot be found.
         """
         if execution_environment_name is None:
-            raise ValueError("ExecutionEnvironment names must be a execution_environment name")
+            raise ValueError(
+                "ExecutionEnvironment names must be a execution_environment name"
+            )
         else:
-            execution_environment = self.get_execution_environment(execution_environment_name)
+            execution_environment = self.get_execution_environment(
+                execution_environment_name
+            )
             if execution_environment:
                 # remove key until we have a delete method on project_config
                 # self._project_config_with_variables_substituted.execution_environments[
@@ -808,7 +818,11 @@ class BaseDataContext(object):
                 # del self._project_config["execution_environments"][execution_environment_name]
                 del self._cached_execution_environments[execution_environment_name]
             else:
-                raise ValueError("ExecutionEnvironment {} not found".format(execution_environment_name))
+                raise ValueError(
+                    "ExecutionEnvironment {} not found".format(
+                        execution_environment_name
+                    )
+                )
 
     # TODO: deprecate "datasource" in favor of "execution_environment"
     def get_available_data_asset_names(
@@ -816,7 +830,7 @@ class BaseDataContext(object):
         datasource_names=None,
         batch_kwargs_generator_names=None,
         execution_environment_names=None,
-        data_connector_names=None
+        data_connector_names=None,
     ):
         """Inspect execution environment (AKA datasource) and data connectors (AKA batch kwargs generators) to provide
         available
@@ -849,7 +863,7 @@ class BaseDataContext(object):
 
         """
         assert (datasource_names and not execution_environment_names) or (
-                not datasource_names and execution_environment_names
+            not datasource_names and execution_environment_names
         ), "Please provide either datasource_names or execution_environment_names."
         if datasource_names:
             warnings.warn(
@@ -860,7 +874,7 @@ class BaseDataContext(object):
             execution_environment_names = datasource_names
 
         assert (batch_kwargs_generator_names and not data_connector_names) or (
-                not batch_kwargs_generator_names and data_connector_names
+            not batch_kwargs_generator_names and data_connector_names
         ), "Please provide either batch_kwargs_generator_names or data_connector_names."
         if batch_kwargs_generator_names:
             warnings.warn(
@@ -873,7 +887,8 @@ class BaseDataContext(object):
         data_asset_names = {}
         if execution_environment_names is None:
             execution_environment_names = [
-                execution_environment["name"] for execution_environment in self.list_execution_environments()
+                execution_environment["name"]
+                for execution_environment in self.list_execution_environments()
             ]
         elif isinstance(execution_environment_names, str):
             execution_environment_names = [execution_environment_names]
@@ -893,8 +908,12 @@ class BaseDataContext(object):
             if len(data_connector_names) == len(
                 execution_environment_names
             ):  # Iterate over both together
-                for idx, execution_environment_name in enumerate(execution_environment_names):
-                    execution_environment = self.get_execution_environment(execution_environment_name)
+                for idx, execution_environment_name in enumerate(
+                    execution_environment_names
+                ):
+                    execution_environment = self.get_execution_environment(
+                        execution_environment_name
+                    )
                     data_asset_names[
                         execution_environment_name
                     ] = execution_environment.get_available_data_asset_names(
@@ -902,7 +921,9 @@ class BaseDataContext(object):
                     )
 
             elif len(data_connector_names) == 1:
-                execution_environment = self.get_execution_environment(execution_environment_names[0])
+                execution_environment = self.get_execution_environment(
+                    execution_environment_names[0]
+                )
                 execution_environment_names[
                     execution_environment_names[0]
                 ] = execution_environment.get_available_data_asset_names(
@@ -919,7 +940,9 @@ class BaseDataContext(object):
         else:  # data_connector_names is None
             for execution_environment_name in execution_environment_names:
                 try:
-                    execution_environment = self.get_execution_environment(execution_environment_name)
+                    execution_environment = self.get_execution_environment(
+                        execution_environment_name
+                    )
                     data_asset_names[
                         execution_environment_name
                     ] = execution_environment.get_available_data_asset_names()
@@ -956,7 +979,7 @@ class BaseDataContext(object):
 
         """
         assert (datasource and not execution_environment) or (
-                not datasource and execution_environment
+            not datasource and execution_environment
         ), "Please provide either datasource or execution_environment."
         if datasource:
             warnings.warn(
@@ -967,7 +990,7 @@ class BaseDataContext(object):
             execution_environment = datasource
 
         assert (batch_kwargs_generator and not data_connector) or (
-                not batch_kwargs_generator and data_connector
+            not batch_kwargs_generator and data_connector
         ), "Please provide either batch_kwargs_generator or data_connector."
         if batch_kwargs_generator:
             warnings.warn(
@@ -987,7 +1010,9 @@ class BaseDataContext(object):
                 DeprecationWarning,
             )
             data_asset_name = kwargs.pop("name")
-        execution_environment_obj = self.get_execution_environment(execution_environment)
+        execution_environment_obj = self.get_execution_environment(
+            execution_environment
+        )
         batch_kwargs = execution_environment_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
             data_asset_name=data_asset_name,
@@ -998,23 +1023,25 @@ class BaseDataContext(object):
 
     # WIP new get_batch
     def _get_batch(
-            self,
-            batch_parameters: dict,
+        self,
+        batch_parameters: dict,
+        in_memory_dataset: any = None,  # should this be any?
     ) -> ExecutionEngine:
-        execution_environment = self.get_execution_environment(batch_parameters.get("execution_environment"))
+        execution_environment = self.get_execution_environment(
+            batch_parameters.get("execution_environment")
+        )
         return execution_environment.get_batch(
-            batch_parameters,
+            batch_parameters=batch_parameters, in_memory_dataset=in_memory_dataset
         )
 
     def get_validator(
-        self,
-        batch_parameters,
-        expectation_suite_name: Union[str, ExpectationSuite],
+        self, batch_parameters, expectation_suite_name: Union[str, ExpectationSuite],
     ):
-        execution_environment = self.get_execution_environment(batch_parameters.get("execution_environment"))
+        execution_environment = self.get_execution_environment(
+            batch_parameters.get("execution_environment")
+        )
         return execution_environment.get_validator(
-            batch_parameters,
-            expectation_suite_name
+            batch_parameters, expectation_suite_name
         )
 
     def get_batch(
@@ -1215,10 +1242,14 @@ class BaseDataContext(object):
             execution_environment (ExecutionEnvironment)
         """
         logger.debug("Starting BaseDataContext.add_execution_environment for %s" % name)
-        module_name = kwargs.get("module_name", "great_expectations.execution_environment")
+        module_name = kwargs.get(
+            "module_name", "great_expectations.execution_environment"
+        )
         verify_dynamic_loading_support(module_name=module_name)
         class_name = kwargs.get("class_name")
-        execution_environment_class = load_class(module_name=module_name, class_name=class_name)
+        execution_environment_class = load_class(
+            module_name=module_name, class_name=class_name
+        )
 
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
@@ -1235,7 +1266,10 @@ class BaseDataContext(object):
         # context provides. ExecutionEnvironments should not see unsubstituted variables in their config.
         if initialize:
             execution_environment = self._build_execution_environment_from_config(
-                name, self._project_config_with_variables_substituted.execution_environments[name]
+                name,
+                self._project_config_with_variables_substituted.execution_environments[
+                    name
+                ],
             )
             self._cached_execution_environments[name] = execution_environment
         else:
@@ -1266,27 +1300,27 @@ class BaseDataContext(object):
         )
         return generator
 
-    def add_data_connector(
-        self, execution_environment_name, data_connector_name, class_name, **kwargs
-    ):
-        """
-        Add a data connector to the named execution_environment, using the provided
-        configuration.
-
-        Args:
-            execution_environment_name: name of execution_environment to which to add the new data connector
-            data_connector_name: name of the data_connector to add
-            class_name: class of the data connector to add
-            **kwargs: data connector configuration, provided as kwargs
-
-        Returns:
-
-        """
-        execution_environment_obj = self.get_execution_environment(execution_environment_name)
-        data_connector = execution_environment_obj.add_data_connector(
-            name=data_connector_name, class_name=class_name, **kwargs
-        )
-        return data_connector
+    # def add_data_connector(
+    #     self, execution_environment_name, data_connector_name, class_name, **kwargs
+    # ):
+    #     """
+    #     Add a data connector to the named execution_environment, using the provided
+    #     configuration.
+    #
+    #     Args:
+    #         execution_environment_name: name of execution_environment to which to add the new data connector
+    #         data_connector_name: name of the data_connector to add
+    #         class_name: class of the data connector to add
+    #         **kwargs: data connector configuration, provided as kwargs
+    #
+    #     Returns:
+    #
+    #     """
+    #     execution_environment_obj = self.get_execution_environment(execution_environment_name)
+    #     data_connector = execution_environment_obj.add_data_connector(
+    #         name=data_connector_name, class_name=class_name, **kwargs
+    #     )
+    #     return data_connector_name
 
     def get_config(self):
         return self._project_config
@@ -1362,7 +1396,9 @@ class BaseDataContext(object):
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
-    def get_execution_environment(self, execution_environment_name: str = "default") -> ExecutionEnvironment:
+    def get_execution_environment(
+        self, execution_environment_name: str = "default"
+    ) -> ExecutionEnvironment:
         """Get the named execution_environment
 
         Args:
@@ -1388,11 +1424,15 @@ class BaseDataContext(object):
                 f"invalid "
                 f"configuration."
             )
-        execution_environment_config = executionEnvironmentConfigSchema.load(execution_environment_config)
+        execution_environment_config = executionEnvironmentConfigSchema.load(
+            execution_environment_config
+        )
         execution_environment = self._build_execution_environment_from_config(
             execution_environment_name, execution_environment_config
         )
-        self._cached_execution_environments[execution_environment_name] = execution_environment
+        self._cached_execution_environments[
+            execution_environment_name
+        ] = execution_environment
         return execution_environment
 
     def list_expectation_suites(self):
@@ -1431,7 +1471,9 @@ class BaseDataContext(object):
         for (
             key,
             value,
-        ) in self._project_config_with_variables_substituted.execution_environments.items():
+        ) in (
+            self._project_config_with_variables_substituted.execution_environments.items()
+        ):
             value["name"] = key
             execution_environments.append(value)
         return execution_environments
