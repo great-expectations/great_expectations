@@ -562,6 +562,19 @@ Notes:
         self._batch_parameters = batch_parameters
         self._batch_markers = batch_markers
 
+    @property
+    def dataframe(self):
+        if not self.batch:
+            if self._batch_parameters:
+                self.load_batch(self._batch_parameters)
+            else:
+                raise ValueError(
+                    "Batch has not been loaded and no batch parameters were found. Please run "
+                    "load_batch() to load a batch."
+                )
+
+        return self.batch.data
+
     def _get_reader_fn(self, reader_method=None, path=None):
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
         correct reader_method.
