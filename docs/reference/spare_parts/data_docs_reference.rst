@@ -455,7 +455,7 @@ Custom Page Renderer Example
 .. literalinclude:: ../example_code/custom_renderer.py
     :language: python
 
-.. image:: ../images/customizing_data_docs.png
+.. image:: /images/customizing_data_docs.png
 
 Dependencies
 =============

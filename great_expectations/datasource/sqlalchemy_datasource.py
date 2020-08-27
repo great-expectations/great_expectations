@@ -321,8 +321,8 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
         return options, create_engine_kwargs, drivername
 
     def _get_sqlalchemy_key_pair_auth_url(self, drivername, credentials):
-        from cryptography.hazmat.primitives import serialization
         from cryptography.hazmat.backends import default_backend
+        from cryptography.hazmat.primitives import serialization
 
         private_key_path = credentials.pop("private_key_path")
         private_key_passphrase = credentials.pop("private_key_passphrase")

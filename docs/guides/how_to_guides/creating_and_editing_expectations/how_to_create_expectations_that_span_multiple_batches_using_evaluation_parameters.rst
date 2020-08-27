@@ -123,17 +123,17 @@ In a notebook,
 
     If your Evaluation Parameter was executed successfully, you'll see something like this:
 
-    .. image:: ../../images/evaluation_parameter_success.png
+    .. image:: /images/evaluation_parameter_success.png
 
     |
 
     If it encountered an error, you'll see something like this. The most common problem is a mis-specified URN name.
 
-    .. image:: ../../images/evaluation_parameter_error.png
+    .. image:: /images/evaluation_parameter_error.png
 
     .. warning::
         
-        In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the `Great Expectations discussion forum <discuss.great_expectations.io>`_ and `Slack channel <great_expectations.io/slack>`_.
+        In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the `Great Expectations discussion forum <https://discuss.great_expectations.io>`_ and `Slack channel <https://great_expectations.io/slack>`_.
 
 
 Comments

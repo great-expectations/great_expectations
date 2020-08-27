@@ -1,6 +1,6 @@
-.. _how_to_guides__creating_and_editing_expectations__how_to_quickly_explore_data_using_expectations_in_a_notebook:
+.. _tutorials__explore_expectations_in_a_notebook:
 
-How to quickly explore data using Expectations in a notebook
+How to quickly explore Expectations in a notebook
 ============================================================
 
 Building :ref:`Expectations` as you conduct exploratory data analysis is a great way to ensure that your insights about data processes and pipelines remain part of your team's knowledge.
@@ -16,7 +16,7 @@ This guide will help you quickly get a taste of Great Expectations, without even
 
 .. note:: 
 
-    Unlike most how-to guides, these instructions do *not* assume that you have already configured a Data Context by running ``great_expectations init``. Once you're comfortable with these basic concepts, you will almost certainly want to unlock the full power of Great Expectations by configuring a Data Context. Please check out the instructions in the :ref:`Getting started` tutorial when you're ready to start.
+    Unlike most how-to guides, these instructions do *not* assume that you have already configured a Data Context by running ``great_expectations init``. Once you're comfortable with these basic concepts, you will almost certainly want to unlock the full power of Great Expectations by configuring a Data Context. Please check out the instructions in the :ref:`tutorials__getting_started` tutorial when you're ready to start.
 
 Steps
 -----
@@ -74,19 +74,19 @@ All of these steps take place within your notebook:
         
     In addition, ``my_df`` has access to a wide array of Expectations. You can see the full list :ref:`here <Glossary of Expectations>`. By convention, every Expectation method name starts with the name ``expect_...``, so you can quickly access the full list with tab-based autocomplete:
 
-    .. image:: ../../images/expectation_autocomplete.gif
+    .. image:: /images/expectation_autocomplete.gif
 
     |
 
     When you invoke an Expectation, it will immediately be validated against your data. The returned object will contain the result and a list of unexpected values. This instant feedback helps you zero in on unexpected data very quickly, taking a lot of the guesswork out of data exploration.
 
-    .. image:: ../../images/expectation_notebook_interactive_loop.gif
+    .. image:: /images/expectation_notebook_interactive_loop.gif
 
     |
 
     Hint: it's common to encounter data issues where most cases match, but you can't guarantee 100% adherence. In these cases, consider using a ``mostly`` parameter. This parameter is an option for all Expectations that are applied on a row-by-row basis, and allows you to control the level of wiggle room you want built into your data validation.
 
-    .. figure:: ../../images/interactive_mostly.gif
+    .. figure:: /images/interactive_mostly.gif
 
         Note how ``success`` switches from ``false`` to ``true`` once ``mostly=.99`` is added.
 
