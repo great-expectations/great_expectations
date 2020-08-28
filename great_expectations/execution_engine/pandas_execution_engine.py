@@ -413,7 +413,8 @@ Notes:
     _internal_names_set = set(_internal_names)
 
     recognized_batch_parameters = {
-        "reader_method",
+        "execution_environment",
+        "data_asset_name" "reader_method",
         "reader_options",
         "limit",
         "dataset_options",
@@ -499,9 +500,9 @@ Notes:
                 df = reader_fn(path, **reader_options)
 
             elif isinstance(batch_kwargs, S3BatchKwargs):
-                s3_object = data_connector.get_s3_object(batch_kwargs=batch_kwargs)
+                url, s3_object = data_connector.get_s3_object(batch_kwargs=batch_kwargs)
                 reader_method = batch_kwargs.get("reader_method")
-                reader_fn = self._get_reader_fn(reader_method, s3_object.key)
+                reader_fn = self._get_reader_fn(reader_method, url.key)
                 df = reader_fn(
                     StringIO(
                         s3_object["Body"]
