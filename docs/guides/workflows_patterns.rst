@@ -13,4 +13,3 @@ This page contains a collection of instructional guides for workflows, best prac
 
    /guides/workflows_patterns/deployment_airflow
    /guides/workflows_patterns/deployment_hosted_environments
-   /guides/workflows_patterns/ge_on_teams
