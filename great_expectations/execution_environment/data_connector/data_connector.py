@@ -81,7 +81,7 @@ class DataConnector(object):
 
     def reset_iterator(self, data_asset_name=None, **kwargs):
         if not data_asset_name:
-            raise ValueError("Please provide either name or data_asset_name.")
+            raise ValueError("Please provide data_asset_name.")
 
         self._data_asset_iterators[data_asset_name] = (
             self._get_iterator(data_asset_name=data_asset_name, **kwargs),
@@ -90,7 +90,7 @@ class DataConnector(object):
 
     def get_iterator(self, data_asset_name=None, **kwargs):
         if not data_asset_name:
-            raise ValueError("Please provide either name or data_asset_name.")
+            raise ValueError("Please provide data_asset_name.")
 
         if data_asset_name in self._data_asset_iterators:
             data_asset_iterator, passed_kwargs = self._data_asset_iterators[
