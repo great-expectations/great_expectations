@@ -101,6 +101,50 @@ class DataContextConfig(DictDot):
         yaml.dump(commented_map, outfile)
 
 
+class ExecutionEngineConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    class_name = fields.String()
+    module_name = fields.String(missing="great_expectations.execution_engine")
+    caching = fields.Boolean()
+    batch_spec_defaults = fields.Dict(
+        allow_none=True
+    )
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_execution_engine_config(self, data, **kwargs):
+        return ExecutionEngineConfig(**data)
+
+
+class ExecutionEngineConfig(DictDot):
+    def __init__(
+        self,
+        class_name,
+        module_name=None,
+        caching=None,
+        batch_spec_defaults=None,
+        **kwargs
+    ):
+        self._class_name = class_name
+        self._module_name = module_name
+        if caching is not None:
+            self.caching = caching
+        if batch_spec_defaults is not None:
+            self.batch_spec_defaults = batch_spec_defaults
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+
 class ExecutionEnvironmentConfig(DictDot):
     def __init__(
         self,
@@ -143,7 +187,7 @@ class ExecutionEnvironmentConfigSchema(Schema):
 
     class_name = fields.String(missing="ExecutionEnvironment")
     module_name = fields.String(missing="great_expectations.execution_environment")
-    execution_engine = fields.Nested(ClassConfigSchema)
+    execution_engine = fields.Nested(ExecutionEngineConfigSchema)
     # TODO: Update to data_connector-specific
     # data_connectors = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.DataConnectorSchema))
     data_connectors = fields.Dict(
