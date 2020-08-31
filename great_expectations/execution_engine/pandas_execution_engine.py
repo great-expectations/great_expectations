@@ -641,31 +641,25 @@ Notes:
         )
 
     def process_batch_definition(
-        self, reader_method=None, reader_options=None, limit=None, dataset_options=None,
+        self,
+        batch_definition,
+        batch_spec
     ):
-        batch_parameters = self.batch_spec_defaults
-
-        # Then update with any locally-specified reader options
-        if reader_options:
-            if not batch_parameters.get("reader_options"):
-                batch_parameters["reader_options"] = dict()
-            batch_parameters["reader_options"].update(reader_options)
+        limit = batch_definition.get("limit")
 
         if limit is not None:
-            if not batch_parameters.get("reader_options"):
-                batch_parameters["reader_options"] = dict()
-            batch_parameters["reader_options"]["nrows"] = limit
+            if not batch_spec.get("reader_options"):
+                batch_spec["reader_options"] = dict()
+            batch_spec["reader_options"]["nrows"] = limit
 
-        if reader_method is not None:
-            batch_parameters["reader_method"] = reader_method
+        # TODO: Make sure dataset_options are accounted for in __init__ of ExecutionEngine
+        # if dataset_options is not None:
+        #     # Then update with any locally-specified reader options
+        #     if not batch_parameters.get("dataset_options"):
+        #         batch_parameters["dataset_options"] = dict()
+        #     batch_parameters["dataset_options"].update(dataset_options)
 
-        if dataset_options is not None:
-            # Then update with any locally-specified reader options
-            if not batch_parameters.get("dataset_options"):
-                batch_parameters["dataset_options"] = dict()
-            batch_parameters["dataset_options"].update(dataset_options)
-
-        return batch_parameters
+        return batch_spec
 
     def get_row_count(self):
         return self.dataframe.shape[0]
