@@ -21,14 +21,11 @@ from great_expectations.dataset.util import (
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
 )
-from great_expectations.execution_environment.types import (
-    PathBatchKwargs,
-    S3BatchKwargs,
-)
+from great_expectations.execution_environment.types import (PathBatchSpec, S3BatchSpec,)
 
 from ..core.batch import Batch
 from ..datasource.pandas_datasource import HASH_THRESHOLD
-from ..exceptions import BatchKwargsError
+from ..exceptions import BatchKwargsError, BatchSpecError
 from ..execution_environment.types import BatchMarkers
 from ..execution_environment.util import S3Url, hash_pandas_dataframe
 from .execution_engine import ExecutionEngine
@@ -493,13 +490,13 @@ Notes:
             # We will use and manipulate reader_options along the way
             reader_options = batch_spec.get("reader_options", {})
 
-            if isinstance(batch_spec, PathBatchKwargs):
+            if isinstance(batch_spec, PathBatchSpec):
                 path = batch_spec["path"]
                 reader_method = batch_spec.get("reader_method")
                 reader_fn = self._get_reader_fn(reader_method, path)
                 df = reader_fn(path, **reader_options)
 
-            elif isinstance(batch_spec, S3BatchKwargs):
+            elif isinstance(batch_spec, S3BatchSpec):
                 url, s3_object = data_connector.get_s3_object(batch_spec=batch_spec)
                 reader_method = batch_spec.get("reader_method")
                 reader_fn = self._get_reader_fn(reader_method, url.key)
@@ -517,7 +514,7 @@ Notes:
                 #
                 #     s3 = boto3.client("s3", **self._boto3_options)
                 # except ImportError:
-                #     raise BatchKwargsError(
+                #     raise BatchSpecError(
                 #         "Unable to load boto3 client to read s3 asset.", batch_spec
                 #     )
                 # raw_url = batch_spec["s3"]
@@ -549,7 +546,7 @@ Notes:
                 batch_spec["ge_batch_id"] = str(uuid.uuid1())
 
             else:
-                raise BatchKwargsError(
+                raise BatchSpecError(
                     "Invalid batch_spec: path, s3, or df is required for a PandasDatasource",
                     batch_spec,
                 )
@@ -595,7 +592,7 @@ Notes:
 
         """
         if reader_method is None and path is None:
-            raise BatchKwargsError(
+            raise BatchSpecError(
                 "Unable to determine pandas reader function without reader_method or path.",
                 {"reader_method": reader_method},
             )
@@ -614,7 +611,7 @@ Notes:
                 reader_fn = partial(reader_fn, **reader_options)
             return reader_fn
         except AttributeError:
-            raise BatchKwargsError(
+            raise BatchSpecError(
                 "Unable to find reader_method %s in pandas." % reader_method,
                 {"reader_method": reader_method},
             )
@@ -639,7 +636,7 @@ Notes:
                 "reader_options": {"compression": "gzip"},
             }
 
-        raise BatchKwargsError(
+        raise BatchSpecError(
             "Unable to determine reader method from path: %s" % path, {"path": path}
         )
 
