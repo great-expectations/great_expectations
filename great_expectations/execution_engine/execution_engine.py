@@ -228,33 +228,32 @@ class ExecutionEngine(MetaExecutionEngine):
     def batch(self):
         return self._batch
 
-    # # TODO: this was from datasource.py - discuss if still relevant
-    # def process_batch_definition(self, limit=None, dataset_options=None):
-    #     """Use ExecutionEnvironment-specific configuration to translate any batch parameters into batch kwargs at the
-    #     ExecutionEnvironment
-    #     level.
-    #
-    #     Args:
-    #         limit (int): a parameter all ExecutionEnvironments must accept to allow limiting a batch to a smaller
-    #         number of rows.
-    #         dataset_options (dict): a set of kwargs that will be passed to the constructor of a dataset built using
-    #             these batch_kwargs
-    #
-    #     Returns:
-    #         batch_kwargs: Result will include both parameters passed via argument and configured parameters.
-    #     """
-    #     batch_kwargs = self._execution_environment_config.get("batch_kwargs", {})
-    #
-    #     if limit is not None:
-    #         batch_kwargs["limit"] = limit
-    #
-    #     if dataset_options is not None:
-    #         # Then update with any locally-specified reader options
-    #         if not batch_kwargs.get("dataset_options"):
-    #             batch_kwargs["dataset_options"] = dict()
-    #         batch_kwargs["dataset_options"].update(dataset_options)
-    #
-    #     return batch_kwargs
+    # TODO: this was from datasource.py - discuss if still relevant
+    def process_batch_definition(self, batch_definition, batch_spec):
+        """Use ExecutionEnvironment-specific configuration to translate any batch parameters into batch kwargs at the
+        ExecutionEnvironment
+        level.
+
+        Args:
+            limit (int): a parameter all ExecutionEnvironments must accept to allow limiting a batch to a smaller
+            number of rows.
+            dataset_options (dict): a set of kwargs that will be passed to the constructor of a dataset built using
+                these batch_kwargs
+
+        Returns:
+            batch_kwargs: Result will include both parameters passed via argument and configured parameters.
+        """
+        raise NotImplementedError
+
+    def load_batch(self, batch_definition, in_memory_dataset=None):
+        """
+        Load a Batch specified by the batch_definition.
+
+        :param batch_definition:
+        :param in_memory_dataset:
+        :return:
+        """
+        raise NotImplementedError
 
     def get_batch(self, batch_kwargs, batch_parameters=None):
         """Get a batch of data from the datasource.
