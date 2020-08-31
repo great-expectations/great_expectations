@@ -66,6 +66,10 @@ class InvalidBatchKwargsError(GreatExpectationsError):
     pass
 
 
+class InvalidBatchSpecError(GreatExpectationsError):
+    pass
+
+
 class InvalidBatchIdError(GreatExpectationsError):
     pass
 
@@ -257,6 +261,13 @@ class BatchKwargsError(DataContextError):
     def __init__(self, message, batch_kwargs=None):
         self.message = message
         self.batch_kwargs = batch_kwargs
+        super().__init__(self.message)
+
+
+class BatchSpecError(DataContextError):
+    def __init__(self, message, batch_spec=None):
+        self.message = message
+        self.batch_spec = batch_spec
         super().__init__(self.message)
 
 

@@ -53,7 +53,7 @@ class S3GlobReaderDataConnector(DataConnector):
                     max_keys: 100
     """
 
-    recognized_batch_parameters = {
+    recognized_batch_definition_keys = {
         "execution_environment" "data_asset_name",
         "partition_id",
         "reader_method",
@@ -184,7 +184,7 @@ class S3GlobReaderDataConnector(DataConnector):
             )
 
         partition_id = batch_parameters.pop("partition_id", None)
-        batch_kwargs = self._execution_environment.execution_engine.process_batch_parameters(
+        batch_kwargs = self._execution_environment.execution_engine.process_batch_definition(
             reader_method=batch_parameters.get("reader_method") or self.reader_method,
             reader_options=batch_parameters.get("reader_options")
             or self.reader_options,

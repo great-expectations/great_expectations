@@ -400,9 +400,9 @@ Notes:
     # case is that we want the former, but also want to re-initialize these values to None so we don't
     # get an attribute error when trying to access them (I think this could be done in __finalize__?)
     _internal_names = pd.DataFrame._internal_names + [
-        "_batch_kwargs",
+        "_batch_spec",
         "_batch_markers",
-        "_batch_parameters",
+        "_batch_definition",
         "_batch_id",
         "_expectation_suite",
         "_config",
@@ -412,13 +412,13 @@ Notes:
     ]
     _internal_names_set = set(_internal_names)
 
-    recognized_batch_parameters = {
-        "execution_environment",
-        "data_asset_name" "reader_method",
+    recognized_batch_definition_keys = {
+        "limit"
+    }
+
+    recognized_batch_spec_defaults = {
+        "reader_method",
         "reader_options",
-        "limit",
-        "dataset_options",
-        "data_connector",
     }
 
     # We may want to expand or alter support for subclassing dataframes in the future:
@@ -450,8 +450,8 @@ Notes:
             "discard_subset_failing_expectations", False
         )
 
-    def load_batch(self, batch_parameters, in_memory_dataset=None):
-        execution_environment_name = batch_parameters.get("execution_environment")
+    def load_batch(self, batch_definition, in_memory_dataset=None):
+        execution_environment_name = batch_definition.get("execution_environment")
         execution_environment = self._data_context.get_execution_environment(
             execution_environment_name
         )
@@ -465,15 +465,15 @@ Notes:
             }
         )
 
-        data_connector_name = batch_parameters.get("data_connector")
-        # TODO: Is it ok that this in_memory_dataset is a batch_parameter and not top level?
+        data_connector_name = batch_definition.get("data_connector")
+        # TODO: Is it ok that this in_memory_dataset is a batch_definition key and not top level?
         if in_memory_dataset is not None:
-            if batch_parameters.get("data_asset_name") and batch_parameters.get(
+            if batch_definition.get("data_asset_name") and batch_definition.get(
                 "partition_id"
             ):
                 df = in_memory_dataset
-                batch_kwargs = {}
-                batch_parameters["data_connector"] = "dummy_data_connector"
+                batch_spec = {}
+                batch_definition["data_connector"] = "dummy_data_connector"
             else:
                 raise ValueError(
                     "To pass an in_memory_dataset, you must also pass a data_asset_name "
@@ -488,20 +488,20 @@ Notes:
                     "No in_memory_dataset found. To use the dummy_data_connector, please ensure that you"
                     "are passing a dataset to load_batch()"
                 )
-            batch_kwargs = data_connector.build_batch_kwargs(**batch_parameters)
+            batch_spec = data_connector.build_batch_spec(batch_definition=batch_definition)
 
             # We will use and manipulate reader_options along the way
-            reader_options = batch_kwargs.get("reader_options", {})
+            reader_options = batch_spec.get("reader_options", {})
 
-            if isinstance(batch_kwargs, PathBatchKwargs):
-                path = batch_kwargs["path"]
-                reader_method = batch_kwargs.get("reader_method")
+            if isinstance(batch_spec, PathBatchKwargs):
+                path = batch_spec["path"]
+                reader_method = batch_spec.get("reader_method")
                 reader_fn = self._get_reader_fn(reader_method, path)
                 df = reader_fn(path, **reader_options)
 
-            elif isinstance(batch_kwargs, S3BatchKwargs):
-                url, s3_object = data_connector.get_s3_object(batch_kwargs=batch_kwargs)
-                reader_method = batch_kwargs.get("reader_method")
+            elif isinstance(batch_spec, S3BatchKwargs):
+                url, s3_object = data_connector.get_s3_object(batch_spec=batch_spec)
+                reader_method = batch_spec.get("reader_method")
                 reader_fn = self._get_reader_fn(reader_method, url.key)
                 df = reader_fn(
                     StringIO(
@@ -518,10 +518,10 @@ Notes:
                 #     s3 = boto3.client("s3", **self._boto3_options)
                 # except ImportError:
                 #     raise BatchKwargsError(
-                #         "Unable to load boto3 client to read s3 asset.", batch_kwargs
+                #         "Unable to load boto3 client to read s3 asset.", batch_spec
                 #     )
-                # raw_url = batch_kwargs["s3"]
-                # reader_method = batch_kwargs.get("reader_method")
+                # raw_url = batch_spec["s3"]
+                # reader_method = batch_spec.get("reader_method")
                 # url = S3Url(raw_url)
                 # logger.debug(
                 #     "Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key)
@@ -537,43 +537,43 @@ Notes:
                 #     **reader_options
                 # )
 
-            elif "dataset" in batch_kwargs and isinstance(
-                batch_kwargs["dataset"], (pd.DataFrame, pd.Series)
+            elif "dataset" in batch_spec and isinstance(
+                batch_spec["dataset"], (pd.DataFrame, pd.Series)
             ):
-                df = batch_kwargs.get("dataset")
-                # We don't want to store the actual dataframe in kwargs; copy the remaining batch_kwargs
-                batch_kwargs = {
-                    k: batch_kwargs[k] for k in batch_kwargs if k != "dataset"
+                df = batch_spec.get("dataset")
+                # We don't want to store the actual dataframe in kwargs; copy the remaining batch_spec
+                batch_spec = {
+                    k: batch_spec[k] for k in batch_spec if k != "dataset"
                 }
-                batch_kwargs["PandasInMemoryDF"] = True
-                batch_kwargs["ge_batch_id"] = str(uuid.uuid1())
+                batch_spec["PandasInMemoryDF"] = True
+                batch_spec["ge_batch_id"] = str(uuid.uuid1())
 
             else:
                 raise BatchKwargsError(
-                    "Invalid batch_kwargs: path, s3, or df is required for a PandasDatasource",
-                    batch_kwargs,
+                    "Invalid batch_spec: path, s3, or df is required for a PandasDatasource",
+                    batch_spec,
                 )
 
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
         self._batch = Batch(
-            execution_environment_name=batch_parameters.get("execution_environment"),
-            batch_kwargs=batch_kwargs,
+            execution_environment_name=batch_definition.get("execution_environment"),
+            batch_spec=batch_spec,
             data=df,
-            batch_parameters=batch_parameters,
+            batch_definition=batch_definition,
             batch_markers=batch_markers,
             data_context=self._data_context,
         )
-        self._batch_kwargs = batch_kwargs
-        self._batch_parameters = batch_parameters
+        self._batch_spec = batch_spec
+        self._batch_definition = batch_definition
         self._batch_markers = batch_markers
 
     @property
     def dataframe(self):
         if not self.batch:
-            if self._batch_parameters:
-                self.load_batch(self._batch_parameters)
+            if self._batch_definition:
+                self.load_batch(self._batch_definition)
             else:
                 raise ValueError(
                     "Batch has not been loaded and no batch parameters were found. Please run "
@@ -643,10 +643,10 @@ Notes:
             "Unable to determine reader method from path: %s" % path, {"path": path}
         )
 
-    def process_batch_parameters(
+    def process_batch_definition(
         self, reader_method=None, reader_options=None, limit=None, dataset_options=None,
     ):
-        batch_parameters = self.default_batch_parameters
+        batch_parameters = self.batch_spec_defaults
 
         # Then update with any locally-specified reader options
         if reader_options:
