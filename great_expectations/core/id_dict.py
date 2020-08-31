@@ -27,5 +27,9 @@ class BatchKwargs(IDDict):
     pass
 
 
+class BatchSpec(IDDict):
+    pass
+
+
 class MetricKwargs(IDDict):
     pass
