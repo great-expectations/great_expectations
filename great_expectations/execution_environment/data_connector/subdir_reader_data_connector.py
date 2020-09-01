@@ -135,7 +135,7 @@ class SubdirReaderDataConnector(DataConnector):
             )
         ]
 
-    def _build_batch_spec(self, batch_definition):
+    def _build_batch_spec(self, batch_definition, batch_spec=None):
         """
 
         Args:
@@ -145,6 +145,8 @@ class SubdirReaderDataConnector(DataConnector):
             batch_spec
 
         """
+        batch_spec = batch_spec or {}
+
         try:
             data_asset_name = batch_definition.pop("data_asset_name")
         except KeyError:
@@ -190,11 +192,17 @@ class SubdirReaderDataConnector(DataConnector):
                     % data_asset_name,
                     batch_definition,
                 )
-            return self._build_batch_spec_from_path(path, **batch_definition)
+            return self._build_batch_spec_from_path(
+                path,
+                batch_definition,
+                batch_spec
+            )
 
         else:
             return self.yield_batch_spec(
-                data_asset_name=data_asset_name, **batch_definition
+                data_asset_name=data_asset_name,
+                batch_definition=batch_definition,
+                batch_spec=batch_spec
             )
 
     def _get_valid_file_options(self, base_directory=None):
@@ -222,7 +230,12 @@ class SubdirReaderDataConnector(DataConnector):
                         valid_options.append((file_option, "directory"))
         return valid_options
 
-    def _get_iterator(self, data_asset_name, reader_options=None, limit=None, **kwargs):
+    def _get_iterator(
+        self,
+        data_asset_name,
+        batch_definition,
+        batch_spec
+    ):
         logger.debug(
             "Beginning SubdirReaderDataConnector _get_iterator for data_asset_name: %s"
             % data_asset_name
@@ -233,20 +246,22 @@ class SubdirReaderDataConnector(DataConnector):
             subdir_options = os.listdir(
                 os.path.join(self.base_directory, data_asset_name)
             )
-            batches = []
+            path_list = []
             for file_option in subdir_options:
                 for extension in self.known_extensions:
                     if file_option.endswith(extension) and not file_option.startswith(
                         "."
                     ):
-                        batches.append(
+                        path_list.append(
                             os.path.join(
                                 self.base_directory, data_asset_name, file_option
                             )
                         )
 
             return self._build_batch_spec_path_iter(
-                batches, reader_options=reader_options, limit=limit
+                path_list,
+                batch_definition,
+                batch_spec
             )
         else:
             for extension in self.known_extensions:
@@ -255,7 +270,9 @@ class SubdirReaderDataConnector(DataConnector):
                     return iter(
                         [
                             self._build_batch_spec_from_path(
-                                path, reader_options=reader_options, limit=limit
+                                path,
+                                batch_definition,
+                                batch_spec
                             )
                         ]
                     )
@@ -271,20 +288,24 @@ class SubdirReaderDataConnector(DataConnector):
                 ),
             )
 
-    def _build_batch_spec_path_iter(self, path_list, reader_options=None, limit=None):
+    def _build_batch_spec_path_iter(self, path_list, batch_definition, batch_spec):
         for path in path_list:
             yield self._build_batch_spec_from_path(
-                path, reader_options=reader_options, limit=limit
+                path,
+                batch_definition,
+                batch_spec
             )
 
     def _build_batch_spec_from_path(
-        self, path, reader_method=None, reader_options=None, limit=None
+        self,
+        path,
+        batch_definition,
+        batch_spec
     ):
-        batch_spec = self._execution_environment.execution_engine.process_batch_definition(
-            reader_method=reader_method or self.reader_method,
-            reader_options=reader_options or self.reader_options,
-            limit=limit,
-        )
         batch_spec["path"] = path
-        batch_spec["execution_environment"] = self._execution_environment.name
+        batch_spec = self._execution_environment.execution_engine.process_batch_definition(
+            batch_definition=batch_definition,
+            batch_spec=batch_spec
+        )
+
         return PathBatchSpec(batch_spec)
