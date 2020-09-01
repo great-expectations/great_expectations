@@ -4,9 +4,6 @@
 Introduction
 ############
 
-.. toctree::
-   :maxdepth: 2
-
 *Always know what to expect from your data.*
 
 ***************************
@@ -115,10 +112,10 @@ How do I get started?
 *********************
 
 
-Check out :ref:`Getting started` to set up your first deployment of Great Expectations, and learn important concepts along the way.
+Check out :ref:`tutorials__getting_started` to set up your first local deployment of Great Expectations, and learn important concepts along the way.
 
-If you'd like to contribute to Great Expectations, please start :ref:`here <Contribute to Great Expectations>`.
+If you'd like to contribute to Great Expectations, please start :ref:`here <contributing>`.
 
-If you're interested in a paid support contract or consulting services for Great Expectations, please see options `here <https://greatexpectations.io/blog/how-do-we-engage/>`__
+If you're interested in a paid support contract or consulting services for Great Expectations, please see options `here <https://superconductive.com/>`__
 
-For other questions and resources, please visit :ref:`Community resources`.
+For other questions and resources, please visit :ref:`community`.

@@ -264,7 +264,7 @@ def usage_statistics_enabled_method(
                 if handler is not None:
                     handler.emit(message)
             # except Exception:
-            except Exception as e:
+            except Exception:
                 message["success"] = False
                 handler = get_usage_statistics_handler(args)
                 if handler:

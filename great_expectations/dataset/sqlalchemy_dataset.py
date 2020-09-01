@@ -30,13 +30,13 @@ try:
     import sqlalchemy as sa
     from sqlalchemy.dialects import registry
     from sqlalchemy.engine import reflection
-    from sqlalchemy.sql.expression import BinaryExpression, literal
-    from sqlalchemy.sql.selectable import Select, CTE
-    from sqlalchemy.sql.operators import custom_op
-    from sqlalchemy.sql.elements import Label, WithinGroup, TextClause
-    from sqlalchemy.engine.result import RowProxy
     from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.engine.result import RowProxy
     from sqlalchemy.exc import ProgrammingError
+    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup
+    from sqlalchemy.sql.expression import BinaryExpression, literal
+    from sqlalchemy.sql.operators import custom_op
+    from sqlalchemy.sql.selectable import CTE, Select
 except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
@@ -1418,7 +1418,7 @@ WHERE
             raise ValueError("Type not recognized by current driver: %s" % type_)
 
     @DocInherit
-    @DataAsset.expectation(["column", "type_", "mostly"])
+    @DataAsset.expectation(["column", "type_list", "mostly"])
     def expect_column_values_to_be_in_type_list(
         self,
         column,

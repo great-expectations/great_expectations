@@ -468,6 +468,23 @@ class DefaultMarkdownPageView(DefaultJinjaView):
 
     _template = "markdown_validation_results_page.j2"
 
+    def render(self, document, template=None, **kwargs):
+        """
+        Handle list as well as single document
+        """
+        if isinstance(document, list):
+            return [
+                super(DefaultMarkdownPageView, self).render(
+                    document=d, template=template, **kwargs
+                )
+                for d in document
+            ]
+
+        else:
+            return super(DefaultMarkdownPageView, self).render(
+                document=document, template=template, **kwargs
+            )
+
     def render_string_template(self, template: pTemplate) -> pTemplate:
         """
         Render string for markdown rendering. Bold all parameters and perform substitution.

@@ -12,15 +12,31 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
 
 .. attention::
 
-   Welcome to our brand new docs site! We are actively improving the docs and migrating content to this new format, but there are still some places under construction. Feel free to ask questions on our `Slack channel <greatexpectations.io/slack>`__ or `discussion forum <discuss.greatexpectations.io>`__!
+   Welcome to our brand new docs site! We are actively improving the docs and migrating content to this new format, but there are still some places under construction. Feel free to ask questions on our `Slack channel <https://greatexpectations.io/slack>`__ or `discussion forum <https://discuss.greatexpectations.io>`__!
 
 .. toctree::
    :maxdepth: 2
 
    intro
+
+.. toctree::
+   :maxdepth: 2
+
    guides
+
+.. toctree::
+   :maxdepth: 2
+
    reference
+
+.. toctree::
+   :maxdepth: 2
+
    community
+
+.. toctree::
+   :maxdepth: 2
+
    contributing
 
 .. toctree::

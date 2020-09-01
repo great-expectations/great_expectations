@@ -39,7 +39,7 @@ def test_SlackRenderer():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Batch Validation Status*: Success :white_check_mark:\n*Expectation suite name*: `default`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Timestamp*: `09/24/2019 23:18:36`\n*Summary*: *0* of *0* expectations were met",
+                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Summary*: *0* of *0* expectations were met",
                 },
             },
             {"type": "divider"},
@@ -48,12 +48,12 @@ def test_SlackRenderer():
                 "elements": [
                     {
                         "type": "mrkdwn",
-                        "text": "Learn how to review validation results in Data Docs: https://docs.greatexpectations.io/en/latest/tutorials/getting_started/set_up_data_docs.html#_getting_started__set_up_data_docs",
+                        "text": "Learn how to review validation results in Data Docs: https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html",
                     }
                 ],
             },
         ],
-        "text": "default: Success :white_check_mark:",
+        "text": "default: Success :tada:",
     }
 
     # We're okay with system variation in locales (OS X likes 24 hour, but not Travis)

@@ -1,10 +1,6 @@
-# Python package
-# Create and test a Python package on multiple Python versions.
-# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/python
-
 trigger:
-- main
+  - develop
+  - main
 
 resources:
   containers:
@@ -50,9 +46,10 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install  isort[requirements]==4.3.21 black==19.10b0
-              isort --check-only --skip docs/
+              pip install  isort[requirements]==5.4.2 flake8==3.8.3 black==19.10b0
+              isort . --check-only --skip docs/
               black --check --exclude docs/ .
+              flake8 great_expectations/core
 
   - stage: required
     pool:
@@ -268,42 +265,39 @@ stages:
     dependsOn: [required, lint]
 
     jobs:
-      - deployment: deploy
+      - job: deploy
         variables:
           python.version: '3.8'
-        environment: 'great_expectations'
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: UsePythonVersion@0
-                  inputs:
-                    versionSpec: '$(python.version)'
-                  displayName: 'Use Python $(python.version)'
 
-                - bash: python -m pip install --upgrade pip
-                  displayName: 'Update pip'
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
 
-                - script: |
-                    pip install twine
-                    pip install wheel
-                    echo "Creating tag: $(cat ./great_expectations/deployment_version)"
-                    git config --global user.email "team@greatexpectations.io"
-                    git config --global user.name "Great Expectations"
-                    git tag --annotate $(cat ./great_expectations/deployment_version) -m "$(cat ./great_expectations/deployment_version)" || echo "tag exists, skipping"
-                  displayName: 'Add new version tag'
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
 
-                # Build the python distribution from source
-                - script: |
-                    python setup.py sdist
-                    python setup.py bdist_wheel
-                  displayName: 'Build distribution'
+          - script: |
+              pip install twine
+              pip install wheel
+              echo "Creating tag: $(cat ./great_expectations/deployment_version)"
+              git config --global user.email "team@greatexpectations.io"
+              git config --global user.name "Great Expectations"
+              git tag --annotate $(cat ./great_expectations/deployment_version) -m "$(cat ./great_expectations/deployment_version)" || echo "tag exists, skipping"
+            displayName: 'Add new version tag'
 
-                - task: TwineAuthenticate@1
-                  inputs:
-                    pythonUploadServiceConnection: pypi
+          # Build the python distribution from source
+          - script: |
+              python setup.py sdist
+              python setup.py bdist_wheel
+            displayName: 'Build distribution'
 
-                # Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
-                - script: |
-                    python -m twine upload -r great-expectations --config-file $(PYPIRC_PATH) dist/*
-                  displayName: 'Upload'
+          - task: TwineAuthenticate@1
+            inputs:
+              pythonUploadServiceConnection: pypi
+
+          # Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
+          - script: |
+              python -m twine upload -r great-expectations --config-file $(PYPIRC_PATH) dist/*
+            displayName: 'Upload'
