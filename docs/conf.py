@@ -46,7 +46,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinxcontrib.contentui",
     "sphinx_gitstamp",
-    "sphinx.ext.autosectionlabel",
+    # "sphinx.ext.autosectionlabel",
     "sphinxcontrib.discourse",
     "autoapi.extension",
 ]
