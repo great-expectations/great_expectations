@@ -161,7 +161,7 @@ The core team will not be able to merge your contribution until they're able to 
                         elif type_.lower() in ["float", "double"]:
                             df[col] = pd.to_numeric(df[col])
                         elif type_.lower() in ["timestamp", "datetime"]:
-                            df[col] = pd.to_datetime(df[col]).dt.strftime('%Y-%m-%d')
+                            df[col] = pd.to_datetime(df[col]).dt.strftime('%Y-%m-%d %H:%M:%S')
                         elif type_.lower() in ["varchar"]:
                             df[col] = df[col].astype(str)
 
