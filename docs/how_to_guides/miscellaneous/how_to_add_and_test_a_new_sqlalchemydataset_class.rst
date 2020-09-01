@@ -143,7 +143,7 @@ The core team will not be able to merge your contribution until they're able to 
             elif dataset_type == "presto":
                 from sqlalchemy import create_engine
 
-                engine = create_engine("presto://presto@localhost/memory/test_ci", echo=True)
+                engine = create_engine("presto://presto@localhost/memory/test_ci", echo=False)
                 conn = engine.connect()
 
                 sql_dtypes = {}
@@ -213,4 +213,3 @@ Once Expectation tests pass, make sure all the remaining tests pass:
    
    - develop a Datasource for this dialect
    - develop a CLI integration for this dialect
-
