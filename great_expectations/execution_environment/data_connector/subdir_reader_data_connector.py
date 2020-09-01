@@ -43,7 +43,8 @@ class SubdirReaderDataConnector(DataConnector):
         "partition_id",
         "execution_environment",
         "data_connector",
-        "batch_spec_passthrough"
+        "batch_spec_passthrough",
+        "limit"
     }
 
     def __init__(

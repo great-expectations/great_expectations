@@ -33,7 +33,14 @@ class DataConnector(object):
     """
 
     _batch_spec_type = BatchSpec
-    recognized_batch_definition_keys = set()
+    recognized_batch_definition_keys = {
+        "data_asset_name",
+        "partition_id",
+        "execution_environment",
+        "data_connector",
+        "batch_spec_passthrough",
+        "limit"
+    }
 
     def __init__(self, name, execution_environment, batch_definition_defaults=None):
         self._name = name
@@ -47,7 +54,6 @@ class DataConnector(object):
                 "Unrecognized batch_definition key(s): %s"
                 % str(batch_definition_defaults_keys - self.recognized_batch_definition_keys)
             )
-
 
         self._batch_definition_defaults = {
             key: value for key, value in batch_definition_defaults.items() if key in self.recognized_batch_definition_keys
