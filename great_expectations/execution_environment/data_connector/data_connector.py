@@ -2,7 +2,9 @@
 
 import logging
 import warnings
+from copy import deepcopy
 
+from great_expectations.core import nested_update
 from great_expectations.core.id_dict import BatchSpec
 
 logger = logging.getLogger(__name__)
@@ -143,16 +145,27 @@ class DataConnector(object):
                 % str(batch_definition_keys - recognized_batch_definition_keys)
             )
 
+        batch_definition_defaults = deepcopy(self.batch_definition_defaults)
         batch_definition = {
             key: value for key, value in batch_definition.items() if key in recognized_batch_definition_keys
         }
+        batch_definition = nested_update(batch_definition_defaults, batch_definition)
 
-        batch_spec = self._build_batch_spec(batch_definition)
-        batch_spec["data_asset_name"] = data_asset_name
+        batch_spec_defaults = deepcopy(self._execution_environment.execution_engine.batch_spec_defaults)
+        batch_spec_passthrough = batch_definition.get("batch_spec_passthrough", {})
+        batch_spec_scaffold = nested_update(batch_spec_defaults, batch_spec_passthrough)
+
+        batch_spec_scaffold["data_asset_name"] = batch_definition.get("data_asset_name")
         # Track the execution_environment *in batch_spec* when building from a context so that the context can easily
         # reuse
         # them.
-        batch_spec["execution_environment"] = self._execution_environment.name
+        batch_spec_scaffold["execution_environment"] = self._execution_environment.name
+
+        batch_spec = self._build_batch_spec(
+            batch_definition=batch_definition,
+            batch_spec=batch_spec_scaffold
+        )
+
         return batch_spec
 
     def _build_batch_spec(self, batch_definition, batch_spec):
