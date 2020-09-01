@@ -54,8 +54,13 @@ class SubdirReaderDataConnector(DataConnector):
         reader_options=None,
         known_extensions=None,
         reader_method=None,
+        batch_definition_defaults=None
     ):
-        super().__init__(name, execution_environment=execution_environment)
+        super().__init__(
+            name,
+            execution_environment=execution_environment,
+            batch_definition_defaults=batch_definition_defaults
+        )
         if reader_options is None:
             reader_options = self._default_reader_options
 
