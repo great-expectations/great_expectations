@@ -21,6 +21,7 @@ Develop
 * [DOCS] Add how-to guides for configuring MySQL and MSSQL Datasources
 * [DOCS] Add information about issue tags to contributing docs
 * [DEPRECATION] Deprecate demo suite behavior in `suite new`
+* [FEATURE] Add airflow plugin
 
 0.11.9
 -----------------

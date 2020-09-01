@@ -36,7 +36,8 @@ config = {
     },
     "packages": find_packages(exclude=["docs*", "tests*", "examples*"]),
     "entry_points": {
-        "console_scripts": ["great_expectations=great_expectations.cli:main"]
+        "console_scripts": ["great_expectations=great_expectations.cli:main"],
+        "airflow.plugins": ["great_expectations_airflow=great_expectations.airflow:GreatExpectationsPlugin"]
     },
     "name": "great_expectations",
     "long_description": long_description,
