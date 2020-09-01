@@ -155,14 +155,14 @@ The core team will not be able to merge your contribution until they're able to 
                     schema = schemas["presto"]
                     sql_dtypes = {col: PRESTO_TYPES[dtype] for (col, dtype) in schema.items()}
                     for col in schema:
-                        type_ = schema[col]
-                        if type_.lower() in ["integer", "smallint", "bigint"]:
+                        type_ = schema[col].lower()
+                        if type_ in ["integer", "smallint", "bigint"]:
                             df[col] = pd.to_numeric(df[col])
-                        elif type_.lower() in ["float", "double"]:
+                        elif type_ in ["float", "double"]:
                             df[col] = pd.to_numeric(df[col])
-                        elif type_.lower() in ["timestamp", "datetime"]:
+                        elif type_ in ["timestamp", "datetime"]:
                             df[col] = pd.to_datetime(df[col]).dt.strftime('%Y-%m-%d %H:%M:%S')
-                        elif type_.lower() in ["varchar"]:
+                        elif type_ in ["varchar"]:
                             df[col] = df[col].astype(str)
 
                 tablename = generate_test_table_name(dataset_id)
