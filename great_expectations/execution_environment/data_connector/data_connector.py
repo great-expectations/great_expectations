@@ -64,7 +64,12 @@ class DataConnector(object):
     def name(self):
         return self._name
 
-    def _get_iterator(self, data_asset_name, **kwargs):
+    def _get_iterator(
+        self,
+        data_asset_name,
+        batch_definition,
+        batch_spec
+    ):
         raise NotImplementedError
 
     def get_available_data_asset_names(self):
@@ -91,13 +96,15 @@ class DataConnector(object):
     def get_config(self):
         return self._data_connector_config
 
-    def reset_iterator(self, data_asset_name=None, **kwargs):
-        if not data_asset_name:
-            raise ValueError("Please provide data_asset_name.")
+    def reset_iterator(self, data_asset_name, batch_definition, batch_spec):
 
         self._data_asset_iterators[data_asset_name] = (
-            self._get_iterator(data_asset_name=data_asset_name, **kwargs),
-            kwargs,
+            self._get_iterator(
+                data_asset_name=data_asset_name,
+                batch_definition=batch_definition,
+                batch_spec=batch_spec
+            ),
+            batch_definition,
         )
 
     def get_iterator(self, data_asset_name=None, **kwargs):
@@ -148,49 +155,61 @@ class DataConnector(object):
         batch_spec["execution_environment"] = self._execution_environment.name
         return batch_spec
 
-    def _build_batch_spec(self, batch_parameters):
+    def _build_batch_spec(self, batch_definition, batch_spec):
         raise NotImplementedError
 
-    def yield_batch_spec(self, data_asset_name=None, **kwargs):
-        if not data_asset_name:
-            raise ValueError("Please provide a data_asset_name.")
+    def yield_batch_spec(self, data_asset_name, batch_definition, batch_spec):
 
         if data_asset_name not in self._data_asset_iterators:
-            self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
-        data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
-        if passed_kwargs != kwargs:
-            logger.warning(
-                "Asked to yield batch_spec using different supplemental kwargs. Resetting iterator to "
-                "use new supplemental kwargs."
+            self.reset_iterator(
+                data_asset_name=data_asset_name,
+                batch_definition=batch_definition,
+                batch_spec=batch_spec
             )
-            self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
-            data_asset_iterator, passed_kwargs = self._data_asset_iterators[
+        data_asset_iterator, passed_batch_definition = self._data_asset_iterators[data_asset_name]
+        if passed_batch_definition != batch_definition:
+            logger.warning(
+                "Asked to yield batch_spec using different supplemental batch_definition. Resetting iterator to "
+                "use new supplemental batch_definition."
+            )
+            self.reset_iterator(
+                data_asset_name=data_asset_name,
+                batch_definition=batch_definition,
+                batch_spec=batch_spec
+            )
+            data_asset_iterator, passed_batch_definition = self._data_asset_iterators[
                 data_asset_name
             ]
         try:
             batch_spec = next(data_asset_iterator)
-            batch_spec["execution_environment"] = self._execution_environment.name
             return batch_spec
         except StopIteration:
-            self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
-            data_asset_iterator, passed_kwargs = self._data_asset_iterators[
+            self.reset_iterator(
+                data_asset_name=data_asset_name,
+                batch_definition=batch_definition,
+                batch_spec=batch_spec
+            )
+            data_asset_iterator, passed_batch_definition = self._data_asset_iterators[
                 data_asset_name
             ]
-            if passed_kwargs != kwargs:
+            if passed_batch_definition != batch_definition:
                 logger.warning(
                     "Asked to yield batch_spec using different batch parameters. Resetting iterator to "
                     "use different batch parameters."
                 )
-                self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
-                data_asset_iterator, passed_kwargs = self._data_asset_iterators[
+                self.reset_iterator(
+                    data_asset_name=data_asset_name,
+                    batch_definition=batch_definition,
+                    batch_spec=batch_spec
+                )
+                data_asset_iterator, passed_batch_definition = self._data_asset_iterators[
                     data_asset_name
                 ]
             try:
                 batch_spec = next(data_asset_iterator)
-                batch_spec["execution_environment"] = self._execution_environment.name
                 return batch_spec
             except StopIteration:
-                # This is a degenerate case in which no kwargs are actually being generated
+                # This is a degenerate case in which no batch_definition are actually being generated
                 logger.warning(
                     "No batch_spec found for data_asset_name %s" % data_asset_name
                 )
