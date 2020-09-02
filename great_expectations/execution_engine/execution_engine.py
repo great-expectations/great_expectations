@@ -204,8 +204,11 @@ class ExecutionEngine(MetaExecutionEngine):
             key: value for key, value in batch_spec_defaults.items() if key in self.recognized_batch_spec_defaults
         }
 
-        batch = kwargs.pop("batch", None)
-        self._batch = batch
+        loaded_batch_id = kwargs.pop("loaded_batch_id", None)
+        self._loaded_batch_id = loaded_batch_id
+
+        batches = kwargs.pop("batches", {})
+        self._batches = batches
 
         super().__init__(*args, **kwargs)
 
@@ -219,8 +222,19 @@ class ExecutionEngine(MetaExecutionEngine):
         return self._batch_spec_defaults
 
     @property
-    def batch(self):
-        return self._batch
+    def loaded_batch_id(self):
+        return self._loaded_batch_id
+
+    @property
+    def loaded_batch(self):
+        if not self.loaded_batch_id:
+            return None
+        else:
+            return self.batches.get(self.loaded_batch_id)
+
+    @property
+    def batches(self):
+        return self._batches
 
     # TODO: this was from datasource.py - discuss if still relevant
     def process_batch_definition(self, batch_definition, batch_spec):
