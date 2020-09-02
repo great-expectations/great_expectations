@@ -100,10 +100,11 @@
           },
           "out": {
             "success": false,
-            "observed_value": 0.8660254037844386
+            "observed_value": 1
           },
           "tolerance": 0.000000000001,
-          "exact_match_out": false
+          "exact_match_out": false,
+          "only_for": ["pandas"]
         },
         {
           "title": "Basic pass test",
@@ -115,7 +116,8 @@
             "success": true,
             "observed_value": 0
           },
-          "exact_match_out": false
+          "exact_match_out": false,
+          "only_for": ["pandas"]
         },
         {
           "title": "Basic pass int string test",
@@ -127,7 +129,8 @@
             "success": true,
             "observed_value": 0
           },
-          "exact_match_out": false
+          "exact_match_out": false,
+           "only_for": ["pandas"]
         },
         {
           "title": "test string n_bins",
@@ -138,10 +141,11 @@
           },
           "out": {
             "success": false,
-            "observed_value": 0.6938886664887111
+            "observed_value": 0.8498365855987975
           },
           "exact_match_out": false,
-          "tolerance": 0.000000000001
+          "tolerance": 0.000000000001,
+          "only_for": ["pandas"]
         },
         {
           "title": "test string preconfigured bins",
@@ -165,9 +169,10 @@
           },
           "out": {
             "success": false,
-            "observed_value": 0.912870929175277
+            "observed_value": 1.0
           },
-          "exact_match_out": false
+          "exact_match_out": false,
+          "only_for": ["pandas"]
         },
         {
           "title": "test float bins preconfigured bins",
@@ -180,7 +185,8 @@
             "success": true,
             "observed_value": 0
           },
-          "exact_match_out": false
+          "exact_match_out": false,
+          "only_for": ["pandas"]
         },
         {
           "title": "test float with missing",
@@ -193,7 +199,8 @@
             "success": true,
             "observed_value": 0
           },
-          "exact_match_out": false
+          "exact_match_out": false,
+          "only_for": ["pandas"]
         },
         {
           "title": "test float and string with missings",
@@ -204,9 +211,10 @@
           },
           "out": {
             "success": false,
-            "observed_value": 0.5
+            "observed_value": 0.5773502691896257
           },
-          "exact_match_out": false
+          "exact_match_out": false,
+          "only_for": ["pandas"]
         }
       ]
     }

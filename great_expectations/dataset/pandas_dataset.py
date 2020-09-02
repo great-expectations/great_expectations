@@ -69,16 +69,10 @@ class MetaPandasDataset(Dataset):
                 result_format = self.default_expectation_args["result_format"]
 
             result_format = parse_result_format(result_format)
-            if row_condition:
-                if condition_parser not in ["python", "pandas"]:
-                    raise ValueError(
-                        "condition_parser is required when setting a row_condition,"
-                        " and must be 'python' or 'pandas'"
-                    )
-                else:
-                    data = self.query(
-                        row_condition, parser=condition_parser
-                    ).reset_index(drop=True)
+            if row_condition and self._supports_row_condition:
+                data = self._apply_row_condition(
+                    row_condition=row_condition, condition_parser=condition_parser
+                )
             else:
                 data = self
 
@@ -393,6 +387,7 @@ Notes:
         "discard_subset_failing_expectations",
     ]
     _internal_names_set = set(_internal_names)
+    _supports_row_condition = True
 
     # We may want to expand or alter support for subclassing dataframes in the future:
     # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
@@ -421,6 +416,17 @@ Notes:
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
         )
+
+    def _apply_row_condition(self, row_condition, condition_parser):
+        if condition_parser not in ["python", "pandas"]:
+            raise ValueError(
+                "condition_parser is required when setting a row_condition,"
+                " and must be 'python' or 'pandas'"
+            )
+        else:
+            return self.query(row_condition, parser=condition_parser).reset_index(
+                drop=True
+            )
 
     def get_row_count(self):
         return self.shape[0]

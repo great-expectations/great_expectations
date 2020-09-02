@@ -96,8 +96,10 @@ class MetaDataset(DataAsset):
             # Retain support for string-only output formats:
             result_format = parse_result_format(result_format)
 
-            if row_condition:
-                self = self.query(row_condition).reset_index(drop=True)
+            if row_condition and self._supports_row_condition:
+                self = self.query(row_condition, parser=condition_parser).reset_index(
+                    drop=True
+                )
 
             element_count = self.get_row_count()
 
@@ -111,17 +113,23 @@ class MetaDataset(DataAsset):
                 # column is treated specially as a positional argument in most expectations
                 args = tuple((column, *args))
             elif kwargs.get("column_A") and kwargs.get("column_B"):
-                nonnull_count = (
-                    self[kwargs.get("column_A")].notnull()
-                    & self[kwargs.get("column_B")].notnull()
-                ).sum()
+                try:
+                    nonnull_count = (
+                        self[kwargs.get("column_A")].notnull()
+                        & self[kwargs.get("column_B")].notnull()
+                    ).sum()
+                except TypeError:
+                    nonnull_count = None
             else:
                 raise ValueError(
                     "The column_aggregate_expectation wrapper requires either column or "
                     "both column_A and column_B as input."
                 )
 
-            null_count = element_count - nonnull_count
+            if nonnull_count:
+                null_count = element_count - nonnull_count
+            else:
+                null_count = None
 
             evaluation_result = func(self, *args, **kwargs)
 
@@ -145,11 +153,19 @@ class MetaDataset(DataAsset):
             return_obj["result"] = {
                 "observed_value": evaluation_result["result"]["observed_value"],
                 "element_count": element_count,
-                "missing_count": null_count,
-                "missing_percent": null_count * 100.0 / element_count
-                if element_count > 0
-                else None,
             }
+
+            if null_count:
+                return_obj["result"]["missing_count"] = null_count
+                if element_count > 0:
+                    return_obj["result"]["missing_percent"] = (
+                        null_count * 100.0 / element_count
+                    )
+                else:
+                    return_obj["result"]["missing_percent"] = None
+            else:
+                return_obj["result"]["missing_count"] = None
+                return_obj["result"]["missing_percent"] = None
 
             if result_format["result_format"] == "BASIC":
                 return return_obj
@@ -173,6 +189,7 @@ class Dataset(MetaDataset):
     # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
     # That way, multiple backends can implement the same data_asset_type
     _data_asset_type = "Dataset"
+    _supports_row_condition = False
 
     # getter functions with hashable arguments - can be cached
     hashable_getters = [
@@ -4253,10 +4270,10 @@ class Dataset(MetaDataset):
             threshold (float): Maximum allowed value of cramers V for expectation to pass.
 
         Keyword Args:
-            bins_A (list of float): Bins for column_A if numeric.
-            bins_B (list of float): Bins for column_B if numeric.
-            n_bins_A (int): Number of bins for column_A if numeric. Ignored if bins_A is not None.
-            n_bins_B (int): Number of bins for column_B if numeric. Ignored if bins_B is not None.
+            bins_A (list of float): Bins for column_A.
+            bins_B (list of float): Bins for column_B.
+            n_bins_A (int): Number of bins for column_A. Ignored if bins_A is not None.
+            n_bins_B (int): Number of bins for column_B. Ignored if bins_B is not None.
 
         Other Parameters:
             result_format (str or None): \
@@ -4284,8 +4301,14 @@ class Dataset(MetaDataset):
         )
         chi2_result = stats.chi2_contingency(crosstab)
         # See e.g. https://en.wikipedia.org/wiki/Cram%C3%A9r%27s_V
-        cramers_V = np.sqrt(
-            chi2_result[0] / self.get_row_count() / (min(crosstab.shape) - 1)
+        cramers_V = max(
+            min(
+                np.sqrt(
+                    chi2_result[0] / self.get_row_count() / (min(crosstab.shape) - 1)
+                ),
+                1,
+            ),
+            0,
         )
         return_obj = {
             "success": cramers_V <= threshold,
@@ -4444,7 +4467,7 @@ class Dataset(MetaDataset):
 
     ###
     #
-    # Multicolumn pairs
+    # Multicolumn
     #
     ###
 
@@ -4486,6 +4509,27 @@ class Dataset(MetaDataset):
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
+        """
+        raise NotImplementedError
+
+    def expect_multicolumn_sum_to_equal(
+        self,
+        column_list,
+        sum_total,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        """ Multi-Column Map Expectation
+
+        Expects that sum of all rows for a set of columns is equal to a specific value
+
+        Args:
+            column_list (List[str]): \
+                Set of columns to be checked
+            sum_total (int): \
+                expected sum of columns
         """
         raise NotImplementedError
 
