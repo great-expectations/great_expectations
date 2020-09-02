@@ -56,7 +56,7 @@ Another option is to use the output of the `checkpoint script` command and paste
 Additional Resources
 --------------------
 
-- :ref:`Check out the detailed tutorial on Checkpoints <tutorials__getting_started__set_up_your_first_checkpoint>`
+- :ref:`Check out the detailed tutorial on Checkpoints <_tutorials__getting_started__validate_your_data>`
 
 
 .. discourse::

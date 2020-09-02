@@ -19,7 +19,7 @@ Great Expectations' built-in library includes more than 50 common Expectations, 
 
 For a full list of available Expectations, please check out the :ref:`expectation_glossary`. Please note that not all Expectations are implemented on all :ref:`Execution engines` yet. You can see the grid of supported Expectations :ref:`here <implemented_expectations>`. We welcome :ref:`contributions <contributing>` to fill in the gaps.
 
-You can also extend Great Expectations by :ref:`creating your own custom Expectations <_how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations>`.
+You can also extend Great Expectations by :ref:`creating your own custom Expectations <how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations>`.
 
 Expectations *enhance communication* about your data and *amplify quality* in data applications. Using expectations
 helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."

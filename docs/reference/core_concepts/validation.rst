@@ -114,7 +114,6 @@ and Validation Results.
 If you would like to review the raw validation results in JSON format, the default Validation Results directory is ``uncommitted/validations/``.
 Note that by default, Data Docs will only compile Validation Results located in this directory.
 
-To learn more about setting up Great Expectations for your team read :ref:`using_ge_on_teams`.
 
 ********************
 Validation Operators

@@ -7,8 +7,8 @@ If you would like to implement custom notifications that include a link to Data 
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <tutorial_getting_started>`
-  - :ref:`Created an Expectation Suite to use for validation <tutorial_create_expectations>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
+  - :ref:`Created an Expectation Suite to use for validation <tutorials__create_expectations>`
 
 1. First, this is the standard boilerplate to load a Data Context and run validation on a Batch:
 
