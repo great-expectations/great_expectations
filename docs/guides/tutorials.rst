@@ -17,7 +17,6 @@ These tutorials will teach you the basics of what you need to know to get up and
 
 * Finally, if you're interested in contributing to the open source project, thank you! Please check out :ref:`the Contributing section <contributing>` to learn how.
 
-
 .. toctree::
    :hidden:
 

@@ -74,19 +74,19 @@ All of these steps take place within your notebook:
         
     In addition, ``my_df`` has access to a wide array of Expectations. You can see the full list :ref:`here <Glossary of Expectations>`. By convention, every Expectation method name starts with the name ``expect_...``, so you can quickly access the full list with tab-based autocomplete:
 
-    .. image:: ../../images/expectation_autocomplete.gif
+    .. image:: /images/expectation_autocomplete.gif
 
     |
 
     When you invoke an Expectation, it will immediately be validated against your data. The returned object will contain the result and a list of unexpected values. This instant feedback helps you zero in on unexpected data very quickly, taking a lot of the guesswork out of data exploration.
 
-    .. image:: ../../images/expectation_notebook_interactive_loop.gif
+    .. image:: /images/expectation_notebook_interactive_loop.gif
 
     |
 
     Hint: it's common to encounter data issues where most cases match, but you can't guarantee 100% adherence. In these cases, consider using a ``mostly`` parameter. This parameter is an option for all Expectations that are applied on a row-by-row basis, and allows you to control the level of wiggle room you want built into your data validation.
 
-    .. figure:: ../../images/interactive_mostly.gif
+    .. figure:: /images/interactive_mostly.gif
 
         Note how ``success`` switches from ``false`` to ``true`` once ``mostly=.99`` is added.
 

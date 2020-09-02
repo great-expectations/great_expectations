@@ -25,7 +25,7 @@ Steps
 
     For convenience, the :ref:`Data Docs` page for each Expectation Suite has the CLI command syntax for you. Simply press the “How to Edit This Suite” button, and copy/paste the CLI command into your terminal.
 
-    .. image:: ../../images/edit_e_s_popup.png
+    .. image:: /images/edit_e_s_popup.png
 
 2. Run the boilerplate code at the top of the notebook.
 
