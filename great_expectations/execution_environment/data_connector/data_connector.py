@@ -134,9 +134,6 @@ class DataConnector(object):
             return self._data_asset_iterators[data_asset_name][0]
 
     def build_batch_spec(self, batch_definition):
-        # data_asset_name=None, partition_id=None, **kwargs
-        # TODO: The logic before raised an error here, but we also check for this below - which should it be?
-
         if "data_asset_name" not in batch_definition:
             raise ValueError("Batch definition must have a data_asset_name.")
 
