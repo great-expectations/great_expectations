@@ -463,14 +463,21 @@ Notes:
         )
 
         data_connector_name = batch_definition.get("data_connector")
-        # TODO: Is it ok that this in_memory_dataset is a batch_definition key and not top level?
+        assert data_connector_name, "Batch definition must specify a data_connector"
+
         if in_memory_dataset is not None:
             if batch_definition.get("data_asset_name") and batch_definition.get(
                 "partition_id"
             ):
                 df = in_memory_dataset
-                batch_spec = {}
-                batch_definition["data_connector"] = "dummy_data_connector"
+                data_connector = execution_environment.get_data_connector(
+                    data_connector_name
+                )
+                batch_spec = data_connector.build_batch_spec(batch_definition=batch_definition)
+                batch_id = batch_spec.to_id()
+                if self.batches.get(batch_id):
+                    self._loaded_batch_id = batch_id
+                    return self.batches.get(batch_id)
             else:
                 raise ValueError(
                     "To pass an in_memory_dataset, you must also pass a data_asset_name "
@@ -480,10 +487,10 @@ Notes:
             data_connector = execution_environment.get_data_connector(
                 data_connector_name
             )
-            if data_connector == "dummy_data_connector":
+            if data_connector.get_config().get("class_name") == "DataConnector":
                 raise ValueError(
-                    "No in_memory_dataset found. To use the dummy_data_connector, please ensure that you"
-                    "are passing a dataset to load_batch()"
+                    "No in_memory_dataset found. To use a data_connector with class DataConnector, please ensure that "
+                    "you are passing a dataset to load_batch()"
                 )
             batch_spec = data_connector.build_batch_spec(batch_definition=batch_definition)
 
