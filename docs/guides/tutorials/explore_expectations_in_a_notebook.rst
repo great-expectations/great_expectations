@@ -72,7 +72,7 @@ All of these steps take place within your notebook:
         my_df[my_df.Sex=="male"].head()
         # etc., etc. 
         
-    In addition, ``my_df`` has access to a wide array of Expectations. You can see the full list :ref:`here <Glossary of Expectations>`. By convention, every Expectation method name starts with the name ``expect_...``, so you can quickly access the full list with tab-based autocomplete:
+    In addition, ``my_df`` has access to a wide array of Expectations. You can see the full list :ref:`here <expectation_glossary>`. By convention, every Expectation method name starts with the name ``expect_...``, so you can quickly access the full list with tab-based autocomplete:
 
     .. image:: /images/expectation_autocomplete.gif
 
@@ -223,7 +223,7 @@ As a general rule,
 Additional resources
 --------------------
 
-- :ref:`Glossary of Expectations`
+- :ref:`expectation_glossary`
 
 
 Comments

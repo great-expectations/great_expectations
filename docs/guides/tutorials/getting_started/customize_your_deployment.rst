@@ -84,10 +84,10 @@ Additional Datasources and Generators
 
 Great Expectations plugs into a wide variety of Datasources, and the list is constantly getting longer. If you have an idea for a Datasource not listed here, please speak up in `the public discussion forum <https://discuss.greatexpectations.io/>`_.
 
-* :ref:`How to configure a Pandas/filesystem Datasource`
-* :ref:`How to configure a Pandas/S3 Datasource`
-* :ref:`How to configure a Redshift Datasource`
-* :ref:`How to configure a Snowflake Datasource`
+* :ref:`how_to_guides__configuring_datasources__how_to_configure_a_pandas_filesystem_datasource`
+* :ref:`how_to_guides__configuring_datasources__how_to_configure_a_pandas_s3_datasource`
+* :ref:`how_to_guides__configuring_datasources__how_to_configure_a_redshift_datasource`
+* :ref:`how_to_guides__configuring_datasources__how_to_configure_a_snowflake_datasource`
 * :ref:`how_to_guides__configuring_datasources__how_to_configure_a_bigquery_datasource`
 * :ref:`how_to_guides__configuring_datasources__how_to_configure_a_databricks_azure_datasource`
 * :ref:`how_to_guides__configuring_datasources__how_to_configure_an_emr_spark_datasource`
