@@ -10,7 +10,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.datasource import SqlAlchemyDatasource
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import Validator, BridgeValidator
 
 yaml = YAML()
 
@@ -182,7 +182,7 @@ def test_sqlalchemy_source_templating(sqlitedb_engine):
             "test", query_parameters={"col_name": "animal_name"}
         )
     )
-    dataset = Validator(
+    dataset = BridgeValidator(
         batch,
         expectation_suite=ExpectationSuite("test"),
         expectation_engine=SqlAlchemyDataset,
@@ -201,7 +201,7 @@ def test_sqlalchemy_source_limit(sqlitedb_engine):
     datasource = SqlAlchemyDatasource("SqlAlchemy", engine=sqlitedb_engine)
     limited_batch = datasource.get_batch({"table": "table_1", "limit": 1, "offset": 2})
     assert isinstance(limited_batch, Batch)
-    limited_dataset = Validator(
+    limited_dataset = BridgeValidator(
         limited_batch,
         expectation_suite=ExpectationSuite("test"),
         expectation_engine=SqlAlchemyDataset,
@@ -261,7 +261,7 @@ def test_sqlalchemy_datasource_processes_dataset_options(test_db_connection_stri
     )
     batch_kwargs["query"] = "select * from table_1;"
     batch = datasource.get_batch(batch_kwargs)
-    validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
     dataset = validator.get_dataset()
     assert dataset.caching is False
 
@@ -270,7 +270,7 @@ def test_sqlalchemy_datasource_processes_dataset_options(test_db_connection_stri
     )
     batch_kwargs["query"] = "select * from table_1;"
     batch = datasource.get_batch(batch_kwargs)
-    validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
     dataset = validator.get_dataset()
     assert dataset.caching is True
 
@@ -279,6 +279,6 @@ def test_sqlalchemy_datasource_processes_dataset_options(test_db_connection_stri
         "dataset_options": {"caching": False},
     }
     batch = datasource.get_batch(batch_kwargs)
-    validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
     dataset = validator.get_dataset()
     assert dataset.caching is False
