@@ -933,54 +933,26 @@ class BaseDataContext(object):
 
         return data_asset_names
 
-    # TODO: deprecate "datasource" and "batch_kwargs_generator"
     def build_batch_kwargs(
         self,
-        datasource=None,
-        batch_kwargs_generator=None,
+        datasource,
+        batch_kwargs_generator,
         data_asset_name=None,
         partition_id=None,
-        execution_environment=None,
-        data_connector=None,
         **kwargs,
     ):
-        """Builds batch kwargs using the provided execution environment (AKA datasource), data_connector (AKA batch
-        kwargs generator), and batch_parameters.
+        """Builds batch kwargs using the provided datasource, batch kwargs generator, and batch_parameters.
 
         Args:
             datasource (str): the name of the datasource for which to build batch_kwargs
             batch_kwargs_generator (str): the name of the batch kwargs generator to use to build batch_kwargs
             data_asset_name (str): an optional name batch_parameter
-            execution_environment (str): the name of the execution environment for which to build batch_kwargs
-            data_connector (str): the name of the data connector to use to build batch_kwargs
             **kwargs: additional batch_parameters
 
         Returns:
             BatchKwargs
 
         """
-        assert (datasource and not execution_environment) or (
-            not datasource and execution_environment
-        ), "Please provide either datasource or execution_environment."
-        if datasource:
-            warnings.warn(
-                "The 'datasource' argument will be deprecated and renamed to 'execution_environment'. "
-                "Please update code accordingly.",
-                DeprecationWarning,
-            )
-            execution_environment = datasource
-
-        assert (batch_kwargs_generator and not data_connector) or (
-            not batch_kwargs_generator and data_connector
-        ), "Please provide either batch_kwargs_generator or data_connector."
-        if batch_kwargs_generator:
-            warnings.warn(
-                "The 'batch_kwargs_generator' argument will be deprecated and renamed to 'data_connector'. "
-                "Please update code accordingly.",
-                DeprecationWarning,
-            )
-            data_connector = batch_kwargs_generator
-
         if kwargs.get("name"):
             if data_asset_name:
                 raise ValueError(
@@ -991,16 +963,40 @@ class BaseDataContext(object):
                 DeprecationWarning,
             )
             data_asset_name = kwargs.pop("name")
-        execution_environment_obj = self.get_execution_environment(
-            execution_environment
-        )
-        batch_kwargs = execution_environment_obj.build_batch_kwargs(
+        datasource_obj = self.get_datasource(datasource)
+        batch_kwargs = datasource_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
             data_asset_name=data_asset_name,
             partition_id=partition_id,
             **kwargs,
         )
         return batch_kwargs
+
+    def build_batch_spec(
+        self,
+        execution_environment,
+        data_connector,
+        batch_definition
+    ):
+        """Builds batch_spec using the provided execution_environment, data_connector, and batch_definition.
+
+        Args:
+            execution_environment (str): the name of the execution_environment for which to build batch_kwargs
+            data_connector (str): the name of the data_connector to use to build batch_spec
+            batch_definition (dict): dict specifying batch - used to generate a batch_spec
+
+        Returns:
+            BatchSpec
+
+        """
+        execution_environment_obj = self.get_execution_environment(
+            execution_environment
+        )
+        batch_spec = execution_environment_obj.build_batch_spec(
+            data_connector=data_connector,
+            batch_definition=batch_definition
+        )
+        return batch_spec
 
     # WIP new get_batch
     def _get_batch(
