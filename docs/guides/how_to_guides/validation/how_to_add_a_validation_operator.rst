@@ -64,7 +64,7 @@ The snippet below shows a portion of your ``great_expectations.yml`` configurati
 
 #. **Configure additional fields.**
 
-   Consult the reference documentation of the class that implements the Validation Operator you are adding for additional properties (required or optional) that are specific to that class. The snippet above configured one such property specific to the :ref:`ActionListValidationOperator` class.
+   Consult the reference documentation of the class that implements the Validation Operator you are adding for additional properties (required or optional) that are specific to that class. The snippet above configured one such property specific to the :py:class:`~great_expectations.validation_operators.ActionListValidationOperator` class.
 
    |
 #. **Test your configuration.**

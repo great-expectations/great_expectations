@@ -2,9 +2,9 @@
 
 .. warning:: This doc is a stub.
 
-#################################
+#############################################################################################
 Deploying Great Expectations in a hosted environment without file system or CLI
-#################################
+#############################################################################################
 
 .. admonition:: Admonition from Mr. Dickens
 

@@ -1,7 +1,7 @@
 .. _how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_on_a_filesystem:
 
 How to configure a Validation Result store on a filesystem
-=====================================================
+==========================================================
 
 By default, Validation results are stored in the ``uncommitted/validations/`` directory.  Since Validations may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure a new storage location for Validations on your filesystem.
 

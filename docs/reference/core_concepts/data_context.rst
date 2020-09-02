@@ -1,9 +1,9 @@
 .. _data_context:
 
 
-############
+###########################
 Data Contexts
-############
+###########################
 
 A Data Context represents a Great Expectations project. It organizes storage and access for
 Expectation Suites, Datasources, notification settings, and data fixtures.
