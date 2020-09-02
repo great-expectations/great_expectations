@@ -97,7 +97,7 @@ class MetaDataset(DataAsset):
             result_format = parse_result_format(result_format)
 
             if row_condition:
-                self = self.query(row_condition,).reset_index(drop=True)
+                self = self.query(row_condition).reset_index(drop=True)
 
             element_count = self.get_row_count()
 
