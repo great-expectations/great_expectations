@@ -9,7 +9,7 @@ To simplify this workflow, the CLI command ``suite edit`` takes a named :ref:`Ex
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
   - Created an Expectation Suite, possibly using the :ref:`great_expectations suite scaffold <how_to_guides__creating_and_editing_expectations__how_to_create_a_new_expectation_suite_using_suite_scaffold>` or :ref:`great_expectations suite new <how_to_guides__creating_and_editing_expectations__how_to_create_a_new_expectation_suite_using_the_cli>` commands
 
 Steps

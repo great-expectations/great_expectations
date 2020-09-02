@@ -129,7 +129,7 @@ documentation for more information.
 Stores
 =============
 
-A DataContext requires three :ref:`stores <stores_reference>` to function properly: an `expectations_store`,
+A DataContext requires three :ref:`stores <Stores>` to function properly: an `expectations_store`,
 `validations_store`, and `evaluation_parameter_store`. Consequently a minimal store configuration for a DataContext
 would include the following:
 
@@ -193,7 +193,7 @@ for boto3 to use in the `boto3_options key` of the store_backend configuration.
 Validation Operators
 =====================
 
-See the :ref:`validation_operators` for more information regarding configuring and using validation operators.
+See the :ref:`Validation Operators` for more information regarding configuring and using validation operators.
 
 .. _environment_and_secrets:
 

@@ -7,7 +7,7 @@ This guide will explain how to host and share Data Docs on a filesystem.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+    - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
 
 Steps
 -----

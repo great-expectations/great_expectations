@@ -1,7 +1,7 @@
 .. _tutorials__getting_started__validate_your_data:
 
 Validate your data using a Checkpoint
-============================
+=====================================
 
 :ref:`validation` is the core operation of Great Expectations: “Validate data X against Expectation Y.”
 
@@ -54,7 +54,7 @@ Our newly configured Checkpoint knows how to load ``yellow_tripdata_staging`` as
 You don't need to worry much about the details of Validation Operators for now. They orchestrate the actual work of validating data and processing the results. After executing validation, the Validation Operator can kick off additional workflows through :ref:`Validation Actions`. For more examples of post-validation actions, please see the :ref:`How-to section for Validation <how_to_guides__validation>`.
 
 How to validate data by running Checkpoints
-----------------------
+-------------------------------------------
 
 The final step in this tutorial is to confirm that our Expectation Suite indeed catches the data quality issues in the staging data! Run the Checkpoint we just created to trigger validation of the staging data:
 

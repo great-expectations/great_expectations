@@ -7,7 +7,7 @@ This guide will help you run a Great Expectations checkpoint in Apache Airflow, 
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-- :ref:`Set up a working deployment of Great Expectations <getting_started>`
+- :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
 - :ref:`Created an Expectation Suite <how_to_guides__creating_and_editing_expectations__how_to_create_a_new_expectation_suite_using_the_cli>`
 - :ref:`Created a checkpoint for that Expectation Suite and a data asset <how_to_guides__validation__how_to_create_a_new_checkpoint>`
 - Created an Airflow DAG file
@@ -15,7 +15,7 @@ This guide will help you run a Great Expectations checkpoint in Apache Airflow, 
 Using checkpoints is the most straightforward way to trigger a validation run from within Airflow. The following sections describe two alternative approaches to accomplishing this.
 
 Running a checkpoint with a BashOperator
-----------
+----------------------------------------
 You can use a simple `BashOperator` in Airflow to trigger the checkpoint run. The following snippet shows an Airflow task for an Airflow DAG named `dag` that triggers the run of a checkpoint we named `my_checkpoint`:
 
     .. code-block:: python
@@ -26,7 +26,7 @@ You can use a simple `BashOperator` in Airflow to trigger the checkpoint run. Th
     )
     
 Running the `checkpoint script` output with a PythonOperator    
------------
+------------------------------------------------------------
 
 Another option is to use the output of the `checkpoint script` command and paste it into a method that is called from a PythonOperator in the DAG. This gives you more fine-grained control over how to respond to validation results:
 
@@ -54,7 +54,7 @@ Another option is to use the output of the `checkpoint script` command and paste
     )
 
 Additional Resources
---------------
+--------------------
 
 - :ref:`Check out the detailed tutorial on Checkpoints <tutorials__getting_started__set_up_your_first_checkpoint>`
 

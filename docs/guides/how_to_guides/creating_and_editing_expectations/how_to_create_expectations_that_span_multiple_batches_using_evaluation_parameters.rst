@@ -7,7 +7,7 @@ This guide will help you create Expectations that span multiple :ref:`Batches` o
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
   - Configured a :ref:`Datasource <Datasources>` (or Datasources) with at least two Data Assets.
   - Also created :ref:`Expectation Suites` for those Data Assets.
   - Have a working :ref:`Evaluation Parameter Store`. (The default in-memory store from ``great_expectations init`` can work for this.)

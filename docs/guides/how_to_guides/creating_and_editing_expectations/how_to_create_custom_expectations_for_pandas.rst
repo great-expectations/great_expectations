@@ -7,7 +7,7 @@ Custom Expectations let you extend the logic for validating data to use any crit
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+    - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
     - Launched a generic notebook (e.g. ``jupyter notebook``, ``jupyter lab``, etc.)
     - Obtained data that can be accessed from your notebook
     - :ref:`Configured a pandas Datasource <how_to_guides__configuring_datasources__how_to_configure_a_pandas_filesystem_datasource>`

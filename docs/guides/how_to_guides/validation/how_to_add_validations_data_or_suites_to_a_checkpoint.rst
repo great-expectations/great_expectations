@@ -8,7 +8,7 @@ This is useful if you want to aggregate individual validations (across suites or
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+    - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
     - You have an :ref:`existing Expectation Suite <how_to_guides__creating_and_editing_expectations>`
     - You have an :ref:`existing Checkpoint <how_to_guides__validation__how_to_create_a_new_checkpoint>`
 

@@ -7,7 +7,7 @@ This guide will help you add a BigQuery project (or a dataset) as a Datasource. 
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
   - Followed the `Google Cloud library guide <https://googleapis.dev/python/google-api-core/latest/auth.html>`_ for authentication
   - Installed the pybigquery package for the BigQuery sqlalchemy dialect (``pip install pybigquery``)
 

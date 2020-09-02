@@ -9,7 +9,7 @@ As a general rule, Validation Operators should be invoked from within :ref:`Chec
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`.
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`.
   - Created at least one Expectation Suite.
   - Created at least one :ref:`Checkpoint <how_to_guides__validation__how_to_create_a_new_checkpoint>`. You will need it in order to test that your new Validation Operator is working.
 

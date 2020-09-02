@@ -31,7 +31,7 @@ You will see the following output:
 
 
 Which data should I choose when creating Expectations?
-====================
+======================================================
 
 In this example, we want to build an Expectation Suite based on what we know about our taxi data: each taxi ride has a ``passenger_count`` between 1 and 6. We then want to use that Expectation Suite to validate any future data that is loaded into the ``staging`` table. Hence, we choose the ``yellow_tripdata_sample_2019_01`` table when creating the new Expectation Suite, which we will then use to validate the ``yellow_tripdata_staging`` table **in a later step**. Makes sense, right?
 
@@ -39,7 +39,7 @@ After selecting the table, Great Expectations will open a Jupyter notebook which
 
 
 Creating Expectations in Jupyter notebooks
--------------------
+------------------------------------------
 
 In this section, we will explain how to create and edit Expectations in a Jupyter notebook. Notebooks are a simple way of interacting with the Great Expectations Python API. You could also just write all this in plain Python code, but for convenience, Great Expectations provides you some boilerplate code in notebooks.
 

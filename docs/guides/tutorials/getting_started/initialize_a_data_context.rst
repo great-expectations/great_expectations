@@ -1,7 +1,7 @@
 .. _tutorials__getting_started__initialize_a_data_context:
 
 Set up the tutorial data and initialize a Data Context
-===============================================
+======================================================
 
 In Great Expectations, your :ref:`Data Context` manages your project configuration. Using a Data Context is almost always the fastest way to get up and running, even though some teams don't need every component of a Data Context.
 
@@ -34,7 +34,7 @@ You'll also need to install a few other dependencies into your virtual environme
 If you intend to develop within Great Expectations (e.g. to contribute back to the project), and would like to install it from a git branch or a fork, check out :ref:`contributing_setting_up_your_dev_environment` in the contributor documentation.
 
 Preparation instructions
----------------------
+------------------------
 
 For this tutorial, we will use a simplified version of the NYC taxi ride data. We prepared a Docker image that contains a local Postgres database with the data pre-loaded, so you can easily get up and running without any local dependencies.
 

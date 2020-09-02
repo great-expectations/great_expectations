@@ -7,7 +7,7 @@ This guide will help you create an Expectation that loads part of its :ref:`Expe
 
 .. admonition:: Prerequisites - This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
   - Obtained credentials for a database to query for dynamic values
   - Identified a SQL query that will return values for your expectation configuration.
 

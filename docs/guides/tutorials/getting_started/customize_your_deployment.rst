@@ -1,7 +1,7 @@
 .. _tutorials__getting_started__customize_your_deployment:
 
 Optional: Customize your deployment
-=========================
+===================================
 
 At this point, you have your first, working local deployment of Great Expectations. You've also been introduced to the foundational concepts in the library: :ref:`data_context`, :ref:`Datasources`, :ref:`Expectations`, :ref:`Profilers`, :ref:`Data Docs`, :ref:`Validation`, and :ref:`Checkpoints`.
 

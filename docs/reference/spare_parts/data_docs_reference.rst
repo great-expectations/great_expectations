@@ -201,7 +201,7 @@ Here is when the ``docs build`` command should be called:
 * after a new expectation suite is added or an existing one is edited
 * after new data is profiled (only if you declined the prompt to build data docs when running the profiling command)
 
-When a new validation result is generated after running a Validation Operator, the Data Docs sites will add this result automatically if the operator has the UpdateDataDocsAction action configured (read :ref:`actions`).
+When a new validation result is generated after running a Validation Operator, the Data Docs sites will add this result automatically if the operator has the UpdateDataDocsAction action configured (read :ref:`Validation Actions`).
 
 
 Using the raw API

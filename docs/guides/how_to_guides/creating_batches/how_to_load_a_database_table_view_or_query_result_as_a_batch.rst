@@ -8,7 +8,7 @@ This guide shows how to get a :ref:`batch <Batch>` of data that Great Expectatio
 
 .. admonition:: Prerequisites -- this how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
   - :ref:`Configured a SQL datasource <how_to_guides__configuring_datasources>`
   - Identified a ``table`` name, ``view`` name, or ``query`` that you would like to use as the data to validate.
   - Optionally, configured a Batch Kwargs Generator to support inspecting your database and dynamically building Batch Kwargs.
