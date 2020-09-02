@@ -57,7 +57,7 @@ from great_expectations.profile.basic_dataset_profiler import \
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import Validator, BridgeValidator
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -1082,7 +1082,7 @@ class BaseDataContext(object):
         )
         if data_asset_type is None:
             data_asset_type = datasource.config.get("data_asset_type")
-        validator = Validator(
+        validator = BridgeValidator(
             batch=batch,
             expectation_suite=expectation_suite,
             expectation_engine=data_asset_type,
