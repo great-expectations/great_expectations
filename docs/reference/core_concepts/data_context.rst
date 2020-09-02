@@ -23,4 +23,4 @@ define, like “NPI” for National Provider Identifier data or “company.users
 The Data Context also provides other services, such as storing and substituting evaluation parameters during validation.
 See :ref:`data_context_evaluation_parameter_store` for more information.
 
-See the :ref:`data_context_reference` for more information.
+See the :ref:`reference__core_concepts__data_contexts` section for more information.

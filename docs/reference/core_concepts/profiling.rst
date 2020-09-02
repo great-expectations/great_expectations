@@ -29,6 +29,6 @@ Profiling is still a beta feature in Great Expectations. Over time, we plan to e
 Warning: ``BasicDatasetProfiler`` will evaluate the entire batch without limits or sampling, which may be very time
 consuming. As a rule of thumb, we recommend starting with small batches of data.
 
-See the :ref:`profiling_reference` for more information.
+See the :ref:`reference__core_concepts__profiling` for more information.
 
 

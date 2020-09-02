@@ -5,7 +5,7 @@ Validate your data using a Checkpoint
 
 :ref:`validation` is the core operation of Great Expectations: “Validate data X against Expectation Y.”
 
-In normal usage, the best way to validate data is with a :ref:`Checkpoint`. Checkpoints bring :ref:`Batches` of data together with corresponding :ref:`Expectation Suites` for validation. Configuring Checkpoints simplifies deployment, by pre-specifying the "X"s and "Y"s that you want to validate at any given point in your data infrastructure.
+In normal usage, the best way to validate data is with a :ref:`Checkpoint <reference__core_concepts__validation__checkpoints>`. Checkpoints bring :ref:`Batches <reference__core_concepts__batches>` of data together with corresponding :ref:`Expectation Suites <reference__core_concepts__expectations__expectation_suites>` for validation. Configuring Checkpoints simplifies deployment, by pre-specifying the "X"s and "Y"s that you want to validate at any given point in your data infrastructure.
 
 Let’s set up our first Checkpoint by running the following CLI command:
 
@@ -13,7 +13,7 @@ Let’s set up our first Checkpoint by running the following CLI command:
 
   great_expectations checkpoint new staging.chk taxi.demo
 
-``staging.chk`` will be the name of your new Checkpoint. It will use ``taxi.demo`` as its primary :ref:`Expectation Suite` and will be configured to validate the ``yellow_tripdata_staging`` table. That way, we can simply run the Checkpoint each time we have new data loaded to ``staging`` and validate that the data meets our expectations!
+``staging.chk`` will be the name of your new Checkpoint. It will use ``taxi.demo`` as its primary :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>` and will be configured to validate the ``yellow_tripdata_staging`` table. That way, we can simply run the Checkpoint each time we have new data loaded to ``staging`` and validate that the data meets our expectations!
 
 From there, you will be prompted by the CLI to configure the Checkpoint:
 
@@ -49,9 +49,9 @@ Your new Checkpoint file is in ``staging.chk``. With comments removed, it looks 
         expectation_suite_names:
           - taxi.demo
 
-Our newly configured Checkpoint knows how to load ``yellow_tripdata_staging`` as a Batch, pair it with the ``taxi.demo`` Expectation Suite, and execute validation of the Batch using a pre-configured :ref:`Validation Operator <Validation Operators>` called ``action_list_operator``.
+Our newly configured Checkpoint knows how to load ``yellow_tripdata_staging`` as a Batch, pair it with the ``taxi.demo`` Expectation Suite, and execute validation of the Batch using a pre-configured :ref:`Validation Operator <reference__core_concepts__validation__validation_operator>` called ``action_list_operator``.
 
-You don't need to worry much about the details of Validation Operators for now. They orchestrate the actual work of validating data and processing the results. After executing validation, the Validation Operator can kick off additional workflows through :ref:`Validation Actions`. For more examples of post-validation actions, please see the :ref:`How-to section for Validation <how_to_guides__validation>`.
+You don't need to worry much about the details of Validation Operators for now. They orchestrate the actual work of validating data and processing the results. After executing validation, the Validation Operator can kick off additional workflows through :ref:`Validation Actions <validation_actions>`. For more examples of post-validation actions, please see the :ref:`How-to section for Validation <how_to_guides__validation>`.
 
 How to validate data by running Checkpoints
 -------------------------------------------

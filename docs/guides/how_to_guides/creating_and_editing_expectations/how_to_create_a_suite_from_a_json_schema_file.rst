@@ -4,7 +4,7 @@ How to create a new Expectation Suite from a jsonschema file
 ============================================================
 
 
-The ``JsonSchemaProfiler`` helps you quickly create :ref:`Expectation Suites` from jsonschema files.
+The ``JsonSchemaProfiler`` helps you quickly create :ref:`Expectation Suites <reference__core_concepts__expectations__expectation_suites>` from jsonschema files.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 

@@ -19,7 +19,7 @@ A check asset is a slice of data that is only created for validation purposes an
 These check assets should be built in your pipeline\'s native transformation language.
 For example, if your pipeline is primarily SQL, create an additional table or view that slices the data so that you can use the built in expectations found here: :ref:`expectation_glossary`.
 
-Using a check asset introduces a new node into your data pipeline. You should clearly name the expectations about a check asset in a way that makes it easy to understand how it is used in the pipeline, for example by creating an :ref:`Expectation Suite`_ with the name ``event_data.time_rollup_check.warning``.
+Using a check asset introduces a new node into your data pipeline. You should clearly name the expectations about a check asset in a way that makes it easy to understand how it is used in the pipeline, for example by creating an :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>`_ with the name ``event_data.time_rollup_check.warning``.
 
 -----------------------
 Postgres SQL example.

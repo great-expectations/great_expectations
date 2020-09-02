@@ -63,7 +63,7 @@ Steps
 
 #. **Define an expectation that relies on a dynamic query**
 
-    Great Expectations recognizes several types of :ref:`Evaluation Parameters <reference__core_concepts__evaluation_parameters>` that can use advanced features provided by the Data Context. To dynamically load data, we will be using a store-style URN, which starts with "urn:great_expectations:stores". The next component of the URN is the name of the store we configured above (``my_query_store``), and the final component is the name of the query we defined above (``current_genre_ids``):
+    Great Expectations recognizes several types of :ref:`Evaluation Parameters <reference__core_concepts__data_context__evaluation_parameter_stores>` that can use advanced features provided by the Data Context. To dynamically load data, we will be using a store-style URN, which starts with "urn:great_expectations:stores". The next component of the URN is the name of the store we configured above (``my_query_store``), and the final component is the name of the query we defined above (``current_genre_ids``):
 
     .. code-block:: python
 

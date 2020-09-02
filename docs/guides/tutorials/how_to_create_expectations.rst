@@ -47,7 +47,7 @@ The command concludes by saving the newly generated Expectation Suite as a JSON 
 Review an Expectation Suite
 ---------------------------
 
-:ref:`Data Docs<data_docs>` is a feature of Great Expectations that creates data documentation by compiling Expectations and validation results into HTML.
+:ref:`Data Docs<reference__core_concepts__data_docs>` is a feature of Great Expectations that creates data documentation by compiling Expectations and validation results into HTML.
 
 Data Docs produces a visual data quality report of what you expect from your data, and how the observed properties of your data differ from your Expectations.
 It helps to keep your entire team on the same page as data evolves.

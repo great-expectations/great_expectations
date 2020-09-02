@@ -293,7 +293,7 @@ Develop
 
 0.10.0
 -----------------
-* (BREAKING) Clarified API language: renamed all ``generator`` parameters and methods to the more correct ``batch_kwargs_generator`` language. Existing projects may require simple migration steps. See :ref:`Upgrading to 0.10.x` for instructions.
+* (BREAKING) Clarified API language: renamed all ``generator`` parameters and methods to the more correct ``batch_kwargs_generator`` language. Existing projects may require simple migration steps. See :ref:`Upgrading to 0.10.x <upgrading_to_0.10.x>` for instructions.
 * Adds anonymized usage statistics to Great Expectations. See this article for details: :ref:`Usage Statistics`.
 * CLI: improve look/consistency of ``docs list``, ``suite list``, and ``datasource list`` output; add ``store list`` and ``validation-operator list`` commands.
 * New SuiteBuilderProfiler that facilitates faster suite generation by allowing columns to be profiled
@@ -609,7 +609,7 @@ Highlights include:
 
    - **Environments**: A DataContext can now manage :ref:`environment_and_secrets` more easily thanks to more dynamic and
      flexible variable substitution.
-   - **Stores**: A new internal abstraction for DataContexts, :ref:`Stores`, make extending GE easier by
+   - **Stores**: A new internal abstraction for DataContexts, :ref:`Stores <reference__core_concepts__data_context__stores>`, make extending GE easier by
      consolidating logic for reading and writing resources from a database, local, or cloud storage.
    - **Types**: Utilities configured in a DataContext are now referenced using `class_name` and `module_name` throughout
      the DataContext configuration, making it easier to extend or supplement pre-built resources. For now, the "type"
@@ -617,7 +617,7 @@ Highlights include:
 
 3. Partitioners: Batch Kwargs are clarified and enhanced to help easily reference well-known chunks of data using a
    partition_id. Batch ID and Batch Fingerprint help round out support for enhanced metadata around data
-   assets that GE validates. See :ref:`Batch Identifiers` for more information. The `GlobReaderBatchKwargsGenerator`,
+   assets that GE validates. See :ref:`Batch Identifiers <reference__core_concepts__batch_parameters>` for more information. The `GlobReaderBatchKwargsGenerator`,
    `QueryBatchKwargsGenerator`, `S3GlobReaderBatchKwargsGenerator`, `SubdirReaderBatchKwargsGenerator`, and `TableBatchKwargsGenerator` all support partition_id for
    easily accessing data assets.
 

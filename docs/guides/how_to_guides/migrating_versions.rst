@@ -233,6 +233,7 @@ After::
   great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/my_run_id/my_run_time/batch_identifier.html
 
 .. _upgrading_to_0.10.x:
+
 ************************
 How to upgrade to 0.10.x
 ************************

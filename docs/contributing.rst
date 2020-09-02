@@ -85,7 +85,7 @@ Our goal is to make your experience as great as possible. Please follow these st
 
 .. container:: custom-indented-paragraph
 
-   Make sure to reference the :ref:`contributing_style_guide` and instructions on :ref:`contributing_testing` when developing your code. When your changes are ready, run through our :ref:`contributing_contribution_checklist` for pull requests.
+   Make sure to reference the :ref:`contributing__style_guide` and instructions on :ref:`contributing_testing` when developing your code. When your changes are ready, run through our :ref:`contributing_contribution_checklist` for pull requests.
 
    Note that if it’s your first contribution, there is a standard :ref:`contributing_cla` to sign.
 

@@ -80,13 +80,13 @@ You can create and edit Expectations using several different workflows. The CLI 
 
 This Profiler connected to your data (using the Datasource you configured in the previous step), took a quick look at the contents, and produced an initial set of Expectations. These Expectations are not intended to be very smart. Instead, the goal is to quickly provide some good examples, so that you're not starting from a blank slate.
 
-Later, you should also take a look at other workflows for :ref:`Creating and editing Expectations`. Creating and editing Expectations is a very active area of work in the Great Expectations community. Stay tuned for improvements over time.
+Later, you should also take a look at other workflows for :ref:`Creating and editing Expectations <how_to_guides__creating_and_editing_expectations>`. Creating and editing Expectations is a very active area of work in the Great Expectations community. Stay tuned for improvements over time.
 
 
 A first look at real Expectations
 ---------------------------------
 
-The newly profiled Expectations are stored in an :ref:`Expectation Suite`.
+The newly profiled Expectations are stored in an :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>`.
 
 By default, Expectation Suites are stored in a JSON file in a subdirectory of your ``great_expectations/`` folder. You can also configure Great Expectations to store Expectations to other locations, such as S3, Postgres, etc. We'll come back to these options in the last step of the tutorial.
 

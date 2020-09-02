@@ -17,7 +17,7 @@ Great Expectations' built-in library includes more than 50 common Expectations, 
 * ``expect_table_row_count_to_be_between``
 * ``expect_column_median_to_be_between``
 
-For a full list of available Expectations, please check out the :ref:`expectation_glossary`. Please note that not all Expectations are implemented on all :ref:`Execution engines` yet. You can see the grid of supported Expectations :ref:`here <implemented_expectations>`. We welcome :ref:`contributions <contributing>` to fill in the gaps.
+For a full list of available Expectations, please check out the :ref:`expectation_glossary`. Please note that not all Expectations are implemented on all Execution Engines yet. You can see the grid of supported Expectations :ref:`here <implemented_expectations>`. We welcome :ref:`contributions <contributing>` to fill in the gaps.
 
 You can also extend Great Expectations by :ref:`creating your own custom Expectations <how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations>`.
 

@@ -5,7 +5,7 @@ How to edit an Expectation Suite using a disposable notebook
 
 Editing :ref:`Expectations` in a notebook is usually much more convenient than editing them as raw JSON objects. You can evaluate them against real data, examine the results, and calibrate parameters. Often, you also learn about your data in the process.
     
-To simplify this workflow, the CLI command ``suite edit`` takes a named :ref:`Expectation Suite` and uses it to *generate* an equivalent Jupyter notebook. You can then use this notebook as a disposable interface to explore data and edit your Expectations.
+To simplify this workflow, the CLI command ``suite edit`` takes a named :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>` and uses it to *generate* an equivalent Jupyter notebook. You can then use this notebook as a disposable interface to explore data and edit your Expectations.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -23,7 +23,7 @@ Steps
 
         great_expectations suite edit movieratings.ratings
 
-    For convenience, the :ref:`Data Docs` page for each Expectation Suite has the CLI command syntax for you. Simply press the “How to Edit This Suite” button, and copy/paste the CLI command into your terminal.
+    For convenience, the :ref:`Data Docs <reference__core_concepts__datasources>` page for each Expectation Suite has the CLI command syntax for you. Simply press the “How to Edit This Suite” button, and copy/paste the CLI command into your terminal.
 
     .. image:: /images/edit_e_s_popup.png
 
