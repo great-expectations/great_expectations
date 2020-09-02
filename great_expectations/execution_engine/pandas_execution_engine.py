@@ -577,16 +577,12 @@ Notes:
 
     @property
     def dataframe(self):
-        if not self.batch:
-            if self._batch_definition:
-                self.load_batch(self._batch_definition)
-            else:
-                raise ValueError(
-                    "Batch has not been loaded and no batch parameters were found. Please run "
-                    "load_batch() to load a batch."
-                )
+        if not self.loaded_batch:
+            raise ValueError(
+                "Batch has not been loaded - please run load_batch() to load a batch."
+            )
 
-        return self.batch.data
+        return self.loaded_batch.data
 
     def _get_reader_fn(self, reader_method=None, path=None):
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
