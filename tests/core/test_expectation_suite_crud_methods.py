@@ -2,9 +2,7 @@ import pytest
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.exceptions import (
-    DataContextError,
-    InvalidExpectationConfigurationError,
-)
+    DataContextError, InvalidExpectationConfigurationError)
 
 
 @pytest.fixture

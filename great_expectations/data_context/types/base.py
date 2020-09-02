@@ -2,15 +2,8 @@ import logging
 import uuid
 from copy import deepcopy
 
-from marshmallow import (
-    INCLUDE,
-    Schema,
-    ValidationError,
-    fields,
-    post_dump,
-    post_load,
-    validates_schema,
-)
+from marshmallow import (INCLUDE, Schema, ValidationError, fields, post_dump,
+                         post_load, validates_schema)
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 

@@ -19,17 +19,11 @@ from scipy import stats
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-    load_class,
-    verify_dynamic_loading_support,
-)
+    instantiate_class_from_config, load_class, verify_dynamic_loading_support)
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.execution_engine.util import (
-    build_categorical_partition_object,
-    build_continuous_partition_object,
-    is_valid_categorical_partition_object,
-    is_valid_partition_object,
-)
+    build_categorical_partition_object, build_continuous_partition_object,
+    is_valid_categorical_partition_object, is_valid_partition_object)
 from great_expectations.types import ClassConfig
 
 logger = logging.getLogger(__name__)

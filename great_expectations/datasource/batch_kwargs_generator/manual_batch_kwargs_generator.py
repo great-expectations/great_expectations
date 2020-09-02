@@ -2,10 +2,10 @@ import logging
 import warnings
 from copy import deepcopy
 
-from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
-    BatchKwargsGenerator,
-)
-from great_expectations.exceptions import BatchKwargsError, InvalidBatchKwargsError
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import \
+    BatchKwargsGenerator
+from great_expectations.exceptions import (BatchKwargsError,
+                                           InvalidBatchKwargsError)
 
 logger = logging.getLogger(__name__)
 

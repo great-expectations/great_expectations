@@ -1,16 +1,12 @@
 from freezegun import freeze_time
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
-    RunIdentifier,
-)
+from great_expectations.core import (ExpectationConfiguration,
+                                     ExpectationSuiteValidationResult,
+                                     ExpectationValidationResult,
+                                     RunIdentifier)
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
-)
+    ExpectationSuiteIdentifier, ValidationResultIdentifier)
 from great_expectations.validation_operators.actions import StoreMetricsAction
 
 

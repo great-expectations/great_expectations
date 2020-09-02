@@ -1,12 +1,11 @@
 from great_expectations.core import ExpectationSuiteSchema
-from great_expectations.data_context.store.database_store_backend import (
-    DatabaseStoreBackend,
-)
+from great_expectations.data_context.store.database_store_backend import \
+    DatabaseStoreBackend
 from great_expectations.data_context.store.store import Store
-from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-)
+from great_expectations.data_context.store.tuple_store_backend import \
+    TupleStoreBackend
+from great_expectations.data_context.types.resource_identifiers import \
+    ExpectationSuiteIdentifier
 from great_expectations.data_context.util import load_class
 from great_expectations.util import verify_dynamic_loading_support
 

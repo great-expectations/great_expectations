@@ -6,11 +6,9 @@ from click.testing import CliRunner
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from tests.cli.test_cli import yaml
-from tests.cli.utils import (
-    assert_dict_key_and_val_in_stdout,
-    assert_no_logging_messages_or_tracebacks,
-    assert_no_tracebacks,
-)
+from tests.cli.utils import (assert_dict_key_and_val_in_stdout,
+                             assert_no_logging_messages_or_tracebacks,
+                             assert_no_tracebacks)
 
 
 def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):

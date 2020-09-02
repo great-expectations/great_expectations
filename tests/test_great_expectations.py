@@ -8,18 +8,14 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as ge
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuite,
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
-    expectationSuiteSchema,
-    expectationSuiteValidationResultSchema,
-)
+from great_expectations.core import (ExpectationConfiguration,
+                                     ExpectationSuite,
+                                     ExpectationSuiteValidationResult,
+                                     ExpectationValidationResult,
+                                     expectationSuiteSchema,
+                                     expectationSuiteValidationResultSchema)
 from great_expectations.data_asset.data_asset import (
-    ValidationStatistics,
-    _calc_validation_statistics,
-)
+    ValidationStatistics, _calc_validation_statistics)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import MetaPandasDataset, PandasDataset
 from great_expectations.exceptions import InvalidCacheValueError
