@@ -289,22 +289,10 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
             ] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
 
-    # def build_batch_kwargs(
-    #     self, batch_kwargs_generator, data_asset_name=None, partition_id=None, **kwargs
-    # ):
-    #     if kwargs.get("name"):
-    #         if data_asset_name:
-    #             raise ValueError(
-    #                 "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
-    #             )
-    #         warnings.warn(
-    #             "name is being deprecated as a batch_parameter. Please use data_asset_name instead.",
-    #             DeprecationWarning,
-    #         )
-    #         data_asset_name = kwargs.pop("name")
-    #     generator_obj = self.get_batch_kwargs_generator(batch_kwargs_generator)
-    #     if partition_id is not None:
-    #         kwargs["partition_id"] = partition_id
-    #     return generator_obj.build_batch_kwargs(
-    #         data_asset_name=data_asset_name, **kwargs
-    #     )
+    def build_batch_spec(
+        self, data_connector, batch_definition
+    ):
+        generator_obj = self.get_data_connector(data_connector)
+        return generator_obj.build_batch_spec(
+            batch_definition=batch_definition
+        )
