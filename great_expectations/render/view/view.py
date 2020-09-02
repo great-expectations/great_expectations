@@ -8,21 +8,13 @@ from string import Template as pTemplate
 from uuid import uuid4
 
 import mistune
-from jinja2 import (
-    ChoiceLoader,
-    Environment,
-    FileSystemLoader,
-    PackageLoader,
-    contextfilter,
-    select_autoescape,
-)
+from jinja2 import (ChoiceLoader, Environment, FileSystemLoader, PackageLoader,
+                    contextfilter, select_autoescape)
 
 from great_expectations import __version__ as ge_version
-from great_expectations.render.types import (
-    RenderedComponentContent,
-    RenderedContent,
-    RenderedDocumentContent,
-)
+from great_expectations.render.types import (RenderedComponentContent,
+                                             RenderedContent,
+                                             RenderedDocumentContent)
 
 
 class NoOpTemplate(object):

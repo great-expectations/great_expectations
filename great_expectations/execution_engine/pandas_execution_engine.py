@@ -11,17 +11,17 @@ import jsonschema
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+from great_expectations.validator.validator import Validator
 from scipy import stats
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     _scipy_distribution_positional_args_from_dict,
-    is_valid_continuous_partition_object,
-    validate_distribution_parameters,
-)
-from great_expectations.execution_environment.types import (PathBatchSpec, S3BatchSpec,)
+    is_valid_continuous_partition_object, validate_distribution_parameters)
+from great_expectations.execution_environment.types import (BatchSpec,
+                                                            PathBatchSpec,
+                                                            S3BatchSpec)
 
 from ..core.batch import Batch
 from ..datasource.pandas_datasource import HASH_THRESHOLD
@@ -61,7 +61,7 @@ class MetaPandasExecutionEngine(ExecutionEngine):
         """
         argspec = inspect.getfullargspec(func)[0][1:]
 
-        @cls.expectation(argspec)
+        @Validator.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
             self,
@@ -182,7 +182,7 @@ class MetaPandasExecutionEngine(ExecutionEngine):
         """
         argspec = inspect.getfullargspec(func)[0][1:]
 
-        @cls.expectation(argspec)
+        @Validator.expectation(argspec)  # TODO: confirm that this is correct
         @wraps(func)
         def inner_wrapper(
             self,
@@ -289,7 +289,7 @@ class MetaPandasExecutionEngine(ExecutionEngine):
         """
         argspec = inspect.getfullargspec(func)[0][1:]
 
-        @cls.expectation(argspec)
+        @Validator.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
             self,
@@ -463,14 +463,21 @@ Notes:
         )
 
         data_connector_name = batch_definition.get("data_connector")
-        # TODO: Is it ok that this in_memory_dataset is a batch_definition key and not top level?
+        assert data_connector_name, "Batch definition must specify a data_connector"
+
         if in_memory_dataset is not None:
             if batch_definition.get("data_asset_name") and batch_definition.get(
                 "partition_id"
             ):
                 df = in_memory_dataset
-                batch_spec = {}
-                batch_definition["data_connector"] = "dummy_data_connector"
+                data_connector = execution_environment.get_data_connector(
+                    data_connector_name
+                )
+                batch_spec = data_connector.build_batch_spec(batch_definition=batch_definition)
+                batch_id = batch_spec.to_id()
+                if self.batches.get(batch_id):
+                    self._loaded_batch_id = batch_id
+                    return self.batches.get(batch_id)
             else:
                 raise ValueError(
                     "To pass an in_memory_dataset, you must also pass a data_asset_name "
@@ -480,12 +487,16 @@ Notes:
             data_connector = execution_environment.get_data_connector(
                 data_connector_name
             )
-            if data_connector == "dummy_data_connector":
+            if data_connector.get_config().get("class_name") == "DataConnector":
                 raise ValueError(
-                    "No in_memory_dataset found. To use the dummy_data_connector, please ensure that you"
-                    "are passing a dataset to load_batch()"
+                    "No in_memory_dataset found. To use a data_connector with class DataConnector, please ensure that "
+                    "you are passing a dataset to load_batch()"
                 )
             batch_spec = data_connector.build_batch_spec(batch_definition=batch_definition)
+            batch_id = batch_spec.to_id()
+            if self.batches.get(batch_id):
+                self._loaded_batch_id = batch_id
+                return self.batches.get(batch_id)
 
             # We will use and manipulate reader_options along the way
             reader_options = batch_spec.get("reader_options", {})
@@ -554,7 +565,7 @@ Notes:
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
-        self._batch = Batch(
+        batch = Batch(
             execution_environment_name=batch_definition.get("execution_environment"),
             batch_spec=batch_spec,
             data=df,
@@ -562,22 +573,16 @@ Notes:
             batch_markers=batch_markers,
             data_context=self._data_context,
         )
-        self._batch_spec = batch_spec
-        self._batch_definition = batch_definition
-        self._batch_markers = batch_markers
+        self.batches[batch_id] = batch
 
     @property
     def dataframe(self):
-        if not self.batch:
-            if self._batch_definition:
-                self.load_batch(self._batch_definition)
-            else:
-                raise ValueError(
-                    "Batch has not been loaded and no batch parameters were found. Please run "
-                    "load_batch() to load a batch."
-                )
+        if not self.loaded_batch:
+            raise ValueError(
+                "Batch has not been loaded - please run load_batch() to load a batch."
+            )
 
-        return self.batch.data
+        return self.loaded_batch.data
 
     def _get_reader_fn(self, reader_method=None, path=None):
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
@@ -929,7 +934,7 @@ Notes:
 
         return res
 
-    @DataAsset.expectation(["column", "type_", "mostly"])
+    @Validator.expectation(["column", "type_", "mostly"])
     def _expect_column_values_to_be_of_type__aggregate(
         self,
         column,
@@ -1154,7 +1159,7 @@ Notes:
 
         return res
 
-    @MetaPandasExecutionEngine.expectation(["column", "type_list", "mostly"])
+    @Validator.expectation(["column", "type_list", "mostly"])
     def _expect_column_values_to_be_in_type_list__aggregate(
         self,
         column,

@@ -1,10 +1,8 @@
 import os
 
 from great_expectations.datasource.batch_kwargs_generator import (
-    DatabricksTableBatchKwargsGenerator,
-    GlobReaderBatchKwargsGenerator,
-    SubdirReaderBatchKwargsGenerator,
-)
+    DatabricksTableBatchKwargsGenerator, GlobReaderBatchKwargsGenerator,
+    SubdirReaderBatchKwargsGenerator)
 
 try:
     from unittest import mock

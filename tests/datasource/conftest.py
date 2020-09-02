@@ -1,10 +1,7 @@
 import pytest
 
-from great_expectations.datasource import (
-    PandasDatasource,
-    SparkDFDatasource,
-    SqlAlchemyDatasource,
-)
+from great_expectations.datasource import (PandasDatasource, SparkDFDatasource,
+                                           SqlAlchemyDatasource)
 
 
 @pytest.fixture(scope="module")

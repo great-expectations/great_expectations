@@ -6,26 +6,20 @@ import traceback
 import altair as alt
 import pandas as pd
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from great_expectations.core import (ExpectationConfiguration,
+                                     ExpectationValidationResult)
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.render.renderer.content_block import (
-    ExceptionListContentBlockRenderer,
-)
+from great_expectations.render.renderer.content_block import \
+    ExceptionListContentBlockRenderer
 from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import (
-    RenderedBulletListContent,
-    RenderedGraphContent,
-    RenderedHeaderContent,
-    RenderedSectionContent,
-    RenderedStringTemplateContent,
-    RenderedTableContent,
-    TextContent,
-    ValueListContent,
-)
+from great_expectations.render.types import (RenderedBulletListContent,
+                                             RenderedGraphContent,
+                                             RenderedHeaderContent,
+                                             RenderedSectionContent,
+                                             RenderedStringTemplateContent,
+                                             RenderedTableContent, TextContent,
+                                             ValueListContent)
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
 logger = logging.getLogger(__name__)

@@ -6,13 +6,10 @@ import re
 import altair as alt
 import pandas as pd
 
-from great_expectations.render.renderer.content_block.content_block import (
-    ContentBlockRenderer,
-)
-from great_expectations.render.types import (
-    RenderedGraphContent,
-    RenderedStringTemplateContent,
-)
+from great_expectations.render.renderer.content_block.content_block import \
+    ContentBlockRenderer
+from great_expectations.render.types import (RenderedGraphContent,
+                                             RenderedStringTemplateContent)
 from great_expectations.render.util import num_to_str, ordinal
 
 

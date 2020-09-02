@@ -8,9 +8,7 @@ from moto import mock_s3
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
-)
+    ExpectationSuiteIdentifier, ValidationResultIdentifier)
 from great_expectations.util import gen_directory_tree_str
 
 

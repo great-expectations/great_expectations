@@ -6,14 +6,11 @@ import nbformat
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.data_context.types.base import (
-    NotebookTemplateConfig,
-    notebookConfigSchema,
-)
+from great_expectations.data_context.types.base import (NotebookTemplateConfig,
+                                                        notebookConfigSchema)
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import (
-    SuiteEditNotebookCustomTemplateModuleNotFoundError,
-)
+from great_expectations.exceptions import \
+    SuiteEditNotebookCustomTemplateModuleNotFoundError
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import lint_code
 

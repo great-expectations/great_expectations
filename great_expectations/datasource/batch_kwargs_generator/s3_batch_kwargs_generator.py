@@ -3,11 +3,11 @@ import logging
 import re
 import warnings
 
-from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
-    BatchKwargsGenerator,
-)
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import \
+    BatchKwargsGenerator
+from great_expectations.exceptions import (BatchKwargsError,
+                                           GreatExpectationsError)
 from great_expectations.execution_environment.types import S3BatchKwargs
-from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
 
 try:
     import boto3

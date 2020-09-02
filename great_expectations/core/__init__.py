@@ -13,19 +13,14 @@ from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.data_context_key import DataContextKey
-from great_expectations.core.evaluation_parameters import (
-    find_evaluation_parameter_dependencies,
-)
+from great_expectations.core.evaluation_parameters import \
+    find_evaluation_parameter_dependencies
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
-    DataContextError,
-    InvalidCacheValueError,
-    InvalidExpectationConfigurationError,
-    InvalidExpectationKwargsError,
-    ParserError,
-    UnavailableMetricError,
-)
+    DataContextError, InvalidCacheValueError,
+    InvalidExpectationConfigurationError, InvalidExpectationKwargsError,
+    ParserError, UnavailableMetricError)
 from great_expectations.types import DictDot
 
 logger = logging.getLogger(__name__)
@@ -1459,6 +1454,7 @@ class ExpectationSuite(object):
         expectations=None,
         evaluation_parameters=None,
         data_asset_type=None,
+        execution_engine_type=None,
         meta=None,
     ):
         self.expectation_suite_name = expectation_suite_name
@@ -1474,6 +1470,7 @@ class ExpectationSuite(object):
             evaluation_parameters = {}
         self.evaluation_parameters = evaluation_parameters
         self.data_asset_type = data_asset_type
+        self.execution_engine_type = execution_engine_type
         if meta is None:
             meta = {"great_expectations_version": ge_version}
         if (

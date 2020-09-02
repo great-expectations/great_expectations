@@ -1,7 +1,5 @@
-from great_expectations.render.types import (
-    RenderedStringTemplateContent,
-    RenderedTableContent,
-)
+from great_expectations.render.types import (RenderedStringTemplateContent,
+                                             RenderedTableContent)
 
 from .content_block import ContentBlockRenderer
 
