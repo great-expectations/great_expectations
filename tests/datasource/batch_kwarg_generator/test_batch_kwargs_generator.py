@@ -1,6 +1,5 @@
-from great_expectations.datasource.batch_kwargs_generator import (
-    GlobReaderBatchKwargsGenerator,
-)
+from great_expectations.datasource.batch_kwargs_generator import \
+    GlobReaderBatchKwargsGenerator
 
 
 def test_batch_kwargs_generator_class_name(basic_pandas_datasource):

@@ -12,9 +12,8 @@ from IPython import get_ipython
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.data_context_key import DataContextKey
-from great_expectations.core.evaluation_parameters import (
-    find_evaluation_parameter_dependencies,
-)
+from great_expectations.core.evaluation_parameters import \
+    find_evaluation_parameter_dependencies
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (

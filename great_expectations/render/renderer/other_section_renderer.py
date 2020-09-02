@@ -2,14 +2,12 @@ import warnings
 from collections import Counter, defaultdict
 
 from great_expectations.profile.base import ProfilerTypeMapping
-from great_expectations.render.types import (
-    CollapseContent,
-    RenderedBulletListContent,
-    RenderedHeaderContent,
-    RenderedSectionContent,
-    RenderedStringTemplateContent,
-    RenderedTableContent,
-)
+from great_expectations.render.types import (CollapseContent,
+                                             RenderedBulletListContent,
+                                             RenderedHeaderContent,
+                                             RenderedSectionContent,
+                                             RenderedStringTemplateContent,
+                                             RenderedTableContent)
 
 from .renderer import Renderer
 

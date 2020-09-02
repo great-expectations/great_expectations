@@ -6,9 +6,8 @@ import locale
 import re
 import warnings
 
-from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
-)
+from great_expectations.data_context.types.resource_identifiers import \
+    ValidationResultIdentifier
 
 DEFAULT_PRECISION = 4
 # create a new context for this task

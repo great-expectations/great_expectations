@@ -11,8 +11,7 @@ from IPython.core.display import HTML, display
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ProfilingResultsColumnSectionRenderer,
-    ValidationResultsColumnSectionRenderer,
-)
+    ValidationResultsColumnSectionRenderer)
 from great_expectations.render.view import DefaultJinjaSectionView
 
 

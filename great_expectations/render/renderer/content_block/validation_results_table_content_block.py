@@ -2,15 +2,12 @@ import logging
 import traceback
 from copy import deepcopy
 
-from great_expectations.render.renderer.content_block.expectation_string import (
-    ExpectationStringRenderer,
-)
-from great_expectations.render.types import (
-    CollapseContent,
-    RenderedContentBlockContainer,
-    RenderedStringTemplateContent,
-    RenderedTableContent,
-)
+from great_expectations.render.renderer.content_block.expectation_string import \
+    ExpectationStringRenderer
+from great_expectations.render.types import (CollapseContent,
+                                             RenderedContentBlockContainer,
+                                             RenderedStringTemplateContent,
+                                             RenderedTableContent)
 from great_expectations.render.util import num_to_str
 
 logger = logging.getLogger(__name__)

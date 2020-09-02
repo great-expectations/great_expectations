@@ -2,7 +2,8 @@ import logging
 from abc import ABCMeta
 
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchKwargsError
+from great_expectations.exceptions import (InvalidBatchIdError,
+                                           InvalidBatchKwargsError)
 
 logger = logging.getLogger(__name__)
 

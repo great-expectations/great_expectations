@@ -15,20 +15,16 @@ from typing import List
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuite,
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
-    RunIdentifier,
-    expectationSuiteSchema,
-)
-from great_expectations.core.evaluation_parameters import build_evaluation_parameters
+from great_expectations.core import (ExpectationConfiguration,
+                                     ExpectationSuite,
+                                     ExpectationSuiteValidationResult,
+                                     ExpectationValidationResult,
+                                     RunIdentifier, expectationSuiteSchema)
+from great_expectations.core.evaluation_parameters import \
+    build_evaluation_parameters
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_asset.util import (
-    parse_result_format,
-    recursively_convert_to_json_serializable,
-)
+    parse_result_format, recursively_convert_to_json_serializable)
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.marshmallow__shade import ValidationError
 

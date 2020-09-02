@@ -13,10 +13,8 @@ import black
 from pkg_resources import Distribution
 
 from great_expectations.core import expectationSuiteSchema
-from great_expectations.exceptions import (
-    PluginClassNotFoundError,
-    PluginModuleNotFoundError,
-)
+from great_expectations.exceptions import (PluginClassNotFoundError,
+                                           PluginModuleNotFoundError)
 
 try:
     # This library moved in python 3.8

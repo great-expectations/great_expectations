@@ -1,11 +1,9 @@
 import logging
 
-from great_expectations.profile.base import (
-    DatasetProfiler,
-    ProfilerCardinality,
-    ProfilerDataType,
-    ProfilerTypeMapping,
-)
+from great_expectations.profile.base import (DatasetProfiler,
+                                             ProfilerCardinality,
+                                             ProfilerDataType,
+                                             ProfilerTypeMapping)
 
 try:
     from sqlalchemy.exc import OperationalError

@@ -5,10 +5,12 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
-from great_expectations.cli.toolkit import load_data_context_with_error_handling
+from great_expectations.cli.toolkit import \
+    load_data_context_with_error_handling
 from great_expectations.cli.upgrade_helpers import UpgradeHelperV11
 from great_expectations.cli.util import cli_message
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.core.usage_statistics.usage_statistics import \
+    send_usage_message
 
 
 @click.group()

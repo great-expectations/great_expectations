@@ -8,11 +8,9 @@ import pytest
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.render.renderer import (
-    ExpectationSuitePageRenderer,
-    ProfilingResultsPageRenderer,
-    ValidationResultsPageRenderer,
-)
+from great_expectations.render.renderer import (ExpectationSuitePageRenderer,
+                                                ProfilingResultsPageRenderer,
+                                                ValidationResultsPageRenderer)
 from great_expectations.render.types import RenderedContent
 
 

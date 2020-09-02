@@ -11,8 +11,8 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.dataset import SparkDFDataset
 from great_expectations.datasource import SparkDFDatasource
-from great_expectations.execution_environment.types import InMemoryBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
+from great_expectations.execution_environment.types import InMemoryBatchKwargs
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import Validator
 
