@@ -11,10 +11,10 @@ import jsonschema
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+from great_expectations.validator.validator import Validator
 from scipy import stats
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     _scipy_distribution_positional_args_from_dict,
@@ -61,7 +61,7 @@ class MetaPandasExecutionEngine(ExecutionEngine):
         """
         argspec = inspect.getfullargspec(func)[0][1:]
 
-        @cls.expectation(argspec)
+        @Validator.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
             self,
@@ -182,7 +182,7 @@ class MetaPandasExecutionEngine(ExecutionEngine):
         """
         argspec = inspect.getfullargspec(func)[0][1:]
 
-        @cls.expectation(argspec)
+        @Validator.expectation(argspec)  # TODO: confirm that this is correct
         @wraps(func)
         def inner_wrapper(
             self,
@@ -289,7 +289,7 @@ class MetaPandasExecutionEngine(ExecutionEngine):
         """
         argspec = inspect.getfullargspec(func)[0][1:]
 
-        @cls.expectation(argspec)
+        @Validator.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
             self,
@@ -934,7 +934,7 @@ Notes:
 
         return res
 
-    @DataAsset.expectation(["column", "type_", "mostly"])
+    @Validator.expectation(["column", "type_", "mostly"])
     def _expect_column_values_to_be_of_type__aggregate(
         self,
         column,
@@ -1159,7 +1159,7 @@ Notes:
 
         return res
 
-    @MetaPandasExecutionEngine.expectation(["column", "type_list", "mostly"])
+    @Validator.expectation(["column", "type_list", "mostly"])
     def _expect_column_values_to_be_in_type_list__aggregate(
         self,
         column,

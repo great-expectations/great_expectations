@@ -13,10 +13,10 @@ from typing import Any, List, Union
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+from great_expectations.validator.validator import Validator
 from ruamel.yaml import YAML
 from scipy import stats
 
-from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.data_context.util import (
     instantiate_class_from_config, load_class, verify_dynamic_loading_support)
@@ -31,10 +31,18 @@ yaml = YAML()
 yaml.default_flow_style = False
 
 
-class MetaExecutionEngine(DataAsset):
+class MetaExecutionEngine(object):
     """
     Holds expectation decorators.
     """
+
+    def __init__(self, *args, **kwargs):
+        default_expectation_args = {
+            "include_config": True,
+            "catch_exceptions": False,
+            "result_format": "BASIC",
+        }
+        self.default_expectation_args = kwargs.get("default_expectation_args") or default_expectation_args
 
     @classmethod
     def column_map_expectation(cls, func):
@@ -60,7 +68,7 @@ class MetaExecutionEngine(DataAsset):
             Depending on the `result_format` selected, column_map_expectation can additional data to a return object, \
             including `element_count`, `nonnull_values`, `nonnull_count`, `success_count`, `unexpected_list`, and \
             `unexpected_index_list`. \
-            See :func:`_format_map_output <great_expectations.data_asset.data_asset.DataAsset._format_map_output>`
+            See :func:`_format_map_output <great_expectations.validator.validator.Validator._format_map_output>`
 
         See also:
             :func:`expect_column_values_to_be_in_set \
@@ -91,7 +99,7 @@ class MetaExecutionEngine(DataAsset):
         """
         argspec = inspect.getfullargspec(func)[0][1:]
 
-        @cls.expectation(argspec)
+        @Validator.expectation(argspec)  # TODO: confirm that this is correct
         @wraps(func)
         def inner_wrapper(
             self,
@@ -523,7 +531,7 @@ class ExecutionEngine(MetaExecutionEngine):
     #####
 
     @DocInherit
-    @DataAsset.expectation(["column"])
+    @Validator.expectation(["column"])
     def expect_column_to_exist(
         self,
         column,
@@ -536,7 +544,7 @@ class ExecutionEngine(MetaExecutionEngine):
         """Expect the specified column to exist.
 
         expect_column_to_exist is a :func:`expectation \
-        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        <great_expectations.validator.validator.Validator.expectation>`, not a
         ``column_map_expectation`` or ``column_aggregate_expectation``.
 
         Args:
@@ -578,7 +586,7 @@ class ExecutionEngine(MetaExecutionEngine):
             return {"success": False}
 
     @DocInherit
-    @DataAsset.expectation(["column_list"])
+    @Validator.expectation(["column_list"])
     def expect_table_columns_to_match_ordered_list(
         self,
         column_list,
@@ -590,7 +598,7 @@ class ExecutionEngine(MetaExecutionEngine):
         """Expect the columns to exactly match a specified list.
 
         expect_table_columns_to_match_ordered_list is a :func:`expectation \
-        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        <great_expectations.validator.validator.Validator.expectation>`, not a
         ``column_map_expectation`` or ``column_aggregate_expectation``.
 
         Args:
@@ -646,7 +654,7 @@ class ExecutionEngine(MetaExecutionEngine):
 
     # noinspection PyUnusedLocal
     @DocInherit
-    @DataAsset.expectation(["min_value", "max_value"])
+    @Validator.expectation(["min_value", "max_value"])
     def expect_table_column_count_to_be_between(
         self,
         min_value=None,
@@ -659,7 +667,7 @@ class ExecutionEngine(MetaExecutionEngine):
         """Expect the number of columns to be between two values.
 
         expect_table_column_count_to_be_between is a :func:`expectation \
-        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        <great_expectations.validator.validator.Validator.expectation>`, not a
         ``column_map_expectation`` or ``column_aggregate_expectation``.
 
         Keyword Args:
@@ -730,7 +738,7 @@ class ExecutionEngine(MetaExecutionEngine):
 
     # noinspection PyUnusedLocal
     @DocInherit
-    @DataAsset.expectation(["value"])
+    @Validator.expectation(["value"])
     def expect_table_column_count_to_equal(
         self,
         value,
@@ -742,7 +750,7 @@ class ExecutionEngine(MetaExecutionEngine):
         """Expect the number of columns to equal a value.
 
         expect_table_column_count_to_equal is a :func:`expectation \
-        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        <great_expectations.validator.validator.Validator.expectation>`, not a
         ``column_map_expectation`` or ``column_aggregate_expectation``.
 
         Args:
@@ -787,7 +795,7 @@ class ExecutionEngine(MetaExecutionEngine):
 
     # noinspection PyUnusedLocal
     @DocInherit
-    @DataAsset.expectation(["min_value", "max_value"])
+    @Validator.expectation(["min_value", "max_value"])
     def expect_table_row_count_to_be_between(
         self,
         min_value=None,
@@ -800,7 +808,7 @@ class ExecutionEngine(MetaExecutionEngine):
         """Expect the number of rows to be between two values.
 
         expect_table_row_count_to_be_between is a :func:`expectation \
-        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        <great_expectations.validator.validator.Validator.expectation>`, not a
         ``column_map_expectation`` or ``column_aggregate_expectation``.
 
         Keyword Args:
@@ -871,7 +879,7 @@ class ExecutionEngine(MetaExecutionEngine):
 
     # noinspection PyUnusedLocal
     @DocInherit
-    @DataAsset.expectation(["value"])
+    @Validator.expectation(["value"])
     def expect_table_row_count_to_equal(
         self,
         value,
@@ -883,7 +891,7 @@ class ExecutionEngine(MetaExecutionEngine):
         """Expect the number of rows to equal a value.
 
         expect_table_row_count_to_equal is a :func:`expectation \
-        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        <great_expectations.validator.validator.Validator.expectation>`, not a
         ``column_map_expectation`` or ``column_aggregate_expectation``.
 
         Args:
