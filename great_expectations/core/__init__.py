@@ -1464,6 +1464,7 @@ class ExpectationSuite(object):
         expectations=None,
         evaluation_parameters=None,
         data_asset_type=None,
+        execution_engine_type=None,
         meta=None,
     ):
         self.expectation_suite_name = expectation_suite_name
@@ -1479,6 +1480,7 @@ class ExpectationSuite(object):
             evaluation_parameters = {}
         self.evaluation_parameters = evaluation_parameters
         self.data_asset_type = data_asset_type
+        self.execution_engine_type = execution_engine_type
         if meta is None:
             meta = {"great_expectations_version": ge_version}
         if (
