@@ -9,7 +9,7 @@ This guide will help you deploy Great Expectations within an Airflow pipeline. Y
 
     - Configured a :ref:`Data Context <tutorials__getting_started__initialize_a_data_context>`.
     - Configured an :ref:`Expectations Suite <tutorials__getting_started__create_your_first_expectations>`.
-    - Optional: Configured a :ref:`Checkpoint <_tutorials__getting_started__validate_your_data>`.
+    - Optional: Configured a :ref:`Checkpoint <tutorials__getting_started__validate_your_data>`.
     - Configured an Airflow pipeline (DAG).
 
 There are two supported methods: using an Airflow ``PythonOperator`` to run Validations using python code or invoking the Great Expectations CLI to run a Checkpoint using an Airflow ``BashOperator``.

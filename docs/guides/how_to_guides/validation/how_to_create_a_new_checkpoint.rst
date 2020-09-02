@@ -30,7 +30,7 @@ Steps
 
 Additional Resources
 --------------------
-- :ref:`Check out the detailed tutorial on Checkpoints <_tutorials__getting_started__validate_your_data>`
+- :ref:`Check out the detailed tutorial on Checkpoints <tutorials__getting_started__validate_your_data>`
 
 
 .. discourse::

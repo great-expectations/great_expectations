@@ -55,21 +55,21 @@ Many teams find it convenient to store Expectations in git. Essentially, this ap
 
 Alternatively, you can treat Expectations like configs, and store them in a blob store. Finally, you can store them in a database.
 
-* :ref:`How to configure an Expectation store in Amazon S3`
-* :ref:`How to configure an Expectation store in GCS`
-* :ref:`How to configure an Expectation store in Azure blob storage`
-* :ref:`How to configure an Expectation store to postgresql`
+* :ref:`how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_amazon_s3`
+* :ref:`how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_gcs`
+* :ref:`how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_azure_blob_storage`
+* :ref:`how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_to_postgresql`
 
 
 Options for storing Validation Results
 --------------------------------------
 By default, Validation Results are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. The most common pattern is to use a cloud-based blob store such as S3, GCS, or Azure blob store. You can also store Validation Results in a database.
 
-* :ref:`How to configure a Validation Result store on a filesystem`
-* :ref:`How to configure a Validation Result store in S3`
-* :ref:`How to configure a Validation Result store in GCS`
-* :ref:`How to configure a Validation Result store in Azure blob storage`
-* :ref:`How to configure a Validation Result store to postgresql`
+* :ref:`how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_on_a_filesystem`
+* :ref:`how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_s3`
+* :ref:`how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_gcs`
+* :ref:`how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_azure_blob_storage`
+* :ref:`how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_to_postgresql`
 
 
 Options for customizing generated notebooks
@@ -88,11 +88,11 @@ Great Expectations plugs into a wide variety of Datasources, and the list is con
 * :ref:`How to configure a Pandas/S3 Datasource`
 * :ref:`How to configure a Redshift Datasource`
 * :ref:`How to configure a Snowflake Datasource`
-* :ref:`How to configure a BigQuery Datasource`
-* :ref:`How to configure a Databricks Azure Datasource`
-* :ref:`How to configure an EMR Spark Datasource`
-* :ref:`How to configure a Databricks AWS Datasource`
-* :ref:`How to configure a self managed Spark Datasource`
+* :ref:`how_to_guides__configuring_datasources__how_to_configure_a_bigquery_datasource`
+* :ref:`how_to_guides__configuring_datasources__how_to_configure_a_databricks_azure_datasource`
+* :ref:`how_to_guides__configuring_datasources__how_to_configure_an_emr_spark_datasource`
+* :ref:`how_to_guides__configuring_datasources__how_to_configure_a_databricks_aws_datasource`
+* :ref:`how_to_guides__configuring_datasources__how_to_configure_a_self_managed_spark_datasource`
 
 
 Options for hosting Data Docs
@@ -100,10 +100,10 @@ Options for hosting Data Docs
 
 By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure blob store), configured to share a static website.
 
-* :ref:`How to host and share Data Docs on a filesystem`
-* :ref:`How to host and share Data Docs on S3`
-* :ref:`How to host and share Data Docs on Azure Blob Storage`
-* :ref:`How to host and share Data Docs on GCS`
+* :ref:`how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_a_filesystem`
+* :ref:`how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_s3`
+* :ref:`how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_azure_blob_storage`
+* :ref:`how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_gcs`
 
 
 Additional Validation Operators and Actions
@@ -112,8 +112,8 @@ Additional Validation Operators and Actions
 Most teams will want to configure various :ref:`Validation Actions` as part of their deployment.
 
 * :ref:`how_to_guides__validation__how_to_update_data_docs_as_a_validation_action`
-* :ref:`How to store Validation Results as a Validation Action`
-* :ref:`How to trigger slack notifications as a Validation Action`
+* :ref:`how_to_guides__validation__how_to_store_validation_results_as_a_validation_action`
+* :ref:`how_to_guides__validation__how_to_trigger_slack_notifications_as_a_validation_action`
 
 If you also want to modify your :ref:`Validation Operators`, you can learn how here:
 
@@ -131,7 +131,7 @@ Options for triggering Validation
 
 There are two primary patterns for deploying Checkpoints. Sometimes Checkpoints are executed during data processing (e.g. as a task within Airflow). From this vantage point, they can control program flow. Sometimes Checkpoints are executed against materialized data. Great Expectations supports both patterns. There are also some rare instances where you may want to validate data without using a Checkpoint.
 
-* :ref:`How to run a Checkpoint in Airflow`
-* :ref:`How to run a Checkpoint in python`
-* :ref:`How to run a Checkpoint in terminal`
-* :ref:`How to validate data without a Checkpoint`
+* :ref:`how_to_guides__validation__how_to_run_a_checkpoint_in_airflow`
+* :ref:`how_to_guides__validation__how_to_run_a_checkpoint_in_python`
+* :ref:`how_to_guides__validation__how_to_run_a_checkpoint_in_terminal`
+* :ref:`how_to_guides__validation__how_to_validate_data_without_a_checkpoint`
