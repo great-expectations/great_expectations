@@ -29,11 +29,12 @@ DEFAULT_USAGE_STATISTICS_URL = (
 )
 
 
+# TODO: <Alex>To delete datasources or keep for backward compatibility?</Alex>
 class DataContextConfig(DictDot):
     def __init__(
         self,
         config_version,
-        datasources,
+        # datasources,
         expectations_store_name,
         validations_store_name,
         evaluation_parameter_store_name,
@@ -45,7 +46,8 @@ class DataContextConfig(DictDot):
         config_variables_file_path=None,
         anonymous_usage_statistics=None,
         commented_map=None,
-        execution_environments=None
+        datasources=None,
+        execution_environments=None,
     ):
         if commented_map is None:
             commented_map = CommentedMap()
@@ -54,6 +56,8 @@ class DataContextConfig(DictDot):
         if datasources is None:
             datasources = {}
         self.datasources = datasources
+        if execution_environments is None:
+            execution_environments = {}
         self.execution_environments = execution_environments
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
@@ -485,7 +489,7 @@ class DataContextConfigSchema(Schema):
         error_messages={"invalid": "config version must " "be a number."},
     )
     datasources = fields.Dict(
-        keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema)
+        keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema), allow_none=True
     )
     execution_environments = fields.Dict(
         keys=fields.Str(), values=fields.Nested(ExecutionEnvironmentConfigSchema), allow_none=True
