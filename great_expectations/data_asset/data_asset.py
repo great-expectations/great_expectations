@@ -57,11 +57,8 @@ class DataAsset(object):
         expectation_suite = kwargs.pop("expectation_suite", None)
         expectation_suite_name = kwargs.pop("expectation_suite_name", None)
         data_context = kwargs.pop("data_context", None)
-        # batch_kwargs = kwargs.pop(
-        #     "batch_kwargs", BatchKwargs(ge_batch_id=str(uuid.uuid1()))
-        # )
         batch_kwargs = kwargs.pop(
-            "batch_kwargs", {}
+            "batch_kwargs", BatchKwargs(ge_batch_id=str(uuid.uuid1()))
         )
         batch_parameters = kwargs.pop("batch_parameters", {})
         batch_markers = kwargs.pop("batch_markers", {})
@@ -78,7 +75,7 @@ class DataAsset(object):
             expectation_suite_name=expectation_suite_name,
         )
         self._data_context = data_context
-        self._batch_kwargs = BatchKwargs(batch_kwargs) if batch_kwargs else {}
+        self._batch_kwargs = BatchKwargs(batch_kwargs)
         self._batch_markers = batch_markers
         self._batch_parameters = batch_parameters
 
