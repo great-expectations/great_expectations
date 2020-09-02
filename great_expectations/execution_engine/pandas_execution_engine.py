@@ -493,6 +493,10 @@ Notes:
                     "you are passing a dataset to load_batch()"
                 )
             batch_spec = data_connector.build_batch_spec(batch_definition=batch_definition)
+            batch_id = batch_spec.to_id()
+            if self.batches.get(batch_id):
+                self._loaded_batch_id = batch_id
+                return self.batches.get(batch_id)
 
             # We will use and manipulate reader_options along the way
             reader_options = batch_spec.get("reader_options", {})
@@ -561,7 +565,7 @@ Notes:
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
-        self._batch = Batch(
+        batch = Batch(
             execution_environment_name=batch_definition.get("execution_environment"),
             batch_spec=batch_spec,
             data=df,
@@ -569,9 +573,7 @@ Notes:
             batch_markers=batch_markers,
             data_context=self._data_context,
         )
-        self._batch_spec = batch_spec
-        self._batch_definition = batch_definition
-        self._batch_markers = batch_markers
+        self.batches[batch_id] = batch
 
     @property
     def dataframe(self):
