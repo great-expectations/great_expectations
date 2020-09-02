@@ -174,8 +174,9 @@ class DataConnector(object):
 
         return batch_spec
 
+    # TODO: will need to handle partition_definition for in-memory df case
     def _build_batch_spec(self, batch_definition, batch_spec):
-        raise NotImplementedError
+        return BatchSpec(batch_spec)
 
     def yield_batch_spec(self, data_asset_name, batch_definition, batch_spec):
 
