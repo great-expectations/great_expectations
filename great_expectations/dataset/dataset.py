@@ -97,12 +97,19 @@ class MetaDataset(DataAsset):
             result_format = parse_result_format(result_format)
 
             if row_condition:
-                self = self.query(row_condition).reset_index(drop=True)
+                self = self.query(row_condition,).reset_index(drop=True)
 
             element_count = self.get_row_count()
 
-            if column is not None or kwargs.get("column"):
-                nonnull_count = self.get_column_nonnull_count(kwargs.get("column", column))
+            if kwargs.get("column"):
+                column = kwargs.get("column")
+
+            if column is not None:
+                nonnull_count = self.get_column_nonnull_count(
+                    kwargs.get("column", column)
+                )
+                # column is treated specially as a positional argument in most expectations
+                args = tuple((column, *args))
             elif kwargs.get("column_A") and kwargs.get("column_B"):
                 nonnull_count = (
                     self[kwargs.get("column_A")].notnull()
