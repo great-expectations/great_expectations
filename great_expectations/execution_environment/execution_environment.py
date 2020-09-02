@@ -5,6 +5,7 @@ import logging
 import warnings
 from typing import Union
 
+from great_expectations.validator.validator import Validator
 from ruamel.yaml import YAML
 
 from great_expectations.core import ExpectationSuite
@@ -79,13 +80,13 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         expectation_suite_name: Union[str, ExpectationSuite],
         in_memory_dataset: any = None,  # TODO: should this be any to accommodate the different engines?
     ):
-        self.execution_engine._initialize_expectations(
-            expectation_suite_name=expectation_suite_name
-        )
         self.execution_engine.load_batch(
             batch_definition=batch_definition, in_memory_dataset=in_memory_dataset
         )
-        return self.execution_engine
+        return Validator(
+            execution_engine=self.execution_engine,
+            expectation_suite_name=expectation_suite_name
+        )
 
     @classmethod
     def from_configuration(cls, **kwargs):

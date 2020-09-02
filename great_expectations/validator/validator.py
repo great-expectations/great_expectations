@@ -13,7 +13,9 @@ from functools import wraps
 from typing import List
 
 from dateutil.parser import parse
+
 from marshmallow import ValidationError
+import pandas as pd
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core import (ExpectationConfiguration,
@@ -59,14 +61,7 @@ class Validator(object):
         expectation_suite = kwargs.pop("expectation_suite", None)
         expectation_suite_name = kwargs.pop("expectation_suite_name", None)
         data_context = kwargs.pop("data_context", None)
-        # batch_kwargs = kwargs.pop(
-        #     "batch_kwargs", BatchKwargs(ge_batch_id=str(uuid.uuid1()))
-        # )
-        batch_kwargs = kwargs.pop(
-            "batch_kwargs", {}
-        )
-        batch_parameters = kwargs.pop("batch_parameters", {})
-        batch_markers = kwargs.pop("batch_markers", {})
+        execution_engine = kwargs.pop("execution_engine", None)
 
         if "autoinspect_func" in kwargs:
             warnings.warn(
@@ -74,15 +69,13 @@ class Validator(object):
                 category=DeprecationWarning,
             )
         super().__init__(*args, **kwargs)
+        self._data_context = data_context
+        self._execution_engine = execution_engine
         self._config = {"interactive_evaluation": interactive_evaluation}
         self._initialize_expectations(
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
         )
-        self._data_context = data_context
-        self._batch_kwargs = BatchKwargs(batch_kwargs) if batch_kwargs else {}
-        self._batch_markers = batch_markers
-        self._batch_parameters = batch_parameters
 
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
@@ -91,6 +84,18 @@ class Validator(object):
             profiler.profile(self)
         if data_context and hasattr(data_context, "_expectation_explorer_manager"):
             self.set_default_expectation_argument("include_config", True)
+
+    def __getattr__(self, name):
+        if name.startswith("expect_") and hasattr(self.execution_engine, name):
+            return getattr(self.execution_engine, name)
+        # elif type(self.execution_engine).__name__ == "PandasExecutionEngine" and hasattr(pd.DataFrame, name):
+        #     return getattr(pd.DataFrame, name)
+        else:
+            raise AttributeError("'Validator' object has no attribute '%s'" % name)
+
+    @property
+    def execution_engine(self):
+        return self._execution_engine
 
     def list_available_expectation_types(self):
         keys = dir(self)
@@ -377,12 +382,7 @@ class Validator(object):
                 expectation_suite_name=expectation_suite_name
             )
 
-        self._expectation_suite.data_asset_type = self._data_asset_type
-        self.default_expectation_args = {
-            "include_config": True,
-            "catch_exceptions": False,
-            "result_format": "BASIC",
-        }
+        self._expectation_suite.execution_engine_type = type(self.execution_engine).__name__
 
     def append_expectation(self, expectation_config):
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""
@@ -448,20 +448,30 @@ class Validator(object):
         return self._config[key]
 
     @property
-    def batch_kwargs(self):
-        return self._batch_kwargs
+    def batch(self):
+        return self.execution_engine.loaded_batch
+
+    @property
+    def batch_spec(self):
+        if not self.batch:
+            return None
+        else:
+            return self.batch.batch_spec
 
     @property
     def batch_id(self):
-        return self.batch_kwargs.to_id()
+        return self.batch_spec.to_id()
 
     @property
     def batch_markers(self):
-        return self._batch_markers
+        if not self.batch:
+            return None
+        else:
+            return self.batch.batch_markers
 
     @property
-    def batch_parameters(self):
-        return self._batch_parameters
+    def batch_definition(self):
+        return self.batch.batch_definition
 
     def discard_failing_expectations(self):
         res = self.validate(only_return_failures=True).results
@@ -490,7 +500,11 @@ class Validator(object):
         See also:
             set_default_expectation_arguments
         """
-        return self.default_expectation_args
+        return self.execution_engine.default_expectation_args
+
+    @property
+    def default_expectation_args(self):
+        return self.execution_engine.default_expectation_args
 
     def set_default_expectation_argument(self, argument, value):
         """Set a default expectation argument for this data_asset
@@ -992,9 +1006,9 @@ class Validator(object):
                     "great_expectations_version": ge_version,
                     "expectation_suite_name": expectation_suite_name,
                     "run_id": run_id,
-                    "batch_kwargs": self.batch_kwargs,
+                    "batch_spec": self.batch_spec,
                     "batch_markers": self.batch_markers,
-                    "batch_parameters": self.batch_parameters,
+                    "batch_definition": self.batch_definition,
                     "validation_time": validation_time,
                 },
             )
@@ -1051,22 +1065,22 @@ class Validator(object):
     def add_citation(
         self,
         comment,
-        batch_kwargs=None,
+        batch_spec=None,
         batch_markers=None,
-        batch_parameters=None,
+        batch_definition=None,
         citation_date=None,
     ):
-        if batch_kwargs is None:
-            batch_kwargs = self.batch_kwargs
+        if batch_spec is None:
+            batch_spec = self.batch_spec
         if batch_markers is None:
             batch_markers = self.batch_markers
-        if batch_parameters is None:
-            batch_parameters = self.batch_parameters
+        if batch_definition is None:
+            batch_definition = self.batch_definition
         self._expectation_suite.add_citation(
             comment,
-            batch_kwargs=batch_kwargs,
+            batch_spec=batch_spec,
             batch_markers=batch_markers,
-            batch_parameters=batch_parameters,
+            batch_definition=batch_definition,
             citation_date=citation_date,
         )
 
