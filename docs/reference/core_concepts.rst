@@ -32,7 +32,6 @@ Suites should have names corresponding to the kind of data they define, like “
    /reference/core_concepts/expectations/distributional_expectations.rst
    /reference/core_concepts/expectations/standard_arguments.rst
    /reference/core_concepts/expectations/result_format.rst
-   /reference/core_concepts/expectations/glossary_of_expectations.rst
    /reference/core_concepts/expectations/implemented_expectations.rst
 
 .. _reference__core_concepts__validation:

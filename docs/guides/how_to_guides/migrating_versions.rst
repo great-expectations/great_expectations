@@ -41,7 +41,7 @@ in your source control system already, right? ;-)
 Upgrading to 0.12.x
 *************************
 
-The 0.12.0 release makes a small but breaking change to the ``add_expectation``, ``remove_expectation``, and ``find_expectations`` methods. To update your code, replace the ``expectation_type``, ``column``, or ``kwargs`` arguments with an Expectation Configuration object. For more information on the ``match_type`` parameter, see :ref:`expectation_suite_operations`_.
+The 0.12.0 release makes a small but breaking change to the ``add_expectation``, ``remove_expectation``, and ``find_expectations`` methods. To update your code, replace the ``expectation_type``, ``column``, or ``kwargs`` arguments with an Expectation Configuration object. For more information on the ``match_type`` parameter, see :ref:`expectation_suite_operations`.
 
 For example, using the old API:
 

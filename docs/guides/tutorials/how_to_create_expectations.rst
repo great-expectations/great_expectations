@@ -221,7 +221,6 @@ The DataContext's ``get_batch`` method is used to load a batch of a data asset:
 
 Calling this method asks the Context to get a batch of data and attach the expectation suite ``expectation_suite_name`` to it. The ``batch_kwargs`` argument specifies which batch of the data asset should be loaded.
 
-|
 3. Author Expectations
 ********************************************
 

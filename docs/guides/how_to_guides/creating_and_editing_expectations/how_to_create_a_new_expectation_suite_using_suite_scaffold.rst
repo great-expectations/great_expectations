@@ -39,6 +39,7 @@ Steps
     You can also run this command without opening the notebook by using the `` --no-jupyter`` flag and then starting up jupyter separately:
         
      .. code-block:: bash
+     
         suite scaffold npi_distributions --no-jupyter
         Heads up! This feature is Experimental. It may change. Please give us your feedback!
 

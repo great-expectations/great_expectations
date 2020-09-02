@@ -40,7 +40,7 @@ Steps
     - If you re-run these cells with no changes, you will re-validate all of your Expectations against the chosen Batch. At the end of your notebook, the Expectation Suite will contain exactly the same Expectations that you started out with.
     - If you edit and run any of the Expectations, the new parameters will replace the old ones.
     - If you don't run an Expectation, it will be left out of the Suite.
-    |
+
     Until you run the final cell in the notebook, any changes will only affect the Expectation Suite in memory. They won't yet be saved for later.
     
 4. Save your Expectations and review them in Data Docs
