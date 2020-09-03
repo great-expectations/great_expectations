@@ -7,7 +7,7 @@ This guide will explain how to host and share Data Docs on AWS S3.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+    - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
     - `Set up the AWS Command Line Interface <https://aws.amazon.com/cli/>`_
 
 Steps

@@ -31,7 +31,7 @@ You will see the following output:
 
 
 Which data should I choose when creating Expectations?
-====================
+======================================================
 
 In this example, we want to build an Expectation Suite based on what we know about our taxi data: each taxi ride has a ``passenger_count`` between 1 and 6. We then want to use that Expectation Suite to validate any future data that is loaded into the ``staging`` table. Hence, we choose the ``yellow_tripdata_sample_2019_01`` table when creating the new Expectation Suite, which we will then use to validate the ``yellow_tripdata_staging`` table **in a later step**. Makes sense, right?
 
@@ -39,7 +39,7 @@ After selecting the table, Great Expectations will open a Jupyter notebook which
 
 
 Creating Expectations in Jupyter notebooks
--------------------
+------------------------------------------
 
 In this section, we will explain how to create and edit Expectations in a Jupyter notebook. Notebooks are a simple way of interacting with the Great Expectations Python API. You could also just write all this in plain Python code, but for convenience, Great Expectations provides you some boilerplate code in notebooks.
 
@@ -80,19 +80,19 @@ You can create and edit Expectations using several different workflows. The CLI 
 
 This Profiler connected to your data (using the Datasource you configured in the previous step), took a quick look at the contents, and produced an initial set of Expectations. These Expectations are not intended to be very smart. Instead, the goal is to quickly provide some good examples, so that you're not starting from a blank slate.
 
-Later, you should also take a look at other workflows for :ref:`Creating and editing Expectations`. Creating and editing Expectations is a very active area of work in the Great Expectations community. Stay tuned for improvements over time.
+Later, you should also take a look at other workflows for :ref:`Creating and editing Expectations <how_to_guides__creating_and_editing_expectations>`. Creating and editing Expectations is a very active area of work in the Great Expectations community. Stay tuned for improvements over time.
 
 
 A first look at real Expectations
 ---------------------------------
 
-The newly profiled Expectations are stored in an :ref:`Expectation Suite`.
+The newly profiled Expectations are stored in an :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>`.
 
 By default, Expectation Suites are stored in a JSON file in a subdirectory of your ``great_expectations/`` folder. You can also configure Great Expectations to store Expectations to other locations, such as S3, Postgres, etc. We'll come back to these options in the last step of the tutorial.
 
 If you open up the file at ``great_expectations/expectations/taxi/demo.json`` in a text editor, you'll see the following:
 
-.. code-block:: JSON
+.. code-block::
 
     {
       "data_asset_type": "Dataset",
