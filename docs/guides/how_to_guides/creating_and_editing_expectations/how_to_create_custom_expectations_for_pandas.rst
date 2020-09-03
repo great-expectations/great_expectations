@@ -235,7 +235,7 @@ Steps
 
     Executing this Expectation should return something like:
 
-    .. code-block:: json
+    .. code-block::
 
         {
             "result": {

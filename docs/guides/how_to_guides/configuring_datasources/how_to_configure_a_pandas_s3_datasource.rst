@@ -102,7 +102,7 @@ To add an S3-backed Pandas datasource do this:
 
     #. **Verify that all your data assets appear in the list**
 
-        .. code-block:: bash
+        .. code-block::
 
             Which data would you like to use?
                 1. your_first_data_asset_name (file)

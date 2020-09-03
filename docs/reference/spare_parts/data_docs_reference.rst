@@ -452,7 +452,7 @@ An example of a custom page Renderer, using all built-in UI elements is provided
 Custom Page Renderer Example
 -----------------------------
 
-.. literalinclude:: ../example_code/custom_renderer.py
+.. literalinclude:: ../../example_code/custom_renderer.py
     :language: python
 
 .. image:: /images/customizing_data_docs.png

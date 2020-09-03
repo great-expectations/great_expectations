@@ -92,7 +92,7 @@ By default, Expectation Suites are stored in a JSON file in a subdirectory of yo
 
 If you open up the file at ``great_expectations/expectations/taxi/demo.json`` in a text editor, you'll see the following:
 
-.. code-block:: JSON
+.. code-block::
 
     {
       "data_asset_type": "Dataset",

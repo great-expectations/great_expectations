@@ -72,7 +72,7 @@ Overwriting a section
 
     ``great_expectations/plugins/notebook_assets/suite_edit/HEADER.md:``
 
-    .. code-block:: markdown
+    .. code-block::
 
         # Custom header for {{ company_name }}
 

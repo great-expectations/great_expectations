@@ -61,7 +61,7 @@ observed mean or distribution of data.
 
 .. _reference__core_concepts__validation__validation_operator:
 
-A **Validation Operator** stitches together resources provided by the Data Context to provide an easy way to deploy Great Expectations in your environment. It executes configurable **Action**s such as updating Data Docs, sending a notification to your team about validation results, or storing a result in a shared S3 bucket.
+A **Validation Operator** stitches together resources provided by the Data Context to provide an easy way to deploy Great Expectations in your environment. It executes configurable **Action** such as updating Data Docs, sending a notification to your team about validation results, or storing a result in a shared S3 bucket.
 
 .. _reference__core_concepts__validation__checkpoints:
 
