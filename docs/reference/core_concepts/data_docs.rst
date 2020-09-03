@@ -8,7 +8,7 @@ Data Docs compile Great Expectations objects such as Expectations and
 Validations into structured, formatted documents. In these documents, they 
 attempt to capture the key characteristics of a dataset.
 
-One example of Data Docs is HTML documentation, which takes expectation suites and validation results and produces clear, functional, and self-healing
+One example of Data Docs is HTML documentation, which takes expectation suites and validation results and produces clear, functional, and self-updating
 documentation of expected and observed data characteristics. Together with profiling, it can help to rapidly create
 a clearer picture of your data, and keep your entire team on the same page as data evolves.
 
