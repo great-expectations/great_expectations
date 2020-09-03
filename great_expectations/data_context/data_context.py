@@ -803,29 +803,15 @@ class BaseDataContext(object):
                     )
                 )
 
-    # TODO: deprecate "datasource" in favor of "execution_environment"
     def get_available_data_asset_names(
-        self,
-        datasource_names=None,
-        batch_kwargs_generator_names=None,
-        execution_environment_names=None,
-        data_connector_names=None,
+        self, datasource_names=None, batch_kwargs_generator_names=None
     ):
-        """Inspect execution environment (AKA datasource) and data connectors (AKA batch kwargs generators) to provide
-        available
-        data_asset
-        objects.
+        """Inspect datasource and batch kwargs generators to provide available data_asset objects.
 
         Args:
             datasource_names: list of datasources for which to provide available data_asset_name objects. If None, \
             return available data assets for all datasources.
             batch_kwargs_generator_names: list of batch kwargs generators for which to provide available
-            data_asset_name objects.
-            execution_environment_names: list of execution_environments for which to provide available data_asset_name
-            objects. If
-            None, \
-            return available data assets for all execution_environments.
-            data_connector_names: list of batch kwargs generators for which to provide available
             data_asset_name objects.
 
         Returns:
@@ -833,152 +819,214 @@ class BaseDataContext(object):
             ::
 
                 {
-                  execution_environment_name: {
-                    data_connector_name: [ data_asset_1, data_asset_2, ... ]
+                  datasource_name: {
+                    batch_kwargs_generator_name: [ data_asset_1, data_asset_2, ... ]
                     ...
                   }
                   ...
                 }
 
         """
-        assert (datasource_names and not execution_environment_names) or (
-            not datasource_names and execution_environment_names
-        ), "Please provide either datasource_names or execution_environment_names."
-        if datasource_names:
-            warnings.warn(
-                "The 'datasource_names' argument will be deprecated and renamed to 'execution_environment_names'. "
-                "Please update code accordingly.",
-                DeprecationWarning,
-            )
-            execution_environment_names = datasource_names
-
-        assert (batch_kwargs_generator_names and not data_connector_names) or (
-            not batch_kwargs_generator_names and data_connector_names
-        ), "Please provide either batch_kwargs_generator_names or data_connector_names."
-        if batch_kwargs_generator_names:
-            warnings.warn(
-                "The 'batch_kwargs_generator_names' argument will be deprecated and renamed to 'data_connector_names'. "
-                "Please update code accordingly.",
-                DeprecationWarning,
-            )
-            data_connector_names = batch_kwargs_generator_names
-
         data_asset_names = {}
-        if execution_environment_names is None:
-            execution_environment_names = [
-                execution_environment["name"]
-                for execution_environment in self.list_execution_environments()
+        if datasource_names is None:
+            datasource_names = [
+                datasource["name"] for datasource in self.list_datasources()
             ]
-        elif isinstance(execution_environment_names, str):
-            execution_environment_names = [execution_environment_names]
-        elif not isinstance(execution_environment_names, list):
+        elif isinstance(datasource_names, str):
+            datasource_names = [datasource_names]
+        elif not isinstance(datasource_names, list):
             raise ValueError(
-                "Execution environment names must be a execution_environment name, list of execution_environment names "
-                "or None ("
-                "to "
-                "list "
-                "all "
-                "execution_environments)"
+                "Datasource names must be a datasource name, list of datasource names or None (to list all datasources)"
             )
 
-        if data_connector_names is not None:
-            if isinstance(data_connector_names, str):
-                data_connector_names = [data_connector_names]
-            if len(data_connector_names) == len(
-                execution_environment_names
+        if batch_kwargs_generator_names is not None:
+            if isinstance(batch_kwargs_generator_names, str):
+                batch_kwargs_generator_names = [batch_kwargs_generator_names]
+            if len(batch_kwargs_generator_names) == len(
+                datasource_names
             ):  # Iterate over both together
-                for idx, execution_environment_name in enumerate(
-                    execution_environment_names
-                ):
-                    execution_environment = self.get_execution_environment(
-                        execution_environment_name
-                    )
+                for idx, datasource_name in enumerate(datasource_names):
+                    datasource = self.get_datasource(datasource_name)
                     data_asset_names[
-                        execution_environment_name
-                    ] = execution_environment.get_available_data_asset_names(
-                        data_connector_names[idx]
+                        datasource_name
+                    ] = datasource.get_available_data_asset_names(
+                        batch_kwargs_generator_names[idx]
                     )
 
-            elif len(data_connector_names) == 1:
-                execution_environment = self.get_execution_environment(
-                    execution_environment_names[0]
-                )
-                execution_environment_names[
-                    execution_environment_names[0]
-                ] = execution_environment.get_available_data_asset_names(
-                    data_connector_names
+            elif len(batch_kwargs_generator_names) == 1:
+                datasource = self.get_datasource(datasource_names[0])
+                datasource_names[
+                    datasource_names[0]
+                ] = datasource.get_available_data_asset_names(
+                    batch_kwargs_generator_names
                 )
 
             else:
                 raise ValueError(
-                    "If providing data connector, you must either specify one for each execution_environment "
-                    "or "
-                    "only "
-                    "one execution_environment."
+                    "If providing batch kwargs generator, you must either specify one for each datasource or only "
+                    "one datasource."
                 )
-        else:  # data_connector_names is None
-            for execution_environment_name in execution_environment_names:
+        else:  # generator_names is None
+            for datasource_name in datasource_names:
                 try:
-                    execution_environment = self.get_execution_environment(
-                        execution_environment_name
-                    )
+                    datasource = self.get_datasource(datasource_name)
                     data_asset_names[
-                        execution_environment_name
-                    ] = execution_environment.get_available_data_asset_names()
+                        datasource_name
+                    ] = datasource.get_available_data_asset_names()
                 except ValueError:
-                    # handle the edge case of a non-existent execution_environment
-                    data_asset_names[execution_environment_name] = {}
+                    # handle the edge case of a non-existent datasource
+                    data_asset_names[datasource_name] = {}
 
         return data_asset_names
 
-    # TODO: deprecate "datasource" and "batch_kwargs_generator"
+    # # TODO: deprecate "datasource" in favor of "execution_environment"
+    # def get_available_data_asset_names(
+    #     self,
+    #     datasource_names=None,
+    #     batch_kwargs_generator_names=None,
+    #     execution_environment_names=None,
+    #     data_connector_names=None,
+    # ):
+    #     """Inspect execution environment (AKA datasource) and data connectors (AKA batch kwargs generators) to provide
+    #     available
+    #     data_asset
+    #     objects.
+    #
+    #     Args:
+    #         datasource_names: list of datasources for which to provide available data_asset_name objects. If None, \
+    #         return available data assets for all datasources.
+    #         batch_kwargs_generator_names: list of batch kwargs generators for which to provide available
+    #         data_asset_name objects.
+    #         execution_environment_names: list of execution_environments for which to provide available data_asset_name
+    #         objects. If
+    #         None, \
+    #         return available data assets for all execution_environments.
+    #         data_connector_names: list of batch kwargs generators for which to provide available
+    #         data_asset_name objects.
+    #
+    #     Returns:
+    #         data_asset_names (dict): Dictionary describing available data assets
+    #         ::
+    #
+    #             {
+    #               execution_environment_name: {
+    #                 data_connector_name: [ data_asset_1, data_asset_2, ... ]
+    #                 ...
+    #               }
+    #               ...
+    #             }
+    #
+    #     """
+    #     assert (datasource_names and not execution_environment_names) or (
+    #         not datasource_names and execution_environment_names
+    #     ), "Please provide either datasource_names or execution_environment_names."
+    #     if datasource_names:
+    #         warnings.warn(
+    #             "The 'datasource_names' argument will be deprecated and renamed to 'execution_environment_names'. "
+    #             "Please update code accordingly.",
+    #             DeprecationWarning,
+    #         )
+    #         execution_environment_names = datasource_names
+    #
+    #     assert (batch_kwargs_generator_names and not data_connector_names) or (
+    #         not batch_kwargs_generator_names and data_connector_names
+    #     ), "Please provide either batch_kwargs_generator_names or data_connector_names."
+    #     if batch_kwargs_generator_names:
+    #         warnings.warn(
+    #             "The 'batch_kwargs_generator_names' argument will be deprecated and renamed to 'data_connector_names'. "
+    #             "Please update code accordingly.",
+    #             DeprecationWarning,
+    #         )
+    #         data_connector_names = batch_kwargs_generator_names
+    #
+    #     data_asset_names = {}
+    #     if execution_environment_names is None:
+    #         execution_environment_names = [
+    #             execution_environment["name"]
+    #             for execution_environment in self.list_execution_environments()
+    #         ]
+    #     elif isinstance(execution_environment_names, str):
+    #         execution_environment_names = [execution_environment_names]
+    #     elif not isinstance(execution_environment_names, list):
+    #         raise ValueError(
+    #             "Execution environment names must be a execution_environment name, list of execution_environment names "
+    #             "or None ("
+    #             "to "
+    #             "list "
+    #             "all "
+    #             "execution_environments)"
+    #         )
+    #
+    #     if data_connector_names is not None:
+    #         if isinstance(data_connector_names, str):
+    #             data_connector_names = [data_connector_names]
+    #         if len(data_connector_names) == len(
+    #             execution_environment_names
+    #         ):  # Iterate over both together
+    #             for idx, execution_environment_name in enumerate(
+    #                 execution_environment_names
+    #             ):
+    #                 execution_environment = self.get_execution_environment(
+    #                     execution_environment_name
+    #                 )
+    #                 data_asset_names[
+    #                     execution_environment_name
+    #                 ] = execution_environment.get_available_data_asset_names(
+    #                     data_connector_names[idx]
+    #                 )
+    #
+    #         elif len(data_connector_names) == 1:
+    #             execution_environment = self.get_execution_environment(
+    #                 execution_environment_names[0]
+    #             )
+    #             execution_environment_names[
+    #                 execution_environment_names[0]
+    #             ] = execution_environment.get_available_data_asset_names(
+    #                 data_connector_names
+    #             )
+    #
+    #         else:
+    #             raise ValueError(
+    #                 "If providing data connector, you must either specify one for each execution_environment "
+    #                 "or "
+    #                 "only "
+    #                 "one execution_environment."
+    #             )
+    #     else:  # data_connector_names is None
+    #         for execution_environment_name in execution_environment_names:
+    #             try:
+    #                 execution_environment = self.get_execution_environment(
+    #                     execution_environment_name
+    #                 )
+    #                 data_asset_names[
+    #                     execution_environment_name
+    #                 ] = execution_environment.get_available_data_asset_names()
+    #             except ValueError:
+    #                 # handle the edge case of a non-existent execution_environment
+    #                 data_asset_names[execution_environment_name] = {}
+    #
+    #     return data_asset_names
+
     def build_batch_kwargs(
         self,
-        datasource=None,
-        batch_kwargs_generator=None,
+        datasource,
+        batch_kwargs_generator,
         data_asset_name=None,
         partition_id=None,
-        execution_environment=None,
-        data_connector=None,
         **kwargs,
     ):
-        """Builds batch kwargs using the provided execution environment (AKA datasource), data_connector (AKA batch
-        kwargs generator), and batch_parameters.
+        """Builds batch kwargs using the provided datasource, batch kwargs generator, and batch_parameters.
 
         Args:
             datasource (str): the name of the datasource for which to build batch_kwargs
             batch_kwargs_generator (str): the name of the batch kwargs generator to use to build batch_kwargs
             data_asset_name (str): an optional name batch_parameter
-            execution_environment (str): the name of the execution environment for which to build batch_kwargs
-            data_connector (str): the name of the data connector to use to build batch_kwargs
             **kwargs: additional batch_parameters
 
         Returns:
             BatchKwargs
 
         """
-        assert (datasource and not execution_environment) or (
-            not datasource and execution_environment
-        ), "Please provide either datasource or execution_environment."
-        if datasource:
-            warnings.warn(
-                "The 'datasource' argument will be deprecated and renamed to 'execution_environment'. "
-                "Please update code accordingly.",
-                DeprecationWarning,
-            )
-            execution_environment = datasource
-
-        assert (batch_kwargs_generator and not data_connector) or (
-            not batch_kwargs_generator and data_connector
-        ), "Please provide either batch_kwargs_generator or data_connector."
-        if batch_kwargs_generator:
-            warnings.warn(
-                "The 'batch_kwargs_generator' argument will be deprecated and renamed to 'data_connector'. "
-                "Please update code accordingly.",
-                DeprecationWarning,
-            )
-            data_connector = batch_kwargs_generator
-
         if kwargs.get("name"):
             if data_asset_name:
                 raise ValueError(
@@ -989,16 +1037,40 @@ class BaseDataContext(object):
                 DeprecationWarning,
             )
             data_asset_name = kwargs.pop("name")
-        execution_environment_obj = self.get_execution_environment(
-            execution_environment
-        )
-        batch_kwargs = execution_environment_obj.build_batch_kwargs(
+        datasource_obj = self.get_datasource(datasource)
+        batch_kwargs = datasource_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
             data_asset_name=data_asset_name,
             partition_id=partition_id,
             **kwargs,
         )
         return batch_kwargs
+
+    def build_batch_spec(
+        self,
+        execution_environment,
+        data_connector,
+        batch_definition
+    ):
+        """Builds batch_spec using the provided execution_environment, data_connector, and batch_definition.
+
+        Args:
+            execution_environment (str): the name of the execution_environment for which to build batch_kwargs
+            data_connector (str): the name of the data_connector to use to build batch_spec
+            batch_definition (dict): dict specifying batch - used to generate a batch_spec
+
+        Returns:
+            BatchSpec
+
+        """
+        execution_environment_obj = self.get_execution_environment(
+            execution_environment
+        )
+        batch_spec = execution_environment_obj.build_batch_spec(
+            data_connector=data_connector,
+            batch_definition=batch_definition
+        )
+        return batch_spec
 
     # WIP new get_batch
     def _get_batch(

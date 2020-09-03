@@ -14,7 +14,7 @@ from great_expectations.datasource import SparkDFDatasource
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.execution_environment.types import InMemoryBatchKwargs
 from great_expectations.util import is_library_loadable
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import Validator, BridgeValidator
 
 yaml = YAML()
 
@@ -390,7 +390,7 @@ def test_spark_datasource_processes_dataset_options(
     )
     batch_kwargs["dataset_options"] = {"caching": False, "persist": False}
     batch = datasource.get_batch(batch_kwargs)
-    validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
     dataset = validator.get_dataset()
     assert dataset.caching is False
     assert dataset._persist is False
