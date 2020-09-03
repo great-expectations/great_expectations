@@ -57,7 +57,7 @@ All Expectations accept a boolean `catch_exceptions` parameter. If true, executi
 
     {
         "result": False,
-        "raised_exception": True,
+        "catch_exceptions": True,
         "exception_traceback": "..."
     }
 
