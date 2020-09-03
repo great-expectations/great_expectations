@@ -1,13 +1,11 @@
 import copy
 import datetime
-import decimal
 import inspect
 import json
 import logging
 import traceback
-import uuid
 import warnings
-from collections import Counter, defaultdict, namedtuple
+from collections import defaultdict, namedtuple
 from collections.abc import Hashable
 from functools import wraps
 from typing import List
@@ -18,20 +16,22 @@ from marshmallow import ValidationError
 import pandas as pd
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core import (ExpectationConfiguration,
-                                     ExpectationSuite,
-                                     ExpectationSuiteValidationResult,
-                                     ExpectationValidationResult,
-                                     RunIdentifier, expectationSuiteSchema)
-from great_expectations.core.evaluation_parameters import \
-    build_evaluation_parameters
-from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.data_asset.util import (
-    parse_result_format, recursively_convert_to_json_serializable)
-from great_expectations.dataset import (PandasDataset, SparkDFDataset,
-                                        SqlAlchemyDataset)
-from great_expectations.dataset.sqlalchemy_dataset import \
-    SqlAlchemyBatchReference
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+    RunIdentifier,
+    expectationSuiteSchema
+)
+from great_expectations.core.evaluation_parameters import build_evaluation_parameters
+from great_expectations.data_asset.util import recursively_convert_to_json_serializable
+from great_expectations.dataset import (
+    PandasDataset,
+    SparkDFDataset,
+    SqlAlchemyDataset
+)
+from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.types import ClassConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support
@@ -1094,166 +1094,6 @@ class Validator(object):
     def expectation_suite_name(self, expectation_suite_name):
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
         self._expectation_suite.expectation_suite_name = expectation_suite_name
-
-    ###
-    #
-    # Output generation
-    #
-    ###
-
-    def _format_map_output(
-        self,
-        result_format,
-        success,
-        element_count,
-        nonnull_count,
-        unexpected_count,
-        unexpected_list,
-        unexpected_index_list,
-    ):
-        """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
-        and file_lines_map_expectation).
-
-        Expectations support four result_formats: BOOLEAN_ONLY, BASIC, SUMMARY, and COMPLETE.
-        In each case, the object returned has a different set of populated fields.
-        See :ref:`result_format` for more information.
-
-        This function handles the logic for mapping those fields for column_map_expectations.
-        """
-        # NB: unexpected_count parameter is explicit some implementing classes may limit the length of unexpected_list
-
-        # Retain support for string-only output formats:
-        result_format = parse_result_format(result_format)
-
-        # Incrementally add to result and return when all values for the specified level are present
-        return_obj = {"success": success}
-
-        if result_format["result_format"] == "BOOLEAN_ONLY":
-            return return_obj
-
-        missing_count = element_count - nonnull_count
-
-        if element_count > 0:
-            unexpected_percent = unexpected_count / element_count * 100
-            missing_percent = missing_count / element_count * 100
-
-            if nonnull_count > 0:
-                unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
-            else:
-                unexpected_percent_nonmissing = None
-
-        else:
-            missing_percent = None
-            unexpected_percent = None
-            unexpected_percent_nonmissing = None
-
-        return_obj["result"] = {
-            "element_count": element_count,
-            "missing_count": missing_count,
-            "missing_percent": missing_percent,
-            "unexpected_count": unexpected_count,
-            "unexpected_percent": unexpected_percent,
-            "unexpected_percent_nonmissing": unexpected_percent_nonmissing,
-            "partial_unexpected_list": unexpected_list[
-                : result_format["partial_unexpected_count"]
-            ],
-        }
-
-        if result_format["result_format"] == "BASIC":
-            return return_obj
-
-        # Try to return the most common values, if possible.
-        if 0 < result_format.get("partial_unexpected_count"):
-            try:
-                partial_unexpected_counts = [
-                    {"value": key, "count": value}
-                    for key, value in sorted(
-                        Counter(unexpected_list).most_common(
-                            result_format["partial_unexpected_count"]
-                        ),
-                        key=lambda x: (-x[1], x[0]),
-                    )
-                ]
-            except TypeError:
-                partial_unexpected_counts = []
-                if "details" not in return_obj["result"]:
-                    return_obj["result"]["details"] = {}
-                return_obj["result"]["details"][
-                    "partial_unexpected_counts_error"
-                ] = "partial_unexpected_counts requested, but requires a hashable type"
-            finally:
-                return_obj["result"].update(
-                    {
-                        "partial_unexpected_index_list": unexpected_index_list[
-                            : result_format["partial_unexpected_count"]
-                        ]
-                        if unexpected_index_list is not None
-                        else None,
-                        "partial_unexpected_counts": partial_unexpected_counts,
-                    }
-                )
-
-        if result_format["result_format"] == "SUMMARY":
-            return return_obj
-
-        return_obj["result"].update(
-            {
-                "unexpected_list": unexpected_list,
-                "unexpected_index_list": unexpected_index_list,
-            }
-        )
-
-        if result_format["result_format"] == "COMPLETE":
-            return return_obj
-
-        raise ValueError(
-            "Unknown result_format %s." % (result_format["result_format"],)
-        )
-
-    def _calc_map_expectation_success(self, success_count, nonnull_count, mostly):
-        """Calculate success and percent_success for column_map_expectations
-
-        Args:
-            success_count (int): \
-                The number of successful values in the column
-            nonnull_count (int): \
-                The number of nonnull values in the column
-            mostly (float or None): \
-                A value between 0 and 1 (or None), indicating the fraction of successes required to pass the \
-                expectation as a whole. If mostly=None, then all values must succeed in order for the expectation as \
-                a whole to succeed.
-
-        Returns:
-            success (boolean), percent_success (float)
-        """
-        if isinstance(success_count, decimal.Decimal):
-            raise ValueError(
-                "success_count must not be a decimal; check your db configuration"
-            )
-
-        if isinstance(nonnull_count, decimal.Decimal):
-            raise ValueError(
-                "nonnull_count must not be a decimal; check your db configuration"
-            )
-
-        if nonnull_count > 0:
-            percent_success = success_count / nonnull_count
-
-            if mostly is not None:
-                success = bool(percent_success >= mostly)
-            else:
-                success = bool(nonnull_count - success_count == 0)
-        else:
-            success = True
-            percent_success = None
-
-        return success, percent_success
-
-    ###
-    #
-    # Iterative testing for custom expectations
-    #
-    ###
 
     def test_expectation_function(self, function, *args, **kwargs):
         """Test a generic expectation function
