@@ -413,13 +413,30 @@ class S3GlobReaderDataConnector(DataConnector):
         url = S3Url(raw_url)
         logger.debug("Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key))
         s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
-        # reader_fn = engine._get_reader_fn(reader_method, url.key)
+
+        # try:
+        #     import boto3
+        #
+        #     s3 = boto3.client("s3", **self._boto3_options)
+        # except ImportError:
+        #     raise BatchSpecError(
+        #         "Unable to load boto3 client to read s3 asset.", batch_spec
+        #     )
+        # raw_url = batch_spec["s3"]
+        # reader_method = batch_spec.get("reader_method")
+        # url = S3Url(raw_url)
+        # logger.debug(
+        #     "Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key)
+        # )
+        # s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
+        # reader_fn = self._get_reader_fn(reader_method, url.key)
         # df = reader_fn(
         #     StringIO(
         #         s3_object["Body"]
         #             .read()
         #             .decode(s3_object.get("ContentEncoding", "utf-8"))
         #     ),
-        #     **self.reader_options
+        #     **reader_options
         # )
+
         return url, s3_object

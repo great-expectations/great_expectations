@@ -2,7 +2,6 @@ import datetime
 import inspect
 import json
 import logging
-import uuid
 from functools import partial, wraps
 from io import StringIO
 from typing import List
@@ -18,16 +17,19 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     _scipy_distribution_positional_args_from_dict,
-    is_valid_continuous_partition_object, validate_distribution_parameters)
-from great_expectations.execution_environment.types import (BatchSpec,
-                                                            PathBatchSpec,
-                                                            S3BatchSpec)
+    is_valid_continuous_partition_object,
+    validate_distribution_parameters
+)
+from great_expectations.execution_environment.types import (
+    PathBatchSpec,
+    S3BatchSpec
+)
 
 from ..core.batch import Batch
 from ..datasource.pandas_datasource import HASH_THRESHOLD
-from ..exceptions import BatchKwargsError, BatchSpecError
+from ..exceptions import BatchSpecError
 from ..execution_environment.types import BatchMarkers
-from ..execution_environment.util import S3Url, hash_pandas_dataframe
+from ..execution_environment.util import hash_pandas_dataframe
 from .execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -465,38 +467,26 @@ Notes:
         data_connector_name = batch_definition.get("data_connector")
         assert data_connector_name, "Batch definition must specify a data_connector"
 
+        data_connector = execution_environment.get_data_connector(data_connector_name)
+        batch_spec = data_connector.build_batch_spec(batch_definition=batch_definition)
+        batch_id = batch_spec.to_id()
+
         if in_memory_dataset is not None:
             if batch_definition.get("data_asset_name") and batch_definition.get(
                 "partition_id"
             ):
                 df = in_memory_dataset
-                data_connector = execution_environment.get_data_connector(
-                    data_connector_name
-                )
-                batch_spec = data_connector.build_batch_spec(batch_definition=batch_definition)
-                batch_id = batch_spec.to_id()
-                if self.batches.get(batch_id):
-                    self._loaded_batch_id = batch_id
-                    return self.batches.get(batch_id)
             else:
                 raise ValueError(
                     "To pass an in_memory_dataset, you must also pass a data_asset_name "
                     "and partition_id"
                 )
         else:
-            data_connector = execution_environment.get_data_connector(
-                data_connector_name
-            )
             if data_connector.get_config().get("class_name") == "DataConnector":
                 raise ValueError(
                     "No in_memory_dataset found. To use a data_connector with class DataConnector, please ensure that "
                     "you are passing a dataset to load_batch()"
                 )
-            batch_spec = data_connector.build_batch_spec(batch_definition=batch_definition)
-            batch_id = batch_spec.to_id()
-            if self.batches.get(batch_id):
-                self._loaded_batch_id = batch_id
-                return self.batches.get(batch_id)
 
             # We will use and manipulate reader_options along the way
             reader_options = batch_spec.get("reader_options", {})
@@ -506,7 +496,6 @@ Notes:
                 reader_method = batch_spec.get("reader_method")
                 reader_fn = self._get_reader_fn(reader_method, path)
                 df = reader_fn(path, **reader_options)
-
             elif isinstance(batch_spec, S3BatchSpec):
                 url, s3_object = data_connector.get_s3_object(batch_spec=batch_spec)
                 reader_method = batch_spec.get("reader_method")
@@ -519,43 +508,6 @@ Notes:
                     ),
                     **reader_options
                 )
-
-                # try:
-                #     import boto3
-                #
-                #     s3 = boto3.client("s3", **self._boto3_options)
-                # except ImportError:
-                #     raise BatchSpecError(
-                #         "Unable to load boto3 client to read s3 asset.", batch_spec
-                #     )
-                # raw_url = batch_spec["s3"]
-                # reader_method = batch_spec.get("reader_method")
-                # url = S3Url(raw_url)
-                # logger.debug(
-                #     "Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key)
-                # )
-                # s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
-                # reader_fn = self._get_reader_fn(reader_method, url.key)
-                # df = reader_fn(
-                #     StringIO(
-                #         s3_object["Body"]
-                #             .read()
-                #             .decode(s3_object.get("ContentEncoding", "utf-8"))
-                #     ),
-                #     **reader_options
-                # )
-
-            elif "dataset" in batch_spec and isinstance(
-                batch_spec["dataset"], (pd.DataFrame, pd.Series)
-            ):
-                df = batch_spec.get("dataset")
-                # We don't want to store the actual dataframe in kwargs; copy the remaining batch_spec
-                batch_spec = {
-                    k: batch_spec[k] for k in batch_spec if k != "dataset"
-                }
-                batch_spec["PandasInMemoryDF"] = True
-                batch_spec["ge_batch_id"] = str(uuid.uuid1())
-
             else:
                 raise BatchSpecError(
                     "Invalid batch_spec: path, s3, or df is required for a PandasDatasource",
@@ -565,15 +517,18 @@ Notes:
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
-        batch = Batch(
-            execution_environment_name=batch_definition.get("execution_environment"),
-            batch_spec=batch_spec,
-            data=df,
-            batch_definition=batch_definition,
-            batch_markers=batch_markers,
-            data_context=self._data_context,
-        )
-        self.batches[batch_id] = batch
+        if not self.batches.get(batch_id):
+            batch = Batch(
+                execution_environment_name=batch_definition.get("execution_environment"),
+                batch_spec=batch_spec,
+                data=df,
+                batch_definition=batch_definition,
+                batch_markers=batch_markers,
+                data_context=self._data_context,
+            )
+            self.batches[batch_id] = batch
+
+        self._loaded_batch_id = batch_id
 
     @property
     def dataframe(self):
