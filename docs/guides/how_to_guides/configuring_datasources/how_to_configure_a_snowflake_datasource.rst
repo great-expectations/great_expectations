@@ -14,7 +14,7 @@ Great Expectations supports 3 different authentication mechanisms for Snowflake:
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
 
 -----
 Steps

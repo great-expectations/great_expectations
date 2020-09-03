@@ -8,7 +8,7 @@ By default, Validation results are stored in the ``uncommitted/validations/`` di
 
     - Configured a :ref:`Data Context <tutorials__getting_started__initialize_a_data_context>`.
     - Configured an :ref:`Expectation Suite <tutorials__getting_started__create_your_first_expectations>`.
-    - Configured a :ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>`.
+    - Configured a :ref:`Checkpoint <tutorials__getting_started__validate_your_data>`.
     - Installed `boto3 <https://github.com/boto/boto3>`_ in your local environment.
     - Identified the S3 bucket and prefix where Validation results will be stored.
 
@@ -96,7 +96,7 @@ Steps
 
 6. **Confirm that the Validations store has been correctly configured.**
 
-    Run a :ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>` to store results in the new Validations store on S3 then visualize the results by re-building :ref:`Data Docs <tutorials__getting_started__set_up_data_docs>`.
+    Run a :ref:`Checkpoint <tutorials__getting_started__validate_your_data>` to store results in the new Validations store on S3 then visualize the results by re-building :ref:`Data Docs <tutorials__getting_started__set_up_data_docs>`.
 
 
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on `Slack <https://greatexpectations.io/slack>`_ if you would like to learn more, or have any questions.

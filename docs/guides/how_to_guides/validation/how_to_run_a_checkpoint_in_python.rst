@@ -8,7 +8,7 @@ This is useful if your pipeline environment or orchestration engine does not hav
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
   - You have :ref:`created a Checkpoint <how_to_guides__validation__how_to_create_a_new_checkpoint>`
 
 Steps

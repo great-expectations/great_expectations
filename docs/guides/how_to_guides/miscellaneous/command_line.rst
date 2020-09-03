@@ -570,7 +570,7 @@ Here is an example validation config file:
 great_expectations datasource
 ==============================
 
-All command line operations for working with :ref:`datasources <datasource>` are here.
+All command line operations for working with :ref:`datasources <reference__core_concepts__datasources>` are here.
 A datasource is a connection to data and a processing engine.
 Examples of a datasource are:
 - csv files processed in pandas or Spark
