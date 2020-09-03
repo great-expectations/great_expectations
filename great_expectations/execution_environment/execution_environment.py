@@ -70,9 +70,11 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         batch_definition: dict,
         in_memory_dataset: any = None,  # TODO: should this be any to accommodate the different engines?
     ):
-        return self.execution_engine.load_batch(
+        # TODO: <Alex>To delete datasources or keep for backward compatibility?</Alex>
+        self.execution_engine.load_batch(
             batch_definition=batch_definition, in_memory_dataset=in_memory_dataset
         )
+        return self.execution_engine.loaded_batch
 
     def get_validator(
         self,
@@ -231,6 +233,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
                 "Unable to load data connector %s -- no configuration found or invalid configuration."
                 % name
             )
+        data_connector_config.update({"name": name})
         data_connector = self._build_data_connector(**data_connector_config)
         self._data_connectors[name] = data_connector
         return data_connector
