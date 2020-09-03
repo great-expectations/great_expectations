@@ -110,7 +110,7 @@ The core team will not be able to merge your contribution until they're able to 
 4. Make changes to tests/test_utils.py
 ######################################
 
-    * **Add a try-except clause to import dialect-specific types and map them to generic types.**
+    * **Add a try-except clause to import dialect-specific types and map them to type names that will be used in test schema definitions.**
 
         .. code-block:: python
 
