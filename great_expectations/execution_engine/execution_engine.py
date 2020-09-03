@@ -200,6 +200,9 @@ class ExecutionEngine(MetaExecutionEngine):
         # (e.g. self.spark_df) over the lifetime of the dataset instance
         self.caching = kwargs.pop("caching", True)
 
+        data_context = kwargs.pop("data_context", None)
+        self._data_context = data_context
+
         batch_spec_defaults = kwargs.pop("batch_spec_defaults", {})
         batch_spec_defaults_keys = set(batch_spec_defaults.keys())
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
@@ -218,12 +221,60 @@ class ExecutionEngine(MetaExecutionEngine):
         batches = kwargs.pop("batches", {})
         self._batches = batches
 
+        validator = kwargs.pop("validator", None)
+        self._validator = validator
+
         super().__init__(*args, **kwargs)
 
         if self.caching:
             for func in self.hashable_getters:
                 caching_func = lru_cache(maxsize=None)(getattr(self, func))
                 setattr(self, func, caching_func)
+
+    @property
+    def data_context(self):
+        return self._data_context
+
+    @data_context.setter
+    def data_context(self, data_context):
+        self._data_context = data_context
+
+    @property
+    def _active_validation(self):
+        if not self.validator:
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute `_active_validation` - please set "
+                                 f"_validator attribute first.")
+        else:
+            return self.validator._active_validation
+
+    @_active_validation.setter
+    def _active_validation(self, active_validation):
+        if not self.validator:
+            raise AttributeError(f"'{type(self).__name__}' object cannot set `_active_validation` attribute - please "
+                                 f"set "
+                                 f"_validator attribute first.")
+        else:
+            self.validator._active_validation = active_validationf
+
+    @property
+    def _expectation_suite(self):
+        if not self.validator:
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute `_expectation_suite` - please set "
+                                 f"_validator attribute first.")
+        else:
+            return self.validator._expectation_suite
+
+    @property
+    def _validator_config(self):
+        if not self.validator:
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute `_validator_config` - please set "
+            f"_validator attribute first.")
+        else:
+            return self.validator._validator_config
+
+    @property
+    def validator(self):
+        return self._validator
 
     @property
     def batch_spec_defaults(self):
