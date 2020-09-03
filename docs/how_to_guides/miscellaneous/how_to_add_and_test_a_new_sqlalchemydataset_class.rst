@@ -17,7 +17,7 @@ Steps
 1. Install and document dependencies
 ####################################
 
-    * **Install the python dependencies for your dialect.**  While you're at it, please add a line(s) to ``requirements-dev.txt``. Examples:
+    * **Install the python dependencies for your dialect.**  While you're at it, please add a line(s) to ``requirements-dev-sqlalchemy.txt``. Examples:
     
         .. code-block:: bash
         
