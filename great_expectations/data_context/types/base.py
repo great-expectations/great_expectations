@@ -29,12 +29,10 @@ DEFAULT_USAGE_STATISTICS_URL = (
 )
 
 
-# TODO: <Alex>To delete datasources or keep for backward compatibility?</Alex>
 class DataContextConfig(DictDot):
     def __init__(
         self,
         config_version,
-        # datasources,
         expectations_store_name,
         validations_store_name,
         evaluation_parameter_store_name,
@@ -47,7 +45,7 @@ class DataContextConfig(DictDot):
         anonymous_usage_statistics=None,
         commented_map=None,
         datasources=None,
-        execution_environments=None,
+        execution_environments=None
     ):
         if commented_map is None:
             commented_map = CommentedMap()
