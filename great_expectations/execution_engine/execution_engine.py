@@ -254,7 +254,7 @@ class ExecutionEngine(MetaExecutionEngine):
                                  f"set "
                                  f"_validator attribute first.")
         else:
-            self.validator._active_validation = active_validationf
+            self.validator._active_validation = active_validation
 
     @property
     def _expectation_suite(self):
