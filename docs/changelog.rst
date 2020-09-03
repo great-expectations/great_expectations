@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [DOCS] Add notes on transient table creation to Snowflake guide (thanks @verhey)!
 
 
 0.12.1
