@@ -4,8 +4,8 @@
 Expectations
 ############
 
-Expectations are the workhorse abstraction in Great Expectations. Like assertions in traditional python unit tests,
-Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests,
+An Expectation is a declaritive statement that describes a property of a dataset. Like assertions in traditional python unit tests,
+Expectations provide a flexible, declarative language for despicting expected behavior. Unlike traditional unit tests,
 Great Expectations applies Expectations to data instead of code.
 
 Great Expectations' built-in library includes more than 50 common Expectations, such as:
@@ -21,7 +21,7 @@ For a full list of available Expectations, please check out the :ref:`expectatio
 
 You can also extend Great Expectations by :ref:`creating your own custom Expectations <_how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations>`.
 
-Expectations *enhance communication* about your data and *amplify quality* in data applications. Using expectations
+Expectations *enhance communication* about your data and *improve quality* for data applications. Using expectations
 helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."
 
 .. attention::
