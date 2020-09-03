@@ -60,7 +60,6 @@ class Validator(object):
         profiler = kwargs.pop("profiler", None)
         expectation_suite = kwargs.pop("expectation_suite", None)
         expectation_suite_name = kwargs.pop("expectation_suite_name", None)
-        data_context = kwargs.pop("data_context", None)
         execution_engine = kwargs.pop("execution_engine", None)
 
         if "autoinspect_func" in kwargs:
@@ -69,9 +68,9 @@ class Validator(object):
                 category=DeprecationWarning,
             )
         super().__init__(*args, **kwargs)
-        self._data_context = data_context
+        self._data_context = execution_engine.data_context
         self._execution_engine = execution_engine
-        self._config = {"interactive_evaluation": interactive_evaluation}
+        self._validator_config = {"interactive_evaluation": interactive_evaluation}
         self._initialize_expectations(
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
@@ -82,16 +81,18 @@ class Validator(object):
         self._active_validation = False
         if profiler is not None:
             profiler.profile(self)
-        if data_context and hasattr(data_context, "_expectation_explorer_manager"):
+        if self._data_context and hasattr(self._data_context, "_expectation_explorer_manager"):
             self.set_default_expectation_argument("include_config", True)
+
+        self._execution_engine._validator = self
 
     def __getattr__(self, name):
         if name.startswith("expect_") and hasattr(self.execution_engine, name):
             return getattr(self.execution_engine, name)
-        # elif type(self.execution_engine).__name__ == "PandasExecutionEngine" and hasattr(pd.DataFrame, name):
-        #     return getattr(pd.DataFrame, name)
+        elif type(self.execution_engine).__name__ == "PandasExecutionEngine" and hasattr(pd.DataFrame, name):
+            return getattr(self.batch.data, name)
         else:
-            raise AttributeError("'Validator' object has no attribute '%s'" % name)
+            raise AttributeError(f"'{type(self).__name__}'  object has no attribute '{name}'")
 
     @property
     def execution_engine(self):
@@ -234,7 +235,7 @@ class Validator(object):
                     ) = build_evaluation_parameters(
                         expectation_args,
                         self._expectation_suite.evaluation_parameters,
-                        self._config.get("interactive_evaluation", True),
+                        self._validator_config.get("interactive_evaluation", True),
                         self._data_context,
                     )
                 else:
@@ -244,7 +245,7 @@ class Validator(object):
                     ) = build_evaluation_parameters(
                         expectation_args,
                         None,
-                        self._config.get("interactive_evaluation", True),
+                        self._validator_config.get("interactive_evaluation", True),
                         self._data_context,
                     )
 
@@ -259,7 +260,7 @@ class Validator(object):
 
                 # Finally, execute the expectation method itself
                 if (
-                    self._config.get("interactive_evaluation", True)
+                    self._validator_config.get("interactive_evaluation", True)
                     or self._active_validation
                 ):
                     try:
@@ -442,10 +443,10 @@ class Validator(object):
         )
 
     def set_config_value(self, key, value):
-        self._config[key] = value
+        self._validator_config[key] = value
 
     def get_config_value(self, key):
-        return self._config[key]
+        return self._validator_config[key]
 
     @property
     def batch(self):
@@ -941,7 +942,7 @@ class Validator(object):
                     ) = build_evaluation_parameters(
                         expectation.kwargs,
                         runtime_evaluation_parameters,
-                        self._config.get("interactive_evaluation", True),
+                        self._validator_config.get("interactive_evaluation", True),
                         self._data_context,
                     )
 
