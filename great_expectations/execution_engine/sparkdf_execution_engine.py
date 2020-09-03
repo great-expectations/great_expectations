@@ -19,6 +19,7 @@ from great_expectations.data_asset.util import DocInherit, parse_result_format
 
 from great_expectations.validator.validator import Validator
 from .execution_engine import ExecutionEngine
+from .pandas_execution_engine import PandasExecutionEngine
 from great_expectations.execution_environment.types import (
     PathBatchSpec,
     S3BatchSpec
