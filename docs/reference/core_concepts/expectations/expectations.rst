@@ -4,7 +4,7 @@
 Expectations
 ############
 
-An Expectation is a declaritive statement that describes a property of a dataset. Like assertions in traditional python unit tests,
+An Expectation is a statement describing a verifiable property of a data set. Like assertions in traditional python unit tests,
 Expectations provide a flexible, declarative language for despicting expected behavior. Unlike traditional unit tests,
 Great Expectations applies Expectations to data instead of code.
 
