@@ -5,15 +5,13 @@ Validate your data using a Checkpoint
 
 :ref:`validation` is the core operation of Great Expectations: “Validate data X against Expectation Y.”
 
-In normal usage, the best way to validate data is with a :ref:`Checkpoint <reference__core_concepts__validation__checkpoints>`. Checkpoints bring :ref:`Batches <reference__core_concepts__batches>` of data together with corresponding :ref:`Expectation Suites <reference__core_concepts__expectations__expectation_suites>` for validation. Configuring Checkpoints simplifies deployment, by pre-specifying the "X"s and "Y"s that you want to validate at any given point in your data infrastructure.
+In normal usage, the best way to validate data is with a :ref:`Checkpoint`. Checkpoints bundle :ref:`Batches` of data with corresponding :ref:`Expectation Suites` for validation.
 
-Let’s set up our first Checkpoint by running the following CLI command:
+Let’s set up our first Checkpoint! **Go back to your terminal** and shut down the Jupyter notebook, if you haven't yet. Then run the following command:
 
 .. code-block:: bash
 
   great_expectations checkpoint new staging.chk taxi.demo
-
-``staging.chk`` will be the name of your new Checkpoint. It will use ``taxi.demo`` as its primary :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>` and will be configured to validate the ``yellow_tripdata_staging`` table. That way, we can simply run the Checkpoint each time we have new data loaded to ``staging`` and validate that the data meets our expectations!
 
 From there, you will be prompted by the CLI to configure the Checkpoint:
 
@@ -29,34 +27,19 @@ From there, you will be prompted by the CLI to configure the Checkpoint:
 
     A checkpoint named `staging.chk` was added to your project!
     ...
-    
-Let’s explain what happened there before continuing.
 
-How Checkpoints work
---------------------
+**What just happened?**
 
-Your new Checkpoint file is in ``staging.chk``. With comments removed, it looks like this:
+- ``staging.chk`` is the name of your new Checkpoint.
+- The Checkpoint uses ``taxi.demo`` as its primary :ref:`Expectation Suite`.
+- You configured the Checkpoint to validate the ``yellow_tripdata_staging`` table.
 
-.. code-block:: yaml
-
-    validation_operator_name: action_list_operator
-    batches:
-      - batch_kwargs:
-          table: yellow_tripdata_staging
-          schema: public
-          data_asset_name: yellow_tripdata_staging
-          datasource: my_postgres_db
-        expectation_suite_names:
-          - taxi.demo
-
-Our newly configured Checkpoint knows how to load ``yellow_tripdata_staging`` as a Batch, pair it with the ``taxi.demo`` Expectation Suite, and execute validation of the Batch using a pre-configured :ref:`Validation Operator <reference__core_concepts__validation__validation_operator>` called ``action_list_operator``.
-
-You don't need to worry much about the details of Validation Operators for now. They orchestrate the actual work of validating data and processing the results. After executing validation, the Validation Operator can kick off additional workflows through :ref:`Validation Actions <validation_actions>`. For more examples of post-validation actions, please see the :ref:`How-to section for Validation <how_to_guides__validation>`.
+That way, **we can simply run the Checkpoint each time we have new data loaded** to ``yellow_tripdata_staging`` and validate that the data meets our Expectations!
 
 How to validate data by running Checkpoints
 -------------------------------------------
 
-The final step in this tutorial is to confirm that our Expectation Suite indeed catches the data quality issues in the staging data! Run the Checkpoint we just created to trigger validation of the staging data:
+The final step in this tutorial is to use our Expectation Suite to alert us of the 0 values in the ``passenger_count`` column in the staging data! Run the Checkpoint we just created to trigger validation of the staging data:
 
 .. code-block:: bash
 
@@ -73,20 +56,22 @@ This will output the following:
 
 We ran the Checkpoint and it successfully failed! **Wait - what?** Yes, that's correct, and that's we wanted. We know that in this example, the staging data has data quality issues, which means we *expect* the validation to fail. Let's open up Data Docs again to see the details.
 
-If you refresh the Data Docs Home page, you will now see a *failed* validation result at the top of the page:
+If you navigate to the Data Docs *Home* page and refresh, you will now see a *failed* validation run at the top of the page:
 
 .. figure:: /images/validation_results_failed.png
 
-If you click through to the failed validation results page, you will see that the validation of the staging data *failed* because the set of *Observed Values* in the ``passenger_count`` column contained the value 0! This violates our Expectation, which makes the validation fail.
+If you click through to the validation results page, you will see that the validation of the staging data *failed* because the set of *Observed Values* in the ``passenger_count`` column contained the value 0.0! This violates our Expectation, which makes the validation fail.
 
 .. figure:: /images/validation_results_failed_detail.png
 
-**And this is it!** We have successfully created an Expectation Suite based on historical data, and used it to detect an issue with our new data.
+.. admonition:: And this is it!
+
+   We have successfully created an Expectation Suite based on historical data, and used it to detect an issue with our new data. **Congratulations! You have now completed the "Getting started with Great Expectations" tutorial**.
 
 Wrap-up and next steps
 ----------------------
 
-**Congratulations! You have now completed the "Getting started with Great Expectations" tutorial**. In this tutorial, we have covered the following basic capabilities of Great Expectations:
+In this tutorial, we have covered the following basic capabilities of Great Expectations:
 
 * Setting up a Data Context
 * Connecting a Data Source
@@ -94,4 +79,6 @@ Wrap-up and next steps
 * Exploring validation results in Data Docs
 * Validating a new batch of data with a Checkpoint
 
-As a final, optional step, you can check out the next section on how to customize your deployment in order to configure options such as where to store Expectations, validation results, and Data Docs.
+As a final, **optional step**, you can check out the next section on how to customize your deployment in order to configure options such as where to store Expectations, validation results, and Data Docs.
+
+And if you want to stop here, feel free to join our `Slack community <https://greatexpectations.io/slack>`_ to say hi to fellow Great Expectations users in the **#beginners** channel!
