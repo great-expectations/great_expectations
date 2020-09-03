@@ -25,7 +25,7 @@ Steps
             PyAthena[SQLAlchemy]>=1.1
             pybigquery>=0.4.15
 
-    * **Install any necessary drivers**. sqlalchemy requires special drivers for some databases. If yours is one of them, please carefully document the steps in {{document TBD}}
+    * **Install any necessary drivers**. sqlalchemy requires special drivers for some databases. If yours is one of them, please carefully document the steps .
     * **If possible, add docker containers for test resources.** (You can find examples of similar containers in `assets/docker/`.) Otherwise, please document the steps to set up a suitable test environment.
 
 The core team will not be able to merge your contribution until they're able to replicate your setup.
