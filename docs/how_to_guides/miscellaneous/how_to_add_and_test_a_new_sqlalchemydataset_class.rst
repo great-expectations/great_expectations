@@ -60,6 +60,10 @@ The core team will not be able to merge your contribution until they're able to 
                 stmt = "CREATE OR REPLACE TABLE {table_name} AS {custom_sql}".format(
                     table_name=table_name, custom_sql=custom_sql)
 
+    * **Review SqlAlchemyDataset methods starting with _get_dialect_**
+
+        Methods like ``_get_dialect_type_module`` and ``_get_dialect_regex_expression`` allow you to customize their behavior to accommodate the idiosyncracies of specific databases. In some cases, the methods specify defaults that will work for most SQL engines. In other cases, you'll need to implement custom logic. In either case, you need to verify that they behave properly for your dialect.
+
 
 3. Make changes to conftest.py
 ##############################
@@ -183,8 +187,8 @@ The core team will not be able to merge your contribution until they're able to 
             def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
                 if context in ["sqlite", "postgresql", "mysql", "presto"]:
 
-5. Get tests to pass
-####################
+5. Use tests to verify consistency with other databases
+########################################################
 
 Since Great Expectations already has rich tests for Expectations, we recommend test-driven development when adding support for a new SQL dialect.
 
@@ -196,6 +200,7 @@ You can run the main dev loop with:
 
 You may need to add specific spot checks to text fixture JSON objects, such as: ``tests/test_definitions/column_map_expectations/expect_column_values_to_be_of_type.json``
 
+In some rare cases, you may need to suppress certain tests for your SQL backend. In that case, you can use the ``only_for`` or ``suppress_test_for`` flags in the test configs. However, we try very hard to avoid such cases, since they weaken the "works the same on all execution engines" principle of Great Expectations.
 
 Once Expectation tests pass, make sure all the remaining tests pass:
 
