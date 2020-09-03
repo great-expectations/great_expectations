@@ -28,7 +28,7 @@ We will describe the Create, Review and Edit steps in brief:
 Create an Expectation Suite
 ---------------------------
 
-Expectation Suites are saved as JSON files, so you *could* create a new suite by writing a file directly. However the preferred way is to let the CLI save you time and typos.  If you cannot use the :ref:`CLI <command_line>` in your environment (e.g., in a Databricks cluster), you can create and edit an Expectation Suite in a notebook. Jump to this section for details: :ref:`Jupyter Notebook for Creating and Editing Expectation Suites`.
+Expectation Suites are saved as JSON files, so you *could* create a new suite by writing a file directly. However the preferred way is to let the CLI save you time and typos.  If you cannot use the :ref:`CLI <command_line>` in your environment (e.g., in a Databricks cluster), you can create and edit an Expectation Suite in a notebook. Jump to this section for details: :ref:`jupyter_notebook_for_creating_and_editing_expectation_suites`.
 
 To continue with the :ref:`CLI <command_line>`, run this command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory:
 
@@ -47,7 +47,7 @@ The command concludes by saving the newly generated Expectation Suite as a JSON 
 Review an Expectation Suite
 ---------------------------
 
-:ref:`Data Docs<data_docs>` is a feature of Great Expectations that creates data documentation by compiling Expectations and validation results into HTML.
+:ref:`Data Docs<reference__core_concepts__data_docs>` is a feature of Great Expectations that creates data documentation by compiling Expectations and validation results into HTML.
 
 Data Docs produces a visual data quality report of what you expect from your data, and how the observed properties of your data differ from your Expectations.
 It helps to keep your entire team on the same page as data evolves.
@@ -75,11 +75,11 @@ The :ref:`CLI <command_line>` provides a command that, given an Expectation Suit
 
 The generated Jupyter notebook can be discarded, since it is auto-generated.
 
-To understand this auto-generated notebook in more depth, jump to this section: :ref:`Jupyter Notebook for Creating and Editing Expectation Suites`.
+To understand this auto-generated notebook in more depth, jump to this section: :ref:`jupyter_notebook_for_creating_and_editing_expectation_suites`.
 
 
 
-
+.. _jupyter_notebook_for_creating_and_editing_expectation_suites:
 
 Jupyter Notebook for Creating and Editing Expectation Suites
 ------------------------------------------------------------
@@ -221,7 +221,6 @@ The DataContext's ``get_batch`` method is used to load a batch of a data asset:
 
 Calling this method asks the Context to get a batch of data and attach the expectation suite ``expectation_suite_name`` to it. The ``batch_kwargs`` argument specifies which batch of the data asset should be loaded.
 
-|
 3. Author Expectations
 ********************************************
 

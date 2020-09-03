@@ -3,12 +3,12 @@
 How to load a database table, view, or query result as a batch
 ==============================================================
 
-This guide shows how to get a :ref:`batch <Batch>` of data that Great Expectations can validate from a SQL database. When you validate data using SQL, all compute is managed by your database, and only Validation Results are returned.
+This guide shows how to get a :ref:`batch <reference__core_concepts__batches>` of data that Great Expectations can validate from a SQL database. When you validate data using SQL, all compute is managed by your database, and only Validation Results are returned.
 
 
 .. admonition:: Prerequisites -- this how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
   - :ref:`Configured a SQL datasource <how_to_guides__configuring_datasources>`
   - Identified a ``table`` name, ``view`` name, or ``query`` that you would like to use as the data to validate.
   - Optionally, configured a Batch Kwargs Generator to support inspecting your database and dynamically building Batch Kwargs.
