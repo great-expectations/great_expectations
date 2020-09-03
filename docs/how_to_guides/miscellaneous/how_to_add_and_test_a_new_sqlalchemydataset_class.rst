@@ -136,7 +136,7 @@ The core team will not be able to merge your contribution until they're able to 
             except ImportError:
                 PRESTO_TYPES = {}
 
-    * **In get_dataset, add an elif clause to connect to data, .** Note: some SQL backends require a schema. If so, this is also the right place to create a test schema, usually called ``test_ci``.
+    * **In get_dataset, add an elif clause to build temporary datasets for testing.** Note: some SQL backends require a schema. If so, this is also the right place to create a test schema, usually called ``test_ci``.
 
         .. code-block:: python
 
