@@ -83,10 +83,10 @@ related to your validation are appropriately versioned and visible to your team.
 
 A **Store** provides a consistent API to manage access to Expectations, Expectation Suite Validation Results and other Great Expectations assets, making it easy to share resources across a team that uses AWS, Azure, GCP, local storage, or something else entirely.
 
-An **Evaluation Parameter** Store makes it possible to build expectation suites that depend on values from other batches
+An **Evaluation Parameter Store** makes it possible to build expectation suites that depend on values from other batches
 of data, such as ensuring that the number of rows in a downstream dataset equals the number of unique values from an upstream one. A Data Context can manage a store to facilitate that validation scenario.
 
-A **Metric** Store makes facilitates saving any metric or statistic generated during validation, for example making it easy to create a dashboard showing key output from running Great Expectations.
+A **Metric Store** makes facilitates saving any metric or statistic generated during validation, for example making it easy to create a dashboard showing key output from running Great Expectations.
 
 
 .. toctree::
