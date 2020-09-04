@@ -13,7 +13,7 @@ Great Expectations provides a direct, expressive framework for describing distri
 Partition Objects
 --------------------------------------------------------------------------------
 
-The core constructs of a great expectations distributional expectation are the partitions, which are intervals/classes in a distributions and are made of histogram bins and their associated weights.
+Distributional expectations rely on expected distributions or "partition objects", which are built from intervals for continuous data or categorical classes and their associated weights.
 
 For continuous data:
 
