@@ -3,7 +3,7 @@
 Connect to data
 ===============
 
-Once you have a DataContext, you'll want to connect to data.  In Great Expectations, :ref:`Datasources` simplify connections, by managing configuration and providing a consistent, cross-platform API for referencing data.
+Once you have a DataContext, you'll want to connect to data.  In Great Expectations, :ref:`Datasources <reference__core_concepts__datasources>` simplify connections, by managing configuration and providing a consistent, cross-platform API for referencing data.
 
 Let's configure your first Datasource, a connection to the local Postgres database we've provided. Follow the next steps in the CLI init flow (**note** the non-standard port for the Postgres connection!):
     
@@ -37,7 +37,7 @@ Let's configure your first Datasource, a connection to the local Postgres databa
     What is the port for the postgres connection? [5432]: 65432
     What is the username for the postgres connection? [postgres]: ge_tutorials
     What is the password for the postgres connection?: ge_tutorials
-    What is the username for the postgres connection? [postgres]: ge_tutorials
+    What is the database name for the postgres connection? [postgres]: ge_tutorials
 
     ...
 

@@ -9,7 +9,6 @@ from typing import Any, List, Union
 import jsonpatch
 from dateutil.parser import parse
 from IPython import get_ipython
-from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.data_context_key import DataContextKey
@@ -25,6 +24,13 @@ from great_expectations.exceptions import (
     InvalidExpectationKwargsError,
     ParserError,
     UnavailableMetricError,
+)
+from great_expectations.marshmallow__shade import (
+    Schema,
+    ValidationError,
+    fields,
+    post_load,
+    pre_dump,
 )
 from great_expectations.types import DictDot
 

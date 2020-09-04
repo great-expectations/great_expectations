@@ -1,5 +1,4 @@
-.. _contributing_style_guide:
-
+.. _contributing__style_guide:
 
 Style Guide
 ===========
@@ -96,7 +95,7 @@ Within the table of contents, each section has specific role to play. Broadly sp
 * **Core concepts are always capitalized, and always are linked on first reference within each page.** Pretend the docs are a fantasy novel, and core concepts are magic.
 
     * Wrong: “You can create expectation suites as follows...”
-    * Better: “You can create :ref:`Expectation Suites` as follows...”
+    * Better: “You can create :ref:`Expectation Suites <reference__core_concepts__expectations__expectation_suites>` as follows...”
     * Avoid: “You can create suites of Expectations as follows...”
 
 * **Class names are written in upper camel case, and always linked on first reference.** Good: "ValidationOperator." Bad: "validationOperator", "validation operator". If a word is both a core concept and a class name, prefer the core concept unless the text refers specifically to the class.
