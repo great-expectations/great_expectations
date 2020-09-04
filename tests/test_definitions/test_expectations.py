@@ -10,12 +10,14 @@ from collections import OrderedDict
 import pandas as pd
 import pytest
 
-from great_expectations.dataset import (PandasDataset, SparkDFDataset,
-                                        SqlAlchemyDataset)
+from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 
 from ..conftest import build_test_backends_list
-from ..test_utils import (candidate_test_is_on_temporary_notimplemented_list,
-                          evaluate_json_test, get_dataset)
+from ..test_utils import (
+    candidate_test_is_on_temporary_notimplemented_list,
+    evaluate_json_test,
+    get_dataset,
+)
 
 try:
     from sqlalchemy.dialects.mssql import dialect as mssqlDialect

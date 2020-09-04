@@ -1,3 +1,7 @@
-from .view import (DefaultJinjaComponentView, DefaultJinjaIndexPageView,
-                   DefaultJinjaPageView, DefaultJinjaSectionView,
-                   DefaultMarkdownPageView)
+from .view import (
+    DefaultJinjaComponentView,
+    DefaultJinjaIndexPageView,
+    DefaultJinjaPageView,
+    DefaultJinjaSectionView,
+    DefaultMarkdownPageView,
+)

@@ -10,7 +10,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.datasource import SqlAlchemyDatasource
-from great_expectations.validator.validator import Validator, BridgeValidator
+from great_expectations.validator.validator import BridgeValidator, Validator
 
 yaml = YAML()
 

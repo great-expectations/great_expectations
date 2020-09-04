@@ -1,5 +1,4 @@
-from great_expectations.data_context.store.tuple_store_backend import \
-    TupleStoreBackend
+from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 
 
 class MyCustomStoreBackend(TupleStoreBackend):

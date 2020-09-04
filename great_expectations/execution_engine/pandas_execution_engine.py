@@ -10,7 +10,6 @@ import jsonschema
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-from great_expectations.validator.validator import Validator
 from scipy import stats
 
 from great_expectations.core import ExpectationConfiguration
@@ -18,12 +17,10 @@ from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     _scipy_distribution_positional_args_from_dict,
     is_valid_continuous_partition_object,
-    validate_distribution_parameters
+    validate_distribution_parameters,
 )
-from great_expectations.execution_environment.types import (
-    PathBatchSpec,
-    S3BatchSpec
-)
+from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec
+from great_expectations.validator.validator import Validator
 
 from ..core.batch import Batch
 from ..datasource.pandas_datasource import HASH_THRESHOLD
@@ -412,9 +409,7 @@ Notes:
     # ]
     # _internal_names_set = set(_internal_names)
 
-    recognized_batch_definition_keys = {
-        "limit"
-    }
+    recognized_batch_definition_keys = {"limit"}
 
     recognized_batch_spec_defaults = {
         "reader_method",
@@ -520,7 +515,9 @@ Notes:
 
         if not self.batches.get(batch_id):
             batch = Batch(
-                execution_environment_name=batch_definition.get("execution_environment"),
+                execution_environment_name=batch_definition.get(
+                    "execution_environment"
+                ),
                 batch_spec=batch_spec,
                 data=df,
                 batch_definition=batch_definition,
@@ -601,11 +598,7 @@ Notes:
             "Unable to determine reader method from path: %s" % path, {"path": path}
         )
 
-    def process_batch_definition(
-        self,
-        batch_definition,
-        batch_spec
-    ):
+    def process_batch_definition(self, batch_definition, batch_spec):
         limit = batch_definition.get("limit")
 
         if limit is not None:

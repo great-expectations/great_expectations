@@ -1,10 +1,10 @@
 import copy
+import datetime
 import inspect
 import json
-import uuid
 import logging
+import uuid
 from collections import OrderedDict
-import datetime
 from functools import reduce, wraps
 from io import StringIO
 from typing import List
@@ -16,24 +16,21 @@ from dateutil.parser import parse
 
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
-
+from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec
 from great_expectations.validator.validator import Validator
-from .execution_engine import ExecutionEngine
-from .pandas_execution_engine import PandasExecutionEngine
-from great_expectations.execution_environment.types import (
-    PathBatchSpec,
-    S3BatchSpec
-)
+
 from ..core.batch import Batch
 from ..exceptions import BatchKwargsError, BatchSpecError
 from ..execution_environment.types import BatchMarkers
+from .execution_engine import ExecutionEngine
+from .pandas_execution_engine import PandasExecutionEngine
 
 logger = logging.getLogger(__name__)
 
 try:
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
-    from pyspark.sql import DataFrame, Window, SQLContext
+    from pyspark.sql import DataFrame, SQLContext, Window
     from pyspark.sql.functions import (
         array,
         col,
@@ -44,6 +41,9 @@ try:
         expr,
         isnan,
         lag,
+    )
+    from pyspark.sql.functions import length as length_
+    from pyspark.sql.functions import (
         lit,
         monotonically_increasing_id,
         stddev_samp,
@@ -51,7 +51,6 @@ try:
         when,
         year,
     )
-    from pyspark.sql.functions import length as length_
 except ImportError as e:
     logger.debug(str(e))
     logger.debug(
@@ -235,9 +234,9 @@ class MetaSparkDFExecutionEngine(ExecutionEngine):
             eval_col_A = "__eval_col_A_" + column_A.replace(".", "__").replace("`", "_")
             eval_col_B = "__eval_col_B_" + column_B.replace(".", "__").replace("`", "_")
 
-            spark_df = self.dataframe.withColumn(
-                eval_col_A, col(column_A)
-            ).withColumn(eval_col_B, col(column_B))
+            spark_df = self.dataframe.withColumn(eval_col_A, col(column_A)).withColumn(
+                eval_col_B, col(column_B)
+            )
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -327,8 +326,12 @@ class MetaSparkDFExecutionEngine(ExecutionEngine):
                                 val = (parse(val[0]), parse(val[1]))
                             parsed_maybe_limited_unexpected_list.append(
                                 (
-                                    datetime.datetime.strftime(val[0], output_strftime_format),
-                                    datetime.datetime.strftime(val[1], output_strftime_format),
+                                    datetime.datetime.strftime(
+                                        val[0], output_strftime_format
+                                    ),
+                                    datetime.datetime.strftime(
+                                        val[1], output_strftime_format
+                                    ),
                                 )
                             )
                     maybe_limited_unexpected_list = parsed_maybe_limited_unexpected_list
@@ -483,7 +486,12 @@ class MetaSparkDFExecutionEngine(ExecutionEngine):
                                 val = OrderedDict((k, parse(v)) for k, v in val)
                             parsed_maybe_limited_unexpected_list.append(
                                 OrderedDict(
-                                    (k, datetime.datetime.strftime(v, output_strftime_format))
+                                    (
+                                        k,
+                                        datetime.datetime.strftime(
+                                            v, output_strftime_format
+                                        ),
+                                    )
                                     for k, v in val
                                 )
                             )
@@ -597,9 +605,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 --ge-feature-maturity-info--
     """
 
-    recognized_batch_definition_keys = {
-        "limit"
-    }
+    recognized_batch_definition_keys = {"limit"}
 
     recognized_batch_spec_defaults = {
         "reader_method",
@@ -634,7 +640,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         batch_id = batch_spec.to_id()
 
         if in_memory_dataset is not None:
-            if batch_definition.get("data_asset_name") and batch_definition.get("partition_id"):
+            if batch_definition.get("data_asset_name") and batch_definition.get(
+                "partition_id"
+            ):
                 df = in_memory_dataset
             else:
                 raise ValueError(
@@ -661,9 +669,11 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 reader_fn = self._get_reader_fn(reader_method, url.key)
                 df = reader_fn(
                     StringIO(
-                        s3_object["Body"].read().decode(s3_object.get("ContentEncoding", "utf-8"))
+                        s3_object["Body"]
+                        .read()
+                        .decode(s3_object.get("ContentEncoding", "utf-8"))
                     ),
-                    **reader_options
+                    **reader_options,
                 )
             else:
                 raise BatchSpecError(
@@ -676,7 +686,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         if not self.batches.get(batch_id):
             batch = Batch(
-                execution_environment_name=batch_definition.get("execution_environment"),
+                execution_environment_name=batch_definition.get(
+                    "execution_environment"
+                ),
                 batch_spec=batch_spec,
                 data=df,
                 batch_definition=batch_definition,
@@ -803,7 +815,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
         if collate is not None:
-            raise ValueError("collate parameter is not supported in SparkDFExecutionEngine")
+            raise ValueError(
+                "collate parameter is not supported in SparkDFExecutionEngine"
+            )
         value_counts = (
             self.dataframe.select(column)
             .where(col(column).isNotNull())
@@ -1028,7 +1042,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         # NOTE: This function is implemented using native functions instead of UDFs, which is a faster
         # implementation. Please ensure new spark implementations migrate to the new style where possible
         if allow_cross_type_comparisons:
-            raise ValueError("Cross-type comparisons are not valid for SparkDFExecutionEngine")
+            raise ValueError(
+                "Cross-type comparisons are not valid for SparkDFExecutionEngine"
+            )
 
         if parse_strings_as_datetimes:
             min_value = parse(min_value)
@@ -1177,7 +1193,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         # %D is an example of a format that can format but not parse, e.g.
         try:
             datetime.datetime.strptime(
-                datetime.datetime.strftime(datetime.datetime.now(), strftime_format), strftime_format
+                datetime.datetime.strftime(datetime.datetime.now(), strftime_format),
+                strftime_format,
             )
         except ValueError as e:
             raise ValueError("Unable to use provided strftime_format. " + e.message)

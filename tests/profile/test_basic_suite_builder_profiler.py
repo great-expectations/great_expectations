@@ -11,8 +11,9 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
 from great_expectations.exceptions import ProfilerError
-from great_expectations.profile.basic_suite_builder_profiler import \
-    BasicSuiteBuilderProfiler
+from great_expectations.profile.basic_suite_builder_profiler import (
+    BasicSuiteBuilderProfiler,
+)
 from tests.test_utils import expectationSuiteValidationResultSchema
 
 FALSEY_VALUES = [None, [], False]

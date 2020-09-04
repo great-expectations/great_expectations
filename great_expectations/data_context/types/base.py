@@ -45,7 +45,7 @@ class DataContextConfig(DictDot):
         anonymous_usage_statistics=None,
         commented_map=None,
         datasources=None,
-        execution_environments=None
+        execution_environments=None,
     ):
         if commented_map is None:
             commented_map = CommentedMap()
@@ -110,9 +110,7 @@ class ExecutionEngineConfigSchema(Schema):
     class_name = fields.String()
     module_name = fields.String(missing="great_expectations.execution_engine")
     caching = fields.Boolean()
-    batch_spec_defaults = fields.Dict(
-        allow_none=True
-    )
+    batch_spec_defaults = fields.Dict(allow_none=True)
 
     # noinspection PyUnusedLocal
     @post_load
@@ -490,7 +488,9 @@ class DataContextConfigSchema(Schema):
         keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema), allow_none=True
     )
     execution_environments = fields.Dict(
-        keys=fields.Str(), values=fields.Nested(ExecutionEnvironmentConfigSchema), allow_none=True
+        keys=fields.Str(),
+        values=fields.Nested(ExecutionEnvironmentConfigSchema),
+        allow_none=True,
     )
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()

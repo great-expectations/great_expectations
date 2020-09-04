@@ -4,8 +4,9 @@ import pytest
 from click.testing import CliRunner
 
 from great_expectations.cli import cli
-from great_expectations.cli.python_subprocess import \
-    execute_shell_command_with_progress_polling
+from great_expectations.cli.python_subprocess import (
+    execute_shell_command_with_progress_polling,
+)
 from great_expectations.util import gen_directory_tree_str, is_library_loadable
 from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks

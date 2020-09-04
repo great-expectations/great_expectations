@@ -39,7 +39,7 @@ class DataConnector(object):
         "execution_environment",
         "data_connector",
         "batch_spec_passthrough",
-        "limit"
+        "limit",
     }
 
     def __init__(self, name, execution_environment, batch_definition_defaults=None):
@@ -52,11 +52,16 @@ class DataConnector(object):
         if not batch_definition_defaults_keys <= self.recognized_batch_definition_keys:
             logger.warning(
                 "Unrecognized batch_definition key(s): %s"
-                % str(batch_definition_defaults_keys - self.recognized_batch_definition_keys)
+                % str(
+                    batch_definition_defaults_keys
+                    - self.recognized_batch_definition_keys
+                )
             )
 
         self._batch_definition_defaults = {
-            key: value for key, value in batch_definition_defaults.items() if key in self.recognized_batch_definition_keys
+            key: value
+            for key, value in batch_definition_defaults.items()
+            if key in self.recognized_batch_definition_keys
         }
         if execution_environment is None:
             raise ValueError(
@@ -72,12 +77,7 @@ class DataConnector(object):
     def name(self):
         return self._name
 
-    def _get_iterator(
-        self,
-        data_asset_name,
-        batch_definition,
-        batch_spec
-    ):
+    def _get_iterator(self, data_asset_name, batch_definition, batch_spec):
         raise NotImplementedError
 
     def get_available_data_asset_names(self):
@@ -110,7 +110,7 @@ class DataConnector(object):
             self._get_iterator(
                 data_asset_name=data_asset_name,
                 batch_definition=batch_definition,
-                batch_spec=batch_spec
+                batch_spec=batch_spec,
             ),
             batch_definition,
         )
@@ -150,11 +150,15 @@ class DataConnector(object):
 
         batch_definition_defaults = deepcopy(self.batch_definition_defaults)
         batch_definition = {
-            key: value for key, value in batch_definition.items() if key in recognized_batch_definition_keys
+            key: value
+            for key, value in batch_definition.items()
+            if key in recognized_batch_definition_keys
         }
         batch_definition = nested_update(batch_definition_defaults, batch_definition)
 
-        batch_spec_defaults = deepcopy(self._execution_environment.execution_engine.batch_spec_defaults)
+        batch_spec_defaults = deepcopy(
+            self._execution_environment.execution_engine.batch_spec_defaults
+        )
         batch_spec_passthrough = batch_definition.get("batch_spec_passthrough", {})
         batch_spec_scaffold = nested_update(batch_spec_defaults, batch_spec_passthrough)
 
@@ -165,8 +169,7 @@ class DataConnector(object):
         batch_spec_scaffold["execution_environment"] = self._execution_environment.name
 
         batch_spec = self._build_batch_spec(
-            batch_definition=batch_definition,
-            batch_spec=batch_spec_scaffold
+            batch_definition=batch_definition, batch_spec=batch_spec_scaffold
         )
 
         return batch_spec
@@ -181,9 +184,11 @@ class DataConnector(object):
             self.reset_iterator(
                 data_asset_name=data_asset_name,
                 batch_definition=batch_definition,
-                batch_spec=batch_spec
+                batch_spec=batch_spec,
             )
-        data_asset_iterator, passed_batch_definition = self._data_asset_iterators[data_asset_name]
+        data_asset_iterator, passed_batch_definition = self._data_asset_iterators[
+            data_asset_name
+        ]
         if passed_batch_definition != batch_definition:
             logger.warning(
                 "Asked to yield batch_spec using different supplemental batch_definition. Resetting iterator to "
@@ -192,7 +197,7 @@ class DataConnector(object):
             self.reset_iterator(
                 data_asset_name=data_asset_name,
                 batch_definition=batch_definition,
-                batch_spec=batch_spec
+                batch_spec=batch_spec,
             )
             data_asset_iterator, passed_batch_definition = self._data_asset_iterators[
                 data_asset_name
@@ -204,7 +209,7 @@ class DataConnector(object):
             self.reset_iterator(
                 data_asset_name=data_asset_name,
                 batch_definition=batch_definition,
-                batch_spec=batch_spec
+                batch_spec=batch_spec,
             )
             data_asset_iterator, passed_batch_definition = self._data_asset_iterators[
                 data_asset_name
@@ -217,11 +222,12 @@ class DataConnector(object):
                 self.reset_iterator(
                     data_asset_name=data_asset_name,
                     batch_definition=batch_definition,
-                    batch_spec=batch_spec
+                    batch_spec=batch_spec,
                 )
-                data_asset_iterator, passed_batch_definition = self._data_asset_iterators[
-                    data_asset_name
-                ]
+                (
+                    data_asset_iterator,
+                    passed_batch_definition,
+                ) = self._data_asset_iterators[data_asset_name]
             try:
                 batch_spec = next(data_asset_iterator)
                 return batch_spec
@@ -234,7 +240,6 @@ class DataConnector(object):
         except TypeError:
             # If we don't actually have an iterator we can generate, even after resetting, just return empty
             logger.warning(
-                "Unable to generate batch_spec for data_asset_name %s"
-                % data_asset_name
+                "Unable to generate batch_spec for data_asset_name %s" % data_asset_name
             )
             return {}

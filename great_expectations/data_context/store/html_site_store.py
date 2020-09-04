@@ -4,12 +4,16 @@ import os
 from mimetypes import guess_type
 
 from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier, SiteSectionIdentifier,
-    ValidationResultIdentifier)
+    ExpectationSuiteIdentifier,
+    SiteSectionIdentifier,
+    ValidationResultIdentifier,
+)
 from great_expectations.data_context.util import (
-    file_relative_path, instantiate_class_from_config, load_class)
-from great_expectations.exceptions import (ClassInstantiationError,
-                                           DataContextError)
+    file_relative_path,
+    instantiate_class_from_config,
+    load_class,
+)
+from great_expectations.exceptions import ClassInstantiationError, DataContextError
 from great_expectations.util import verify_dynamic_loading_support
 
 from ...core.data_context_key import DataContextKey

@@ -3,8 +3,10 @@ import warnings
 import pytest
 
 import great_expectations as ge
-from great_expectations.core import (ExpectationConfiguration,
-                                     ExpectationValidationResult)
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.data_context.util import file_relative_path
 
 

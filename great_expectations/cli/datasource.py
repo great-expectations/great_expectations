@@ -16,20 +16,29 @@ from great_expectations.cli.cli_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import (
-    CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES, cli_message,
-    cli_message_dict, verify_library_dependent_modules)
+    CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+    cli_message,
+    cli_message_dict,
+    verify_library_dependent_modules,
+)
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.usage_statistics.usage_statistics import \
-    send_usage_message
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import DatasourceConfigSchema
-from great_expectations.datasource import (PandasDatasource, SparkDFDatasource,
-                                           SqlAlchemyDatasource)
-from great_expectations.datasource.batch_kwargs_generator import \
-    ManualBatchKwargsGenerator
-from great_expectations.datasource.batch_kwargs_generator.table_batch_kwargs_generator import \
-    TableBatchKwargsGenerator
-from great_expectations.exceptions import (BatchKwargsError,
-                                           DatasourceInitializationError)
+from great_expectations.datasource import (
+    PandasDatasource,
+    SparkDFDatasource,
+    SqlAlchemyDatasource,
+)
+from great_expectations.datasource.batch_kwargs_generator import (
+    ManualBatchKwargsGenerator,
+)
+from great_expectations.datasource.batch_kwargs_generator.table_batch_kwargs_generator import (
+    TableBatchKwargsGenerator,
+)
+from great_expectations.exceptions import (
+    BatchKwargsError,
+    DatasourceInitializationError,
+)
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)

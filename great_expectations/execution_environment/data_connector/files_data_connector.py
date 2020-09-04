@@ -55,13 +55,13 @@ class FilesDataConnector(DataConnector):
     }
 
     def __init__(
-            self,
-            name="default",
-            execution_environment=None,
-            base_directory="/data",
-            reader_options=None,
-            asset_param=None,
-            reader_method=None,
+        self,
+        name="default",
+        execution_environment=None,
+        base_directory="/data",
+        reader_options=None,
+        asset_param=None,
+        reader_method=None,
     ):
         logger.debug("Constructing FilesDataConnector {!r}".format(name))
         super().__init__(name, execution_environment=execution_environment)
@@ -100,8 +100,8 @@ class FilesDataConnector(DataConnector):
         # If base directory is a relative path, interpret it as relative to the data context's
         # context root directory (parent directory of great_expectation dir)
         if (
-                os.path.isabs(self._base_directory)
-                or self._execution_environment.data_context is None
+            os.path.isabs(self._base_directory)
+            or self._execution_environment.data_context is None
         ):
             return self._base_directory
         else:
@@ -212,7 +212,7 @@ class FilesDataConnector(DataConnector):
                     for i in range(len(partition_params)):
                         partition_definition_inner_dict[partition_params[i]] = matches[
                             i + 1
-                            ]
+                        ]
                     partitions["partition_definition"] = partition_definition_inner_dict
 
                 if "partition_delimiter" in files_config:
@@ -248,7 +248,7 @@ class FilesDataConnector(DataConnector):
         return files
 
     """
-    # Maybe we dont need this? 
+    # Maybe we dont need this?
 
     def _get_iterator(
         self, data_asset_name, reader_method=None, reader_options=None, limit=None
@@ -266,12 +266,12 @@ class FilesDataConnector(DataConnector):
     """
 
     def _build_batch_kwargs_path_iter(
-            self,
-            path_list,
-            glob_config,
-            reader_method=None,
-            reader_options=None,
-            limit=None,
+        self,
+        path_list,
+        glob_config,
+        reader_method=None,
+        reader_options=None,
+        limit=None,
     ):
         for path in path_list:
             yield self._build_batch_kwargs_from_path(
@@ -283,16 +283,16 @@ class FilesDataConnector(DataConnector):
             )
 
     def _build_batch_kwargs_from_path(
-            self, path, glob_config, reader_method=None, reader_options=None, limit=None
+        self, path, glob_config, reader_method=None, reader_options=None, limit=None
     ):
 
         batch_kwargs = self._execution_environment.execution_engine.process_batch_parameters(
             reader_method=reader_method
-                          or glob_config.get("reader_method")
-                          or self.reader_method,
+            or glob_config.get("reader_method")
+            or self.reader_method,
             reader_options=reader_options
-                           or glob_config.get("reader_options")
-                           or self.reader_options,
+            or glob_config.get("reader_options")
+            or self.reader_options,
             limit=limit or glob_config.get("limit"),
         )
 

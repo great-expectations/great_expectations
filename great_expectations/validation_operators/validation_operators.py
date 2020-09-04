@@ -8,11 +8,14 @@ from great_expectations.core import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier, ValidationResultIdentifier)
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.validation_operators.types.validation_operator_result import \
-    ValidationOperatorResult
+from great_expectations.validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
 from great_expectations.validator.validator import Validator
 
 from .util import send_slack_notification

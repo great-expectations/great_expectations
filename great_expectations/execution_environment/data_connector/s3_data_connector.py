@@ -4,10 +4,10 @@ import re
 import warnings
 from io import StringIO
 
-from great_expectations.exceptions import (BatchKwargsError,
-                                           GreatExpectationsError)
-from great_expectations.execution_environment.data_connector.data_connector import \
-    DataConnector
+from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
+from great_expectations.execution_environment.data_connector.data_connector import (
+    DataConnector,
+)
 from great_expectations.execution_environment.types import S3BatchKwargs
 from great_expectations.execution_environment.util import S3Url
 

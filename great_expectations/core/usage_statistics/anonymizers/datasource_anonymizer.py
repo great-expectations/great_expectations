@@ -1,8 +1,10 @@
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import \
-    Anonymizer
-from great_expectations.datasource import (Datasource, PandasDatasource,
-                                           SparkDFDatasource,
-                                           SqlAlchemyDatasource)
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
+from great_expectations.datasource import (
+    Datasource,
+    PandasDatasource,
+    SparkDFDatasource,
+    SqlAlchemyDatasource,
+)
 
 
 class DatasourceAnonymizer(Anonymizer):

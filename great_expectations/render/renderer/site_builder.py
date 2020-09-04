@@ -6,9 +6,13 @@ from collections import OrderedDict
 import great_expectations.exceptions as exceptions
 from great_expectations.core import nested_update
 from great_expectations.data_context.store.html_site_store import (
-    HtmlSiteStore, SiteSectionIdentifier)
+    HtmlSiteStore,
+    SiteSectionIdentifier,
+)
 from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier, ValidationResultIdentifier)
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render.util import resource_key_passes_run_name_filter
 
@@ -546,7 +550,7 @@ class DefaultSiteIndexBuilder(object):
         run_name=None,
         asset_name=None,
         batch_kwargs=None,
-        batch_spec=None
+        batch_spec=None,
     ):
         import os
 
@@ -805,9 +809,10 @@ class DefaultSiteIndexBuilder(object):
                         run_id=profiling_result_key.run_id,
                         run_time=profiling_result_key.run_id.run_time,
                         run_name=profiling_result_key.run_id.run_name,
-                        asset_name=batch_kwargs.get("data_asset_name") or batch_spec.get("data_asset_name"),
+                        asset_name=batch_kwargs.get("data_asset_name")
+                        or batch_spec.get("data_asset_name"),
                         batch_kwargs=batch_kwargs,
-                        batch_spec=batch_spec
+                        batch_spec=batch_spec,
                     )
                 except Exception:
                     error_msg = "Profiling result not found: {0:s} - skipping".format(
@@ -861,9 +866,10 @@ class DefaultSiteIndexBuilder(object):
                         validation_success=validation_success,
                         run_time=validation_result_key.run_id.run_time,
                         run_name=validation_result_key.run_id.run_name,
-                        asset_name=batch_kwargs.get("data_asset_name") or batch_spec.get("data_asset_name"),
+                        asset_name=batch_kwargs.get("data_asset_name")
+                        or batch_spec.get("data_asset_name"),
                         batch_kwargs=batch_kwargs,
-                        batch_spec=batch_spec
+                        batch_spec=batch_spec,
                     )
                 except Exception:
                     error_msg = "Validation result not found: {0:s} - skipping".format(

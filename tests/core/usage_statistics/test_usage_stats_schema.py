@@ -3,13 +3,18 @@ import mock
 import pytest
 
 from great_expectations.core.usage_statistics.schemas import (
-    anonymized_batch_schema, anonymized_datasource_schema,
-    cli_new_ds_choice_payload, datasource_sqlalchemy_connect_payload,
-    empty_payload_schema, init_payload_schema,
+    anonymized_batch_schema,
+    anonymized_datasource_schema,
+    cli_new_ds_choice_payload,
+    datasource_sqlalchemy_connect_payload,
+    empty_payload_schema,
+    init_payload_schema,
     save_or_edit_expectation_suite_payload_schema,
-    usage_statistics_record_schema)
-from tests.integration.usage_statistics.test_usage_statistics_messages import \
-    valid_usage_statistics_messages
+    usage_statistics_record_schema,
+)
+from tests.integration.usage_statistics.test_usage_statistics_messages import (
+    valid_usage_statistics_messages,
+)
 
 
 def test_comprehensive_list_of_messages():
