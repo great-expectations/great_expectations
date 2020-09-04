@@ -6,6 +6,11 @@ Changelog
 
 Develop
 -----------------
+* [DOCS] Add notes on transient table creation to Snowflake guide (thanks @verhey)!
+
+
+0.12.1
+-----------------
 * [FEATURE] Add ``expect_column_pair_cramers_phi_value_to_be_less_than`` expectation to ``PandasDatasource`` to check for the independence of two columns by computing their Cramers Phi (thanks @mlondschien)!
 * [FEATURE] add support for ``expect_column_pair_values_to_be_in_set`` to ``Spark`` (thanks @mikaylaedwards)!
 * [FEATURE] Add new expectation:`` expect_multicolumn_sum_to_equal`` for ``pandas` and ``Spark`` (thanks @chipmyersjr)!
@@ -19,7 +24,7 @@ Develop
 
 0.12.0
 -----------------
-* [BREAKING] This release includes a breaking change that *only* affects users who directly call `add_expectation`, `remove_expectation`, or `find_expectations`. (Most users do not use these APIs but add Expectations by stating them directly on Datasets). Those methods have been updated to take an ExpectationConfiguration object and `match_type` object. The change provides more flexibility in determining which expectations should be modified and allows us provide substantially improved support for two major features that we have frequently heard requested: conditional Expectations and more flexible multi-column custom expectations. See :ref:`expectation_suite_operations`_ and :ref:`migrating_versions`_ for more information.
+* [BREAKING] This release includes a breaking change that *only* affects users who directly call `add_expectation`, `remove_expectation`, or `find_expectations`. (Most users do not use these APIs but add Expectations by stating them directly on Datasets). Those methods have been updated to take an ExpectationConfiguration object and `match_type` object. The change provides more flexibility in determining which expectations should be modified and allows us provide substantially improved support for two major features that we have frequently heard requested: conditional Expectations and more flexible multi-column custom expectations. See :ref:`expectation_suite_operations` and :ref:`migrating_versions` for more information.
 * [FEATURE] Add support for conditional expectations using pandas execution engine (#1217 HUGE thanks @arsenii!)
 * [FEATURE] ValidationActions can now consume and return "payload", which can be used to share information across ValidationActions
 * [FEATURE] Add support for nested columns in the PySpark expectations (thanks @bramelfrink)!
@@ -237,10 +242,12 @@ Develop
   - DataContext.list_checkpoints() returns a list of checkpoint names found in the project
   - DataContext.get_checkpoint() returns a validated dictionary loaded from yml
   - new cli commands
+
     - `checkpoint new`
     - `checkpoint list`
     - `checkpoint run`
     - `checkpoint script`
+    
 * marked cli `tap` commands as deprecating on next release
 * marked cli `validation-operator run` command as deprecating
 * internal improvements in the cli code
@@ -296,7 +303,7 @@ Develop
 
 0.10.0
 -----------------
-* (BREAKING) Clarified API language: renamed all ``generator`` parameters and methods to the more correct ``batch_kwargs_generator`` language. Existing projects may require simple migration steps. See :ref:`Upgrading to 0.10.x` for instructions.
+* (BREAKING) Clarified API language: renamed all ``generator`` parameters and methods to the more correct ``batch_kwargs_generator`` language. Existing projects may require simple migration steps. See :ref:`Upgrading to 0.10.x <upgrading_to_0.10.x>` for instructions.
 * Adds anonymized usage statistics to Great Expectations. See this article for details: :ref:`Usage Statistics`.
 * CLI: improve look/consistency of ``docs list``, ``suite list``, and ``datasource list`` output; add ``store list`` and ``validation-operator list`` commands.
 * New SuiteBuilderProfiler that facilitates faster suite generation by allowing columns to be profiled
@@ -612,7 +619,7 @@ Highlights include:
 
    - **Environments**: A DataContext can now manage :ref:`environment_and_secrets` more easily thanks to more dynamic and
      flexible variable substitution.
-   - **Stores**: A new internal abstraction for DataContexts, :ref:`Stores`, make extending GE easier by
+   - **Stores**: A new internal abstraction for DataContexts, :ref:`Stores <reference__core_concepts__data_context__stores>`, make extending GE easier by
      consolidating logic for reading and writing resources from a database, local, or cloud storage.
    - **Types**: Utilities configured in a DataContext are now referenced using `class_name` and `module_name` throughout
      the DataContext configuration, making it easier to extend or supplement pre-built resources. For now, the "type"
@@ -620,7 +627,7 @@ Highlights include:
 
 3. Partitioners: Batch Kwargs are clarified and enhanced to help easily reference well-known chunks of data using a
    partition_id. Batch ID and Batch Fingerprint help round out support for enhanced metadata around data
-   assets that GE validates. See :ref:`Batch Identifiers` for more information. The `GlobReaderBatchKwargsGenerator`,
+   assets that GE validates. See :ref:`Batch Identifiers <reference__core_concepts__batch_parameters>` for more information. The `GlobReaderBatchKwargsGenerator`,
    `QueryBatchKwargsGenerator`, `S3GlobReaderBatchKwargsGenerator`, `SubdirReaderBatchKwargsGenerator`, and `TableBatchKwargsGenerator` all support partition_id for
    easily accessing data assets.
 

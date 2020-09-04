@@ -11,7 +11,7 @@ The guide demonstrates the recommended path for instantiating a Data Context wit
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - :ref:`Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration<getting_started>`.
+    - :ref:`Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration<tutorials__getting_started>`.
 
 Steps
 -----

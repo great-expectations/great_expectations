@@ -3,7 +3,7 @@
 Set up Data Docs
 ================
 
-:ref:`Data Docs` translate :ref:`Expectations`, :ref:`Validation Results`, and other metadata into clean, human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs guarantees that your documentation will never go stale.
+:ref:`Data Docs <reference__core_concepts__data_docs>` translate :ref:`Expectations`, :ref:`Validation Results <reference__core_concepts__validation__expectation_validation_result>`, and other metadata into clean, human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs guarantees that your documentation will never go stale.
 
 In the previous steps, when you executed the last cell in the Jupyter notebook, Great Expectations used the Expectation Suite you generated to validate the January data batch. It then compiled those validation results to HTML, and opened a browser window with a Data Docs validation results page:
 
