@@ -392,24 +392,24 @@ Notes:
 --ge-feature-maturity-info--
     """
 
-    # this is necessary to subclass pandas in a proper way.
-    # NOTE: specifying added properties in this way means that they will NOT be carried over when
-    # the dataframe is manipulated, which we might want. To specify properties that are carried over
-    # to manipulation results, we would just use `_metadata = ['row_count', ...]` here. The most likely
-    # case is that we want the former, but also want to re-initialize these values to None so we don't
-    # get an attribute error when trying to access them (I think this could be done in __finalize__?)
-    _internal_names = pd.DataFrame._internal_names + [
-        "_batch_spec",
-        "_batch_markers",
-        "_batch_definition",
-        "_batch_id",
-        "_expectation_suite",
-        "_config",
-        "caching",
-        "default_expectation_args",
-        "discard_subset_failing_expectations",
-    ]
-    _internal_names_set = set(_internal_names)
+    # # this is necessary to subclass pandas in a proper way.
+    # # NOTE: specifying added properties in this way means that they will NOT be carried over when
+    # # the dataframe is manipulated, which we might want. To specify properties that are carried over
+    # # to manipulation results, we would just use `_metadata = ['row_count', ...]` here. The most likely
+    # # case is that we want the former, but also want to re-initialize these values to None so we don't
+    # # get an attribute error when trying to access them (I think this could be done in __finalize__?)
+    # _internal_names = pd.DataFrame._internal_names + [
+    #     "_batch_spec",
+    #     "_batch_markers",
+    #     "_batch_definition",
+    #     "_batch_id",
+    #     "_expectation_suite",
+    #     "_config",
+    #     "caching",
+    #     "default_expectation_args",
+    #     "discard_subset_failing_expectations",
+    # ]
+    # _internal_names_set = set(_internal_names)
 
     recognized_batch_definition_keys = {
         "limit"
@@ -423,25 +423,25 @@ Notes:
     # We may want to expand or alter support for subclassing dataframes in the future:
     # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
 
-    @property
-    def _constructor(self):
-        return self.__class__
-
-    def __finalize__(self, other, method=None, **kwargs):
-        if isinstance(other, PandasExecutionEngine):
-            self._initialize_expectations(other._expectation_suite)
-            # If other was coerced to be a PandasExecutionEngine (e.g. via _constructor call during self.copy()
-            # operation)
-            # then it may not have discard_subset_failing_expectations set. Default to self value
-            self.discard_subset_failing_expectations = getattr(
-                other,
-                "discard_subset_failing_expectations",
-                self.discard_subset_failing_expectations,
-            )
-            if self.discard_subset_failing_expectations:
-                self.discard_failing_expectations()
-        super().__finalize__(other, method, **kwargs)
-        return self
+    # @property
+    # def _constructor(self):
+    #     return self.__class__
+    #
+    # def __finalize__(self, other, method=None, **kwargs):
+    #     if isinstance(other, PandasExecutionEngine):
+    #         self._initialize_expectations(other._expectation_suite)
+    #         # If other was coerced to be a PandasExecutionEngine (e.g. via _constructor call during self.copy()
+    #         # operation)
+    #         # then it may not have discard_subset_failing_expectations set. Default to self value
+    #         self.discard_subset_failing_expectations = getattr(
+    #             other,
+    #             "discard_subset_failing_expectations",
+    #             self.discard_subset_failing_expectations,
+    #         )
+    #         if self.discard_subset_failing_expectations:
+    #             self.discard_failing_expectations()
+    #     super().__finalize__(other, method, **kwargs)
+    #     return self
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
