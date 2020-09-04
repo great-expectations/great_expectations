@@ -86,7 +86,7 @@ Tests interpret partition objects literally, so care should be taken when a part
 Available Distributional Expectations
 --------------------------------------
 
-`Kullback-Leibler (KL) divergence <https://www.youtube.com/watch?v=ErfnhcEV1O8/>`_ is available as an expectation for both categorical and continuous data (continuous data will be discretized according to the provided partition prior to computing divergence). Unlike KS and Chi-Squared tests which can use a p-value, you must provide a threshold for the relative entropy to use KL divergence. Further, KL divergence is not symmetric.
+Kullback-Leibler (KL) divergence (also known as `relative entropy https://www.youtube.com/watch?v=ErfnhcEV1O8`_) is available as an expectation for both categorical and continuous data (continuous data will be discretized according to the provided partition prior to computing divergence). Unlike KS and Chi-Squared tests which can use a p-value, you must provide a threshold for the relative entropy to use KL divergence. Further, KL divergence is not symmetric.
 
 * :func:`expect_column_kl_divergence_to_be_less_than <great_expectations.dataset.dataset.Dataset.expect_column_kl_divergence_to_be_less_than>`
 
