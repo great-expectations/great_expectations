@@ -9,14 +9,12 @@ from typing import Any, List, Union
 import jsonpatch
 from dateutil.parser import parse
 from IPython import get_ipython
-from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.evaluation_parameters import (
     find_evaluation_parameter_dependencies,
 )
-from great_expectations.core.id_dict import IDDict
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
@@ -26,6 +24,13 @@ from great_expectations.exceptions import (
     InvalidExpectationKwargsError,
     ParserError,
     UnavailableMetricError,
+)
+from great_expectations.marshmallow__shade import (
+    Schema,
+    ValidationError,
+    fields,
+    post_load,
+    pre_dump,
 )
 from great_expectations.types import DictDot
 
@@ -85,11 +90,12 @@ def convert_to_json_serializable(data):
         test_obj may also be converted in place.
 
     """
-    import numpy as np
-    import pandas as pd
     import datetime
     import decimal
     import sys
+
+    import numpy as np
+    import pandas as pd
 
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
@@ -206,10 +212,11 @@ def ensure_json_serializable(data):
         test_obj may also be converted in place.
 
     """
-    import numpy as np
-    import pandas as pd
     import datetime
     import decimal
+
+    import numpy as np
+    import pandas as pd
 
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
@@ -1616,7 +1623,7 @@ class ExpectationSuite(object):
     def _sort_citations(citations):
         return sorted(citations, key=lambda x: x["citation_date"])
 
-    ### CRUD methods ###
+    # CRUD methods #
 
     def append_expectation(self, expectation_config):
         """Appends an expectation.
@@ -1659,7 +1666,7 @@ class ExpectationSuite(object):
             raise ValueError("No matching expectation was found.")
 
         elif len(found_expectation_indexes) > 1:
-            if remove_multiple_matches == True:
+            if remove_multiple_matches:
                 removed_expectations = []
                 for index in sorted(found_expectation_indexes, reverse=True):
                     removed_expectations.append(self.expectations.pop(index))

@@ -5,7 +5,7 @@ How to quickly explore Expectations in a notebook
 
 Building :ref:`Expectations` as you conduct exploratory data analysis is a great way to ensure that your insights about data processes and pipelines remain part of your team's knowledge.
 
-This guide will help you quickly get a taste of Great Expectations, without even setting up a :ref:`Data Context`. All you need is a notebook and some data.
+This guide will help you quickly get a taste of Great Expectations, without even setting up a :ref:`Data Context <reference__core_concepts__data_context__data_context>`. All you need is a notebook and some data.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -72,21 +72,21 @@ All of these steps take place within your notebook:
         my_df[my_df.Sex=="male"].head()
         # etc., etc. 
         
-    In addition, ``my_df`` has access to a wide array of Expectations. You can see the full list :ref:`here <Glossary of Expectations>`. By convention, every Expectation method name starts with the name ``expect_...``, so you can quickly access the full list with tab-based autocomplete:
+    In addition, ``my_df`` has access to a wide array of Expectations. You can see the full list :ref:`here <expectation_glossary>`. By convention, every Expectation method name starts with the name ``expect_...``, so you can quickly access the full list with tab-based autocomplete:
 
-    .. image:: ../../images/expectation_autocomplete.gif
+    .. image:: /images/expectation_autocomplete.gif
 
     |
 
     When you invoke an Expectation, it will immediately be validated against your data. The returned object will contain the result and a list of unexpected values. This instant feedback helps you zero in on unexpected data very quickly, taking a lot of the guesswork out of data exploration.
 
-    .. image:: ../../images/expectation_notebook_interactive_loop.gif
+    .. image:: /images/expectation_notebook_interactive_loop.gif
 
     |
 
     Hint: it's common to encounter data issues where most cases match, but you can't guarantee 100% adherence. In these cases, consider using a ``mostly`` parameter. This parameter is an option for all Expectations that are applied on a row-by-row basis, and allows you to control the level of wiggle room you want built into your data validation.
 
-    .. figure:: ../../images/interactive_mostly.gif
+    .. figure:: /images/interactive_mostly.gif
 
         Note how ``success`` switches from ``false`` to ``true`` once ``mostly=.99`` is added.
 
@@ -94,7 +94,7 @@ All of these steps take place within your notebook:
 
 4. **Review your Expectations.**
 
-    As you run Expectations in your notebook, ``my_df`` will build up a running list of Expectations. By default, Great Expectations will recognize and replace duplicate Expectations, so that only the most recent version is stored. (See :ref:`Determining duplicate results` below for details.)
+    As you run Expectations in your notebook, ``my_df`` will build up a running list of Expectations. By default, Great Expectations will recognize and replace duplicate Expectations, so that only the most recent version is stored. (See :ref:`determining_duplicate_results` below for details.)
 
     You can get the config file for your Expectations by running:
 
@@ -102,7 +102,7 @@ All of these steps take place within your notebook:
     
         my_df.get_expectation_suite()
 
-    which will return an :ref:`Expectation Suite` object.
+    which will return an :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>` object.
 
     By default, ``get_expectation_suite()`` only returns Expectations with ``success=True`` on their most recent validation. You can override this behavior with:
     
@@ -126,7 +126,7 @@ All of these steps take place within your notebook:
     
     As you develop more Expectation Suites, you'll probably want some kind of system for naming and organizing them, not to mention matching them up with data, validating them, and keeping track of validation results.
 
-    When you get to this stage, we recommend following the :ref:`Getting started` tutorial to set up a :ref:`Data Context`. You can get through the basics in less than half an hour, and setting up a Data Context will unlock many additional power tools within Great Expectations.
+    When you get to this stage, we recommend following the :ref:`tutorials__getting_started` tutorial to set up a :ref:`Data Context <reference__core_concepts__data_context__data_context>`. You can get through the basics in less than half an hour, and setting up a Data Context will unlock many additional power tools within Great Expectations.
         
 Additional notes
 ----------------
@@ -146,6 +146,8 @@ You can also add notes and structured metadata to Expectations:
             "source": "max@company.com"
             }
        )
+
+.. _determining_duplicate_results:
 
 Determining duplicate results
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -223,7 +225,7 @@ As a general rule,
 Additional resources
 --------------------
 
-- :ref:`Glossary of Expectations`
+- :ref:`expectation_glossary`
 
 
 Comments
