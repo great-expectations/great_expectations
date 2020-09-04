@@ -9,7 +9,7 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
 
     - Configured a :ref:`Data Context <tutorials__getting_started__initialize_a_data_context>`.
     - Configured an :ref:`Expectations Suite <tutorials__getting_started__create_your_first_expectations>`.
-    - Configured a :ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>`.
+    - Configured a :ref:`Checkpoint <tutorials__getting_started__validate_your_data>`.
     - Configured a `PostgreSQL <https://www.postgresql.org/>`_ database with appropriate credentials.
 
 Steps
@@ -93,14 +93,14 @@ Steps
 
 6. **Confirm that the Validations store has been correctly configured.**
 
-    Run a :ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>` to store results in the new Validations store in PostgreSQL then visualize the results by re-building :ref:`Data Docs <tutorials__getting_started__set_up_data_docs>`.
+    Run a :ref:`Checkpoint <tutorials__getting_started__validate_your_data>` to store results in the new Validations store in PostgreSQL then visualize the results by re-building :ref:`Data Docs <tutorials__getting_started__set_up_data_docs>`.
 
     Behind the scenes, Great Expectations will create a new table in your database called ``ge_validations_store``, and populate the fields with information from the Validation results.
 
 
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
 
-Also, please reach out to us on `Slack <greatexpectations.io/slack>`_ if you would like to learn more, or have any questions.
+Also, please reach out to us on `Slack <https://greatexpectations.io/slack>`_ if you would like to learn more, or have any questions.
 
 .. discourse::
     :topic_identifier: 177

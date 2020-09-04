@@ -7,7 +7,7 @@ This guide will explain how to use a YAML file and/or environment variables to p
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
 
 Steps
 ------

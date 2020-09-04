@@ -30,7 +30,7 @@ Datasources tell Great Expectations where your data lives and how to get it.
 Using the :ref:`CLI <command_line>` command ``great_expectations datasource new`` is the easiest way to
 add a new datasource.
 
-The `datasources` section declares which :ref:`datasource` objects should be available in the DataContext.
+The `datasources` section declares which :ref:`datasource <reference__core_concepts__datasources>` objects should be available in the DataContext.
 Each datasource definition should include the `class_name` of the datasource, generators, and any other relevant
 configuration information. For example, the following simple configuration supports a Pandas-based pipeline:
 
@@ -129,7 +129,7 @@ documentation for more information.
 Stores
 =============
 
-A DataContext requires three :ref:`stores <stores_reference>` to function properly: an `expectations_store`,
+A DataContext requires three :ref:`stores <reference__core_concepts__data_context__stores>` to function properly: an `expectations_store`,
 `validations_store`, and `evaluation_parameter_store`. Consequently a minimal store configuration for a DataContext
 would include the following:
 
@@ -193,7 +193,7 @@ for boto3 to use in the `boto3_options key` of the store_backend configuration.
 Validation Operators
 =====================
 
-See the :ref:`validation_operators` for more information regarding configuring and using validation operators.
+See the :ref:reference__core_concepts__validation__validation_operator for more information regarding configuring and using validation operators.
 
 .. _environment_and_secrets:
 
@@ -398,8 +398,7 @@ new directory or use this template:
 Usage Statistics
 #################
 
-To help us improve the tool, by default we track event data when certain Data Context-enabled commands are run. The
-usage statistics include things like the OS and python version, and which GE features are used. You can see the exact
+To help us improve the tool, by default we track event data when certain Data Context-enabled commands are run. Our `blog post from April 2020 <https://greatexpectations.io/blog/anonymous-usage-statistics/>`_ explains a little bit more about what we want to capture with usage statistics and why! The usage statistics include things like the OS and python version, and which GE features are used. You can see the exact
 schemas for all of our messages `here <https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/core/usage_statistics/schemas.py>`_.
 
 While we hope you'll leave them on, you can easily disable usage statistics for a Data Context by adding the

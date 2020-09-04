@@ -677,8 +677,6 @@ class TupleGCSStoreBackend(TupleStoreBackend):
 
     def get_url_for_key(self, key, protocol=None):
         path = self._convert_key_to_filepath(key)
-        if not path.startswith(self.prefix):
-            path = os.path.join(self.prefix, path)
         if self._public_urls:
             base_url = "https://storage.googleapis.com/"
         else:

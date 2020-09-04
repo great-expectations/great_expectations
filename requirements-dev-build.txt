@@ -3,5 +3,6 @@
 # To run tests for smaller subsets of infrastructure, please look at other requirements-dev-*.txt files.
 # Otherwise (i.e., if/when you are not concerned with running tests), please ignore these comments.
 
-isort[requirements]==4.3.21  # lint
-pre-commit>=2.3.0  # lint
+flake8==3.8.3  # lint
+isort[requirements]==5.4.2  # lint
+pre-commit>=2.6.0  # lint

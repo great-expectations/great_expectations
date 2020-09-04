@@ -22,7 +22,7 @@ Start editing
 **2. Make edits**
 
     * Make your edits and use the Preview tab to preview changes.
-    * Please pay close attention to the :ref:`contributing_style_guide`.
+    * Please pay close attention to the :ref:`contributing__style_guide`.
 
 Submit a pull request
 ---------------------
