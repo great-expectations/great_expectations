@@ -198,6 +198,7 @@ class MetaPandasExecutionEngine(ExecutionEngine):
             *args,
             **kwargs
         ):
+            df = self.dataframe
 
             if result_format is None:
                 result_format = self.default_expectation_args[
@@ -205,10 +206,10 @@ class MetaPandasExecutionEngine(ExecutionEngine):
                 ]  # TODO: should this be in batch_params?
 
             if row_condition:
-                self = self.dataframe.query(row_condition).reset_index(drop=True)
+                self = df.query(row_condition).reset_index(drop=True)
 
-            series_A = self[column_A]
-            series_B = self[column_B]
+            series_A = df[column_A]
+            series_B = df[column_B]
 
             if ignore_row_if == "both_values_are_missing":
                 boolean_mapped_null_values = series_A.isnull() & series_B.isnull()
@@ -304,16 +305,16 @@ class MetaPandasExecutionEngine(ExecutionEngine):
             *args,
             **kwargs
         ):
-
+            df = self.dataframe
             if result_format is None:
                 result_format = self.default_expectation_args[
                     "result_format"
                 ]  # TODO: should this be in batch_params?
 
             if row_condition:
-                self = self.dataframe.query(row_condition).reset_index(drop=True)
+                df = df.query(row_condition).reset_index(drop=True)
 
-            test_df = self[column_list]
+            test_df = df[column_list]
 
             if ignore_row_if == "all_values_are_missing":
                 boolean_mapped_skip_values = test_df.isnull().all(axis=1)
@@ -809,7 +810,7 @@ Notes:
         """
         # Short-circuit if the dtype tells us; in that case use column-aggregate (vs map) semantics
         if (
-            self[column].dtype != "object"
+            self.dataframe[column].dtype != "object"
             or type_ is None
             or type_ in ["object", "object_", "O"]
         ):
@@ -931,11 +932,11 @@ Notes:
             native_type = self._native_type_type_map(type_)
             if native_type is not None:
                 comp_types.extend(native_type)
-            success = self[column].dtype.type in comp_types
+            success = self.dataframe[column].dtype.type in comp_types
 
         return {
             "success": success,
-            "result": {"observed_value": self[column].dtype.type.__name__},
+            "result": {"observed_value": self.dataframe[column].dtype.type.__name__},
         }
 
     @staticmethod
@@ -1036,7 +1037,7 @@ Notes:
         numpy 'string_' (bytes)); consequently, it is not possible to test for string columns using aggregate semantics.
         """
         # Short-circuit if the dtype tells us; in that case use column-aggregate (vs map) semantics
-        if self[column].dtype != "object" or type_list is None:
+        if self.dataframe[column].dtype != "object" or type_list is None:
             res = self._expect_column_values_to_be_in_type_list__aggregate(
                 column, type_list, **kwargs
             )
@@ -1158,11 +1159,11 @@ Notes:
                 if native_type is not None:
                     comp_types.extend(native_type)
 
-            success = self[column].dtype.type in comp_types
+            success = self.dataframe[column].dtype.type in comp_types
 
         return {
             "success": success,
-            "result": {"observed_value": self[column].dtype.type.__name__},
+            "result": {"observed_value": self.dataframe[column].dtype.type.__name__},
         }
 
     @MetaPandasExecutionEngine.column_map_expectation
@@ -1740,7 +1741,7 @@ Notes:
         catch_exceptions=None,
         meta=None,
     ):
-        column = self[column]
+        column = self.dataframe[column]
 
         if p_value <= 0 or p_value >= 1:
             raise ValueError("p_value must be between 0 and 1 exclusive")
@@ -1789,7 +1790,7 @@ Notes:
         catch_exceptions=None,
         meta=None,
     ):
-        column = self[column]
+        column = self.dataframe[column]
 
         if not is_valid_continuous_partition_object(partition_object):
             raise ValueError("Invalid continuous partition object.")
