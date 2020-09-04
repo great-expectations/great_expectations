@@ -1195,7 +1195,7 @@ class BaseDataContext(object):
             )
 
         for batch in assets_to_validate:
-            if not isinstance(batch, (tuple, DataAsset)):
+            if not isinstance(batch, (tuple, DataAsset, Validator)):
                 raise ge_exceptions.DataContextError(
                     "Batches are required to be of type DataAsset"
                 )
