@@ -9,7 +9,6 @@ Develop
 * [FEATURE] Add new exception: expect_multicolumn_sum_to_equal for `pandas` and `Spark` (thanks @chipmyersjr)!
 * [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
 * [BUGFIX] Fix bug preventing the use of get_available_partition_ids in s3 generator
-* [BUGFIX] Clarify inclusiveness of min/max_value in data docs
 
 0.12.0
 -----------------
