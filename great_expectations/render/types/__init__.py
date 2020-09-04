@@ -429,6 +429,7 @@ class RenderedDocumentContent(RenderedContent):
         cta_footer=None,
         expectation_suite_name=None,
         batch_kwargs=None,
+        batch_spec=None
     ):
         if not isinstance(sections, list) and all(
             [isinstance(section, RenderedSectionContent) for section in sections]
@@ -446,6 +447,7 @@ class RenderedDocumentContent(RenderedContent):
         self.cta_footer = cta_footer
         self.expectation_suite_name = expectation_suite_name
         self.batch_kwargs = batch_kwargs
+        self.batch_spec = batch_spec
 
     def to_json_dict(self):
         d = super().to_json_dict()
@@ -458,6 +460,7 @@ class RenderedDocumentContent(RenderedContent):
         d["cta_footer"] = self.cta_footer
         d["expectation_suite_name"] = self.expectation_suite_name
         d["batch_kwargs"] = self.batch_kwargs
+        d["batch_spec"] = self.batch_spec
         return d
 
 
