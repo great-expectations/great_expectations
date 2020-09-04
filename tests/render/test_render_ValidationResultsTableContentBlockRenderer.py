@@ -169,13 +169,15 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                 **{
                     "content_block_type": "string_template",
                     "string_template": {
-                        "template": "Must have more than $min_value rows.",
+                        "template": "Must have at least $min_value rows.",
                         "params": {
                             "min_value": 0,
                             "max_value": None,
                             "result_format": "SUMMARY",
                             "row_condition": None,
                             "condition_parser": None,
+                            "strict_max": None,
+                            "strict_min": None,
                         },
                         "styling": None,
                     },
