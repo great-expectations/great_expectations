@@ -22,7 +22,7 @@ For continuous data:
 * However, following the behavior of numpy.histogram, a data element x is in the largest bin k if x == upper_bound_k.
 * A partition object can also include ``tail_weights`` which extend from -Infinity to the lowest bound, and from the highest bound to +Infinity.
 
-* Partition weights define the probability of the associated bin interval. Note that this applies a "piecewise uniform" distribution to the data for the purpose of statistical tests. The weights must define a valid probability distribution, i.e. they must be non-negative numbers that sum to 1.
+* Partition weights define the probability of the associated bin or interval. Note that this applies a "piecewise uniform" distribution to the data for the purpose of statistical tests. The weights must define a valid probability distribution, i.e. they must be non-negative numbers that sum to 1.
 
 Example continuous partition object:
 
