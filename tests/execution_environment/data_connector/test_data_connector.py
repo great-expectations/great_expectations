@@ -129,20 +129,6 @@ def test_data_connector_params():
     print(result_we_get)
 
 
-
-
-
-
-
-def test_data_connector_entire_directory():
-    pass
-
-
-
-
-
-
-
 def no_test_build_execution_environment_simple_directory():
     # we have this DataSource Design documennt : https://github.com/superconductive/design/blob/main/docs/20200813_datasource_configuration.md
     """
