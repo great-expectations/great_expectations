@@ -14,8 +14,8 @@ from great_expectations.data_context.store import (
     TupleS3StoreBackend,
 )
 from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
     ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
 )
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.util import gen_directory_tree_str

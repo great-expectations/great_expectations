@@ -165,7 +165,28 @@ anonymized_expectation_suite_schema = {
                 "anonymized_expectation_type_counts": {"type": "object"},
             },
             "additionalProperties": False,
-        }
+        },
+        {
+            "type": "object",
+            "properties": {
+                "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+                "expectation_count": {"type": "number"},
+                "anonymized_expectation_types_list": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "expectation_type": {"type": "string"},
+                            "anonymized_expectation_type": {
+                                "$ref": "#/definitions/anonymized_string"
+                            },
+                            "count": {"type": "number"},
+                        },
+                    },
+                },
+            },
+            "additionalProperties": False,
+        },
     ],
 }
 

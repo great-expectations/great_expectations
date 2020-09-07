@@ -178,6 +178,40 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
+  - stage: usage_stats_integration
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    dependsOn: []
+
+    jobs:
+      - job: mysql
+        services:
+          mysql: mysql
+
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+                pip install --requirement requirements.txt
+                pip install $(GE_pytest_pip_opts)
+                pip install  .
+              displayName: 'Install dependencies'
+
+            - script: |
+                pip install pytest pytest-azurepipelines
+                pytest --aws-integration tests/integration/usage_statistics
+              displayName: 'pytest'
+
   - stage: db_integration
     pool:
       vmImage: 'ubuntu-latest'
