@@ -1094,7 +1094,7 @@ class DataAsset:
         self,
         result_format,
         success,
-        unexpected_percent,
+        success_percent,
         element_count,
         nonnull_count,
         unexpected_count,
@@ -1110,8 +1110,8 @@ class DataAsset:
 
         This function handles the logic for mapping those fields for column_map_expectations.
         """
+        unexpected_percent = 100 - success_percent if success_percent else None
         # NB: unexpected_count parameter is explicit some implementing classes may limit the length of unexpected_list
-
         # Retain support for string-only output formats:
         result_format = parse_result_format(result_format)
 
