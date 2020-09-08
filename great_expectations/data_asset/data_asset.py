@@ -1094,6 +1094,7 @@ class DataAsset:
         self,
         result_format,
         success,
+        unexpected_percent,
         element_count,
         nonnull_count,
         unexpected_count,
@@ -1123,7 +1124,6 @@ class DataAsset:
         missing_count = element_count - nonnull_count
 
         if element_count > 0:
-            unexpected_percent = unexpected_count / element_count * 100
             missing_percent = missing_count / element_count * 100
 
             if nonnull_count > 0:
@@ -1133,7 +1133,6 @@ class DataAsset:
 
         else:
             missing_percent = None
-            unexpected_percent = None
             unexpected_percent_nonmissing = None
 
         return_obj["result"] = {

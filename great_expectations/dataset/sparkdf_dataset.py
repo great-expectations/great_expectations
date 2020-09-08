@@ -181,6 +181,7 @@ class MetaSparkDFDataset(Dataset):
             return_obj = self._format_map_output(
                 result_format,
                 success,
+                percent_success,
                 element_count,
                 nonnull_count,
                 unexpected_count,
@@ -353,6 +354,7 @@ class MetaSparkDFDataset(Dataset):
             return_obj = self._format_map_output(
                 result_format,
                 success,
+                percent_success,
                 element_count,
                 nonnull_count,
                 unexpected_count,
@@ -508,6 +510,7 @@ class MetaSparkDFDataset(Dataset):
             return_obj = self._format_map_output(
                 result_format,
                 success,
+                percent_success,
                 element_count,
                 nonnull_count,
                 unexpected_count,
