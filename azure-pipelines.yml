@@ -185,9 +185,7 @@ stages:
     dependsOn: []
 
     jobs:
-      - job: mysql
-        services:
-          mysql: mysql
+      - job: test_usage_stats_messages
 
         variables:
           python.version: '3.8'
@@ -203,14 +201,12 @@ stages:
 
           - script: |
                 pip install --requirement requirements.txt
-                pip install $(GE_pytest_pip_opts)
-                pip install  .
-              displayName: 'Install dependencies'
+            displayName: 'Install dependencies'
 
-            - script: |
-                pip install pytest pytest-azurepipelines
-                pytest --aws-integration tests/integration/usage_statistics
-              displayName: 'pytest'
+          - script: |
+              pip install pytest pytest-azurepipelines
+              pytest --aws-integration tests/integration/usage_statistics
+            displayName: 'pytest'
 
   - stage: db_integration
     pool:
@@ -296,7 +292,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [required, lint]
+    dependsOn: [required, lint, db_integration, usage_stats_integration]
 
     jobs:
       - job: deploy
