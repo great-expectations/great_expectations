@@ -10,7 +10,7 @@ from great_expectations.render.types import (
     RenderedSectionContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
-    ValueListContent
+    ValueListContent,
 )
 
 
