@@ -441,23 +441,47 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             expectation.kwargs, ["column_A", "column_B"]
         )
 
+        crosstab = params.get("details", {}).get("crosstab")
+
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
 
         template_str = "Values in $column_A and $column_B must be independent."
 
-        return [
-            RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
+        rendered_string_template_content = RenderedStringTemplateContent(
+            **{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
+            }
+        )
+
+        if crosstab:
+            return [
+                {
+                    "content_block_type": "table",
+                    "header_row": crosstab.columns,
+                    "table": list(crosstab.to_dict("list").values()),
+                    "styling": {
+                        "body": {
+                            "classes": [
+                                "table",
+                                "table-sm",
+                                "table-unbordered",
+                                "col-4",
+                                "mt-2",
+                            ],
+                        }
                     },
-                }
-            )
-        ]
+                    "parent": {"styles": {"list-style-type": "none"}},
+                },
+                rendered_string_template_content,
+            ]
+        else:
+            return [rendered_string_template_content]
 
     @classmethod
     def expect_multicolumn_values_to_be_unique(
