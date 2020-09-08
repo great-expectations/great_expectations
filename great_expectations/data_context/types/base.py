@@ -2,12 +2,19 @@ import logging
 import uuid
 from copy import deepcopy
 
-from marshmallow import (INCLUDE, Schema, ValidationError, fields, post_dump,
-                         post_load, validates_schema)
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.marshmallow__shade import (
+    INCLUDE,
+    Schema,
+    ValidationError,
+    fields,
+    post_dump,
+    post_load,
+    validates_schema,
+)
 from great_expectations.types import DictDot
 from great_expectations.types.configurations import ClassConfigSchema
 
@@ -38,7 +45,7 @@ class DataContextConfig(DictDot):
         anonymous_usage_statistics=None,
         commented_map=None,
         datasources=None,
-        execution_environments=None
+        execution_environments=None,
     ):
         if commented_map is None:
             commented_map = CommentedMap()
@@ -103,9 +110,7 @@ class ExecutionEngineConfigSchema(Schema):
     class_name = fields.String()
     module_name = fields.String(missing="great_expectations.execution_engine")
     caching = fields.Boolean()
-    batch_spec_defaults = fields.Dict(
-        allow_none=True
-    )
+    batch_spec_defaults = fields.Dict(allow_none=True)
 
     # noinspection PyUnusedLocal
     @post_load
@@ -483,7 +488,9 @@ class DataContextConfigSchema(Schema):
         keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema), allow_none=True
     )
     execution_environments = fields.Dict(
-        keys=fields.Str(), values=fields.Nested(ExecutionEnvironmentConfigSchema), allow_none=True
+        keys=fields.Str(),
+        values=fields.Nested(ExecutionEnvironmentConfigSchema),
+        allow_none=True,
     )
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()

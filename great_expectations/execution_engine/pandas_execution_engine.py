@@ -10,7 +10,6 @@ import jsonschema
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-from great_expectations.validator.validator import Validator
 from scipy import stats
 
 from great_expectations.core import ExpectationConfiguration
@@ -18,12 +17,10 @@ from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     _scipy_distribution_positional_args_from_dict,
     is_valid_continuous_partition_object,
-    validate_distribution_parameters
+    validate_distribution_parameters,
 )
-from great_expectations.execution_environment.types import (
-    PathBatchSpec,
-    S3BatchSpec
-)
+from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec
+from great_expectations.validator.validator import Validator
 
 from ..core.batch import Batch
 from ..datasource.pandas_datasource import HASH_THRESHOLD
@@ -198,6 +195,7 @@ class MetaPandasExecutionEngine(ExecutionEngine):
             *args,
             **kwargs
         ):
+            df = self.dataframe
 
             if result_format is None:
                 result_format = self.default_expectation_args[
@@ -205,10 +203,10 @@ class MetaPandasExecutionEngine(ExecutionEngine):
                 ]  # TODO: should this be in batch_params?
 
             if row_condition:
-                self = self.dataframe.query(row_condition).reset_index(drop=True)
+                self = df.query(row_condition).reset_index(drop=True)
 
-            series_A = self[column_A]
-            series_B = self[column_B]
+            series_A = df[column_A]
+            series_B = df[column_B]
 
             if ignore_row_if == "both_values_are_missing":
                 boolean_mapped_null_values = series_A.isnull() & series_B.isnull()
@@ -304,16 +302,16 @@ class MetaPandasExecutionEngine(ExecutionEngine):
             *args,
             **kwargs
         ):
-
+            df = self.dataframe
             if result_format is None:
                 result_format = self.default_expectation_args[
                     "result_format"
                 ]  # TODO: should this be in batch_params?
 
             if row_condition:
-                self = self.dataframe.query(row_condition).reset_index(drop=True)
+                df = df.query(row_condition).reset_index(drop=True)
 
-            test_df = self[column_list]
+            test_df = df[column_list]
 
             if ignore_row_if == "all_values_are_missing":
                 boolean_mapped_skip_values = test_df.isnull().all(axis=1)
@@ -392,28 +390,26 @@ Notes:
 --ge-feature-maturity-info--
     """
 
-    # this is necessary to subclass pandas in a proper way.
-    # NOTE: specifying added properties in this way means that they will NOT be carried over when
-    # the dataframe is manipulated, which we might want. To specify properties that are carried over
-    # to manipulation results, we would just use `_metadata = ['row_count', ...]` here. The most likely
-    # case is that we want the former, but also want to re-initialize these values to None so we don't
-    # get an attribute error when trying to access them (I think this could be done in __finalize__?)
-    _internal_names = pd.DataFrame._internal_names + [
-        "_batch_spec",
-        "_batch_markers",
-        "_batch_definition",
-        "_batch_id",
-        "_expectation_suite",
-        "_config",
-        "caching",
-        "default_expectation_args",
-        "discard_subset_failing_expectations",
-    ]
-    _internal_names_set = set(_internal_names)
+    # # this is necessary to subclass pandas in a proper way.
+    # # NOTE: specifying added properties in this way means that they will NOT be carried over when
+    # # the dataframe is manipulated, which we might want. To specify properties that are carried over
+    # # to manipulation results, we would just use `_metadata = ['row_count', ...]` here. The most likely
+    # # case is that we want the former, but also want to re-initialize these values to None so we don't
+    # # get an attribute error when trying to access them (I think this could be done in __finalize__?)
+    # _internal_names = pd.DataFrame._internal_names + [
+    #     "_batch_spec",
+    #     "_batch_markers",
+    #     "_batch_definition",
+    #     "_batch_id",
+    #     "_expectation_suite",
+    #     "_config",
+    #     "caching",
+    #     "default_expectation_args",
+    #     "discard_subset_failing_expectations",
+    # ]
+    # _internal_names_set = set(_internal_names)
 
-    recognized_batch_definition_keys = {
-        "limit"
-    }
+    recognized_batch_definition_keys = {"limit"}
 
     recognized_batch_spec_defaults = {
         "reader_method",
@@ -423,25 +419,25 @@ Notes:
     # We may want to expand or alter support for subclassing dataframes in the future:
     # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
 
-    @property
-    def _constructor(self):
-        return self.__class__
-
-    def __finalize__(self, other, method=None, **kwargs):
-        if isinstance(other, PandasExecutionEngine):
-            self._initialize_expectations(other._expectation_suite)
-            # If other was coerced to be a PandasExecutionEngine (e.g. via _constructor call during self.copy()
-            # operation)
-            # then it may not have discard_subset_failing_expectations set. Default to self value
-            self.discard_subset_failing_expectations = getattr(
-                other,
-                "discard_subset_failing_expectations",
-                self.discard_subset_failing_expectations,
-            )
-            if self.discard_subset_failing_expectations:
-                self.discard_failing_expectations()
-        super().__finalize__(other, method, **kwargs)
-        return self
+    # @property
+    # def _constructor(self):
+    #     return self.__class__
+    #
+    # def __finalize__(self, other, method=None, **kwargs):
+    #     if isinstance(other, PandasExecutionEngine):
+    #         self._initialize_expectations(other._expectation_suite)
+    #         # If other was coerced to be a PandasExecutionEngine (e.g. via _constructor call during self.copy()
+    #         # operation)
+    #         # then it may not have discard_subset_failing_expectations set. Default to self value
+    #         self.discard_subset_failing_expectations = getattr(
+    #             other,
+    #             "discard_subset_failing_expectations",
+    #             self.discard_subset_failing_expectations,
+    #         )
+    #         if self.discard_subset_failing_expectations:
+    #             self.discard_failing_expectations()
+    #     super().__finalize__(other, method, **kwargs)
+    #     return self
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -519,7 +515,9 @@ Notes:
 
         if not self.batches.get(batch_id):
             batch = Batch(
-                execution_environment_name=batch_definition.get("execution_environment"),
+                execution_environment_name=batch_definition.get(
+                    "execution_environment"
+                ),
                 batch_spec=batch_spec,
                 data=df,
                 batch_definition=batch_definition,
@@ -600,11 +598,7 @@ Notes:
             "Unable to determine reader method from path: %s" % path, {"path": path}
         )
 
-    def process_batch_definition(
-        self,
-        batch_definition,
-        batch_spec
-    ):
+    def process_batch_definition(self, batch_definition, batch_spec):
         limit = batch_definition.get("limit")
 
         if limit is not None:
@@ -809,7 +803,7 @@ Notes:
         """
         # Short-circuit if the dtype tells us; in that case use column-aggregate (vs map) semantics
         if (
-            self[column].dtype != "object"
+            self.dataframe[column].dtype != "object"
             or type_ is None
             or type_ in ["object", "object_", "O"]
         ):
@@ -931,11 +925,11 @@ Notes:
             native_type = self._native_type_type_map(type_)
             if native_type is not None:
                 comp_types.extend(native_type)
-            success = self[column].dtype.type in comp_types
+            success = self.dataframe[column].dtype.type in comp_types
 
         return {
             "success": success,
-            "result": {"observed_value": self[column].dtype.type.__name__},
+            "result": {"observed_value": self.dataframe[column].dtype.type.__name__},
         }
 
     @staticmethod
@@ -1036,7 +1030,7 @@ Notes:
         numpy 'string_' (bytes)); consequently, it is not possible to test for string columns using aggregate semantics.
         """
         # Short-circuit if the dtype tells us; in that case use column-aggregate (vs map) semantics
-        if self[column].dtype != "object" or type_list is None:
+        if self.dataframe[column].dtype != "object" or type_list is None:
             res = self._expect_column_values_to_be_in_type_list__aggregate(
                 column, type_list, **kwargs
             )
@@ -1158,11 +1152,11 @@ Notes:
                 if native_type is not None:
                     comp_types.extend(native_type)
 
-            success = self[column].dtype.type in comp_types
+            success = self.dataframe[column].dtype.type in comp_types
 
         return {
             "success": success,
-            "result": {"observed_value": self[column].dtype.type.__name__},
+            "result": {"observed_value": self.dataframe[column].dtype.type.__name__},
         }
 
     @MetaPandasExecutionEngine.column_map_expectation
@@ -1740,7 +1734,7 @@ Notes:
         catch_exceptions=None,
         meta=None,
     ):
-        column = self[column]
+        column = self.dataframe[column]
 
         if p_value <= 0 or p_value >= 1:
             raise ValueError("p_value must be between 0 and 1 exclusive")
@@ -1789,7 +1783,7 @@ Notes:
         catch_exceptions=None,
         meta=None,
     ):
-        column = self[column]
+        column = self.dataframe[column]
 
         if not is_valid_continuous_partition_object(partition_object):
             raise ValueError("Invalid continuous partition object.")

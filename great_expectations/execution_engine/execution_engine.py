@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 
+import decimal
 import inspect
 import logging
+from collections import Counter
 from datetime import datetime
 from functools import lru_cache, wraps
 from itertools import zip_longest
 from numbers import Number
 from typing import Any, List, Union
-import decimal
-from collections import Counter
 
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-from great_expectations.validator.validator import Validator
 from ruamel.yaml import YAML
 from scipy import stats
 
@@ -22,8 +21,9 @@ from great_expectations.execution_engine.util import (
     build_categorical_partition_object,
     build_continuous_partition_object,
     is_valid_categorical_partition_object,
-    is_valid_partition_object
+    is_valid_partition_object,
 )
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -41,7 +41,9 @@ class MetaExecutionEngine(object):
             "catch_exceptions": False,
             "result_format": "BASIC",
         }
-        self.default_expectation_args = kwargs.get("default_expectation_args") or default_expectation_args
+        self.default_expectation_args = (
+            kwargs.get("default_expectation_args") or default_expectation_args
+        )
 
     @classmethod
     def column_map_expectation(cls, func):
@@ -107,7 +109,7 @@ class MetaExecutionEngine(object):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
@@ -229,8 +231,8 @@ class ExecutionEngine(MetaExecutionEngine):
             "unexpected_percent": unexpected_percent,
             "unexpected_percent_nonmissing": unexpected_percent_nonmissing,
             "partial_unexpected_list": unexpected_list[
-                                       : result_format["partial_unexpected_count"]
-                                       ],
+                : result_format["partial_unexpected_count"]
+            ],
         }
 
         if result_format["result_format"] == "BASIC":
@@ -259,8 +261,8 @@ class ExecutionEngine(MetaExecutionEngine):
                 return_obj["result"].update(
                     {
                         "partial_unexpected_index_list": unexpected_index_list[
-                                                         : result_format["partial_unexpected_count"]
-                                                         ]
+                            : result_format["partial_unexpected_count"]
+                        ]
                         if unexpected_index_list is not None
                         else None,
                         "partial_unexpected_counts": partial_unexpected_counts,
@@ -367,7 +369,9 @@ class ExecutionEngine(MetaExecutionEngine):
             )
 
         self._batch_spec_defaults = {
-            key: value for key, value in batch_spec_defaults.items() if key in self.recognized_batch_spec_defaults
+            key: value
+            for key, value in batch_spec_defaults.items()
+            if key in self.recognized_batch_spec_defaults
         }
 
         loaded_batch_id = kwargs.pop("loaded_batch_id", None)
@@ -397,33 +401,41 @@ class ExecutionEngine(MetaExecutionEngine):
     @property
     def _active_validation(self):
         if not self.validator:
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute `_active_validation` - please set "
-                                 f"_validator attribute first.")
+            raise AttributeError(
+                f"'{type(self).__name__}' object has no attribute `_active_validation` - please set "
+                f"_validator attribute first."
+            )
         else:
             return self.validator._active_validation
 
     @_active_validation.setter
     def _active_validation(self, active_validation):
         if not self.validator:
-            raise AttributeError(f"'{type(self).__name__}' object cannot set `_active_validation` attribute - please "
-                                 f"set "
-                                 f"_validator attribute first.")
+            raise AttributeError(
+                f"'{type(self).__name__}' object cannot set `_active_validation` attribute - please "
+                f"set "
+                f"_validator attribute first."
+            )
         else:
             self.validator._active_validation = active_validation
 
     @property
     def _expectation_suite(self):
         if not self.validator:
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute `_expectation_suite` - please set "
-                                 f"_validator attribute first.")
+            raise AttributeError(
+                f"'{type(self).__name__}' object has no attribute `_expectation_suite` - please set "
+                f"_validator attribute first."
+            )
         else:
             return self.validator._expectation_suite
 
     @property
     def _validator_config(self):
         if not self.validator:
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute `_validator_config` - please set "
-            f"_validator attribute first.")
+            raise AttributeError(
+                f"'{type(self).__name__}' object has no attribute `_validator_config` - please set "
+                f"_validator attribute first."
+            )
         else:
             return self.validator._validator_config
 

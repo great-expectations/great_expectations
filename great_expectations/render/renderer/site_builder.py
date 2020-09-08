@@ -546,6 +546,7 @@ class DefaultSiteIndexBuilder(object):
         run_name=None,
         asset_name=None,
         batch_kwargs=None,
+        batch_spec=None,
     ):
         import os
 
@@ -584,6 +585,7 @@ class DefaultSiteIndexBuilder(object):
                 "run_name": run_name,
                 "asset_name": asset_name,
                 "batch_kwargs": batch_kwargs,
+                "batch_spec": batch_spec,
                 "expectation_suite_filepath": expectation_suite_filepath
                 if run_id
                 else None,
@@ -676,6 +678,7 @@ class DefaultSiteIndexBuilder(object):
 
         return results
 
+    # TODO: deprecate dual batch api support
     def build(self, skip_and_clean_missing=True):
         """
         :param skip_and_clean_missing: if True, target html store keys without corresponding source store keys will
@@ -792,6 +795,7 @@ class DefaultSiteIndexBuilder(object):
                     )
 
                     batch_kwargs = validation.meta.get("batch_kwargs", {})
+                    batch_spec = validation.meta.get("batch_spec", {})
 
                     self.add_resource_info_to_index_links_dict(
                         index_links_dict=index_links_dict,
@@ -801,8 +805,10 @@ class DefaultSiteIndexBuilder(object):
                         run_id=profiling_result_key.run_id,
                         run_time=profiling_result_key.run_id.run_time,
                         run_name=profiling_result_key.run_id.run_name,
-                        asset_name=batch_kwargs.get("data_asset_name"),
+                        asset_name=batch_kwargs.get("data_asset_name")
+                        or batch_spec.get("data_asset_name"),
                         batch_kwargs=batch_kwargs,
+                        batch_spec=batch_spec,
                     )
                 except Exception:
                     error_msg = "Profiling result not found: {0:s} - skipping".format(
@@ -845,6 +851,7 @@ class DefaultSiteIndexBuilder(object):
 
                     validation_success = validation.success
                     batch_kwargs = validation.meta.get("batch_kwargs", {})
+                    batch_spec = validation.meta.get("batch_spec", {})
 
                     self.add_resource_info_to_index_links_dict(
                         index_links_dict=index_links_dict,
@@ -855,8 +862,10 @@ class DefaultSiteIndexBuilder(object):
                         validation_success=validation_success,
                         run_time=validation_result_key.run_id.run_time,
                         run_name=validation_result_key.run_id.run_name,
-                        asset_name=batch_kwargs.get("data_asset_name"),
+                        asset_name=batch_kwargs.get("data_asset_name")
+                        or batch_spec.get("data_asset_name"),
                         batch_kwargs=batch_kwargs,
+                        batch_spec=batch_spec,
                     )
                 except Exception:
                     error_msg = "Validation result not found: {0:s} - skipping".format(

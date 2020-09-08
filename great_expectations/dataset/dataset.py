@@ -81,27 +81,54 @@ class MetaDataset(DataAsset):
         @wraps(func)
         def inner_wrapper(
             self,
-            column,
+            column=None,
             result_format=None,
             row_condition=None,
             condition_parser=None,
             *args,
             **kwargs
         ):
-
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
             # Retain support for string-only output formats:
             result_format = parse_result_format(result_format)
 
-            if row_condition:
-                self = self.query(row_condition).reset_index(drop=True)
+            if row_condition and self._supports_row_condition:
+                self = self.query(row_condition, parser=condition_parser).reset_index(
+                    drop=True
+                )
 
             element_count = self.get_row_count()
-            nonnull_count = self.get_column_nonnull_count(column)
-            null_count = element_count - nonnull_count
 
-            evaluation_result = func(self, column, *args, **kwargs)
+            if kwargs.get("column"):
+                column = kwargs.get("column")
+
+            if column is not None:
+                nonnull_count = self.get_column_nonnull_count(
+                    kwargs.get("column", column)
+                )
+                # column is treated specially as a positional argument in most expectations
+                args = tuple((column, *args))
+            elif kwargs.get("column_A") and kwargs.get("column_B"):
+                try:
+                    nonnull_count = (
+                        self[kwargs.get("column_A")].notnull()
+                        & self[kwargs.get("column_B")].notnull()
+                    ).sum()
+                except TypeError:
+                    nonnull_count = None
+            else:
+                raise ValueError(
+                    "The column_aggregate_expectation wrapper requires either column or "
+                    "both column_A and column_B as input."
+                )
+
+            if nonnull_count:
+                null_count = element_count - nonnull_count
+            else:
+                null_count = None
+
+            evaluation_result = func(self, *args, **kwargs)
 
             if "success" not in evaluation_result:
                 raise ValueError(
@@ -123,11 +150,19 @@ class MetaDataset(DataAsset):
             return_obj["result"] = {
                 "observed_value": evaluation_result["result"]["observed_value"],
                 "element_count": element_count,
-                "missing_count": null_count,
-                "missing_percent": null_count * 100.0 / element_count
-                if element_count > 0
-                else None,
             }
+
+            if null_count:
+                return_obj["result"]["missing_count"] = null_count
+                if element_count > 0:
+                    return_obj["result"]["missing_percent"] = (
+                        null_count * 100.0 / element_count
+                    )
+                else:
+                    return_obj["result"]["missing_percent"] = None
+            else:
+                return_obj["result"]["missing_count"] = None
+                return_obj["result"]["missing_percent"] = None
 
             if result_format["result_format"] == "BASIC":
                 return return_obj
@@ -151,6 +186,7 @@ class Dataset(MetaDataset):
     # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
     # That way, multiple backends can implement the same data_asset_type
     _data_asset_type = "Dataset"
+    _supports_row_condition = False
 
     # getter functions with hashable arguments - can be cached
     hashable_getters = [
@@ -339,6 +375,18 @@ class Dataset(MetaDataset):
         self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
     ):
         """Returns: int"""
+        raise NotImplementedError
+
+    def get_crosstab(
+        self,
+        column_A,
+        column_B,
+        bins_A=None,
+        bins_B=None,
+        n_bins_A=None,
+        n_bins_B=None,
+    ):
+        """Get crosstab of column_A and column_B, binning values if necessary"""
         raise NotImplementedError
 
     def test_column_map_expectation_function(self, function, *args, **kwargs):
@@ -4195,6 +4243,80 @@ class Dataset(MetaDataset):
 
         return return_obj
 
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_pair_cramers_phi_value_to_be_less_than(
+        self,
+        column_A,
+        column_B,
+        bins_A=None,
+        bins_B=None,
+        n_bins_A=None,
+        n_bins_B=None,
+        threshold=0.05,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        """
+        Expect the values in column_A to be independent of those in column_B.
+
+        Args:
+            column_A (str): The first column name
+            column_B (str): The second column name
+            threshold (float): Maximum allowed value of cramers V for expectation to pass.
+
+        Keyword Args:
+            bins_A (list of float): Bins for column_A.
+            bins_B (list of float): Bins for column_B.
+            n_bins_A (int): Number of bins for column_A. Ignored if bins_A is not None.
+            n_bins_B (int): Number of bins for column_B. Ignored if bins_B is not None.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+        crosstab = self.get_crosstab(
+            column_A, column_B, bins_A, bins_B, n_bins_A, n_bins_B
+        )
+        chi2_result = stats.chi2_contingency(crosstab)
+        # See e.g. https://en.wikipedia.org/wiki/Cram%C3%A9r%27s_V
+        cramers_V = max(
+            min(
+                np.sqrt(
+                    chi2_result[0] / self.get_row_count() / (min(crosstab.shape) - 1)
+                ),
+                1,
+            ),
+            0,
+        )
+        return_obj = {
+            "success": cramers_V <= threshold,
+            "result": {
+                "observed_value": cramers_V,
+                "unexpected_list": crosstab,
+                "details": {"crosstab": crosstab},
+            },
+        }
+        return return_obj
+
     ###
     #
     # Column pairs
@@ -4342,7 +4464,7 @@ class Dataset(MetaDataset):
 
     ###
     #
-    # Multicolumn pairs
+    # Multicolumn
     #
     ###
 
@@ -4384,6 +4506,27 @@ class Dataset(MetaDataset):
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
+        """
+        raise NotImplementedError
+
+    def expect_multicolumn_sum_to_equal(
+        self,
+        column_list,
+        sum_total,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        """ Multi-Column Map Expectation
+
+        Expects that sum of all rows for a set of columns is equal to a specific value
+
+        Args:
+            column_list (List[str]): \
+                Set of columns to be checked
+            sum_total (int): \
+                expected sum of columns
         """
         raise NotImplementedError
 

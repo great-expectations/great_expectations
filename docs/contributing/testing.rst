@@ -55,7 +55,7 @@ To accomplish this, Great Expectations encapsulates unit tests for Expectations 
 
 Test fixture files are structured as follows:
 
-.. code-block:: json
+.. code-block::
 
     {
         "expectation_type" : "expect_column_max_to_be_between",
@@ -73,7 +73,7 @@ Each item under ``datasets`` includes three entries: ``data``, ``schemas``, and 
 
     ...defines a dataframe of sample data to apply Expectations against. The dataframe is defined as a dictionary of lists, with keys containing column names and values containing lists of data entries. All lists within a dataset must have the same length.
 
-    .. code-block:: json
+    .. code-block::
 
         "data" : {
             "w" : [1, 2, 3, 4, 5, 5, 4, 3, 2, 1],
@@ -89,7 +89,7 @@ Each item under ``datasets`` includes three entries: ``data``, ``schemas``, and 
 
     ...define the types to be used when instantiating tests against different execution environments, including different SQL dialects. Each schema is defined as dictionary with column names and types as key-value pairs. If the schema isn't specified for a given execution environment, Great Expectations will introspect values and attempt to guess the schema.
 
-    .. code-block:: json
+    .. code-block::
 
         "schemas": {
             "sqlite": {
@@ -120,7 +120,7 @@ Each item under ``datasets`` includes three entries: ``data``, ``schemas``, and 
 
     See an example below. For other examples
 
-    .. code-block:: json
+    .. code-block::
 
         "tests" : [{
             "title": "Basic negative test case",

@@ -15,6 +15,6 @@ are aware of a source of data and can produce produce identifying information, c
 
 See :ref:`datasource_reference` for more detail about configuring and using datasources in your DataContext.
 
-See datasource module docs :ref:`datasource_module` for more detail about available datasources.
+See datasource module docs :mod:`great_expectations.datasource.datasource` for more detail about available datasources.
 
 

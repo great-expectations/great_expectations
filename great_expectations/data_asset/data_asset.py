@@ -13,7 +13,6 @@ from functools import wraps
 from typing import List
 
 from dateutil.parser import parse
-from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core import (ExpectationConfiguration,
@@ -27,6 +26,7 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_asset.util import (
     parse_result_format, recursively_convert_to_json_serializable)
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.marshmallow__shade import ValidationError
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)

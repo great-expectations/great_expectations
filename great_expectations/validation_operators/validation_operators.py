@@ -11,8 +11,10 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier, ValidationResultIdentifier)
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.validation_operators.types.validation_operator_result import \
-    ValidationOperatorResult
+from great_expectations.validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
+from great_expectations.validator.validator import Validator
 
 from .util import send_slack_notification
 
@@ -256,7 +258,7 @@ The ``run`` method returns a ValidationOperatorResult object:
             A batch of data
 
         """
-        if not isinstance(item, DataAsset):
+        if not isinstance(item, (DataAsset, Validator)):
             if not (
                 isinstance(item, tuple)
                 and len(item) == 2

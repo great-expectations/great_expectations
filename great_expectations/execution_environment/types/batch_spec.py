@@ -2,8 +2,7 @@ import logging
 from abc import ABCMeta
 
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.exceptions import (InvalidBatchIdError,
-                                           InvalidBatchSpecError)
+from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecError
 
 logger = logging.getLogger(__name__)
 

@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 try:
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
-    from pyspark.sql import Window, SQLContext
+    from pyspark.sql import SQLContext, Window
     from pyspark.sql.functions import (
         array,
         col,
@@ -34,6 +34,9 @@ try:
         expr,
         isnan,
         lag,
+    )
+    from pyspark.sql.functions import length as length_
+    from pyspark.sql.functions import (
         lit,
         monotonically_increasing_id,
         stddev_samp,
@@ -41,7 +44,6 @@ try:
         when,
         year,
     )
-    from pyspark.sql.functions import length as length_
 except ImportError as e:
     logger.debug(str(e))
     logger.debug(

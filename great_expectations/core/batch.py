@@ -12,7 +12,7 @@ class Batch(DictDot):
         batch_kwargs=None,
         batch_spec=None,
         datasource_name=None,
-        execution_environment_name=None
+        execution_environment_name=None,
     ):
         self._datasource_name = datasource_name
         self._batch_kwargs = batch_kwargs

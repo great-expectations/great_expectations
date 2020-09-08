@@ -5,14 +5,17 @@ import logging
 import warnings
 from typing import Union
 
-from great_expectations.validator.validator import Validator
 from ruamel.yaml import YAML
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import (
-    instantiate_class_from_config, load_class, verify_dynamic_loading_support)
+    instantiate_class_from_config,
+    load_class,
+    verify_dynamic_loading_support,
+)
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.types import ClassConfig
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -87,7 +90,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         )
         return Validator(
             execution_engine=self.execution_engine,
-            expectation_suite_name=expectation_suite_name
+            expectation_suite_name=expectation_suite_name,
         )
 
     @classmethod
@@ -292,10 +295,6 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
             ] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
 
-    def build_batch_spec(
-        self, data_connector, batch_definition
-    ):
+    def build_batch_spec(self, data_connector, batch_definition):
         generator_obj = self.get_data_connector(data_connector)
-        return generator_obj.build_batch_spec(
-            batch_definition=batch_definition
-        )
+        return generator_obj.build_batch_spec(batch_definition=batch_definition)

@@ -1,7 +1,7 @@
 import importlib
 import json
 
-from marshmallow import ValidationError
+from great_expectations.marshmallow__shade import ValidationError
 
 
 class GreatExpectationsError(Exception):

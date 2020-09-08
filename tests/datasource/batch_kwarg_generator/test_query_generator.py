@@ -3,10 +3,12 @@ import shutil
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import Datasource
-from great_expectations.datasource.batch_kwargs_generator import \
-    QueryBatchKwargsGenerator
-from great_expectations.execution_environment.types import \
-    SqlAlchemyDatasourceQueryBatchKwargs
+from great_expectations.datasource.batch_kwargs_generator import (
+    QueryBatchKwargsGenerator,
+)
+from great_expectations.execution_environment.types import (
+    SqlAlchemyDatasourceQueryBatchKwargs,
+)
 
 
 def test_basic_operation(basic_sqlalchemy_datasource):
