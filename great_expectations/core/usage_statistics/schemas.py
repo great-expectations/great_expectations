@@ -171,7 +171,7 @@ anonymized_expectation_suite_schema = {
             "properties": {
                 "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
                 "expectation_count": {"type": "number"},
-                "anonymized_expectation_types_list": {
+                "anonymized_expectation_counts": {
                     "type": "array",
                     "items": {
                         "type": "object",

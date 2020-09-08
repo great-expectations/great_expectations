@@ -182,7 +182,7 @@ valid_usage_statistics_messages = {
                     {
                         "anonymized_name": "238e99998c7674e4ff26a9c529d43da4",
                         "expectation_count": 8,
-                        "anonymized_expectation_types_list": [
+                        "anonymized_expectation_counts": [
                             {
                                 "expectation_type": "expect_column_value_lengths_to_be_between",
                                 "count": 1,

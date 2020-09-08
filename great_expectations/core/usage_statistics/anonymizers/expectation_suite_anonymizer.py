@@ -13,7 +13,7 @@ class ExpectationSuiteAnonymizer(Anonymizer):
 
     def anonymize_expectation_suite_info(self, expectation_suite):
         anonymized_info_dict = dict()
-        anonymized_expectation_types_list = list()
+        anonymized_expectation_counts = list()
 
         expectations = expectation_suite.expectations
         expectation_types = [
@@ -27,14 +27,14 @@ class ExpectationSuiteAnonymizer(Anonymizer):
                 expectation_info["anonymized_expectation_type"] = self.anonymize(
                     expectation_type
                 )
-            anonymized_expectation_types_list.append(expectation_info)
+            anonymized_expectation_counts.append(expectation_info)
 
         anonymized_info_dict["anonymized_name"] = self.anonymize(
             expectation_suite.expectation_suite_name
         )
         anonymized_info_dict["expectation_count"] = len(expectations)
         anonymized_info_dict[
-            "anonymized_expectation_types_list"
-        ] = anonymized_expectation_types_list
+            "anonymized_expectation_counts"
+        ] = anonymized_expectation_counts
 
         return anonymized_info_dict
