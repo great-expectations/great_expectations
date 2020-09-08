@@ -1,9 +1,10 @@
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import \
-    Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.site_builder_anonymizer import \
-    SiteBuilderAnonymizer
-from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymizer import \
-    StoreBackendAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
+from great_expectations.core.usage_statistics.anonymizers.site_builder_anonymizer import (
+    SiteBuilderAnonymizer,
+)
+from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymizer import (
+    StoreBackendAnonymizer,
+)
 
 
 class DataDocsSiteAnonymizer(Anonymizer):

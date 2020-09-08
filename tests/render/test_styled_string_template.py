@@ -5,8 +5,11 @@ import pytest
 import great_expectations as ge
 import great_expectations.render as render
 from great_expectations.render.renderer import (
-    ExpectationSuiteColumnSectionRenderer, ExpectationSuitePageRenderer,
-    ProfilingResultsColumnSectionRenderer, ProfilingResultsPageRenderer)
+    ExpectationSuiteColumnSectionRenderer,
+    ExpectationSuitePageRenderer,
+    ProfilingResultsColumnSectionRenderer,
+    ProfilingResultsPageRenderer,
+)
 from great_expectations.render.view import DefaultJinjaPageView
 
 

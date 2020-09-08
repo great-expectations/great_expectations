@@ -3,7 +3,9 @@ import pytest
 
 from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.dataset.util import (
-    build_continuous_partition_object, is_valid_continuous_partition_object)
+    build_continuous_partition_object,
+    is_valid_continuous_partition_object,
+)
 
 
 def test_build_continuous_partition_object(

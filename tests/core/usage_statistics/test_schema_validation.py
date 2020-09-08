@@ -2,8 +2,11 @@ import jsonschema
 import pytest
 
 from great_expectations.core.usage_statistics.schemas import (
-    anonymized_datasource_schema, anonymized_string_schema,
-    init_payload_schema, usage_statistics_record_schema)
+    anonymized_datasource_schema,
+    anonymized_string_schema,
+    init_payload_schema,
+    usage_statistics_record_schema,
+)
 
 
 def test_anonymized_name_validation():

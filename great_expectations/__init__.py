@@ -6,8 +6,17 @@ del get_versions  # isort:skip
 
 from great_expectations.data_context import DataContext
 
-from .util import (from_pandas, measure_execution_time, read_csv, read_excel,
-                   read_feather, read_json, read_parquet, read_pickle,
-                   read_table, validate)
+from .util import (
+    from_pandas,
+    measure_execution_time,
+    read_csv,
+    read_excel,
+    read_feather,
+    read_json,
+    read_parquet,
+    read_pickle,
+    read_table,
+    validate,
+)
 
 rtd_url_ge_version = __version__.replace(".", "_")

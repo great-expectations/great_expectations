@@ -2,8 +2,7 @@
 The real meat of these tests lives in the test_definitions directory for individual expectations
 """
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.render.renderer.content_block import \
-    ExpectationStringRenderer
+from great_expectations.render.renderer.content_block import ExpectationStringRenderer
 
 
 def test_expectation_string_renderer_styling():

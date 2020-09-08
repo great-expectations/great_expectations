@@ -8,14 +8,18 @@ import pytest
 import great_expectations as ge
 from great_expectations.core import expectationSuiteSchema
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.profile.basic_dataset_profiler import \
-    BasicDatasetProfiler
+from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer import (
-    ExpectationSuiteColumnSectionRenderer, ExpectationSuitePageRenderer,
-    ProfilingResultsColumnSectionRenderer, ProfilingResultsPageRenderer,
-    ValidationResultsColumnSectionRenderer, ValidationResultsPageRenderer)
-from great_expectations.render.renderer.content_block import \
-    ValidationResultsTableContentBlockRenderer
+    ExpectationSuiteColumnSectionRenderer,
+    ExpectationSuitePageRenderer,
+    ProfilingResultsColumnSectionRenderer,
+    ProfilingResultsPageRenderer,
+    ValidationResultsColumnSectionRenderer,
+    ValidationResultsPageRenderer,
+)
+from great_expectations.render.renderer.content_block import (
+    ValidationResultsTableContentBlockRenderer,
+)
 from great_expectations.render.view import DefaultJinjaPageView
 from tests.test_utils import expectationSuiteValidationResultSchema
 

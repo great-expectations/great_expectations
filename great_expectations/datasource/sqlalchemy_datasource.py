@@ -6,8 +6,7 @@ from urllib.parse import urlparse
 
 from great_expectations.core.batch import Batch
 from great_expectations.core.util import nested_update
-from great_expectations.dataset.sqlalchemy_dataset import \
-    SqlAlchemyBatchReference
+from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.datasource import Datasource
 from great_expectations.exceptions import (
     DatasourceInitializationError,

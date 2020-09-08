@@ -14,8 +14,10 @@ from dateutil.parser import parse
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
-    check_sql_engine_dialect, get_approximate_percentile_disc_sql,
-    get_sql_dialect_floating_point_infinity_value)
+    check_sql_engine_dialect,
+    get_approximate_percentile_disc_sql,
+    get_sql_dialect_floating_point_infinity_value,
+)
 from great_expectations.util import import_library_module
 
 from ..core import convert_to_json_serializable

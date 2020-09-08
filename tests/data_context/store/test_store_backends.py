@@ -7,10 +7,12 @@ import pytest
 from moto import mock_s3
 
 from great_expectations.core import RunIdentifier
-from great_expectations.data_context.store import (InMemoryStoreBackend,
-                                                   TupleFilesystemStoreBackend,
-                                                   TupleGCSStoreBackend,
-                                                   TupleS3StoreBackend)
+from great_expectations.data_context.store import (
+    InMemoryStoreBackend,
+    TupleFilesystemStoreBackend,
+    TupleGCSStoreBackend,
+    TupleS3StoreBackend,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,

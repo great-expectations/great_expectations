@@ -1,7 +1,10 @@
-from great_expectations.core import (ExpectationConfiguration,
-                                     ExpectationValidationResult)
-from great_expectations.render.renderer.content_block import \
-    ExceptionListContentBlockRenderer
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.render.renderer.content_block import (
+    ExceptionListContentBlockRenderer,
+)
 
 
 def test_exception_list_content_block_renderer():

@@ -18,8 +18,11 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core import (ExpectationSuite, RunIdentifier,
-                                     get_metric_kwargs_id)
+from great_expectations.core import (
+    ExpectationSuite,
+    RunIdentifier,
+    get_metric_kwargs_id,
+)
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import (  # TODO: deprecate
@@ -49,10 +52,16 @@ from great_expectations.data_context.types.base import (  # TODO: deprecate
     executionEnvironmentConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier, ValidationResultIdentifier)
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 from great_expectations.data_context.util import (
-    file_relative_path, instantiate_class_from_config, load_class,
-    substitute_all_config_variables, substitute_config_variable)
+    file_relative_path,
+    instantiate_class_from_config,
+    load_class,
+    substitute_all_config_variables,
+    substitute_config_variable,
+)
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource  # TODO: deprecate
 from great_expectations.execution_engine import ExecutionEngine

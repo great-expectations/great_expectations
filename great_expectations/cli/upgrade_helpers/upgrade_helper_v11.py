@@ -6,19 +6,21 @@ import traceback
 from dateutil.parser import parse
 
 from great_expectations import DataContext
-from great_expectations.cli.upgrade_helpers.base_upgrade_helper import \
-    BaseUpgradeHelper
+from great_expectations.cli.upgrade_helpers.base_upgrade_helper import BaseUpgradeHelper
 from great_expectations.cli.util import cli_message
-from great_expectations.data_context.store import (DatabaseStoreBackend,
-                                                   HtmlSiteStore,
-                                                   InMemoryStoreBackend,
-                                                   MetricStore,
-                                                   TupleFilesystemStoreBackend,
-                                                   TupleGCSStoreBackend,
-                                                   TupleS3StoreBackend,
-                                                   ValidationsStore)
-from great_expectations.data_context.types.resource_identifiers import \
-    ValidationResultIdentifier
+from great_expectations.data_context.store import (
+    DatabaseStoreBackend,
+    HtmlSiteStore,
+    InMemoryStoreBackend,
+    MetricStore,
+    TupleFilesystemStoreBackend,
+    TupleGCSStoreBackend,
+    TupleS3StoreBackend,
+    ValidationsStore,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationResultIdentifier,
+)
 
 
 class UpgradeHelperV11(BaseUpgradeHelper):

@@ -1,10 +1,13 @@
 import pytest
 
 from great_expectations.core import ExpectationSuite
-from great_expectations.data_context.store import (DatabaseStoreBackend,
-                                                   ExpectationsStore)
-from great_expectations.data_context.types.resource_identifiers import \
-    ExpectationSuiteIdentifier
+from great_expectations.data_context.store import (
+    DatabaseStoreBackend,
+    ExpectationsStore,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+)
 from great_expectations.exceptions import StoreBackendError
 
 
