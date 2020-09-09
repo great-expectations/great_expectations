@@ -98,7 +98,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
         renderer,
         slack_webhook,
         notify_on="all",
-        data_doc_site_names=None,
+        data_docs_site_names=None,
     ):
         """Construct a SlackNotificationAction
 
@@ -127,7 +127,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
         self.slack_webhook = slack_webhook
         assert slack_webhook, "No Slack webhook found in action config."
         self.notify_on = notify_on
-        self.data_doc_site_names = data_doc_site_names
+        self.data_docs_site_names = data_docs_site_names
 
     def _run(
         self,
@@ -167,7 +167,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
             and not validation_success
         ):
             query = self.renderer.render(
-                validation_result_suite, data_docs_pages, self.data_doc_site_names
+                validation_result_suite, data_docs_pages, self.data_docs_site_names
             )
             # this will actually sent the POST request to the Slack webapp server
             slack_notif_result = send_slack_notification(

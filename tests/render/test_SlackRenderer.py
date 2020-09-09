@@ -8,7 +8,8 @@ from ..test_utils import modify_locale
 
 @modify_locale
 @freeze_time("09/24/2019 23:18:36")
-def test_SlackRenderer():
+def test_SlackRenderer_validation_results_with_datadocs():
+
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=True,
@@ -30,18 +31,26 @@ def test_SlackRenderer():
         },
     )
 
-    rendered_output = SlackRenderer().render(validation_result_suite)
+    data_docs_pages = {"local_site": "file:///localsite/index.html"}
+    data_docs_site_names = ["local_site"]
+    rendered_output = SlackRenderer().render(
+        validation_result_suite, data_docs_pages, data_docs_site_names
+    )
 
-    # TODO : Add test for data_docs_pages which is a dictionary containing docs_site as key and index page as value {"local_site": "file:///localsite/index.html"}
-    # TODO : Add test for data_doc_site_names, which is None (default) or a list of data doc sites to include in Slack message
-
-    expected_renderer_output = {
+    expected_output = {
         "blocks": [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
                     "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Summary*: *0* of *0* expectations were met",
+                },
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*DataDocs* can be found here: `file:///localsite/index.html` \n (Please copy and paste link into a browser to view)\n",
                 },
             },
             {"type": "divider"},
@@ -58,18 +67,4 @@ def test_SlackRenderer():
         "text": "default: Success :tada:",
     }
 
-    # We're okay with system variation in locales (OS X likes 24 hour, but not Travis)
-    expected_renderer_output["blocks"][0]["text"]["text"] = expected_renderer_output[
-        "blocks"
-    ][0]["text"]["text"].replace("09/24/2019 11:18:36 PM", "LOCALEDATE")
-    expected_renderer_output["blocks"][0]["text"]["text"] = expected_renderer_output[
-        "blocks"
-    ][0]["text"]["text"].replace("09/24/2019 23:18:36", "LOCALEDATE")
-    rendered_output["blocks"][0]["text"]["text"] = rendered_output["blocks"][0]["text"][
-        "text"
-    ].replace("09/24/2019 11:18:36 PM UTC", "LOCALEDATE")
-    rendered_output["blocks"][0]["text"]["text"] = rendered_output["blocks"][0]["text"][
-        "text"
-    ].replace("09/24/2019 23:18:36 UTC", "LOCALEDATE")
-
-    assert rendered_output == expected_renderer_output
+    assert rendered_output == expected_output
