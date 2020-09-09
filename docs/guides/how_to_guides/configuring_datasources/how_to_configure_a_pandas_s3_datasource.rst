@@ -8,7 +8,7 @@ This guide shows how to connect to a Pandas Datasource such that the data is acc
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
 
 -----
 Steps
@@ -102,7 +102,7 @@ To add an S3-backed Pandas datasource do this:
 
     #. **Verify that all your data assets appear in the list**
 
-        .. code-block:: bash
+        .. code-block::
 
             Which data would you like to use?
                 1. your_first_data_asset_name (file)

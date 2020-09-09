@@ -7,9 +7,6 @@ import pytest
 import great_expectations as ge
 import great_expectations.render as render
 from great_expectations.core import ExpectationSuiteValidationResultSchema
-from great_expectations.render.page_renderer_util import (
-    render_multiple_validation_result_pages_markdown,
-)
 from great_expectations.render.renderer import ValidationResultsPageRenderer
 from great_expectations.render.types import (
     RenderedDocumentContent,
@@ -103,15 +100,17 @@ def test_snapshot_render_section_page_with_fixture_data(validation_operator_resu
 
     validation_operator_result = ValidationOperatorResult(**validation_operator_result)
 
-    md_str = ""
     validation_results_page_renderer = ValidationResultsPageRenderer(
         run_info_at_end=True
     )
-    for validation_result in validation_operator_result.list_validation_results():
-        rendered_document_content = validation_results_page_renderer.render(
-            validation_result
-        )
-        md_str += DefaultMarkdownPageView().render(rendered_document_content) + " "
+
+    rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result(
+        validation_operator_result=validation_operator_result
+    )
+
+    md_str_list = DefaultMarkdownPageView().render(rendered_document_content_list)
+
+    md_str = " ".join(md_str_list)
 
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
 
@@ -473,9 +472,18 @@ def test_render_section_page_with_fixture_data_multiple_validations(
 
     validation_operator_result = ValidationOperatorResult(**validation_operator_result)
 
-    md_str = render_multiple_validation_result_pages_markdown(
-        validation_operator_result
+    validation_results_page_renderer = ValidationResultsPageRenderer(
+        run_info_at_end=True
     )
+
+    rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result(
+        validation_operator_result=validation_operator_result
+    )
+
+    md_str_list = DefaultMarkdownPageView().render(rendered_document_content_list)
+
+    md_str = " ".join(md_str_list)
+
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
 
     print(md_str)

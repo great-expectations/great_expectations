@@ -7,7 +7,7 @@ This guide will help you deploy a scheduled Checkpoint with cron.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
   - You have :ref:`created a Checkpoint <how_to_guides__validation__how_to_create_a_new_checkpoint>`
 
 1. First, verify that your Checkpoint is runnable via shell:

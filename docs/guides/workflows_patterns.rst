@@ -2,9 +2,9 @@
 
 .. warning:: This doc is a stub.
 
-#########
+########################
 Workflows and patterns
-#########
+########################
 
 This page contains a collection of instructional guides for workflows, best practices, and design patterns involving Great Expectations.
 
