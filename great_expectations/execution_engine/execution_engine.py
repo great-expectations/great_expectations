@@ -170,6 +170,64 @@ class MetaExecutionEngine(object):
 
 # noinspection PyIncorrectDocstring
 class ExecutionEngine(MetaExecutionEngine):
+    # getter functions with hashable arguments - can be cached
+    hashable_getters = [
+        "get_column_min",
+        "get_column_max",
+        "get_column_mean",
+        "get_column_modes",
+        "get_column_median",
+        "get_column_quantiles",
+        "get_column_nonnull_count",
+        "get_column_stdev",
+        "get_column_sum",
+        "get_column_unique_count",
+        "get_column_value_counts",
+        "get_row_count",
+        "get_column_count",
+        "get_table_columns",
+        "get_column_count_in_range",
+    ]
+
+    recognized_batch_spec_defaults = set()
+
+    def __init__(self, *args, **kwargs):
+        # NOTE: using caching makes the strong assumption that the user will not modify the core data store
+        # (e.g. self.spark_df) over the lifetime of the dataset instance
+        self.caching = kwargs.pop("caching", True)
+
+        data_context = kwargs.pop("data_context", None)
+        self._data_context = data_context
+
+        batch_spec_defaults = kwargs.pop("batch_spec_defaults", {})
+        batch_spec_defaults_keys = set(batch_spec_defaults.keys())
+        if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
+            logger.warning(
+                "Unrecognized batch_spec_default(s): %s"
+                % str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)
+            )
+
+        self._batch_spec_defaults = {
+            key: value
+            for key, value in batch_spec_defaults.items()
+            if key in self.recognized_batch_spec_defaults
+        }
+
+        loaded_batch_id = kwargs.pop("loaded_batch_id", None)
+        self._loaded_batch_id = loaded_batch_id
+
+        batches = kwargs.pop("batches", {})
+        self._batches = batches
+
+        validator = kwargs.pop("validator", None)
+        self._validator = validator
+
+        super().__init__(*args, **kwargs)
+
+        if self.caching:
+            for func in self.hashable_getters:
+                caching_func = lru_cache(maxsize=None)(getattr(self, func))
+                setattr(self, func, caching_func)
 
     # TODO: <Alex></Alex>
     ###
@@ -326,69 +384,6 @@ class ExecutionEngine(MetaExecutionEngine):
             percent_success = None
 
         return success, percent_success
-
-    # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
-    # That way, multiple backends can implement the same data_asset_type
-    _data_asset_type = "ExecutionEngine"
-
-    # getter functions with hashable arguments - can be cached
-    hashable_getters = [
-        "get_column_min",
-        "get_column_max",
-        "get_column_mean",
-        "get_column_modes",
-        "get_column_median",
-        "get_column_quantiles",
-        "get_column_nonnull_count",
-        "get_column_stdev",
-        "get_column_sum",
-        "get_column_unique_count",
-        "get_column_value_counts",
-        "get_row_count",
-        "get_column_count",
-        "get_table_columns",
-        "get_column_count_in_range",
-    ]
-
-    recognized_batch_spec_defaults = set()
-
-    def __init__(self, *args, **kwargs):
-        # NOTE: using caching makes the strong assumption that the user will not modify the core data store
-        # (e.g. self.spark_df) over the lifetime of the dataset instance
-        self.caching = kwargs.pop("caching", True)
-
-        data_context = kwargs.pop("data_context", None)
-        self._data_context = data_context
-
-        batch_spec_defaults = kwargs.pop("batch_spec_defaults", {})
-        batch_spec_defaults_keys = set(batch_spec_defaults.keys())
-        if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
-            logger.warning(
-                "Unrecognized batch_spec_default(s): %s"
-                % str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)
-            )
-
-        self._batch_spec_defaults = {
-            key: value
-            for key, value in batch_spec_defaults.items()
-            if key in self.recognized_batch_spec_defaults
-        }
-
-        loaded_batch_id = kwargs.pop("loaded_batch_id", None)
-        self._loaded_batch_id = loaded_batch_id
-
-        batches = kwargs.pop("batches", {})
-        self._batches = batches
-
-        validator = kwargs.pop("validator", None)
-        self._validator = validator
-
-        super().__init__(*args, **kwargs)
-
-        if self.caching:
-            for func in self.hashable_getters:
-                caching_func = lru_cache(maxsize=None)(getattr(self, func))
-                setattr(self, func, caching_func)
 
     @property
     def data_context(self):
