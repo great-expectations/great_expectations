@@ -4,8 +4,9 @@ import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
-from great_expectations.render.renderer.suite_scaffold_notebook_renderer import \
-    SuiteScaffoldNotebookRenderer
+from great_expectations.render.renderer.suite_scaffold_notebook_renderer import (
+    SuiteScaffoldNotebookRenderer,
+)
 
 
 def test_render_snapshot_test(titanic_data_context):

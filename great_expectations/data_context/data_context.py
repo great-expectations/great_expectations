@@ -14,48 +14,63 @@ import webbrowser
 from typing import Dict, List, Optional, Union
 
 from dateutil.parser import parse
-from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core import (ExpectationSuite, RunIdentifier,
-                                     get_metric_kwargs_id)
+from great_expectations.core import (
+    ExpectationSuite,
+    RunIdentifier,
+    get_metric_kwargs_id,
+)
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
-from great_expectations.core.usage_statistics.usage_statistics import \
-    add_datasource_usage_statistics  # TODO: deprecate
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler, run_validation_operator_usage_statistics,
-    save_expectation_suite_usage_statistics, usage_statistics_enabled_method)
+from great_expectations.core.usage_statistics.usage_statistics import (  # TODO: deprecate
+    UsageStatisticsHandler,
+    add_datasource_usage_statistics,
+    run_validation_operator_usage_statistics,
+    save_expectation_suite_usage_statistics,
+    usage_statistics_enabled_method,
+)
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.templates import (
-    CONFIG_VARIABLES_TEMPLATE, PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
-    PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
-from great_expectations.data_context.types.base import \
-    DatasourceConfig  # TODO: deprecate
-from great_expectations.data_context.types.base import \
-    datasourceConfigSchema  # TODO: deprecate
-from great_expectations.data_context.types.base import (
-    CURRENT_CONFIG_VERSION, MINIMUM_SUPPORTED_CONFIG_VERSION,
-    AnonymizedUsageStatisticsConfig, DataContextConfig,
-    ExecutionEnvironmentConfig, anonymizedUsageStatisticsSchema,
-    dataContextConfigSchema, executionEnvironmentConfigSchema)
+    CONFIG_VARIABLES_TEMPLATE,
+    PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
+    PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
+)
+from great_expectations.data_context.types.base import (  # TODO: deprecate
+    CURRENT_CONFIG_VERSION,
+    MINIMUM_SUPPORTED_CONFIG_VERSION,
+    AnonymizedUsageStatisticsConfig,
+    DataContextConfig,
+    DatasourceConfig,
+    ExecutionEnvironmentConfig,
+    anonymizedUsageStatisticsSchema,
+    dataContextConfigSchema,
+    datasourceConfigSchema,
+    executionEnvironmentConfigSchema,
+)
 from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier, ValidationResultIdentifier)
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 from great_expectations.data_context.util import (
-    file_relative_path, instantiate_class_from_config, load_class,
-    substitute_all_config_variables, substitute_config_variable)
+    file_relative_path,
+    instantiate_class_from_config,
+    load_class,
+    substitute_all_config_variables,
+    substitute_config_variable,
+)
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource  # TODO: deprecate
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment import ExecutionEnvironment
-from great_expectations.profile.basic_dataset_profiler import \
-    BasicDatasetProfiler
+from great_expectations.marshmallow__shade import ValidationError
+from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
-from great_expectations.validator.validator import Validator, BridgeValidator
+from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -1046,12 +1061,7 @@ class BaseDataContext(object):
         )
         return batch_kwargs
 
-    def build_batch_spec(
-        self,
-        execution_environment,
-        data_connector,
-        batch_definition
-    ):
+    def build_batch_spec(self, execution_environment, data_connector, batch_definition):
         """Builds batch_spec using the provided execution_environment, data_connector, and batch_definition.
 
         Args:
@@ -1067,8 +1077,7 @@ class BaseDataContext(object):
             execution_environment
         )
         batch_spec = execution_environment_obj.build_batch_spec(
-            data_connector=data_connector,
-            batch_definition=batch_definition
+            data_connector=data_connector, batch_definition=batch_definition
         )
         return batch_spec
 

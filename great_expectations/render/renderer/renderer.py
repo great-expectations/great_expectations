@@ -1,5 +1,7 @@
-from great_expectations.core import (ExpectationConfiguration,
-                                     ExpectationValidationResult)
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 
 
 class Renderer(object):

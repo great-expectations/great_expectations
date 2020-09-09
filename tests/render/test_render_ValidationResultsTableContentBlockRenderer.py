@@ -2,12 +2,17 @@
 
 import json
 
-from great_expectations.core import (ExpectationConfiguration,
-                                     ExpectationValidationResult)
-from great_expectations.render.renderer.content_block import \
-    ValidationResultsTableContentBlockRenderer
-from great_expectations.render.types import (RenderedComponentContent,
-                                             RenderedStringTemplateContent)
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.render.renderer.content_block import (
+    ValidationResultsTableContentBlockRenderer,
+)
+from great_expectations.render.types import (
+    RenderedComponentContent,
+    RenderedStringTemplateContent,
+)
 
 
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation(

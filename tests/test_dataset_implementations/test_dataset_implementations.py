@@ -7,11 +7,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from great_expectations.data_asset.util import \
-    recursively_convert_to_json_serializable
+from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 
-from ..test_utils import (candidate_getter_is_on_temporary_notimplemented_list,
-                          get_dataset)
+from ..test_utils import (
+    candidate_getter_is_on_temporary_notimplemented_list,
+    get_dataset,
+)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 test_config_path = os.path.join(dir_path, "test_dataset_implementations.json")

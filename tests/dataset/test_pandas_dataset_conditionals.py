@@ -8,8 +8,10 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
-from tests.test_utils import (expectationConfigurationSchema,
-                              expectationValidationResultSchema)
+from tests.test_utils import (
+    expectationConfigurationSchema,
+    expectationValidationResultSchema,
+)
 
 
 def duplicate_and_obfuscuate(df):
@@ -101,7 +103,12 @@ def test_expectation_decorator_summary_mode():
 
     assert (
         df.expect_column_mean_to_be_between(
-            "x", 3, 7, result_format="SUMMARY", row_condition="group=='a'"
+            "x",
+            3,
+            7,
+            result_format="SUMMARY",
+            row_condition="group=='a'",
+            condition_parser="pandas",
         )
         == exp_output
     )

@@ -8,7 +8,7 @@ This guide shows how to connect to a Spark Datasource such that the data is acce
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
 
 -----
 Steps

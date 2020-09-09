@@ -1,4 +1,3 @@
-
 import datetime
 import glob
 import logging
@@ -9,6 +8,9 @@ from great_expectations.execution_environment.data_connector.data_connector impo
     DataConnector,
 )
 
+logger = logging.getLogger(__name__)
+
+
 class RegexPartitioner(object):
     """
     A regex partitioner generates partitions based on the regex and names that are passed in a parameters
@@ -17,20 +19,13 @@ class RegexPartitioner(object):
     CURRENTLY THIS ISN'T CONNECTED TO ANYTHING
     """
 
-    def __init__(
-        self,
-
-        asset_regex,
-        asset_field_definitions,
-        use_directory=True):
+    def __init__(self, asset_regex, asset_field_definitions, use_directory=True):
 
         self._asset_regex = asset_regex
         self.asset_field_definitions = asset_field_definitions
         self.partitions = []
         # see if we can
-        self.partition_ids =
-
-
+        self.partition_ids = "FOO"
 
     def get_available_partitions(self, data_asset_name=None):
         files_config = self._get_data_asset_config(data_asset_name=data_asset_name)
@@ -42,14 +37,12 @@ class RegexPartitioner(object):
         ]
         return partitions
 
-
     def get_available_partition_ids(self, data_asset_name=None):
         partitions = self.get_available_partitions(data_asset_name)
         partition_ids = []
         for partition in partitions:
             partition_ids.append(partition["partition_id"])
         return partition_ids
-
 
     def get_available_partition_definitions(self, data_asset_name=None):
         partitions = self.get_available_partitions(data_asset_name)
@@ -59,7 +52,6 @@ class RegexPartitioner(object):
             partition_definitions.append(partition["partition_definition"])
         return partition_definitions
 
-
     def _partitioner(self, path, files_config):
         partitions = {}
 
@@ -68,12 +60,19 @@ class RegexPartitioner(object):
             partitions = {
                 "partition_definition": {},
                 "partition_id": (
-                        datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ") + "__unmatched")}
-            return (partitions)
+                    datetime.datetime.now(datetime.timezone.utc).strftime(
+                        "%Y%m%dT%H%M%S.%fZ"
+                    )
+                    + "__unmatched"
+                ),
+            }
+            return partitions
         else:
             # TODO: check if this is really dangerous, because it seems that way
 
-            partition_regex = self._base_directory + '/' + files_config["partition_regex"]
+            partition_regex = (
+                self._base_directory + "/" + files_config["partition_regex"]
+            )
             # matches = re.match(files_config["partition_regex"], path)
             matches = re.match(partition_regex, path)
             if matches is None:
@@ -82,8 +81,13 @@ class RegexPartitioner(object):
                 partitions = {
                     "partition_definition": {},
                     "partition_id": (
-                                datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ") + "__unmatched")}
-                return (partitions)
+                        datetime.datetime.now(datetime.timezone.utc).strftime(
+                            "%Y%m%dT%H%M%S.%fZ"
+                        )
+                        + "__unmatched"
+                    ),
+                }
+                return partitions
             else:
                 # need to check that matches length is the same as partition_param
                 if "partition_param" in files_config:
@@ -108,7 +112,7 @@ class RegexPartitioner(object):
                     for i in range(len(partition_params)):
                         partition_definition_inner_dict[partition_params[i]] = matches[
                             i + 1
-                            ]
+                        ]
                     partitions["partition_definition"] = partition_definition_inner_dict
 
                 if "partition_delimiter" in files_config:

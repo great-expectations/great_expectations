@@ -1,7 +1,9 @@
 import pytest
 
-from great_expectations.core import (ExpectationConfiguration,
-                                     ExpectationValidationResult)
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.data_asset import DataAsset
 from great_expectations.dataset import MetaPandasDataset, PandasDataset
 

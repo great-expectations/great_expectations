@@ -6,10 +6,13 @@ import re
 import altair as alt
 import pandas as pd
 
-from great_expectations.render.renderer.content_block.content_block import \
-    ContentBlockRenderer
-from great_expectations.render.types import (RenderedGraphContent,
-                                             RenderedStringTemplateContent)
+from great_expectations.render.renderer.content_block.content_block import (
+    ContentBlockRenderer,
+)
+from great_expectations.render.types import (
+    RenderedGraphContent,
+    RenderedStringTemplateContent,
+)
 from great_expectations.render.util import num_to_str, ordinal
 
 
@@ -416,6 +419,32 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             last_idx = len(params["column_list"]) - 1
             template_str += "$column_list_" + str(last_idx)
             params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    @classmethod
+    def expect_column_pair_cramers_phi_value_to_be_less_than(
+        cls, expectation, styling=None, include_column_name=True
+    ):
+        params = substitute_none_for_missing(
+            expectation.kwargs, ["column_A", "column_B"]
+        )
+
+        if (params["column_A"] is None) or (params["column_B"] is None):
+            template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
+
+        template_str = "Values in $column_A and $column_B must be independent."
 
         return [
             RenderedStringTemplateContent(

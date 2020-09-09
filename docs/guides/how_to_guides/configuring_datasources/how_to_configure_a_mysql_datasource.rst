@@ -9,7 +9,7 @@ This guide shows how to connect to a MySql Datasource. Great Expectations uses S
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
   - Obtained database credentials for mysql, including username, password, hostname, and database.
 
 Steps

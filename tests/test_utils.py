@@ -12,13 +12,15 @@ import pandas as pd
 import pytest
 from dateutil.parser import parse
 
-from great_expectations.core import (ExpectationConfigurationSchema,
-                                     ExpectationSuiteValidationResultSchema,
-                                     ExpectationValidationResultSchema)
-from great_expectations.dataset import (PandasDataset, SparkDFDataset,
-                                        SqlAlchemyDataset)
-from great_expectations.dataset.util import \
-    get_sql_dialect_floating_point_infinity_value
+from great_expectations.core import (
+    ExpectationConfigurationSchema,
+    ExpectationSuiteValidationResultSchema,
+    ExpectationValidationResultSchema,
+)
+from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
+from great_expectations.dataset.util import (
+    get_sql_dialect_floating_point_infinity_value,
+)
 from great_expectations.profile import ColumnsExistProfiler
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
@@ -641,6 +643,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_pair_values_A_to_be_greater_than_B",
             "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
+            "expect_column_pair_cramers_phi_value_to_be_less_than",
             # "expect_table_row_count_to_equal_other_table",
             "expect_multicolumn_sum_to_equal",
         ]
@@ -691,6 +694,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_pair_values_A_to_be_greater_than_B",
             # "expect_column_pair_values_to_be_in_set",
             # "expect_multicolumn_values_to_be_unique",
+            "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_table_row_count_to_equal_other_table",
             # "expect_multicolumn_sum_to_equal",
         ]

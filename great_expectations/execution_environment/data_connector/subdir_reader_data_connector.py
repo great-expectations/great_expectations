@@ -3,8 +3,9 @@ import os
 import warnings
 
 from great_expectations.exceptions import BatchSpecError
-from great_expectations.execution_environment.data_connector.data_connector import \
-    DataConnector
+from great_expectations.execution_environment.data_connector.data_connector import (
+    DataConnector,
+)
 from great_expectations.execution_environment.types import PathBatchSpec
 
 logger = logging.getLogger(__name__)
@@ -43,7 +44,7 @@ class SubdirReaderDataConnector(DataConnector):
         "execution_environment",
         "data_connector",
         "batch_spec_passthrough",
-        "limit"
+        "limit",
     }
 
     def __init__(
@@ -54,12 +55,12 @@ class SubdirReaderDataConnector(DataConnector):
         reader_options=None,
         known_extensions=None,
         reader_method=None,
-        batch_definition_defaults=None
+        batch_definition_defaults=None,
     ):
         super().__init__(
             name,
             execution_environment=execution_environment,
-            batch_definition_defaults=batch_definition_defaults
+            batch_definition_defaults=batch_definition_defaults,
         )
         if reader_options is None:
             reader_options = self._default_reader_options
@@ -192,17 +193,13 @@ class SubdirReaderDataConnector(DataConnector):
                     % data_asset_name,
                     batch_definition,
                 )
-            return self._build_batch_spec_from_path(
-                path,
-                batch_definition,
-                batch_spec
-            )
+            return self._build_batch_spec_from_path(path, batch_definition, batch_spec)
 
         else:
             return self.yield_batch_spec(
                 data_asset_name=data_asset_name,
                 batch_definition=batch_definition,
-                batch_spec=batch_spec
+                batch_spec=batch_spec,
             )
 
     def _get_valid_file_options(self, base_directory=None):
@@ -230,12 +227,7 @@ class SubdirReaderDataConnector(DataConnector):
                         valid_options.append((file_option, "directory"))
         return valid_options
 
-    def _get_iterator(
-        self,
-        data_asset_name,
-        batch_definition,
-        batch_spec
-    ):
+    def _get_iterator(self, data_asset_name, batch_definition, batch_spec):
         logger.debug(
             "Beginning SubdirReaderDataConnector _get_iterator for data_asset_name: %s"
             % data_asset_name
@@ -259,9 +251,7 @@ class SubdirReaderDataConnector(DataConnector):
                         )
 
             return self._build_batch_spec_path_iter(
-                path_list,
-                batch_definition,
-                batch_spec
+                path_list, batch_definition, batch_spec
             )
         else:
             for extension in self.known_extensions:
@@ -270,9 +260,7 @@ class SubdirReaderDataConnector(DataConnector):
                     return iter(
                         [
                             self._build_batch_spec_from_path(
-                                path,
-                                batch_definition,
-                                batch_spec
+                                path, batch_definition, batch_spec
                             )
                         ]
                     )
@@ -290,22 +278,12 @@ class SubdirReaderDataConnector(DataConnector):
 
     def _build_batch_spec_path_iter(self, path_list, batch_definition, batch_spec):
         for path in path_list:
-            yield self._build_batch_spec_from_path(
-                path,
-                batch_definition,
-                batch_spec
-            )
+            yield self._build_batch_spec_from_path(path, batch_definition, batch_spec)
 
-    def _build_batch_spec_from_path(
-        self,
-        path,
-        batch_definition,
-        batch_spec
-    ):
+    def _build_batch_spec_from_path(self, path, batch_definition, batch_spec):
         batch_spec["path"] = path
         batch_spec = self._execution_environment.execution_engine.process_batch_definition(
-            batch_definition=batch_definition,
-            batch_spec=batch_spec
+            batch_definition=batch_definition, batch_spec=batch_spec
         )
 
         return PathBatchSpec(batch_spec)

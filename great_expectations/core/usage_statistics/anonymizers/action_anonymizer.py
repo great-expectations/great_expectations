@@ -1,9 +1,13 @@
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import \
-    Anonymizer
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.validation_operators import (
-    NoOpAction, SlackNotificationAction, StoreEvaluationParametersAction,
-    StoreMetricsAction, StoreValidationResultAction, UpdateDataDocsAction,
-    ValidationAction)
+    NoOpAction,
+    SlackNotificationAction,
+    StoreEvaluationParametersAction,
+    StoreMetricsAction,
+    StoreValidationResultAction,
+    UpdateDataDocsAction,
+    ValidationAction,
+)
 
 
 class ActionAnonymizer(Anonymizer):

@@ -3,9 +3,13 @@ import pytest
 
 from great_expectations.core import RunIdentifier
 from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier, ValidationResultIdentifier)
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 from great_expectations.render.util import (
-    num_to_str, resource_key_passes_run_name_filter)
+    num_to_str,
+    resource_key_passes_run_name_filter,
+)
 
 
 def test_num_to_str():

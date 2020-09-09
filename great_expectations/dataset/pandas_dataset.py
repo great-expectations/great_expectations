@@ -16,7 +16,9 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     _scipy_distribution_positional_args_from_dict,
-    is_valid_continuous_partition_object, validate_distribution_parameters)
+    is_valid_continuous_partition_object,
+    validate_distribution_parameters,
+)
 
 from .dataset import Dataset
 
@@ -67,16 +69,10 @@ class MetaPandasDataset(Dataset):
                 result_format = self.default_expectation_args["result_format"]
 
             result_format = parse_result_format(result_format)
-            if row_condition:
-                if condition_parser not in ["python", "pandas"]:
-                    raise ValueError(
-                        "condition_parser is required when setting a row_condition,"
-                        " and must be 'python' or 'pandas'"
-                    )
-                else:
-                    data = self.query(
-                        row_condition, parser=condition_parser
-                    ).reset_index(drop=True)
+            if row_condition and self._supports_row_condition:
+                data = self._apply_row_condition(
+                    row_condition=row_condition, condition_parser=condition_parser
+                )
             else:
                 data = self
 
@@ -391,6 +387,7 @@ Notes:
         "discard_subset_failing_expectations",
     ]
     _internal_names_set = set(_internal_names)
+    _supports_row_condition = True
 
     # We may want to expand or alter support for subclassing dataframes in the future:
     # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
@@ -419,6 +416,17 @@ Notes:
                 self.discard_failing_expectations()
         super().__finalize__(other, method, **kwargs)
         return self
+
+    def _apply_row_condition(self, row_condition, condition_parser):
+        if condition_parser not in ["python", "pandas"]:
+            raise ValueError(
+                "condition_parser is required when setting a row_condition,"
+                " and must be 'python' or 'pandas'"
+            )
+        else:
+            return self.query(row_condition, parser=condition_parser).reset_index(
+                drop=True
+            )
 
     def get_row_count(self):
         return self.shape[0]
@@ -518,6 +526,57 @@ Notes:
             else:
                 result = result[result <= max_val]
         return len(result)
+
+    def get_crosstab(
+        self,
+        column_A,
+        column_B,
+        bins_A=None,
+        bins_B=None,
+        n_bins_A=None,
+        n_bins_B=None,
+    ):
+        """Get crosstab of column_A and column_B, binning values if necessary"""
+        series_A = self.get_binned_values(self[column_A], bins_A, n_bins_A)
+        series_B = self.get_binned_values(self[column_B], bins_B, n_bins_B)
+        return pd.crosstab(series_A, columns=series_B)
+
+    def get_binned_values(self, series, bins, n_bins):
+        """
+        Get binned values of series.
+
+        Args:
+            Series (pd.Series): Input series
+            bins (list):
+                Bins for the series. List of numeric if series is numeric or list of list
+                of series values else.
+            n_bins (int): Number of bins. Ignored if bins is not None.
+        """
+        if n_bins is None:
+            n_bins = 10
+
+        if series.dtype in ["int", "float"]:
+            if bins is None:
+                bins = np.histogram_bin_edges(series[series.notnull()], bins=n_bins)
+                # Make sure max of series is included in rightmost bin
+                bins[-1] = np.nextafter(bins[-1], bins[-1] + 1)
+
+            # Missings get digitized into bin = n_bins+1
+            return np.digitize(series, bins=bins)
+
+        else:
+            if bins is None:
+                value_counts = series.value_counts(sort=True)
+                if len(value_counts) < n_bins + 1:
+                    return series.fillna("(missing)")
+                else:
+                    other_values = sorted(value_counts.index[n_bins:])
+                    replace = {value: "(other)" for value in other_values}
+            else:
+                replace = dict()
+                for x in bins:
+                    replace.update({value: ", ".join(x) for value in x})
+            return series.replace(to_replace=replace).fillna("(missing)")
 
     ### Expectation methods ###
 

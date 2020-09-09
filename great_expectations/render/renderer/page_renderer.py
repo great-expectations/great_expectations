@@ -5,18 +5,24 @@ from typing import List
 
 from dateutil.parser import parse
 
-from great_expectations.core import (ExpectationSuiteValidationResult,
-                                     RunIdentifier)
+from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.util import num_to_str
 
-from ...validation_operators.types.validation_operator_result import \
-    ValidationOperatorResult
-from ..types import (CollapseContent, RenderedDocumentContent,
-                     RenderedHeaderContent, RenderedMarkdownContent,
-                     RenderedSectionContent, RenderedStringTemplateContent,
-                     RenderedTableContent, TextContent)
+from ...validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
+from ..types import (
+    CollapseContent,
+    RenderedDocumentContent,
+    RenderedHeaderContent,
+    RenderedMarkdownContent,
+    RenderedSectionContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+    TextContent,
+)
 from .renderer import Renderer
 
 logger = logging.getLogger(__name__)
@@ -85,16 +91,23 @@ class ValidationResultsPageRenderer(Renderer):
             run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
-        batch_kwargs = validation_results.meta.get("batch_kwargs", {}) or validation_results.meta.get("batch_spec", {})
+        batch_kwargs = validation_results.meta.get(
+            "batch_kwargs", {}
+        ) or validation_results.meta.get("batch_spec", {})
 
         # add datasource key to batch_kwargs if missing
-        if "datasource" not in batch_kwargs and "execution_environment" not in batch_kwargs:
+        if (
+            "datasource" not in batch_kwargs
+            and "execution_environment" not in batch_kwargs
+        ):
             # check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
             if len(expectation_suite_name.split(".")) == 4:
                 if "batch_kwargs" in validation_results.meta:
                     batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
                 else:
-                    batch_kwargs["execution_environment"] = expectation_suite_name.split(".")[0]
+                    batch_kwargs[
+                        "execution_environment"
+                    ] = expectation_suite_name.split(".")[0]
 
         # Group EVRs by column
         columns = {}
@@ -230,8 +243,12 @@ class ValidationResultsPageRenderer(Renderer):
             **{
                 "renderer_type": "ValidationResultsPageRenderer",
                 "page_title": page_title,
-                "batch_kwargs": batch_kwargs if "batch_kwargs" in validation_results.meta else None,
-                "batch_spec": batch_kwargs if "batch_spec" in validation_results.meta else None,
+                "batch_kwargs": batch_kwargs
+                if "batch_kwargs" in validation_results.meta
+                else None,
+                "batch_spec": batch_kwargs
+                if "batch_spec" in validation_results.meta
+                else None,
                 "expectation_suite_name": expectation_suite_name,
                 "sections": sections,
                 "utm_medium": "validation-results-page",
@@ -803,16 +820,23 @@ class ProfilingResultsPageRenderer(Renderer):
             run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
-        batch_kwargs = validation_results.meta.get("batch_kwargs", {}) or validation_results.meta.get("batch_spec", {})
+        batch_kwargs = validation_results.meta.get(
+            "batch_kwargs", {}
+        ) or validation_results.meta.get("batch_spec", {})
 
         # add datasource key to batch_kwargs if missing
-        if "datasource" not in batch_kwargs and "execution_environment" not in batch_kwargs:
+        if (
+            "datasource" not in batch_kwargs
+            and "execution_environment" not in batch_kwargs
+        ):
             # check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
             if len(expectation_suite_name.split(".")) == 4:
                 if "batch_kwargs" in validation_results.meta:
                     batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
                 else:
-                    batch_kwargs["execution_environment"] = expectation_suite_name.split(".")[0]
+                    batch_kwargs[
+                        "execution_environment"
+                    ] = expectation_suite_name.split(".")[0]
 
         # Group EVRs by column
         # TODO: When we implement a ValidationResultSuite class, this method will move there.
@@ -851,8 +875,12 @@ class ProfilingResultsPageRenderer(Renderer):
                 "page_title": page_title,
                 "expectation_suite_name": expectation_suite_name,
                 "utm_medium": "profiling-results-page",
-                "batch_kwargs": batch_kwargs if "batch_kwargs" in validation_results.meta else None,
-                "batch_spec": batch_kwargs if "batch_spec" in validation_results.meta else None,
+                "batch_kwargs": batch_kwargs
+                if "batch_kwargs" in validation_results.meta
+                else None,
+                "batch_spec": batch_kwargs
+                if "batch_spec" in validation_results.meta
+                else None,
                 "sections": [
                     self._overview_section_renderer.render(
                         validation_results, section_name="Overview"

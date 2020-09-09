@@ -6,26 +6,37 @@ import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
-from great_expectations.core import (ExpectationConfiguration,
-                                     ExpectationSuite, RunIdentifier,
-                                     expectationSuiteSchema)
-from great_expectations.data_context import (BaseDataContext, DataContext,
-                                             ExplorerDataContext)
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    RunIdentifier,
+    expectationSuiteSchema,
+)
+from great_expectations.data_context import (
+    BaseDataContext,
+    DataContext,
+    ExplorerDataContext,
+)
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.data_context.types.resource_identifiers import \
-    ExpectationSuiteIdentifier
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource
-from great_expectations.exceptions import (BatchKwargsError, CheckpointError,
-                                           CheckpointNotFoundError,
-                                           ConfigNotFoundError,
-                                           DataContextError)
+from great_expectations.exceptions import (
+    BatchKwargsError,
+    CheckpointError,
+    CheckpointNotFoundError,
+    ConfigNotFoundError,
+    DataContextError,
+)
 from great_expectations.execution_environment.types import PathBatchKwargs
 from great_expectations.util import gen_directory_tree_str
-from tests.integration.usage_statistics.test_integration_usage_statistics import \
-    USAGE_STATISTICS_QA_URL
+from tests.integration.usage_statistics.test_integration_usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
+)
 from tests.test_utils import safe_remove
 
 try:

@@ -429,7 +429,7 @@ class RenderedDocumentContent(RenderedContent):
         cta_footer=None,
         expectation_suite_name=None,
         batch_kwargs=None,
-        batch_spec=None
+        batch_spec=None,
     ):
         if not isinstance(sections, list) and all(
             [isinstance(section, RenderedSectionContent) for section in sections]

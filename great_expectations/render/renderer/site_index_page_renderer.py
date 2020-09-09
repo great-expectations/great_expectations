@@ -6,12 +6,14 @@ import traceback
 import tzlocal
 from dateutil.parser import parse
 
-from great_expectations.render.types import (RenderedBootstrapTableContent,
-                                             RenderedDocumentContent,
-                                             RenderedHeaderContent,
-                                             RenderedSectionContent,
-                                             RenderedStringTemplateContent,
-                                             RenderedTabsContent)
+from great_expectations.render.types import (
+    RenderedBootstrapTableContent,
+    RenderedDocumentContent,
+    RenderedHeaderContent,
+    RenderedSectionContent,
+    RenderedStringTemplateContent,
+    RenderedTabsContent,
+)
 
 from .call_to_action_renderer import CallToActionRenderer
 from .renderer import Renderer
@@ -127,7 +129,7 @@ class SiteIndexPageRenderer(Renderer):
                     "batch_identifier": cls._render_batch_id_cell(
                         dict_.get("batch_identifier"),
                         dict_.get("batch_kwargs"),
-                        dict_.get("batch_spec")
+                        dict_.get("batch_spec"),
                     ),
                     "_batch_identifier_sort": dict_.get("batch_identifier"),
                     "profiler_name": dict_.get("expectation_suite_name").split(".")[-1],
@@ -225,7 +227,7 @@ class SiteIndexPageRenderer(Renderer):
                     "batch_identifier": cls._render_batch_id_cell(
                         dict_.get("batch_identifier"),
                         dict_.get("batch_kwargs"),
-                        dict_.get("batch_spec")
+                        dict_.get("batch_spec"),
                     ),
                     "_batch_identifier_sort": dict_.get("batch_identifier"),
                     "expectation_suite_name": cls._render_expectation_suite_cell(

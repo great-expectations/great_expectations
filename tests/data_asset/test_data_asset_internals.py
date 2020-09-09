@@ -5,10 +5,12 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
-from great_expectations.core import (ExpectationConfiguration,
-                                     ExpectationSuite,
-                                     ExpectationValidationResult,
-                                     expectationSuiteSchema)
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    ExpectationValidationResult,
+    expectationSuiteSchema,
+)
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 
 

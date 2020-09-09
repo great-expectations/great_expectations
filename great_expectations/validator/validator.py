@@ -10,10 +10,9 @@ from collections.abc import Hashable
 from functools import wraps
 from typing import List
 
-from dateutil.parser import parse
-
-from marshmallow import ValidationError
 import pandas as pd
+from dateutil.parser import parse
+from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core import (
@@ -22,15 +21,11 @@ from great_expectations.core import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
     RunIdentifier,
-    expectationSuiteSchema
+    expectationSuiteSchema,
 )
 from great_expectations.core.evaluation_parameters import build_evaluation_parameters
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
-from great_expectations.dataset import (
-    PandasDataset,
-    SparkDFDataset,
-    SqlAlchemyDataset
-)
+from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.types import ClassConfig
@@ -41,7 +36,6 @@ logging.captureWarnings(True)
 
 
 class Validator(object):
-
     def __init__(self, *args, **kwargs):
         """
         Initialize the DataAsset.
@@ -81,7 +75,9 @@ class Validator(object):
         self._active_validation = False
         if profiler is not None:
             profiler.profile(self)
-        if self._data_context and hasattr(self._data_context, "_expectation_explorer_manager"):
+        if self._data_context and hasattr(
+            self._data_context, "_expectation_explorer_manager"
+        ):
             self.set_default_expectation_argument("include_config", True)
 
         self._execution_engine._validator = self
@@ -89,10 +85,14 @@ class Validator(object):
     def __getattr__(self, name):
         if name.startswith("expect_") and hasattr(self.execution_engine, name):
             return getattr(self.execution_engine, name)
-        elif type(self.execution_engine).__name__ == "PandasExecutionEngine" and hasattr(pd.DataFrame, name):
+        elif type(
+            self.execution_engine
+        ).__name__ == "PandasExecutionEngine" and hasattr(pd.DataFrame, name):
             return getattr(self.batch.data, name)
         else:
-            raise AttributeError(f"'{type(self).__name__}'  object has no attribute '{name}'")
+            raise AttributeError(
+                f"'{type(self).__name__}'  object has no attribute '{name}'"
+            )
 
     @property
     def execution_engine(self):
@@ -383,7 +383,9 @@ class Validator(object):
                 expectation_suite_name=expectation_suite_name
             )
 
-        self._expectation_suite.execution_engine_type = type(self.execution_engine).__name__
+        self._expectation_suite.execution_engine_type = type(
+            self.execution_engine
+        ).__name__
 
     def append_expectation(self, expectation_config):
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""
@@ -949,7 +951,7 @@ class Validator(object):
                     result = expectation_method(
                         catch_exceptions=catch_exceptions,
                         include_config=True,
-                        **evaluation_args
+                        **evaluation_args,
                     )
 
                 except Exception as err:

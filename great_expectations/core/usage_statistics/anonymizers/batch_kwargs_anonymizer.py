@@ -1,5 +1,4 @@
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import \
-    Anonymizer
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 
 
 class BatchKwargsAnonymizer(Anonymizer):
