@@ -6,8 +6,6 @@ from great_expectations.render.renderer import SlackRenderer
 from ..test_utils import modify_locale
 
 
-@modify_locale
-@freeze_time("09/24/2019 23:18:36")
 def test_SlackRenderer_validation_results_with_datadocs():
 
     validation_result_suite = ExpectationSuiteValidationResult(
@@ -30,6 +28,32 @@ def test_SlackRenderer_validation_results_with_datadocs():
             "run_id": "2019-09-25T060538.829112Z",
         },
     )
+
+    rendered_output = SlackRenderer().render(validation_result_suite)
+
+    expected_output = {
+        "blocks": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Summary*: *0* of *0* expectations were met",
+                },
+            },
+            {"type": "divider"},
+            {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": "Learn how to review validation results in Data Docs: https://docs.greatexpectations.io/en/latest/tutorials/getting_started/set_up_data_docs.html#_getting_started__set_up_data_docs",
+                    }
+                ],
+            },
+        ],
+        "text": "default: Success :tada:",
+    }
+    assert rendered_output == expected_output
 
     data_docs_pages = {"local_site": "file:///localsite/index.html"}
     data_docs_site_names = ["local_site"]
@@ -66,5 +90,4 @@ def test_SlackRenderer_validation_results_with_datadocs():
         ],
         "text": "default: Success :tada:",
     }
-
     assert rendered_output == expected_output
