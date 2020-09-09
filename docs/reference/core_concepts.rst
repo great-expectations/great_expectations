@@ -20,6 +20,8 @@ Expectations are assertions for data. They help accelerate data engineering and 
 
 **Expectation Implementations** provide the critical translation layer between what we expect and how to verify the expectation in data or express it in :ref:`data_docs`. Expectation Implementations are tailored for specific validation engines where the actual expectation is executed.
 
+.. _reference__core_concepts__expectations__expectation_suites:
+
 **Expectation Suites** combine multiple Expectation Configurations into an overall description of a dataset. Expectation
 Suites should have names corresponding to the kind of data they define, like “NPI” for National Provider Identifier data or “company.users” for a users table.
 
@@ -30,7 +32,6 @@ Suites should have names corresponding to the kind of data they define, like “
    /reference/core_concepts/expectations/distributional_expectations.rst
    /reference/core_concepts/expectations/standard_arguments.rst
    /reference/core_concepts/expectations/result_format.rst
-   /reference/core_concepts/expectations/glossary_of_expectations.rst
    /reference/core_concepts/expectations/implemented_expectations.rst
 
 .. _reference__core_concepts__validation:
@@ -47,6 +48,8 @@ Great Expectations makes it possible to validate your data against an Expectatio
 
 A **DataAsset** is a Great Expectations object that can create and validate Expectations against specific data. DataAssets are connected to data. A DataAsset can evaluate Expectations wherever you access your data, using different **ValidationEngines** such as Pandas, Spark, or SqlAlchemy.
 
+.. _reference__core_concepts__validation__expectation_validation_result:
+
 An **Expectation Validation Result** captures the output of checking an expectation against data. It describes whether
 the data met the expectation, and additional metrics from the data such as the percentage of unique values or observed mean.
 
@@ -56,7 +59,11 @@ validation into a single report.
 A **Metric** is a value produced by Great Expectations when evaluating one or more batches of data, such as an
 observed mean or distribution of data.
 
-A **Validation Operator** stitches together resources provided by the Data Context to provide an easy way to deploy Great Expectations in your environment. It executes configurable **Action**s such as updating Data Docs, sending a notification to your team about validation results, or storing a result in a shared S3 bucket.
+.. _reference__core_concepts__validation__validation_operator:
+
+A **Validation Operator** stitches together resources provided by the Data Context to provide an easy way to deploy Great Expectations in your environment. It executes configurable **Action** such as updating Data Docs, sending a notification to your team about validation results, or storing a result in a shared S3 bucket.
+
+.. _reference__core_concepts__validation__checkpoints:
 
 A **Checkpoint** is a configuration for a Validation Operator that specifies which Batches of data and Expectation Suites should be validated.
 
@@ -75,18 +82,26 @@ A **Checkpoint** is a configuration for a Validation Operator that specifies whi
 Data Context
 *************
 
+.. _reference__core_concepts__data_context__data_context:
+
 A **Data Context** stitches together all the features available with Great Expectations, making it possible to easily 
 manage configurations for resources such as Datasources, Validation Operators, Data Docs Sites, and Stores.
 
 A **Data Context Configuration** is a yaml file that can be committed to source control to ensure that all the settings 
 related to your validation are appropriately versioned and visible to your team. It can flexibly describe plugins and other customizations for accessing datasources or building data docs sites.
 
+.. _reference__core_concepts__data_context__stores:
+
 A **Store** provides a consistent API to manage access to Expectations, Expectation Suite Validation Results and other Great Expectations assets, making it easy to share resources across a team that uses AWS, Azure, GCP, local storage, or something else entirely.
 
-An **Evaluation Parameter** Store makes it possible to build expectation suites that depend on values from other batches
+.. _reference__core_concepts__data_context__evaluation_parameter_stores:
+
+An **Evaluation Parameter Store** makes it possible to build expectation suites that depend on values from other batches
 of data, such as ensuring that the number of rows in a downstream dataset equals the number of unique values from an upstream one. A Data Context can manage a store to facilitate that validation scenario.
 
-A **Metric** Store makes facilitates saving any metric or statistic generated during validation, for example making it easy to create a dashboard showing key output from running Great Expectations.
+.. _reference__core_concepts__data_context__metrics:
+
+A **Metric Store** makes facilitates saving any metric or statistic generated during validation, for example making it easy to create a dashboard showing key output from running Great Expectations.
 
 
 .. toctree::
@@ -118,16 +133,21 @@ Datasources, Batch Kwargs Generators, Batch Parameters, and Batch Kwargs make it
 
 A **Datasource** is a connection to a **Validation Engine** (a compute environment such as Pandas, Spark, or a SQL-compatible database) and one or more data storage locations. For a SQL database, the Validation Engine and data storage locations will be the same, but for Spark or Pandas, you may be reading data from a remote location such as an S3 bucket but validating it in a cluster or local machine. The Datasource produces Batches of data that Great Expectations can validate in that environment.
 
+.. _reference__core_concepts__batches:
+.. _reference__core_concepts__batch_kwargs:
+
 **Batch Kwargs** are specific instructions for a Datasource about what data should be prepared as a Batch for
 validation. The Batch could reference a specific database table, the most recent log file delivered to S3, or a subset of one of those objects, for example just the first 10,000 rows.
 
+.. _reference__core_concepts__batch_kwargs_generators:
+
 A **Batch Kwargs Generator** produces datasource-specific Batch Kwargs. The most basic Batch Kwargs Generator simply stores Batch Kwargs by name to make it easy to retrieve them and obtain batches of data. But Batch Kwargs Generators can be more powerful and offer stronger guarantees about reproducibility and compatibility with other tools, and help identify available Data Assets and Partitions by inspecting a storage environment.
+
+.. _reference__core_concepts__batch_parameters:
 
 **Batch Parameters** provide instructions for how to retrieve stored Batch Kwargs or build new Batch Kwargs that reflect partitions, deliveries, or slices of logical data assets.
 
 **Batch Markers** provide additional metadata a batch to help ensure reproducitiblity, such as the timestamp at which it was created.
-
-.. _reference__core_concepts__batch_kwargs_generators:
 
 A **Batch Kwargs Generator** translates Batch Parameters to datasource-specific Batch Kwargs. A Batch Kwargs Generator 
 can also identify data assets and partitions by inspecting a storage environment.
@@ -161,6 +181,9 @@ specific expected values. It provides a detailed look into what Great Expectatio
 
    /reference/core_concepts/data_docs.rst
    /reference/core_concepts/profiling.rst
+
+
+.. _reference__core_concepts__profiling:
 
 *********
 Profiling

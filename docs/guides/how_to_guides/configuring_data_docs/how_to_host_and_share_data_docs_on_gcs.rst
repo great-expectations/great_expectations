@@ -7,7 +7,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+    - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
     - `Set up a Google Cloud project <https://cloud.google.com/resource-manager/docs/creating-managing-projects>`_
     - `Installed and initialized the Google Cloud SDK (in order to use the gcloud CLI) <https://cloud.google.com/sdk/docs/quickstarts>`_
     - `Set up the gsutil command line tool <https://cloud.google.com/storage/docs/gsutil_install>`_

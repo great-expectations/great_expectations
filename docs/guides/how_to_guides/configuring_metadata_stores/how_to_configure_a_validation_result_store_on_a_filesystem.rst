@@ -1,7 +1,7 @@
 .. _how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_on_a_filesystem:
 
 How to configure a Validation Result store on a filesystem
-=====================================================
+==========================================================
 
 By default, Validation results are stored in the ``uncommitted/validations/`` directory.  Since Validations may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure a new storage location for Validations on your filesystem.
 
@@ -9,7 +9,7 @@ By default, Validation results are stored in the ``uncommitted/validations/`` di
 
     - Configured a :ref:`Data Context <tutorials__getting_started__initialize_a_data_context>`.
     - Configured an :ref:`Expectation Suite <tutorials__getting_started__create_your_first_expectations>`.
-    - Configured a :ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>`.
+    - Configured a :ref:`Checkpoint <tutorials__getting_started__validate_your_data>`.
     - Determined a new storage location where you would like to store Validations. This can either be a local path, or a path to a secure network filesystem.
 
 Steps
@@ -82,7 +82,7 @@ Steps
 
 5. **Confirm that the Validations store has been correctly configured**
 
-    Run a :ref:`Checkpoint <tutorials__getting_started__set_up_your_first_checkpoint>` to store results in the new Validations store on in your new location then visualize the results by re-building :ref:`Data Docs <tutorials__getting_started__set_up_data_docs>`.
+    Run a :ref:`Checkpoint <tutorials__getting_started__validate_your_data>` to store results in the new Validations store on in your new location then visualize the results by re-building :ref:`Data Docs <tutorials__getting_started__set_up_data_docs>`.
 
 
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on `Slack <https://greatexpectations.io/slack>`_ if you would like to learn more, or have any questions.

@@ -7,7 +7,7 @@ This guide will explain how to use a Validation Action to update Data Docs sites
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+    - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
     - :ref:`Added a Validation Operator <how_to_guides__validation__how_to_add_a_validation_operator>`
     - Set up an :py:class:`~great_expectations.validation_operators.validation_operators.ActionListValidationOperator` **or**
     - Set up a :py:class:`~great_expectations.validation_operators.validation_operators.WarningAndFailureExpectationSuitesValidationOperator`
