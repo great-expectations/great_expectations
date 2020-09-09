@@ -144,8 +144,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 **Additional notes**
 
 - There may be times, you can route the traffic through a DNS, which means your domain will be something other "storage.googleapis.com"
-- In that case, the user can set the ``base_public_url`` field in the `great_expectations.yml` file, which will then be used.
-
+- In that case, you can set the ``base_public_path`` field in the `great_expectations.yml` file, which will then be used.
 
 
 **Additional resources**
