@@ -1,7 +1,6 @@
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.expectations.core.expect_column_values_to_be_in_set import (
-    ExpectColumnValuesToBeInSet,
-)
+from great_expectations.expectations.core.expect_column_values_to_be_in_set import \
+    ExpectColumnValuesToBeInSet
 from great_expectations.expectations.registry import get_expectation_impl
 
 

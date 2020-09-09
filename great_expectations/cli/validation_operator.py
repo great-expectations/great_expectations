@@ -11,7 +11,8 @@ from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message, cli_message_dict
 from great_expectations.core import RunIdentifier
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.core.usage_statistics.usage_statistics import \
+    send_usage_message
 
 json_parse_exception = json.decoder.JSONDecodeError
 

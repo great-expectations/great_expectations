@@ -6,14 +6,12 @@ import traceback
 import tzlocal
 from dateutil.parser import parse
 
-from great_expectations.render.types import (
-    RenderedBootstrapTableContent,
-    RenderedDocumentContent,
-    RenderedHeaderContent,
-    RenderedSectionContent,
-    RenderedStringTemplateContent,
-    RenderedTabsContent,
-)
+from great_expectations.render.types import (RenderedBootstrapTableContent,
+                                             RenderedDocumentContent,
+                                             RenderedHeaderContent,
+                                             RenderedSectionContent,
+                                             RenderedStringTemplateContent,
+                                             RenderedTabsContent)
 
 from .call_to_action_renderer import CallToActionRenderer
 from .renderer import Renderer

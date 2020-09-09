@@ -9,7 +9,8 @@ import pandas as pd
 from great_expectations.core.batch import Batch
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.execution_environment.types import BatchMarkers
-from great_expectations.execution_environment.util import S3Url, hash_pandas_dataframe
+from great_expectations.execution_environment.util import (
+    S3Url, hash_pandas_dataframe)
 from great_expectations.types import ClassConfig
 
 from ..types.configurations import classConfigSchema

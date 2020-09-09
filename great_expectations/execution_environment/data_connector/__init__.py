@@ -3,4 +3,3 @@ from .files_data_connector import FilesDataConnector
 from .query_data_connector import QueryDataConnector
 from .subdir_reader_data_connector import SubdirReaderDataConnector
 from .table_data_connector import TableDataConnector
-from .files_data_connector import FilesDataConnector

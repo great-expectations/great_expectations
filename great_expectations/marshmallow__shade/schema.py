@@ -14,32 +14,21 @@ from functools import lru_cache
 from great_expectations.marshmallow__shade import base, class_registry
 from great_expectations.marshmallow__shade import fields as ma_fields
 from great_expectations.marshmallow__shade import types
-from great_expectations.marshmallow__shade.decorators import (
-    POST_DUMP,
-    POST_LOAD,
-    PRE_DUMP,
-    PRE_LOAD,
-    VALIDATES,
-    VALIDATES_SCHEMA,
-)
+from great_expectations.marshmallow__shade.decorators import (POST_DUMP,
+                                                              POST_LOAD,
+                                                              PRE_DUMP,
+                                                              PRE_LOAD,
+                                                              VALIDATES,
+                                                              VALIDATES_SCHEMA)
 from great_expectations.marshmallow__shade.error_store import ErrorStore
 from great_expectations.marshmallow__shade.exceptions import (
-    StringNotCollectionError,
-    ValidationError,
-)
+    StringNotCollectionError, ValidationError)
 from great_expectations.marshmallow__shade.orderedset import OrderedSet
 from great_expectations.marshmallow__shade.utils import (
-    EXCLUDE,
-    INCLUDE,
-    RAISE,
-    get_value,
-    is_collection,
-    is_instance_or_subclass,
-    is_iterable_but_not_string,
-    missing,
-    set_value,
-)
-from great_expectations.marshmallow__shade.warnings import RemovedInMarshmallow4Warning
+    EXCLUDE, INCLUDE, RAISE, get_value, is_collection, is_instance_or_subclass,
+    is_iterable_but_not_string, missing, set_value)
+from great_expectations.marshmallow__shade.warnings import \
+    RemovedInMarshmallow4Warning
 
 _T = typing.TypeVar("_T")
 

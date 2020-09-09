@@ -18,11 +18,8 @@ from scipy import stats
 
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.execution_engine.util import (
-    build_categorical_partition_object,
-    build_continuous_partition_object,
-    is_valid_categorical_partition_object,
-    is_valid_partition_object,
-)
+    build_categorical_partition_object, build_continuous_partition_object,
+    is_valid_categorical_partition_object, is_valid_partition_object)
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)

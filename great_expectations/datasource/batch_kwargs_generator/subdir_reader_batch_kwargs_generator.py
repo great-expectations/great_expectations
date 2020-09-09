@@ -2,9 +2,8 @@ import logging
 import os
 import warnings
 
-from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
-    BatchKwargsGenerator,
-)
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import \
+    BatchKwargsGenerator
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.execution_environment.types import PathBatchKwargs
 

@@ -6,9 +6,7 @@ import re
 from collections import OrderedDict
 
 from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    DataContextConfigSchema,
-)
+    DataContextConfig, DataContextConfigSchema)
 from great_expectations.exceptions import MissingConfigVariableError
 from great_expectations.util import load_class, verify_dynamic_loading_support
 

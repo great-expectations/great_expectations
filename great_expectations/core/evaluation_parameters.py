@@ -4,20 +4,9 @@ import math
 import operator
 import traceback
 
-from pyparsing import (
-    CaselessKeyword,
-    Combine,
-    Forward,
-    Group,
-    Literal,
-    ParseException,
-    Regex,
-    Suppress,
-    Word,
-    alphanums,
-    alphas,
-    delimitedList,
-)
+from pyparsing import (CaselessKeyword, Combine, Forward, Group, Literal,
+                       ParseException, Regex, Suppress, Word, alphanums,
+                       alphas, delimitedList)
 
 from great_expectations.core.urn import ge_urn
 from great_expectations.exceptions import EvaluationParameterError

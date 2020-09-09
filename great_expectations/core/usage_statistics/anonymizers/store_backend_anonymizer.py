@@ -1,13 +1,12 @@
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.data_context.store import (
-    DatabaseStoreBackend,
-    InMemoryStoreBackend,
-    StoreBackend,
-    TupleFilesystemStoreBackend,
-    TupleGCSStoreBackend,
-    TupleS3StoreBackend,
-    TupleStoreBackend,
-)
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import \
+    Anonymizer
+from great_expectations.data_context.store import (DatabaseStoreBackend,
+                                                   InMemoryStoreBackend,
+                                                   StoreBackend,
+                                                   TupleFilesystemStoreBackend,
+                                                   TupleGCSStoreBackend,
+                                                   TupleS3StoreBackend,
+                                                   TupleStoreBackend)
 
 
 class StoreBackendAnonymizer(Anonymizer):

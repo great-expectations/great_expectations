@@ -2,17 +2,14 @@ import json
 from copy import deepcopy
 from typing import Dict, List, Union
 
-from great_expectations.core import (
-    ExpectationSuiteValidationResult,
-    RunIdentifier,
-    RunIdentifierSchema,
-    convert_to_json_serializable,
-)
+from great_expectations.core import (ExpectationSuiteValidationResult,
+                                     RunIdentifier, RunIdentifierSchema,
+                                     convert_to_json_serializable)
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
-)
-from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
+from great_expectations.data_context.types.resource_identifiers import \
+    ValidationResultIdentifier
+from great_expectations.marshmallow__shade import (Schema, fields, post_load,
+                                                   pre_dump)
 from great_expectations.types import DictDot
 
 

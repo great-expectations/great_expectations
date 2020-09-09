@@ -1,4 +1,5 @@
-from great_expectations.expectations.expectation import ColumnMapDatasetExpectation
+from great_expectations.expectations.expectation import \
+    ColumnMapDatasetExpectation
 
 
 class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):

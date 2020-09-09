@@ -5,9 +5,8 @@ import pandas as pd
 import pytest
 from moto import mock_s3
 
-from great_expectations.datasource.batch_kwargs_generator.s3_batch_kwargs_generator import (
-    S3GlobReaderBatchKwargsGenerator,
-)
+from great_expectations.datasource.batch_kwargs_generator.s3_batch_kwargs_generator import \
+    S3GlobReaderBatchKwargsGenerator
 from great_expectations.exceptions import BatchKwargsError
 
 

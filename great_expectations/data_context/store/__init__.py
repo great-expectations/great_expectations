@@ -7,12 +7,9 @@ from .metric_store import EvaluationParameterStore, MetricStore
 from .query_store import SqlAlchemyQueryStore
 from .store import Store
 from .store_backend import InMemoryStoreBackend, StoreBackend
-from .tuple_store_backend import (
-    TupleFilesystemStoreBackend,
-    TupleGCSStoreBackend,
-    TupleS3StoreBackend,
-    TupleStoreBackend,
-)
+from .tuple_store_backend import (TupleFilesystemStoreBackend,
+                                  TupleGCSStoreBackend, TupleS3StoreBackend,
+                                  TupleStoreBackend)
 from .validations_store import ValidationsStore
 
 for module_name, package_name in [

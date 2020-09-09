@@ -8,10 +8,8 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
-from tests.test_utils import (
-    expectationConfigurationSchema,
-    expectationValidationResultSchema,
-)
+from tests.test_utils import (expectationConfigurationSchema,
+                              expectationValidationResultSchema)
 
 
 def duplicate_and_obfuscuate(df):

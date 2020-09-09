@@ -3,10 +3,10 @@ import os
 import warnings
 
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import BatchKwargsError, ClassInstantiationError
-from great_expectations.execution_environment.types import (
-    SqlAlchemyDatasourceQueryBatchKwargs,
-)
+from great_expectations.exceptions import (BatchKwargsError,
+                                           ClassInstantiationError)
+from great_expectations.execution_environment.types import \
+    SqlAlchemyDatasourceQueryBatchKwargs
 
 from .data_connector import DataConnector
 

@@ -4,9 +4,8 @@ import logging
 import os
 import re
 
-from great_expectations.execution_environment.data_connector.data_connector import (
-    DataConnector,
-)
+from great_expectations.execution_environment.data_connector.data_connector import \
+    DataConnector
 
 logger = logging.getLogger(__name__)
 

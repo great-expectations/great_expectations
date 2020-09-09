@@ -6,15 +6,12 @@ from freezegun import freeze_time
 
 from great_expectations import DataContext
 from great_expectations.core import RunIdentifier
-from great_expectations.data_context.store import ExpectationsStore, ValidationsStore
+from great_expectations.data_context.store import (ExpectationsStore,
+                                                   ValidationsStore)
 from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
-)
+    ExpectationSuiteIdentifier, ValidationResultIdentifier)
 from great_expectations.data_context.util import (
-    file_relative_path,
-    instantiate_class_from_config,
-)
+    file_relative_path, instantiate_class_from_config)
 from great_expectations.render.renderer.site_builder import SiteBuilder
 
 

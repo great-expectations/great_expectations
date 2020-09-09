@@ -12,15 +12,13 @@ import pandas as pd
 import pytest
 from dateutil.parser import parse
 
-from great_expectations.core import (
-    ExpectationConfigurationSchema,
-    ExpectationSuiteValidationResultSchema,
-    ExpectationValidationResultSchema,
-)
-from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
-from great_expectations.dataset.util import (
-    get_sql_dialect_floating_point_infinity_value,
-)
+from great_expectations.core import (ExpectationConfigurationSchema,
+                                     ExpectationSuiteValidationResultSchema,
+                                     ExpectationValidationResultSchema)
+from great_expectations.dataset import (PandasDataset, SparkDFDataset,
+                                        SqlAlchemyDataset)
+from great_expectations.dataset.util import \
+    get_sql_dialect_floating_point_infinity_value
 from great_expectations.profile import ColumnsExistProfiler
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
