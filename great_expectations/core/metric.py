@@ -5,8 +5,9 @@ from dateutil.parser import parse
 from great_expectations.core import RunIdentifier
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import IDDict
-from great_expectations.data_context.types.resource_identifiers import \
-    ExpectationSuiteIdentifier
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+)
 from great_expectations.exceptions import GreatExpectationsError
 
 

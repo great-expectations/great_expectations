@@ -9,19 +9,23 @@ import pandas as pd
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core.expectation_configuration import \
-    ExpectationConfiguration
-from great_expectations.core.expectation_validation_result import \
-    ExpectationValidationResult
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_validation_result import (
+    ExpectationValidationResult,
+)
 from great_expectations.dataset.dataset import DatasetBackendTypes
 from great_expectations.exceptions import (
-    GreatExpectationsError, InvalidExpectationConfigurationError)
+    GreatExpectationsError,
+    InvalidExpectationConfigurationError,
+)
 from great_expectations.expectations.registry import register_expectation
 
 from ..core.batch import Batch
 from ..data_asset.util import recursively_convert_to_json_serializable
-from ..exceptions.expectation_engine import (UnimplementedBackendError,
-                                             UnrecognizedDataAssetError)
+from ..exceptions.expectation_engine import (
+    UnimplementedBackendError,
+    UnrecognizedDataAssetError,
+)
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
 p2 = re.compile(r"([a-z0-9])([A-Z])")

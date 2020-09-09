@@ -15,19 +15,18 @@ from dateutil.parser import parse
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core import (ExpectationConfiguration,
-                                     ExpectationSuite,
-                                     ExpectationSuiteValidationResult,
-                                     ExpectationValidationResult,
-                                     RunIdentifier, expectationSuiteSchema)
-from great_expectations.core.evaluation_parameters import \
-    build_evaluation_parameters
-from great_expectations.data_asset.util import \
-    recursively_convert_to_json_serializable
-from great_expectations.dataset import (PandasDataset, SparkDFDataset,
-                                        SqlAlchemyDataset)
-from great_expectations.dataset.sqlalchemy_dataset import \
-    SqlAlchemyBatchReference
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+    RunIdentifier,
+    expectationSuiteSchema,
+)
+from great_expectations.core.evaluation_parameters import build_evaluation_parameters
+from great_expectations.data_asset.util import recursively_convert_to_json_serializable
+from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
+from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.types import ClassConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support

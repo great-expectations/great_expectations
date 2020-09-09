@@ -6,8 +6,9 @@ import re
 import warnings
 
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.execution_environment.data_connector.data_connector import \
-    DataConnector
+from great_expectations.execution_environment.data_connector.data_connector import (
+    DataConnector,
+)
 from great_expectations.execution_environment.types import PathBatchKwargs
 
 logger = logging.getLogger(__name__)

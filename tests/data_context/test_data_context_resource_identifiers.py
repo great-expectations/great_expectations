@@ -2,7 +2,9 @@ import pytest
 from freezegun import freeze_time
 
 from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier, ValidationResultIdentifier)
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 from great_expectations.exceptions import InvalidDataContextKeyError
 
 

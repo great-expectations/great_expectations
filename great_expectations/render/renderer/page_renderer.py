@@ -5,18 +5,24 @@ from typing import List
 
 from dateutil.parser import parse
 
-from great_expectations.core import (ExpectationSuiteValidationResult,
-                                     RunIdentifier)
+from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.util import num_to_str
 
-from ...validation_operators.types.validation_operator_result import \
-    ValidationOperatorResult
-from ..types import (CollapseContent, RenderedDocumentContent,
-                     RenderedHeaderContent, RenderedMarkdownContent,
-                     RenderedSectionContent, RenderedStringTemplateContent,
-                     RenderedTableContent, TextContent)
+from ...validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
+from ..types import (
+    CollapseContent,
+    RenderedDocumentContent,
+    RenderedHeaderContent,
+    RenderedMarkdownContent,
+    RenderedSectionContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+    TextContent,
+)
 from .renderer import Renderer
 
 logger = logging.getLogger(__name__)

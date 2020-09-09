@@ -9,7 +9,10 @@ from ruamel.yaml import YAML
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import (
-    instantiate_class_from_config, load_class, verify_dynamic_loading_support)
+    instantiate_class_from_config,
+    load_class,
+    verify_dynamic_loading_support,
+)
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.types import ClassConfig
 from great_expectations.validator.validator import Validator

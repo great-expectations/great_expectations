@@ -11,17 +11,18 @@ import uuid
 import warnings
 from collections.abc import Mapping as _Mapping
 
-from great_expectations.marshmallow__shade import (class_registry, types,
-                                                   utils, validate)
+from great_expectations.marshmallow__shade import class_registry, types, utils, validate
 from great_expectations.marshmallow__shade.base import FieldABC, SchemaABC
 from great_expectations.marshmallow__shade.exceptions import (
-    FieldInstanceResolutionError, StringNotCollectionError, ValidationError)
+    FieldInstanceResolutionError,
+    StringNotCollectionError,
+    ValidationError,
+)
 from great_expectations.marshmallow__shade.utils import is_aware, is_collection
 from great_expectations.marshmallow__shade.utils import missing as missing_
 from great_expectations.marshmallow__shade.utils import resolve_field_instance
 from great_expectations.marshmallow__shade.validate import Length, Validator
-from great_expectations.marshmallow__shade.warnings import \
-    RemovedInMarshmallow4Warning
+from great_expectations.marshmallow__shade.warnings import RemovedInMarshmallow4Warning
 
 __all__ = [
     "Field",

@@ -16,9 +16,10 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     _scipy_distribution_positional_args_from_dict,
-    is_valid_continuous_partition_object, validate_distribution_parameters)
-from great_expectations.execution_environment.types import (PathBatchSpec,
-                                                            S3BatchSpec)
+    is_valid_continuous_partition_object,
+    validate_distribution_parameters,
+)
+from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec
 from great_expectations.validator.validator import Validator
 
 from ..core.batch import Batch

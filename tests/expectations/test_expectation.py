@@ -1,9 +1,9 @@
 import pandas as pd
 
-from great_expectations.core.expectation_configuration import \
-    ExpectationConfiguration
-from great_expectations.core.expectation_validation_result import \
-    ExpectationValidationResult
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_validation_result import (
+    ExpectationValidationResult,
+)
 from great_expectations.datasource import PandasDatasource
 from great_expectations.validator.validator import DatasetValidator
 

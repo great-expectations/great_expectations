@@ -5,8 +5,10 @@ import pandas as pd
 
 from ...core.expectation_configuration import ExpectationConfiguration
 from ...dataset.dataset import DatasetBackendTypes
-from ..expectation import (ColumnMapDatasetExpectation,
-                           InvalidExpectationConfigurationError)
+from ..expectation import (
+    ColumnMapDatasetExpectation,
+    InvalidExpectationConfigurationError,
+)
 
 # equivalence kwargs -> "column"
 # validation kwargs += "value_set", "mostly"

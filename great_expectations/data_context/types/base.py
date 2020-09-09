@@ -6,10 +6,15 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.marshmallow__shade import (INCLUDE, Schema,
-                                                   ValidationError, fields,
-                                                   post_dump, post_load,
-                                                   validates_schema)
+from great_expectations.marshmallow__shade import (
+    INCLUDE,
+    Schema,
+    ValidationError,
+    fields,
+    post_dump,
+    post_load,
+    validates_schema,
+)
 from great_expectations.types import DictDot
 from great_expectations.types.configurations import ClassConfigSchema
 

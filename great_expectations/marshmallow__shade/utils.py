@@ -12,10 +12,10 @@ from email.utils import format_datetime, parsedate_to_datetime
 from pprint import pprint as py_pprint
 
 from great_expectations.marshmallow__shade.base import FieldABC
-from great_expectations.marshmallow__shade.exceptions import \
-    FieldInstanceResolutionError
-from great_expectations.marshmallow__shade.warnings import \
-    RemovedInMarshmallow4Warning
+from great_expectations.marshmallow__shade.exceptions import (
+    FieldInstanceResolutionError,
+)
+from great_expectations.marshmallow__shade.warnings import RemovedInMarshmallow4Warning
 
 EXCLUDE = "exclude"
 INCLUDE = "include"

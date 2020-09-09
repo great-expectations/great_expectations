@@ -1,16 +1,22 @@
 from distutils.version import LooseVersion
 
-from great_expectations.marshmallow__shade.decorators import (post_dump,
-                                                              post_load,
-                                                              pre_dump,
-                                                              pre_load,
-                                                              validates,
-                                                              validates_schema)
+from great_expectations.marshmallow__shade.decorators import (
+    post_dump,
+    post_load,
+    pre_dump,
+    pre_load,
+    validates,
+    validates_schema,
+)
 from great_expectations.marshmallow__shade.exceptions import ValidationError
 from great_expectations.marshmallow__shade.schema import Schema, SchemaOpts
-from great_expectations.marshmallow__shade.utils import (EXCLUDE, INCLUDE,
-                                                         RAISE, missing,
-                                                         pprint)
+from great_expectations.marshmallow__shade.utils import (
+    EXCLUDE,
+    INCLUDE,
+    RAISE,
+    missing,
+    pprint,
+)
 
 from . import fields
 

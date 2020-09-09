@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from great_expectations.core import (ExpectationConfiguration,
-                                     ExpectationValidationResult)
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.render.renderer.renderer import Renderer
 
 

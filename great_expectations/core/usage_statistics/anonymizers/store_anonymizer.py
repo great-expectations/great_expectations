@@ -1,11 +1,15 @@
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import \
-    Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymizer import \
-    StoreBackendAnonymizer
-from great_expectations.data_context.store import (EvaluationParameterStore,
-                                                   ExpectationsStore,
-                                                   HtmlSiteStore, MetricStore,
-                                                   Store, ValidationsStore)
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
+from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymizer import (
+    StoreBackendAnonymizer,
+)
+from great_expectations.data_context.store import (
+    EvaluationParameterStore,
+    ExpectationsStore,
+    HtmlSiteStore,
+    MetricStore,
+    Store,
+    ValidationsStore,
+)
 
 
 class StoreAnonymizer(Anonymizer):

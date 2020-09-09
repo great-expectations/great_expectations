@@ -13,12 +13,15 @@ from freezegun import freeze_time
 
 import great_expectations as ge
 from great_expectations import DataContext
-from great_expectations.core import (ExpectationConfiguration,
-                                     ExpectationSuite,
-                                     ExpectationValidationResult,
-                                     expectationSuiteSchema)
-from great_expectations.data_context.types.resource_identifiers import \
-    ExpectationSuiteIdentifier
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    ExpectationValidationResult,
+    expectationSuiteSchema,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource

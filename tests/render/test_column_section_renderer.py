@@ -3,18 +3,22 @@ from collections import OrderedDict
 
 import pytest
 
-from great_expectations.core import (ExpectationConfiguration,
-                                     ExpectationSuiteValidationResult,
-                                     ExpectationValidationResult,
-                                     expectationSuiteSchema)
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+    expectationSuiteSchema,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ProfilingResultsColumnSectionRenderer,
     ProfilingResultsOverviewSectionRenderer,
-    ValidationResultsColumnSectionRenderer)
-from great_expectations.render.renderer.content_block import \
-    ValidationResultsTableContentBlockRenderer
+    ValidationResultsColumnSectionRenderer,
+)
+from great_expectations.render.renderer.content_block import (
+    ValidationResultsTableContentBlockRenderer,
+)
 
 
 @pytest.fixture(scope="module")

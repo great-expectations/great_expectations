@@ -1,5 +1,7 @@
-from great_expectations.render.types import (RenderedBulletListContent,
-                                             RenderedStringTemplateContent)
+from great_expectations.render.types import (
+    RenderedBulletListContent,
+    RenderedStringTemplateContent,
+)
 
 from .content_block import ContentBlockRenderer
 

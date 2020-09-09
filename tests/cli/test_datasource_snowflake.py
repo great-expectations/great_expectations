@@ -8,8 +8,7 @@ from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.cli.datasource import _collect_snowflake_credentials
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import \
-    DatasourceKeyPairAuthBadPassphraseError
+from great_expectations.exceptions import DatasourceKeyPairAuthBadPassphraseError
 
 
 def test_snowflake_user_password_credentials_exit(empty_data_context):

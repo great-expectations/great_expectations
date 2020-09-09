@@ -14,21 +14,19 @@ from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.docs import build_docs
-from great_expectations.cli.upgrade_helpers import \
-    GE_UPGRADE_HELPER_VERSION_MAP
+from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.cli.util import cli_colorize_string, cli_message
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.usage_statistics.usage_statistics import \
-    send_usage_message
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.types.base import \
-    MINIMUM_SUPPORTED_CONFIG_VERSION
+from great_expectations.data_context.types.base import MINIMUM_SUPPORTED_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier, ValidationResultIdentifier)
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 from great_expectations.datasource import Datasource
-from great_expectations.exceptions import (CheckpointError,
-                                           CheckpointNotFoundError)
+from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
 

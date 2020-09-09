@@ -8,10 +8,12 @@ from functools import wraps
 import numpy as np
 import pandas as pd
 
-from great_expectations.core import (ExpectationConfiguration,
-                                     ExpectationSuite,
-                                     ExpectationSuiteValidationResult,
-                                     ExpectationValidationResult)
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+)
 
 
 def parse_result_format(result_format):

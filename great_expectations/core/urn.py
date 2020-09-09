@@ -1,5 +1,4 @@
-from pyparsing import (Combine, LineEnd, Literal, Optional, Suppress, Word,
-                       alphanums)
+from pyparsing import Combine, LineEnd, Literal, Optional, Suppress, Word, alphanums
 
 urn_word = Word(alphanums + "_$?=%.&,")
 ge_metrics_urn = Combine(

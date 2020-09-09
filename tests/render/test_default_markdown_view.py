@@ -8,13 +8,16 @@ import great_expectations as ge
 import great_expectations.render as render
 from great_expectations.core import ExpectationSuiteValidationResultSchema
 from great_expectations.render.renderer import ValidationResultsPageRenderer
-from great_expectations.render.types import (RenderedDocumentContent,
-                                             RenderedHeaderContent,
-                                             RenderedSectionContent,
-                                             RenderedTableContent)
+from great_expectations.render.types import (
+    RenderedDocumentContent,
+    RenderedHeaderContent,
+    RenderedSectionContent,
+    RenderedTableContent,
+)
 from great_expectations.render.view import DefaultMarkdownPageView
-from great_expectations.validation_operators.types.validation_operator_result import \
-    ValidationOperatorResult
+from great_expectations.validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
 
 
 @pytest.fixture()

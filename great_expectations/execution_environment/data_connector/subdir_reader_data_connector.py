@@ -3,8 +3,9 @@ import os
 import warnings
 
 from great_expectations.exceptions import BatchSpecError
-from great_expectations.execution_environment.data_connector.data_connector import \
-    DataConnector
+from great_expectations.execution_environment.data_connector.data_connector import (
+    DataConnector,
+)
 from great_expectations.execution_environment.types import PathBatchSpec
 
 logger = logging.getLogger(__name__)
