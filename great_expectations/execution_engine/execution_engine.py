@@ -479,21 +479,6 @@ class ExecutionEngine(MetaExecutionEngine):
         """
         raise NotImplementedError
 
-    def get_batch(self, batch_kwargs, batch_parameters=None):
-        """Get a batch of data from the datasource.
-
-        Args:
-            batch_kwargs: the BatchKwargs to use to construct the batch
-            batch_parameters: optional parameters to store as the reference description of the batch. They should
-                reflect parameters that would provide the passed BatchKwargs.
-
-
-        Returns:
-            Batch
-
-        """
-        raise NotImplementedError
-
     def get_available_data_asset_names(self, data_connector_names=None):
         """
         Returns a dictionary of data_asset_names that the specified data connector can provide. Note that some data
@@ -529,12 +514,6 @@ class ExecutionEngine(MetaExecutionEngine):
                 data_connector_name
             ] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
-
-    @classmethod
-    def from_dataset(cls, dataset=None):
-        """This base implementation naively passes arguments on to the real constructor, which
-        is suitable really when a constructor knows to take its own type. In general, this should be overridden"""
-        return cls(dataset)
 
     def get_row_count(self):
         """Returns: int, table row count"""
