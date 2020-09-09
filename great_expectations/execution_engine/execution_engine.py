@@ -457,20 +457,15 @@ class ExecutionEngine(MetaExecutionEngine):
     def batches(self):
         return self._batches
 
-    # TODO: this was from datasource.py - discuss if still relevant
     def process_batch_definition(self, batch_definition, batch_spec):
-        """Use ExecutionEnvironment-specific configuration to translate any batch parameters into batch kwargs at the
-        ExecutionEnvironment
-        level.
+        """Use ExecutionEngine-specific configuration to translate any batch_definition keys into batch_spec keys
 
         Args:
-            limit (int): a parameter all ExecutionEnvironments must accept to allow limiting a batch to a smaller
-            number of rows.
-            dataset_options (dict): a set of kwargs that will be passed to the constructor of a dataset built using
-                these batch_kwargs
+            batch_definition (dict): batch_definition to process
+            batch_spec (dict): batch_spec to map processed batch_definition keys to
 
         Returns:
-            batch_kwargs: Result will include both parameters passed via argument and configured parameters.
+            batch_spec (dict)
         """
         raise NotImplementedError
 
