@@ -8,8 +8,12 @@ class MetricEdgeKey(object):
         self, metric_name: str, metric_domain_kwargs: dict, metric_value_kwargs: dict
     ):
         self._metric_name = metric_name
-        self._metric_domain_kwargs = IDDict(metric_domain_kwargs)
-        self._metric_value_kwargs = IDDict(metric_value_kwargs)
+        if not isinstance(metric_domain_kwargs, IDDict):
+            metric_domain_kwargs = IDDict(metric_domain_kwargs)
+        self._metric_domain_kwargs = metric_domain_kwargs
+        if not isinstance(metric_value_kwargs, IDDict):
+            metric_value_kwargs = IDDict(metric_value_kwargs)
+        self._metric_value_kwargs = metric_value_kwargs
 
     @property
     def metric_name(self):

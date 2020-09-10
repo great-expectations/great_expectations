@@ -5,7 +5,7 @@ from collections import Counter
 from copy import deepcopy
 from functools import wraps
 from inspect import isabstract
-from typing import Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 import pandas as pd
 from dateutil.parser import parse
@@ -23,7 +23,10 @@ from great_expectations.exceptions import (
 from great_expectations.expectations.registry import register_expectation
 
 from ..core.batch import Batch
-from ..data_asset.util import recursively_convert_to_json_serializable
+from ..data_asset.util import (
+    parse_result_format,
+    recursively_convert_to_json_serializable,
+)
 from ..exceptions.metric_exceptions import MetricError
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..validator.validator import Validator
@@ -64,6 +67,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 20,},
     }
     _validators = dict()
+    _post_validation_hooks = list()
 
     def __init__(self, configuration: Optional[ExpectationConfiguration] = None):
         if configuration is not None:
@@ -111,15 +115,44 @@ class Expectation(ABC, metaclass=MetaExpectation):
                         f"Overwriting declaration of validator with metric dag: {str(metric_dependencies)}."
                     )
             logger.debug(f"Registering validator: {str(metric_dependencies)}")
-            cls._validators[metric_dependencies] = validator
 
             @wraps(validator)
             def inner_func(*args, **kwargs):
-                return ExpectationValidationResult(**validator(*args, **kwargs))
+                raw_response = validator(*args, **kwargs)
+                # raw_response = cls._process_post_validation_hooks(raw_response)
+                return cls._build_evr(raw_response)
+
+            cls._validators[metric_dependencies] = inner_func
 
             return inner_func
 
         return outer
+
+    # @classmethod
+    # def post_validation(cls, func: Callable):
+    #
+    #     @wraps(func)
+    #     def hook(raw_response: Any):
+    #         return func(raw_response)
+    #
+    #     cls._post_validation_hooks.append(hook)
+    #
+    #     return hook
+    #
+    # def _process_post_validation_hooks(self, raw_response):
+    #     for hook in self._post_validation_hooks:
+    #         res = hook(raw_response)
+    #     return raw_response
+
+    @staticmethod
+    def _build_evr(raw_response):
+        if not isinstance(raw_response, ExpectationValidationResult):
+            if isinstance(raw_response, dict):
+                return ExpectationValidationResult(**raw_response)
+            else:
+                raise GreatExpectationsError("Unable to build EVR")
+        else:
+            return raw_response
 
     def get_validation_dependencies(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -129,8 +162,11 @@ class Expectation(ABC, metaclass=MetaExpectation):
             configuration = self.configuration
 
         return {
-            "domain": self.get_domain_kwargs(configuration),
-            "success_kwargs": self.get_success_kwargs(configuration),
+            "domain": configuration.get_domain_kwargs(),
+            "success_kwargs": configuration.get_success_kwargs(),
+            "result_format": parse_result_format(
+                configuration.get_runtime_kwargs().get("result_format")
+            ),
             "metrics": tuple(),
         }
 
@@ -176,18 +212,16 @@ class Expectation(ABC, metaclass=MetaExpectation):
         return success_kwargs
 
     def get_runtime_kwargs(
-        self, configuration: Optional[ExpectationConfiguration] = None
+        self,
+        configuration: Optional[ExpectationConfiguration] = None,
+        runtime_configuration: dict = None,
     ):
         if not configuration:
             configuration = self.configuration
 
-        success_kwargs = self.get_success_kwargs()
-        runtime_kwargs = {
-            key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
-            for key in self.runtime_kwargs
-        }
-        runtime_kwargs.update(success_kwargs)
-        return runtime_kwargs
+        return configuration.get_runtime_kwargs(
+            runtime_configuration=runtime_configuration
+        )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         if configuration is None:
@@ -280,6 +314,8 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
 
 class DatasetExpectation(Expectation, ABC):
+    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+
     @staticmethod
     def get_value_set_parser(execution_engine: ExecutionEngine):
         if isinstance(execution_engine, PandasExecutionEngine):
@@ -288,6 +324,27 @@ class DatasetExpectation(Expectation, ABC):
         raise GreatExpectationsError(
             f"No parser found for backend: {str(execution_engine.__name__)}"
         )
+
+    @PandasExecutionEngine.metric(
+        metric_name="snippet",
+        metric_domain_keys=domain_keys,
+        metric_value_keys=tuple(),
+        metric_dependencies=tuple(),
+        batchable=True,
+    )
+    def _snippet(
+        self,
+        batches: Dict[str, Batch],
+        execution_engine: PandasExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: dict,
+        runtime_configuration: dict = None,
+    ):
+        df = execution_engine.get_domain_dataframe(
+            domain_kwargs=metric_domain_kwargs, batches=batches
+        )
+        return df
 
     @staticmethod
     def _pandas_value_set_parser(value_set):
@@ -304,17 +361,9 @@ class DatasetExpectation(Expectation, ABC):
 
 
 class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
-    def build_validation_kwargs(
-        self, configuration: Optional[ExpectationConfiguration]
-    ):
-        validation_kwargs = super().build_validation_kwargs(configuration)
-        validation_kwargs.update(
-            {
-                "column": configuration.kwargs.get("column"),
-                "mostly": configuration.kwargs.get("mostly", 1),
-            }
-        )
-        return validation_kwargs
+    map_metric = None
+    metric_dependencies = "map.nonnull.count"
+    success_keys = ("mostly",)
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
@@ -332,115 +381,48 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    def format_map_output(
-        self,
-        result_format,
-        success,
-        element_count,
-        nonnull_count,
-        unexpected_count,
-        unexpected_list,
-        unexpected_index_list,
+    def get_validation_dependencies(
+        self, configuration: Optional[ExpectationConfiguration] = None
     ):
-        """Delegate to the helper method. But we maintain this method so that subclassers can choose to modify if
-        desired."""
-        return _format_map_output(
-            result_format,
-            success,
-            element_count,
-            nonnull_count,
-            unexpected_count,
-            unexpected_list,
-            unexpected_index_list,
-        )
+        dependencies = super().get_validation_dependencies(configuration)
+        metric_dependencies = set(self.metric_dependencies)
 
-    def calculate_map_expectation_success(self, success_count, nonnull_count, mostly):
-        return _calc_map_expectation_success(success_count, nonnull_count, mostly)
+        dependencies["metrics"] = metric_dependencies
+        result_format_str = dependencies["result_format"].get("result_format")
+        if result_format_str == ["BOOLEAN_ONLY"]:
+            return dependencies
 
-    def _build_runtime_kwargs(self, configuration):
-        # TODO: add support for configuration defaults
-        return {
-            # TODO: use configuration default
-            "result_format": configuration.kwargs.get("result_format", "SUMMARY")
-        }
+        metric_dependencies.add("map.count")
+        assert isinstance(
+            self.map_metric, str
+        ), "ColumnMapDatasetExpectation must override get_validation_dependencies or delcare exactly one map_metric"
+        metric_dependencies.add(self.map_metric + ".unexpected_values")
+        if result_format_str in ["BASIC", "SUMMARY"]:
+            return dependencies
 
-    def _validate_pandas(
+        metric_dependencies.add(self.map_metric + ".unexpected_rows")
+
+        return dependencies
+
+    @PandasExecutionEngine.metric(
+        metric_name="map.count",
+        metric_domain_keys=DatasetExpectation.domain_keys,
+        metric_value_keys=tuple(),
+        metric_dependencies=tuple(),
+    )
+    def _count(
         self,
-        data: "Dataset",
-        configuration: ExpectationConfiguration,
-        runtime_configuration=None,
+        batches: Dict[str, Batch],
+        execution_engine: PandasExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: dict,
+        runtime_configuration: dict = None,
     ):
-        import numpy as np
-
-        validation_kwargs = self.build_validation_kwargs(configuration)
-        runtime_configuration = configuration.build_runtime_configuration(
-            runtime_configuration
+        df = execution_engine.get_domain_dataframe(
+            domain_kwargs=metric_domain_kwargs, batches=batches
         )
-        result_format = runtime_configuration.result_format
-
-        column = validation_kwargs.pop("column")
-        series = data[column]
-        element_count = int(len(series))
-        if configuration.expectation_type in [
-            "expect_column_values_to_not_be_null",
-            "expect_column_values_to_be_null",
-        ]:
-            # Counting the number of unexpected values can be expensive when there is a large
-            # number of np.nan values.
-            # This only happens on expect_column_values_to_not_be_null expectations.
-            # Since there is no reason to look for most common unexpected values in this case,
-            # we will instruct the result formatting method to skip this step.
-            # FIXME rename to mapped_ignore_values?
-            boolean_mapped_null_values = np.full(series.shape, False)
-            result_format["partial_unexpected_count"] = 0
-        else:
-            boolean_mapped_null_values = series.isnull().values
-
-        validated_values = series[boolean_mapped_null_values == False]
-        validated_values_count = int((boolean_mapped_null_values == False).sum())
-
-        boolean_mapped_success_values = self._validate_pandas_series(
-            validated_values,
-            **validation_kwargs,
-            runtime_configuration=runtime_configuration,
-        )
-        success_count = np.count_nonzero(boolean_mapped_success_values)
-
-        unexpected_list = list(validated_values[boolean_mapped_success_values == False])
-        unexpected_index_list = list(
-            validated_values[boolean_mapped_success_values == False].index
-        )
-
-        # DEPRECATED / NO LONGER SUPPORTED
-        # if "output_strftime_format" in runtime_kwargs:
-        #     output_strftime_format = runtime_kwargs["output_strftime_format"]
-        #     parsed_unexpected_list = []
-        #     for val in unexpected_list:
-        #         if val is None:
-        #             parsed_unexpected_list.append(val)
-        #         else:
-        #             if isinstance(val, str):
-        #                 val = parse(val)
-        #             parsed_unexpected_list.append(datetime.strftime(val, output_strftime_format))
-        #     unexpected_list = parsed_unexpected_list
-
-        success, percent_success = self.calculate_map_expectation_success(
-            success_count, validated_values_count, validation_kwargs.get("mostly")
-        )
-
-        return_obj = self.format_map_output(
-            result_format,
-            success,
-            element_count,
-            validated_values_count,
-            len(unexpected_list),
-            unexpected_list,
-            unexpected_index_list,
-        )
-        return return_obj
-
-    def _validate_pandas_series(self, series: pd.Series, **kwargs):
-        raise NotImplementedError
+        return df.shape[0]
 
 
 def _calc_map_expectation_success(success_count, nonnull_count, mostly):

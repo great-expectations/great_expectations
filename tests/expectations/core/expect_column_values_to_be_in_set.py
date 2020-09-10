@@ -18,7 +18,8 @@ def test_expect_column_values_to_be_in_set_impl():
         kwargs={"column": "a", "value_set": [1, 2], "mostly": 1},
     )
     expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch = Batch(data=df)
     result = expectation.validate(
-        batches=[Batch(data=df)], execution_engine=PandasExecutionEngine()
+        batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
     assert result == ExpectationValidationResult(success=False,)

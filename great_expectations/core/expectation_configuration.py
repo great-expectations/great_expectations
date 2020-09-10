@@ -32,6 +32,19 @@ from great_expectations.types import DictDot
 logger = logging.getLogger(__name__)
 
 
+def parse_result_format(result_format):
+    """This is a simple helper utility that can be used to parse a string result_format into the dict format used
+    internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
+    there is no need to specify a custom partial_unexpected_count."""
+    if isinstance(result_format, str):
+        result_format = {"result_format": result_format, "partial_unexpected_count": 20}
+    else:
+        if "partial_unexpected_count" not in result_format:
+            result_format["partial_unexpected_count"] = 20
+
+    return result_format
+
+
 class ExpectationConfiguration(DictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
@@ -884,19 +897,25 @@ class ExpectationConfiguration(DictDot):
         success_kwargs.update(domain_kwargs)
         return success_kwargs
 
-    def get_runtime_kwargs(self):
+    def get_runtime_kwargs(self, runtime_configuration=None):
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
         if expectation_kwargs_dict is None:
             expectation_kwargs_dict = self._get_default_custom_kwargs()
         success_kwargs = self.get_success_kwargs()
+        lookup_kwargs = self.kwargs
+        if runtime_configuration:
+            lookup_kwargs.update(runtime_configuration)
         runtime_kwargs = {
-            key: self.kwargs.get(
+            key: lookup_kwargs.get(
                 key, expectation_kwargs_dict.get("default_kwarg_values").get(key)
             )
             for key in self.runtime_kwargs
         }
+        runtime_kwargs["result_format"] = parse_result_format(
+            runtime_kwargs["result_format"]
+        )
         runtime_kwargs.update(success_kwargs)
         return runtime_kwargs
 

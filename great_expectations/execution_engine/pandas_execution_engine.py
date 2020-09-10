@@ -30,6 +30,7 @@ from ..core import IDDict
 from ..core.batch import Batch, BatchMarkers
 from ..datasource.pandas_datasource import HASH_THRESHOLD
 from ..exceptions import BatchSpecError, ValidationError
+from ..exceptions.metric_exceptions import MetricError
 from ..execution_environment.util import hash_pandas_dataframe
 from ..validator.validation_graph import MetricEdgeKey
 from .execution_engine import ExecutionEngine
@@ -627,7 +628,7 @@ Notes:
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
             if batches and len(batches) == 1:
-                batch = batches[0]
+                batch = [batch for batch in batches.values()][0]
             elif self.loaded_batch:
                 batch = self.loaded_batch
             else:
@@ -669,7 +670,6 @@ Notes:
         else:
             return data
 
-    # noinspection PyUnusedLocal
     def column_map_count(
         self,
         metric_name: str,
@@ -682,14 +682,11 @@ Notes:
     ):
         """Return the count of nonzero values from the map-style metric in the metrics dictionary"""
         assert metric_name.endswith(".count")
-        metric_key = (
-            metric_name[: -len(".count")],
-            IDDict(metric_domain_kwargs).to_id(),
-            IDDict(metric_value_kwargs).to_id(),
-        )
+        metric_key = MetricEdgeKey(
+            metric_name[: -len(".count")], metric_domain_kwargs, metric_value_kwargs,
+        ).id
         return np.count_nonzero(metrics.get(metric_key))
 
-    # noinspection PyUnusedLocal
     def column_map_values(
         self,
         metric_name: str,
@@ -701,17 +698,106 @@ Notes:
         **kwargs,
     ):
         """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
-        data = execution_engine.get_domain_dataframe(metric_domain_kwargs)
+        data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
         assert metric_name.endswith(".unexpected_values")
-        metric_key = (
-            metric_name[: -len(".count")],
-            IDDict(metric_domain_kwargs).to_id(),
-            IDDict(metric_value_kwargs).to_id(),
-        )
-        boolean_mapped_success_values = metrics.get(metrics.get(metric_key))
-        return data[boolean_mapped_success_values == False]
+        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
+        result_format = metric_value_kwargs["result_format"]
+        base_metric_value_kwargs = {
+            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
+        }
+        metric_key = MetricEdgeKey(
+            metric_name[: -len(".unexpected_values")],
+            metric_domain_kwargs,
+            base_metric_value_kwargs,
+        ).id
+        boolean_mapped_success_values = metrics.get(metric_key)
+        if result_format["result_format"] == "COMPLETE":
+            return list(data[boolean_mapped_success_values == False])
+        else:
+            return list(
+                data[boolean_mapped_success_values == False][
+                    : result_format["partial_unexpected_count"]
+                ]
+            )
 
-    # noinspection PyUnusedLocal
+    def column_map_index(
+        self,
+        metric_name: str,
+        batches: Dict[str, Batch],
+        execution_engine: "PandasExecutionEngine",
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[Tuple, Any],
+        **kwargs,
+    ):
+        data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
+        assert metric_name.endswith(".unexpected_index")
+        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
+        result_format = metric_value_kwargs["result_format"]
+        base_metric_value_kwargs = {
+            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
+        }
+        metric_key = MetricEdgeKey(
+            metric_name[: -len(".unexpected_index")],
+            metric_domain_kwargs,
+            base_metric_value_kwargs,
+        ).id
+        boolean_mapped_success_values = metrics.get(metric_key)
+        if result_format["result_format"] == "COMPLETE":
+            return list(data[boolean_mapped_success_values == False].index)
+        else:
+            return list(
+                data[boolean_mapped_success_values == False].index[
+                    : result_format["partial_unexpected_count"]
+                ]
+            )
+
+    def column_map_value_counts(
+        self,
+        metric_name: str,
+        batches: Dict[str, Batch],
+        execution_engine: "PandasExecutionEngine",
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[Tuple, Any],
+        **kwargs,
+    ):
+        """Return values from the specified domain (ignoring the column constraint) that match the map-style metric in the metrics dictionary."""
+        row_domain = {k: v for (k, v) in metric_domain_kwargs.items() if k != "column"}
+        data = execution_engine.get_domain_dataframe(row_domain, batches)
+        assert metric_name.endswith(".unexpected_value_counts")
+        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
+        result_format = metric_value_kwargs["result_format"]
+        base_metric_value_kwargs = {
+            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
+        }
+        metric_key = MetricEdgeKey(
+            metric_name[: -len(".unexpected_value_counts")],
+            metric_domain_kwargs,
+            base_metric_value_kwargs,
+        ).id
+        boolean_mapped_success_values = metrics.get(metric_key)
+        value_counts = None
+        try:
+            value_counts = data[boolean_mapped_success_values == False].value_counts()
+        except ValueError:
+            try:
+                value_counts = (
+                    data[boolean_mapped_success_values == False]
+                    .apply(tuple)
+                    .value_counts()
+                )
+            except ValueError:
+                pass
+
+        if not value_counts:
+            raise MetricError("Unable to compute value counts")
+
+        if result_format["result_format"] == "COMPLETE":
+            return value_counts
+        else:
+            return value_counts[result_format["partial_unexpected_count"]]
+
     def column_map_rows(
         self,
         metric_name: str,
@@ -724,23 +810,33 @@ Notes:
     ):
         """Return values from the specified domain (ignoring the column constraint) that match the map-style metric in the metrics dictionary."""
         row_domain = {k: v for (k, v) in metric_domain_kwargs.items() if k != "column"}
-        data = execution_engine.get_domain_dataframe(row_domain)
+        data = execution_engine.get_domain_dataframe(row_domain, batches)
         assert metric_name.endswith(".unexpected_rows")
-        metric_key = (
-            metric_name[: -len(".count")],
-            IDDict(metric_domain_kwargs).to_id(),
-            IDDict(metric_value_kwargs).to_id(),
-        )
+        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
+        result_format = metric_value_kwargs["result_format"]
+        base_metric_value_kwargs = {
+            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
+        }
+        metric_key = MetricEdgeKey(
+            metric_name[: -len(".unexpected_rows")],
+            metric_domain_kwargs,
+            base_metric_value_kwargs,
+        ).id
         boolean_mapped_success_values = metrics.get(metric_key)
-        return data[boolean_mapped_success_values == False]
+        if result_format["result_format"] == "COMPLETE":
+            return data[boolean_mapped_success_values == False]
+        else:
+            return data[boolean_mapped_success_values == False][
+                result_format["partial_unexpected_count"]
+            ]
 
     @classmethod
     def column_map_metric(
         cls,
         metric_name: str,
-        metric_domain_keys: tuple,
-        metric_value_keys: tuple,
-        metric_dependencies: tuple,
+        metric_domain_keys: Tuple[str, ...],
+        metric_value_keys: Tuple[str, ...],
+        metric_dependencies: Tuple[str, ...],
     ):
         """
         A decorator for declaring a metric provider
@@ -786,15 +882,23 @@ Notes:
             register_metric(
                 metric_name=metric_name + ".unexpected_values",
                 metric_domain_keys=metric_domain_keys,
-                metric_value_keys=metric_value_keys,
+                metric_value_keys=(*metric_value_keys, "result_format"),
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls.column_map_values,
             )
             register_metric(
+                metric_name=metric_name + ".unexpected_value_counts",
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=(*metric_value_keys, "result_format"),
+                execution_engine=cls,
+                metric_dependencies=(metric_name,),
+                metric_provider=cls.column_map_value_counts,
+            )
+            register_metric(
                 metric_name=metric_name + ".unexpected_rows",
                 metric_domain_keys=metric_domain_keys,
-                metric_value_keys=metric_value_keys,
+                metric_value_keys=(metric_value_keys, "result_format"),
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls.column_map_rows,

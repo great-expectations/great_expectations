@@ -3,6 +3,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type
 
 from great_expectations.core.id_dict import IDDict
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
+from great_expectations.validator.validation_graph import MetricEdgeKey
 
 logger = logging.getLogger(__name__)
 
@@ -156,10 +157,11 @@ def get_metric_kwargs(
             "metric_value_keys": metric_definition["metric_value_keys"],
         }
         if configuration:
+            configuration_kwargs = configuration.get_runtime_kwargs()
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
                     {
-                        k: configuration.kwargs.get(k)
+                        k: configuration_kwargs.get(k)
                         for k in metric_kwargs["metric_domain_keys"]
                     }
                 )
@@ -168,7 +170,7 @@ def get_metric_kwargs(
             if len(metric_kwargs["metric_value_keys"]) > 0:
                 metric_value_kwargs = IDDict(
                     {
-                        k: configuration.kwargs.get(k)
+                        k: configuration_kwargs.get(k)
                         for k in metric_kwargs["metric_value_keys"]
                     }
                 )
@@ -178,7 +180,7 @@ def get_metric_kwargs(
             metric_kwargs["metric_value_kwargs"] = metric_value_kwargs
         return metric_kwargs
     except KeyError:
-        raise MetricProviderError(f"No definition found for {metric_name}")
+        raise MetricProviderError(f"Incomplete definition found for {metric_name}")
 
 
 def extract_metrics(
@@ -190,11 +192,11 @@ def extract_metrics(
     for metric_name in metric_names:
         kwargs = get_metric_kwargs(metric_name, configuration)
         res[metric_name] = metrics[
-            (
+            MetricEdgeKey(
                 metric_name,
-                kwargs["metric_domain_kwargs"].to_id(),
-                kwargs["metric_value_kwargs"].to_id(),
-            )
+                kwargs["metric_domain_kwargs"],
+                kwargs["metric_value_kwargs"],
+            ).id
         ]
     return res
 

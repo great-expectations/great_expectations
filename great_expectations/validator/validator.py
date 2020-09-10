@@ -127,11 +127,12 @@ class Validator(object):
         parent_node: Union[MetricEdgeKey, None] = None,
     ) -> None:
         metric_kwargs = get_metric_kwargs(metric_name)
+        configuration_kwargs = configuration.get_runtime_kwargs()
         try:
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
                     {
-                        k: configuration.kwargs.get(k)
+                        k: configuration_kwargs.get(k)
                         for k in metric_kwargs["metric_domain_keys"]
                     }
                 )
@@ -140,7 +141,7 @@ class Validator(object):
             if len(metric_kwargs["metric_value_keys"]) > 0:
                 metric_value_kwargs = IDDict(
                     {
-                        k: configuration.kwargs.get(k)
+                        k: configuration_kwargs.get(k)
                         for k in metric_kwargs["metric_value_keys"]
                     }
                 )
