@@ -78,6 +78,24 @@ class MetaPandasExecutionEngine(ExecutionEngine):
             *args,
             **kwargs,
         ):
+            """A wrapper for an Expectation Validator which takes in Standard Expectation Params and outputs Standard
+            Expectation results. Used to transition Expectations to Execution Engine Build.
+
+             Args:
+                column (str) - The column being validated
+                mostly (None or float between 0 and 1) - Percent success to be met in order for validation to
+                                                        return successfully
+                result_format (None or str) - A choice for the format of the result being returned. Options are
+                                            BOOLEAN ONLY, BASIC, SUMMARY, and COMPLETE
+                row_condition (None or a Boolean Expression String) - A condition that can used to query rows prior
+                                                                     to the validation itself taking place
+                condition_parser (None or str) - defines which syntax has been used to build the row conditions
+                                                (default = pandas)
+            Return:
+                return_obj (dict) - A dictionary specifying all kwargs returned by the function implementing this wrapper
+
+
+            """
 
             if result_format is None:
                 result_format = self.default_expectation_args[
@@ -452,7 +470,7 @@ Notes:
         )
 
     def load_batch(self, batch_definition, in_memory_dataset=None):
-        """Using the execution environment and data connector specified within the batch definition, builds a batch spec
+        """With the help of the execution environment and data connector specified within the batch definition, builds a batch spec
         and utilizes it to load a batch using the appropriate file reader and the given file path.
 
                Args:
@@ -627,6 +645,16 @@ Notes:
         )
 
     def process_batch_definition(self, batch_definition, batch_spec):
+        """Takes in a batch definition and batch spec. If the batch definition has a limit, uses it to initialize the
+        number of rows to process for the batch spec in obtaining a batch
+
+        Args:
+            batch_definition (dict) - The batch definition as defined by the user
+            batch_spec (dict) - The batch spec used to query the backend
+
+        Returns:
+             batch_spec (dict) - The batch spec used to query the backend, with the added row limit
+            """
         limit = batch_definition.get("limit")
 
         if limit is not None:
@@ -644,8 +672,21 @@ Notes:
         return batch_spec
 
     def get_domain_dataframe(
+
         self, domain_kwargs: dict, batches: Dict[str, Batch] = None
     ):
+        """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
+        to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
+        or otherwise a Data Frame.
+
+        Args:
+            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
+            batches (dict) - A dictionary specifying batch id and which batches to obtain
+
+        Returns:
+            One of 2 formats, as specified by the domain kwargs. Either a Column (Pandas Series) or otherwise a Pandas
+            Data Frame.
+        """
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
@@ -984,39 +1025,48 @@ Notes:
         return outer
 
     def get_row_count(self):
+        """Getter for Pandas Data Frame row count"""
         return self.dataframe.shape[0]
 
     def get_column_count(self):
+        """Getter for Pandas Data Frame column count"""
         return self.dataframe.shape[1]
 
     def get_table_columns(self) -> List[str]:
+        """Returns a list of table column names"""
         return list(self.dataframe.columns)
 
     def get_column_sum(self, column):
+        """Returns the sum of a numerical column"""
         return self.dataframe[column].sum()
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
+        """Returns the maximum value in a column"""
         temp_column = self.dataframe[column].dropna()
         if parse_strings_as_datetimes:
             temp_column = temp_column.map(parse)
         return temp_column.max()
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
+        """Returns the minimum value in a column"""
         temp_column = self.dataframe[column].dropna()
         if parse_strings_as_datetimes:
             temp_column = temp_column.map(parse)
         return temp_column.min()
 
     def get_column_mean(self, column):
+        """Returns column mean"""
         return self.dataframe[column].mean()
 
     def get_column_nonnull_count(self, column):
+        """Returns number of non-null values in a column"""
         series = self.dataframe[column]
         null_indexes = series.isnull()
         nonnull_values = series[null_indexes == False]
         return len(nonnull_values)
 
     def get_column_value_counts(self, column, sort="value", collate=None):
+        """Returns value counts for a column"""
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
         if collate is not None:
@@ -1040,15 +1090,19 @@ Notes:
         return counts
 
     def get_column_unique_count(self, column):
+        """Returns the number of unique values in a column"""
         return self.dataframe.get_column_value_counts(column).shape[0]
 
     def get_column_modes(self, column):
+        """Returns the mode of a column"""
         return list(self.dataframe[column].mode().values)
 
     def get_column_median(self, column):
+        """Returns the median of a column"""
         return self.dataframe[column].median()
 
     def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
+        """Returns the column's quantiles as a lift using the "nearest" interpolation """
         if allow_relative_error is not False:
             raise ValueError(
                 "PandasExecutionEngine does not support relative error in column quantiles."
@@ -1058,15 +1112,18 @@ Notes:
         )
 
     def get_column_stdev(self, column):
+        """Returns the Standard Deviation of a Column"""
         return self.dataframe[column].std()
 
     def get_column_hist(self, column, bins):
+        """Returns value counts in given histogram bins for a given column as a list"""
         hist, bin_edges = np.histogram(self.dataframe[column], bins, density=False)
         return list(hist)
 
     def get_column_count_in_range(
         self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
     ):
+        """For a given column, checks how many values are in a given range"""
         # TODO this logic could probably go in the non-underscore version if we want to cache
         if min_val is None and max_val is None:
             raise ValueError("Must specify either min or max value")
