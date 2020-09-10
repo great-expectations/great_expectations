@@ -699,6 +699,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             bucket.delete_blobs(blobs=bucket.list_blobs(prefix=self.prefix))
         except NotFound:
             return False
+
         return True
 
     def _has_key(self, key):
