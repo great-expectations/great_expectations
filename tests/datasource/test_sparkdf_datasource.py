@@ -7,8 +7,8 @@ import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.dataset import SparkDFDataset
 from great_expectations.datasource import SparkDFDatasource
 from great_expectations.exceptions import BatchKwargsError

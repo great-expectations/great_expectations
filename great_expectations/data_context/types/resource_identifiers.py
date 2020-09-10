@@ -4,9 +4,9 @@ from typing import Union
 
 from dateutil.parser import parse
 
-from great_expectations.core import RunIdentifier, RunIdentifierSchema
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs, IDDict
+from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.exceptions import DataContextError, InvalidDataContextKeyError
 from great_expectations.marshmallow__shade import Schema, fields, post_load
 

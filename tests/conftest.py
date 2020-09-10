@@ -13,11 +13,10 @@ from freezegun import freeze_time
 
 import great_expectations as ge
 from great_expectations import DataContext
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuite,
+from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
-    expectationSuiteSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,

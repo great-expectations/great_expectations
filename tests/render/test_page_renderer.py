@@ -6,7 +6,8 @@ from collections import OrderedDict
 import mistune
 import pytest
 
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer import (
     ExpectationSuitePageRenderer,

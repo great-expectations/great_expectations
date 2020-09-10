@@ -3,6 +3,7 @@ import logging
 import math
 import operator
 import traceback
+from collections import namedtuple
 
 from pyparsing import (
     CaselessKeyword,
@@ -352,3 +353,39 @@ def parse_evaluation_parameter(
         )
 
     return result
+
+
+def _deduplicate_evaluation_parameter_dependencies(dependencies):
+    deduplicated = dict()
+    for suite_name, required_metrics in dependencies.items():
+        deduplicated[suite_name] = []
+        metrics = set()
+        metric_kwargs = dict()
+        for metric in required_metrics:
+            if isinstance(metric, str):
+                metrics.add(metric)
+            elif isinstance(metric, dict):
+                # There is a single metric_kwargs_id object in this construction
+                for kwargs_id, metric_list in metric["metric_kwargs_id"].items():
+                    if kwargs_id not in metric_kwargs:
+                        metric_kwargs[kwargs_id] = set()
+                    for metric_name in metric_list:
+                        metric_kwargs[kwargs_id].add(metric_name)
+        deduplicated[suite_name] = list(metrics)
+        if len(metric_kwargs) > 0:
+            deduplicated[suite_name] = deduplicated[suite_name] + [
+                {
+                    "metric_kwargs_id": {
+                        metric_kwargs: list(metrics_set)
+                        for (metric_kwargs, metrics_set) in metric_kwargs.items()
+                    }
+                }
+            ]
+
+    return deduplicated
+
+
+EvaluationParameterIdentifier = namedtuple(
+    "EvaluationParameterIdentifier",
+    ["expectation_suite_name", "metric_name", "metric_kwargs_id"],
+)

@@ -5,7 +5,8 @@ Tests for autoinspection framework.
 import pytest
 
 import great_expectations as ge
-from great_expectations.core import ExpectationConfiguration
+import great_expectations.core.expectation_configuration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 
 from .test_utils import get_dataset
 
@@ -37,7 +38,7 @@ def test_autoinspect_existing_dataset(test_backend):
     # Ensure that autoinspect worked
     assert len(suite.expectations) == 1
     assert suite.expectations == [
-        ge.core.ExpectationConfiguration(
+        great_expectations.core.expectation_configuration.ExpectationConfiguration(
             expectation_type="expect_column_to_exist", kwargs={"column": "a"}
         )
     ]

@@ -1,9 +1,11 @@
+import logging
 import re
 from abc import ABC, ABCMeta
 from collections import Counter
 from copy import deepcopy
+from functools import wraps
 from inspect import isabstract
-from typing import Optional, Union
+from typing import Callable, Dict, List, Optional, Type, Union
 
 import pandas as pd
 from dateutil.parser import parse
@@ -13,19 +15,21 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.dataset.dataset import DatasetBackendTypes
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
+    InvalidExpectationKwargsError,
 )
 from great_expectations.expectations.registry import register_expectation
 
 from ..core.batch import Batch
 from ..data_asset.util import recursively_convert_to_json_serializable
-from ..exceptions.expectation_engine import (
-    UnimplementedBackendError,
-    UnrecognizedDataAssetError,
-)
+from ..exceptions.metric_exceptions import MetricError
+from ..execution_engine import ExecutionEngine, PandasExecutionEngine
+from ..validator.validator import Validator
+
+logger = logging.getLogger(__name__)
+
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
 p2 = re.compile(r"([a-z0-9])([A-Z])")
@@ -36,19 +40,9 @@ def camel_to_snake(name):
     return p2.sub(r"\1_\2", name).lower()
 
 
-def lookup_backend(data):
-    if isinstance(data, Batch):
-        return data.get_expectation_engine()
-
-    if isinstance(data, pd.DataFrame):
-        return DatasetBackendTypes.PandasDataFrame
-
-    raise UnrecognizedDataAssetError(
-        "Unable to determine the expectation engine for data."
-    )
-
-
 class MetaExpectation(ABCMeta):
+    """MetaExpectation registers Expectations as they are defined."""
+
     def __new__(cls, clsname, bases, attrs):
         newclass = super(MetaExpectation, cls).__new__(cls, clsname, bases, attrs)
         if not isabstract(newclass):
@@ -58,18 +52,87 @@ class MetaExpectation(ABCMeta):
 
 
 class Expectation(ABC, metaclass=MetaExpectation):
+    """Base class for all Expectations."""
+
     version = ge_version
-    default_expectation_args = {
+    domain_kwargs = []
+    success_kwargs = []
+    runtime_kwargs = ["include_config", "catch_exceptions", "result_format"]
+    default_kwarg_values = {
         "include_config": True,
         "catch_exceptions": True,
         "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 20,},
     }
-    validation_kwargs = []
+    _validators = dict()
 
     def __init__(self, configuration: Optional[ExpectationConfiguration] = None):
         if configuration is not None:
             self.validate_configuration(configuration)
         self._configuration = configuration
+
+    def metrics_validate(
+        self,
+        metrics: dict,
+        configuration: Optional[ExpectationConfiguration] = None,
+        runtime_configuration: dict = None,
+    ) -> "ExpectationValidationResult":
+        if configuration is None:
+            configuration = self.configuration
+
+        available_metrics = set([metric[0] for metric in metrics.keys()])
+        available_validators = sorted(
+            [
+                (set(metric_deps), validator)
+                for (metric_deps, validator) in self._validators.items()
+            ],
+            key=lambda x: len(x[0]),
+        )
+        for metric_deps, validator in available_validators:
+            if metric_deps <= available_metrics:
+                return validator(
+                    self,
+                    configuration,
+                    metrics,
+                    runtime_configuration=runtime_configuration,
+                )
+        raise MetricError("No validator found for available metrics")
+
+    @classmethod
+    def validates(cls, metric_dependencies: tuple):
+        def outer(validator: Callable):
+            if metric_dependencies in cls._validators:
+                if validator == cls._validators[metric_dependencies]:
+                    logger.info(
+                        f"Multiple declarations of validator with metric dag: {str(metric_dependencies)} found."
+                    )
+                    return
+                else:
+                    logger.warning(
+                        f"Overwriting declaration of validator with metric dag: {str(metric_dependencies)}."
+                    )
+            logger.debug(f"Registering validator: {str(metric_dependencies)}")
+            cls._validators[metric_dependencies] = validator
+
+            @wraps(validator)
+            def inner_func(*args, **kwargs):
+                return ExpectationValidationResult(**validator(*args, **kwargs))
+
+            return inner_func
+
+        return outer
+
+    def get_validation_dependencies(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ):
+        """Construct the validation graph for this expectation."""
+        if not configuration:
+            configuration = self.configuration
+
+        return {
+            "domain": self.get_domain_kwargs(configuration),
+            "success_kwargs": self.get_success_kwargs(configuration),
+            "metrics": tuple(),
+        }
 
     def __check_validation_kwargs_definition(self):
         """As a convenience to implementers, we verify that validation kwargs are indeed always supersets of their
@@ -81,13 +144,50 @@ class Expectation(ABC, metaclass=MetaExpectation):
             ), ("Invalid Expectation " "definition for : " + self.__class__.__name__)
         return True
 
-    def build_validation_kwargs(
-        self, configuration: Optional[ExpectationConfiguration]
+    def get_domain_kwargs(
+        self, configuration: Optional[ExpectationConfiguration] = None
     ):
-        if configuration is None:
+        if not configuration:
             configuration = self.configuration
-        self.validate_configuration(configuration)
-        return dict()
+
+        domain_kwargs = {
+            key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
+            for key in self.domain_kwargs
+        }
+        missing_kwargs = set(self.domain_kwargs) - set(domain_kwargs.keys())
+        if missing_kwargs:
+            raise InvalidExpectationKwargsError(
+                f"Missing domain kwargs: {list(missing_kwargs)}"
+            )
+        return domain_kwargs
+
+    def get_success_kwargs(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ):
+        if not configuration:
+            configuration = self.configuration
+
+        domain_kwargs = self.get_domain_kwargs(configuration)
+        success_kwargs = {
+            key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
+            for key in self.success_kwargs
+        }
+        success_kwargs.update(domain_kwargs)
+        return success_kwargs
+
+    def get_runtime_kwargs(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ):
+        if not configuration:
+            configuration = self.configuration
+
+        success_kwargs = self.get_success_kwargs()
+        runtime_kwargs = {
+            key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
+            for key in self.runtime_kwargs
+        }
+        runtime_kwargs.update(success_kwargs)
+        return runtime_kwargs
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         if configuration is None:
@@ -102,25 +202,19 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
     def validate(
         self,
-        data,
+        batches: Dict[str, Batch],
+        execution_engine: ExecutionEngine,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration=None,
     ):
         if configuration is None:
             configuration = self.configuration
-        result = self._validate(
-            data,
-            configuration=configuration,
+        return Validator._graph_validate(
+            batches=batches,
+            execution_engine=execution_engine,
+            configurations=[configuration],
             runtime_configuration=runtime_configuration,
-        )
-        if isinstance(result, dict):
-            result = ExpectationValidationResult(**result)
-        return result
-
-    def _validate(
-        self, data, configuration: ExpectationConfiguration, runtime_configuration=None
-    ):
-        raise NotImplementedError
+        )[0]
 
     @property
     def configuration(self):
@@ -187,12 +281,12 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
 class DatasetExpectation(Expectation, ABC):
     @staticmethod
-    def get_value_set_parser(backend_type: DatasetBackendTypes):
-        if backend_type == DatasetBackendTypes.PandasDataFrame:
+    def get_value_set_parser(execution_engine: ExecutionEngine):
+        if isinstance(execution_engine, PandasExecutionEngine):
             return DatasetExpectation._pandas_value_set_parser
 
         raise GreatExpectationsError(
-            "No parser found for backend: " + str(backend_type)
+            f"No parser found for backend: {str(execution_engine.__name__)}"
         )
 
     @staticmethod
@@ -203,9 +297,9 @@ class DatasetExpectation(Expectation, ABC):
         return parsed_value_set
 
     def parse_value_set(
-        self, backend_type: DatasetBackendTypes, value_set: Union[list, set]
+        self, execution_engine: Type[ExecutionEngine], value_set: Union[list, set]
     ):
-        value_set_parser = self.get_value_set_parser(backend_type)
+        value_set_parser = self.get_value_set_parser(execution_engine)
         return value_set_parser(value_set)
 
 
@@ -270,26 +364,6 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
             "result_format": configuration.kwargs.get("result_format", "SUMMARY")
         }
 
-    def get_validator(self, data: "Dataset"):
-        if isinstance(data, Batch):
-            data = data.data
-        backend_type = lookup_backend(data)
-        if backend_type == DatasetBackendTypes.PandasDataFrame:
-            return self._validate_pandas
-        raise UnimplementedBackendError(
-            "Unable to find validator for the data type provided."
-        )
-
-    def _validate(
-        self,
-        data: "Dataset",
-        configuration: ExpectationConfiguration,
-        runtime_configuration=None,
-    ):
-        validator = self.get_validator(data)
-        result = validator(data, configuration, runtime_configuration)
-        return result
-
     def _validate_pandas(
         self,
         data: "Dataset",
@@ -328,7 +402,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         boolean_mapped_success_values = self._validate_pandas_series(
             validated_values,
             **validation_kwargs,
-            runtime_configuration=runtime_configuration
+            runtime_configuration=runtime_configuration,
         )
         success_count = np.count_nonzero(boolean_mapped_success_values)
 

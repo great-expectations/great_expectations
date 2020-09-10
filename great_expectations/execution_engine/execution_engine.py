@@ -8,7 +8,7 @@ from datetime import datetime
 from functools import lru_cache, wraps
 from itertools import zip_longest
 from numbers import Number
-from typing import Any, List, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -16,6 +16,7 @@ from dateutil.parser import parse
 from ruamel.yaml import YAML
 from scipy import stats
 
+from great_expectations.core.batch import Batch
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.execution_engine.util import (
     build_categorical_partition_object,
@@ -23,6 +24,8 @@ from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
 )
+from great_expectations.expectations.registry import get_metric_provider
+from great_expectations.validator.validation_graph import MetricEdgeKey
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -514,6 +517,57 @@ class ExecutionEngine(MetaExecutionEngine):
                 data_connector_name
             ] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
+
+    def resolve_metrics(
+        self,
+        batches: Dict[str, Batch],
+        metrics_to_resolve: Iterable[MetricEdgeKey],
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: dict = None,
+    ) -> dict:
+        if batches is None:
+            batches = self.batches
+        if metrics is None:
+            metrics = dict()
+
+        resolve_batch = []
+        for metric_to_resolve in metrics_to_resolve:
+            metric_provider = get_metric_provider(
+                metric_name=metric_to_resolve.metric_name, execution_engine=self
+            )
+            metric_provider_kwargs = {
+                "metric_name": metric_to_resolve.metric_name,
+                "batches": batches,
+                "execution_engine": self,
+                "metric_domain_kwargs": metric_to_resolve.metric_domain_kwargs,
+                "metric_value_kwargs": metric_to_resolve.metric_value_kwargs,
+                "runtime_configuration": runtime_configuration,
+            }
+            if getattr(metric_provider, "_is_batchable", False):
+                resolve_batch.append(
+                    (metric_to_resolve, metric_provider, metric_provider_kwargs)
+                )
+            else:
+                metrics[metric_to_resolve.id] = metric_provider(
+                    self, **metric_provider_kwargs, metrics=metrics
+                )
+        metrics.update(self.batch_resolve(resolve_batch, metrics=metrics))
+
+        return metrics
+
+    def batch_resolve(
+        self,
+        resolve_batch: Iterable[Tuple[MetricEdgeKey, Callable, dict]],
+        metrics: Dict[Tuple, Any] = None,
+    ) -> dict:
+        """The dumb implementation simply calls one at a time. Individual Execution Engines can override this intelligently."""
+        if metrics is None:
+            metrics = dict()
+        for metric_to_resolve, metric_provider, metric_provider_kwargs in resolve_batch:
+            metrics[metric_to_resolve.id] = metric_provider(
+                self, **metric_provider_kwargs, metrics=metrics
+            )
+        return metrics
 
     def get_row_count(self):
         """Returns: int, table row count"""
@@ -4778,6 +4832,13 @@ class ExecutionEngine(MetaExecutionEngine):
 
         """
         raise NotImplementedError
+
+    @staticmethod
+    def parse_value_set(value_set):
+        parsed_value_set = [
+            parse(value) if isinstance(value, str) else value for value in value_set
+        ]
+        return parsed_value_set
 
     @staticmethod
     def _parse_value_set(value_set):

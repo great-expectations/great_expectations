@@ -18,13 +18,11 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core import (
-    ExpectationSuite,
-    RunIdentifier,
-    get_metric_kwargs_id,
-)
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import (  # TODO: deprecate
     UsageStatisticsHandler,
     add_datasource_usage_statistics,

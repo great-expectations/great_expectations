@@ -2,24 +2,9 @@ import logging
 from abc import ABCMeta
 
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchKwargsError
+from great_expectations.exceptions import InvalidBatchKwargsError
 
 logger = logging.getLogger(__name__)
-
-
-class BatchMarkers(BatchKwargs):
-    """A BatchMarkers is a special type of BatchKwargs (so that it has a batch_fingerprint) but it generally does
-    NOT require specific keys and instead captures information about the OUTPUT of a datasource's fetch
-    process, such as the timestamp at which a query was executed."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if "ge_load_time" not in self:
-            raise InvalidBatchIdError("BatchMarkers requires a ge_load_time")
-
-    @property
-    def ge_load_time(self):
-        return self.get("ge_load_time")
 
 
 class PandasDatasourceBatchKwargs(BatchKwargs, metaclass=ABCMeta):

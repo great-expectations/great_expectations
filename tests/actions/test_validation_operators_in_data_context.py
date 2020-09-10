@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from great_expectations.core import expectationSuiteSchema
+from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import DataContextError

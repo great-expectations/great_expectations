@@ -12,7 +12,7 @@ class IDDict(dict):
             id_ignore_keys = self._id_ignore_keys
         id_keys = set(id_keys) - set(id_ignore_keys)
         if len(id_keys) == 0:
-            return None
+            return tuple()
         elif len(id_keys) == 1:
             key = list(id_keys)[0]
             return key + "=" + str(self[key])

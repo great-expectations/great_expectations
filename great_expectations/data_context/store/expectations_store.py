@@ -1,4 +1,4 @@
-from great_expectations.core import ExpectationSuiteSchema
+from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )

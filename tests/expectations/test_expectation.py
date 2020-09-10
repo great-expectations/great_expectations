@@ -5,7 +5,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.datasource import PandasDatasource
-from great_expectations.validator.validator import DatasetValidator
+from great_expectations.validator.validator import Validator
 
 
 def test_configuration_validation():
@@ -27,6 +27,6 @@ def test_dataset_validation():
     #    - Does not have a suite property that it maintains
     # InteractiveValidator
     #    - Does have a suite property that it maintains
-    validator = DatasetValidator(batch=batch)
+    validator = Validator(batch=batch)
     res = validator.expect_column_values_to_be_in_set("PClass", [1, 2])
     assert res.success is False

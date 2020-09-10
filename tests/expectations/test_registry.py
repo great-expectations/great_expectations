@@ -1,4 +1,4 @@
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.expectations.core.expect_column_values_to_be_in_set import (
     ExpectColumnValuesToBeInSet,
 )

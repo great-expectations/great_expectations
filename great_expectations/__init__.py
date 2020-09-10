@@ -5,6 +5,7 @@ __version__ = get_versions()["version"]  # isort:skip
 del get_versions  # isort:skip
 
 from great_expectations.data_context import DataContext
+from great_expectations.expectations.core import *
 
 from .util import (
     from_pandas,

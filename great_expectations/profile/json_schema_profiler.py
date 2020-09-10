@@ -4,7 +4,8 @@ from typing import Any, Dict, List, Optional
 
 import jsonschema
 
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.profile.base import Profiler, ProfilerTypeMapping
 
 logger = logging.getLogger(__name__)
