@@ -452,6 +452,16 @@ Notes:
         )
 
     def load_batch(self, batch_definition, in_memory_dataset=None):
+        """Using the execution environment and data connector specified within the batch definition, builds a batch spec
+        and utilizes it to load a batch using the appropriate file reader and the given file path.
+
+               Args:
+                   batch_definition (dict): A dictionary specifying the parameters used to build the batch
+                   in_memory_dataset (A Pandas DataFrame or None): Optional specification of an in memory Dataset used
+                                                                    to load a batch. A Data Asset name and partition ID
+                                                                    must still be passed via batch definition.
+
+               """
         execution_environment_name = batch_definition.get("execution_environment")
         execution_environment = self._data_context.get_execution_environment(
             execution_environment_name
@@ -536,6 +546,9 @@ Notes:
 
     @property
     def dataframe(self):
+        """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a
+        ValueError Exception
+        """
         if not self.loaded_batch:
             raise ValueError(
                 "Batch has not been loaded - please run load_batch() to load a batch."
@@ -549,7 +562,7 @@ Notes:
 
         Args:
             reader_method (str): the name of the reader method to use, if available.
-            path (str): the to use to guess
+            path (str): the path used to guess
 
         Returns:
             ReaderMethod to use for the filepath
@@ -582,6 +595,15 @@ Notes:
 
     @staticmethod
     def guess_reader_method_from_path(path):
+        """Helper method for deciding which reader to use to read in a certain path.
+
+               Args:
+                   path (str): the to use to guess
+
+               Returns:
+                   ReaderMethod to use for the filepath
+
+               """
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
         elif path.endswith(".parquet"):
