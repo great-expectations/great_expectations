@@ -5,11 +5,11 @@ Connect to data
 
 Once you have a DataContext, you'll want to connect to data.  In Great Expectations, :ref:`Datasources <reference__core_concepts__datasources>` simplify connections, by managing configuration and providing a consistent, cross-platform API for referencing data.
 
-Let's configure your first Datasource: a connection to the local Postgres database we've provided. Follow the next steps in the CLI init flow (**Note** the non-standard port ``65432`` for the Postgres connection!):
+Let's configure your first Datasource: a connection to the local Postgres database we've provided. Follow the next steps in the CLI init flow. (**Note** the non-standard port ``65432`` for the Postgres connection!):
     
 .. code-block:: bash
     
-    Would you like to configure a Datasource? [Y/n]: <hit enter>
+    Would you like to configure a Datasource? [Y/n]: <press enter>
     
     What data would you like Great Expectations to connect to?
         1. Files on a filesystem (for processing with Pandas or Spark)
@@ -26,14 +26,14 @@ Let's configure your first Datasource: a connection to the local Postgres databa
     : 2
     
     Give your new Datasource a short name.
-     [my_postgres_db]: <hit enter>
+     [my_postgres_db]: <press enter>
     
     Next, we will configure database credentials and store them in the `my_postgres_db`
     section of this config file: great_expectations/uncommitted/config_variables.yml:
 
-    Would you like to proceed? [Y/n]: <hit enter>
+    Would you like to proceed? [Y/n]: <press enter>
 
-    What is the host for the postgres connection? [localhost]: <hit enter>
+    What is the host for the postgres connection? [localhost]: <press enter>
     What is the port for the postgres connection? [5432]: 65432
     What is the username for the postgres connection? [postgres]: ge_tutorials
     What is the password for the postgres connection?: ge_tutorials <input is hidden>
@@ -44,7 +44,7 @@ Let's configure your first Datasource: a connection to the local Postgres databa
 
     The credentials will be saved in uncommitted/config_variables.yml under the key 'my_postgres_db'
 
-    Would you like to proceed? [Y/n]: <hit enter>
+    Would you like to proceed? [Y/n]: <press enter>
 
     Great Expectations connected to your database!
 
@@ -53,7 +53,9 @@ Let's configure your first Datasource: a connection to the local Postgres databa
     Would you like to profile new Expectations for a single data asset
     within your new Datasource? [Y/n]: n
 
-That's it! **You just configured your first Datasource!** Make sure to choose ``n`` at this prompt to exit the ``init`` flow for now. Normally, the ``init`` flow takes you through another step to create sample Expectations, but we want to jump straight to creating an Expectation Suite using the ``scaffold`` method next.
+That's it! **You just configured your first Datasource!**
+
+Make sure to choose ``n`` at this prompt to exit the ``init`` flow for now. Normally, the ``init`` flow takes you through another step to create sample Expectations, but we want to jump straight to creating an Expectation Suite using the ``scaffold`` method next.
 
 **Before continuing, let's stop and unpack what just happened.**
 

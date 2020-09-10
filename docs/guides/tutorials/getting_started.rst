@@ -6,7 +6,7 @@ Getting started with Great Expectations
 
 Welcome to Great Expectations! This tutorial will help you set up your first local deployment of Great Expectations that contains a small Expectation Suite to validate some sample data. We'll also introduce important concepts, with links to detailed material you can dig into later.
 
-The tutorial will walk you throw the following steps:
+The tutorial will walk you through the following steps:
 
 #. First, we will introduce you to the data and help you initialize a **Data Context**.
 #. Then you will learn how to configure a **Datasource** to connect to your data.

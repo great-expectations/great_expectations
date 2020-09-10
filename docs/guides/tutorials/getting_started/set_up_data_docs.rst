@@ -38,8 +38,9 @@ This Profiler connected to your data (using the Datasource you configured in the
 * the number of times values occur
 * the number of NULL values
 
-
 These Expectations are not intended to be very smart. Instead, the goal is to quickly provide some good examples, so that you're not starting from a blank slate.
+
+Later, you should also take a look at other workflows for :ref:`how_to_guides__creating_and_editing_expectations`. Creating and editing Expectations is a very active area of work in the Great Expectations community. Stay tuned for improvements over time.
 
 Expectations under the hood
 ---------------------------------
@@ -79,9 +80,9 @@ For example, a snippet of the JSON file for the Expectation Suite we just genera
 
 You can see that the Expectation we just looked at is represented as ``expect_column_distinct_values_to_be_in_set``, with the ``value_set`` containing the numbers 1 through 6. This is how we store the Expectations that are shown in human-readable format in Data Docs.
 
-.. admonition:: Now we only have one problem left to solve:
+**Now we only have one problem left to solve:**
 
-  How do we use this Expectation Suite to validate that **new** batch of data we have in our ``staging`` table?
+How do we use this Expectation Suite to validate that **new** batch of data we have in our ``staging`` table?
 
 In the next step, we will complete the Great Expectations workflow by showing you how to validate a new batch of data with the Expectation Suite you just created!
 

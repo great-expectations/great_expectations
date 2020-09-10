@@ -64,9 +64,9 @@ If you click through to the validation results page, you will see that the valid
 
 .. figure:: /images/validation_results_failed_detail.png
 
-.. admonition:: And this is it!
+**And this is it!**
 
-   We have successfully created an Expectation Suite based on historical data, and used it to detect an issue with our new data. **Congratulations! You have now completed the "Getting started with Great Expectations" tutorial**.
+We have successfully created an Expectation Suite based on historical data, and used it to detect an issue with our new data. **Congratulations! You have now completed the "Getting started with Great Expectations" tutorial**.
 
 Wrap-up and next steps
 ----------------------

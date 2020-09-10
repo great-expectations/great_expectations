@@ -49,14 +49,14 @@ You will now have a Postgres database running in the background with the pre-loa
 Install Great Expectations and dependencies
 -----------------------------------------------
 
-If you haven't already, install Great Expectations. The command to install is especially great <a href="https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/pip_install_great_expectations.png" target="_blank">if you're a Dickens fan</a>:
+If you haven't already, install Great Expectations. The command to install is especially great `if you're a Dickens fan <https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/pip_install_great_expectations.png>`_:
 
 
 .. code-block:: bash
 
     pip install great_expectations
 
-You'll also need to install a few other dependencies:
+You'll also need to install a few other dependencies to connect to your Postgres database. In general, Great Expectations doesn't clutter up your deployments by installing dependencies before you need them.
 
 .. code-block:: bash
 
@@ -66,7 +66,7 @@ You'll also need to install a few other dependencies:
 Create a Data Context
 -----------------------------------------------
 
-In Great Expectations, your :ref:`Data Context` manages your project configuration, so let's go and create a Data Context!
+In Great Expectations, your :ref:`Data Context` manages your project configuration, so let's go and create a Data Context for our tutorial project!
 
 First, we want to create a separate project directory ``ge_example/`` for our tutorial project. The ``ge_tutorials`` repo contains the final version of this tutorial, but we want to start from scratch here, so let's move out of ``ge_tutorials``:
 
