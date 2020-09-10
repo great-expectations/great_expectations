@@ -793,6 +793,7 @@ Notes:
         metrics: Dict[Tuple, Any],
         **kwargs,
     ):
+        """Maps metric values and kwargs to results of success kwargs"""
         data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
         assert metric_name.endswith(".unexpected_index")
         # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
