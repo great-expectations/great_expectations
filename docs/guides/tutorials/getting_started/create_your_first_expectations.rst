@@ -1,7 +1,7 @@
 .. _tutorials__getting_started__create_your_first_expectations:
 
 Create your first Expectations
-==============================
+======================================
 
 :ref:`Expectations` are the key concept in Great Expectations.
 
@@ -46,7 +46,7 @@ After selecting the table, Great Expectations will open a Jupyter notebook which
 
 
 Creating Expectations in Jupyter notebooks
-------------------------------------------
+---------------------------------------------------------
 
 Notebooks are a simple way of interacting with the Great Expectations Python API. You could also just write all this in plain Python code, but for convenience, Great Expectations provides you some boilerplate code in notebooks.
 
@@ -76,7 +76,6 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 
 #. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the validation results.
 
-<<<<<<< HEAD
 **Let's execute all the cells** and wait for Great Expectations to open a browser window with Data Docs. **Pause here** to read on first and find out what just happened!
 
 
@@ -151,7 +150,4 @@ Every Expectation in the file expresses a test that can be validated against dat
 #. These dense JSON objects are very hard to read. How can we have a nicer representation of our Expectations?
 #. How do we use this Expectation Suite to validate that new batch of data we have in our ``staging`` table?
 
-In the next step, we'll address the first question and show you how to use Data Docs to interact with Expectation Suites in a more human-friendly format.
-=======
 **Let's execute all the cells** and wait for Great Expectations to open a browser window with Data Docs. **Go to the next step in the tutorial** for an explanation of what you see in Data Docs!
->>>>>>> Updating GE getting started tutorial after user tests

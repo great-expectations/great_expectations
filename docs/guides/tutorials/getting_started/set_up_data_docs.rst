@@ -1,7 +1,7 @@
 .. _tutorials__getting_started__set_up_data_docs:
 
 How to use Data Docs
-================
+========================
 
 :ref:`Data Docs <reference__core_concepts__data_docs>` translate :ref:`Expectations`, :ref:`Validation Results <reference__core_concepts__validation__expectation_validation_result>`, and other metadata into clean, human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs guarantees that your documentation will never go stale.
 
@@ -27,7 +27,7 @@ For now, your static site is built and stored locally. In the last step of the t
 .. _tutorials__getting_started__create_your_first_expectations__what_just_happened:
 
 How did we get those Expectations?
--------------------
+--------------------------------------
 
 You can create and edit Expectations using several different workflows. The CLI ``scaffold`` command just used one of the quickest and simplest: scaffolding Expectations using an automated :ref:`Profiler <Profilers>`.
 
@@ -37,6 +37,8 @@ This Profiler connected to your data (using the Datasource you configured in the
 * simple statistics like column min, max, mean
 * the number of times values occur
 * the number of NULL values
+
+If you would like to learn more about how the Profiler works, you can dig deeper here: :py:class:`great_expectations.profile.BasicSuiteBuilderProfiler`
 
 These Expectations are not intended to be very smart. Instead, the goal is to quickly provide some good examples, so that you're not starting from a blank slate.
 

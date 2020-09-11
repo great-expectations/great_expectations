@@ -1,7 +1,7 @@
 .. _tutorials__getting_started__connect_to_data:
 
 Connect to data
-===============
+====================
 
 Once you have a DataContext, you'll want to connect to data.  In Great Expectations, :ref:`Datasources <reference__core_concepts__datasources>` simplify connections, by managing configuration and providing a consistent, cross-platform API for referencing data.
 
@@ -61,7 +61,7 @@ Make sure to choose ``n`` at this prompt to exit the ``init`` flow for now. Norm
 
 
 Configuring Datasources
------------------------
+---------------------------
 
 When you completed those last few steps in ``great_expectations init``, you told Great Expectations that:
 

@@ -39,7 +39,7 @@ Here's an overview of the components of a typical Great Expectations deployment:
 .. _tutorials__getting_started__customize_your_deployment__options_for_storing_great_expectations_configuration:
 
 Options for storing Great Expectations configuration
-----------------------------------------------------
+--------------------------------------------------------
 
 The simplest way to manage your Great Expectations configuration is usually by committing ``great_expectations/great_expectations.yml`` to git. However, it's not usually a good idea to commit credentials to source control. In some situations, you might need to deploy without access to source control (or maybe even a file system).
 
@@ -52,7 +52,7 @@ Here's how to handle each of those cases:
 .. _tutorials__getting_started__customize_your_deployment__options_for_storing_expectations:
 
 Options for storing Expectations
---------------------------------
+------------------------------------
 
 Many teams find it convenient to store Expectations in git. Essentially, this approach treats Expectations like test fixtures: they live adjacent to code and are stored within version control. git acts as a collaboration tool and source of record.
 
@@ -66,7 +66,7 @@ Alternatively, you can treat Expectations like configs, and store them in a blob
 .. _tutorials__getting_started__customize_your_deployment__options_for_storing_validation_results:
 
 Options for storing Validation Results
---------------------------------------
+------------------------------------------
 By default, Validation Results are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. The most common pattern is to use a cloud-based blob store such as S3, GCS, or Azure blob store. You can also store Validation Results in a database.
 
 * :ref:`how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_on_a_filesystem`
@@ -79,7 +79,7 @@ By default, Validation Results are stored locally, in an uncommitted directory. 
 .. _tutorials__getting_started__customize_your_deployment__options_for_customizing_generated_notebooks:
 
 Options for customizing generated notebooks
--------------------------------------------
+-----------------------------------------------
 Great Expectations generates and provides notebooks as interactive development environments for expectation suites. You might want to customize parts of the notebooks to add company-specific documentation, or change the code sections to suit your use-cases.
 
 * :ref:`how_to_guides__configuring_generated_notebooks__how_to_configure_suite_edit_generated_notebooks`
@@ -87,7 +87,7 @@ Great Expectations generates and provides notebooks as interactive development e
 .. _tutorials__getting_started__customize_your_deployment__additional_datasources_and_generators:
 
 Additional Datasources and Generators
--------------------------------------
+-----------------------------------------
 
 Great Expectations plugs into a wide variety of Datasources, and the list is constantly getting longer. If you have an idea for a Datasource not listed here, please speak up in `the public discussion forum <https://discuss.greatexpectations.io/>`_.
 
@@ -105,7 +105,7 @@ Great Expectations plugs into a wide variety of Datasources, and the list is con
 .. _tutorials__getting_started__customize_your_deployment__options_for_hosting_data_docs:
 
 Options for hosting Data Docs
------------------------------
+---------------------------------
 
 By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure blob store), configured to share a static website.
 
@@ -118,7 +118,7 @@ By default, Data Docs are stored locally, in an uncommitted directory. This is g
 .. _tutorials__getting_started__customize_your_deployment__additional_validation_operators_and_actions:
 
 Additional Validation Operators and Actions
--------------------------------------------
+-----------------------------------------------
 
 Most teams will want to configure various :ref:`Validation Actions <validation_actions>` as part of their deployment.
 
@@ -140,7 +140,7 @@ If you also want to modify your :ref:reference__core_concepts__validation__valid
 .. _tutorials__getting_started__customize_your_deployment__options_for_triggering_validation:
 
 Options for triggering Validation
----------------------------------
+-------------------------------------
 
 There are two primary patterns for deploying Checkpoints. Sometimes Checkpoints are executed during data processing (e.g. as a task within Airflow). From this vantage point, they can control program flow. Sometimes Checkpoints are executed against materialized data. Great Expectations supports both patterns. There are also some rare instances where you may want to validate data without using a Checkpoint.
 

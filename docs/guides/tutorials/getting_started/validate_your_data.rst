@@ -37,7 +37,7 @@ From there, you will be prompted by the CLI to configure the Checkpoint:
 That way, **we can simply run the Checkpoint each time we have new data loaded** to ``yellow_tripdata_staging`` and validate that the data meets our Expectations!
 
 How to validate data by running Checkpoints
--------------------------------------------
+--------------------------------------------------
 
 The final step in this tutorial is to use our Expectation Suite to alert us of the 0 values in the ``passenger_count`` column in the staging data! Run the Checkpoint we just created to trigger validation of the staging data:
 
@@ -69,7 +69,7 @@ If you click through to the validation results page, you will see that the valid
 We have successfully created an Expectation Suite based on historical data, and used it to detect an issue with our new data. **Congratulations! You have now completed the "Getting started with Great Expectations" tutorial**.
 
 Wrap-up and next steps
-----------------------
+-----------------------------
 
 In this tutorial, we have covered the following basic capabilities of Great Expectations:
 
