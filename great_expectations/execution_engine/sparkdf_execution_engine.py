@@ -753,6 +753,23 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 {"reader_method": reader_method},
             )
 
+    def process_batch_definition(self, batch_definition, batch_spec):
+        limit = batch_definition.get("limit")
+
+        if limit is not None:
+            if not batch_spec.get("reader_options"):
+                batch_spec["reader_options"] = dict()
+            batch_spec["reader_options"]["nrows"] = limit
+
+        # TODO: Make sure dataset_options are accounted for in __init__ of ExecutionEngine
+        # if dataset_options is not None:
+        #     # Then update with any locally-specified reader options
+        #     if not batch_parameters.get("dataset_options"):
+        #         batch_parameters["dataset_options"] = dict()
+        #     batch_parameters["dataset_options"].update(dataset_options)
+
+        return batch_spec
+
     def head(self, n=5):
         return self.dataframe.limit(n).toPandas()
 
