@@ -3,7 +3,7 @@ import datetime
 import numpy as np
 from dateutil.parser import parse
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.dataset.util import build_categorical_partition_object
 from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.base import ProfilerCardinality, ProfilerDataType

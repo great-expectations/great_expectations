@@ -1,6 +1,6 @@
 import datetime
 
-from great_expectations.core import RunIdentifier
+from great_expectations.core.run_identifier import RunIdentifier
 
 
 def test_run_identifier_parses_datetime_run_name():

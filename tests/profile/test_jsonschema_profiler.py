@@ -1,7 +1,7 @@
 import jsonschema
 import pytest
 
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.profile.base import ProfilerTypeMapping
 from great_expectations.profile.json_schema_profiler import JsonSchemaProfiler
 

@@ -6,7 +6,9 @@ import pytest
 
 import great_expectations as ge
 import great_expectations.render as render
-from great_expectations.core import ExpectationSuiteValidationResultSchema
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResultSchema,
+)
 from great_expectations.render.renderer import ValidationResultsPageRenderer
 from great_expectations.render.types import (
     RenderedDocumentContent,

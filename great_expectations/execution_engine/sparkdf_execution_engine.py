@@ -19,9 +19,8 @@ from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec
 from great_expectations.validator.validator import Validator
 
-from ..core.batch import Batch
+from ..core.batch import Batch, BatchMarkers
 from ..exceptions import BatchKwargsError, BatchSpecError
-from ..execution_environment.types import BatchMarkers
 from .execution_engine import ExecutionEngine
 from .pandas_execution_engine import PandasExecutionEngine
 

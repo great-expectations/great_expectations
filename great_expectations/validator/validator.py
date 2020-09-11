@@ -8,28 +8,43 @@ import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
 from functools import wraps
-from typing import List
+from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import pandas as pd
 from dateutil.parser import parse
-from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core import (
-    ExpectationConfiguration,
+from great_expectations.core.batch import Batch
+from great_expectations.core.evaluation_parameters import build_evaluation_parameters
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_suite import (
     ExpectationSuite,
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
-    RunIdentifier,
     expectationSuiteSchema,
 )
-from great_expectations.core.evaluation_parameters import build_evaluation_parameters
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+)
+from great_expectations.core.id_dict import IDDict
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.exceptions.metric_exceptions import MetricError
+from great_expectations.expectations.registry import (
+    get_expectation_impl,
+    get_metric_dependencies,
+    get_metric_kwargs,
+)
+from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.types import ClassConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support
+from great_expectations.validator.validation_graph import (
+    MetricEdge,
+    MetricEdgeKey,
+    ValidationGraph,
+)
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -103,6 +118,167 @@ class Validator(object):
         return [
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
+
+    @staticmethod
+    def _populate_dependencies(
+        graph_family: Dict[str, ValidationGraph],
+        metric_name: str,
+        configuration: ExpectationConfiguration,
+        parent_node: Union[MetricEdgeKey, None] = None,
+    ) -> None:
+        metric_kwargs = get_metric_kwargs(metric_name)
+        configuration_kwargs = configuration.get_runtime_kwargs()
+        try:
+            if len(metric_kwargs["metric_domain_keys"]) > 0:
+                metric_domain_kwargs = IDDict(
+                    {
+                        k: configuration_kwargs.get(k)
+                        for k in metric_kwargs["metric_domain_keys"]
+                    }
+                )
+            else:
+                metric_domain_kwargs = IDDict()
+            if len(metric_kwargs["metric_value_keys"]) > 0:
+                metric_value_kwargs = IDDict(
+                    {
+                        k: configuration_kwargs.get(k)
+                        for k in metric_kwargs["metric_value_keys"]
+                    }
+                )
+            else:
+                metric_value_kwargs = IDDict()
+        except KeyError:
+            raise MetricError(
+                f"missing kwarg value while trying to identify dependency graph for metric {metric_name}"
+            )
+        domain_id = metric_domain_kwargs.to_id()
+        if domain_id not in graph_family:
+            graph_family[domain_id] = ValidationGraph(metric_domain_kwargs)
+
+        graph = graph_family[domain_id]
+        metric_dependencies = get_metric_dependencies(metric_name)
+
+        if parent_node:
+            graph.edges.add(
+                MetricEdge(
+                    parent_node,
+                    MetricEdgeKey(
+                        metric_name, metric_domain_kwargs, metric_value_kwargs
+                    ),
+                )
+            )
+
+        if len(metric_dependencies) == 0:
+            graph.edges.add(
+                MetricEdge(
+                    MetricEdgeKey(
+                        metric_name, metric_domain_kwargs, metric_value_kwargs
+                    ),
+                    None,
+                )
+            )
+
+        else:
+            for dependent_metric in metric_dependencies:
+                Validator._populate_dependencies(
+                    graph_family,
+                    dependent_metric,
+                    configuration,
+                    MetricEdgeKey(
+                        metric_name, metric_domain_kwargs, metric_value_kwargs
+                    ),
+                )
+
+    @staticmethod
+    def _get_validation_graphs(
+        configurations: List[ExpectationConfiguration],
+        runtime_configuration: dict = None,
+    ) -> dict:
+        validation_graphs = dict()
+        for configuration in configurations:
+            expectation_impl = get_expectation_impl(configuration.expectation_type)
+            validation_dependencies = expectation_impl(
+                configuration
+            ).get_validation_dependencies()
+            domain_id = IDDict(validation_dependencies["domain"]).to_id()
+            if domain_id not in validation_graphs:
+                validation_graphs[domain_id] = ValidationGraph(
+                    validation_dependencies["domain"]
+                )
+
+            for metric_name in validation_dependencies.get("metrics"):
+                Validator._populate_dependencies(
+                    validation_graphs, metric_name, configuration
+                )
+
+        return validation_graphs
+
+    @staticmethod
+    def _graph_validate(
+        batches: Dict[str, Batch],
+        execution_engine: "ExecutionEngine",
+        configurations: List[ExpectationConfiguration],
+        metrics: dict = None,
+        runtime_configuration: dict = None,
+    ) -> List[ExpectationValidationResult]:
+        validation_graphs = Validator._get_validation_graphs(
+            configurations, runtime_configuration=runtime_configuration
+        )
+        if metrics is None:
+            metrics = dict()
+
+        for validation_graph in validation_graphs.values():
+            done: bool = False
+            while not done:
+                ready_metrics, needed_metrics = Validator._parse_validation_graph(
+                    validation_graph, metrics
+                )
+                metrics.update(
+                    Validator._resolve_metrics(
+                        batches=batches,
+                        execution_engine=execution_engine,
+                        metrics_to_resolve=ready_metrics,
+                        metrics=metrics,
+                        runtime_configuration=runtime_configuration,
+                    )
+                )
+                if len(ready_metrics) + len(needed_metrics) == 0:
+                    done = True
+
+        evrs = list()
+        for configuration in configurations:
+            evrs.append(
+                configuration.metrics_validate(
+                    metrics, runtime_configuration=runtime_configuration
+                )
+            )
+        return evrs
+
+    @staticmethod
+    def _parse_validation_graph(validation_graph, metrics):
+        needed_metrics = set()
+        ready_metrics = set()
+
+        for edge in validation_graph.edges:
+            if edge.left.id not in metrics:
+                if edge.right is None or edge.right.id in metrics:
+                    ready_metrics.add(edge.left)
+                else:
+                    needed_metrics.add(edge.left)
+
+        return ready_metrics, needed_metrics
+
+    @staticmethod
+    def _resolve_metrics(
+        batches: Dict[str, Batch],
+        execution_engine: "ExecutionEngine",
+        metrics_to_resolve: Iterable[MetricEdgeKey],
+        metrics: dict,
+        runtime_configuration: dict = None,
+    ):
+        return execution_engine.resolve_metrics(
+            batches, metrics_to_resolve, metrics, runtime_configuration
+        )
 
     def autoinspect(self, profiler):
         """Deprecated: use profile instead.

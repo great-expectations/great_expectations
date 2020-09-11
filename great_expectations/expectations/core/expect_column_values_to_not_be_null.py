@@ -1,36 +1,18 @@
+import pandas as pd
+
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapDatasetExpectation
 
 
 class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
-    def format_map_output(
-        self,
-        result_format,
-        success,
-        element_count,
-        nonnull_count,
-        unexpected_count,
-        unexpected_list,
-        unexpected_index_list,
-    ):
-        return_obj = super().format_map_output(
-            result_format,
-            success,
-            element_count,
-            nonnull_count,
-            unexpected_count,
-            unexpected_list,
-            unexpected_index_list,
-        )
-        del return_obj["result"]["unexpected_percent_nonmissing"]
-        del return_obj["result"]["missing_count"]
-        del return_obj["result"]["missing_percent"]
-        try:
-            del return_obj["result"]["partial_unexpected_counts"]
-        except KeyError:
-            pass
-        try:
-            del return_obj["result"]["partial_unexpected_list"]
-        except KeyError:
-            pass
+    map_metric = "map.nonnull"
+    metric_dependencies = "map.nonnull.count"
 
-        return return_obj
+    @PandasExecutionEngine.column_map_metric(
+        metric_name=map_metric,
+        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+        metric_value_keys=tuple(),
+        metric_dependencies=tuple(),
+    )
+    def _nonnull_count(self, series: pd.Series, runtime_configuration: dict = None):
+        return ~series.isnull()

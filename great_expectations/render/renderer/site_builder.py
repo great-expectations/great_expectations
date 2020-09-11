@@ -4,7 +4,7 @@ import traceback
 from collections import OrderedDict
 
 import great_expectations.exceptions as exceptions
-from great_expectations.core import nested_update
+from great_expectations.core.util import nested_update
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,

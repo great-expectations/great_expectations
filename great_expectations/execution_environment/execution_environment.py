@@ -7,7 +7,7 @@ from typing import Union
 
 from ruamel.yaml import YAML
 
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     load_class,

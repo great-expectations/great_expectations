@@ -7,7 +7,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
 from great_expectations.cli.suite import _suite_edit
-from great_expectations.core import ExpectationSuiteSchema
+from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )

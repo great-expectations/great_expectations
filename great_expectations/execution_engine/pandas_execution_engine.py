@@ -4,7 +4,7 @@ import json
 import logging
 from functools import partial, wraps
 from io import StringIO
-from typing import List
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import jsonschema
 import numpy as np
@@ -12,7 +12,7 @@ import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     _scipy_distribution_positional_args_from_dict,
@@ -20,13 +20,19 @@ from great_expectations.dataset.util import (
     validate_distribution_parameters,
 )
 from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec
+from great_expectations.expectations.registry import (
+    get_metric_provider,
+    register_metric,
+)
 from great_expectations.validator.validator import Validator
 
-from ..core.batch import Batch
+from ..core import IDDict
+from ..core.batch import Batch, BatchMarkers
 from ..datasource.pandas_datasource import HASH_THRESHOLD
-from ..exceptions import BatchSpecError
-from ..execution_environment.types import BatchMarkers
+from ..exceptions import BatchSpecError, ValidationError
+from ..exceptions.metric_exceptions import MetricError
 from ..execution_environment.util import hash_pandas_dataframe
+from ..validator.validation_graph import MetricEdgeKey
 from .execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -70,7 +76,7 @@ class MetaPandasExecutionEngine(ExecutionEngine):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
@@ -193,7 +199,7 @@ class MetaPandasExecutionEngine(ExecutionEngine):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
             df = self.dataframe
 
@@ -300,7 +306,7 @@ class MetaPandasExecutionEngine(ExecutionEngine):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
             df = self.dataframe
             if result_format is None:
@@ -502,7 +508,7 @@ Notes:
                         .read()
                         .decode(s3_object.get("ContentEncoding", "utf-8"))
                     ),
-                    **reader_options
+                    **reader_options,
                 )
             else:
                 raise BatchSpecError(
@@ -614,6 +620,346 @@ Notes:
         #     batch_parameters["dataset_options"].update(dataset_options)
 
         return batch_spec
+
+    def get_domain_dataframe(
+        self, domain_kwargs: dict, batches: Dict[str, Batch] = None
+    ):
+        batch_id = domain_kwargs.get("batch_id")
+        if batch_id is None:
+            # We allow no batch id specified if there is only one batch
+            if batches and len(batches) == 1:
+                batch = [batch for batch in batches.values()][0]
+            elif self.loaded_batch:
+                batch = self.loaded_batch
+            else:
+                raise ValidationError(
+                    "No batch is specified, but multiple batches are available."
+                )
+        else:
+            if batches and batch_id in batches:
+                batch = batches[batch_id]
+            elif batch_id == self.loaded_batch_id:
+                batch = self.loaded_batch
+            else:
+                raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
+
+        table = domain_kwargs.get("table", None)
+        if table:
+            raise ValueError(
+                "PandasExecutionEngine does not currently support multiple named tables."
+            )
+
+        row_condition = domain_kwargs.get("row_condition", None)
+        if row_condition:
+            condition_parser = domain_kwargs.get("condition_parser", None)
+            if condition_parser not in ["python", "pandas"]:
+                raise ValueError(
+                    "condition_parser is required when setting a row_condition,"
+                    " and must be 'python' or 'pandas'"
+                )
+            else:
+                data = batch.data.query(
+                    row_condition, parser=condition_parser
+                ).reset_index(drop=True)
+        else:
+            data = batch.data
+
+        column = domain_kwargs.get("column", None)
+        if column:
+            return data[column]
+        else:
+            return data
+
+    def column_map_count(
+        self,
+        metric_name: str,
+        batches: Dict[str, Batch],
+        execution_engine: "PandasExecutionEngine",
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[Tuple, Any],
+        **kwargs,
+    ):
+        """Return the count of nonzero values from the map-style metric in the metrics dictionary"""
+        assert metric_name.endswith(".count")
+        metric_key = MetricEdgeKey(
+            metric_name[: -len(".count")], metric_domain_kwargs, metric_value_kwargs,
+        ).id
+        return np.count_nonzero(metrics.get(metric_key))
+
+    def column_map_values(
+        self,
+        metric_name: str,
+        batches: Dict[str, Batch],
+        execution_engine: "PandasExecutionEngine",
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[Tuple, Any],
+        **kwargs,
+    ):
+        """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+        data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
+        assert metric_name.endswith(".unexpected_values")
+        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
+        result_format = metric_value_kwargs["result_format"]
+        base_metric_value_kwargs = {
+            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
+        }
+        metric_key = MetricEdgeKey(
+            metric_name[: -len(".unexpected_values")],
+            metric_domain_kwargs,
+            base_metric_value_kwargs,
+        ).id
+        boolean_mapped_success_values = metrics.get(metric_key)
+        if result_format["result_format"] == "COMPLETE":
+            return list(data[boolean_mapped_success_values == False])
+        else:
+            return list(
+                data[boolean_mapped_success_values == False][
+                    : result_format["partial_unexpected_count"]
+                ]
+            )
+
+    def column_map_index(
+        self,
+        metric_name: str,
+        batches: Dict[str, Batch],
+        execution_engine: "PandasExecutionEngine",
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[Tuple, Any],
+        **kwargs,
+    ):
+        data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
+        assert metric_name.endswith(".unexpected_index")
+        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
+        result_format = metric_value_kwargs["result_format"]
+        base_metric_value_kwargs = {
+            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
+        }
+        metric_key = MetricEdgeKey(
+            metric_name[: -len(".unexpected_index")],
+            metric_domain_kwargs,
+            base_metric_value_kwargs,
+        ).id
+        boolean_mapped_success_values = metrics.get(metric_key)
+        if result_format["result_format"] == "COMPLETE":
+            return list(data[boolean_mapped_success_values == False].index)
+        else:
+            return list(
+                data[boolean_mapped_success_values == False].index[
+                    : result_format["partial_unexpected_count"]
+                ]
+            )
+
+    def column_map_value_counts(
+        self,
+        metric_name: str,
+        batches: Dict[str, Batch],
+        execution_engine: "PandasExecutionEngine",
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[Tuple, Any],
+        **kwargs,
+    ):
+        """Return values from the specified domain (ignoring the column constraint) that match the map-style metric in the metrics dictionary."""
+        row_domain = {k: v for (k, v) in metric_domain_kwargs.items() if k != "column"}
+        data = execution_engine.get_domain_dataframe(row_domain, batches)
+        assert metric_name.endswith(".unexpected_value_counts")
+        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
+        result_format = metric_value_kwargs["result_format"]
+        base_metric_value_kwargs = {
+            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
+        }
+        metric_key = MetricEdgeKey(
+            metric_name[: -len(".unexpected_value_counts")],
+            metric_domain_kwargs,
+            base_metric_value_kwargs,
+        ).id
+        boolean_mapped_success_values = metrics.get(metric_key)
+        value_counts = None
+        try:
+            value_counts = data[boolean_mapped_success_values == False].value_counts()
+        except ValueError:
+            try:
+                value_counts = (
+                    data[boolean_mapped_success_values == False]
+                    .apply(tuple)
+                    .value_counts()
+                )
+            except ValueError:
+                pass
+
+        if not value_counts:
+            raise MetricError("Unable to compute value counts")
+
+        if result_format["result_format"] == "COMPLETE":
+            return value_counts
+        else:
+            return value_counts[result_format["partial_unexpected_count"]]
+
+    def column_map_rows(
+        self,
+        metric_name: str,
+        batches: Dict[str, Batch],
+        execution_engine: "PandasExecutionEngine",
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[Tuple, Any],
+        **kwargs,
+    ):
+        """Return values from the specified domain (ignoring the column constraint) that match the map-style metric in the metrics dictionary."""
+        row_domain = {k: v for (k, v) in metric_domain_kwargs.items() if k != "column"}
+        data = execution_engine.get_domain_dataframe(row_domain, batches)
+        assert metric_name.endswith(".unexpected_rows")
+        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
+        result_format = metric_value_kwargs["result_format"]
+        base_metric_value_kwargs = {
+            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
+        }
+        metric_key = MetricEdgeKey(
+            metric_name[: -len(".unexpected_rows")],
+            metric_domain_kwargs,
+            base_metric_value_kwargs,
+        ).id
+        boolean_mapped_success_values = metrics.get(metric_key)
+        if result_format["result_format"] == "COMPLETE":
+            return data[boolean_mapped_success_values == False]
+        else:
+            return data[boolean_mapped_success_values == False][
+                result_format["partial_unexpected_count"]
+            ]
+
+    @classmethod
+    def column_map_metric(
+        cls,
+        metric_name: str,
+        metric_domain_keys: Tuple[str, ...],
+        metric_value_keys: Tuple[str, ...],
+        metric_dependencies: Tuple[str, ...],
+    ):
+        """
+        A decorator for declaring a metric provider
+        """
+
+        def outer(metric_fn: Callable):
+            _declared_name = metric_name
+
+            @wraps(metric_fn)
+            def inner_func(
+                self,
+                metric_name: str,
+                batches: Dict[str, Batch],
+                execution_engine: PandasExecutionEngine,
+                metric_domain_kwargs: dict,
+                metric_value_kwargs: dict,
+                metrics: Dict[Tuple, Any],
+                **kwargs,
+            ):
+                if _declared_name != metric_name:
+                    logger.warning("using metric provider with an unrecognized metric")
+                series = execution_engine.get_domain_dataframe(
+                    batches=batches, domain_kwargs=metric_domain_kwargs
+                )
+                return metric_fn(self, series=series, **metric_value_kwargs, **kwargs)
+
+            register_metric(
+                metric_name=metric_name,
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=metric_value_keys,
+                execution_engine=cls,
+                metric_dependencies=metric_dependencies,
+                metric_provider=inner_func,
+            )
+            register_metric(
+                metric_name=metric_name + ".count",
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=metric_value_keys,
+                execution_engine=cls,
+                metric_dependencies=(metric_name,),
+                metric_provider=cls.column_map_count,
+            )
+            register_metric(
+                metric_name=metric_name + ".unexpected_values",
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=(*metric_value_keys, "result_format"),
+                execution_engine=cls,
+                metric_dependencies=(metric_name,),
+                metric_provider=cls.column_map_values,
+            )
+            register_metric(
+                metric_name=metric_name + ".unexpected_value_counts",
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=(*metric_value_keys, "result_format"),
+                execution_engine=cls,
+                metric_dependencies=(metric_name,),
+                metric_provider=cls.column_map_value_counts,
+            )
+            register_metric(
+                metric_name=metric_name + ".unexpected_rows",
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=(metric_value_keys, "result_format"),
+                execution_engine=cls,
+                metric_dependencies=(metric_name,),
+                metric_provider=cls.column_map_rows,
+            )
+            return inner_func
+
+        return outer
+
+    @classmethod
+    def metric(
+        cls,
+        metric_name: str,
+        metric_domain_keys: tuple,
+        metric_value_keys: tuple,
+        metric_dependencies: tuple,
+        batchable: bool = False,
+    ):
+        """
+        A decorator for declaring a metric provider
+        """
+
+        def outer(metric_fn: Callable):
+            _declared_name = metric_name
+
+            @wraps(metric_fn)
+            def inner_func(
+                self,
+                metric_name: str,
+                batches: Dict[str, Batch],
+                execution_engine: PandasExecutionEngine,
+                metric_domain_kwargs: dict,
+                metric_value_kwargs: dict,
+                metrics: Dict[Tuple, Any],
+                **kwargs,
+            ):
+                if _declared_name != metric_name:
+                    logger.warning(
+                        "using validator provider with an unrecognized metric"
+                    )
+                return metric_fn(
+                    self,
+                    batches=batches,
+                    execution_engine=execution_engine,
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    metric_value_kwargs=metric_value_kwargs,
+                    metrics=metrics,
+                    **kwargs,
+                )
+
+            register_metric(
+                metric_name=metric_name,
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=metric_value_keys,
+                execution_engine=cls,
+                metric_dependencies=metric_dependencies,
+                metric_provider=inner_func,
+                batchable=batchable,
+            )
+            return inner_func
+
+        return outer
 
     def get_row_count(self):
         return self.dataframe.shape[0]

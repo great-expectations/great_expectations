@@ -1,13 +1,17 @@
 import logging
 import traceback
 
-from ....core import ExpectationConfiguration, ExpectationValidationResult
-from ...types import (
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_validation_result import (
+    ExpectationValidationResult,
+)
+from great_expectations.render.types import (
     CollapseContent,
     RenderedMarkdownContent,
     RenderedStringTemplateContent,
     TextContent,
 )
+
 from ..renderer import Renderer
 
 logger = logging.getLogger(__name__)

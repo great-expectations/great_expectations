@@ -21,8 +21,7 @@ from great_expectations.dataset.util import (
 from great_expectations.util import import_library_module
 
 from ..core import convert_to_json_serializable
-from ..core.batch import Batch
-from ..execution_environment.types import BatchMarkers
+from ..core.batch import Batch, BatchMarkers
 from . import ExecutionEngine
 from .pandas_execution_engine import PandasExecutionEngine
 

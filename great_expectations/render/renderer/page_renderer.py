@@ -5,11 +5,12 @@ from typing import List
 
 from dateutil.parser import parse
 
-from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.util import num_to_str
 
+from ...core.expectation_validation_result import ExpectationSuiteValidationResult
+from ...core.run_identifier import RunIdentifier
 from ...validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )

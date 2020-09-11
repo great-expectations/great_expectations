@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
@@ -20,7 +21,6 @@ from great_expectations.dataset.util import (
 )
 from great_expectations.util import import_library_module
 
-from ..core import convert_to_json_serializable
 from .dataset import Dataset
 from .pandas_dataset import PandasDataset
 

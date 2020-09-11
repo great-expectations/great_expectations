@@ -1,4 +1,6 @@
-from great_expectations.core import ExpectationSuiteValidationResultSchema
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResultSchema,
+)
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )

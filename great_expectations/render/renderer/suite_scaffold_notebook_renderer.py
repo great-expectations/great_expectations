@@ -1,7 +1,7 @@
 import nbformat
 
 from great_expectations import DataContext
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.dataset import Dataset
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,

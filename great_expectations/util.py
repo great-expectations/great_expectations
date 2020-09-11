@@ -12,7 +12,7 @@ from typing import Callable, Union
 import black
 from pkg_resources import Distribution
 
-from great_expectations.core import expectationSuiteSchema
+from great_expectations.core.expectation_suite import expectationSuiteSchema
 from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,

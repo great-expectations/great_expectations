@@ -7,7 +7,7 @@ from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 

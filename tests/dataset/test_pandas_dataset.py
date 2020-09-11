@@ -5,7 +5,10 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
-from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,
+    expectationSuiteSchema,
+)
 from great_expectations.profile import ColumnsExistProfiler
 from tests.test_utils import expectationValidationResultSchema
 
