@@ -175,6 +175,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.VERY_MANY,
                     ProfilerCardinality.UNIQUE,
                 ]:
+                    # TODO: change to class-first expectation structure?
                     df.expect_column_min_to_be_between(
                         column, min_value=None, max_value=None
                     )
@@ -230,6 +231,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.VERY_MANY,
                     ProfilerCardinality.UNIQUE,
                 ]:
+                    # TODO: migrate to class first structure
                     df.expect_column_min_to_be_between(
                         column, min_value=None, max_value=None
                     )
