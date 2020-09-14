@@ -25,6 +25,8 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
 
     You can store your Expectations anywhere that is accessible to the cloud Composer environment. One simple pattern is to use a folder in the bucket provided by the Composer environment. You can manually push updated expectation JSON files from your version controlled repository via ``gsutil`` or the GCS UI, or automate using Google Cloud Build or any other automation tool.
 
+    `Read more about setting up expectation stores in GCS here <how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_gcs>`.
+
     .. code-block:: bash
 
         # copy expectation suites to bucket
