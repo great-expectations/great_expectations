@@ -4,7 +4,7 @@ import logging
 import warnings
 from copy import deepcopy
 
-from great_expectations.core import nested_update
+from great_expectations.core.util import nested_update
 from great_expectations.core.id_dict import BatchSpec
 
 logger = logging.getLogger(__name__)
