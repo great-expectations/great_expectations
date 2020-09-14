@@ -46,7 +46,7 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
             plugins_directory=None,
             config_variables_file_path=None,
             datasources={
-                "my_pandas_datasource": {
+                "my_pandas_datasource": { # This is an example for a Pandas Datasource
                     "data_asset_type": {
                         "class_name": "PandasDataset",
                         "module_name": "great_expectations.dataset",
@@ -55,6 +55,17 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
                     "module_name": "great_expectations.datasource",
                     "batch_kwargs_generators": {
                         # TODO: Enter these here or later in your validations
+                    },
+                },
+                "my_bigquery_datasource": { # This is an example for a BigQuery Datasource with a credentials file
+                    "data_asset_type": {
+                        "module_name": "great_expectations.dataset",
+                        "class_name": "SqlAlchemyDataset"
+                    },
+                    "class_name": "SqlAlchemyDatasource",
+                    "module_name": "great_expectations.datasource",
+                    "credentials": {
+                        "url": "bigquery://REPLACE/ME/credentials.json" # TODO: replace with your value
                     },
                 }
             },
