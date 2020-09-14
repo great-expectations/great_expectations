@@ -22,7 +22,6 @@ from great_expectations.validator.validator import Validator
 from ..core.batch import Batch, BatchMarkers
 from ..exceptions import BatchKwargsError, BatchSpecError
 from .execution_engine import ExecutionEngine
-from .pandas_execution_engine import PandasExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -680,6 +679,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                     batch_spec,
                 )
 
+        limit = batch_definition.get("limit") or batch_spec.get("limit")
+        if limit:
+            df = df.limit(limit)
+
         if self._persist:
             df.persist()
 
@@ -754,19 +757,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     def process_batch_definition(self, batch_definition, batch_spec):
         limit = batch_definition.get("limit")
-
         if limit is not None:
-            if not batch_spec.get("reader_options"):
-                batch_spec["reader_options"] = dict()
-            batch_spec["reader_options"]["nrows"] = limit
-
-        # TODO: Make sure dataset_options are accounted for in __init__ of ExecutionEngine
-        # if dataset_options is not None:
-        #     # Then update with any locally-specified reader options
-        #     if not batch_parameters.get("dataset_options"):
-        #         batch_parameters["dataset_options"] = dict()
-        #     batch_parameters["dataset_options"].update(dataset_options)
-
+            if not batch_spec.get("limit"):
+                batch_spec["limit"] = limit
         return batch_spec
 
     def head(self, n=5):
