@@ -46,7 +46,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinxcontrib.contentui",
     "sphinx_gitstamp",
-    "sphinx.ext.autosectionlabel",
+    # "sphinx.ext.autosectionlabel",
     "sphinxcontrib.discourse",
     "autoapi.extension",
 ]
@@ -54,6 +54,7 @@ extensions = [
 autoapi_type = "python"
 autoapi_dirs = ["../great_expectations"]
 autoapi_add_toctree_entry = False
+# autoapi_keep_files = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
