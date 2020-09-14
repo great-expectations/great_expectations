@@ -22,7 +22,6 @@ from great_expectations.validator.validator import Validator
 from ..core.batch import Batch, BatchMarkers
 from ..exceptions import BatchKwargsError, BatchSpecError
 from .execution_engine import ExecutionEngine
-from .pandas_execution_engine import PandasExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -680,6 +679,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                     batch_spec,
                 )
 
+        limit = batch_definition.get("limit") or batch_spec.get("limit")
+        if limit:
+            df = df.limit(limit)
+
         if self._persist:
             df.persist()
 
@@ -751,6 +754,13 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 "Unable to find reader_method %s in spark." % reader_method,
                 {"reader_method": reader_method},
             )
+
+    def process_batch_definition(self, batch_definition, batch_spec):
+        limit = batch_definition.get("limit")
+        if limit is not None:
+            if not batch_spec.get("limit"):
+                batch_spec["limit"] = limit
+        return batch_spec
 
     def head(self, n=5):
         return self.dataframe.limit(n).toPandas()
