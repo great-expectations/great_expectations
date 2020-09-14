@@ -127,6 +127,12 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
 
     Here we will follow the instructions for :ref:`Running a Validation using a PythonOperator <workflows_patterns__deployment_airflow__running-a-validation-using-a-pythonoperator>`. Note that we will use the Data Context instantiated in the previous step in place of reading from the filesystem as in the linked example.
 
+    You can raise an ``AirflowException`` if your Validation fails (as in the example here: :ref:`Running a Validation using a PythonOperator <workflows_patterns__deployment_airflow__running-a-validation-using-a-pythonoperator>`) which will show in logs and the UI as in the image below:
+
+.. image:: dag_airflow_example.png
+    :width: 800
+    :alt: Airflow pipeline with Validations passing and failing.
+
 5. Upload your Expectations and DAG
 
     Upload your Expectations to your expectation store (as configured in your Data Context). If your expectation store is in your GCS bucket you can use ``gsutil`` to upload the JSON files - just make sure to keep the same directory structure. Alternatively you can automate using something like Google Cloud Build or Github Actions or your favorite CI tool.
@@ -135,13 +141,7 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
 
 6. Monitor your deployment
 
-    You can now monitor your deployment just like any other Airflow environment either via the Airflow UI (linked from your cloud platform environments page) or by submitting commands using `Google Cloud Shell <https://cloud.google.com/shell>`_.
-
-    You can raise an ``AirflowException`` if your Validation fails (as in the example here: :ref:`Running a Validation using a PythonOperator <workflows_patterns__deployment_airflow__running-a-validation-using-a-pythonoperator>`) which will show in logs and the UI as in the image below:
-
-.. image:: dag_airflow_example.png
-    :width: 800
-    :alt: Airflow pipeline with Validations passing and failing.
+    You can now monitor your deployment just like any other Airflow environment either via the Airflow UI (linked from your cloud platform environments page) or by submitting commands using `Google Cloud Shell <https://cloud.google.com/shell>`_. If you used AirflowExceptions to handle failing Validations as in step 4, these will show up in your logs and in the Airflow UI.
 
 Additional resources
 --------------------
