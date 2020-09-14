@@ -21,7 +21,7 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
 
 2. Create Expectations
 
-    Create :ref:`Expectations <reference__core_concepts__expectations>` using our guide to `Creating and Editing Expectations <https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations.html>`_.
+    Create :ref:`Expectations <reference__core_concepts__expectations>` using our guide to :ref:`Creating and Editing Expectations <how_to_guides__creating_and_editing_expectations>`.
 
     You can store your Expectations anywhere that is accessible to the cloud Composer environment. One simple pattern is to use a folder in the bucket provided by the Composer environment. You can manually push updated expectation JSON files from your version controlled repository via ``gsutil`` or the GCS UI, or automate using Google Cloud Build or any other automation tool.
 
@@ -33,9 +33,9 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
 
 3. Create your Data Context
 
-    Since we'd prefer not to use the airflow container filesystem to host a Data Context as a .yml file, another approach is to instantiate it in a python file either as part of your DAG or imported by your DAG at runtime. `Follow this guide on How to instantiate a Data Context without a yml file <https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.html>`_ and see the example below.
+    Since we'd prefer not to use the airflow container filesystem to host a :ref:`Data Context <reference__core_concepts__data-context>` as a .yml file, another approach is to instantiate it in a python file either as part of your DAG or imported by your DAG at runtime. :ref:`Follow this guide on How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>` and see the example below.
 
-    Note: You may want to reference our `Configuring metadata stores <https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_metadata_stores.html>`_ and `Configuring Data Docs <https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs.html>`_ how-to guides. All of the stores in the below example are configured to use GCS, however you can use whichever store is applicable to your infrastructure.
+    Note: You may want to reference our :ref:`Configuring metadata stores <how_to_guides__configuring_metadata_stores>` and :ref:`Configuring Data Docs <how_to_guides__configuring_data_docs>` how-to guides. All of the stores in the below example are configured to use GCS, however you can use whichever store is applicable to your infrastructure.
 
     .. code-block:: python
 
@@ -123,13 +123,13 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
         context = BaseDataContext(project_config=project_config)
 
 
-4. Create a DAG with validations
+4. Create a DAG with Validations
 
-    Here we will follow the instructions for `Running a Validation using a PythonOperator <https://docs.greatexpectations.io/en/latest/guides/workflows_patterns/deployment_airflow.html#running-a-validation-using-a-pythonoperator>`_. Note that we will use the data context instantiated in the previous step in place of reading from the filesystem as in the linked example.
+    Here we will follow the instructions for :ref:`Running a Validation using a PythonOperator <workflows_patterns__deployment_airflow__running-a-validation-using-a-pythonoperator>`. Note that we will use the Data Context instantiated in the previous step in place of reading from the filesystem as in the linked example.
 
 5. Upload your Expectations and DAG
 
-    Upload your Expectations to your expectation store (as configured in your data context). If your expectation store is in your GCS bucket you can use ``gsutil`` to upload the json files - just make sure to keep the same directory structure. Alternatively you can automate using something like Google Cloud Build or Github Actions or your favorite CI tool.
+    Upload your Expectations to your expectation store (as configured in your Data Context). If your expectation store is in your GCS bucket you can use ``gsutil`` to upload the JSON files - just make sure to keep the same directory structure. Alternatively you can automate using something like Google Cloud Build or Github Actions or your favorite CI tool.
 
     Upload your DAG files to the cloud bucket ``dags/`` folder assigned to your Composer environment.
 
@@ -137,11 +137,11 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
 
     You can now monitor your deployment just like any other Airflow environment either via the Airflow UI (linked from your cloud platform environments page) or by submitting commands using `Google Cloud Shell <https://cloud.google.com/shell>`_.
 
-    You can raise an ``AirflowException`` if validation fails (as in the example here: `Running a Validation using a PythonOperator <https://docs.greatexpectations.io/en/latest/guides/workflows_patterns/deployment_airflow.html#running-a-validation-using-a-pythonoperator>`_) which will show in logs and the UI as in the image below:
+    You can raise an ``AirflowException`` if your Validation fails (as in the example here: :ref:`Running a Validation using a PythonOperator <workflows_patterns__deployment_airflow__running-a-validation-using-a-pythonoperator>`) which will show in logs and the UI as in the image below:
 
 .. image:: dag_airflow_example.png
     :width: 800
-    :alt: Airflow pipeline with validations passing and failing.
+    :alt: Airflow pipeline with Validations passing and failing.
 
 Additional resources
 --------------------
