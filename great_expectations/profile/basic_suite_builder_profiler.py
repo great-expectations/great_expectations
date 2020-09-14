@@ -98,6 +98,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             column_type = cls._get_column_type(dataset, column_name)
             column_cache_entry["type"] = column_type
             # remove the expectation
+            # Does this change with different config format?
             dataset.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_values_to_be_in_type_list",
@@ -581,6 +582,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
         return expectation_suite
 
+    # TODO: MIGRATE TO CLASS-FIRST STRUCTURE
+    # Question: do Domain and Success kwargs need to be passed here as well?
     @classmethod
     def _build_table_row_count_expectation(cls, dataset, tolerance=0.1):
         assert tolerance >= 0, "Tolerance must be greater than zero"
