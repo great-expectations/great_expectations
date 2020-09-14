@@ -23,7 +23,7 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
 
     Create :ref:`Expectations <reference__core_concepts__expectations>` using our guide to :ref:`Creating and Editing Expectations <how_to_guides__creating_and_editing_expectations>`.
 
-    You can store your Expectations anywhere that is accessible to the cloud Composer environment. One simple pattern is to use a folder in the bucket provided by the Composer environment. You can manually push updated expectation JSON files from your version controlled repository via ``gsutil`` (as in the code snippet below) or the GCS UI. Alternatively you can automate this using Google Cloud Build or any other automation tool.
+    You can store your Expectations anywhere that is accessible to the Cloud Composer environment. One simple pattern is to use a folder in the bucket provided by the Composer environment. You can manually push updated expectation JSON files from your version controlled repository via ``gsutil`` (as in the code snippet below) or the GCS UI. Alternatively you can automate this using Google Cloud Build or any other automation tool.
 
     :ref:`Read more about setting up expectation stores in GCS here <how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_gcs>`.
 
@@ -35,7 +35,7 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
 
 3. Create your Data Context
 
-    Since we'd prefer not to use the airflow container filesystem to host a :ref:`Data Context <reference__core_concepts__data-context>` as a .yml file, another approach is to instantiate it in a python file either as part of your DAG or imported by your DAG at runtime. :ref:`Follow this guide on How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>` and see the example below.
+    Since we'd prefer not to use the Airflow container filesystem to host a :ref:`Data Context <reference__core_concepts__data-context>` as a .yml file, another approach is to instantiate it in a Python file either as part of your DAG or imported by your DAG at runtime. :ref:`Follow this guide on How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>` and see the example below.
 
     Note: You may want to reference our :ref:`Configuring metadata stores <how_to_guides__configuring_metadata_stores>` and :ref:`Configuring Data Docs <how_to_guides__configuring_data_docs>` how-to guides. All of the stores in the below example are configured to use GCS, however you can use whichever store is applicable to your infrastructure.
 
@@ -137,9 +137,9 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
 
 5. Upload your Expectations and DAG
 
-    Upload your Expectations to your expectation store (as configured in your Data Context). If your expectation store is in your GCS bucket you can use ``gsutil`` to upload the JSON files - just make sure to keep the same directory structure. Alternatively you can automate using something like Google Cloud Build or Github Actions or your favorite CI tool.
+    Upload your Expectations to your Expectation Store (as configured in your Data Context). If your Expectation Store is in your GCS bucket you can use ``gsutil`` to upload the JSON files - just make sure to keep the same directory structure. Alternatively you can automate using something like Google Cloud Build or GitHub Actions or your favorite CI tool.
 
-    Upload your DAG files to the cloud bucket ``dags/`` folder assigned to your Composer environment.
+    Upload your DAG files to the GCS bucket ``dags/`` folder assigned to your Composer environment.
 
 6. Monitor your deployment
 
