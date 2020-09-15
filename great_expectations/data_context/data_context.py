@@ -764,9 +764,11 @@ class BaseDataContext:
         else:
             datasource = self.get_datasource(datasource_name)
             if datasource:
-                # remove key until we have a delete method on project_config
-                # self._project_config_with_variables_substituted.datasources[datasource_name].remove()
-                # del self._project_config["datasources"][datasource_name]
+                # delete datasources project config
+                del self._project_config_with_variables_substituted.datasources[
+                    datasource_name
+                ]
+                del self._project_config.datasources[datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
                 raise ValueError("Datasource {} not found".format(datasource_name))
@@ -2347,6 +2349,14 @@ class DataContext(BaseDataContext):
         self._save_project_config()
 
         return new_datasource
+
+    def delete_datasource(self, name, **kwargs):
+        logger.debug("Starting DataContext.delete_datasource for datasource %s" % name)
+
+        delete_datasource = super().delete_datasource(name, **kwargs)
+        self._save_project_config()
+
+        return delete_datasource
 
     @classmethod
     def find_context_root_dir(cls):

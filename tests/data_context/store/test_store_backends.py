@@ -450,7 +450,8 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
     my_store.set(("AAA",), "aaa", content_type="text/html; charset=utf-8")
     assert my_store.get(("AAA",)) == "aaa"
 
-    obj = boto3.client("s3").get_object(Bucket=bucket, Key=prefix + "/my_file_AAA")
+    obj = boto3.client("s3").get_object(Bucket=bucket, Key=prefix + "my_file_AAA")
+    assert my_store._build_s3_object_key(("AAA",)) == "my_file_AAA"
     assert obj["ContentType"] == "text/html; charset=utf-8"
     assert obj["ContentEncoding"] == "utf-8"
 
