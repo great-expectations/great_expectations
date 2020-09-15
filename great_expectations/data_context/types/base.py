@@ -29,93 +29,156 @@ DEFAULT_USAGE_STATISTICS_URL = (
 )
 
 
-class DataContextConfig(DictDot):
+class OrderedFieldConfig(DictDot):
     def __init__(
         self,
-        config_version,
-        expectations_store_name,
-        validations_store_name,
-        evaluation_parameter_store_name,
-        plugins_directory,
-        validation_operators,
-        stores,
-        data_docs_sites,
-        notebooks=None,
-        config_variables_file_path=None,
-        anonymous_usage_statistics=None,
-        commented_map=None,
-        datasources=None,
-        execution_environments=None,
+        class_name=None,
+        module_name=None,
+        orderby="asc",
+        **kwargs,
     ):
-        if commented_map is None:
-            commented_map = CommentedMap()
-        self._commented_map = commented_map
-        self._config_version = config_version
-        if datasources is None:
-            datasources = {}
-        self.datasources = datasources
-        if execution_environments is None:
-            execution_environments = {}
-        self.execution_environments = execution_environments
-        self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
-        self.evaluation_parameter_store_name = evaluation_parameter_store_name
-        self.plugins_directory = plugins_directory
-        if not isinstance(validation_operators, dict):
-            raise ValueError(
-                "validation_operators must be configured with a dictionary"
-            )
-        self.validation_operators = validation_operators
-        self.stores = stores
-        self.notebooks = notebooks
-        self.data_docs_sites = data_docs_sites
-        self.config_variables_file_path = config_variables_file_path
-        if anonymous_usage_statistics is None:
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
-        elif isinstance(anonymous_usage_statistics, dict):
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
-                **anonymous_usage_statistics
-            )
-        self.anonymous_usage_statistics = anonymous_usage_statistics
+        self._class_name = class_name
+        self._module_name = module_name
+        self._orderby = orderby
+
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     @property
-    def commented_map(self):
-        return self._commented_map
+    def class_name(self):
+        return self._class_name
 
     @property
-    def config_version(self):
-        return self._config_version
+    def module_name(self):
+        return self._module_name
 
-    @classmethod
-    def from_commented_map(cls, commented_map):
-        try:
-            config = dataContextConfigSchema.load(commented_map)
-            return cls(commented_map=commented_map, **config)
-        except ValidationError:
-            logger.error(
-                "Encountered errors during loading data context config. See ValidationError for more details."
-            )
-            raise
-
-    def to_yaml(self, outfile):
-        commented_map = deepcopy(self.commented_map)
-        commented_map.update(dataContextConfigSchema.dump(self))
-        yaml.dump(commented_map, outfile)
+    @property
+    def orderby(self):
+        return self._orderby
 
 
-class ExecutionEngineConfigSchema(Schema):
+class OrderedFieldConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String()
-    module_name = fields.String(missing="great_expectations.execution_engine")
-    caching = fields.Boolean()
-    batch_spec_defaults = fields.Dict(allow_none=True)
+    class_name = fields.String(missing="OrderedField")
+    module_name = fields.String(missing="great_expectations.ordered_field")
+    orderby = fields.String(missing="asc")
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
 
     # noinspection PyUnusedLocal
     @post_load
-    def make_execution_engine_config(self, data, **kwargs):
-        return ExecutionEngineConfig(**data)
+    def make_ordered_field_config(self, data, **kwargs):
+        return OrderedFieldConfig(**data)
+
+
+class PartitionerConfig(DictDot):
+    def __init__(
+        self,
+        class_name=None,
+        module_name=None,
+        ordered_fields=None,
+        **kwargs,
+    ):
+        self._class_name = class_name
+        self._module_name = module_name
+        if ordered_fields is not None:
+            self.ordered_fields = ordered_fields
+
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+
+class PartitionerConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    class_name = fields.String(missing="Partitioner")
+    module_name = fields.String(missing="great_expectations.partitioner")
+
+    ordered_fields = fields.List(
+        values=fields.Nested(OrderedFieldConfigSchema),
+        allow_none=True,
+    )
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_partitioner_config(self, data, **kwargs):
+        return PartitionerConfig(**data)
+
+
+class DataConnectorConfig(DictDot):
+    def __init__(
+        self,
+        partitioners,
+        partitioner_name,
+        class_name=None,
+        module_name=None,
+    ):
+        self._class_name = class_name
+        self._module_name = module_name
+        self._partitioner_name = partitioner_name
+        if partitioners is not None:
+            self.partitioners = partitioners
+
+    @property
+    def partitioners(self):
+        return self.partitioners
+
+    @property
+    def partitioner_name(self):
+        return self._partitione_name
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+
+class DataConnectorConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    class_name = fields.String(missing="DataConnector")
+    module_name = fields.String(missing="great_expectations.data_connector")
+
+    partitioner_name = fields.String(allo_none=False)
+
+    partitioners = fields.Dict(
+        keys=fields.Str(),
+        values=fields.Nested(PartitionerConfigSchema),
+        allow_none=False,
+    )
+
+    # TODO: <Alex></Alex>
+    # Allow the specification of "assets" List with custom partitioner configuration for each asset.
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_data_connector_config(self, data, **kwargs):
+        return DataConnectorConfig(**data)
 
 
 class ExecutionEngineConfig(DictDot):
@@ -143,6 +206,25 @@ class ExecutionEngineConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
+
+
+class ExecutionEngineConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    class_name = fields.String()
+    module_name = fields.String(missing="great_expectations.execution_engine")
+    caching = fields.Boolean()
+    batch_spec_defaults = fields.Dict(allow_none=True)
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_execution_engine_config(self, data, **kwargs):
+        return ExecutionEngineConfig(**data)
 
 
 class ExecutionEnvironmentConfig(DictDot):
@@ -190,8 +272,14 @@ class ExecutionEnvironmentConfigSchema(Schema):
     execution_engine = fields.Nested(ExecutionEngineConfigSchema)
     # TODO: Update to data_connector-specific
     # data_connectors = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.DataConnectorSchema))
+    # TODO: <Alex>Review commented code and delete it if not needed.</Alex>
+    # data_connectors = fields.Dict(
+    #     keys=fields.Str(), values=fields.Dict(), allow_none=True
+    # )
     data_connectors = fields.Dict(
-        keys=fields.Str(), values=fields.Dict(), allow_none=True
+        keys=fields.Str(),
+        values=fields.Nested(DataConnectorConfigSchema),
+        allow_none=False,
     )
     credentials = fields.Raw(allow_none=True)
     spark_context = fields.Raw(allow_none=True)
@@ -380,22 +468,22 @@ class NotebookTemplateConfigSchema(Schema):
 
 class NotebookConfig(DictDot):
     def __init__(
-        self,
-        class_name,
-        module_name,
-        custom_templates_module,
-        header_markdown=None,
-        footer_markdown=None,
-        table_expectations_header_markdown=None,
-        column_expectations_header_markdown=None,
-        table_expectations_not_found_markdown=None,
-        column_expectations_not_found_markdown=None,
-        authoring_intro_markdown=None,
-        column_expectations_markdown=None,
-        header_code=None,
-        footer_code=None,
-        column_expectation_code=None,
-        table_expectation_code=None,
+            self,
+            class_name,
+            module_name,
+            custom_templates_module,
+            header_markdown=None,
+            footer_markdown=None,
+            table_expectations_header_markdown=None,
+            column_expectations_header_markdown=None,
+            table_expectations_not_found_markdown=None,
+            column_expectations_not_found_markdown=None,
+            authoring_intro_markdown=None,
+            column_expectations_markdown=None,
+            header_code=None,
+            footer_code=None,
+            column_expectation_code=None,
+            table_expectation_code=None,
     ):
         self.class_name = class_name
         self.module_name = module_name
@@ -479,13 +567,89 @@ class NotebooksConfigSchema(Schema):
         return NotebooksConfig(**data)
 
 
+class DataContextConfig(DictDot):
+    def __init__(
+        self,
+        config_version,
+        expectations_store_name,
+        validations_store_name,
+        evaluation_parameter_store_name,
+        plugins_directory,
+        validation_operators,
+        stores,
+        data_docs_sites,
+        notebooks=None,
+        config_variables_file_path=None,
+        anonymous_usage_statistics=None,
+        commented_map=None,
+        datasources=None,
+        execution_environments=None,
+    ):
+        if commented_map is None:
+            commented_map = CommentedMap()
+        self._commented_map = commented_map
+        self._config_version = config_version
+        if datasources is None:
+            datasources = {}
+        self.datasources = datasources
+        if execution_environments is None:
+            execution_environments = {}
+        self.execution_environments = execution_environments
+        self.expectations_store_name = expectations_store_name
+        self.validations_store_name = validations_store_name
+        self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.plugins_directory = plugins_directory
+        if not isinstance(validation_operators, dict):
+            raise ValueError(
+                "validation_operators must be configured with a dictionary"
+            )
+        self.validation_operators = validation_operators
+        self.stores = stores
+        self.notebooks = notebooks
+        self.data_docs_sites = data_docs_sites
+        self.config_variables_file_path = config_variables_file_path
+        if anonymous_usage_statistics is None:
+            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
+        elif isinstance(anonymous_usage_statistics, dict):
+            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
+                **anonymous_usage_statistics
+            )
+        self.anonymous_usage_statistics = anonymous_usage_statistics
+
+    @property
+    def commented_map(self):
+        return self._commented_map
+
+    @property
+    def config_version(self):
+        return self._config_version
+
+    @classmethod
+    def from_commented_map(cls, commented_map):
+        try:
+            config = dataContextConfigSchema.load(commented_map)
+            return cls(commented_map=commented_map, **config)
+        except ValidationError:
+            logger.error(
+                "Encountered errors during loading data context config. See ValidationError for more details."
+            )
+            raise
+
+    def to_yaml(self, outfile):
+        commented_map = deepcopy(self.commented_map)
+        commented_map.update(dataContextConfigSchema.dump(self))
+        yaml.dump(commented_map, outfile)
+
+
 class DataContextConfigSchema(Schema):
     config_version = fields.Number(
         validate=lambda x: 0 < x < 100,
         error_messages={"invalid": "config version must " "be a number."},
     )
     datasources = fields.Dict(
-        keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema), allow_none=True
+        keys=fields.Str(),
+        values=fields.Nested(DatasourceConfigSchema),
+        allow_none=True
     )
     execution_environments = fields.Dict(
         keys=fields.Str(),
@@ -530,8 +694,8 @@ class DataContextConfigSchema(Schema):
 
         # When migrating from 0.7.x to 0.8.0
         if data["config_version"] == 0 and (
-            "validations_store" in list(data.keys())
-            or "validations_stores" in list(data.keys())
+                "validations_store" in list(data.keys())
+                or "validations_stores" in list(data.keys())
         ):
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
