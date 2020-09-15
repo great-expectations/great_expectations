@@ -131,7 +131,7 @@ def valid_usage_statistics_message():
     }
 
 
-def send_malformed_data(valid_usage_statistics_message):
+def test_send_malformed_data(valid_usage_statistics_message):
     # We should be able to successfully send a valid message, but find that
     # a malformed message is not accepted
     res = requests.post(USAGE_STATISTICS_QA_URL, json=valid_usage_statistics_message)
@@ -142,7 +142,7 @@ def send_malformed_data(valid_usage_statistics_message):
     assert res.status_code == 400
 
 
-def graceful_failure_with_no_internet():
+def test_graceful_failure_with_no_internet():
     """Test that having usage statistics enabled does not negatively impact kill signals or cause loss of queued usage statistics. """
 
     # Execute process that initializes data context
