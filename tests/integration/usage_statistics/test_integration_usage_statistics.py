@@ -175,8 +175,6 @@ def test_graceful_failure_with_no_internet():
     )
     outs = str(outs)
     errs = str(errs)
-    print(outs)
-    print(errs)
     assert "INFO" not in outs
     assert "Done constructing a DataContext" in outs
     assert "Ending a long nap" in outs
