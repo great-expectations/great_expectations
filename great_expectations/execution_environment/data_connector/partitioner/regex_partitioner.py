@@ -10,7 +10,7 @@ class RegexPartitioner(Partitioner):
 
     recognized_batch_parameters = {
         "regex",
-        "ordered_fields",
+        "sorters",
     }
 
     # defaults
@@ -19,17 +19,17 @@ class RegexPartitioner(Partitioner):
 
 
     def __init__(
-            self,
-            name,
-            regex=None,
-            ordered_fields=None
+        self,
+        name,
+        regex=None,
+        sorters=None
     ):
 
         logger.debug("Constructing RegexPartitioner {!r}".format(name))
         super().__init__(name)
 
         self._regex = regex
-        self._ordered_fields = ordered_fields
+        self._sorters = sorters
         self._partitions = {}
 
     @property
@@ -41,16 +41,16 @@ class RegexPartitioner(Partitioner):
         self._regex = regex
 
     @property
-    def ordered_fields(self):
-        return self._ordered_fields
+    def sorters(self):
+        return self._sorters
 
-    def get_part(self, partition_key):
+    def get_part(self, partition_name):
         # this will return : Part object (Will and Alex part - aka single part)
         pass
 
-    def get_available_partition_keys(self, paths):
+    def get_available_partition_names(self, paths):
         return [
-            partition["partition_key"] for partition in self.get_available_partitions(paths)
+            partition["partition_name"] for partition in self.get_available_partitions(paths)
         ]
 
     def get_available_partitions(self, paths):
@@ -82,20 +82,20 @@ class RegexPartitioner(Partitioner):
         else:
             # default case : there are no named ordered fields?
             # and add the name?
-            if self.ordered_fields is None:
+            if self.sorters is None:
                 # then we want to use the defaults:
                 # NOTE : matches begin with the full regex match at index=0 and then each matching group
                 # and then each subsequent match in following indices.
-                # this is why partition_definition_inner_dict is loaded with partition_params[i] as key
+                # this is why partition_definition_inner_dict is loaded with partition_params[i] as name
                 # and matches[i+1] as value
                 partition_definition_inner_dict = {}
                 for i in range(len(matches)-1):
                     partition_param = self.default_group_name + "_" + str(i)
                     partition_definition_inner_dict[partition_param] = matches[i+1]
                 temp_partitions["partition_definition"] = partition_definition_inner_dict
-            partition_key = []
-            for key in temp_partitions["partition_definition"].keys():
-                partition_key.append(str(temp_partitions["partition_definition"][key]))
-            partition_key = self.default_delim.join(partition_key)
-            temp_partitions["partition_key"] = partition_key
+            partition_name_list = []
+            for name in temp_partitions["partition_definition"].keys():
+                partition_name_list.append(str(temp_partitions["partition_definition"][name]))
+            partition_name = self.default_delim.join(partition_name_list)
+            temp_partitions["partition_name"] = partition_name
         return temp_partitions
