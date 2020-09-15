@@ -1371,6 +1371,8 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             "parse_strings_as_datetimes": None,
                             "row_condition": None,
                             "condition_parser": None,
+                            "strict_max": None,
+                            "strict_min": None,
                         },
                         "styling": {
                             "default": {"classes": ["badge", "badge-secondary"]},

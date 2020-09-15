@@ -9,6 +9,8 @@ Develop
 * [BUGFIX] Fix bug in deleting datasource config from config file (thanks @rxmeez)!
 * [DOCS] Add notes on transient table creation to Snowflake guide (thanks @verhey)!
 * [DOCS] Fixed several broken links and glossary organization (thanks @JavierMonton and @sbrugman)!
+* [BUGFIX] clarify inclusiveness of min/max values in string rendering
+* [DOCS] Deploying Great Expectations with Google Cloud Composer (Hosted Airflow)
 
 
 0.12.1
