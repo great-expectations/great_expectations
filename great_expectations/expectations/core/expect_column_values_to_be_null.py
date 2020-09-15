@@ -14,5 +14,6 @@ class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
         metric_value_keys=tuple(),
         metric_dependencies=tuple(),
     )
+    # TODO: shouldn't this be null count?
     def _nonnull_count(self, series: pd.Series, runtime_configuration: dict = None):
         return series.isnull()

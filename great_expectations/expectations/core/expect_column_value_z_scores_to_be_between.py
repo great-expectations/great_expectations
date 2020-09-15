@@ -2,6 +2,7 @@
 from typing import Dict, List, Optional, Union
 
 import pandas as pd
+import numpy as np
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
@@ -67,8 +68,9 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
                 Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
                 :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
     """
-    # Setting neccessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values
-    metric_dependencies = ("map.mean", "map.std_dev")
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    map_metric = "map.z_scores"
+    metric_dependencies = ("map.mean", "map.std_dev", "map.nonnull.count", "map.z_scores.number_over_threshold")
     domain_kwargs = ("batch_id", "table", "column", "row_condition", "condition_parser")
     success_kwargs = ("threshold", "double_sided", "mostly")
 
@@ -92,7 +94,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         metric_value_keys=(),
         metric_dependencies=tuple(),
     )
-    def _pandas_map_in_set(
+    def _pandas_mean(
             self,
             series: pd.Series,
             runtime_configuration: dict = None,
@@ -109,7 +111,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     metric_value_keys = (),
     metric_dependencies = tuple(),
     )
-    def _pandas_map_in_set(
+    def _pandas_std_dev(
             self,
             series: pd.Series,
             runtime_configuration: dict = None,
@@ -117,6 +119,49 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         """Standard Deviation Metric Function"""
 
         return series.std()
+
+    @PandasExecutionEngine.column_map_metric(
+
+        metric_name="map.z_scores",
+        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+        metric_value_keys=(),
+        metric_dependencies=("map.mean", "map.std_dev"),
+    )
+    def _pandas_z_scores(
+                self,
+                series: pd.Series,
+                mean,
+                std_dev,
+                runtime_configuration: dict = None,
+    ):
+        """Z-Score Metric Function"""
+        # Currently does not handle columns with some random strings in them: should it?
+        try:
+            return (series - mean) / std_dev
+        except TypeError:
+            raise(TypeError("Cannot complete Z-score calculations on a non-numerical column."))
+
+
+    @PandasExecutionEngine.column_map_metric(
+
+        metric_name="map.z_score.number_over_threshold",
+        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+        metric_value_keys=(),
+        metric_dependencies=(),
+    )
+    def _pandas_number_over_threshold(
+            self,
+            series: pd.Series,
+            runtime_configuration: dict = None,
+    ):
+        """Z-Score Metric Function"""
+        # Currently does not handle columns with some random strings in them: should it?
+        try:
+            return np.count_nonzero(series > self.success_kwargs["threshold"])
+        except TypeError:
+            raise (TypeError("Cannot check if a string lies over a numerical threshold"))
+
+
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -179,7 +224,8 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             metrics: dict,
             runtime_configuration: dict = None,
     ):
-        """Validates the given data against the set Z Score threshold, returning a nested dictionary documenting the validation."""
+        """Validates the given data against the set Z Score threshold, returning a nested dictionary documenting the
+        validation."""
 
         validation_dependencies = self.get_validation_dependencies(configuration)[
             "metrics"
@@ -190,8 +236,6 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         mostly = configuration.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
-        threshold = configuration.get_success_kwargs().get(
-            "threshold", self.default_kwarg_values.get("threshold"))
 
         # If result_format is changed by the runtime configuration
         if runtime_configuration:
@@ -201,24 +245,15 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         else:
             result_format = self.default_kwarg_values.get("result_format")
 
-        # Obtaining scores to test against threshold: this should be stored??
-        scores = (self.domain_kwargs.get("table").get(self.domain_kwargs.get("column")) - metric_vals.get("map.mean")) / metric_vals.get("map.std_dev")
-
-        # Finding which scores have exceeded threshold and checking double-sidedness
-        over_threshold = scores[scores > threshold]
-        if configuration.get_success_kwargs().get(
-                "double_sided", self.default_kwarg_values.get("double_sided")):
-            scores = abs(scores)
-
-            # Returning dictionary output with necessary metrics based on the format
+        # Returning dictionary output with necessary metrics based on the format
         return _format_map_output(
             result_format=parse_result_format(result_format),
-            success=(len(over_threshold) / metric_vals.get("map.nonull_count"))
+            success= (metric_vals.get("map.z_scores.number_over_threshold") / metric_vals.get("map.nonull_count"))
                     > mostly,
             element_count=metric_vals.get("map.count"),
             nonnull_count=metric_vals.get("map.nonnull.count"),
             unexpected_count=metric_vals.get("map.nonnull.count")
-                             - len(over_threshold),
+                             - "map.z_scores.number_over_threshold",
             unexpected_list=metric_vals.get("map.in_set.unexpected_values"),
             unexpected_index_list=metric_vals.get("map.is_in.unexpected_index"),
         )
