@@ -29,7 +29,7 @@ DEFAULT_USAGE_STATISTICS_URL = (
 )
 
 
-class OrderedFieldConfig(DictDot):
+class PartitionConfig(DictDot):
     def __init__(
         self,
         class_name=None,
@@ -57,12 +57,12 @@ class OrderedFieldConfig(DictDot):
         return self._orderby
 
 
-class OrderedFieldConfigSchema(Schema):
+class PartitionConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String(missing="OrderedField")
-    module_name = fields.String(missing="great_expectations.ordered_field")
+    class_name = fields.String(required=True)
+    module_name = fields.String(missing="great_expectations.partition")
     orderby = fields.String(missing="asc")
 
     @validates_schema
@@ -71,8 +71,8 @@ class OrderedFieldConfigSchema(Schema):
 
     # noinspection PyUnusedLocal
     @post_load
-    def make_ordered_field_config(self, data, **kwargs):
-        return OrderedFieldConfig(**data)
+    def make_partition_config(self, data, **kwargs):
+        return PartitionConfig(**data)
 
 
 class PartitionerConfig(DictDot):
@@ -80,13 +80,13 @@ class PartitionerConfig(DictDot):
         self,
         class_name=None,
         module_name=None,
-        ordered_fields=None,
+        partitions=None,
         **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
-        if ordered_fields is not None:
-            self.ordered_fields = ordered_fields
+        if partitions is not None:
+            self.partitions = partitions
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -104,11 +104,12 @@ class PartitionerConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String(missing="Partitioner")
+    class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.partitioner")
 
-    ordered_fields = fields.List(
-        values=fields.Nested(OrderedFieldConfigSchema),
+    partitions = fields.List(
+        cls_or_instance=fields.Nested(PartitionConfigSchema),
+        required=False,
         allow_none=True,
     )
 
@@ -134,11 +135,11 @@ class DataConnectorConfig(DictDot):
         self._module_name = module_name
         self._partitioner_name = partitioner_name
         if partitioners is not None:
-            self.partitioners = partitioners
+            self._partitioners = partitioners
 
     @property
     def partitioners(self):
-        return self.partitioners
+        return self._partitioners
 
     @property
     def partitioner_name(self):
@@ -157,14 +158,18 @@ class DataConnectorConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String(missing="DataConnector")
+    class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.data_connector")
 
-    partitioner_name = fields.String(allo_none=False)
+    partitioner_name = fields.String(
+        required=True,
+        allow_none=False,
+    )
 
     partitioners = fields.Dict(
         keys=fields.Str(),
         values=fields.Nested(PartitionerConfigSchema),
+        required=True,
         allow_none=False,
     )
 
@@ -212,7 +217,7 @@ class ExecutionEngineConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String()
+    class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.execution_engine")
     caching = fields.Boolean()
     batch_spec_defaults = fields.Dict(allow_none=True)
@@ -279,6 +284,7 @@ class ExecutionEnvironmentConfigSchema(Schema):
     data_connectors = fields.Dict(
         keys=fields.Str(),
         values=fields.Nested(DataConnectorConfigSchema),
+        required=True,
         allow_none=False,
     )
     credentials = fields.Raw(allow_none=True)
@@ -287,11 +293,6 @@ class ExecutionEnvironmentConfigSchema(Schema):
     @validates_schema
     def validate_schema(self, data, **kwargs):
         pass
-        # if "generators" in data:
-        #     raise ge_exceptions.InvalidConfigError(
-        #         "Your current configuration uses the 'generators' key in a datasource, but in version 0.10 of "
-        #         "GE, that key is renamed to 'batch_kwargs_generators'. Please update your config to continue."
-        #     )
 
     # noinspection PyUnusedLocal
     @post_load
