@@ -1,3 +1,6 @@
 from .expect_column_values_to_be_in_set import ExpectColumnValuesToBeInSet
 from .expect_column_values_to_be_null import ExpectColumnValuesToBeNull
 from .expect_column_values_to_not_be_null import ExpectColumnValuesToNotBeNull
+from .expect_column_value_z_scores_to_be_less_than import ExpectColumnValueZScoresToBeLessThan
+
+

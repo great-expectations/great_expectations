@@ -70,7 +70,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     """
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     map_metric = "map.z_scores"
-    metric_dependencies = ("mean", "standard_deviation", "map.nonnull.count","z_scores", "z_scores.count_over_threshold")
+    metric_dependencies = ("mean", "standard_deviation", "map.nonnull.count","map.z_scores", "map.z_scores.count_over_threshold")
     domain_kwargs = ("batch_id", "table", "column", "row_condition", "condition_parser")
     success_kwargs = ("threshold", "double_sided", "mostly")
 
@@ -89,7 +89,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
 
     """ A Column Map Metric Decorator for the Mean"""
     @PandasExecutionEngine.column_map_metric(
-        metric_name="map.mean",
+        metric_name="mean",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
@@ -102,6 +102,24 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         """Mean Metric Function"""
 
         return series.mean()
+
+    """ A Column Map Metric Decorator for the Mean"""
+
+    @PandasExecutionEngine.column_map_metric(
+        metric_name="standard_deviation",
+        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+        metric_value_keys=(),
+        metric_dependencies=tuple(),
+    )
+    def _pandas_standard_deviation(
+            self,
+            series: pd.Series,
+            runtime_configuration: dict = None,
+    ):
+        """Mean Metric Function"""
+
+        return series.std()
+
 
     @PandasExecutionEngine.column_map_metric(
 
@@ -126,7 +144,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
 
     @PandasExecutionEngine.column_map_metric(
 
-        metric_name="map.z_score.number_over_threshold",
+        metric_name="map.z_scores.number_over_threshold",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=(),
@@ -168,36 +186,6 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    def get_validation_dependencies(self, configuration: Optional[ExpectationConfiguration] = None):
-        """
-        Obtains and returns neccessary validation metric dependencies, based on the result format indicated by the
-        user or the default result format/
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            metric_dependencies (dict): \
-                A dictionary of all metrics neccessary for the validation format beyond computational defaults
-        """
-        # Building a dictionary of dependencies
-        dependencies = super().get_validation_dependencies(configuration)
-        metric_dependencies = set(self.metric_dependencies)
-        dependencies["metrics"] = metric_dependencies
-        result_format_str = dependencies["result_format"].get("result_format")
-        if result_format_str == "BOOLEAN ONLY":
-            return dependencies
-
-        # Count and unexpected values needed for basic/summary modes
-        metric_dependencies.add("map.count")
-        metric_dependencies.add("map.in_set.unexpected_values")
-        if result_format_str in ["BASIC", "SUMMARY"]:
-            return dependencies
-
-        # Complete mode requires unexpected rows
-        metric_dependencies.add("map.in_set.unexpected_rows")
-        return metric_dependencies
-
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
             self,
@@ -229,8 +217,8 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         # Returning dictionary output with necessary metrics based on the format
         return _format_map_output(
             result_format=parse_result_format(result_format),
-            success= (metric_vals.get("map.z_scores.number_over_threshold") / metric_vals.get("map.nonull_count"))
-                    > mostly,
+            success=(metric_vals.get("map.z_scores.number_over_threshold") / metric_vals.get("map.nonull_count"))
+                    >= mostly,
             element_count=metric_vals.get("map.count"),
             nonnull_count=metric_vals.get("map.nonnull.count"),
             unexpected_count=metric_vals.get("map.nonnull.count")
