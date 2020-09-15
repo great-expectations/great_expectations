@@ -161,7 +161,7 @@ Success Percent  | ≈81.82%
 
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
-❌  | Must have at least **27000** and at most **33000** rows.  | 30
+❌  | Must have greater than or equal to **27000** and less than or equal to **33000** rows.  | 30
 ✅  | Must have exactly **3** columns.  | 3
 ✅  | Must have these columns in this order: **Team**, ** "Payroll (millions)"**, ** "Wins"**  | ['Team', ' "Payroll (millions)"', ' "Wins"']
 
@@ -181,10 +181,10 @@ Success Percent  | ≈81.82%
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
-✅  | minimum value must be at least **54.24** and at most **56.24**.  | 55.24
-✅  | maximum value must be at least **196.96** and at most **198.96**.  | 197.96
-✅  | mean must be at least **97.01899999999998** and at most **99.01899999999998**.  | ≈98.019
-❌  | median must be at least **84000.75** and at most **86000.75**.  | 85.75
+✅  | minimum value must be greater than or equal to **54.24** and less than or equal to **56.24**.  | 55.24
+✅  | maximum value must be greater than or equal to **196.96** and less than or equal to **198.96**.  | 197.96
+✅  | mean must be greater than or equal to **97.01899999999998** and less than or equal to **99.01899999999998**.  | ≈98.019
+❌  | median must be greater than or equal to **84000.75** and less than or equal to **86000.75**.  | 85.75
 ✅  | quantiles must be within the following value ranges.
 
 
@@ -227,7 +227,7 @@ Q3  | 117.62
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
-✅  | values must always be at least **1** characters long.  | 0% unexpected
+✅  | values must always be greater than or equal to **1** characters long.  | 0% unexpected
 
 
 
@@ -328,7 +328,7 @@ Success Percent  | ≈81.82%
 
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
-❌  | Must have at least **27000** and at most **33000** rows.  | 30
+❌  | Must have greater than or equal to **27000** and less than or equal to **33000** rows.  | 30
 ✅  | Must have exactly **3** columns.  | 3
 ✅  | Must have these columns in this order: **Team**, ** "Payroll (millions)"**, ** "Wins"**  | ['Team', ' "Payroll (millions)"', ' "Wins"']
 
@@ -348,10 +348,10 @@ Success Percent  | ≈81.82%
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
-✅  | minimum value must be at least **54.24** and at most **56.24**.  | 55.24
-✅  | maximum value must be at least **196.96** and at most **198.96**.  | 197.96
-✅  | mean must be at least **97.01899999999998** and at most **99.01899999999998**.  | ≈98.019
-❌  | median must be at least **84000.75** and at most **86000.75**.  | 85.75
+✅  | minimum value must be greater than or equal to **54.24** and less than or equal to **56.24**.  | 55.24
+✅  | maximum value must be greater than or equal to **196.96** and less than or equal to **198.96**.  | 197.96
+✅  | mean must be greater than or equal to **97.01899999999998** and less than or equal to **99.01899999999998**.  | ≈98.019
+❌  | median must be greater than or equal to **84000.75** and less than or equal to **86000.75**.  | 85.75
 ✅  | quantiles must be within the following value ranges.
 
 
@@ -394,7 +394,7 @@ Q3  | 117.62
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
-✅  | values must always be at least **1** characters long.  | 0% unexpected
+✅  | values must always be greater than or equal to **1** characters long.  | 0% unexpected
 
 
 
@@ -533,7 +533,7 @@ Success Percent  | ≈81.82%
 
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
-❌  | Must have at least **27000** and at most **33000** rows.  | 30
+❌  | Must have greater than or equal to **27000** and less than or equal to **33000** rows.  | 30
 ✅  | Must have exactly **3** columns.  | 3
 ✅  | Must have these columns in this order: **Team**, ** "Payroll (millions)"**, ** "Wins"**  | ['Team', ' "Payroll (millions)"', ' "Wins"']
 
@@ -553,10 +553,10 @@ Success Percent  | ≈81.82%
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
-✅  | minimum value must be at least **54.24** and at most **56.24**.  | 55.24
-✅  | maximum value must be at least **196.96** and at most **198.96**.  | 197.96
-✅  | mean must be at least **97.01899999999998** and at most **99.01899999999998**.  | ≈98.019
-❌  | median must be at least **84000.75** and at most **86000.75**.  | 85.75
+✅  | minimum value must be greater than or equal to **54.24** and less than or equal to **56.24**.  | 55.24
+✅  | maximum value must be greater than or equal to **196.96** and less than or equal to **198.96**.  | 197.96
+✅  | mean must be greater than or equal to **97.01899999999998** and less than or equal to **99.01899999999998**.  | ≈98.019
+❌  | median must be greater than or equal to **84000.75** and less than or equal to **86000.75**.  | 85.75
 ✅  | quantiles must be within the following value ranges.
 
 
@@ -599,7 +599,7 @@ Q3  | 117.62
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
-✅  | values must always be at least **1** characters long.  | 0% unexpected
+✅  | values must always be greater than or equal to **1** characters long.  | 0% unexpected
 
 
 
@@ -700,7 +700,7 @@ Success Percent  | ≈81.82%
 
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
-❌  | Must have at least **27000** and at most **33000** rows.  | 30
+❌  | Must have greater than or equal to **27000** and less than or equal to **33000** rows.  | 30
 ✅  | Must have exactly **3** columns.  | 3
 ✅  | Must have these columns in this order: **Team**, ** "Payroll (millions)"**, ** "Wins"**  | ['Team', ' "Payroll (millions)"', ' "Wins"']
 
@@ -720,10 +720,10 @@ Success Percent  | ≈81.82%
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
-✅  | minimum value must be at least **54.24** and at most **56.24**.  | 55.24
-✅  | maximum value must be at least **196.96** and at most **198.96**.  | 197.96
-✅  | mean must be at least **97.01899999999998** and at most **99.01899999999998**.  | ≈98.019
-❌  | median must be at least **84000.75** and at most **86000.75**.  | 85.75
+✅  | minimum value must be greater than or equal to **54.24** and less than or equal to **56.24**.  | 55.24
+✅  | maximum value must be greater than or equal to **196.96** and less than or equal to **198.96**.  | 197.96
+✅  | mean must be greater than or equal to **97.01899999999998** and less than or equal to **99.01899999999998**.  | ≈98.019
+❌  | median must be greater than or equal to **84000.75** and less than or equal to **86000.75**.  | 85.75
 ✅  | quantiles must be within the following value ranges.
 
 
@@ -766,7 +766,7 @@ Q3  | 117.62
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
-✅  | values must always be at least **1** characters long.  | 0% unexpected
+✅  | values must always be greater than or equal to **1** characters long.  | 0% unexpected
 
 
 
