@@ -8,22 +8,22 @@ from typing import Dict, Iterator, List, Mapping, Optional, Set, Tuple, Union
 
 logger = logging.getLogger(__name__)
 
-ANNOTATION_REGEX = ""
-ANNOTATION_REGEX += "[\\s]*(id:.*)[\n]"
-ANNOTATION_REGEX += "[\\s]*(title:.*)[\n]"
-ANNOTATION_REGEX += "[\\s]*(icon:.*)[\n]"
-ANNOTATION_REGEX += "[\\s]*(short_description:.*)[\n]"
-ANNOTATION_REGEX += "[\\s]*(description:.*)[\n]"
-ANNOTATION_REGEX += "[\\s]*(how_to_guide_url:.*)[\n]"
-ANNOTATION_REGEX += "[\\s]*(maturity:.*)[\n]"
-ANNOTATION_REGEX += "[\\s]*(maturity_details:.*)[\n]"
-ANNOTATION_REGEX += "[\\s]*(api_stability:.*)[\n]"
-ANNOTATION_REGEX += "[\\s]*(implementation_completeness:.*)[\n]"
-ANNOTATION_REGEX += "[\\s]*(unit_test_coverage:.*)[\n]"
-ANNOTATION_REGEX += "[\\s]*(integration_infrastructure_test_coverage:.*)[\n]"
-ANNOTATION_REGEX += "[\\s]*(documentation_completeness:.*)[\n]"
-ANNOTATION_REGEX += "[\\s]*(bug_risk:.*)[\n]"
-ANNOTATION_REGEX += "([\\s]*(expectation_completeness:.*)[\n])?"
+ANNOTATION_REGEX = r""
+ANNOTATION_REGEX += r"[\s]*(id:.*)[\n]"
+ANNOTATION_REGEX += r"[\s]*(title:.*)[\n]"
+ANNOTATION_REGEX += r"[\s]*(icon:.*)[\n]"
+ANNOTATION_REGEX += r"[\s]*(short_description:.*)[\n]"
+ANNOTATION_REGEX += r"[\s]*(description:.*)[\n]"
+ANNOTATION_REGEX += r"[\s]*(how_to_guide_url:.*)[\n]"
+ANNOTATION_REGEX += r"[\s]*(maturity:.*)[\n]"
+ANNOTATION_REGEX += r"[\s]*(maturity_details:.*)[\n]"
+ANNOTATION_REGEX += r"[\s]*(api_stability:.*)[\n]"
+ANNOTATION_REGEX += r"[\s]*(implementation_completeness:.*)[\n]"
+ANNOTATION_REGEX += r"[\s]*(unit_test_coverage:.*)[\n]"
+ANNOTATION_REGEX += r"[\s]*(integration_infrastructure_test_coverage:.*)[\n]"
+ANNOTATION_REGEX += r"[\s]*(documentation_completeness:.*)[\n]"
+ANNOTATION_REGEX += r"[\s]*(bug_risk:.*)[\n]"
+ANNOTATION_REGEX += r"([\s]*(expectation_completeness:.*)[\n])?"
 annotation_regex_compiled = re.compile(ANNOTATION_REGEX)
 
 
