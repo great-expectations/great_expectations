@@ -21,32 +21,32 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     """
     Expect the Z-scores of a columns values to be less than a given threshold
 
-            expect_column_values_to_be_of_type is a :func:`column_aggregate_expectation \
-            <great_expectations.execution_engine.execution_engine.MetaExecutionEngine.column_aggregate_expectation>` for
+            expect_column_values_to_be_of_type is a :func:`column_map_expectation \
+            <great_expectations.execution_engine.execution_engine.MetaExecutionEngine.column_map_expectation>` for
             typed-column
             backends,
             and also for PandasExecutionEngine where the column dtype and provided type_ are unambiguous constraints (any
             dtype
             except 'object' or dtype of 'object' with type_ specified as 'object').
 
-            Args:
+            Parameters:
                 column (str): \
                     The column name of a numerical column.
                 threshold (number): \
                     A maximum Z-score threshold. All column Z-scores that are lower than this threshold will evaluate
                     successfully.
-                double_sided (boolean): \
-                    A True of False value indicating whether to evaluate double sidedly.
-                    Example:
-                    double_sided = True, threshold = 2 -> Z scores in non-inclusive interval(-2,2)
-                    double_sided = False, threshold = 2 -> Z scores in non-inclusive interval (-infinity,2)
-
 
 
             Keyword Args:
                 mostly (None or a float between 0 and 1): \
                     Return `"success": True` if at least mostly fraction of values match the expectation. \
                     For more detail, see :ref:`mostly`.
+                double_sided (boolean): \
+                    A True of False value indicating whether to evaluate double sidedly.
+                    Example:
+                    double_sided = True, threshold = 2 -> Z scores in non-inclusive interval(-2,2)
+                    double_sided = False, threshold = 2 -> Z scores in non-inclusive interval (-infinity,2)
+
 
             Other Parameters:
                 result_format (str or None): \
@@ -70,7 +70,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     """
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     map_metric = "map.z_scores"
-    metric_dependencies = ("map.mean", "map.std_dev", "map.nonnull.count", "map.z_scores.number_over_threshold")
+    metric_dependencies = ("mean", "standard_deviation", "map.nonnull.count","z_scores", "z_scores.count_over_threshold")
     domain_kwargs = ("batch_id", "table", "column", "row_condition", "condition_parser")
     success_kwargs = ("threshold", "double_sided", "mostly")
 
@@ -103,29 +103,12 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
 
         return series.mean()
 
-    """Column Map Metric Decorator for the Standard Deviation"""
-    @PandasExecutionEngine.column_map_metric(
-
-    metric_name = "map.std_dev",
-    metric_domain_keys = ColumnMapDatasetExpectation.domain_keys,
-    metric_value_keys = (),
-    metric_dependencies = tuple(),
-    )
-    def _pandas_std_dev(
-            self,
-            series: pd.Series,
-            runtime_configuration: dict = None,
-    ):
-        """Standard Deviation Metric Function"""
-
-        return series.std()
-
     @PandasExecutionEngine.column_map_metric(
 
         metric_name="map.z_scores",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=("map.mean", "map.std_dev"),
+        metric_value_keys=("mean", "standard_deviation"),
+        metric_dependencies=("mean", "standard_deviation"),
     )
     def _pandas_z_scores(
                 self,
@@ -141,7 +124,6 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         except TypeError:
             raise(TypeError("Cannot complete Z-score calculations on a non-numerical column."))
 
-
     @PandasExecutionEngine.column_map_metric(
 
         metric_name="map.z_score.number_over_threshold",
@@ -152,16 +134,15 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     def _pandas_number_over_threshold(
             self,
             series: pd.Series,
+            threshold,
             runtime_configuration: dict = None,
     ):
         """Z-Score Metric Function"""
         # Currently does not handle columns with some random strings in them: should it?
         try:
-            return np.count_nonzero(series > self.success_kwargs["threshold"])
+            return np.count_nonzero(series > threshold)
         except TypeError:
             raise (TypeError("Cannot check if a string lies over a numerical threshold"))
-
-
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -176,7 +157,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         """
 
         # Setting up a configuration
-        super().validate_configurations(configuration)
+        super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
         try:
