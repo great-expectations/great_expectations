@@ -1,15 +1,14 @@
 .. _workflows_patterns:
 
-.. warning:: This doc is a stub.
-
-#########
+########################
 Workflows and patterns
-#########
+########################
 
 This page contains a collection of instructional guides for workflows, best practices, and design patterns involving Great Expectations.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    /guides/workflows_patterns/deployment_airflow
+   /guides/workflows_patterns/deployment_google_cloud_composer
    /guides/workflows_patterns/deployment_hosted_environments

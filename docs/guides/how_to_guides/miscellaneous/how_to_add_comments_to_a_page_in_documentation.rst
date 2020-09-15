@@ -3,7 +3,7 @@
 How to add comments to a page on docs.greatexpectations.io
 ==========================================================
 
-Many of the pages in Great Expectations' documentation allow comments through our discussion forum. Here's how to enable comments, specifically on :ref:`How-to Guides`.
+Many of the pages in Great Expectations' documentation allow comments through our discussion forum. Here's how to enable comments, specifically on :ref:`how_to_guides`.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 

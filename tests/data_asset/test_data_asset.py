@@ -104,6 +104,7 @@ def test_valid_expectation_types(dataset, pandas_dataset):
         "expect_column_median_to_be_between",
         "expect_column_min_to_be_between",
         "expect_column_most_common_value_to_be_in_set",
+        "expect_column_pair_cramers_phi_value_to_be_less_than",
         "expect_column_pair_values_A_to_be_greater_than_B",
         "expect_column_pair_values_to_be_equal",
         "expect_column_pair_values_to_be_in_set",
