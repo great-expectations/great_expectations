@@ -672,7 +672,6 @@ Notes:
         return batch_spec
 
     def get_domain_dataframe(
-
         self, domain_kwargs: dict, batches: Dict[str, Batch] = None
     ):
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
