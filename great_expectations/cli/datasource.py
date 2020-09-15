@@ -112,15 +112,17 @@ def delete_datasource(directory, datasource):
     except ValueError:
         cli_message(
             "<red>{}</red>".format(
-                "Datasource {} could not be found".format(datasource)
+                "Datasource {} could not be found.".format(datasource)
             )
         )
         sys.exit(1)
-    else:
+    try:
+        context.get_datasource(datasource)
+    except ValueError:
         cli_message("<green>{}</green>".format("Datasource deleted successfully."))
-
-    if context.get_datasource(datasource) is None:
-        cli_message("<red>{}</red>".format("Datasource not deleted"))
+        sys.exit(1)
+    else:
+        cli_message("<red>{}</red>".format("Datasource not deleted."))
         sys.exit(1)
 
 
