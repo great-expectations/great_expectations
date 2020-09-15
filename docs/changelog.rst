@@ -7,6 +7,7 @@ Changelog
 Develop
 -----------------
 * [DOCS] Add notes on transient table creation to Snowflake guide (thanks @verhey)!
+* [BUGFIX] Fix bug in deleting datasource config from config file (thanks @rxmeez)!
 
 
 0.12.1
