@@ -83,7 +83,6 @@ Aggregate functions
 * :func:`expect_column_max_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_max_to_be_between>`
 * :func:`expect_column_min_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_min_to_be_between>`
 * :func:`expect_column_sum_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_sum_to_be_between>`
-* :func:`expect_column_pair_cramers_phi_value_to_be_less_than <great_expectations.dataset.dataset.Dataset.expect_column_pair_cramers_phi_value_to_be_less_than>`
 
 Multi-column
 ============
@@ -92,6 +91,7 @@ Multi-column
 * :func:`expect_column_pair_values_to_be_in_set <great_expectations.dataset.dataset.Dataset.expect_column_pair_values_to_be_in_set>`
 * :func:`expect_multicolumn_values_to_be_unique <great_expectations.dataset.dataset.Dataset.expect_multicolumn_values_to_be_unique>`
 * :func:`expect_multicolumn_sum_to_equal <great_expectations.dataset.dataset.Dataset.expect_multicolumn_sum_to_equal>`
+* :func:`expect_column_pair_cramers_phi_value_to_be_less_than <great_expectations.dataset.dataset.Dataset.expect_column_pair_cramers_phi_value_to_be_less_than>`
 
 Distributional functions
 ========================
