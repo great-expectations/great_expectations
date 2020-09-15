@@ -6,7 +6,9 @@ Changelog
 
 Develop
 -----------------
+* [BUGFIX] Fix bug in deleting datasource config from config file (thanks @rxmeez)!
 * [DOCS] Add notes on transient table creation to Snowflake guide (thanks @verhey)!
+* [DOCS] Fixed several broken links and glossary organization (thanks @JavierMonton and @sbrugman)!
 
 
 0.12.1
@@ -21,6 +23,7 @@ Develop
 * [BUGFIX] Fix bug preventing the use of get_available_partition_ids in s3 generator
 * [BUGFIX] SuiteEditNotebookRenderer no longer break GCS and S3 data paths
 * [BUGFIX] TupleGCSStoreBackend: remove duplicate prefix for urls (thanks @azban)!
+* [BUGFIX] Fix `TypeError: unhashable type` error in Data Docs rendering
 
 0.12.0
 -----------------
