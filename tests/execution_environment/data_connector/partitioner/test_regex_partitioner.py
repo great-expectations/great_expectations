@@ -58,21 +58,21 @@ def test_regex_partitioner():
     my_partitioner.regex = regex
     returned_partitions = my_partitioner.get_available_partitions(batch_paths)
     assert returned_partitions == [
-        {'partition_definition': {'group_0': 'alex', 'group_1': '20200809', 'group_2': '1000'}, 'partition_key': 'alex-20200809-1000'},
-        {'partition_definition': {'group_0': 'eugene', 'group_1': '20200809', 'group_2': '1500'}, 'partition_key': 'eugene-20200809-1500'},
-        {'partition_definition': {'group_0': 'james', 'group_1': '20200811', 'group_2': '1009'}, 'partition_key': 'james-20200811-1009'},
-        {'partition_definition': {'group_0': 'abe', 'group_1': '20200809', 'group_2': '1040'}, 'partition_key': 'abe-20200809-1040'},
-        {'partition_definition': {'group_0': 'will', 'group_1': '20200809', 'group_2': '1002'}, 'partition_key': 'will-20200809-1002'},
-        {'partition_definition': {'group_0': 'james', 'group_1': '20200713', 'group_2': '1567'}, 'partition_key': 'james-20200713-1567'},
-        {'partition_definition': {'group_0': 'eugene', 'group_1': '20201129', 'group_2': '1900'}, 'partition_key': 'eugene-20201129-1900'},
-        {'partition_definition': {'group_0': 'will', 'group_1': '20200810', 'group_2': '1001'}, 'partition_key': 'will-20200810-1001'},
-        {'partition_definition': {'group_0': 'james', 'group_1': '20200810', 'group_2': '1003'}, 'partition_key': 'james-20200810-1003'},
-        {'partition_definition': {'group_0': 'alex', 'group_1': '20200819', 'group_2': '1300'}, 'partition_key': 'alex-20200819-1300'}
+        {'partition_definition': {'group_0': 'alex', 'group_1': '20200809', 'group_2': '1000'}, 'partition_name': 'alex-20200809-1000'},
+        {'partition_definition': {'group_0': 'eugene', 'group_1': '20200809', 'group_2': '1500'}, 'partition_name': 'eugene-20200809-1500'},
+        {'partition_definition': {'group_0': 'james', 'group_1': '20200811', 'group_2': '1009'}, 'partition_name': 'james-20200811-1009'},
+        {'partition_definition': {'group_0': 'abe', 'group_1': '20200809', 'group_2': '1040'}, 'partition_name': 'abe-20200809-1040'},
+        {'partition_definition': {'group_0': 'will', 'group_1': '20200809', 'group_2': '1002'}, 'partition_name': 'will-20200809-1002'},
+        {'partition_definition': {'group_0': 'james', 'group_1': '20200713', 'group_2': '1567'}, 'partition_name': 'james-20200713-1567'},
+        {'partition_definition': {'group_0': 'eugene', 'group_1': '20201129', 'group_2': '1900'}, 'partition_name': 'eugene-20201129-1900'},
+        {'partition_definition': {'group_0': 'will', 'group_1': '20200810', 'group_2': '1001'}, 'partition_name': 'will-20200810-1001'},
+        {'partition_definition': {'group_0': 'james', 'group_1': '20200810', 'group_2': '1003'}, 'partition_name': 'james-20200810-1003'},
+        {'partition_definition': {'group_0': 'alex', 'group_1': '20200819', 'group_2': '1300'}, 'partition_name': 'alex-20200819-1300'}
     ]
 
-    # partition keys
-    returned_partition_keys = my_partitioner.get_available_partition_keys(batch_paths)
-    assert returned_partition_keys == [
+    # partition names
+    returned_partition_names = my_partitioner.get_available_partition_names(batch_paths)
+    assert returned_partition_names == [
         'alex-20200809-1000',
         'eugene-20200809-1500',
         'james-20200811-1009',
