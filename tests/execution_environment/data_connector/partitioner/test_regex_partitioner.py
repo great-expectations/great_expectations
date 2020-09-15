@@ -2,16 +2,6 @@ import logging
 import pytest
 
 
-# TODO: <Alex>Will, do we need these?</Alex>
-# from great_expectations.execution_environment.execution_environment import (
-#     ExecutionEnvironment as exec,
-# )
-#
-# from great_expectations.execution_environment.data_connector import (
-#     DataConnector,
-#     FilesDataConnector,
-# )
-
 from great_expectations.execution_environment.data_connector.partitioner import RegexPartitioner
 
 try:
