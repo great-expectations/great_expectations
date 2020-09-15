@@ -1,6 +1,7 @@
 import datetime
 import logging
 import uuid
+import warnings
 
 from great_expectations.types import ClassConfig
 
@@ -184,6 +185,13 @@ class SparkDFDatasource(Datasource):
         )
 
         if "path" in batch_kwargs or "s3" in batch_kwargs:
+            if "s3" in batch_kwargs:
+                warnings.warn(
+                    "Direct GE Support for the s3 BatchKwarg will be removed in a future release. Please use a path "
+                    "including the s3a:// protocol instead.",
+                    DeprecationWarning,
+                )
+
             # If both are present, let s3 override
             path = batch_kwargs.get("path")
             path = batch_kwargs.get("s3", path)
