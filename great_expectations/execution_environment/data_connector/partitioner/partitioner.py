@@ -14,7 +14,7 @@ class Partitioner(object):
     _batch_spec_type = BatchSpec  #TODO : is this really needed?
     recognized_batch_definition_keys = {
         "regex",
-        "ordered_fields"
+        "sorters"
     }
 
     def __init__(self, name):

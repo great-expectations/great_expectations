@@ -10,7 +10,7 @@ class RegexPartitioner(Partitioner):
 
     recognized_batch_parameters = {
         "regex",
-        "ordered_fields",
+        "sorters",
     }
 
     # defaults
@@ -19,17 +19,17 @@ class RegexPartitioner(Partitioner):
 
 
     def __init__(
-            self,
-            name,
-            regex=None,
-            ordered_fields=None
+        self,
+        name,
+        regex=None,
+        sorters=None
     ):
 
         logger.debug("Constructing RegexPartitioner {!r}".format(name))
         super().__init__(name)
 
         self._regex = regex
-        self._ordered_fields = ordered_fields
+        self._sorters = sorters
         self._partitions = {}
 
     @property
@@ -41,8 +41,8 @@ class RegexPartitioner(Partitioner):
         self._regex = regex
 
     @property
-    def ordered_fields(self):
-        return self._ordered_fields
+    def sorters(self):
+        return self._sorters
 
     def get_part(self, partition_key):
         # this will return : Part object (Will and Alex part - aka single part)
@@ -82,7 +82,7 @@ class RegexPartitioner(Partitioner):
         else:
             # default case : there are no named ordered fields?
             # and add the name?
-            if self.ordered_fields is None:
+            if self.sorters is None:
                 # then we want to use the defaults:
                 # NOTE : matches begin with the full regex match at index=0 and then each matching group
                 # and then each subsequent match in following indices.

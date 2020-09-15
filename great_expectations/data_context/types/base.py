@@ -29,7 +29,7 @@ DEFAULT_USAGE_STATISTICS_URL = (
 )
 
 
-class PartitionConfig(DictDot):
+class SorterConfig(DictDot):
     def __init__(
         self,
         class_name=None,
@@ -57,12 +57,12 @@ class PartitionConfig(DictDot):
         return self._orderby
 
 
-class PartitionConfigSchema(Schema):
+class SorterConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
     class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.partition")
+    module_name = fields.String(missing="great_expectations.execution_environment.data_connector.partitioner")
     orderby = fields.String(missing="asc")
 
     @validates_schema
@@ -71,8 +71,8 @@ class PartitionConfigSchema(Schema):
 
     # noinspection PyUnusedLocal
     @post_load
-    def make_partition_config(self, data, **kwargs):
-        return PartitionConfig(**data)
+    def make_sorter_config(self, data, **kwargs):
+        return SorterConfig(**data)
 
 
 class PartitionerConfig(DictDot):
@@ -80,13 +80,13 @@ class PartitionerConfig(DictDot):
         self,
         class_name=None,
         module_name=None,
-        partitions=None,
+        sorters=None,
         **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
-        if partitions is not None:
-            self.partitions = partitions
+        if sorters is not None:
+            self.sorters = sorters
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -105,10 +105,10 @@ class PartitionerConfigSchema(Schema):
         unknown = INCLUDE
 
     class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.partitioner")
+    module_name = fields.String(missing="great_expectations.execution_environment.data_connector.partitioner")
 
-    partitions = fields.List(
-        cls_or_instance=fields.Nested(PartitionConfigSchema),
+    sorters = fields.List(
+        cls_or_instance=fields.Nested(SorterConfigSchema),
         required=False,
         allow_none=True,
     )
@@ -159,7 +159,7 @@ class DataConnectorConfigSchema(Schema):
         unknown = INCLUDE
 
     class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.data_connector")
+    module_name = fields.String(missing="great_expectations.execution_environment.data_connector")
 
     partitioner_name = fields.String(
         required=True,
