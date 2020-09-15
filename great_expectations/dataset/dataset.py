@@ -4255,7 +4255,7 @@ class Dataset(MetaDataset):
         bins_B=None,
         n_bins_A=None,
         n_bins_B=None,
-        threshold=0.05,
+        threshold=0.1,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
