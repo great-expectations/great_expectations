@@ -92,8 +92,14 @@ def handle_strict_min_max(params: dict) -> (str, str):
         tuple of strings to use for the at least condition and the at most condition
     """
 
-    at_least_str = "more than" if params.get("strict_min") is True else "at least"
-    at_most_str = "less than" if params.get("strict_max") is True else "at most"
+    at_least_str = (
+        "greater than"
+        if params.get("strict_min") is True
+        else "greater than or equal to"
+    )
+    at_most_str = (
+        "less than" if params.get("strict_max") is True else "less than or equal to"
+    )
 
     return at_least_str, at_most_str
 
