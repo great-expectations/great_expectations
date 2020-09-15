@@ -696,7 +696,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         try:
-            bucket.delete_blobs(blobs=bucket.list_blobs(prefix=self.prefix))
+            bucket.delete_blobs(blobs=list(bucket.list_blobs(prefix=self.prefix)))
         except NotFound:
             return False
         return True

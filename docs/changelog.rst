@@ -6,7 +6,9 @@ Changelog
 
 Develop
 -----------------
+
 * [ENHANCEMENT] Update schema for anonymized expectation types to avoid large key domain
+* [BUGFIX] Fix bug where running checkpoint fails if GCS data docs site has a prefix (thanks @sergii-tsymbal-exa)!
 * [BUGFIX] Fix bug in deleting datasource config from config file (thanks @rxmeez)!
 * [BUGFIX] clarify inclusiveness of min/max values in string rendering
 * [DOCS] Add notes on transient table creation to Snowflake guide (thanks @verhey)!
