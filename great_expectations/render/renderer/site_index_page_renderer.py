@@ -412,7 +412,9 @@ class SiteIndexPageRenderer(Renderer):
             tabs_content_block = RenderedTabsContent(
                 **{
                     "tabs": tabs,
-                    "styling": {"classes": ["col-12", "ge-index-page-tabs-container"],},
+                    "styling": {
+                        "classes": ["col-12", "ge-index-page-tabs-container"],
+                    },
                 }
             )
 

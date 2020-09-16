@@ -573,8 +573,8 @@ After you connect to the datasource, run great_expectations init to continue.
 
 def _should_hide_input():
     """
-        This is a workaround to help identify Windows and adjust the prompts accordingly
-        since hidden prompts may freeze in certain Windows terminals
+    This is a workaround to help identify Windows and adjust the prompts accordingly
+    since hidden prompts may freeze in certain Windows terminals
     """
     if "windows" in platform.platform().lower():
         return False
@@ -713,7 +713,8 @@ def _collect_snowflake_credentials_key_pair():
     credentials = {}
 
     credentials["private_key_path"] = click.prompt(
-        "Path to the private key used for authentication", show_default=False,
+        "Path to the private key used for authentication",
+        show_default=False,
     )
 
     credentials["private_key_passphrase"] = click.prompt(

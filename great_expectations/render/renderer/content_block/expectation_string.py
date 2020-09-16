@@ -136,7 +136,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["column", "column_index"],
+            expectation.kwargs,
+            ["column", "column_index"],
         )
 
         if params["column_index"] is None:
@@ -2454,7 +2455,11 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 bins_x2 = [round(value, 1) for value in bins[1:]]
 
                 df = pd.DataFrame(
-                    {"bin_min": bins_x1, "bin_max": bins_x2, "fraction": weights,}
+                    {
+                        "bin_min": bins_x1,
+                        "bin_max": bins_x2,
+                        "fraction": weights,
+                    }
                 )
 
                 bars = (

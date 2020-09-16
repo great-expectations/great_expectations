@@ -62,7 +62,9 @@ def test_checkpoint_list_with_no_checkpoints(
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint list -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint list -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 0
@@ -92,7 +94,9 @@ def test_checkpoint_list_with_single_checkpoint(
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint list -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint list -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 0
@@ -125,7 +129,9 @@ def test_checkpoint_new_raises_error_on_no_suite_found(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint new foo not_a_suite -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint new foo not_a_suite -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 1
@@ -364,7 +370,9 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run fake_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint run fake_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
 
@@ -396,7 +404,9 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run my_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint run my_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 1
@@ -448,7 +458,9 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run bad_batch -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint run bad_batch -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 1
@@ -505,7 +517,9 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run bad_batch -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint run bad_batch -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 1
@@ -571,7 +585,9 @@ def test_checkpoint_run_on_non_existent_validation_operator(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run bad_operator -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint run bad_operator -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 1
@@ -602,7 +618,9 @@ def test_checkpoint_run_happy_path_with_successful_validation(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run my_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint run my_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 0
@@ -643,7 +661,9 @@ def test_checkpoint_run_happy_path_with_failed_validation(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run my_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint run my_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     print(stdout)
@@ -722,7 +742,9 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint script my_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint script my_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert (
@@ -760,7 +782,9 @@ def test_checkpoint_script_happy_path_generates_script(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint script my_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint script my_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 0
@@ -812,7 +836,9 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint script my_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint script my_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 0
@@ -863,7 +889,9 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint script my_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint script my_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 0

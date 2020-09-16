@@ -104,7 +104,10 @@ def context_with_multiple_local_sites_and_s3_site(empty_data_context):
         },
         "s3_site": {
             "class_name": "SiteBuilder",
-            "store_backend": {"class_name": "TupleS3StoreBackend", "bucket": "foo",},
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": "foo",
+            },
             "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
         },
     }

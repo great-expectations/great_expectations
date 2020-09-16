@@ -1400,7 +1400,8 @@ class ExpectationConfiguration(DictDot):
 
             if not urn.get("metric_kwargs"):
                 nested_update(
-                    dependencies, {urn["expectation_suite_name"]: [urn["metric_name"]]},
+                    dependencies,
+                    {urn["expectation_suite_name"]: [urn["metric_name"]]},
                 )
             else:
                 nested_update(
@@ -1757,21 +1758,21 @@ class ExpectationSuite:
     ) -> ExpectationConfiguration:
         """
 
-       Args:
-            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against to
-                find the expectation to patch.
-            op: A jsonpatch operation (one of 'add','update', or 'remove') (see http://jsonpatch.com/)
-            path: A jsonpatch path for the patch operation (see http://jsonpatch.com/)
-            value: The value to patch (see http://jsonpatch.com/)
-            match_type: The match type to use for find_expectation_index()
+        Args:
+             expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against to
+                 find the expectation to patch.
+             op: A jsonpatch operation (one of 'add','update', or 'remove') (see http://jsonpatch.com/)
+             path: A jsonpatch path for the patch operation (see http://jsonpatch.com/)
+             value: The value to patch (see http://jsonpatch.com/)
+             match_type: The match type to use for find_expectation_index()
 
-       Returns: The patched ExpectationConfiguration
+        Returns: The patched ExpectationConfiguration
 
-       Raises:
-           No match
-           More than 1 match
+        Raises:
+            No match
+            More than 1 match
 
-               """
+        """
         found_expectation_indexes = self.find_expectation_indexes(
             expectation_configuration, match_type
         )

@@ -461,7 +461,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
             self.target_store.set(
                 SiteSectionIdentifier(
-                    site_section_name=self.name, resource_identifier=resource_key,
+                    site_section_name=self.name,
+                    resource_identifier=resource_key,
                 ),
                 viewable_content,
             )

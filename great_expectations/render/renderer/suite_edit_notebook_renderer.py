@@ -235,7 +235,8 @@ class SuiteEditNotebookRenderer(Renderer):
                     meta_args=self._build_meta_arguments(exp.meta),
                 )
                 self.add_code_cell(
-                    code, lint=True,
+                    code,
+                    lint=True,
                 )
 
     def _add_table_level_expectations(self, expectations_by_column):

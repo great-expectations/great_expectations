@@ -236,8 +236,8 @@ def test_expect_file_to_have_valid_table_header():
     invalid_header_dat = ge.data_asset.FileDataAsset(
         file_relative_path(__file__, "../test_sets/same_column_names.csv")
     )
-    invalid_header_dat_expectation = invalid_header_dat.expect_file_to_have_valid_table_header(
-        regex=r"\|", skip=2
+    invalid_header_dat_expectation = (
+        invalid_header_dat.expect_file_to_have_valid_table_header(regex=r"\|", skip=2)
     )
     assert not invalid_header_dat_expectation.success
 
@@ -245,8 +245,8 @@ def test_expect_file_to_have_valid_table_header():
     valid_header_dat = ge.data_asset.FileDataAsset(
         file_relative_path(__file__, "../test_sets/Titanic.csv")
     )
-    valid_header_dat_expectation = valid_header_dat.expect_file_to_have_valid_table_header(
-        regex=","
+    valid_header_dat_expectation = (
+        valid_header_dat.expect_file_to_have_valid_table_header(regex=",")
     )
     assert valid_header_dat_expectation.success
 

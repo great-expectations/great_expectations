@@ -16,7 +16,10 @@ class SlackRenderer(Renderer):
 
         title_block = {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": default_text,},
+            "text": {
+                "type": "mrkdwn",
+                "text": default_text,
+            },
         }
 
         query = {
@@ -48,7 +51,11 @@ class SlackRenderer(Renderer):
 *Run ID*: `{}`
 *Batch ID*: `{}`
 *Summary*: {}""".format(
-                status, expectation_suite_name, run_id, batch_id, check_details_text,
+                status,
+                expectation_suite_name,
+                run_id,
+                batch_id,
+                check_details_text,
             )
             query["blocks"][0]["text"]["text"] = summary_text
             # this abbreviated root level "text" will show up in the notification and not the message

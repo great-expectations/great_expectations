@@ -70,10 +70,14 @@ def pytest_addoption(parser):
         help="If set, suppress all tests against postgresql",
     )
     parser.addoption(
-        "--mysql", action="store_true", help="If set, execute tests against mysql",
+        "--mysql",
+        action="store_true",
+        help="If set, execute tests against mysql",
     )
     parser.addoption(
-        "--mssql", action="store_true", help="If set, execute tests against mssql",
+        "--mssql",
+        action="store_true",
+        help="If set, execute tests against mssql",
     )
     parser.addoption(
         "--aws-integration",
@@ -1254,15 +1258,25 @@ def numeric_high_card_dict():
 @pytest.fixture
 def numeric_high_card_dataset(test_backend, numeric_high_card_dict):
     schemas = {
-        "pandas": {"norm_0_1": "float64",},
+        "pandas": {
+            "norm_0_1": "float64",
+        },
         "postgresql": {
             # "norm_0_1": "DOUBLE_PRECISION",
             "norm_0_1": "NUMERIC",
         },
-        "sqlite": {"norm_0_1": "FLOAT",},
-        "mysql": {"norm_0_1": "DOUBLE",},
-        "mssql": {"norm_0_1": "FLOAT",},
-        "spark": {"norm_0_1": "FloatType",},
+        "sqlite": {
+            "norm_0_1": "FLOAT",
+        },
+        "mysql": {
+            "norm_0_1": "DOUBLE",
+        },
+        "mssql": {
+            "norm_0_1": "FLOAT",
+        },
+        "spark": {
+            "norm_0_1": "FloatType",
+        },
     }
     return get_dataset(test_backend, numeric_high_card_dict, schemas=schemas)
 
@@ -1285,12 +1299,24 @@ def datetime_dataset(test_backend):
     }
 
     schemas = {
-        "pandas": {"datetime": "datetime64",},
-        "postgresql": {"datetime": "TIMESTAMP",},
-        "sqlite": {"datetime": "TIMESTAMP",},
-        "mysql": {"datetime": "TIMESTAMP",},
-        "mssql": {"datetime": "DATETIME",},
-        "spark": {"datetime": "TimestampType",},
+        "pandas": {
+            "datetime": "datetime64",
+        },
+        "postgresql": {
+            "datetime": "TIMESTAMP",
+        },
+        "sqlite": {
+            "datetime": "TIMESTAMP",
+        },
+        "mysql": {
+            "datetime": "TIMESTAMP",
+        },
+        "mssql": {
+            "datetime": "DATETIME",
+        },
+        "spark": {
+            "datetime": "TimestampType",
+        },
     }
     return get_dataset(test_backend, data, schemas=schemas)
 
@@ -1410,12 +1436,24 @@ def non_numeric_low_card_dataset(test_backend):
         ]
     }
     schemas = {
-        "pandas": {"lowcardnonnum": "str",},
-        "postgresql": {"lowcardnonnum": "TEXT",},
-        "sqlite": {"lowcardnonnum": "VARCHAR",},
-        "mysql": {"lowcardnonnum": "TEXT",},
-        "mssql": {"lowcardnonnum": "VARCHAR",},
-        "spark": {"lowcardnonnum": "StringType",},
+        "pandas": {
+            "lowcardnonnum": "str",
+        },
+        "postgresql": {
+            "lowcardnonnum": "TEXT",
+        },
+        "sqlite": {
+            "lowcardnonnum": "VARCHAR",
+        },
+        "mysql": {
+            "lowcardnonnum": "TEXT",
+        },
+        "mssql": {
+            "lowcardnonnum": "VARCHAR",
+        },
+        "spark": {
+            "lowcardnonnum": "StringType",
+        },
     }
     return get_dataset(test_backend, data, schemas=schemas)
 
@@ -1838,12 +1876,30 @@ def non_numeric_high_card_dataset(test_backend):
         ],
     }
     schemas = {
-        "pandas": {"highcardnonnum": "str", "medcardnonnum": "str",},
-        "postgresql": {"highcardnonnum": "TEXT", "medcardnonnum": "TEXT",},
-        "sqlite": {"highcardnonnum": "VARCHAR", "medcardnonnum": "VARCHAR",},
-        "mysql": {"highcardnonnum": "TEXT", "medcardnonnum": "TEXT",},
-        "mssql": {"highcardnonnum": "VARCHAR", "medcardnonnum": "VARCHAR",},
-        "spark": {"highcardnonnum": "StringType", "medcardnonnum": "StringType",},
+        "pandas": {
+            "highcardnonnum": "str",
+            "medcardnonnum": "str",
+        },
+        "postgresql": {
+            "highcardnonnum": "TEXT",
+            "medcardnonnum": "TEXT",
+        },
+        "sqlite": {
+            "highcardnonnum": "VARCHAR",
+            "medcardnonnum": "VARCHAR",
+        },
+        "mysql": {
+            "highcardnonnum": "TEXT",
+            "medcardnonnum": "TEXT",
+        },
+        "mssql": {
+            "highcardnonnum": "VARCHAR",
+            "medcardnonnum": "VARCHAR",
+        },
+        "spark": {
+            "highcardnonnum": "StringType",
+            "medcardnonnum": "StringType",
+        },
     }
     return get_dataset(test_backend, data, schemas=schemas)
 
@@ -1960,11 +2016,13 @@ def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
     monkeypatch.setenv("FOO", "BAR")
     root_dir = empty_data_context.root_directory
     ge_config_path = file_relative_path(
-        __file__, "./test_fixtures/great_expectations_basic_with_variables.yml",
+        __file__,
+        "./test_fixtures/great_expectations_basic_with_variables.yml",
     )
     shutil.copy(ge_config_path, os.path.join(root_dir, "great_expectations.yml"))
     config_variables_path = file_relative_path(
-        __file__, "./test_fixtures/config_variables.yml",
+        __file__,
+        "./test_fixtures/config_variables.yml",
     )
     shutil.copy(config_variables_path, os.path.join(root_dir, "uncommitted"))
     return DataContext(context_root_dir=root_dir)
@@ -2224,7 +2282,8 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
     os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "great_expectations_basic.yml"),
@@ -2266,7 +2325,8 @@ def data_context_with_bad_notebooks(tmp_path_factory):
     custom_notebook_assets_dir = "notebook_assets"
 
     os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "great_expectations_basic_with_bad_notebooks.yml"),
@@ -2299,7 +2359,8 @@ def data_context_custom_notebooks(tmp_path_factory):
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
     os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "great_expectations_custom_notebooks.yml"),
@@ -2329,14 +2390,18 @@ def data_context_simple_expectation_suite(tmp_path_factory):
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
     os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "great_expectations_basic.yml"),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
     shutil.copy(
-        os.path.join(fixture_dir, "rendering_fixtures/expectations_suite_1.json",),
+        os.path.join(
+            fixture_dir,
+            "rendering_fixtures/expectations_suite_1.json",
+        ),
         os.path.join(asset_config_path, "default.json"),
     )
     os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
@@ -2423,7 +2488,12 @@ def filesystem_csv_4(tmp_path_factory):
     base_dir = str(base_dir)
 
     # Put a file in the directory
-    toy_dataset = PandasDataset({"x": [1, 2, 3], "y": [1, 2, 3],})
+    toy_dataset = PandasDataset(
+        {
+            "x": [1, 2, 3],
+            "y": [1, 2, 3],
+        }
+    )
     toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
 
     return base_dir

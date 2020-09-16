@@ -985,11 +985,15 @@ def test_stats_mixed_expectations():
 class TestIO(unittest.TestCase):
     def test_read_csv(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_csv(script_path + "/test_sets/Titanic.csv",)
+        df = ge.read_csv(
+            script_path + "/test_sets/Titanic.csv",
+        )
 
     def test_read_json(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_json(script_path + "/test_sets/test_json_data_file.json",)
+        df = ge.read_json(
+            script_path + "/test_sets/test_json_data_file.json",
+        )
         assert df["x"][0] == "i"
         assert isinstance(df, PandasDataset)
         assert sorted(list(df.keys())) == ["x", "y", "z"]
@@ -1004,7 +1008,9 @@ class TestIO(unittest.TestCase):
 
     def test_read_excel(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_excel(script_path + "/test_sets/Titanic_multi_sheet.xlsx",)
+        df = ge.read_excel(
+            script_path + "/test_sets/Titanic_multi_sheet.xlsx",
+        )
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
@@ -1075,7 +1081,9 @@ class TestIO(unittest.TestCase):
 
     def test_read_pickle(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_pickle(script_path + "/test_sets/Titanic.pkl",)
+        df = ge.read_pickle(
+            script_path + "/test_sets/Titanic.pkl",
+        )
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 

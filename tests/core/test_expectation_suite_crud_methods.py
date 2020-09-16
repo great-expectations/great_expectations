@@ -197,7 +197,12 @@ def suite_with_column_pair_and_table_expectations(
 ):
     suite = ExpectationSuite(
         expectation_suite_name="warning",
-        expectations=[column_pair_expectation, table_exp1, table_exp2, table_exp3,],
+        expectations=[
+            column_pair_expectation,
+            table_exp1,
+            table_exp2,
+            table_exp3,
+        ],
         meta={"notes": "This is an expectation suite."},
     )
     assert suite.expectations == [
@@ -316,7 +321,11 @@ def test_patch_expectation_replace(exp5, exp6, domain_success_runtime_suite):
         exp6, match_type="success"
     )
     domain_success_runtime_suite.patch_expectation(
-        exp5, op="replace", path="/value_set", value=[1, 2], match_type="runtime",
+        exp5,
+        op="replace",
+        path="/value_set",
+        value=[1, 2],
+        match_type="runtime",
     )
     assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
         exp6, match_type="success"
@@ -330,7 +339,11 @@ def test_patch_expectation_add(exp5, exp7, domain_success_runtime_suite):
         exp7, match_type="success"
     )
     domain_success_runtime_suite.patch_expectation(
-        exp5, op="add", path="/value_set/-", value=4, match_type="runtime",
+        exp5,
+        op="add",
+        path="/value_set/-",
+        value=4,
+        match_type="runtime",
     )
     assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
         exp7, match_type="success"
@@ -344,7 +357,11 @@ def test_patch_expectation_remove(exp5, exp8, domain_success_runtime_suite):
         exp8, match_type="runtime"
     )
     domain_success_runtime_suite.patch_expectation(
-        exp5, op="remove", path="/result_format", value=None, match_type="runtime",
+        exp5,
+        op="remove",
+        path="/result_format",
+        value=None,
+        match_type="runtime",
     )
     assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
         exp8, match_type="runtime"

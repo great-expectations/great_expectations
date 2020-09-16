@@ -504,7 +504,8 @@ def ValidationResultsPageRenderer_render_with_run_info_at_start():
 
 
 def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
-    titanic_profiled_evrs_1, ValidationResultsPageRenderer_render_with_run_info_at_end,
+    titanic_profiled_evrs_1,
+    ValidationResultsPageRenderer_render_with_run_info_at_end,
 ):
     validation_results_page_renderer = ValidationResultsPageRenderer(
         run_info_at_end=True

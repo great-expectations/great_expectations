@@ -79,7 +79,12 @@ class MetaSparkDFDataset(Dataset):
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
-            self, column, mostly=None, result_format=None, *args, **kwargs,
+            self,
+            column,
+            mostly=None,
+            result_format=None,
+            *args,
+            **kwargs,
         ):
             """
             This whole decorator is pending a re-write. Currently there is are huge performance issues
@@ -304,7 +309,10 @@ class MetaSparkDFDataset(Dataset):
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
-                    (row["A_{}".format(eval_col_A)], row["B_{}".format(eval_col_B)],)
+                    (
+                        row["A_{}".format(eval_col_A)],
+                        row["B_{}".format(eval_col_B)],
+                    )
                     for row in unexpected_df.collect()
                 ]
 
@@ -517,75 +525,75 @@ class MetaSparkDFDataset(Dataset):
 
 class SparkDFDataset(MetaSparkDFDataset):
     """
-This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
+    This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: validation_engine_pyspark_self_managed
-    title: Validation Engine - pyspark - Self-Managed
-    icon:
-    short_description: Use Spark DataFrame to validate data
-    description: Use Spark DataFrame to validate data
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
-    maturity: Production
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Moderate
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: N/A -> see relevant Datasource evaluation
-        documentation_completeness: Complete
-        bug_risk: Low/Moderate
-        expectation_completeness: Moderate
+        id: validation_engine_pyspark_self_managed
+        title: Validation Engine - pyspark - Self-Managed
+        icon:
+        short_description: Use Spark DataFrame to validate data
+        description: Use Spark DataFrame to validate data
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+        maturity: Production
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Moderate
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: N/A -> see relevant Datasource evaluation
+            documentation_completeness: Complete
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
 
-    id: validation_engine_databricks
-    title: Validation Engine - Databricks
-    icon:
-    short_description: Use Spark DataFrame in a Databricks cluster to validate data
-    description: Use Spark DataFrame in a Databricks cluster to validate data
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
-    maturity: Beta
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Low (dbfs-specific handling)
-        unit_test_coverage: N/A -> implementation not different
-        integration_infrastructure_test_coverage: Minimal (we've tested a bit, know others have used it)
-        documentation_completeness: Moderate (need docs on managing project configuration via dbfs/etc.)
-        bug_risk: Low/Moderate
-        expectation_completeness: Moderate
+        id: validation_engine_databricks
+        title: Validation Engine - Databricks
+        icon:
+        short_description: Use Spark DataFrame in a Databricks cluster to validate data
+        description: Use Spark DataFrame in a Databricks cluster to validate data
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+        maturity: Beta
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Low (dbfs-specific handling)
+            unit_test_coverage: N/A -> implementation not different
+            integration_infrastructure_test_coverage: Minimal (we've tested a bit, know others have used it)
+            documentation_completeness: Moderate (need docs on managing project configuration via dbfs/etc.)
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
 
-    id: validation_engine_emr_spark
-    title: Validation Engine - EMR - Spark
-    icon:
-    short_description: Use Spark DataFrame in an EMR cluster to validate data
-    description: Use Spark DataFrame in an EMR cluster to validate data
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
-    maturity: Experimental
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Low (need to provide guidance on "known good" paths, and we know there are many "knobs" to tune that we have not explored/tested)
-        unit_test_coverage: N/A -> implementation not different
-        integration_infrastructure_test_coverage: Unknown
-        documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
-        bug_risk: Low/Moderate
-        expectation_completeness: Moderate
+        id: validation_engine_emr_spark
+        title: Validation Engine - EMR - Spark
+        icon:
+        short_description: Use Spark DataFrame in an EMR cluster to validate data
+        description: Use Spark DataFrame in an EMR cluster to validate data
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+        maturity: Experimental
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Low (need to provide guidance on "known good" paths, and we know there are many "knobs" to tune that we have not explored/tested)
+            unit_test_coverage: N/A -> implementation not different
+            integration_infrastructure_test_coverage: Unknown
+            documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
 
-    id: validation_engine_spark_other
-    title: Validation Engine - Spark - Other
-    icon:
-    short_description: Use Spark DataFrame to validate data
-    description: Use Spark DataFrame to validate data
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
-    maturity: Experimental
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Other (we haven't tested possibility, known glue deployment)
-        unit_test_coverage: N/A -> implementation not different
-        integration_infrastructure_test_coverage: Unknown
-        documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
-        bug_risk: Low/Moderate
-        expectation_completeness: Moderate
+        id: validation_engine_spark_other
+        title: Validation Engine - Spark - Other
+        icon:
+        short_description: Use Spark DataFrame to validate data
+        description: Use Spark DataFrame to validate data
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+        maturity: Experimental
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Other (we haven't tested possibility, known glue deployment)
+            unit_test_coverage: N/A -> implementation not different
+            integration_infrastructure_test_coverage: Unknown
+            documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
     """
 
     @classmethod

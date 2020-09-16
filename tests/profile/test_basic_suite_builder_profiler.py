@@ -468,7 +468,9 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     # with open(file_relative_path(__file__, '../render/fixtures/BasicSuiteBuilderProfiler_evrs.json'), 'w+') as file:
     #     json.dump(expectationSuiteValidationResultSchema.dump(evrs), file, indent=2)
 
-    with open(expected_filepath,) as file:
+    with open(
+        expected_filepath,
+    ) as file:
         expected_evrs = expectationSuiteValidationResultSchema.load(
             json.load(file, object_pairs_hook=OrderedDict)
         )
@@ -714,7 +716,9 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_ha
 
 
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
-def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(pandas_dataset,):
+def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(
+    pandas_dataset,
+):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset, profiler_configuration={"included_columns": ["naturals"]}
     )
@@ -922,7 +926,8 @@ def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("included_columns", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_falsey_on_pandas(
-    included_columns, pandas_dataset,
+    included_columns,
+    pandas_dataset,
 ):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
@@ -957,15 +962,22 @@ def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_false
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("included_expectations", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations_are_falsey_on_pandas(
-    included_expectations, pandas_dataset,
+    included_expectations,
+    pandas_dataset,
 ):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
-        profiler_configuration={"included_expectations": included_expectations,},
+        profiler_configuration={
+            "included_expectations": included_expectations,
+        },
     )
     assert isinstance(observed_suite, ExpectationSuite)
 
-    expected = ExpectationSuite("default", data_asset_type="Dataset", expectations=[],)
+    expected = ExpectationSuite(
+        "default",
+        data_asset_type="Dataset",
+        expectations=[],
+    )
 
     # remove metadata to simplify assertions
     observed_suite.meta = None
@@ -976,11 +988,14 @@ def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("excluded_expectations", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectations_are_falsey_on_pandas(
-    excluded_expectations, pandas_dataset,
+    excluded_expectations,
+    pandas_dataset,
 ):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
-        profiler_configuration={"excluded_expectations": excluded_expectations,},
+        profiler_configuration={
+            "excluded_expectations": excluded_expectations,
+        },
     )
     assert isinstance(observed_suite, ExpectationSuite)
 
@@ -1194,7 +1209,8 @@ def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectation
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("excluded_columns", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_all_columns_if_excluded_columns_are_falsey_on_pandas(
-    excluded_columns, pandas_dataset,
+    excluded_columns,
+    pandas_dataset,
 ):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
@@ -1312,7 +1328,9 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuratio
     # with open(file_relative_path(__file__, '../render/fixtures/SuiteBuilderProfiler_evrs.json'), 'w+') as file:
     #     json.dump(expectationSuiteValidationResultSchema.dump(evrs), file, indent=2)
 
-    with open(expected_filepath,) as file:
+    with open(
+        expected_filepath,
+    ) as file:
         expected_evrs = expectationSuiteValidationResultSchema.load(
             json.load(file, object_pairs_hook=OrderedDict)
         )

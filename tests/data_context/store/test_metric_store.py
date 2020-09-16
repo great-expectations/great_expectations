@@ -38,6 +38,8 @@ def param_store(request, test_backends):
 
     return instantiate_class_from_config(
         config=request.param,
-        config_defaults={"module_name": "great_expectations.data_context.store",},
+        config_defaults={
+            "module_name": "great_expectations.data_context.store",
+        },
         runtime_environment={},
     )

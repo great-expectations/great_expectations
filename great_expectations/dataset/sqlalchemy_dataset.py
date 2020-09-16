@@ -262,9 +262,9 @@ class MetaSqlAlchemyDataset(Dataset):
                 .limit(unexpected_count_limit)
             )
 
-            nonnull_count: int = count_results["element_count"] - count_results[
-                "null_count"
-            ]
+            nonnull_count: int = (
+                count_results["element_count"] - count_results["null_count"]
+            )
 
             if "output_strftime_format" in kwargs:
                 output_strftime_format = kwargs["output_strftime_format"]
@@ -355,18 +355,28 @@ class MetaSqlAlchemyDataset(Dataset):
             )
             self.engine.execute(inner_case_query)
 
-        element_count_query: Select = sa.select(
-            [
-                sa.func.count().label("element_count"),
-                sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
-                    "null_count"
-                ),
-            ]
-        ).select_from(self._table).alias("ElementAndNullCountsSubquery")
+        element_count_query: Select = (
+            sa.select(
+                [
+                    sa.func.count().label("element_count"),
+                    sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
+                        "null_count"
+                    ),
+                ]
+            )
+            .select_from(self._table)
+            .alias("ElementAndNullCountsSubquery")
+        )
 
-        unexpected_count_query: Select = sa.select(
-            [sa.func.sum(sa.column("condition")).label("unexpected_count"),]
-        ).select_from(temp_table_obj).alias("UnexpectedCountSubquery")
+        unexpected_count_query: Select = (
+            sa.select(
+                [
+                    sa.func.sum(sa.column("condition")).label("unexpected_count"),
+                ]
+            )
+            .select_from(temp_table_obj)
+            .alias("UnexpectedCountSubquery")
+        )
 
         count_query: Select = sa.select(
             [
@@ -410,25 +420,24 @@ class MetaSqlAlchemyDataset(Dataset):
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     """
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: validation_engine_sqlalchemy
-    title: Validation Engine - SQLAlchemy
-    icon:
-    short_description: Use SQLAlchemy to validate data in a database
-    description: Use SQLAlchemy to validate data in a database
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_database_table_or_a_query_result_as_a_batch.html
-    maturity: Production
-    maturity_details:
-        api_stability: High
-        implementation_completeness: Moderate (temp table handling/permissions not universal)
-        unit_test_coverage: High
-        integration_infrastructure_test_coverage: N/A
-        documentation_completeness:  Minimal (none)
-        bug_risk: Low
+        id: validation_engine_sqlalchemy
+        title: Validation Engine - SQLAlchemy
+        icon:
+        short_description: Use SQLAlchemy to validate data in a database
+        description: Use SQLAlchemy to validate data in a database
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_database_table_or_a_query_result_as_a_batch.html
+        maturity: Production
+        maturity_details:
+            api_stability: High
+            implementation_completeness: Moderate (temp table handling/permissions not universal)
+            unit_test_coverage: High
+            integration_infrastructure_test_coverage: N/A
+            documentation_completeness:  Minimal (none)
+            bug_risk: Low
 
---ge-feature-maturity-info--
-"""
+    --ge-feature-maturity-info--"""
 
     @classmethod
     def from_dataset(cls, dataset=None):
@@ -573,12 +582,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return self.engine.dialect
 
     def attempt_allowing_relative_error(self):
-        detected_redshift: bool = (
-            sqlalchemy_redshift is not None
-            and check_sql_engine_dialect(
-                actual_sql_engine_dialect=self.sql_engine_dialect,
-                candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
-            )
+        detected_redshift: bool = sqlalchemy_redshift is not None and check_sql_engine_dialect(
+            actual_sql_engine_dialect=self.sql_engine_dialect,
+            candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
         )
         # noinspection PyTypeChecker
         detected_psycopg2: bool = (
@@ -835,36 +841,45 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def _get_column_quantiles_mysql(self, column: str, quantiles: Iterable) -> list:
         # MySQL does not support "percentile_disc", so we implement it as a compound query.
         # Please see https://stackoverflow.com/questions/19770026/calculate-percentile-value-using-mysql for reference.
-        percent_rank_query: CTE = sa.select(
-            [
-                sa.column(column),
-                sa.cast(
-                    sa.func.percent_rank().over(order_by=sa.column(column).asc()),
-                    sa.dialects.mysql.DECIMAL(18, 15),
-                ).label("p"),
-            ]
-        ).order_by(sa.column("p").asc()).select_from(self._table).cte("t")
+        percent_rank_query: CTE = (
+            sa.select(
+                [
+                    sa.column(column),
+                    sa.cast(
+                        sa.func.percent_rank().over(order_by=sa.column(column).asc()),
+                        sa.dialects.mysql.DECIMAL(18, 15),
+                    ).label("p"),
+                ]
+            )
+            .order_by(sa.column("p").asc())
+            .select_from(self._table)
+            .cte("t")
+        )
 
         selects: List[WithinGroup] = []
         for idx, quantile in enumerate(quantiles):
             # pymysql cannot handle conversion of numpy float64 to float; convert just in case
             if np.issubdtype(type(quantile), np.float_):
                 quantile = float(quantile)
-            quantile_column: Label = sa.func.first_value(sa.column(column)).over(
-                order_by=sa.case(
-                    [
-                        (
-                            percent_rank_query.c.p
-                            <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
-                            percent_rank_query.c.p,
-                        )
-                    ],
-                    else_=None,
-                ).desc()
-            ).label(f"q_{idx}")
+            quantile_column: Label = (
+                sa.func.first_value(sa.column(column))
+                .over(
+                    order_by=sa.case(
+                        [
+                            (
+                                percent_rank_query.c.p
+                                <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
+                                percent_rank_query.c.p,
+                            )
+                        ],
+                        else_=None,
+                    ).desc()
+                )
+                .label(f"q_{idx}")
+            )
             selects.append(quantile_column)
-        quantiles_query: Select = sa.select(selects).distinct().order_by(
-            percent_rank_query.c.p.desc()
+        quantiles_query: Select = (
+            sa.select(selects).distinct().order_by(percent_rank_query.c.p.desc())
         )
 
         try:
@@ -1034,7 +1049,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         query = (
             sa.select(case_conditions)
-            .where(sa.column(column) != None,)
+            .where(
+                sa.column(column) != None,
+            )
             .select_from(self._table)
         )
 
@@ -1180,8 +1197,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             logger.info("Creating transient table %s" % table_name)
             if schema_name is not None:
                 table_name = schema_name + "." + table_name
-            stmt = "CREATE OR REPLACE TRANSIENT TABLE {table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
+            stmt = (
+                "CREATE OR REPLACE TRANSIENT TABLE {table_name} AS {custom_sql}".format(
+                    table_name=table_name, custom_sql=custom_sql
+                )
             )
         elif self.sql_engine_dialect.name == "mysql":
             # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the generic case.
@@ -1298,7 +1317,10 @@ WHERE
         return {
             "success": row_count == other_table_row_count,
             "result": {
-                "observed_value": {"self": row_count, "other": other_table_row_count,}
+                "observed_value": {
+                    "self": row_count,
+                    "other": other_table_row_count,
+                }
             },
         }
 

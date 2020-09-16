@@ -68,7 +68,9 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 if substring in key_element:
                     raise ValueError(
                         "Keys in {} must not contain substrings in {} : {}".format(
-                            self.__class__.__name__, self.forbidden_substrings, key,
+                            self.__class__.__name__,
+                            self.forbidden_substrings,
+                            key,
                         )
                     )
 
@@ -76,7 +78,10 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         if not isinstance(value, str) and not isinstance(value, bytes):
             raise TypeError(
                 "Values in {} must be instances of {} or {}, not {}".format(
-                    self.__class__.__name__, str, bytes, type(value),
+                    self.__class__.__name__,
+                    str,
+                    bytes,
+                    type(value),
                 )
             )
 
@@ -138,7 +143,9 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             # Convert the template to a regex
             indexed_string_substitutions = re.findall(r"{\d+}", filepath_template)
             tuple_index_list = [
-                "(?P<tuple_index_{}>.*)".format(i,)
+                "(?P<tuple_index_{}>.*)".format(
+                    i,
+                )
                 for i in range(len(indexed_string_substitutions))
             ]
             intermediate_filepath_regex = re.sub(
@@ -179,7 +186,9 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise ValueError(
                 "filepath template {} for class {} is not reversible for a tuple of length {}. "
                 "Have you included all elements in the key tuple?".format(
-                    self.filepath_template, self.__class__.__name__, self.key_length,
+                    self.filepath_template,
+                    self.__class__.__name__,
+                    self.key_length,
                 )
             )
 
@@ -284,7 +293,10 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         ):
             for file_ in files:
                 full_path, file_name = os.path.split(os.path.join(root, file_))
-                relative_path = os.path.relpath(full_path, self.full_base_directory,)
+                relative_path = os.path.relpath(
+                    full_path,
+                    self.full_base_directory,
+                )
                 if relative_path == ".":
                     filepath = file_name
                 else:
@@ -661,7 +673,10 @@ class TupleGCSStoreBackend(TupleStoreBackend):
 
         for blob in gcs.list_blobs(self.bucket, prefix=self.prefix):
             gcs_object_name = blob.name
-            gcs_object_key = os.path.relpath(gcs_object_name, self.prefix,)
+            gcs_object_key = os.path.relpath(
+                gcs_object_name,
+                self.prefix,
+            )
             if self.filepath_prefix and not gcs_object_key.startswith(
                 self.filepath_prefix
             ):

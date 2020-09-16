@@ -92,8 +92,8 @@ class JsonSchemaProfiler(Profiler):
                 if string_len_expectation:
                     expectations.append(string_len_expectation)
 
-                null_or_not_null_expectation = self._create_null_or_not_null_column_expectation(
-                    key, details
+                null_or_not_null_expectation = (
+                    self._create_null_or_not_null_column_expectation(key, details)
                 )
                 if null_or_not_null_expectation:
                     expectations.append(null_or_not_null_expectation)

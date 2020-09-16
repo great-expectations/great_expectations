@@ -35,22 +35,21 @@ except ImportError:
 )
 def cli(verbose):
     """
-Welcome to the great_expectations CLI!
+    Welcome to the great_expectations CLI!
 
-Most commands follow this format: great_expectations <NOUN> <VERB>
+    Most commands follow this format: great_expectations <NOUN> <VERB>
 
-The nouns are: datasource, docs, project, suite, validation-operator
+    The nouns are: datasource, docs, project, suite, validation-operator
 
-Most nouns accept the following verbs: new, list, edit
+    Most nouns accept the following verbs: new, list, edit
 
-In particular, the CLI supports the following special commands:
+    In particular, the CLI supports the following special commands:
 
-- great_expectations init : create a new great_expectations project
+    - great_expectations init : create a new great_expectations project
 
-- great_expectations datasource profile : profile a datasource
+    - great_expectations datasource profile : profile a datasource
 
-- great_expectations docs build : compile documentation from expectations
-"""
+    - great_expectations docs build : compile documentation from expectations"""
     logger = _set_up_logger()
     if verbose:
         # Note we are explicitly not using a logger in all CLI output to have

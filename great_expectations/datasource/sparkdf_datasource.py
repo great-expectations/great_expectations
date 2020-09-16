@@ -25,31 +25,31 @@ except ImportError:
 
 class SparkDFDatasource(Datasource):
     """The SparkDFDatasource produces SparkDFDatasets and supports generators capable of interacting with local
-    filesystem (the default subdir_reader batch kwargs  generator) and databricks notebooks.
+        filesystem (the default subdir_reader batch kwargs  generator) and databricks notebooks.
 
-    Accepted Batch Kwargs:
-        - PathBatchKwargs ("path" or "s3" keys)
-        - InMemoryBatchKwargs ("dataset" key)
-        - QueryBatchKwargs ("query" key)
+        Accepted Batch Kwargs:
+            - PathBatchKwargs ("path" or "s3" keys)
+            - InMemoryBatchKwargs ("dataset" key)
+            - QueryBatchKwargs ("query" key)
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: datasource_hdfs_spark
-        title: Datasource - HDFS
-        icon:
-        short_description: HDFS
-        description: Use HDFS as an external datasource in conjunction with Spark.
-        how_to_guide_url:
-        maturity: Experimental
-        maturity_details:
-            api_stability: Stable
-            implementation_completeness: Unknown
-            unit_test_coverage: Minimal (none)
-            integration_infrastructure_test_coverage: Minimal (none)
-            documentation_completeness:  Minimal (none)
-            bug_risk: Unknown
+        id: datasource_hdfs_spark
+            title: Datasource - HDFS
+            icon:
+            short_description: HDFS
+            description: Use HDFS as an external datasource in conjunction with Spark.
+            how_to_guide_url:
+            maturity: Experimental
+            maturity_details:
+                api_stability: Stable
+                implementation_completeness: Unknown
+                unit_test_coverage: Minimal (none)
+                integration_infrastructure_test_coverage: Minimal (none)
+                documentation_completeness:  Minimal (none)
+                bug_risk: Unknown
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
     """
 
     recognized_batch_parameters = {
@@ -152,7 +152,8 @@ class SparkDFDatasource(Datasource):
         self, reader_method=None, reader_options=None, limit=None, dataset_options=None
     ):
         batch_kwargs = super().process_batch_parameters(
-            limit=limit, dataset_options=dataset_options,
+            limit=limit,
+            dataset_options=dataset_options,
         )
 
         # Apply globally-configured reader options first

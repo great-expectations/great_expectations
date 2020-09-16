@@ -25,7 +25,7 @@ def assert_how_to_buttons(
     show_how_to_buttons=True,
 ):
     """Helper function to assert presence or non-presence of how-to buttons and related content in various
-        Data Docs pages.
+    Data Docs pages.
     """
 
     # these are simple checks for presence of certain page elements
@@ -142,7 +142,8 @@ def test_configuration_driven_site_builder(
     )
 
     batch = context.get_batch(
-        batch_kwargs=batch_kwargs, expectation_suite_name=expectation_suite_name,
+        batch_kwargs=batch_kwargs,
+        expectation_suite_name=expectation_suite_name,
     )
     run_id = RunIdentifier(run_name="test_run_id_12345")
     context.run_validation_operator(
@@ -409,7 +410,8 @@ def test_configuration_driven_site_builder_skip_and_clean_missing(
     )
 
     batch = context.get_batch(
-        batch_kwargs=batch_kwargs, expectation_suite_name=expectation_suite_name,
+        batch_kwargs=batch_kwargs,
+        expectation_suite_name=expectation_suite_name,
     )
     run_id = RunIdentifier(run_name="test_run_id_12345")
     context.run_validation_operator(
@@ -543,7 +545,8 @@ def test_configuration_driven_site_builder_without_how_to_buttons(
     )
 
     batch = context.get_batch(
-        batch_kwargs=batch_kwargs, expectation_suite_name=expectation_suite_name,
+        batch_kwargs=batch_kwargs,
+        expectation_suite_name=expectation_suite_name,
     )
     run_id = "test_run_id_12345"
     context.run_validation_operator(

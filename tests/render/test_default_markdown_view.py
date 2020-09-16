@@ -44,7 +44,10 @@ def test_render_section_page():
             "section_name": None,
             "content_blocks": [
                 RenderedHeaderContent(
-                    **{"content_block_type": "header", "header": "Overview",}
+                    **{
+                        "content_block_type": "header",
+                        "header": "Overview",
+                    }
                 ),
                 RenderedTableContent(
                     **{
@@ -104,8 +107,10 @@ def test_snapshot_render_section_page_with_fixture_data(validation_operator_resu
         run_info_at_end=True
     )
 
-    rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result(
-        validation_operator_result=validation_operator_result
+    rendered_document_content_list = (
+        validation_results_page_renderer.render_validation_operator_result(
+            validation_operator_result=validation_operator_result
+        )
     )
 
     md_str_list = DefaultMarkdownPageView().render(rendered_document_content_list)
@@ -476,8 +481,10 @@ def test_render_section_page_with_fixture_data_multiple_validations(
         run_info_at_end=True
     )
 
-    rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result(
-        validation_operator_result=validation_operator_result
+    rendered_document_content_list = (
+        validation_results_page_renderer.render_validation_operator_result(
+            validation_operator_result=validation_operator_result
+        )
     )
 
     md_str_list = DefaultMarkdownPageView().render(rendered_document_content_list)

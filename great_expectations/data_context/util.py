@@ -32,7 +32,8 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
         except KeyError:
             raise KeyError(
                 "Neither config : {} nor config_defaults : {} contains a module_name key.".format(
-                    config, config_defaults,
+                    config,
+                    config_defaults,
                 )
             )
     else:
@@ -52,7 +53,8 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
         except KeyError:
             raise KeyError(
                 "Neither config : {} nor config_defaults : {} contains a class_name key.".format(
-                    config, config_defaults,
+                    config,
+                    config_defaults,
                 )
             )
     else:

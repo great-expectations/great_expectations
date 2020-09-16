@@ -63,13 +63,17 @@ class StoreBackend(metaclass=ABCMeta):
                 if not isinstance(key_element, str):
                     raise TypeError(
                         "Elements within tuples passed as keys to {} must be instances of {}, not {}".format(
-                            self.__class__.__name__, str, type(key_element),
+                            self.__class__.__name__,
+                            str,
+                            type(key_element),
                         )
                     )
         else:
             raise TypeError(
                 "Keys in {} must be instances of {}, not {}".format(
-                    self.__class__.__name__, tuple, type(key),
+                    self.__class__.__name__,
+                    tuple,
+                    type(key),
                 )
             )
 
@@ -108,8 +112,7 @@ class StoreBackend(metaclass=ABCMeta):
 
 
 class InMemoryStoreBackend(StoreBackend):
-    """Uses an in-memory dictionary as a store backend.
-    """
+    """Uses an in-memory dictionary as a store backend."""
 
     # noinspection PyUnusedLocal
     def __init__(self, runtime_environment=None, fixed_length_key=False):

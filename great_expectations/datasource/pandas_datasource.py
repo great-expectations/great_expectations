@@ -141,7 +141,11 @@ class PandasDatasource(Datasource):
         self._limit = configuration_with_defaults.get("limit", None)
 
     def process_batch_parameters(
-        self, reader_method=None, reader_options=None, limit=None, dataset_options=None,
+        self,
+        reader_method=None,
+        reader_options=None,
+        limit=None,
+        dataset_options=None,
     ):
         # Note that we do not pass limit up, since even that will be handled by PandasDatasource
         batch_kwargs = super().process_batch_parameters(dataset_options=dataset_options)

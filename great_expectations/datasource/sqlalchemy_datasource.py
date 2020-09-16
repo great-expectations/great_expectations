@@ -47,122 +47,122 @@ if sqlalchemy != None:
 
 class SqlAlchemyDatasource(Datasource):
     """
-A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using the following rules:
-    - if the batch_kwargs include a table key, the datasource will provide a dataset object connected to that table
-    - if the batch_kwargs include a query key, the datasource will create a temporary table usingthat query. The query can be parameterized according to the standard python Template engine, which uses $parameter, with additional kwargs passed to the get_batch method.
+    A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using the following rules:
+        - if the batch_kwargs include a table key, the datasource will provide a dataset object connected to that table
+        - if the batch_kwargs include a query key, the datasource will create a temporary table usingthat query. The query can be parameterized according to the standard python Template engine, which uses $parameter, with additional kwargs passed to the get_batch method.
 
---ge-feature-maturity-info--
-    id: datasource_postgresql
-    title: Datasource - PostgreSQL
-    icon:
-    short_description: Postgres
-    description: Support for using the open source PostgresQL database as an external datasource and execution engine.
-    how_to_guide_url:
-    maturity: Production
-    maturity_details:
-        api_stability: High
-        implementation_completeness: Complete
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: Complete
-        documentation_completeness: Medium (does not have a specific how-to, but easy to use overall)
-        bug_risk: Low
-        expectation_completeness: Moderate
+    --ge-feature-maturity-info--
+        id: datasource_postgresql
+        title: Datasource - PostgreSQL
+        icon:
+        short_description: Postgres
+        description: Support for using the open source PostgresQL database as an external datasource and execution engine.
+        how_to_guide_url:
+        maturity: Production
+        maturity_details:
+            api_stability: High
+            implementation_completeness: Complete
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: Complete
+            documentation_completeness: Medium (does not have a specific how-to, but easy to use overall)
+            bug_risk: Low
+            expectation_completeness: Moderate
 
-    id: datasource_bigquery
-    title: Datasource - BigQuery
-    icon:
-    short_description: BigQuery
-    description: Use Google BigQuery as an execution engine and external datasource to validate data.
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_bigquery_datasource.html
-    maturity: Beta
-    maturity_details:
-        api_stability: Unstable (table generator inability to work with triple-dotted, temp table usability, init flow calls setup "other")
-        implementation_completeness: Moderate
-        unit_test_coverage: Partial (no test coverage for temp table creation)
-        integration_infrastructure_test_coverage: Minimal
-        documentation_completeness: Partial (how-to does not cover all cases)
-        bug_risk: High (we *know* of several bugs, including inability to list tables, SQLAlchemy URL incomplete)
-        expectation_completeness: Moderate
+        id: datasource_bigquery
+        title: Datasource - BigQuery
+        icon:
+        short_description: BigQuery
+        description: Use Google BigQuery as an execution engine and external datasource to validate data.
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_bigquery_datasource.html
+        maturity: Beta
+        maturity_details:
+            api_stability: Unstable (table generator inability to work with triple-dotted, temp table usability, init flow calls setup "other")
+            implementation_completeness: Moderate
+            unit_test_coverage: Partial (no test coverage for temp table creation)
+            integration_infrastructure_test_coverage: Minimal
+            documentation_completeness: Partial (how-to does not cover all cases)
+            bug_risk: High (we *know* of several bugs, including inability to list tables, SQLAlchemy URL incomplete)
+            expectation_completeness: Moderate
 
-    id: datasource_redshift
-    title: Datasource - Amazon Redshift
-    icon:
-    short_description: Redshift
-    description: Use Amazon Redshift as an execution engine and external datasource to validate data.
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_redshift_datasource.html
-    maturity: Beta
-    maturity_details:
-        api_stability: Moderate (potential metadata/introspection method special handling for performance)
-        implementation_completeness: Complete
-        unit_test_coverage: Minimal
-        integration_infrastructure_test_coverage: Minimal (none automated)
-        documentation_completeness: Moderate
-        bug_risk: Moderate
-        expectation_completeness: Moderate
+        id: datasource_redshift
+        title: Datasource - Amazon Redshift
+        icon:
+        short_description: Redshift
+        description: Use Amazon Redshift as an execution engine and external datasource to validate data.
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_redshift_datasource.html
+        maturity: Beta
+        maturity_details:
+            api_stability: Moderate (potential metadata/introspection method special handling for performance)
+            implementation_completeness: Complete
+            unit_test_coverage: Minimal
+            integration_infrastructure_test_coverage: Minimal (none automated)
+            documentation_completeness: Moderate
+            bug_risk: Moderate
+            expectation_completeness: Moderate
 
-    id: datasource_snowflake
-    title: Datasource - Snowflake
-    icon:
-    short_description: Snowflake
-    description: Use Snowflake Computing as an execution engine and external datasource to validate data.
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_snowflake_datasource.html
-    maturity: Production
-    maturity_details:
-        api_stability: High
-        implementation_completeness: Complete
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: Minimal (manual only)
-        documentation_completeness: Complete
-        bug_risk: Low
-        expectation_completeness: Complete
+        id: datasource_snowflake
+        title: Datasource - Snowflake
+        icon:
+        short_description: Snowflake
+        description: Use Snowflake Computing as an execution engine and external datasource to validate data.
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_datasources/how_to_configure_a_snowflake_datasource.html
+        maturity: Production
+        maturity_details:
+            api_stability: High
+            implementation_completeness: Complete
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: Minimal (manual only)
+            documentation_completeness: Complete
+            bug_risk: Low
+            expectation_completeness: Complete
 
-    id: datasource_mssql
-    title: Datasource - Microsoft SQL Server
-    icon:
-    short_description: Microsoft SQL Server
-    description: Use Microsoft SQL Server as an execution engine and external datasource to validate data.
-    how_to_guide_url:
-    maturity: Experimental
-    maturity_details:
-        api_stability: High
-        implementation_completeness: Moderate
-        unit_test_coverage: Minimal (none)
-        integration_infrastructure_test_coverage: Minimal (none)
-        documentation_completeness: Minimal
-        bug_risk: High
-        expectation_completeness: Low (some required queries do not generate properly, such as related to nullity)
+        id: datasource_mssql
+        title: Datasource - Microsoft SQL Server
+        icon:
+        short_description: Microsoft SQL Server
+        description: Use Microsoft SQL Server as an execution engine and external datasource to validate data.
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: High
+            implementation_completeness: Moderate
+            unit_test_coverage: Minimal (none)
+            integration_infrastructure_test_coverage: Minimal (none)
+            documentation_completeness: Minimal
+            bug_risk: High
+            expectation_completeness: Low (some required queries do not generate properly, such as related to nullity)
 
-    id: datasource_mysql
-    title: Datasource - MySQL
-    icon:
-    short_description: MySQL
-    description: Use MySQL as an execution engine and external datasource to validate data.
-    how_to_guide_url:
-    maturity: Experimental
-    maturity_details:
-        api_stability: Low (no consideration for temp tables)
-        implementation_completeness: Low (no consideration for temp tables)
-        unit_test_coverage: Minimal (none)
-        integration_infrastructure_test_coverage: Minimal (none)
-        documentation_completeness:  Minimal (none)
-        bug_risk: Unknown
-        expectation_completeness: Unknown
+        id: datasource_mysql
+        title: Datasource - MySQL
+        icon:
+        short_description: MySQL
+        description: Use MySQL as an execution engine and external datasource to validate data.
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Low (no consideration for temp tables)
+            implementation_completeness: Low (no consideration for temp tables)
+            unit_test_coverage: Minimal (none)
+            integration_infrastructure_test_coverage: Minimal (none)
+            documentation_completeness:  Minimal (none)
+            bug_risk: Unknown
+            expectation_completeness: Unknown
 
-    id: datasource_mariadb
-    title: Datasource - MariaDB
-    icon:
-    short_description: MariaDB
-    description: Use MariaDB as an execution engine and external datasource to validate data.
-    how_to_guide_url:
-    maturity: Experimental
-    maturity_details:
-        api_stability: Low (no consideration for temp tables)
-        implementation_completeness: Low (no consideration for temp tables)
-        unit_test_coverage: Minimal (none)
-        integration_infrastructure_test_coverage: Minimal (none)
-        documentation_completeness:  Minimal (none)
-        bug_risk: Unknown
-        expectation_completeness: Unknown
+        id: datasource_mariadb
+        title: Datasource - MariaDB
+        icon:
+        short_description: MariaDB
+        description: Use MariaDB as an execution engine and external datasource to validate data.
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Low (no consideration for temp tables)
+            implementation_completeness: Low (no consideration for temp tables)
+            unit_test_coverage: Minimal (none)
+            integration_infrastructure_test_coverage: Minimal (none)
+            documentation_completeness:  Minimal (none)
+            bug_risk: Unknown
+            expectation_completeness: Unknown
     """
 
     recognized_batch_parameters = {"query_parameters", "limit", "dataset_options"}
@@ -453,7 +453,8 @@ A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using th
         self, query_parameters=None, limit=None, dataset_options=None
     ):
         batch_kwargs = super().process_batch_parameters(
-            limit=limit, dataset_options=dataset_options,
+            limit=limit,
+            dataset_options=dataset_options,
         )
         nested_update(batch_kwargs, {"query_parameters": query_parameters})
         return batch_kwargs

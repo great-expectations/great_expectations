@@ -20,7 +20,9 @@ except ImportError:
 @freeze_time("09/26/2019 13:42:41")
 def test_StoreAction():
     fake_in_memory_store = ValidationsStore(
-        store_backend={"class_name": "InMemoryStoreBackend",}
+        store_backend={
+            "class_name": "InMemoryStoreBackend",
+        }
     )
     stores = {"fake_in_memory_store": fake_in_memory_store}
 
@@ -31,7 +33,8 @@ def test_StoreAction():
     data_context.stores = stores
 
     action = StoreValidationResultAction(
-        data_context=data_context, target_store_name="fake_in_memory_store",
+        data_context=data_context,
+        target_store_name="fake_in_memory_store",
     )
     assert fake_in_memory_store.list_keys() == []
 
@@ -62,15 +65,18 @@ def test_StoreAction():
     )
     assert stored_identifier.run_id == expected_run_id
 
-    assert fake_in_memory_store.get(
-        ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(
-                expectation_suite_name="default_expectations"
-            ),
-            run_id=expected_run_id,
-            batch_identifier="1234",
+    assert (
+        fake_in_memory_store.get(
+            ValidationResultIdentifier(
+                expectation_suite_identifier=ExpectationSuiteIdentifier(
+                    expectation_suite_name="default_expectations"
+                ),
+                run_id=expected_run_id,
+                batch_identifier="1234",
+            )
         )
-    ) == ExpectationSuiteValidationResult(success=False, results=[])
+        == ExpectationSuiteValidationResult(success=False, results=[])
+    )
 
 
 def test_SlackNotificationAction(data_context_parameterized_expectation_suite):
@@ -111,11 +117,14 @@ def test_SlackNotificationAction(data_context_parameterized_expectation_suite):
     )
 
     # TODO: improve this test - currently it is verifying a failed call to Slack. It returns a "empty" payload
-    assert slack_action.run(
-        validation_result_suite_identifier=validation_result_suite_id,
-        validation_result_suite=validation_result_suite,
-        data_asset=None,
-    ) == {"slack_notification_result": None}
+    assert (
+        slack_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+        == {"slack_notification_result": None}
+    )
 
 
 # def test_ExtractAndStoreEvaluationParamsAction():

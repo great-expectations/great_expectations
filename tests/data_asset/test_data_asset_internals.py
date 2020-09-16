@@ -19,7 +19,11 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         tmp_path_factory.mktemp("test_get_and_save_expectation_config")
     )
     df = ge.dataset.PandasDataset(
-        {"x": [1, 2, 4], "y": [1, 2, 5], "z": ["hello", "jello", "mello"],}
+        {
+            "x": [1, 2, 4],
+            "y": [1, 2, 5],
+            "z": ["hello", "jello", "mello"],
+        }
     )
 
     df.expect_column_values_to_be_in_set("x", [1, 2, 4])
@@ -123,7 +127,11 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
 
 def test_expectation_meta():
     df = ge.dataset.PandasDataset(
-        {"x": [1, 2, 4], "y": [1, 2, 5], "z": ["hello", "jello", "mello"],}
+        {
+            "x": [1, 2, 4],
+            "y": [1, 2, 5],
+            "z": ["hello", "jello", "mello"],
+        }
     )
     result = df.expect_column_median_to_be_between(
         "x", 2, 2, meta={"notes": "This expectation is for lolz."}
@@ -147,7 +155,11 @@ def test_expectation_meta():
 
 def test_set_default_expectation_argument():
     df = ge.dataset.PandasDataset(
-        {"x": [1, 2, 4], "y": [1, 2, 5], "z": ["hello", "jello", "mello"],}
+        {
+            "x": [1, 2, 4],
+            "y": [1, 2, 5],
+            "z": ["hello", "jello", "mello"],
+        }
     )
 
     assert {
@@ -166,7 +178,12 @@ def test_set_default_expectation_argument():
 
 
 def test_test_column_map_expectation_function():
-    asset = ge.dataset.PandasDataset({"x": [1, 3, 5, 7, 9], "y": [1, 2, None, 7, 9],})
+    asset = ge.dataset.PandasDataset(
+        {
+            "x": [1, 3, 5, 7, 9],
+            "y": [1, 2, None, 7, 9],
+        }
+    )
 
     def is_odd(
         self,
@@ -202,17 +219,25 @@ def test_test_column_map_expectation_function():
         is_odd, column="y", result_format="BOOLEAN_ONLY", include_config=False
     ) == ExpectationValidationResult(success=False)
 
-    assert asset.test_column_map_expectation_function(
-        is_odd,
-        column="y",
-        result_format="BOOLEAN_ONLY",
-        mostly=0.7,
-        include_config=False,
-    ) == ExpectationValidationResult(success=True)
+    assert (
+        asset.test_column_map_expectation_function(
+            is_odd,
+            column="y",
+            result_format="BOOLEAN_ONLY",
+            mostly=0.7,
+            include_config=False,
+        )
+        == ExpectationValidationResult(success=True)
+    )
 
 
 def test_test_column_aggregate_expectation_function():
-    asset = ge.dataset.PandasDataset({"x": [1, 3, 5, 7, 9], "y": [1, 2, None, 7, 9],})
+    asset = ge.dataset.PandasDataset(
+        {
+            "x": [1, 3, 5, 7, 9],
+            "y": [1, 2, None, 7, 9],
+        }
+    )
 
     def expect_second_value_to_be(
         self,
@@ -225,7 +250,9 @@ def test_test_column_aggregate_expectation_function():
     ):
         return {
             "success": self[column].iloc[1] == value,
-            "result": {"observed_value": self[column].iloc[1],},
+            "result": {
+                "observed_value": self[column].iloc[1],
+            },
         }
 
     assert asset.test_column_aggregate_expectation_function(
@@ -252,21 +279,27 @@ def test_test_column_aggregate_expectation_function():
         success=True,
     )
 
-    assert asset.test_column_aggregate_expectation_function(
-        expect_second_value_to_be,
-        "y",
-        value=3,
-        result_format="BOOLEAN_ONLY",
-        include_config=False,
-    ) == ExpectationValidationResult(success=False)
+    assert (
+        asset.test_column_aggregate_expectation_function(
+            expect_second_value_to_be,
+            "y",
+            value=3,
+            result_format="BOOLEAN_ONLY",
+            include_config=False,
+        )
+        == ExpectationValidationResult(success=False)
+    )
 
-    assert asset.test_column_aggregate_expectation_function(
-        expect_second_value_to_be,
-        "y",
-        2,
-        result_format="BOOLEAN_ONLY",
-        include_config=False,
-    ) == ExpectationValidationResult(success=True)
+    assert (
+        asset.test_column_aggregate_expectation_function(
+            expect_second_value_to_be,
+            "y",
+            2,
+            result_format="BOOLEAN_ONLY",
+            include_config=False,
+        )
+        == ExpectationValidationResult(success=True)
+    )
 
 
 def test_meta_version_warning():
@@ -299,7 +332,11 @@ def test_meta_version_warning():
 
 
 def test_format_map_output():
-    df = ge.dataset.PandasDataset({"x": list("abcdefghijklmnopqrstuvwxyz"),})
+    df = ge.dataset.PandasDataset(
+        {
+            "x": list("abcdefghijklmnopqrstuvwxyz"),
+        }
+    )
 
     ### Normal Test ###
 
@@ -312,15 +349,18 @@ def test_format_map_output():
     unexpected_list = []
     unexpected_index_list = []
 
-    assert df._format_map_output(
-        "BOOLEAN_ONLY",
-        success,
-        element_count,
-        nonnull_count,
-        len(unexpected_list),
-        unexpected_list,
-        unexpected_index_list,
-    ) == {"success": True}
+    assert (
+        df._format_map_output(
+            "BOOLEAN_ONLY",
+            success,
+            element_count,
+            nonnull_count,
+            len(unexpected_list),
+            unexpected_list,
+            unexpected_index_list,
+        )
+        == {"success": True}
+    )
 
     assert df._format_map_output(
         "BASIC",
@@ -402,15 +442,18 @@ def test_format_map_output():
     unexpected_list = []
     unexpected_index_list = []
 
-    assert df._format_map_output(
-        "BOOLEAN_ONLY",
-        success,
-        element_count,
-        nonnull_count,
-        len(unexpected_list),
-        unexpected_list,
-        unexpected_index_list,
-    ) == {"success": True}
+    assert (
+        df._format_map_output(
+            "BOOLEAN_ONLY",
+            success,
+            element_count,
+            nonnull_count,
+            len(unexpected_list),
+            unexpected_list,
+            unexpected_index_list,
+        )
+        == {"success": True}
+    )
 
     assert df._format_map_output(
         "BASIC",
@@ -492,15 +535,18 @@ def test_format_map_output():
     unexpected_list = []
     unexpected_index_list = []
 
-    assert df._format_map_output(
-        "BOOLEAN_ONLY",
-        success,
-        element_count,
-        nonnull_count,
-        len(unexpected_list),
-        unexpected_list,
-        unexpected_index_list,
-    ) == {"success": False}
+    assert (
+        df._format_map_output(
+            "BOOLEAN_ONLY",
+            success,
+            element_count,
+            nonnull_count,
+            len(unexpected_list),
+            unexpected_list,
+            unexpected_index_list,
+        )
+        == {"success": False}
+    )
 
     assert df._format_map_output(
         "BASIC",
@@ -776,8 +822,18 @@ def test_discard_failing_expectations():
 
 
 def test_test_expectation_function():
-    asset = ge.dataset.PandasDataset({"x": [1, 3, 5, 7, 9], "y": [1, 2, None, 7, 9],})
-    asset_2 = ge.dataset.PandasDataset({"x": [1, 3, 5, 6, 9], "y": [1, 2, None, 6, 9],})
+    asset = ge.dataset.PandasDataset(
+        {
+            "x": [1, 3, 5, 7, 9],
+            "y": [1, 2, None, 7, 9],
+        }
+    )
+    asset_2 = ge.dataset.PandasDataset(
+        {
+            "x": [1, 3, 5, 6, 9],
+            "y": [1, 2, None, 6, 9],
+        }
+    )
 
     def expect_dataframe_to_contain_7(self):
         return {"success": bool((self == 7).sum().sum() > 0)}

@@ -847,8 +847,8 @@ class DataAsset:
             # So, we load them in reverse order
 
             if data_context is not None:
-                runtime_evaluation_parameters = data_context.evaluation_parameter_store.get_bind_params(
-                    run_id
+                runtime_evaluation_parameters = (
+                    data_context.evaluation_parameter_store.get_bind_params(run_id)
                 )
             else:
                 runtime_evaluation_parameters = {}
@@ -877,7 +877,10 @@ class DataAsset:
                     warnings.warn(
                         "WARNING: This configuration object was built using version %s of great_expectations, but "
                         "is currently being validated by version %s."
-                        % (suite_ge_version, ge_version,)
+                        % (
+                            suite_ge_version,
+                            ge_version,
+                        )
                     )
             else:
                 warnings.warn(

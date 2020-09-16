@@ -32,7 +32,12 @@ def custom_dataset(sa):
             )
 
             mode = self.engine.execute(mode_query).scalar()
-            return {"success": mode == 0, "result": {"observed_value": mode,}}
+            return {
+                "success": mode == 0,
+                "result": {
+                    "observed_value": mode,
+                },
+            }
 
         @MetaSqlAlchemyDataset.column_aggregate_expectation
         def broken_aggregate_expectation(self, column):

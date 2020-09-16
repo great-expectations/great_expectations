@@ -305,7 +305,9 @@ cooltip_style_element = """<style type="text/css">
 
 
 def _render_for_jupyter(
-    view, include_styling, return_without_displaying,
+    view,
+    include_styling,
+    return_without_displaying,
 ):
     if include_styling:
         html_to_display = bootstrap_link_element + cooltip_style_element + view
@@ -319,7 +321,10 @@ def _render_for_jupyter(
 
 
 def display_column_expectations_as_section(
-    expectation_suite, column, include_styling=True, return_without_displaying=False,
+    expectation_suite,
+    column,
+    include_styling=True,
+    return_without_displaying=False,
 ):
     """This is a utility function to render all of the Expectations in an ExpectationSuite with the same column name as an HTML block.
 
@@ -347,11 +352,18 @@ def display_column_expectations_as_section(
     )
     view = DefaultJinjaSectionView().render({"section": document, "section_loop": 1})
 
-    return _render_for_jupyter(view, include_styling, return_without_displaying,)
+    return _render_for_jupyter(
+        view,
+        include_styling,
+        return_without_displaying,
+    )
 
 
 def display_profiled_column_evrs_as_section(
-    evrs, column, include_styling=True, return_without_displaying=False,
+    evrs,
+    column,
+    include_styling=True,
+    return_without_displaying=False,
 ):
     """This is a utility function to render all of the EVRs in an ExpectationSuite with the same column name as an HTML block.
 
@@ -378,14 +390,24 @@ def display_profiled_column_evrs_as_section(
         ProfilingResultsColumnSectionRenderer().render(column_evr_list).to_json_dict()
     )
     view = DefaultJinjaSectionView().render(
-        {"section": document, "section_loop": {"index": 1},}
+        {
+            "section": document,
+            "section_loop": {"index": 1},
+        }
     )
 
-    return _render_for_jupyter(view, include_styling, return_without_displaying,)
+    return _render_for_jupyter(
+        view,
+        include_styling,
+        return_without_displaying,
+    )
 
 
 def display_column_evrs_as_section(
-    evrs, column, include_styling=True, return_without_displaying=False,
+    evrs,
+    column,
+    include_styling=True,
+    return_without_displaying=False,
 ):
     """
     Display validation results for a single column as a section.
@@ -407,10 +429,17 @@ def display_column_evrs_as_section(
         ValidationResultsColumnSectionRenderer().render(column_evr_list).to_json_dict()
     )
     view = DefaultJinjaSectionView().render(
-        {"section": document, "section_loop": {"index": 1},}
+        {
+            "section": document,
+            "section_loop": {"index": 1},
+        }
     )
 
-    return _render_for_jupyter(view, include_styling, return_without_displaying,)
+    return _render_for_jupyter(
+        view,
+        include_styling,
+        return_without_displaying,
+    )
 
 
 # When importing the jupyter_ux module, we set up a preferred logging configuration

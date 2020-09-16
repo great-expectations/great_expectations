@@ -304,11 +304,15 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             )
             type = cls._get_column_type_with_caching(dataset, column, column_cache)
 
-            if cardinality in [
-                ProfilerCardinality.MANY,
-                ProfilerCardinality.VERY_MANY,
-                ProfilerCardinality.UNIQUE,
-            ] and type in [ProfilerDataType.INT, ProfilerDataType.FLOAT]:
+            if (
+                cardinality
+                in [
+                    ProfilerCardinality.MANY,
+                    ProfilerCardinality.VERY_MANY,
+                    ProfilerCardinality.UNIQUE,
+                ]
+                and type in [ProfilerDataType.INT, ProfilerDataType.FLOAT]
+            ):
                 return column
 
         return None
@@ -324,11 +328,15 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             )
             type = cls._get_column_type_with_caching(dataset, column, column_cache)
 
-            if cardinality in [
-                ProfilerCardinality.MANY,
-                ProfilerCardinality.VERY_MANY,
-                ProfilerCardinality.UNIQUE,
-            ] and type in [ProfilerDataType.STRING, ProfilerDataType.UNKNOWN]:
+            if (
+                cardinality
+                in [
+                    ProfilerCardinality.MANY,
+                    ProfilerCardinality.VERY_MANY,
+                    ProfilerCardinality.UNIQUE,
+                ]
+                and type in [ProfilerDataType.STRING, ProfilerDataType.UNKNOWN]
+            ):
                 return column
 
         return None
@@ -346,11 +354,15 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             )
             type = cls._get_column_type_with_caching(dataset, column, column_cache)
 
-            if cardinality in [
-                ProfilerCardinality.MANY,
-                ProfilerCardinality.VERY_MANY,
-                ProfilerCardinality.UNIQUE,
-            ] and type in [ProfilerDataType.DATETIME]:
+            if (
+                cardinality
+                in [
+                    ProfilerCardinality.MANY,
+                    ProfilerCardinality.VERY_MANY,
+                    ProfilerCardinality.UNIQUE,
+                ]
+                and type in [ProfilerDataType.DATETIME]
+            ):
                 return column
 
         return None
@@ -504,7 +516,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             )
         if included_expectations:
             for expectation in dataset.get_expectation_suite(
-                discard_failed_expectations=False, suppress_logging=True,
+                discard_failed_expectations=False,
+                suppress_logging=True,
             ).expectations:
                 if expectation.expectation_type not in included_expectations:
                     try:

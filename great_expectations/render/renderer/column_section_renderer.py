@@ -142,7 +142,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
         populated_content_blocks = list(filter(None, content_blocks))
 
         return RenderedSectionContent(
-            **{"section_name": column, "content_blocks": populated_content_blocks,}
+            **{
+                "section_name": column,
+                "content_blocks": populated_content_blocks,
+            }
         )
 
     @classmethod
@@ -259,9 +262,13 @@ diagnose and repair the underlying issue.  Detailed information follows:
                                 "aria-expanded": "true",
                                 "aria-controls": "collapseExample",
                             },
-                            "styles": {"cursor": "pointer",},
+                            "styles": {
+                                "cursor": "pointer",
+                            },
                         },
-                        "body": {"classes": ["list-group", "collapse"],},
+                        "body": {
+                            "classes": ["list-group", "collapse"],
+                        },
                     },
                 }
             )
@@ -345,7 +352,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 "table": table_rows,
                 "styling": {
                     "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
-                    "body": {"classes": ["table", "table-sm", "table-unbordered"],},
+                    "body": {
+                        "classes": ["table", "table-sm", "table-unbordered"],
+                    },
                 },
             }
         )
@@ -425,7 +434,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     "table": table_rows,
                     "styling": {
                         "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
-                        "body": {"classes": ["table", "table-sm", "table-unbordered"],},
+                        "body": {
+                            "classes": ["table", "table-sm", "table-unbordered"],
+                        },
                     },
                 }
             )
@@ -487,7 +498,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     }
                     for value in values
                 ],
-                "styling": {"classes": classes,},
+                "styling": {
+                    "classes": classes,
+                },
             }
         )
 
@@ -553,7 +566,12 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 value_count_dict["count"] for value_count_dict in value_count_dicts
             ]
 
-        df = pd.DataFrame({"value": values, "count": counts,})
+        df = pd.DataFrame(
+            {
+                "value": values,
+                "count": counts,
+            }
+        )
 
         if len(values) > 60:
             return None
@@ -750,7 +768,8 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
     def _render_bullet_list(self, expectations):
 
         new_block = self._bullet_list_renderer.render(
-            expectations, include_column_name=False,
+            expectations,
+            include_column_name=False,
         )
 
         return [], new_block

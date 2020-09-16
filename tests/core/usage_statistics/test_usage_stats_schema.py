@@ -170,7 +170,8 @@ def test_usage_stats_empty_payload_messages():
     ]
     for message in usage_stats_records_messages:
         jsonschema.validate(
-            valid_usage_statistics_messages[message][0], usage_statistics_record_schema,
+            valid_usage_statistics_messages[message][0],
+            usage_statistics_record_schema,
         )
         jsonschema.validate(
             valid_usage_statistics_messages[message][0]["event_payload"],

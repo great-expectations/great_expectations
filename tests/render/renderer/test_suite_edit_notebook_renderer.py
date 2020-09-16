@@ -104,17 +104,28 @@ def suite_with_multiple_citations():
             "citations": [
                 {
                     "citation_date": "2001-01-01T00:00:01.000001",
-                    "batch_kwargs": {"path": "3.csv", "datasource": "3",},
+                    "batch_kwargs": {
+                        "path": "3.csv",
+                        "datasource": "3",
+                    },
                 },
                 {
                     "citation_date": "2000-01-01T00:00:01.000001",
-                    "batch_kwargs": {"path": "2.csv", "datasource": "2",},
+                    "batch_kwargs": {
+                        "path": "2.csv",
+                        "datasource": "2",
+                    },
                 },
                 # This citation is the most recent and has no batch_kwargs
-                {"citation_date": "2020-01-01T00:00:01.000001",},
+                {
+                    "citation_date": "2020-01-01T00:00:01.000001",
+                },
                 {
                     "citation_date": "1999-01-01T00:00:01.000001",
-                    "batch_kwargs": {"path": "1.csv", "datasource": "1",},
+                    "batch_kwargs": {
+                        "path": "1.csv",
+                        "datasource": "1",
+                    },
                 },
             ],
         },

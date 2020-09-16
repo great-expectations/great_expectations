@@ -26,9 +26,13 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
                 "aria-expanded": "true",
                 "aria-controls": "collapseExample",
             },
-            "styles": {"cursor": "pointer",},
+            "styles": {
+                "cursor": "pointer",
+            },
         },
-        "body": {"classes": ["list-group", "collapse"],},
+        "body": {
+            "classes": ["list-group", "collapse"],
+        },
     }
 
     _default_element_styling = {

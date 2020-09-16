@@ -92,7 +92,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                                 "string_template": {
                                     "template": "",
                                     "tag": "hr",
-                                    "styling": {"classes": ["mt-1", "mb-1"],},
+                                    "styling": {
+                                        "classes": ["mt-1", "mb-1"],
+                                    },
                                 },
                                 "styling": {
                                     "parent": {"styles": {"list-style-type": "none"}}

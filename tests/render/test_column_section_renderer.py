@@ -192,7 +192,8 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
     )
 
     content_block = ProfilingResultsColumnSectionRenderer._render_header(
-        [evr_with_unescaped_dollar_sign], column_type=[],
+        [evr_with_unescaped_dollar_sign],
+        column_type=[],
     ).to_json_dict()
     print(content_block)
     assert content_block == {

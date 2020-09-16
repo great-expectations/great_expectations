@@ -14,7 +14,9 @@ def parameterized_expectation_suite():
         __file__,
         "../test_fixtures/expectation_suites/parameterized_expression_expectation_suite_fixture.json",
     )
-    with open(fixture_path,) as suite:
+    with open(
+        fixture_path,
+    ) as suite:
         return expectationSuiteSchema.load(json.load(suite))
 
 
@@ -88,7 +90,8 @@ def test_run_validation_operator_raises_error_if_no_matching_validation_operator
     context = validation_operators_data_context
     with pytest.raises(DataContextError) as e:
         context.run_validation_operator(
-            validation_operator_name="blarg", assets_to_validate=[(1, 2)],
+            validation_operator_name="blarg",
+            assets_to_validate=[(1, 2)],
         )
     assert (
         e.value.message

@@ -161,7 +161,8 @@ def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
         f.write("")
     assert os.path.isfile(nb_file)
     my_store = TupleFilesystemStoreBackend(
-        root_directory=os.path.abspath("dummy_str"), base_directory=project_path,
+        root_directory=os.path.abspath("dummy_str"),
+        base_directory=project_path,
     )
 
     my_store.set(("AAA",), "aaa")
@@ -200,7 +201,9 @@ def test_TupleS3StoreBackend_with_prefix():
     conn.create_bucket(Bucket=bucket)
 
     my_store = TupleS3StoreBackend(
-        filepath_template="my_file_{0}", bucket=bucket, prefix=prefix,
+        filepath_template="my_file_{0}",
+        bucket=bucket,
+        prefix=prefix,
     )
 
     # We should be able to list keys, even when empty
@@ -268,7 +271,9 @@ def test_tuple_s3_store_backend_slash_conditions():
     )
     assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
     my_store = TupleS3StoreBackend(
-        bucket=bucket, prefix=prefix, platform_specific_separator=False,
+        bucket=bucket,
+        prefix=prefix,
+        platform_specific_separator=False,
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
     expected_s3_keys = ["my_suite"]
@@ -285,7 +290,9 @@ def test_tuple_s3_store_backend_slash_conditions():
     )
     assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
     my_store = TupleS3StoreBackend(
-        bucket=bucket, prefix=prefix, platform_specific_separator=True,
+        bucket=bucket,
+        prefix=prefix,
+        platform_specific_separator=True,
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
     expected_s3_keys = ["my_suite"]
@@ -440,7 +447,9 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
     conn.create_bucket(Bucket=bucket)
 
     my_store = TupleS3StoreBackend(
-        filepath_template="my_file_{0}", bucket=bucket, prefix=prefix,
+        filepath_template="my_file_{0}",
+        bucket=bucket,
+        prefix=prefix,
     )
 
     # We should be able to list keys, even when empty
