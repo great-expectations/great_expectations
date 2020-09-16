@@ -44,4 +44,5 @@ class NumericSorter(Sorter):
             )
         if is_int(value=partition_value):
             return int(partition_value)
+        # The case of strings having floating point number format used as references to partitions should be rare.
         return round(float(partition_value))
