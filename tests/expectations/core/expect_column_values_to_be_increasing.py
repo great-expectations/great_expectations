@@ -24,6 +24,7 @@ def test_expect_column_values_to_be_increasing_impl():
     )
     assert result == ExpectationValidationResult(success=True,)
 
+    # check for "strictly" kwarg
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_increasing",
         kwargs={"column": "a", "strictly": True, "mostly": 1},
@@ -35,6 +36,7 @@ def test_expect_column_values_to_be_increasing_impl():
     )
     assert result == ExpectationValidationResult(success=False, )
 
+    # check for "parse_strings_as_datetimes" kwarg
     df = pd.DataFrame({"a": [
         "12/1/1990",
         "12/2/1990",
