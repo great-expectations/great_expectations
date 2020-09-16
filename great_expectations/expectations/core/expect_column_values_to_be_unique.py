@@ -17,10 +17,10 @@ from ..expectation import (
 from ..registry import extract_metrics, get_metric_kwargs
 
 
-class ExpectColumnValuesToNotMatchRegex(ColumnMapDatasetExpectation):
-    map_metric = "map.not_match_regex"
-    metric_dependencies = ("map.not_match_regex.count", "map.nonnull.count")
-    success_keys = ("regex", "mostly")
+class ExpectColumnValuesToBeUnique(ColumnMapDatasetExpectation):
+    map_metric = "map.are_unique"
+    metric_dependencies = ("map.are_unique.count", "map.nonnull.count")
+    success_keys = "mostly"
 
     default_kwarg_values = {
         "row_condition": None,
@@ -33,29 +33,33 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapDatasetExpectation):
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
         try:
-            assert "regex" in configuration.kwargs, "regex is required"
-            assert isinstance(
-                configuration.kwargs["regex"], str
-            ), "regex must be a string"
+            assert (
+                "column" in configuration.kwargs
+            ), "'column' parameter is required for column map expectations"
+            if "mostly" in configuration.kwargs:
+                mostly = configuration.kwargs["mostly"]
+                assert isinstance(
+                    mostly, (int, float)
+                ), "'mostly' parameter must be an integer or float"
+                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
     @PandasExecutionEngine.column_map_metric(
-        metric_name="map.not_match_regex",
+        metric_name="map.are_unique",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("regex",),
+        metric_value_keys=("value_set",),
         metric_dependencies=tuple(),
     )
-    
-    def _pandas_map_not_match_regex(
-        self, series: pd.Series, regex: str, runtime_configuration: dict = None,
+    def _pandas_map_are_unique(
+        self,
+        series: pd.Series,
+        value_set: Union[list, set],
+        runtime_configuration: dict = None,
     ):
-        return ~series.astype(str).str.contains(regex)
-
+        return ~series.duplicated(keep=False)
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
@@ -80,18 +84,14 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapDatasetExpectation):
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=(
-
-                metric_vals.get("map.not_match_regex.count")
+                metric_vals.get("map.are_unique.count")
                 / metric_vals.get("map.nonnull.count")
             )
             >= mostly,
             element_count=metric_vals.get("map.count"),
             nonnull_count=metric_vals.get("map.nonnull.count"),
             unexpected_count=metric_vals.get("map.nonnull.count")
-
-            - metric_vals.get("map.not_match_regex.count"),
-            unexpected_list=metric_vals.get("map.not_match_regex.unexpected_values"),
-            unexpected_index_list=metric_vals.get(
-                "map.not_match_regex.unexpected_index"
-            ),
+            - metric_vals.get("map.are_unique.count"),
+            unexpected_list=metric_vals.get("map.are_unique.unexpected_values"),
+            unexpected_index_list=metric_vals.get("map.are_unique.unexpected_index"),
         )
