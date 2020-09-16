@@ -1,10 +1,10 @@
 import logging
 import regex as re
-import datetime
+from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+
 logger = logging.getLogger(__name__)
-from great_expectations.execution_environment.data_connector.partitioner import(
-    Partitioner
-)
+
 
 class RegexPartitioner(Partitioner):
 
@@ -14,9 +14,8 @@ class RegexPartitioner(Partitioner):
     }
 
     # defaults
-    default_delim = '-'
-    default_group_name = "group"
-
+    DEFAULT_DELIMITER = "-"
+    DEFAULT_GROUP_NAME = "group"
 
     def __init__(
         self,
@@ -24,7 +23,6 @@ class RegexPartitioner(Partitioner):
         regex=None,
         sorters=None
     ):
-
         logger.debug("Constructing RegexPartitioner {!r}".format(name))
         super().__init__(name)
 
@@ -44,58 +42,69 @@ class RegexPartitioner(Partitioner):
     def sorters(self):
         return self._sorters
 
-    def get_part(self, partition_name):
+    def get_partition(self, partition_name):
         # this will return : Part object (Will and Alex part - aka single part)
         pass
 
     def get_available_partition_names(self, paths):
         return [
-            partition["partition_name"] for partition in self.get_available_partitions(paths)
+            partition.name for partition in self.get_available_partitions(paths)
         ]
 
     def get_available_partitions(self, paths):
         if len(self._partitions) > 0:
             return self._partitions
 
-        partitions = [
-            self._get_partitions(path)
-            for path in paths
-            if self._get_partitions(path) is not None
-        ]
-        # set self:
+        partitions = []
+        for path in paths:
+            partitioned_path = self._get_partitions_for_path(path=path)
+            if partitioned_path is not None:
+                partitions.append(partitioned_path)
+
+        if self.sorters is not None:
+            sorters = reversed(self.sorters)
+            for sorter in sorters:
+                partitions = sorter.get_sorted_partitions(partitions=partitions)
         self._partitions = partitions
+        # TODO: <Alex>OK for now, but not clear that this is how calculate and return should be...  Need to revisit.</Alex>
         # return self._partitions (should this be another method?)
         return self._partitions
 
-    def _get_partitions(self, path):
-        temp_partitions = {}
+    def _get_partitions_for_path(self, path):
         if self.regex is None:
-            raise ValueError("REGEX is not defined")
+            raise ValueError("Regex is not defined")
 
+        # TODO: <Alex>Cleanup</Alex>
         ####################################
         matches = re.match(self.regex, path)
         ####################################
         if matches is None:
             logger.warning("No match found for path: %s" % path)
             raise ValueError("No match found for path: %s" % path)
-
         else:
-            # default case : there are no named ordered fields?
-            # and add the name?
+            partition_definition = {}
+            groups = matches.groups()
             if self.sorters is None:
-                # then we want to use the defaults:
-                # NOTE : matches begin with the full regex match at index=0 and then each matching group
-                # and then each subsequent match in following indices.
-                # this is why partition_definition_inner_dict is loaded with partition_params[i] as name
-                # and matches[i+1] as value
-                partition_definition_inner_dict = {}
-                for i in range(len(matches)-1):
-                    partition_param = self.default_group_name + "_" + str(i)
-                    partition_definition_inner_dict[partition_param] = matches[i+1]
-                temp_partitions["partition_definition"] = partition_definition_inner_dict
-            partition_name_list = []
-            for name in temp_partitions["partition_definition"].keys():
-                partition_name_list.append(str(temp_partitions["partition_definition"][name]))
-            partition_name = self.default_delim.join(partition_name_list)
-            temp_partitions["partition_name"] = partition_name
-        return temp_partitions
+                for idx, group in enumerate(groups):
+                    part_name = f"{RegexPartitioner.DEFAULT_GROUP_NAME}_{idx}"
+                    partition_definition[part_name] = group
+            else:
+                # TODO: <Alex>TODO</Alex>
+                part_names = [sorter.name for sorter in self.sorters]
+                if len(part_names) != len(groups):
+                    logger.warning(
+                        'Number of Regex groups matched in "%s" is %d but number of sorters specified is %d.' %
+                        (path, len(groups), len(part_names))
+                    )
+                    raise ValueError(
+                        'Number of Regex groups matched in "%s" is %d but number of sorters specified is %d.' %
+                        (path, len(groups), len(part_names))
+                    )
+                for idx, group in enumerate(groups):
+                    part_name = part_names[idx]
+                    partition_definition[part_name] = group
+
+            part_name_list = [part_value for part_name, part_value in partition_definition.items()]
+            partition_name = RegexPartitioner.DEFAULT_DELIMITER.join(part_name_list)
+
+        return Partition(name=partition_name, definition=partition_definition)
