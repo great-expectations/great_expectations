@@ -81,7 +81,6 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         "threshold": None,
         "double_sided": True,
         "mostly": 1,
-        "parse_strings_as_datetime": None,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -120,9 +119,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
 
         return series.std()
 
-
     @PandasExecutionEngine.column_map_metric(
-
         metric_name="map.z_scores",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("mean", "standard_deviation"),
@@ -147,7 +144,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         metric_name="map.z_scores.number_over_threshold",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=(),
-        metric_dependencies=(),
+        metric_dependencies=tuple("map.z_scores")
     )
     def _pandas_number_over_threshold(
             self,
@@ -223,7 +220,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             nonnull_count=metric_vals.get("map.nonnull.count"),
             unexpected_count=metric_vals.get("map.nonnull.count")
                              - "map.z_scores.number_over_threshold",
-            unexpected_list=metric_vals.get("map.in_set.unexpected_values"),
-            unexpected_index_list=metric_vals.get("map.is_in.unexpected_index"),
+            unexpected_list=metric_vals.get("map.z_scores.unexpected_values"),
+            unexpected_index_list=metric_vals.get("map.z_scores.unexpected_index"),
         )
 
