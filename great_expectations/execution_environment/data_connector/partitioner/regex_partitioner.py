@@ -48,6 +48,7 @@ class RegexPartitioner(Partitioner):
     def sorters(self) -> List[Sorter]:
         return self._sorters
 
+    # TODO: <Alex>Implement "UpSert" using Partition name for guidance.  Make this part of DataConnector.  No Caching HERE!</Alex>
     def get_available_partitions(self, paths: List[str]) -> List[Partition]:
         if len(self._partitions) > 0:
             return self._partitions
