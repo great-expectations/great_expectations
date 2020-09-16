@@ -1,18 +1,14 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
-import numpy as np
 import pandas as pd
-from dateutil.parser import parse
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 
-from ...core.batch import Batch
 from ...data_asset.util import parse_result_format
 from ..expectation import (
     ColumnMapDatasetExpectation,
     Expectation,
-    InvalidExpectationConfigurationError,
     _format_map_output,
 )
 from ..registry import extract_metrics, get_metric_kwargs
@@ -21,13 +17,12 @@ from ..registry import extract_metrics, get_metric_kwargs
 class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
     map_metric = "map.increasing"
     metric_dependencies = ("map.increasing.count", "map.nonnull.count")
-    success_keys = ("strictly", "mostly", "parse_strings_as_datetimes")
+    success_keys = ("strictly", "mostly",)
 
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
         "strictly": None,
-        "parse_strings_as_datetimes": None,
         "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
@@ -40,30 +35,15 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
     @PandasExecutionEngine.column_map_metric(
         metric_name="map.increasing",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("strictly", "parse_strings_as_datetimes",),
+        metric_value_keys=("strictly",),
         metric_dependencies=tuple(),
     )
     def _pandas_map_increasing(
             self,
             series: pd.Series,
             strictly: Union[bool, None],
-            parse_strings_as_datetimes: Union[bool, None],
             runtime_configuration: dict = None,
     ):
-        if parse_strings_as_datetimes:
-            temp_series = series.map(parse)
-
-            series_diff = temp_series.diff()
-
-            # The first element is null, so it gets a bye and is always treated as True
-            series_diff[0] = pd.Timedelta(1)
-
-            if strictly:
-                return series_diff > pd.Timedelta(0)
-            else:
-                return series_diff >= pd.Timedelta(0)
-
-        else:
             series_diff = series.diff()
             # The first element is null, so it gets a bye and is always treated as True
             series_diff[series_diff.isnull()] = 1
