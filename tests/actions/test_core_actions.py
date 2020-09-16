@@ -14,7 +14,7 @@ from great_expectations.validation_operators import (
 try:
     from unittest import mock
 except ImportError:
-    import mock
+    from unittest import mock
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -24,7 +24,7 @@ def test_StoreAction():
     )
     stores = {"fake_in_memory_store": fake_in_memory_store}
 
-    class Object(object):
+    class Object:
         pass
 
     data_context = Object()

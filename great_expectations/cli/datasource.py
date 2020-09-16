@@ -384,14 +384,14 @@ def _add_pandas_datasource(
         errors = DatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
             raise ge_exceptions.GreatExpectationsError(
-                "Invalid Datasource configuration: {0:s}".format(errors)
+                "Invalid Datasource configuration: {:s}".format(errors)
             )
 
     cli_message(
         """
-Great Expectations will now add a new Datasource '{0:s}' to your deployment, by adding this entry to your great_expectations.yml:
+Great Expectations will now add a new Datasource '{:s}' to your deployment, by adding this entry to your great_expectations.yml:
 
-{1:s}
+{:s}
 """.format(
             datasource_name,
             textwrap.indent(toolkit.yaml.dump({datasource_name: configuration}), "  "),
@@ -513,7 +513,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             errors = DatasourceConfigSchema().validate(configuration)
             if len(errors) != 0:
                 raise ge_exceptions.GreatExpectationsError(
-                    "Invalid Datasource configuration: {0:s}".format(errors)
+                    "Invalid Datasource configuration: {:s}".format(errors)
                 )
 
             cli_message(
@@ -552,9 +552,9 @@ The credentials will be saved in uncommitted/config_variables.yml under the key 
                 # TODO this message about continuing may not be accurate
                 cli_message(
                     """
-We saved datasource {0:s} in {1:s} and the credentials you entered in {2:s}.
+We saved datasource {:s} in {:s} and the credentials you entered in {:s}.
 Since we could not connect to the database, you can complete troubleshooting in the configuration files documented here:
-<blue>https://docs.greatexpectations.io/en/latest/tutorials/add-sqlalchemy-datasource.html?utm_source=cli&utm_medium=init&utm_campaign={3:s}#{4:s}</blue> .
+<blue>https://docs.greatexpectations.io/en/latest/tutorials/add-sqlalchemy-datasource.html?utm_source=cli&utm_medium=init&utm_campaign={:s}#{:s}</blue> .
 
 After you connect to the datasource, run great_expectations init to continue.
 
@@ -877,14 +877,14 @@ def _add_spark_datasource(
         errors = DatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
             raise ge_exceptions.GreatExpectationsError(
-                "Invalid Datasource configuration: {0:s}".format(errors)
+                "Invalid Datasource configuration: {:s}".format(errors)
             )
 
     cli_message(
         """
-Great Expectations will now add a new Datasource '{0:s}' to your deployment, by adding this entry to your great_expectations.yml:
+Great Expectations will now add a new Datasource '{:s}' to your deployment, by adding this entry to your great_expectations.yml:
 
-{1:s}
+{:s}
 """.format(
             datasource_name,
             textwrap.indent(toolkit.yaml.dump({datasource_name: configuration}), "  "),
@@ -1021,7 +1021,7 @@ def get_batch_kwargs(
 
     else:
         raise ge_exceptions.DataContextError(
-            "Datasource {0:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {1:s}".format(
+            "Datasource {:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {:s}".format(
                 datasource_name, str(type(context.get_datasource(datasource_name)))
             )
         )

@@ -1,8 +1,8 @@
 import os
 import shutil
 import subprocess
+from unittest import mock
 
-import mock
 import pytest
 from click.testing import CliRunner
 from ruamel.yaml import YAML
@@ -220,7 +220,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
     context = DataContext(root_dir)
     assert context.list_checkpoints() == ["passengers"]
 
-    with open(expected_checkpoint, "r") as f:
+    with open(expected_checkpoint) as f:
         obs_file = f.read()
 
     # This is snapshot-ish to prove that comments remain in place
@@ -580,11 +580,12 @@ def test_checkpoint_run_on_non_existent_validation_operator(
         f"No validation operator `foo` was found in your project. Please verify this in your great_expectations.yml"
         in stdout
     )
+    usage_emits = mock_emit.call_args_list
 
     assert mock_emit.call_count == 3
-    assert mock_emit.call_args_list[0].args[0]["success"] == True
-    assert mock_emit.call_args_list[1].args[0]["success"] == False
-    assert mock_emit.call_args_list[2].args[0]["success"] == False
+    assert usage_emits[0][0][0]["success"] is True
+    assert usage_emits[1][0][0]["success"] is False
+    assert usage_emits[2][0][0]["success"] is False
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -741,7 +742,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
     ]
 
     # assert the script has original contents
-    with open(script_path, "r") as f:
+    with open(script_path) as f:
         assert f.read() == "script here"
 
     assert_no_logging_messages_or_tracebacks(caplog, result)

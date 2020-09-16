@@ -5,7 +5,7 @@ from great_expectations.types import ClassConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
 
-class Validator(object):
+class Validator:
     def __init__(self, batch, expectation_suite, expectation_engine=None, **kwargs):
         self.batch = batch
         self.expectation_suite = expectation_suite

@@ -295,7 +295,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             return "?"
 
         # assume 100.0 missing for columns where ["result"]["unexpected_percent"] is not available
-        return "{0:.2f}%".format(
+        return "{:.2f}%".format(
             sum(
                 [
                     evr.result["unexpected_percent"]
@@ -348,7 +348,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                 column_types[column] = "bool"
             else:
                 warnings.warn(
-                    "The expected type list is not a subset of any of the profiler type sets: {0:s}".format(
+                    "The expected type list is not a subset of any of the profiler type sets: {:s}".format(
                         str(expected_types)
                     )
                 )

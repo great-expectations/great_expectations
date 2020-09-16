@@ -5,7 +5,7 @@ from great_expectations.datasource.types import *
 try:
     from unittest import mock
 except ImportError:
-    import mock
+    from unittest import mock
 
 
 def test_batch_kwargs_id():
