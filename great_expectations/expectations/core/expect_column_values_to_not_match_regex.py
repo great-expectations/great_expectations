@@ -18,8 +18,8 @@ from ..registry import extract_metrics, get_metric_kwargs
 
 
 class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
-    map_metric = "map.match_regex"
-    metric_dependencies = ("map.match_regex.count", "map.nonnull.count")
+    map_metric = "map.matches_regex"
+    metric_dependencies = ("map.matches_regex.count", "map.nonnull.count")
     success_keys = ("regex", "mostly")
 
     default_kwarg_values = {
@@ -45,12 +45,12 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
         return True
 
     @PandasExecutionEngine.column_map_metric(
-        metric_name="map.match_regex",
+        metric_name="map.matches_regex",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("regex",),
         metric_dependencies=tuple(),
     )
-    def _pandas_map_match_regex(
+    def _pandas_map_matches_regex(
         self, series: pd.Series, regex: str, runtime_configuration: dict = None,
     ):
         return series.astype(str).str.contains(regex)
@@ -78,14 +78,14 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=(
-                metric_vals.get("map.match_regex.count")
+                metric_vals.get("map.matches_regex.count")
                 / metric_vals.get("map.nonnull.count")
             )
             >= mostly,
             element_count=metric_vals.get("map.count"),
             nonnull_count=metric_vals.get("map.nonnull.count"),
             unexpected_count=metric_vals.get("map.nonnull.count")
-            - metric_vals.get("map.match_regex.count"),
-            unexpected_list=metric_vals.get("map.match_regex.unexpected_values"),
-            unexpected_index_list=metric_vals.get("map.match_regex.unexpected_index"),
+            - metric_vals.get("map.matches_regex.count"),
+            unexpected_list=metric_vals.get("map.matches_regex.unexpected_values"),
+            unexpected_index_list=metric_vals.get("map.matches_regex.unexpected_index"),
         )
