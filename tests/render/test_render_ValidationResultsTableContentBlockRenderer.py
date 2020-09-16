@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import json
 
 from great_expectations.core import (

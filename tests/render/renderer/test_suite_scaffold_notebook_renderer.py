@@ -164,7 +164,7 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     renderer.render_to_disk(notebook_path)
     assert os.path.isfile(notebook_path)
 
-    with open(notebook_path, "r") as f:
+    with open(notebook_path) as f:
         nb = nbformat.read(f, as_version=4)
 
     # Run notebook

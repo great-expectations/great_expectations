@@ -342,7 +342,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
     except (
         ge_exceptions.DataContextError,
         ge_exceptions.ProfilerError,
-        IOError,
+        OSError,
         SQLAlchemyError,
     ) as e:
         cli_message("<red>{}</red>".format(e))
