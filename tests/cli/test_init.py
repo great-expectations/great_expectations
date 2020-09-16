@@ -82,7 +82,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     assert os.path.isdir(uncommitted_dir)
     config_var_path = os.path.join(uncommitted_dir, "config_variables.yml")
     assert os.path.isfile(config_var_path)
-    with open(config_var_path, "r") as f:
+    with open(config_var_path) as f:
         assert f.read() == CONFIG_VARIABLES_TEMPLATE
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -185,7 +185,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
     config_path = os.path.join(ge_dir, DataContext.GE_YML)
     assert os.path.isfile(config_path)
 
-    config = yaml.load(open(config_path, "r"))
+    config = yaml.load(open(config_path))
     assert config["datasources"] == {
         "my_db": {
             "data_asset_type": {
@@ -201,7 +201,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
     config_path = os.path.join(
         ge_dir, DataContext.GE_UNCOMMITTED_DIR, "config_variables.yml"
     )
-    config = yaml.load(open(config_path, "r"))
+    config = yaml.load(open(config_path))
     assert config["my_db"] == {"url": "sqlite:////not_a_real.db"}
 
     obs_tree = gen_directory_tree_str(os.path.join(root_dir, "great_expectations"))

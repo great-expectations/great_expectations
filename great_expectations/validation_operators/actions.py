@@ -17,7 +17,7 @@ from .util import send_slack_notification
 logger = logging.getLogger(__name__)
 
 
-class ValidationAction(object):
+class ValidationAction:
     """
     This is the base class for all actions that act on validation results
     and are aware of a Data Context namespace structure.
@@ -138,7 +138,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
             validation_result_suite_identifier, ValidationResultIdentifier
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier, not {0}".format(
+                "validation_result_suite_id must be of type ValidationResultIdentifier, not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -220,7 +220,7 @@ class StoreValidationResultAction(ValidationAction):
             validation_result_suite_identifier, ValidationResultIdentifier
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                "validation_result_id must be of type ValidationResultIdentifier, not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -282,7 +282,7 @@ in the process of validating other prior expectations.
             validation_result_suite_identifier, ValidationResultIdentifier
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                "validation_result_id must be of type ValidationResultIdentifier, not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -357,7 +357,7 @@ in a metrics store.
             validation_result_suite_identifier, ValidationResultIdentifier
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                "validation_result_id must be of type ValidationResultIdentifier, not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -427,7 +427,7 @@ list of sites to update:
             validation_result_suite_identifier, ValidationResultIdentifier
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                "validation_result_id must be of type ValidationResultIdentifier, not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )

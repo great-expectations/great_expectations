@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,

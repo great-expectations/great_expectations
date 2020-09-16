@@ -16,7 +16,7 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 try:
     from unittest import mock
 except ImportError:
-    import mock
+    from unittest import mock
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -73,7 +73,7 @@ def test_cli_init_on_new_project(
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
-    config = yaml.load(open(config_path, "r"))
+    config = yaml.load(open(config_path))
     data_source_class = config["datasources"]["data__dir"]["data_asset_type"][
         "class_name"
     ]
@@ -247,7 +247,7 @@ def _remove_all_datasources(ge_dir):
 def _load_config_file(config_path):
     assert os.path.isfile(config_path), "Config file is missing. Check path"
 
-    with open(config_path, "r") as f:
+    with open(config_path) as f:
         read = f.read()
         config = yaml.load(read)
 
@@ -475,7 +475,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
-    config = yaml.load(open(config_path, "r"))
+    config = yaml.load(open(config_path))
     data_source_class = config["datasources"]["data__dir"]["data_asset_type"][
         "class_name"
     ]
@@ -548,7 +548,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
-    config = yaml.load(open(config_path, "r"))
+    config = yaml.load(open(config_path))
     data_source_class = config["datasources"]["data__dir"]["data_asset_type"][
         "class_name"
     ]

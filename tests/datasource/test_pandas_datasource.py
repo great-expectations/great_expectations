@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 import shutil
 
@@ -100,7 +98,6 @@ def test_create_pandas_datasource(
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
-        "r",
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
@@ -146,7 +143,6 @@ def test_pandas_datasource_custom_data_asset(
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
-        "r",
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 

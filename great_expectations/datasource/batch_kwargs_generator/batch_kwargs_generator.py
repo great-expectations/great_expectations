@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import warnings
 
@@ -8,7 +6,7 @@ from great_expectations.core.id_dict import BatchKwargs
 logger = logging.getLogger(__name__)
 
 
-class BatchKwargsGenerator(object):
+class BatchKwargsGenerator:
     r"""
     BatchKwargsGenerators produce identifying information, called "batch_kwargs" that datasources
     can use to get individual batches of data. They add flexibility in how to obtain data

@@ -1362,7 +1362,7 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     edit_notebook_path = os.path.join(uncommitted_dir, "edit_warning.ipynb")
     assert os.path.isfile(edit_notebook_path)
 
-    with open(edit_notebook_path, "r") as f:
+    with open(edit_notebook_path) as f:
         nb = nbformat.read(f, as_version=4)
 
     # Run notebook
