@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.default_flow_style = False
 
-
+## TODO: JPC: 20200916 - can we remove this class?
 class MetaExecutionEngine(object):
     """
     Holds expectation decorators.
@@ -194,7 +194,10 @@ class ExecutionEngine(MetaExecutionEngine):
 
     recognized_batch_spec_defaults = set()
 
+    ## TODO: JPC: 20200916 - can we explicitly list these args?
     def __init__(self, *args, **kwargs):
+        self._execution_engine_config = {}
+
         # NOTE: using caching makes the strong assumption that the user will not modify the core data store
         # (e.g. self.spark_df) over the lifetime of the dataset instance
         self.caching = kwargs.pop("caching", True)

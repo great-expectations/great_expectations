@@ -481,6 +481,9 @@ Notes:
                                                                     must still be passed via batch definition.
 
                """
+
+        ### Aren't we "past" this at this point?
+
         execution_environment_name = batch_definition.get("execution_environment")
         execution_environment = self._data_context.get_execution_environment(
             execution_environment_name
