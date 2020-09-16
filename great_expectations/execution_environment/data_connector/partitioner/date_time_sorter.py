@@ -37,14 +37,11 @@ class DateTimeSorter(Sorter):
     def __init__(self, name: str, **kwargs):
         datetime_format: str = kwargs.get("datetime_format")
         self._datetime_format = datetime_format
-        print(f'[ALEX_DEV:DATETIME_SORTER#get_partition_key] DATIMEFORMAT: {self._datetime_format}')
         super().__init__(name=name, **kwargs)
 
     def get_partition_key(self, partition: Partition) -> Any:
-        print(f'[ALEX_DEV:DATETIME_SORTER#get_partition_key] NAME: {self._name} ; ORDERBY: {self._orderby}')
         partition_definition: dict = partition.definition
         partition_value: Any = partition_definition[self.name]
-        print(f'[ALEX_DEV:DATETIME_SORTER#get_partition_key] PARTITION_DEFINITION: {partition_definition} ; PARTITION_VALUE: {partition_value}')
         dt: datetime.date = parse_string_to_datetime(
             datetime_string=partition_value, datetime_format_string=self.datetime_format
         )

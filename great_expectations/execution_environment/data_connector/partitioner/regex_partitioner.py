@@ -62,7 +62,8 @@ class RegexPartitioner(Partitioner):
                 partitions.append(partitioned_path)
 
         if self.sorters is not None:
-            for sorter in self.sorters:
+            sorters = reversed(self.sorters)
+            for sorter in sorters:
                 partitions = sorter.get_sorted_partitions(partitions=partitions)
         self._partitions = partitions
         # TODO: <Alex>OK for now, but not clear that this is how calculate and return should be...  Need to revisit.</Alex>
@@ -102,11 +103,8 @@ class RegexPartitioner(Partitioner):
                 for idx, group in enumerate(groups):
                     part_name = part_names[idx]
                     partition_definition[part_name] = group
-                print(f'AHA!!!!! ALEX_DEV ; PARTITION_DEFITION: {partition_definition}')
 
             part_name_list = [part_value for part_name, part_value in partition_definition.items()]
-            print(f'AHA!!!!! ALEX_DEV ; PART_NAME_LIST: {part_name_list}')
             partition_name = RegexPartitioner.DEFAULT_DELIMITER.join(part_name_list)
-            print(f'AHA!!!!! ALEX_DEV ; PARTITION_NAME: {partition_name}')
 
         return Partition(name=partition_name, definition=partition_definition)

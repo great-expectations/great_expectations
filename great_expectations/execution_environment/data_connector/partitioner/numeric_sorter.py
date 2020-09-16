@@ -34,10 +34,8 @@ class NumericSorter(Sorter):
     NumericSorter help
     """
     def get_partition_key(self, partition: Partition) -> Any:
-        print(f'[ALEX_DEV:NUMERIC_SORTER#get_partition_key] NAME: {self._name} ; ORDERBY: {self._orderby}')
         partition_definition: dict = partition.definition
         partition_value: Any = partition_definition[self.name]
-        print(f'[ALEX_DEV:NUMERIC_SORTER#get_partition_key] PARTITION_DEFINITION: {partition_definition} ; PARTITION_VALUE: {partition_value}')
         if not is_numeric(value=partition_value):
             raise ValueError(
                 f'''Part "{self.name}" with value "{partition_value}" in partition "{partition.name}" has value
