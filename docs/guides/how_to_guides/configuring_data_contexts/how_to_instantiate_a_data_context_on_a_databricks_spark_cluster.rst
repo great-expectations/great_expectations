@@ -14,7 +14,7 @@ The guide demonstrates the recommended path for instantiating a Data Context wit
 Steps
 -----
 
-This how-to-guide assumes that you are using a Databricks Notebook, and using the Databricks File Store (DBFS) as the Metadata Store and DataDocs store. The `DBFS is a file store <https://docs.databricks.com/data/databricks-file-system.html>`_ that is native to Databricks clusters and Notebooks. Files on DBFS can be written and read as if they were on a local filesystem, just by adding the `/FileStore/` prefix to the path. For information on how to configure Databricks for filesystems on Azure and AWS, please see the associated documentation in the Additional Notes section below.
+This how-to-guide assumes that you are using a Databricks Notebook, and using the Databricks File Store (DBFS) as the Metadata Store and DataDocs store. The `DBFS is a file store <https://docs.databricks.com/data/databricks-file-system.html>`_ that is native to Databricks clusters and Notebooks. Files on DBFS can be written and read as if they were on a local filesystem, just by `adding the /dbfs/ prefix to the path<https://docs.databricks.com/data/databricks-file-system.html#local-file-apis>`_. For information on how to configure Databricks for filesystems on Azure and AWS, please see the associated documentation in the Additional Notes section below.
 
 #. **Install Great Expectations on your Databricks Spark cluster.**
 
@@ -28,6 +28,9 @@ This how-to-guide assumes that you are using a Databricks Notebook, and using th
 #. **Configure a Data Context in Memory.**
 
 The following snippet shows Python code that instantiates and configures a Data Context in memory. Copy this snippet into a cell in your Databricks Spark notebook, replace the ``TODO`` stubs with paths to your stores, and run.
+
+.. note::
+   If you are using DBFS for your stores, make sure to prepend your ``base_directory`` with ``/dbfs/`` as in the examples below to make sure you are writing to DBFS and not the Spark driver node filesystem.
 
 .. code-block:: python
    :linenos:
@@ -57,14 +60,14 @@ The following snippet shows Python code that instantiates and configures a Data 
            "class_name": "ExpectationsStore",
            "store_backend": {
                "class_name": "TupleFilesystemStoreBackend",
-               "base_directory": "/FileStore/expectations/",  # TODO: replace with the path to your Expectations Store on DBFS
+               "base_directory": "/dbfs/FileStore/expectations/",  # TODO: replace with the path to your Expectations Store on DBFS
            },
        },
        "validations_store": {
            "class_name": "ValidationsStore",
            "store_backend": {
                "class_name": "TupleFilesystemStoreBackend",
-               "base_directory": "/FileStore/validations/",  # TODO: replace with the path to your Validations Store on DBFS
+               "base_directory": "/dbfs/FileStore/validations/",  # TODO: replace with the path to your Validations Store on DBFS
            },
        },
        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
@@ -77,7 +80,7 @@ The following snippet shows Python code that instantiates and configures a Data 
            "class_name": "SiteBuilder",
            "store_backend": {
                "class_name": "TupleFilesystemStoreBackend",
-               "base_directory": "/FileStore/docs/",  # TODO: replace with the path to your DataDocs Store on DBFS
+               "base_directory": "/dbfs/FileStore/docs/",  # TODO: replace with the path to your DataDocs Store on DBFS
            },
            "site_index_builder": {
                "class_name": "DefaultSiteIndexBuilder",
