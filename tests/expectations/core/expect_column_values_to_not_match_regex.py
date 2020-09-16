@@ -6,20 +6,20 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.core.expect_column_values_to_be_in_set import (
-    ExpectColumnValuesToBeInSet,
+from great_expectations.expectations.core.expect_column_values_to_not_match_regex import (
+    ExpectColumnValuesToNotMatchRegex,
 )
 
 
-def test_expect_column_values_to_be_in_set_impl():
-    df = pd.DataFrame({"a": [1, 2, 1]})
+def test_expect_column_values_to_not_match_regex_impl():
+    df = pd.DataFrame({"a": ["bat", "rat", "cat"]})
     expectationConfiguration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={"column": "a", "value_set": [1, 2], "mostly": 1},
+        expectation_type="expect_column_values_to_not_match_regex",
+        kwargs={"column": "a", "regex": ".at", "mostly": 1},
     )
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToNotMatchRegex(expectationConfiguration)
     batch = Batch(data=df)
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
-    assert result == ExpectationValidationResult(success=True,)
+    assert result == ExpectationValidationResult(success=False,)
