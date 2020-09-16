@@ -302,6 +302,7 @@ def test_s3_pandas_source_read_parquet(
                 "class_name": "S3GlobReaderBatchKwargsGenerator",
                 "bucket": test_bucket,
                 "assets": {"test_data": {"prefix": "", "regex_filter": r".*parquet",},},
+                "reader_options": {"columns": ["col_1"]},
             }
         },
     )
@@ -315,8 +316,8 @@ def test_s3_pandas_source_read_parquet(
         ),
         "test_parquet",
     )
+    assert batch.columns == ["col_1"]
     assert batch["col_1"][4] == 5
-    assert batch["col_2"][0] == "a"
 
 
 def test_invalid_reader_pandas_datasource(tmp_path_factory):
