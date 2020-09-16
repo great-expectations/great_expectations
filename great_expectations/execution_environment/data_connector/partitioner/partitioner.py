@@ -6,6 +6,7 @@ from great_expectations.core.id_dict import BatchSpec
 
 logger = logging.getLogger(__name__)
 
+
 class Partitioner(object):
     r"""
     Partitioners help
@@ -21,15 +22,16 @@ class Partitioner(object):
         self._name = name
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
+    # TODO: <Alex>Add type hints throughout, wherever feasible.</Alex>
     # TODO : see if this can actually be reused
     def get_available_partitions(self, **kwargs):
         raise NotImplementedError
 
     # TODO : see if this can actually be reused
-    def get_available_partition_keys(self, **kwargs):
+    def get_available_partition_names(self, **kwargs):
         raise NotImplementedError
 
     # TODO : see if this can actually be reused
