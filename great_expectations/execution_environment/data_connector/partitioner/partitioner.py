@@ -2,6 +2,8 @@
 
 import logging
 
+from typing import List, Iterable
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.core.id_dict import BatchSpec
 
 logger = logging.getLogger(__name__)
@@ -25,17 +27,13 @@ class Partitioner(object):
     def name(self) -> str:
         return self._name
 
-    # TODO: <Alex>Add type hints throughout, wherever feasible.</Alex>
-    # TODO : see if this can actually be reused
-    def get_available_partitions(self, **kwargs):
+    def get_available_partitions(self, **kwargs) -> Iterable[Partition]:
         raise NotImplementedError
 
-    # TODO : see if this can actually be reused
-    def get_available_partition_names(self, **kwargs):
+    def get_available_partition_names(self, **kwargs) -> List[str]:
         raise NotImplementedError
 
-    # TODO : see if this can actually be reused
-    def get_available_partition_definitions(self, **kwargs):
+    def get_partition(self, partition_name: str) -> Partition:
         raise NotImplementedError
 
 

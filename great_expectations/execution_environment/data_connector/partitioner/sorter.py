@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Iterable, Any
+from typing import List, Any
 
 import logging
 
@@ -30,7 +30,7 @@ class Sorter(object):
             self._orderby = orderby
         self._reverse = reverse
 
-    def get_sorted_partitions(self, partitions: Iterable[Partition]) -> Iterable[Partition]:
+    def get_sorted_partitions(self, partitions: List[Partition]) -> List[Partition]:
         return sorted(partitions, key=self._verify_sorting_directives_and_get_partition_key, reverse=self.reverse)
 
     def _verify_sorting_directives_and_get_partition_key(self, partition: Partition) -> Any:
