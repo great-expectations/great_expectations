@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Iterable
+from typing import Iterable, Any
 
 import logging
 
@@ -16,12 +16,27 @@ class Sorter(object):
 
     def __init__(self, name: str, **kwargs):
         self._name = name
-        orderby: str = kwargs.find("orderby")
+        orderby: str = kwargs.get("orderby")
         if orderby:
             self._orderby = orderby
+        print(f'\n[ALEX_DEV#SORTER] NAME: {self._name} ; ORDERBY: {self._orderby}')
 
     def get_sorted_partitions(self, partitions: Iterable[Partition]) -> Iterable[Partition]:
-        pass
+        if self.orderby == "asc":
+            reverse = False
+        elif self.orderby == "desc":
+            reverse = True
+        return sorted(partitions, key=self._verify_sorting_directives_and_get_partition_key, reverse=reverse)
+
+    def _verify_sorting_directives_and_get_partition_key(self, partition: Partition) -> Any:
+        partition_definition = partition.definition
+        if partition_definition.get(self.name) is None:
+            raise ValueError(f'Unable to sort partition "{partition.name}" by attribute "{self.name}".')
+        print(f'\n[ALEX_DEV:SORTER#_verify_sorting_directives_and_get_partition_key] NAME: {self._name} ; PARTITION_DEFINITION: {partition_definition}')
+        return self.get_partition_key(partition=partition)
+
+    def get_partition_key(self, partition: Partition) -> Any:
+        raise NotImplementedError
 
     @property
     def name(self) -> str:

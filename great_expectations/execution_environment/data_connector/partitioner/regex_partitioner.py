@@ -60,9 +60,12 @@ class RegexPartitioner(Partitioner):
             partitioned_path = self._get_partitions_for_path(path=path)
             if partitioned_path is not None:
                 partitions.append(partitioned_path)
-        # set self:
+
+        if self.sorters is not None:
+            for sorter in self.sorters:
+                partitions = sorter.get_sorted_partitions(partitions=partitions)
         self._partitions = partitions
-        # TODO: <Alex>Cleanup</Alex>
+        # TODO: <Alex>OK for now, but not clear that this is how calculate and return should be...  Need to revisit.</Alex>
         # return self._partitions (should this be another method?)
         return self._partitions
 
@@ -78,23 +81,32 @@ class RegexPartitioner(Partitioner):
             logger.warning("No match found for path: %s" % path)
             raise ValueError("No match found for path: %s" % path)
         else:
-            # default case : there are no named ordered fields?
-            # and add the name?
             partition_definition = {}
+            groups = matches.groups()
             if self.sorters is None:
-                # then we want to use the defaults:
-                # NOTE : matches begin with the full regex match at index=0 and then each matching group
-                # and then each subsequent match in following indices.
-                # this is why partition_definition_inner_dict is loaded with partition_params[i] as name
-                # and matches[i+1] as value
-                for i in range(len(matches)-1):
-                    part_name = RegexPartitioner.DEFAULT_GROUP_NAME + "_" + str(i)
-                    partition_definition[part_name] = matches[i+1]
+                for idx, group in enumerate(groups):
+                    part_name = f"{RegexPartitioner.DEFAULT_GROUP_NAME}_{idx}"
+                    partition_definition[part_name] = group
             else:
                 # TODO: <Alex>TODO</Alex>
-                pass
+                part_names = [sorter.name for sorter in self.sorters]
+                if len(part_names) != len(groups):
+                    logger.warning(
+                        'Number of Regex groups matched in "%s" is %d but number of sorters specified is %d.' %
+                        (path, len(groups), len(part_names))
+                    )
+                    raise ValueError(
+                        'Number of Regex groups matched in "%s" is %d but number of sorters specified is %d.' %
+                        (path, len(groups), len(part_names))
+                    )
+                for idx, group in enumerate(groups):
+                    part_name = part_names[idx]
+                    partition_definition[part_name] = group
+                print(f'AHA!!!!! ALEX_DEV ; PARTITION_DEFITION: {partition_definition}')
 
             part_name_list = [part_value for part_name, part_value in partition_definition.items()]
+            print(f'AHA!!!!! ALEX_DEV ; PART_NAME_LIST: {part_name_list}')
             partition_name = RegexPartitioner.DEFAULT_DELIMITER.join(part_name_list)
+            print(f'AHA!!!!! ALEX_DEV ; PARTITION_NAME: {partition_name}')
 
         return Partition(name=partition_name, definition=partition_definition)

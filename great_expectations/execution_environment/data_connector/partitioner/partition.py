@@ -28,3 +28,6 @@ class Partition(object):
         if isinstance(other, Partition):
             return self.name == other.name and self.definition == other.definition
         return False
+
+    def __repr__(self):
+        return f'{self.name}: {self.definition}'
