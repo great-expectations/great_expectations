@@ -28,7 +28,7 @@ def test_recursively_convert_to_json_serializable():
         "w": ["aaaa", "bbbb", 1.3, 5, 6, 7],
         "x": np.array([1, 2, 3]),
         "y": {"alpha": None, "beta": np.nan, "delta": np.inf, "gamma": -np.inf},
-        "z": set([1, 2, 3, 4, 5]),
+        "z": {1, 2, 3, 4, 5},
         "zz": (1, 2, 3),
         "zzz": [datetime.datetime(2017, 1, 1), datetime.date(2017, 5, 1),],
         "np.bool": np.bool_([True, False, True]),
@@ -99,7 +99,7 @@ The following Parent and Child classes are used for testing documentation inheri
 """
 
 
-class Parent(object):
+class Parent:
     """Parent class docstring
     """
 

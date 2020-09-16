@@ -146,14 +146,12 @@ def test_HtmlSiteStore_S3_backend():
 
     # Verify that internals are working as expected, including the default filepath
     # paths below should include the batch_parameters
-    assert set(
-        [
-            s3_object_info["Key"]
-            for s3_object_info in boto3.client("s3").list_objects_v2(
-                Bucket=bucket, Prefix=prefix
-            )["Contents"]
-        ]
-    ) == {
+    assert {
+        s3_object_info["Key"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(
+            Bucket=bucket, Prefix=prefix
+        )["Contents"]
+    } == {
         "test/prefix/index.html",
         "test/prefix/expectations/asset/quarantine.html",
         "test/prefix/validations/asset/quarantine/20191007T151224.1234Z_prod_100/20190926T134241.000000Z/1234.html",

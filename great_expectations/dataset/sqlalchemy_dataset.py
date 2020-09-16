@@ -114,7 +114,7 @@ except ImportError:
     pass
 
 
-class SqlAlchemyBatchReference(object):
+class SqlAlchemyBatchReference:
     def __init__(self, engine, table_name=None, schema=None, query=None):
         self._engine = engine
         if table_name is None and query is None:
@@ -613,7 +613,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 head_sql_str += "`" + self._table.name + "`"
             else:
                 head_sql_str += self._table.name
-            head_sql_str += " limit {0:d}".format(n)
+            head_sql_str += " limit {:d}".format(n)
 
             # Limit is unknown in mssql! Use top instead!
             if self.engine.dialect.name.lower() == "mssql":
@@ -1131,7 +1131,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             condition = max_condition
 
         query = (
-            sa.select([sa.func.count((sa.column(column)))])
+            sa.select([sa.func.count(sa.column(column))])
             .where(sa.and_(sa.column(column) != None, condition))
             .select_from(self._table)
         )
@@ -1300,6 +1300,54 @@ WHERE
             "result": {
                 "observed_value": {"self": row_count, "other": other_table_row_count,}
             },
+        }
+
+    ###
+    ###
+    ###
+    #
+    # Table Expectation Implementations
+    #
+    ###
+    ###
+    ###
+
+    @DocInherit
+    @MetaSqlAlchemyDataset.expectation(["column_list", "ignore_row_if"])
+    def expect_multicolumn_values_to_be_unique(
+        self,
+        column_list,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        columns = [
+            sa.column(col["name"]) for col in self.columns if col["name"] in column_list
+        ]
+        query = (
+            sa.select(columns)
+            .group_by(*columns)
+            .having(sa.func.count() > 1)
+            .select_from(self._table)
+        )
+
+        if ignore_row_if == "all_values_are_missing":
+            query = query.where(sa.and_(*[col != None for col in columns]))
+        elif ignore_row_if == "any_value_is_missing":
+            query = query.where(sa.or_(*[col != None for col in columns]))
+        elif ignore_row_if == "never":
+            pass
+        else:
+            raise ValueError(
+                "ignore_row_if was set to an unexpected value: %s" % ignore_row_if
+            )
+
+        count = self.engine.execute(query.count()).fetchone()[0]
+        return {
+            "success": count == 0,
+            "result": {"observed_value": {"non_distinct_sets": count}},
         }
 
     ###
