@@ -71,8 +71,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     map_metric = "map.z_scores"
     metric_dependencies = ("mean", "standard_deviation", "map.nonnull.count","map.z_scores", "map.z_scores.count_over_threshold")
-    domain_kwargs = ("batch_id", "table", "column", "row_condition", "condition_parser")
-    success_kwargs = ("threshold", "double_sided", "mostly")
+    success_keys = ("threshold", "double_sided", "mostly")
 
     # Default values
     default_kwarg_values = {
@@ -87,11 +86,12 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     }
 
     """ A Column Map Metric Decorator for the Mean"""
-    @PandasExecutionEngine.column_map_metric(
+    @PandasExecutionEngine.metric(
         metric_name="mean",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
+        batchable=False,
     )
     def _pandas_mean(
             self,
@@ -102,28 +102,30 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
 
         return series.mean()
 
-    """ A Column Map Metric Decorator for the Mean"""
+    """ A Column Map Metric Decorator for the Standard Deviation"""
 
-    @PandasExecutionEngine.column_map_metric(
+    @PandasExecutionEngine.metric(
         metric_name="standard_deviation",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
+        batchable=False,
     )
     def _pandas_standard_deviation(
             self,
             series: pd.Series,
             runtime_configuration: dict = None,
     ):
-        """Mean Metric Function"""
+        """Standard Deviation Metric Function"""
 
         return series.std()
 
-    @PandasExecutionEngine.column_map_metric(
+    @PandasExecutionEngine.metric(
         metric_name="map.z_scores",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("mean", "standard_deviation"),
+        metric_value_keys= tuple(),
         metric_dependencies=("mean", "standard_deviation"),
+        batchable=False,
     )
     def _pandas_z_scores(
                 self,
@@ -141,12 +143,12 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
 
     @PandasExecutionEngine.column_map_metric(
 
-        metric_name="map.z_scores.number_over_threshold",
+        metric_name="map.z_scores.over_threshold",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple("map.z_scores")
+        metric_value_keys=("z_scores",),
+        metric_dependencies=("map.z_scores",),
     )
-    def _pandas_number_over_threshold(
+    def _pandas_over_threshold(
             self,
             series: pd.Series,
             threshold,
@@ -214,12 +216,12 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         # Returning dictionary output with necessary metrics based on the format
         return _format_map_output(
             result_format=parse_result_format(result_format),
-            success=(metric_vals.get("map.z_scores.number_over_threshold") / metric_vals.get("map.nonull_count"))
+            success=(metric_vals.get("map.z_scores.count_over_threshold") / metric_vals.get("map.nonull_count"))
                     >= mostly,
             element_count=metric_vals.get("map.count"),
             nonnull_count=metric_vals.get("map.nonnull.count"),
             unexpected_count=metric_vals.get("map.nonnull.count")
-                             - "map.z_scores.number_over_threshold",
+                             - "map.z_scores.count_over_threshold",
             unexpected_list=metric_vals.get("map.z_scores.unexpected_values"),
             unexpected_index_list=metric_vals.get("map.z_scores.unexpected_index"),
         )

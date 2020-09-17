@@ -759,6 +759,18 @@ class ExpectationConfiguration(DictDot):
                 "catch_exceptions": False,
             },
         },
+        "expect_column_value_z_scores_to_be_less_than": {
+            "domain_kwargs": ["column", "row_condition", "condition_parser"],
+            "success_kwargs": ["threshold", "mostly", "double_sided"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": 1,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+                },
+        }
     }
 
     runtime_kwargs = ["result_format", "include_config", "catch_exceptions"]
