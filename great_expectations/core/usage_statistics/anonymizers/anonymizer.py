@@ -6,7 +6,7 @@ from great_expectations.util import load_class
 logger = logging.getLogger(__name__)
 
 
-class Anonymizer(object):
+class Anonymizer:
     """Anonymize string names in an optionally-consistent way."""
 
     def __init__(self, salt=None):

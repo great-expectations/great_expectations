@@ -157,7 +157,7 @@
       },
       {
         "title": "How do you want to trigger validation?",
-        "description": "A [Checkpoint](https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html) makes it possible to easily integrate a validation step into your workflow.",
+        "description": "A [Checkpoint](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html) makes it possible to easily integrate a validation step into your workflow.",
         "id": "checkpoint",
         "cases": [
           {
