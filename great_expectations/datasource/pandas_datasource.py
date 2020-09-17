@@ -222,8 +222,6 @@ class PandasDatasource(Datasource):
                 reader_options["encoding"] = s3_object.get(
                     "ContentEncoding", default_reader_options.get("encoding")
                 )
-            if not reader_options.get("encoding"):
-                reader_options["encoding"] = s3_object.get("ContentEncoding", "utf-8")
             df = reader_fn(BytesIO(s3_object["Body"].read()), **reader_options)
 
         elif "dataset" in batch_kwargs and isinstance(
