@@ -53,12 +53,12 @@ def register_metric(
     execution_engine: Type["ExecutionEngine"],
     metric_dependencies: Tuple[str],
     metric_provider: Callable,
-    batchable: bool = False,
+    bundle_computation: bool = False,
 ) -> dict:
     res = dict()
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")
-    metric_provider._is_batchable = batchable
+    metric_provider._can_be_bundled = bundle_computation
     if metric_name in _registered_metrics:
         metric_definition = _registered_metrics[metric_name]
         current_dependencies = metric_definition.get("metric_dependencies", set())

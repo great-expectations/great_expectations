@@ -18,8 +18,8 @@ from ..registry import extract_metrics, get_metric_kwargs
 
 
 class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
-    map_metric = "map.in_set"
-    metric_dependencies = ("map.in_set.count", "map.nonnull.count")
+    map_metric = "column_values.in_set"
+    metric_dependencies = ("column_values.in_set.count", "map.nonnull.count")
     success_keys = ("value_set", "mostly", "parse_strings_as_datetimes")
 
     default_kwarg_values = {
@@ -46,12 +46,14 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         return True
 
     @PandasExecutionEngine.column_map_metric(
-        metric_name="map.in_set",
+        metric_name="column_values.in_set",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("value_set",),
         metric_dependencies=tuple(),
+        provide_unexpected_metric_values=False,
+        provide_unexpected_value_counts=False,
     )
-    def _pandas_map_in_set(
+    def _pandas_column_values_in_set(
         self,
         series: pd.Series,
         value_set: Union[list, set],
@@ -67,7 +69,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         else:
             parsed_value_set = value_set
 
-        return series.isin(parsed_value_set)
+        return pd.DataFrame({"column_values.in_set": series.isin(parsed_value_set)})
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
@@ -92,16 +94,18 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=(
-                metric_vals.get("map.in_set.count")
+                metric_vals.get("column_values.in_set.count")
                 / metric_vals.get("map.nonnull.count")
             )
             >= mostly,
             element_count=metric_vals.get("map.count"),
             nonnull_count=metric_vals.get("map.nonnull.count"),
             unexpected_count=metric_vals.get("map.nonnull.count")
-            - metric_vals.get("map.in_set.count"),
-            unexpected_list=metric_vals.get("map.in_set.unexpected_values"),
-            unexpected_index_list=metric_vals.get("map.is_in.unexpected_index"),
+            - metric_vals.get("column_values.in_set.count"),
+            unexpected_list=metric_vals.get("column_values.in_set.unexpected_values"),
+            unexpected_index_list=metric_vals.get(
+                "column_values.in_set.unexpected_index"
+            ),
         )
 
     #

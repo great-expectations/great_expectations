@@ -11,11 +11,25 @@ from great_expectations.expectations.core.expect_column_values_to_be_in_set impo
 )
 
 
-def test_expect_column_values_to_be_in_set_impl():
-    df = pd.DataFrame({"a": [1, 2, 1]})
+def test_expect_column_values_to_be_in_set_int_impl():
+    df = pd.DataFrame({"a": [1, 2, 3]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "a", "value_set": [1, 2], "mostly": 1},
+    )
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch = Batch(data=df)
+    result = expectation.validate(
+        batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
+    )
+    assert result == ExpectationValidationResult(success=False,)
+
+
+def test_expect_column_values_to_be_in_set_str_impl():
+    df = pd.DataFrame({"a": ["dog", "cat", "mouse"]})
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={"column": "a", "value_set": ["dog", "cat"], "mostly": 0.5},
     )
     expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
     batch = Batch(data=df)
