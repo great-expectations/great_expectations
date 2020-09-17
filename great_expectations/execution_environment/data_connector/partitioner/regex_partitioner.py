@@ -79,7 +79,7 @@ class RegexPartitioner(Partitioner):
         else:
             partition_definition: dict = {}
             groups: tuple = matches.groups()
-            if self.sorters is None:
+            if len(self.sorters) == 0:
                 for idx, group in enumerate(groups):
                     part_name = f"{RegexPartitioner.DEFAULT_GROUP_NAME}_{idx}"
                     partition_definition[part_name] = group

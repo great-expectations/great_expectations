@@ -9,8 +9,9 @@ from great_expectations.execution_environment.data_connector.partitioner.sorter 
 logger = logging.getLogger(__name__)
 
 
-
-def name_in_list(partition_value: str, reference_list: List[str]) -> bool:
+"""
+# <WILL> TODO : this function originally was intended to handle more sophisticated type checking... is it too much? 
+def is_name_in_list(partition_value: str, reference_list: List[str]) -> bool:
     # check type
     if not isinstance(partition_value, str):
         raise ValueError(
@@ -25,13 +26,16 @@ def name_in_list(partition_value: str, reference_list: List[str]) -> bool:
     except ValueError:
         print('Source ' + partition_value + ' was not found in Reference list.  Try again...')
         return False
-
+"""
 
 class CustomListSorter(Sorter):
     r"""
     CustomListSorter
-        - This is a placeholder Sorter for being able to handle a custom list
-
+        - The CustomListSorter is able to sort partitions values according to a custom list. Maybe there can be a better name for this...
+        - candidates:
+            - CustomSorter - too broad
+            - ReferenceListSorter - eww
+            - ...
     """
     def __init__(self, name: str, **kwargs):
         reference_list: list = kwargs.get("reference_list")
@@ -41,11 +45,12 @@ class CustomListSorter(Sorter):
     def get_partition_key(self, partition: Partition) -> Any:
         partition_definition: dict = partition.definition
         partition_value: Any = partition_definition[self.name]
-        if name_in_list(partition_value, self.reference_list):
+        # TODO: <WILL> simple membership check for parition_value in reference_list. is this sufficient?
+        if partition_value in self.reference_list:
             return self.reference_list.index(partition_value)
         else:
             raise ValueError(
-                'Source "partition_value" was not found in Reference list.  Try again...'
+                'Source {} was not found in Reference list.  Try again...'.format(partition_value)
             )
 
     @property
