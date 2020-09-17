@@ -1,6 +1,7 @@
 import datetime
 import logging
 import uuid
+from collections import Callable
 from functools import partial
 from io import BytesIO
 
@@ -214,7 +215,7 @@ class PandasDatasource(Datasource):
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
             reader_fn = self._get_reader_fn(reader_method, url.key)
             default_reader_options = self._infer_default_options(
-                reader_method, reader_options
+                reader_fn, reader_options
             )
             if not reader_options.get("encoding") and default_reader_options.get(
                 "encoding"
@@ -275,7 +276,7 @@ class PandasDatasource(Datasource):
             "Unable to determine reader method from path: %s" % path, {"path": path}
         )
 
-    def _infer_default_options(self, reader_method: str, reader_options: dict) -> dict:
+    def _infer_default_options(self, reader_fn: Callable, reader_options: dict) -> dict:
         """
         Allows reader options to be customized based on file context before loading to a DataFrame
 
@@ -286,9 +287,9 @@ class PandasDatasource(Datasource):
         Returns:
             dict: A copy of the reader options post-inference
         """
-        if reader_method == "read_parquet":
+        if reader_fn.__name__ == "read_parquet":
             return {}
-        if reader_method == "read_excel":
+        if reader_fn.__name__ == "read_excel":
             return {}
         else:
             return {"encoding": "utf-8"}
