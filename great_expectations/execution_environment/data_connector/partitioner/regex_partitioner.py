@@ -1,6 +1,7 @@
 import logging
 import regex as re
 from typing import List, Iterator, Union
+from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter import Sorter
@@ -21,20 +22,30 @@ class RegexPartitioner(Partitioner):
 
     def __init__(
         self,
+        data_connector: DataConnector,
         name: str,
+        paths: List[str],
         regex: str = None,
+        allow_multifile_partitions: bool = False,
         sorters: List[Sorter] = None
     ):
         logger.debug("Constructing RegexPartitioner {!r}".format(name))
-        super().__init__(name)
+        super().__init__(name=name, data_connector=data_connector)
 
+        self._paths = paths
         self._regex = regex
+        self._allow_multifile_partitions = allow_multifile_partitions
         if sorters is None:
             sorters = []
         self._sorters = sorters
-        # TODO: <Alex></Alex>
-        # self._partitions = {}
-        self._partitions: List[Partition] = []
+
+    @property
+    def paths(self) -> List[str]:
+        return self._paths
+
+    @paths.setter
+    def paths(self, paths: List[str]):
+        self._paths = paths
 
     @property
     def regex(self) -> str:
@@ -45,16 +56,21 @@ class RegexPartitioner(Partitioner):
         self._regex = regex
 
     @property
+    def allow_multifile_partitions(self) -> bool:
+        return self._allow_multifile_partitions
+
+    @allow_multifile_partitions.setter
+    def allow_multifile_partitions(self, allow_multifile_partitions: bool):
+        self._allow_multifile_partitions = allow_multifile_partitions
+
+    @property
     def sorters(self) -> List[Sorter]:
         return self._sorters
 
     # TODO: <Alex>Implement "UpSert" using Partition name for guidance.  Make this part of DataConnector.  No Caching HERE!</Alex>
-    def get_available_partitions(self, paths: List[str]) -> List[Partition]:
-        if len(self._partitions) > 0:
-            return self._partitions
-
+    def get_available_partitions(self, data_asset_name: str = None) -> List[Partition]:
         partitions: List[Partition] = []
-        for path in paths:
+        for path in self.paths:
             partitioned_path: Partition = self._get_partitions_for_path(path=path)
             if partitioned_path is not None:
                 partitions.append(partitioned_path)
@@ -62,10 +78,8 @@ class RegexPartitioner(Partitioner):
         sorters: Iterator[Sorter] = reversed(self.sorters)
         for sorter in sorters:
             partitions = sorter.get_sorted_partitions(partitions=partitions)
-        self._partitions = partitions
-        # TODO: <Alex>OK for now, but not clear that this is how calculate and return should be...  Need to revisit.</Alex>
-        # return self._partitions (should this be another method?)
-        return self._partitions
+        self.data_connector.update_partitions_cache(partitions=partitions, data_asset_name=data_asset_name)
+        return self.data_connector.get_cached_partitions(data_asset_name=data_asset_name)
 
     def _get_partitions_for_path(self, path: str) -> Partition:
         if self.regex is None:
@@ -73,8 +87,8 @@ class RegexPartitioner(Partitioner):
 
         matches: Union[re.Match, None] = re.match(self.regex, path)
         if matches is None:
-            logger.warning("No match found for path: %s" % path)
-            raise ValueError("No match found for path: %s" % path)
+            logger.warning(f'No match found for path: "{path}".')
+            raise ValueError(f'No match found for path: "{path}".')
         else:
             partition_definition: dict = {}
             groups: tuple = matches.groups()
@@ -87,12 +101,14 @@ class RegexPartitioner(Partitioner):
                 part_names: list = [sorter.name for sorter in self.sorters]
                 if len(part_names) != len(groups):
                     logger.warning(
-                        'Number of Regex groups matched in "%s" is %d but number of sorters specified is %d.' %
-                        (path, len(groups), len(part_names))
+                        f'''RegexPartitioner "{self.name}" matched {len(groups)} groups in "{path}", but number of
+sorters specified is {len(part_names)}.
+                        '''
                     )
                     raise ValueError(
-                        'Number of Regex groups matched in "%s" is %d but number of sorters specified is %d.' %
-                        (path, len(groups), len(part_names))
+                        f'''RegexPartitioner "{self.name}" matched {len(groups)} groups in "{path}", but number of
+sorters specified is {len(part_names)}.
+                        '''
                     )
                 for idx, group in enumerate(groups):
                     part_name: str = part_names[idx]
@@ -101,12 +117,24 @@ class RegexPartitioner(Partitioner):
             part_name_list: list = [part_value for part_name, part_value in partition_definition.items()]
             partition_name: str = RegexPartitioner.DEFAULT_DELIMITER.join(part_name_list)
 
-        return Partition(name=partition_name, definition=partition_definition)
+        return Partition(name=partition_name, definition=partition_definition, source=path)
 
-    def get_available_partition_names(self, paths: list) -> List[str]:
-        return [
-            partition.name for partition in self.get_available_partitions(paths)
-        ]
-
-    def get_partition(self, partition_name: str) -> Partition:
-        pass
+    def get_partitions_for_data_asset(self, partition_name: str, data_asset_name: str = None) -> List[Partition]:
+        partitions: List[Partition] = list(
+            filter(
+                lambda partition: partition.name == partition_name,
+                self.data_connector.get_cached_partitions(data_asset_name=data_asset_name)
+            )
+        )
+        if not self.allow_multifile_partitions and len(partitions) > 1:
+            logger.warning(
+                f'''RegexPartitioner "{self.name}' detected multiple partitions detected for partition name
+"{partition_name}"; however, allow_multifile_partitions is set to False.
+                '''
+            )
+            raise ValueError(
+                f'''RegexPartitioner "{self.name}' detected multiple partitions detected for partition name
+"{partition_name}"; however, allow_multifile_partitions is set to False.
+                '''
+            )
+        return partitions
