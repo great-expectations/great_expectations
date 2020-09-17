@@ -15,17 +15,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-"""
-asset_param = {
-    "test_asset": {
-        "partition_regex": r"file_(.*)_(.*).csv",
-        "partition_param": ["year", "file_num"],
-        "partition_delimiter": "-",
-        "reader_method": "read_csv",
-    }
-}
-
-"""
 # TODO: <Alex>We might wish to invent more cool paths to test and different column types and sort orders...</Alex>
 batch_paths = [
   "my_dir/alex_20200809_1000.csv",
@@ -39,7 +28,6 @@ batch_paths = [
   "my_dir/james_20200810_1003.csv",
   "my_dir/alex_20200819_1300.csv",
 ]
-
 
 def test_regex_partitioner():
     # TODO: <Alex>We might wish to invent more cool paths to test and different column types and sort orders...</Alex>
