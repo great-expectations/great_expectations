@@ -13,6 +13,8 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=tuple(),
         metric_dependencies=tuple(),
+        provide_unexpected_metric_values=False,
+        provide_unexpected_value_counts=False,
     )
     def _nonnull_count(self, series: pd.Series, runtime_configuration: dict = None):
         return ~series.isnull()

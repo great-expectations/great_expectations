@@ -32,6 +32,7 @@ from ..datasource.pandas_datasource import HASH_THRESHOLD
 from ..exceptions import BatchSpecError, ValidationError
 from ..exceptions.metric_exceptions import MetricError
 from ..execution_environment.util import hash_pandas_dataframe
+from ..marshmallow__shade.fields import Bool
 from ..validator.validation_graph import MetricEdgeKey
 from .execution_engine import ExecutionEngine
 
@@ -774,12 +775,22 @@ Notes:
         ).id
         boolean_mapped_success_values = metrics.get(metric_key)
         if result_format["result_format"] == "COMPLETE":
-            return list(data[boolean_mapped_success_values == False])
+            return list(
+                data[
+                    boolean_mapped_success_values[
+                        metric_name[: -len(".unexpected_values")]
+                    ]
+                    == False
+                ]
+            )
         else:
             return list(
-                data[boolean_mapped_success_values == False][
-                    : result_format["partial_unexpected_count"]
-                ]
+                data[
+                    boolean_mapped_success_values[
+                        metric_name[: -len(".unexpected_values")]
+                    ]
+                    == False
+                ][: result_format["partial_unexpected_count"]]
             )
 
     def column_map_index(
@@ -900,6 +911,8 @@ Notes:
         metric_domain_keys: Tuple[str, ...],
         metric_value_keys: Tuple[str, ...],
         metric_dependencies: Tuple[str, ...],
+        provide_unexpected_metric_values: bool,
+        provide_unexpected_value_counts: bool,
     ):
         """
         A decorator for declaring a metric provider
@@ -933,6 +946,7 @@ Notes:
                 execution_engine=cls,
                 metric_dependencies=metric_dependencies,
                 metric_provider=inner_func,
+                bundle_computation=True,
             )
             register_metric(
                 metric_name=metric_name + ".count",
@@ -977,7 +991,7 @@ Notes:
         metric_domain_keys: tuple,
         metric_value_keys: tuple,
         metric_dependencies: tuple,
-        batchable: bool = False,
+        bundle_computation: bool,
     ):
         """
         A decorator for declaring a metric provider
@@ -1018,7 +1032,7 @@ Notes:
                 execution_engine=cls,
                 metric_dependencies=metric_dependencies,
                 metric_provider=inner_func,
-                batchable=batchable,
+                bundle_computation=bundle_computation,
             )
             return inner_func
 

@@ -330,7 +330,7 @@ class DatasetExpectation(Expectation, ABC):
         metric_domain_keys=domain_keys,
         metric_value_keys=tuple(),
         metric_dependencies=tuple(),
-        batchable=True,
+        bundle_computation=True,
     )
     def _snippet(
         self,
@@ -409,6 +409,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=tuple(),
         metric_dependencies=tuple(),
+        bundle_computation=True,
     )
     def _count(
         self,

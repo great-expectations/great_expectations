@@ -42,13 +42,15 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("strictly", "parse_strings_as_datetimes",),
         metric_dependencies=tuple(),
+        provide_unexpected_metric_values=False,
+        provide_unexpected_value_counts=False,
     )
     def _pandas_map_increasing(
-            self,
-            series: pd.Series,
-            strictly: Union[bool, None],
-            parse_strings_as_datetimes: Union[bool, None],
-            runtime_configuration: dict = None,
+        self,
+        series: pd.Series,
+        strictly: Union[bool, None],
+        parse_strings_as_datetimes: Union[bool, None],
+        runtime_configuration: dict = None,
     ):
         if parse_strings_as_datetimes:
             temp_series = series.map(parse)
@@ -75,10 +77,10 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
-            self,
-            configuration: ExpectationConfiguration,
-            metrics: dict,
-            runtime_configuration: dict = None,
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: dict,
+        runtime_configuration: dict = None,
     ):
         validation_dependencies = self.get_validation_dependencies(configuration)[
             "metrics"
@@ -96,14 +98,14 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=(
-                            metric_vals.get("map.increasing.count")
-                            / metric_vals.get("map.nonnull.count")
-                    )
-                    >= mostly,
+                metric_vals.get("map.increasing.count")
+                / metric_vals.get("map.nonnull.count")
+            )
+            >= mostly,
             element_count=metric_vals.get("map.count"),
             nonnull_count=metric_vals.get("map.nonnull.count"),
             unexpected_count=metric_vals.get("map.nonnull.count")
-                             - metric_vals.get("map.increasing.count"),
+            - metric_vals.get("map.increasing.count"),
             unexpected_list=metric_vals.get("map.increasing.unexpected_values"),
             unexpected_index_list=metric_vals.get("map.is_in.unexpected_index"),
         )

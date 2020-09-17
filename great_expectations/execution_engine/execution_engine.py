@@ -543,7 +543,7 @@ class ExecutionEngine(MetaExecutionEngine):
                 "metric_value_kwargs": metric_to_resolve.metric_value_kwargs,
                 "runtime_configuration": runtime_configuration,
             }
-            if getattr(metric_provider, "_is_batchable", False):
+            if getattr(metric_provider, "_can_be_bundled", False):
                 resolve_batch.append(
                     (metric_to_resolve, metric_provider, metric_provider_kwargs)
                 )
