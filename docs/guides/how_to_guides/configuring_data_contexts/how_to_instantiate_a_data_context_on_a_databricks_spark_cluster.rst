@@ -163,10 +163,8 @@ Additional notes
 
 Additional resources
 --------------------
-- How to create a Data Source in :ref:`Databricks AWS <_how_to_guides__configuring_datasources__how_to_configure_a_databricks_aws_datasource>`
-
-- How to create a Data Source in :ref:`Databricks Azure <_how_to_guides__configuring_datasources__how_to_configure_a_databricks_azure_datasource>`
-
+- How to create a Data Source in :ref:`Databricks AWS <how_to_guides__configuring_datasources__how_to_configure_a_databricks_aws_datasource>`
+- How to create a Data Source in :ref:`Databricks Azure <how_to_guides__configuring_datasources__how_to_configure_a_databricks_azure_datasource>`
 
 .. discourse::
     :topic_identifier: 320
