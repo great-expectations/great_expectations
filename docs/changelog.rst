@@ -8,6 +8,7 @@ Develop
 -----------------
 
 * [ENHANCEMENT] Update schema for anonymized expectation types to avoid large key domain
+* [BUGFIX] Allow for pandas reader option inference with parquet and Excel (thanks @dlachasse)!
 * [BUGFIX] Fix bug where running checkpoint fails if GCS data docs site has a prefix (thanks @sergii-tsymbal-exa)!
 * [BUGFIX] Fix bug in deleting datasource config from config file (thanks @rxmeez)!
 * [BUGFIX] clarify inclusiveness of min/max values in string rendering
