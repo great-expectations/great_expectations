@@ -59,10 +59,9 @@ class RegexPartitioner(Partitioner):
             if partitioned_path is not None:
                 partitions.append(partitioned_path)
 
-        if self.sorters is not None:
-            sorters: Iterator[Sorter] = reversed(self.sorters)
-            for sorter in sorters:
-                partitions = sorter.get_sorted_partitions(partitions=partitions)
+        sorters: Iterator[Sorter] = reversed(self.sorters)
+        for sorter in sorters:
+            partitions = sorter.get_sorted_partitions(partitions=partitions)
         self._partitions = partitions
         # TODO: <Alex>OK for now, but not clear that this is how calculate and return should be...  Need to revisit.</Alex>
         # return self._partitions (should this be another method?)
@@ -79,7 +78,7 @@ class RegexPartitioner(Partitioner):
         else:
             partition_definition: dict = {}
             groups: tuple = matches.groups()
-            if self.sorters is None:
+            if len(self.sorters) == 0:
                 for idx, group in enumerate(groups):
                     part_name = f"{RegexPartitioner.DEFAULT_GROUP_NAME}_{idx}"
                     partition_definition[part_name] = group

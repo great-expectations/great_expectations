@@ -1,32 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any
 import logging
 
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter import Sorter
 
+from great_expectations.util import(
+    is_numeric,
+    is_int,
+    is_float
+)
+
+from typing import Any
+
 logger = logging.getLogger(__name__)
-
-
-def is_numeric(value: Any) -> bool:
-    return is_int(value) or is_float(value)
-
-
-def is_int(value: Any) -> bool:
-    try:
-        num: int = int(value)
-    except ValueError:
-        return False
-    return True
-
-
-def is_float(value: Any) -> bool:
-    try:
-        num: float = float(value)
-    except ValueError:
-        return False
-    return True
 
 
 class NumericSorter(Sorter):
