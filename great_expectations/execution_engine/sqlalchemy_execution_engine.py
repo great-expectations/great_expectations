@@ -298,14 +298,6 @@ WHERE
         return col_info_dict_list
 
 
-class NoOpDict(object):
-    def __getitem__(self, item):
-        return None
-
-    def __setitem__(self, key, value):
-        return None
-
-
 class SqlAlchemyExecutionEngine(ExecutionEngine):
     def __init__(
         self,
@@ -318,12 +310,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         **kwargs,
     ):
         super().__init__(name=None, data_context=data_context)
-        # NOTE: 20200918 - this is a naive cache; update.
-        if self.caching:
-            self._metric_cache = {}
-        else:
-            self._metric_cache = NoOpDict()
-
         self._name = name
         if engine is not None:
             if credentials is not None:
@@ -596,11 +582,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # We need a different query for each domain (where clause).
         queries: Dict[Tuple, dict] = dict()
         for metric_to_resolve, metric_provider, metric_provider_kwargs in resolve_batch:
-            # We have different semantics for batchable metric providers, so ensure we actually are working only with those.
+            # We have different semantics for bundled metric providers, so ensure we actually are working only with those.
             assert (
-                metric_provider._is_batchable
-            ), "batch_resolve only supports batchable metrics"
-            # batch_id and table are the only determining factors for batchable metrics
+                metric_provider._can_be_bundled
+            ), "batch_resolve only supports metrics that support bundled computation"
+            # batch_id and table are the only determining factors for bundled metrics
             batch_id = metric_to_resolve.metric_domain_kwargs.get("batch_id")
             table = metric_to_resolve.metric_domain_kwargs.get("table")
             select, selectable = metric_provider(
@@ -798,7 +784,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 execution_engine=cls,
                 metric_dependencies=tuple(),
                 metric_provider=inner_func,
-                batchable=False,
+                bundle_computation=False,
             )
             register_metric(
                 metric_name=metric_name + ".count",
@@ -807,7 +793,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_count,
-                batchable=True,
+                bundle_computation=True,
             )
             # noinspection PyTypeChecker
             register_metric(
@@ -817,7 +803,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_values,
-                batchable=False,
+                bundle_computation=False,
             )
             # noinspection PyTypeChecker
             register_metric(
@@ -827,7 +813,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_value_counts,
-                batchable=False,
+                bundle_computation=False,
             )
             # noinspection PyTypeChecker
             register_metric(
@@ -837,7 +823,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_rows,
-                batchable=False,
+                bundle_computation=False,
             )
             return inner_func
 

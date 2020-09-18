@@ -5,11 +5,15 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_environment.types import (
+    BatchSpec,
     SqlAlchemyDatasourceTableBatchSpec,
 )
 from great_expectations.expectations.core.expect_column_values_to_be_in_set import (
@@ -61,5 +65,30 @@ def test_sa_expect_column_values_to_be_in_set_impl():
     batch = myengine.load_batch(batch_spec=batch_spec)
     result = expectation.validate(
         batches={batch_spec.to_id(): batch}, execution_engine=myengine
+    )
+    assert result == ExpectationValidationResult(success=True,)
+
+
+def test_spark_expect_column_values_to_be_in_set_impl():
+    from pyspark.sql import DataFrame, SparkSession
+
+    df = pd.DataFrame({"a": [1, 2, 1]})
+    spark = SparkSession.builder.getOrCreate()
+    df = spark.createDataFrame(df)
+
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={"column": "a", "value_set": [1, 2], "mostly": 1},
+    )
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    myengine = SparkDFExecutionEngine()
+    batch = myengine.load_batch(
+        batch_definition={"data_asset_name": "foo", "partition_name": "bar"},
+        batch_spec=BatchSpec({"blarg": "bah"}),
+        in_memory_dataset=df,
+    )
+
+    result = expectation.validate(
+        batches={batch.batch_spec.to_id(): batch}, execution_engine=myengine
     )
     assert result == ExpectationValidationResult(success=True,)

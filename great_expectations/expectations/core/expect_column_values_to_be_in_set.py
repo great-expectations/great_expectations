@@ -4,7 +4,11 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 
 from ...core.batch import Batch
 from ...data_asset.util import parse_result_format
@@ -56,8 +60,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("value_set",),
         metric_dependencies=tuple(),
-        provide_unexpected_metric_values=False,
-        provide_unexpected_value_counts=False,
+        filter_column_isnull=True,
     )
     def _pandas_column_values_in_set(
         self,
@@ -94,6 +97,27 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
             return True
 
         return column.in_(tuple(value_set))
+
+    @SparkDFExecutionEngine.column_map_metric(
+        metric_name="column_values.in_set",
+        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+        metric_value_keys=("value_set",),
+        metric_dependencies=tuple(),
+    )
+    def _spark_in_set(
+        self,
+        data: "pyspark.sql.DataFrame",
+        column: str,
+        value_set: Union[list, set],
+        runtime_configuration: dict = None,
+    ):
+        import pyspark.sql.functions as F
+
+        if value_set is None:
+            # vacuously true
+            return data.withColumn(column + "__success", F.lit(True))
+
+        return data.withColumn(column + "__success", F.col(column).isin(value_set))
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(

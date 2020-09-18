@@ -28,7 +28,11 @@ from ..data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from ..exceptions.metric_exceptions import MetricError
-from ..execution_engine import ExecutionEngine, PandasExecutionEngine
+from ..execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from ..execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from ..validator.validator import Validator
 
@@ -413,7 +417,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=tuple(),
         metric_dependencies=tuple(),
-        bundle_computation=True,
+        bundle_computation=False,
     )
     def _count(
         self,
@@ -434,7 +438,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=tuple(),
         metric_dependencies=tuple(),
-        batchable=True,
+        bundle_computation=True,
     )
     def _count(
         self,
@@ -451,6 +455,25 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
             domain_kwargs=metric_domain_kwargs, batches=batches
         )
         return sa.func.count(sa.column(metric_domain_kwargs["column"])), table
+
+    @SparkDFExecutionEngine.metric(
+        metric_name="column_values.count",
+        metric_domain_keys=DatasetExpectation.domain_keys,
+        metric_value_keys=tuple(),
+        metric_dependencies=tuple(),
+        bundle_computation=False,
+    )
+    def _count(
+        self,
+        batches: Dict[str, Batch],
+        execution_engine: SparkDFExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: dict,
+        runtime_configuration: dict = None,
+    ):
+        data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
+        return data.count()
 
 
 def _calc_map_expectation_success(success_count, nonnull_count, mostly):

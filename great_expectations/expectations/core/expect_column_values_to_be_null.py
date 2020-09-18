@@ -1,6 +1,9 @@
 import pandas as pd
 
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -33,35 +36,18 @@ class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
 
         return column.is_(None)
 
-    #
-    # @SqlAlchemyExecutionEngine.metric(
-    #     metric_name="column_values.null.count",
-    #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-    #     metric_value_keys=tuple(),
-    #     metric_dependencies=tuple(),
-    #     batchable=True
-    # )
-    # def _sqlalchemy_null_count(
-    #     self,
-    #     batches: Dict[str, Batch],
-    #     execution_engine: SqlAlchemyExecutionEngine,
-    #     metric_domain_kwargs: dict,
-    #     metric_value_kwargs: dict,
-    #     metrics: dict,
-    #     runtime_configuration: dict = None,
-    # ):
-    #     import sqlalchemy as sa
-    #     table = execution_engine._get_selectable(
-    #         domain_kwargs=metric_domain_kwargs, batches=batches
-    #     )
-    #     return sa.func.sum(
-    #         sa.case(
-    #             [
-    #                 (
-    #                     sa.column(metric_domain_kwargs["column"]).is_(None),
-    #                     1,
-    #                 )
-    #             ],
-    #             else_=0,
-    #         )
-    #     ), table
+    @SparkDFExecutionEngine.column_map_metric(
+        metric_name=map_metric,
+        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+        metric_value_keys=tuple(),
+        metric_dependencies=tuple(),
+    )
+    def _spark_null_map_metric(
+        self,
+        data: "pyspark.sql.DataFrame",
+        column: str,
+        runtime_configuration: dict = None,
+    ):
+        import pyspark.sql.functions as F
+
+        return data.withColumn(column + "__success", F.col(column).isNull())

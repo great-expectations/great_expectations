@@ -35,7 +35,17 @@ logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.default_flow_style = False
 
-## TODO: JPC: 20200916 - can we remove this class?
+
+class NoOpDict(object):
+    def __getitem__(self, item):
+        return None
+
+    def __setitem__(self, key, value):
+        return None
+
+        ## TODO: JPC: 20200916 - can we remove this class?
+
+
 class MetaExecutionEngine(object):
     """
     Holds expectation decorators.
@@ -55,12 +65,14 @@ class MetaExecutionEngine(object):
     def column_map_expectation(cls, func):
         """Constructs an expectation using column-map semantics.
 
-        The column_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
+        The column_map_expectation decorator handles boilerplate issues surrounding the common pattern of
+        evaluating
         truthiness of some condition on a per-row basis.
 
         Args:
             func (function): \
-                The function implementing a row-wise expectation. The function should take a column of data and \
+                The function implementing a row-wise expectation. The function should take a column of data
+                and \
                 return an equally-long column of boolean values corresponding to the truthiness of the \
                 underlying expectation.
 
@@ -72,10 +84,12 @@ class MetaExecutionEngine(object):
 
             column_map_expectation *excludes null values* from being passed to the function
 
-            Depending on the `result_format` selected, column_map_expectation can additional data to a return object, \
-            including `element_count`, `nonnull_values`, `nonnull_count`, `success_count`, `unexpected_list`, and \
+            Depending on the `result_format` selected, column_map_expectation can additional data to a return
+            object, \
+            including `element_count`, `nonnull_values`, `nonnull_count`, `success_count`, `unexpected_list`,
+            and \
             `unexpected_index_list`. \
-            See :func:`_format_map_output <great_expectations.validator.validator.Validator._format_map_output>`
+        See :func:`_format_map_output <great_expectations.validator.validator.Validator._format_map_output>`
 
         See also:
             :func:`expect_column_values_to_be_in_set \
@@ -92,17 +106,17 @@ class MetaExecutionEngine(object):
         evaluating truthiness of some condition on an aggregated-column basis.
 
         Args:
-            func (function): \
-                The function implementing an expectation using an aggregate property of a column. \
-                The function should take a column of data and return the aggregate value it computes.
+        func (function): \
+            The function implementing an expectation using an aggregate property of a column. \
+            The function should take a column of data and return the aggregate value it computes.
 
         Notes:
-            column_aggregate_expectation *excludes null values* from being passed to the function
+        column_aggregate_expectation *excludes null values* from being passed to the function
 
         See also:
-            :func:`expect_column_mean_to_be_between \
-            <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_mean_to_be_between>` \
-            for an example of a column_aggregate_expectation
+        :func:`expect_column_mean_to_be_between \
+        <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_mean_to_be_between>` \
+        for an example of a column_aggregate_expectation
         """
         argspec = inspect.getfullargspec(func)[0][1:]
 
@@ -176,25 +190,6 @@ class MetaExecutionEngine(object):
 
 # noinspection PyIncorrectDocstring
 class ExecutionEngine(MetaExecutionEngine):
-    # getter functions with hashable arguments - can be cached
-    hashable_getters = [
-        "get_column_min",
-        "get_column_max",
-        "get_column_mean",
-        "get_column_modes",
-        "get_column_median",
-        "get_column_quantiles",
-        "get_column_nonnull_count",
-        "get_column_stdev",
-        "get_column_sum",
-        "get_column_unique_count",
-        "get_column_value_counts",
-        "get_row_count",
-        "get_column_count",
-        "get_table_columns",
-        "get_column_count_in_range",
-    ]
-
     recognized_batch_spec_defaults = set()
 
     ## TODO: JPC: 20200916 - can we explicitly list these args?
@@ -205,6 +200,11 @@ class ExecutionEngine(MetaExecutionEngine):
         # NOTE: using caching makes the strong assumption that the user will not modify the core data store
         # (e.g. self.spark_df) over the lifetime of the dataset instance
         self.caching = kwargs.pop("caching", True)
+        # NOTE: 20200918 - this is a naive cache; update.
+        if self.caching:
+            self._metric_cache = {}
+        else:
+            self._metric_cache = NoOpDict()
 
         data_context = kwargs.pop("data_context", None)
         self._data_context = data_context
@@ -234,11 +234,6 @@ class ExecutionEngine(MetaExecutionEngine):
 
         super().__init__(*args, **kwargs)
 
-        if self.caching:
-            for func in self.hashable_getters:
-                caching_func = lru_cache(maxsize=None)(getattr(self, func))
-                setattr(self, func, caching_func)
-
     @classmethod
     def metric(
         cls,
@@ -246,7 +241,7 @@ class ExecutionEngine(MetaExecutionEngine):
         metric_domain_keys: tuple,
         metric_value_keys: tuple,
         metric_dependencies: tuple,
-        batchable: bool = False,
+        bundle_computation: bool = False,
     ):
         """
         A decorator for declaring a metric provider
@@ -287,7 +282,7 @@ class ExecutionEngine(MetaExecutionEngine):
                 execution_engine=cls,
                 metric_dependencies=metric_dependencies,
                 metric_provider=inner_func,
-                batchable=batchable,
+                bundle_computation=bundle_computation,
             )
             return inner_func
 
@@ -593,28 +588,35 @@ class ExecutionEngine(MetaExecutionEngine):
 
         resolve_batch = []
         for metric_to_resolve in metrics_to_resolve:
-            metric_provider = get_metric_provider(
-                metric_name=metric_to_resolve.metric_name, execution_engine=self
-            )
-            metric_provider_kwargs = {
-                "metric_name": metric_to_resolve.metric_name,
-                "batches": batches,
-                "execution_engine": self,
-                "metric_domain_kwargs": metric_to_resolve.metric_domain_kwargs,
-                "metric_value_kwargs": metric_to_resolve.metric_value_kwargs,
-                "runtime_configuration": runtime_configuration,
-            }
-            if getattr(metric_provider, "_can_be_bundled", False):
-                resolve_batch.append(
-                    (metric_to_resolve, metric_provider, metric_provider_kwargs)
-                )
+            if metric_to_resolve.id in self._metric_cache:
+                metrics[metric_to_resolve.id] = self._metric_cache[metric_to_resolve.id]
             else:
-                metrics[metric_to_resolve.id] = metric_provider(
-                    self, **metric_provider_kwargs, metrics=metrics
+                metric_provider = get_metric_provider(
+                    metric_name=metric_to_resolve.metric_name, execution_engine=self
                 )
-        metrics.update(self.batch_resolve(resolve_batch, metrics=metrics))
+                metric_provider_kwargs = {
+                    "metric_name": metric_to_resolve.metric_name,
+                    "batches": batches,
+                    "execution_engine": self,
+                    "metric_domain_kwargs": metric_to_resolve.metric_domain_kwargs,
+                    "metric_value_kwargs": metric_to_resolve.metric_value_kwargs,
+                    "runtime_configuration": runtime_configuration,
+                }
+                if getattr(metric_provider, "_can_be_bundled", False):
+                    resolve_batch.append(
+                        (metric_to_resolve, metric_provider, metric_provider_kwargs)
+                    )
+                else:
+                    metrics[metric_to_resolve.id] = metric_provider(
+                        self, **metric_provider_kwargs, metrics=metrics
+                    )
+        if len(resolve_batch) > 0:
+            metrics.update(self.batch_resolve(resolve_batch, metrics=metrics))
 
         return metrics
+
+    def batch_resolve(self, resolve_batch, metrics):
+        raise NotImplementedError
 
     def get_row_count(self):
         """Returns: int, table row count"""

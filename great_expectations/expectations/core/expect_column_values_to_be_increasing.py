@@ -42,8 +42,6 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("strictly", "parse_strings_as_datetimes",),
         metric_dependencies=tuple(),
-        provide_unexpected_metric_values=False,
-        provide_unexpected_value_counts=False,
     )
     def _pandas_map_increasing(
         self,
