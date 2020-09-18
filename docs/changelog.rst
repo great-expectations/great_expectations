@@ -16,7 +16,7 @@ Develop
 * [DOCS] Fixed several broken links and glossary organization (thanks @JavierMonton and @sbrugman)!
 * [DOCS] Deploying Great Expectations with Google Cloud Composer (Hosted Airflow)
 * [ENHANCEMENT] BaseProfiler type mapping expanded to include more pandas and numpy dtypes
-* [ENHANCEMENT] Add expect_compound_columns_to_be_unique expectation
+* [ENHANCEMENT] Add expect_compound_columns_to_be_unique expectation, deprecate expect_multicolumn_values_to_be_unique and change to expect_select_column_values_to_be_unique_within_record
 
 
 0.12.1
