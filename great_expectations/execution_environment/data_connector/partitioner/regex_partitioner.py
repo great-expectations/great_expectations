@@ -76,25 +76,10 @@ class RegexPartitioner(Partitioner):
             cached_partitions = self.data_connector.get_cached_partitions(
                 data_asset_name=data_asset_name
             )
-        if partition_name is None:
-            return cached_partitions
-        partitions: List[Partition] = list(
-            filter(
-                lambda partition: partition.name == partition_name, cached_partitions
-            )
+        return self._apply_allow_multifile_partitions_flag(
+            partitions=cached_partitions,
+            partition_name=partition_name
         )
-        if not self.allow_multifile_partitions and len(partitions) > 1:
-            logger.warning(
-                f'''RegexPartitioner "{self.name}' detected multiple partitions for partition name
-"{partition_name}"; however, allow_multifile_partitions is set to False.
-                '''
-            )
-            raise ValueError(
-                f'''RegexPartitioner "{self.name}' detected multiple partitions for partition name
-"{partition_name}"; however, allow_multifile_partitions is set to False.
-                '''
-            )
-        return partitions
 
     # TODO: <Alex>Implement "UpSert" using Partition name for guidance.  Make this part of DataConnector.  No Caching HERE!</Alex>
     def _find_available_partitions(self, data_asset_name: str = None):
@@ -102,16 +87,6 @@ class RegexPartitioner(Partitioner):
         for path in self.paths:
             partitioned_path: Partition = self._find_partitions_for_path(path=path)
             if partitioned_path is not None:
-                # <WILL> This is a place we can add the check if we are getting multiple?
-                #if not self.allow_multifile_partitions:
-                    # check if duplicate
-                #    if any(x.name == partitioned_path.name for x in partitions):
-                        # TODO <WILL><ALEX> This is a dupilcate error message from `get_available_partitions()`
-                #        raise ValueError(
-                #            f'''RegexPartitioner "{self.name}' detected multiple partitions detected for partition name
-                #        "{partitioned_path.name}"; however, allow_multifile_partitions is set to False.
-                #                        '''
-                #        )
                 partitions.append(partitioned_path)
 
         sorters: Iterator[Sorter] = reversed(self.sorters)
@@ -130,12 +105,13 @@ class RegexPartitioner(Partitioner):
         else:
             partition_definition: dict = {}
             groups: tuple = matches.groups()
+            # TODO: <Alex>TODO: Allow number of sorters to be <= number of groups</Alex>
             if len(self.sorters) == 0:
                 for idx, group in enumerate(groups):
                     part_name = f"{RegexPartitioner.DEFAULT_GROUP_NAME}_{idx}"
                     partition_definition[part_name] = group
             else:
-                # TODO: <Alex>TODO</Alex>
+                # TODO: <Alex>TODO: Allow number of sorters to be <= number of groups</Alex>
                 part_names: list = [sorter.name for sorter in self.sorters]
                 if len(part_names) != len(groups):
                     logger.warning(
@@ -157,3 +133,44 @@ sorters specified is {len(part_names)}.
 
         return Partition(name=partition_name, definition=partition_definition, source=path)
 
+    def _apply_allow_multifile_partitions_flag(
+        self,
+        partitions: List[Partition],
+        partition_name: str = None
+    ) -> List[Partition]:
+        if partition_name is None:
+            for partition in partitions:
+                # noinspection PyUnusedLocal
+                res: List[Partition] = self._apply_allow_multifile_partitions_flag_to_single_partition(
+                    partitions=partitions,
+                    partition_name=partition.name
+                )
+            return partitions
+        else:
+            return self._apply_allow_multifile_partitions_flag_to_single_partition(
+                partitions=partitions,
+                partition_name=partition_name
+            )
+
+    def _apply_allow_multifile_partitions_flag_to_single_partition(
+        self,
+        partitions: List[Partition],
+        partition_name: str,
+    ) -> List[Partition]:
+        partitions: List[Partition] = list(
+            filter(
+                lambda partition: partition.name == partition_name, partitions
+            )
+        )
+        if not self.allow_multifile_partitions and len(partitions) > 1:
+            logger.warning(
+                f'''RegexPartitioner "{self.name}' detected multiple partitions for partition name "{partition_name}";
+however, allow_multifile_partitions is set to False.
+                '''
+            )
+            raise ValueError(
+                f'''RegexPartitioner "{self.name}' detected multiple partitions for partition name "{partition_name}";
+however, allow_multifile_partitions is set to False.
+                '''
+            )
+        return partitions

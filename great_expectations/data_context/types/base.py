@@ -29,6 +29,38 @@ DEFAULT_USAGE_STATISTICS_URL = (
 )
 
 
+class AssetConfig(DictDot):
+    def __init__(
+        self,
+        partitioner_name,
+        **kwargs,
+    ):
+        self._partitioner_name = partitioner_name
+
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    @property
+    def partitioner_name(self):
+        return self._partitioner_name
+
+
+class AssetConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    partitioner_name = fields.String(required=True)
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_asset_config(self, data, **kwargs):
+        return AssetConfig(**data)
+
+
 class SorterConfig(DictDot):
     def __init__(
         self,
@@ -128,14 +160,18 @@ class DataConnectorConfig(DictDot):
         self,
         partitioners,
         partitioner_name,
+        assets=None,
         class_name=None,
         module_name=None,
     ):
         self._class_name = class_name
         self._module_name = module_name
         self._partitioner_name = partitioner_name
-        if partitioners is not None:
-            self._partitioners = partitioners
+        if partitioners is None:
+            partitioners = {}
+        self._partitioners = partitioners
+        if assets is not None:
+            self._assets = assets
 
     @property
     def partitioners(self):
@@ -144,6 +180,10 @@ class DataConnectorConfig(DictDot):
     @property
     def partitioner_name(self):
         return self._partitione_name
+
+    @property
+    def assets(self):
+        return self._assets
 
     @property
     def class_name(self):
@@ -175,6 +215,12 @@ class DataConnectorConfigSchema(Schema):
 
     # TODO: <Alex></Alex>
     # Allow the specification of "assets" List with custom partitioner configuration for each asset.
+    assets = fields.Dict(
+        keys=fields.Str(),
+        values=fields.Nested(AssetConfigSchema),
+        required=False,
+        allow_none=True,
+    )
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
