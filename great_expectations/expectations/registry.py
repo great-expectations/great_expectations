@@ -62,7 +62,7 @@ def register_metric(
     if metric_name in _registered_metrics:
         metric_definition = _registered_metrics[metric_name]
         current_dependencies = metric_definition.get("metric_dependencies", set())
-        if current_dependencies != set(metric_dependencies):
+        if set(current_dependencies) != set(metric_dependencies):
             logger.warning(
                 f"metric {metric_name} is being registered with different dependencies; overwriting dependencies"
             )
@@ -72,7 +72,7 @@ def register_metric(
                 f"metric {metric_name} is being registered with different dependencies; overwriting dependencies",
             )
         current_domain_keys = metric_definition.get("metric_domain_keys", set())
-        if current_domain_keys != set(metric_domain_keys):
+        if set(current_domain_keys) != set(metric_domain_keys):
             logger.warning(
                 f"metric {metric_name} is being registered with different metric_domain_keys; overwriting metric_domain_keys"
             )
@@ -82,7 +82,7 @@ def register_metric(
                 f"metric {metric_name} is being registered with different metric_domain_keys; overwriting metric_domain_keys",
             )
         current_value_keys = metric_definition.get("metric_value_keys", set())
-        if current_value_keys != set(metric_value_keys):
+        if set(current_value_keys) != set(metric_value_keys):
             logger.warning(
                 f"metric {metric_name} is being registered with different metric_value_keys; overwriting metric_value_keys"
             )
