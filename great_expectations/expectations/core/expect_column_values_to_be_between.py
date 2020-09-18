@@ -18,10 +18,10 @@ from ..registry import extract_metrics
 
 class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
 
-    map_metric = "map.is_between"
-    metric_dependencies = ("map.is_between.count", "map.nonnull.count")
+    map_metric = "column_values.is_between"
+    metric_dependencies = ("column_values.is_between.count", "column_values.nonnull.count")
     success_keys = ("min_value", "max_value", "strict_min", "strict_max", "allow_cross_type_comparisons","mostly",
-                    "parse_strings_as_datetimes")
+                    "parse_strings_as_datetimes", "allow_cross_type_comparisons")
 
     default_kwarg_values = {
         "row_condition": None,
@@ -32,28 +32,113 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
         "strict_min": False,
         "strict_max": False,  # tolerance=1e-9,
         "parse_strings_as_datetimes": None,
+        "allow_cross_type_comparisons": None,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
         "meta":None,
+
     }
 
     """ A Column Map Metric Decorator for the Mean"""
 
     @PandasExecutionEngine.column_map_metric(
-        metric_name="map.is_between",
+        metric_name="column_values.is_between",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=(),
-        metric_dependencies=("min_value", "max_value"),
+        metric_dependencies=("min_value", "max_value", "strict_min", "strict_max"),
     )
     def _pandas_is_between(
             self,
             series: pd.Series,
+            min_value = None,
+            max_value = None,
+            strict_min = None,
+            strict_max = None,
+            allow_cross_type_comparisons = None,
             runtime_configuration: dict = None,
     ):
         """Checks whether or not column values are between 2 predefined thresholds"""
+        return series.apply(self.is_between, args=(min_value, max_value, strict_min,
+                                                   strict_max, allow_cross_type_comparisons))
 
-        pass
+    def is_between(self, val,min_value, max_value, strict_min, strict_max, allow_cross_type_comparisons):
+        """Given minimum and maximum values, checks if a given number is between 2 thresholds"""
+        if min_value is not None and max_value is not None:
+            if allow_cross_type_comparisons:
+                try:
+                    if strict_min and strict_max:
+                        return (min_value < val) and (val < max_value)
+                    elif strict_min:
+                        return (min_value < val) and (val <= max_value)
+                    elif strict_max:
+                        return (min_value <= val) and (val < max_value)
+                    else:
+                        return (min_value <= val) and (val <= max_value)
+                except TypeError:
+                    return False
+
+            else:
+                if (isinstance(val, str) != isinstance(min_value, str)) or (
+                        isinstance(val, str) != isinstance(max_value, str)
+                ):
+                    raise TypeError(
+                        "Column values, min_value, and max_value must either be None or of the same type."
+                    )
+
+                if strict_min and strict_max:
+                    return (min_value < val) and (val < max_value)
+                elif strict_min:
+                    return (min_value < val) and (val <= max_value)
+                elif strict_max:
+                    return (min_value <= val) and (val < max_value)
+                else:
+                    return (min_value <= val) and (val <= max_value)
+
+        elif min_value is None and max_value is not None:
+            if allow_cross_type_comparisons:
+                try:
+                    if strict_max:
+                        return val < max_value
+                    else:
+                        return val <= max_value
+                except TypeError:
+                    return False
+
+            else:
+                if isinstance(val, str) != isinstance(max_value, str):
+                    raise TypeError(
+                        "Column values, min_value, and max_value must either be None or of the same type."
+                    )
+
+                if strict_max:
+                    return val < max_value
+                else:
+                    return val <= max_value
+
+        elif min_value is not None and max_value is None:
+            if allow_cross_type_comparisons:
+                try:
+                    if strict_min:
+                        return min_value < val
+                    else:
+                        return min_value <= val
+                except TypeError:
+                    return False
+
+            else:
+                if isinstance(val, str) != isinstance(min_value, str):
+                    raise TypeError(
+                        "Column values, min_value, and max_value must either be None or of the same type."
+                    )
+
+                if strict_min:
+                    return min_value < val
+                else:
+                    return min_value <= val
+
+        else:
+            return False
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -68,7 +153,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
         """
 
         # Setting up a configuration
-        super().validate_configurations(configuration)
+        super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
 
@@ -82,10 +167,10 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
         if "max_value" in configuration:
             max =  configuration.kwargs["max_value"]
 
-
         try:
             # Ensuring Proper interval has been provided
-            assert "min_value" in configuration or "max_value" in configuration, "min_value and max_value cannot both be None"
+            assert "min_value" in configuration or "max_value" in configuration, "min_value and max_value " \
+                                                                                 "cannot both be None"
             assert min is None or isinstance(min, (float, int)), "Provided min threshold must be a number"
             assert max is None or isinstance(max, (float, int)), "Provided max threshold must be a number"
 
@@ -96,36 +181,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
             raise InvalidExpectationConfigurationError("Minimum Threshold cannot be larger than Maximum Threshold")
 
         return True
-
-    def get_validation_dependencies(self, configuration: Optional[ExpectationConfiguration] = None):
-        """
-        Obtains and returns neccessary validation metric dependencies, based on the result format indicated by the
-        user or the default result format/
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            metric_dependencies (dict): \
-                A dictionary of all metrics neccessary for the validation format beyond computational defaults
-        """
-        # Building a dictionary of dependencies
-        dependencies = super().get_validation_dependencies(configuration)
-        metric_dependencies = set(self.metric_dependencies)
-        dependencies["metrics"] = metric_dependencies
-        result_format_str = dependencies["result_format"].get("result_format")
-        if result_format_str == "BOOLEAN ONLY":
-            return dependencies
-
-        # Count and unexpected values needed for basic/summary modes
-        metric_dependencies.add("map.count")
-        metric_dependencies.add("map.in_set.unexpected_values")
-        if result_format_str in ["BASIC", "SUMMARY"]:
-            return dependencies
-
-        # Complete mode requires unexpected rows
-        metric_dependencies.add("map.in_set.unexpected_rows")
-        return metric_dependencies
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
@@ -158,175 +213,11 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
         # Returning dictionary output with necessary metrics based on the format
         return _format_map_output(
             result_format=parse_result_format(result_format),
-            success= (metric_vals.get("map.z_scores.number_over_threshold") / metric_vals.get("map.nonull_count"))
+            success=(metric_vals.get("map.is_between.count") / metric_vals.get("map.nonull_count"))
                     > mostly,
             element_count=metric_vals.get("map.count"),
             nonnull_count=metric_vals.get("map.nonnull.count"),
-            unexpected_count=metric_vals.get("map.nonnull.count")
-                             - "map.z_scores.number_over_threshold",
-            unexpected_list=metric_vals.get("map.in_set.unexpected_values"),
-            unexpected_index_list=metric_vals.get("map.is_in.unexpected_index"),
+            unexpected_count=metric_vals.get("map.is_between.unexpected_count"),
+            unexpected_list=metric_vals.get("map.is_between.unexpected_values"),
+            unexpected_index_list=metric_vals.get("map.is_between.unexpected_index"),
         )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# --------------------------------Metric computations defined below----------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def expect_column_values_to_be_between(
-        self,
-        column,
-        min_value=None,
-        max_value=None,
-        strict_min=False,
-        strict_max=False,  # tolerance=1e-9,
-        parse_strings_as_datetimes=None,
-        output_strftime_format=None,
-        allow_cross_type_comparisons=None,
-        mostly=None,
-        row_condition=None,
-        condition_parser=None,
-        result_format=None,
-        include_config=True,
-        catch_exceptions=None,
-        meta=None,
-    ):
-
-
-        # if strict_min and min_value:
-        #     min_value += tolerance
-        #
-        # if strict_max and max_value:
-        #     max_value -= tolerance
-
-        if parse_strings_as_datetimes:
-            # tolerance = timedelta(days=tolerance)
-            if min_value:
-                min_value = parse(min_value)
-
-            if max_value:
-                max_value = parse(max_value)
-
-            try:
-                temp_column = column.map(parse)
-            except TypeError:
-                temp_column = column
-
-        else:
-            temp_column = column
-
-
-        def is_between(val):
-            # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
-            # Ensure types can be compared since some types in Python 3 cannot be logically compared.
-            # print type(val), type(min_value), type(max_value), val, min_value, max_value
-
-            if type(val) is None:
-                return False
-
-            if min_value is not None and max_value is not None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_min and strict_max:
-                            return (min_value < val) and (val < max_value)
-                        elif strict_min:
-                            return (min_value < val) and (val <= max_value)
-                        elif strict_max:
-                            return (min_value <= val) and (val < max_value)
-                        else:
-                            return (min_value <= val) and (val <= max_value)
-                    except TypeError:
-                        return False
-
-                else:
-                    if (isinstance(val, str) != isinstance(min_value, str)) or (
-                        isinstance(val, str) != isinstance(max_value, str)
-                    ):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_min and strict_max:
-                        return (min_value < val) and (val < max_value)
-                    elif strict_min:
-                        return (min_value < val) and (val <= max_value)
-                    elif strict_max:
-                        return (min_value <= val) and (val < max_value)
-                    else:
-                        return (min_value <= val) and (val <= max_value)
-
-            elif min_value is None and max_value is not None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_max:
-                            return val < max_value
-                        else:
-                            return val <= max_value
-                    except TypeError:
-                        return False
-
-                else:
-                    if isinstance(val, str) != isinstance(max_value, str):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_max:
-                        return val < max_value
-                    else:
-                        return val <= max_value
-
-            elif min_value is not None and max_value is None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_min:
-                            return min_value < val
-                        else:
-                            return min_value <= val
-                    except TypeError:
-                        return False
-
-                else:
-                    if isinstance(val, str) != isinstance(min_value, str):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_min:
-                        return min_value < val
-                    else:
-                        return min_value <= val
-
-            else:
-                return False
-
-        return temp_column.map(is_between)

@@ -6,6 +6,7 @@ import numpy as np
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.expectation import DatasetExpectation, Expectation
 
 from ...data_asset.util import parse_result_format
 from ..expectation import (
@@ -17,7 +18,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
+class ExpectColumnValueZScoresToBeLessThan(DatasetExpectation):
     """
     Expect the Z-scores of a columns values to be less than a given threshold
 
@@ -69,8 +70,8 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
                 :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
     """
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    map_metric = "map.z_scores"
-    metric_dependencies = ("mean", "standard_deviation", "map.nonnull.count","map.z_scores", "map.z_scores.count_over_threshold")
+    map_metric = "z_scores"
+    metric_dependencies = ("mean", "standard_deviation", "column_values.nonnull.count", "column_values.z_scores")
     success_keys = ("threshold", "double_sided", "mostly")
 
     # Default values
@@ -91,7 +92,6 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
-        batchable=False,
     )
     def _pandas_mean(
             self,
@@ -102,30 +102,11 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
 
         return series.mean()
 
-    """ A Column Map Metric Decorator for the Standard Deviation"""
-
     @PandasExecutionEngine.metric(
-        metric_name="standard_deviation",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=tuple(),
-        batchable=False,
-    )
-    def _pandas_standard_deviation(
-            self,
-            series: pd.Series,
-            runtime_configuration: dict = None,
-    ):
-        """Standard Deviation Metric Function"""
-
-        return series.std()
-
-    @PandasExecutionEngine.metric(
-        metric_name="map.z_scores",
+        metric_name="z_scores",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys= tuple(),
         metric_dependencies=("mean", "standard_deviation"),
-        batchable=False,
     )
     def _pandas_z_scores(
                 self,
@@ -143,10 +124,10 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
 
     @PandasExecutionEngine.column_map_metric(
 
-        metric_name="map.z_scores.over_threshold",
+        metric_name="z_scores.over_threshold",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("z_scores",),
-        metric_dependencies=("map.z_scores",),
+        metric_dependencies=("z_scores",),
     )
     def _pandas_over_threshold(
             self,
@@ -219,14 +200,14 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             result_format=parse_result_format(result_format),
 
             # Success = Ratio of successful nonnull values > mostly?
-            success=(len(metric_vals.get("column_values.z_scores.success")) / metric_vals.get(
+            success=(metric_vals.get("z_scores.over_threshold.count") / metric_vals.get(
                 "column_values.nonull_count"))
                     >= mostly,
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.z_scores.unexpected_count"),
-            unexpected_list=metric_vals.get("column_values.z_scores.unexpected_values"),
-            unexpected_index_list=metric_vals.get("column_values.z_scores.unexpected_index"),
+            unexpected_count=metric_vals.get("z_scores.unexpected_count"),
+            unexpected_list=metric_vals.get("z_scores.unexpected_values"),
+            unexpected_index_list=metric_vals.get("z_scores.unexpected_index"),
         )
 
 
