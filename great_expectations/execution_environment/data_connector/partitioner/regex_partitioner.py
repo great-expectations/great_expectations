@@ -72,7 +72,7 @@ class RegexPartitioner(Partitioner):
             data_asset_name=data_asset_name
         )
         if cached_partitions is None:
-            self.find_available_partitions(data_asset_name=data_asset_name)
+            self._find_available_partitions(data_asset_name=data_asset_name)
             cached_partitions = self.data_connector.get_cached_partitions(
                 data_asset_name=data_asset_name
             )
@@ -85,33 +85,33 @@ class RegexPartitioner(Partitioner):
         )
         if not self.allow_multifile_partitions and len(partitions) > 1:
             logger.warning(
-                f'''RegexPartitioner "{self.name}' detected multiple partitions detected for partition name
+                f'''RegexPartitioner "{self.name}' detected multiple partitions for partition name
 "{partition_name}"; however, allow_multifile_partitions is set to False.
                 '''
             )
             raise ValueError(
-                f'''RegexPartitioner "{self.name}' detected multiple partitions detected for partition name
+                f'''RegexPartitioner "{self.name}' detected multiple partitions for partition name
 "{partition_name}"; however, allow_multifile_partitions is set to False.
                 '''
             )
         return partitions
 
     # TODO: <Alex>Implement "UpSert" using Partition name for guidance.  Make this part of DataConnector.  No Caching HERE!</Alex>
-    def find_available_partitions(self, data_asset_name: str = None):
+    def _find_available_partitions(self, data_asset_name: str = None):
         partitions: List[Partition] = []
         for path in self.paths:
             partitioned_path: Partition = self._find_partitions_for_path(path=path)
             if partitioned_path is not None:
                 # <WILL> This is a place we can add the check if we are getting multiple?
-                if not self.allow_multifile_partitions:
+                #if not self.allow_multifile_partitions:
                     # check if duplicate
-                    if any(x.name == partitioned_path.name for x in partitions):
-                        # TODO <WILL> This is a dupilcate error message from `get_available_partitions()`
-                        raise ValueError(
-                            f'''RegexPartitioner "{self.name}' detected multiple partitions detected for partition name
-                        "{partitioned_path.name}"; however, allow_multifile_partitions is set to False.
-                                        '''
-                        )
+                #    if any(x.name == partitioned_path.name for x in partitions):
+                        # TODO <WILL><ALEX> This is a dupilcate error message from `get_available_partitions()`
+                #        raise ValueError(
+                #            f'''RegexPartitioner "{self.name}' detected multiple partitions detected for partition name
+                #        "{partitioned_path.name}"; however, allow_multifile_partitions is set to False.
+                #                        '''
+                #        )
                 partitions.append(partitioned_path)
 
         sorters: Iterator[Sorter] = reversed(self.sorters)
