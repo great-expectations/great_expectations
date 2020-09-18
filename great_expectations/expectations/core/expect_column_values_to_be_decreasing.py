@@ -14,9 +14,9 @@ from ..expectation import (
 from ..registry import extract_metrics, get_metric_kwargs
 
 
-class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
-    map_metric = "map.increasing"
-    metric_dependencies = ("map.increasing.count", "map.nonnull.count")
+class ExpectColumnValuesToBeDecreasing(ColumnMapDatasetExpectation):
+    map_metric = "map.decreasing"
+    metric_dependencies = ("map.decreasing.count", "map.nonnull.count")
     success_keys = ("strictly", "mostly",)
 
     default_kwarg_values = {
@@ -33,12 +33,12 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         return super().validate_configuration(configuration)
 
     @PandasExecutionEngine.column_map_metric(
-        metric_name="map.increasing",
+        metric_name="map.decreasing",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("strictly",),
         metric_dependencies=tuple(),
     )
-    def _pandas_map_increasing(
+    def _pandas_map_decreasing(
             self,
             series: pd.Series,
             strictly: Union[bool, None],
@@ -46,19 +46,19 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
     ):
             series_diff = series.diff()
             # The first element is null, so it gets a bye and is always treated as True
-            series_diff[series_diff.isnull()] = 1
+            series_diff[series_diff.isnull()] = -1
 
             if strictly:
-                return series_diff > 0
+                return series_diff < 0
             else:
-                return series_diff >= 0
+                return series_diff <= 0
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
+            self,
+            configuration: ExpectationConfiguration,
+            metrics: dict,
+            runtime_configuration: dict = None,
     ):
         validation_dependencies = self.get_validation_dependencies(configuration)[
             "metrics"
@@ -76,18 +76,14 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=(
-                metric_vals.get("map.increasing.count")
-                / metric_vals.get("column_values.nonnull.count")
-            )
-            >= mostly,
-            element_count=metric_vals.get("column_values.count"),
-            nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.increasing.count"),
-            unexpected_list=metric_vals.get(
-                "column_values.increasing.unexpected_values"
-            ),
-            unexpected_index_list=metric_vals.get(
-                "column_values.increasing.unexpected_index"
-            ),
+                            metric_vals.get("map.decreasing.count")
+                            / metric_vals.get("map.nonnull.count")
+                    )
+                    >= mostly,
+            element_count=metric_vals.get("map.count"),
+            nonnull_count=metric_vals.get("map.nonnull.count"),
+            unexpected_count=metric_vals.get("map.nonnull.count")
+                             - metric_vals.get("map.decreasing.count"),
+            unexpected_list=metric_vals.get("map.decreasing.unexpected_values"),
+            unexpected_index_list=metric_vals.get("map.is_in.unexpected_index"),
         )
