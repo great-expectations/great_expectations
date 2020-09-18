@@ -1,4 +1,3 @@
-
 from typing import Dict, List, Optional, Union
 
 import pandas as pd
@@ -6,17 +5,16 @@ import numpy as np
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.expectation import DatasetExpectation, Expectation
 
 from ...data_asset.util import parse_result_format
 from ..expectation import (
     ColumnMapDatasetExpectation,
+    DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
 )
 from ..registry import extract_metrics
-
 
 class ExpectColumnValueZScoresToBeLessThan(DatasetExpectation):
     """
@@ -201,7 +199,7 @@ class ExpectColumnValueZScoresToBeLessThan(DatasetExpectation):
 
             # Success = Ratio of successful nonnull values > mostly?
             success=(metric_vals.get("z_scores.over_threshold.count") / metric_vals.get(
-                "column_values.nonull_count"))
+                "column_values.nonull.count"))
                     >= mostly,
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=metric_vals.get("column_values.nonnull.count"),

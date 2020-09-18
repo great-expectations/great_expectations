@@ -157,27 +157,27 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
         if configuration is None:
             configuration = self.configuration
 
-        min = None
-        max = None
+        min_val = None
+        max_val = None
 
         # Setting these values if they are available
         if "min_value" in configuration:
-            min = configuration.kwargs["min_value"]
+            min_val = configuration.kwargs["min_value"]
 
         if "max_value" in configuration:
-            max =  configuration.kwargs["max_value"]
+            max_val = configuration.kwargs["max_value"]
 
         try:
             # Ensuring Proper interval has been provided
             assert "min_value" in configuration or "max_value" in configuration, "min_value and max_value " \
                                                                                  "cannot both be None"
-            assert min is None or isinstance(min, (float, int)), "Provided min threshold must be a number"
-            assert max is None or isinstance(max, (float, int)), "Provided max threshold must be a number"
+            assert min_val is None or isinstance(min_val, (float, int)), "Provided min threshold must be a number"
+            assert max_val is None or isinstance(max_val, (float, int)), "Provided max threshold must be a number"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-        if min is not None and max is not None and min > max:
+        if min_val is not None and max_val is not None and min_val > max_val:
             raise InvalidExpectationConfigurationError("Minimum Threshold cannot be larger than Maximum Threshold")
 
         return True
@@ -213,11 +213,11 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
         # Returning dictionary output with necessary metrics based on the format
         return _format_map_output(
             result_format=parse_result_format(result_format),
-            success=(metric_vals.get("map.is_between.count") / metric_vals.get("map.nonull_count"))
+            success=(metric_vals.get("column_values.is_between.count") / metric_vals.get("column_values.nonull_count"))
                     > mostly,
-            element_count=metric_vals.get("map.count"),
-            nonnull_count=metric_vals.get("map.nonnull.count"),
-            unexpected_count=metric_vals.get("map.is_between.unexpected_count"),
-            unexpected_list=metric_vals.get("map.is_between.unexpected_values"),
-            unexpected_index_list=metric_vals.get("map.is_between.unexpected_index"),
+            element_count=metric_vals.get("column_values.count"),
+            nonnull_count=metric_vals.get("column_values.nonnull.count"),
+            unexpected_count=metric_vals.get("column_values.is_between.unexpected_count"),
+            unexpected_list=metric_vals.get("column_values.is_between.unexpected_values"),
+            unexpected_index_list=metric_vals.get("column_values.is_between.unexpected_index"),
         )
