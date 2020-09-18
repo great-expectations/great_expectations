@@ -3,14 +3,14 @@
 How to validate data without a Checkpoint
 =========================================
 
-This guide demonstrates how to load an Expectation Suite and validate data without using a :ref:`Checkpoint<how_to_guides__validation__how_to_create_a_new_checkpoint>`. This might be suitable for environments or workflows where a user does not want to or cannot create a Checkpoint.
+This guide demonstrates how to load an Expectation Suite and validate data without using a :ref:`Checkpoint<how_to_guides__validation__how_to_create_a_new_checkpoint>`. This might be suitable for environments or workflows where a user does not want to or cannot create a Checkpoint, e.g. in a `hosted environment<deployment_hosted_enviroments>`.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
   - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
   - :ref:`Created an Expectation Suite <how_to_guides__creating_and_editing_expectations>`
 
-The following code mirrors the code provided in the ``validation_playground.ipynb`` notebooks in ``great_expectations/notebooks``. First of all, we import Great Expectations, load our :ref:`Data Context<data_context>`, and define variables for the Datasource and Expectation Suite we want to access:
+The following code mirrors the code provided in the ``validation_playground.ipynb`` notebooks in ``great_expectations/notebooks``. First of all, we import Great Expectations, load our :ref:`Data Context<data_context>`, and define variables for the Datasource we want to access:
 
 .. code-block:: python
 
@@ -54,7 +54,7 @@ Finally, we create the batch using those ``batch_kwargs`` and the name of the Ex
         run_id="my_run_id") # Make my_run_id a unique identifier, e.g. a timestamp
 
 
-This runs validation and saves the results to JSON.
+This runs validation and executes any ValidationActions configured for this ValidationOperator (e.g. saving the results to a ValidationResult Store).
 
 .. discourse::
     :topic_identifier: 229
