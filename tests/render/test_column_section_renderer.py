@@ -23,7 +23,7 @@ from great_expectations.render.renderer.content_block import (
 @pytest.fixture(scope="module")
 def titanic_expectations():
     with open(
-        file_relative_path(__file__, "../test_sets/titanic_expectations.json"), "r"
+        file_relative_path(__file__, "../test_sets/titanic_expectations.json")
     ) as infile:
         return expectationSuiteSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)
@@ -1370,6 +1370,8 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             "parse_strings_as_datetimes": None,
                             "row_condition": None,
                             "condition_parser": None,
+                            "strict_max": None,
+                            "strict_min": None,
                         },
                         "styling": {
                             "default": {"classes": ["badge", "badge-secondary"]},

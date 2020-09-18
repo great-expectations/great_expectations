@@ -55,10 +55,10 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
-            self,
-            configuration: ExpectationConfiguration,
-            metrics: dict,
-            runtime_configuration: dict = None,
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: dict,
+        runtime_configuration: dict = None,
     ):
         validation_dependencies = self.get_validation_dependencies(configuration)[
             "metrics"
@@ -76,14 +76,18 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=(
-                            metric_vals.get("map.increasing.count")
-                            / metric_vals.get("map.nonnull.count")
-                    )
-                    >= mostly,
-            element_count=metric_vals.get("map.count"),
-            nonnull_count=metric_vals.get("map.nonnull.count"),
-            unexpected_count=metric_vals.get("map.nonnull.count")
-                             - metric_vals.get("map.increasing.count"),
-            unexpected_list=metric_vals.get("map.increasing.unexpected_values"),
-            unexpected_index_list=metric_vals.get("map.is_in.unexpected_index"),
+                metric_vals.get("map.increasing.count")
+                / metric_vals.get("column_values.nonnull.count")
+            )
+            >= mostly,
+            element_count=metric_vals.get("column_values.count"),
+            nonnull_count=metric_vals.get("column_values.nonnull.count"),
+            unexpected_count=metric_vals.get("column_values.nonnull.count")
+            - metric_vals.get("column_values.increasing.count"),
+            unexpected_list=metric_vals.get(
+                "column_values.increasing.unexpected_values"
+            ),
+            unexpected_index_list=metric_vals.get(
+                "column_values.increasing.unexpected_index"
+            ),
         )
