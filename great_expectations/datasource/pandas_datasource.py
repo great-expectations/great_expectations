@@ -2,8 +2,9 @@ import datetime
 import logging
 import uuid
 import warnings
+from collections import Callable
 from functools import partial
-from io import StringIO
+from io import BytesIO
 
 import pandas as pd
 
@@ -215,18 +216,20 @@ class PandasDatasource(Datasource):
             reader_method = batch_kwargs.get("reader_method")
             url = S3Url(raw_url)
             logger.debug(
-                "Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key)
+                "Fetching s3 object. Bucket: {} Key: {}".format(url.bucket, url.key)
             )
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
             reader_fn = self._get_reader_fn(reader_method, url.key)
-            df = reader_fn(
-                StringIO(
-                    s3_object["Body"]
-                    .read()
-                    .decode(s3_object.get("ContentEncoding", "utf-8"))
-                ),
-                **reader_options
+            default_reader_options = self._infer_default_options(
+                reader_fn, reader_options
             )
+            if not reader_options.get("encoding") and default_reader_options.get(
+                "encoding"
+            ):
+                reader_options["encoding"] = s3_object.get(
+                    "ContentEncoding", default_reader_options.get("encoding")
+                )
+            df = reader_fn(BytesIO(s3_object["Body"].read()), **reader_options)
 
         elif "dataset" in batch_kwargs and isinstance(
             batch_kwargs["dataset"], (pd.DataFrame, pd.Series)
@@ -278,6 +281,24 @@ class PandasDatasource(Datasource):
         raise BatchKwargsError(
             "Unable to determine reader method from path: %s" % path, {"path": path}
         )
+
+    def _infer_default_options(self, reader_fn: Callable, reader_options: dict) -> dict:
+        """
+        Allows reader options to be customized based on file context before loading to a DataFrame
+
+        Args:
+            reader_method (str): pandas reader method
+            reader_options: Current options and defaults set to pass to the reader method
+
+        Returns:
+            dict: A copy of the reader options post-inference
+        """
+        if reader_fn.__name__ == "read_parquet":
+            return {}
+        if reader_fn.__name__ == "read_excel":
+            return {}
+        else:
+            return {"encoding": "utf-8"}
 
     def _get_reader_fn(self, reader_method=None, path=None):
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the

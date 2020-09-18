@@ -22,7 +22,7 @@ from .tuple_store_backend import TupleStoreBackend
 logger = logging.getLogger(__name__)
 
 
-class HtmlSiteStore(object):
+class HtmlSiteStore:
     """
 A HtmlSiteStore facilitates publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results.
 
@@ -241,7 +241,7 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
         else:
             # this method does not support getting the URL of static assets
             raise ValueError(
-                "Cannot get URL for resource {0:s}".format(str(resource_identifier))
+                "Cannot get URL for resource {:s}".format(str(resource_identifier))
             )
 
         if only_if_exists:

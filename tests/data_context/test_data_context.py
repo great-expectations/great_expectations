@@ -39,7 +39,7 @@ from tests.test_utils import safe_remove
 try:
     from unittest import mock
 except ImportError:
-    import mock
+    from unittest import mock
 
 yaml = YAML()
 
@@ -50,7 +50,7 @@ def parameterized_expectation_suite():
         __file__,
         "../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
     )
-    with open(fixture_path, "r",) as suite:
+    with open(fixture_path,) as suite:
         return json.load(suite)
 
 
@@ -538,19 +538,19 @@ data_docs/
                         BasicDatasetProfiler/
                             profiling/
                                 20190926T134241.000000Z/
-                                    {0:s}.html
+                                    {:s}.html
                     f2/
                         BasicDatasetProfiler/
                             profiling/
                                 20190926T134241.000000Z/
-                                    {1:s}.html
+                                    {:s}.html
             titanic/
                 subdir_reader/
                     Titanic/
                         BasicDatasetProfiler/
                             profiling/
                                 20190926T134241.000000Z/
-                                    {2:s}.html
+                                    {:s}.html
 """.format(
             f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id
         )
@@ -760,7 +760,6 @@ def test_data_context_updates_expectation_suite_names(
             "expectations",
             "a_new_new_suite_name.json",
         ),
-        "r",
     ) as suite_file:
         loaded_suite = expectationSuiteSchema.load(json.load(suite_file))
         assert loaded_suite.expectation_suite_name == "a_new_new_suite_name"
@@ -944,7 +943,7 @@ def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(
     with pytest.warns(UserWarning):
         DataContext.create(project_path)
 
-    with open(ge_yml, "r") as ff:
+    with open(ge_yml) as ff:
         obs = ff.read()
     assert "# LOOK I WAS MODIFIED" in obs
 
@@ -1100,7 +1099,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
     with pytest.warns(UserWarning):
         DataContext.create(project_path)
 
-    with open(config_vars_yml, "r") as ff:
+    with open(config_vars_yml) as ff:
         obs = ff.read()
     assert "# LOOK I WAS MODIFIED" in obs
 
@@ -1157,7 +1156,7 @@ def test_build_batch_kwargs(titanic_multibatch_data_context):
     )
     paths.append(os.path.basename(batch_kwargs["path"]))
 
-    assert set(["Titanic_1912.csv", "Titanic_1911.csv"]) == set(paths)
+    assert {"Titanic_1912.csv", "Titanic_1911.csv"} == set(paths)
 
 
 def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasources_and_a_site_configured(

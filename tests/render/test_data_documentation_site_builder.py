@@ -80,7 +80,7 @@ def assert_how_to_buttons(
 
     for page_type, page_paths in page_paths_dict.items():
         for page_path in page_paths:
-            with open(page_path, "r") as f:
+            with open(page_path) as f:
                 page = f.read()
                 for how_to_element in how_to_page_elements_dict[page_type]:
                     if show_how_to_buttons:
@@ -435,14 +435,12 @@ def test_configuration_driven_site_builder_skip_and_clean_missing(
     site_builder.build()
 
     # test expectation suite pages
-    expectation_suite_html_pages = set(
-        [
-            ExpectationSuiteIdentifier.from_tuple(suite_tuple)
-            for suite_tuple in site_builder.target_store.store_backends[
-                ExpectationSuiteIdentifier
-            ].list_keys()
-        ]
-    )
+    expectation_suite_html_pages = {
+        ExpectationSuiteIdentifier.from_tuple(suite_tuple)
+        for suite_tuple in site_builder.target_store.store_backends[
+            ExpectationSuiteIdentifier
+        ].list_keys()
+    }
     # suites in expectations store should match html pages
     assert expectation_suite_set == expectation_suite_html_pages
 
@@ -455,25 +453,21 @@ def test_configuration_driven_site_builder_skip_and_clean_missing(
     site_builder.build()
 
     expectation_suite_set = set(context.stores["expectations_store"].list_keys())
-    expectation_suite_html_pages = set(
-        [
-            ExpectationSuiteIdentifier.from_tuple(suite_tuple)
-            for suite_tuple in site_builder.target_store.store_backends[
-                ExpectationSuiteIdentifier
-            ].list_keys()
-        ]
-    )
+    expectation_suite_html_pages = {
+        ExpectationSuiteIdentifier.from_tuple(suite_tuple)
+        for suite_tuple in site_builder.target_store.store_backends[
+            ExpectationSuiteIdentifier
+        ].list_keys()
+    }
     assert expectation_suite_set == expectation_suite_html_pages
 
     # test validation result pages
-    validation_html_pages = set(
-        [
-            ValidationResultIdentifier.from_tuple(result_tuple)
-            for result_tuple in site_builder.target_store.store_backends[
-                ValidationResultIdentifier
-            ].list_keys()
-        ]
-    )
+    validation_html_pages = {
+        ValidationResultIdentifier.from_tuple(result_tuple)
+        for result_tuple in site_builder.target_store.store_backends[
+            ValidationResultIdentifier
+        ].list_keys()
+    }
     # validations in store should match html pages
     assert validations_set == validation_html_pages
 
@@ -488,14 +482,12 @@ def test_configuration_driven_site_builder_skip_and_clean_missing(
     site_builder.build()
 
     validations_set = set(context.stores["validations_store"].list_keys())
-    validation_html_pages = set(
-        [
-            ValidationResultIdentifier.from_tuple(result_tuple)
-            for result_tuple in site_builder.target_store.store_backends[
-                ValidationResultIdentifier
-            ].list_keys()
-        ]
-    )
+    validation_html_pages = {
+        ValidationResultIdentifier.from_tuple(result_tuple)
+        for result_tuple in site_builder.target_store.store_backends[
+            ValidationResultIdentifier
+        ].list_keys()
+    }
     assert validations_set == validation_html_pages
 
 

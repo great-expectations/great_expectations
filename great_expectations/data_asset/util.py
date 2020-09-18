@@ -60,7 +60,7 @@ Usage::
 """
 
 
-class DocInherit(object):
+class DocInherit:
     def __init__(self, mthd):
         self.mthd = mthd
         self.name = mthd.__name__

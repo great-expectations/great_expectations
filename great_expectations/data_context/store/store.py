@@ -8,7 +8,7 @@ from great_expectations.exceptions import ClassInstantiationError, DataContextEr
 logger = logging.getLogger(__name__)
 
 
-class Store(object):
+class Store:
     """A store is responsible for reading and writing Great Expectations objects
     to appropriate backends. It provides a generic API that the DataContext can
     use independently of any particular ORM and backend.

@@ -50,7 +50,7 @@ logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 
-class Validator(object):
+class Validator:
     def __init__(self, *args, **kwargs):
         """
         Initialize the DataAsset.
@@ -1007,7 +1007,7 @@ class Validator(object):
                         expectation_suite = expectationSuiteSchema.loads(infile.read())
                 except ValidationError:
                     raise
-                except IOError:
+                except OSError:
                     raise GreatExpectationsError(
                         "Unable to load expectation suite: IO error while reading %s"
                         % expectation_suite
@@ -1331,7 +1331,7 @@ def _calc_validation_statistics(validation_results):
 """This is currently helping bridge APIs"""
 
 
-class BridgeValidator(object):
+class BridgeValidator:
     def __init__(self, batch, expectation_suite, expectation_engine=None, **kwargs):
         self.batch = batch
         self.expectation_suite = expectation_suite
