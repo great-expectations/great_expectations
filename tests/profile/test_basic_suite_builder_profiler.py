@@ -64,13 +64,11 @@ def test__create_expectations_for_low_card_column(non_numeric_low_card_dataset):
     expectation_suite = non_numeric_low_card_dataset.get_expectation_suite(
         suppress_warnings=True
     )
-    assert set(
-        [
-            expectation.expectation_type
-            for expectation in expectation_suite.expectations
-            if expectation.kwargs.get("column") == column
-        ]
-    ) == {
+    assert {
+        expectation.expectation_type
+        for expectation in expectation_suite.expectations
+        if expectation.kwargs.get("column") == column
+    } == {
         "expect_column_to_exist",
         "expect_column_distinct_values_to_be_in_set",
         "expect_column_kl_divergence_to_be_less_than",
@@ -131,13 +129,11 @@ def test__create_expectations_for_numeric_column(
         "mysql",
         "mssql",
     ]:
-        assert set(
-            [
-                expectation.expectation_type
-                for expectation in expectation_suite.expectations
-                if expectation.kwargs.get("column") == column
-            ]
-        ) == {
+        assert {
+            expectation.expectation_type
+            for expectation in expectation_suite.expectations
+            if expectation.kwargs.get("column") == column
+        } == {
             "expect_column_to_exist",
             "expect_column_min_to_be_between",
             "expect_column_max_to_be_between",
@@ -147,13 +143,11 @@ def test__create_expectations_for_numeric_column(
             "expect_column_values_to_not_be_null",
         }
     else:
-        assert set(
-            [
-                expectation.expectation_type
-                for expectation in expectation_suite.expectations
-                if expectation.kwargs.get("column") == column
-            ]
-        ) == {
+        assert {
+            expectation.expectation_type
+            for expectation in expectation_suite.expectations
+            if expectation.kwargs.get("column") == column
+        } == {
             "expect_column_to_exist",
             "expect_column_min_to_be_between",
             "expect_column_max_to_be_between",
@@ -209,13 +203,11 @@ def test__create_expectations_for_string_column(non_numeric_high_card_dataset):
     expectation_suite = non_numeric_high_card_dataset.get_expectation_suite(
         suppress_warnings=True
     )
-    assert set(
-        [
-            expectation.expectation_type
-            for expectation in expectation_suite.expectations
-            if expectation.kwargs.get("column") == column
-        ]
-    ) == {
+    assert {
+        expectation.expectation_type
+        for expectation in expectation_suite.expectations
+        if expectation.kwargs.get("column") == column
+    } == {
         "expect_column_to_exist",
         "expect_column_values_to_not_be_null",
         "expect_column_value_lengths_to_be_between",
@@ -260,13 +252,11 @@ def test__create_expectations_for_datetime_column(datetime_dataset):
         datetime_dataset, column
     )
     expectation_suite = datetime_dataset.get_expectation_suite(suppress_warnings=True)
-    assert set(
-        [
-            expectation.expectation_type
-            for expectation in expectation_suite.expectations
-            if expectation.kwargs.get("column") == column
-        ]
-    ) == {
+    assert {
+        expectation.expectation_type
+        for expectation in expectation_suite.expectations
+        if expectation.kwargs.get("column") == column
+    } == {
         "expect_column_to_exist",
         "expect_column_values_to_be_between",
         "expect_column_values_to_not_be_null",
@@ -478,7 +468,7 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     # with open(file_relative_path(__file__, '../render/fixtures/BasicSuiteBuilderProfiler_evrs.json'), 'w+') as file:
     #     json.dump(expectationSuiteValidationResultSchema.dump(evrs), file, indent=2)
 
-    with open(expected_filepath, "r",) as file:
+    with open(expected_filepath,) as file:
         expected_evrs = expectationSuiteValidationResultSchema.load(
             json.load(file, object_pairs_hook=OrderedDict)
         )
@@ -1322,7 +1312,7 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuratio
     # with open(file_relative_path(__file__, '../render/fixtures/SuiteBuilderProfiler_evrs.json'), 'w+') as file:
     #     json.dump(expectationSuiteValidationResultSchema.dump(evrs), file, indent=2)
 
-    with open(expected_filepath, "r",) as file:
+    with open(expected_filepath,) as file:
         expected_evrs = expectationSuiteValidationResultSchema.load(
             json.load(file, object_pairs_hook=OrderedDict)
         )

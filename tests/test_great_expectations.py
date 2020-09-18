@@ -29,7 +29,7 @@ from great_expectations.exceptions import InvalidCacheValueError
 try:
     from unittest import mock
 except ImportError:
-    import mock
+    from unittest import mock
 
 
 def isprime(n):

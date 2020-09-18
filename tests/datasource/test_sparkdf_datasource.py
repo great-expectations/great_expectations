@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 import re
 
@@ -77,7 +75,6 @@ def test_sparkdf_datasource_custom_data_asset(
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
-        "r",
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
@@ -168,7 +165,6 @@ def test_create_sparkdf_datasource(
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
-        "r",
     ) as configfile:
         lines = configfile.readlines()
         assert "          sep: '|'\n" in lines

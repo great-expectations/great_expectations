@@ -13,29 +13,28 @@ class ExpectationSuiteAnonymizer(Anonymizer):
 
     def anonymize_expectation_suite_info(self, expectation_suite):
         anonymized_info_dict = dict()
-        anonymized_expectation_counts = dict()
+        anonymized_expectation_counts = list()
 
         expectations = expectation_suite.expectations
         expectation_types = [
             expectation.expectation_type for expectation in expectations
         ]
         for expectation_type in set(expectation_types):
+            expectation_info = {"count": expectation_types.count(expectation_type)}
             if expectation_type in self._ge_expectation_types:
-                anonymized_expectation_counts[
-                    expectation_type
-                ] = expectation_types.count(expectation_type)
+                expectation_info["expectation_type"] = expectation_type
             else:
-                anonymized_expectation_type = self.anonymize(expectation_type)
-                anonymized_expectation_counts[
-                    anonymized_expectation_type
-                ] = expectation_types.count(expectation_type)
+                expectation_info["anonymized_expectation_type"] = self.anonymize(
+                    expectation_type
+                )
+            anonymized_expectation_counts.append(expectation_info)
 
         anonymized_info_dict["anonymized_name"] = self.anonymize(
             expectation_suite.expectation_suite_name
         )
         anonymized_info_dict["expectation_count"] = len(expectations)
         anonymized_info_dict[
-            "anonymized_expectation_type_counts"
+            "anonymized_expectation_counts"
         ] = anonymized_expectation_counts
 
         return anonymized_info_dict

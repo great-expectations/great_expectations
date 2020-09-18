@@ -11,7 +11,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.exceptions import GreatExpectationsError
 
 
-class Metric(object):
+class Metric:
     """A Metric associates a value with some name and configuration. The specific configuration parameters that are
     relevant for a given metric's identity depend on the metric. For example, the metric `column_mean` depends on a
     column name.

@@ -7,26 +7,29 @@ import uuid
 from collections import OrderedDict
 from functools import reduce, wraps
 from io import StringIO
-from typing import List
+from typing import Any, Callable, Dict, Iterable, List, Tuple
 
 import jsonschema
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
+from great_expectations.core.id_dict import IDDict
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec
 from great_expectations.validator.validator import Validator
 
 from ..core.batch import Batch, BatchMarkers
-from ..exceptions import BatchKwargsError, BatchSpecError
+from ..exceptions import BatchKwargsError, BatchSpecError, ValidationError
+from ..expectations.registry import register_metric
+from ..validator.validation_graph import MetricEdgeKey
 from .execution_engine import ExecutionEngine
-from .pandas_execution_engine import PandasExecutionEngine
 
 logger = logging.getLogger(__name__)
 
 try:
+    import pyspark.sql.functions as F
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
     from pyspark.sql import DataFrame, SQLContext, Window
@@ -616,11 +619,32 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         self._persist = kwargs.pop("persist", True)
         super().__init__(*args, **kwargs)
 
-    def load_batch(self, batch_definition, in_memory_dataset=None):
-        execution_environment_name = batch_definition.get("execution_environment")
-        execution_environment = self._data_context.get_execution_environment(
-            execution_environment_name
-        )
+    def load_batch(
+        self, batch_definition=None, batch_spec=None, in_memory_dataset=None
+    ) -> Batch:
+        # We need to build a batch_markers to be used in the dataframe
+        if batch_spec and batch_definition:
+            #### IS THIS OK?
+            assert isinstance(batch_spec, IDDict)
+        elif batch_spec and not batch_definition:
+            logger.info("loading a batch without a batch_definition")
+            batch_definition = {}
+        else:
+            execution_environment_name = batch_definition.get("execution_environment")
+            if not self._data_context:
+                raise ValueError("Cannot use a batch definition without a data context")
+            execution_environment = self._data_context.get_execution_environment(
+                execution_environment_name
+            )
+            data_connector_name = batch_definition.get("data_connector")
+            assert data_connector_name, "Batch definition must specify a data_connector"
+
+            data_connector = execution_environment.get_data_connector(
+                data_connector_name
+            )
+            batch_spec = data_connector.build_batch_spec(
+                batch_definition=batch_definition
+            )
 
         # We need to build a batch_markers to be used in the dataframe
         batch_markers = BatchMarkers(
@@ -631,16 +655,11 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             }
         )
 
-        data_connector_name = batch_definition.get("data_connector")
-        assert data_connector_name, "Batch definition must specify a data_connector"
-
-        data_connector = execution_environment.get_data_connector(data_connector_name)
-        batch_spec = data_connector.build_batch_spec(batch_definition=batch_definition)
         batch_id = batch_spec.to_id()
 
         if in_memory_dataset is not None:
             if batch_definition.get("data_asset_name") and batch_definition.get(
-                "partition_id"
+                "partition_name"
             ):
                 df = in_memory_dataset
             else:
@@ -680,6 +699,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                     batch_spec,
                 )
 
+        limit = batch_definition.get("limit") or batch_spec.get("limit")
+        if limit:
+            df = df.limit(limit)
+
         if self._persist:
             df.persist()
 
@@ -695,8 +718,11 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 data_context=self._data_context,
             )
             self.batches[batch_id] = batch
+        else:
+            batch = self.batches.get(batch_id)
 
         self._loaded_batch_id = batch_id
+        return batch
 
     @property
     def dataframe(self):
@@ -751,6 +777,287 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 "Unable to find reader_method %s in spark." % reader_method,
                 {"reader_method": reader_method},
             )
+
+    def process_batch_definition(self, batch_definition, batch_spec):
+        limit = batch_definition.get("limit")
+        if limit is not None:
+            if not batch_spec.get("limit"):
+                batch_spec["limit"] = limit
+        return batch_spec
+
+    def get_domain_dataframe(
+        self,
+        domain_kwargs: dict,
+        batches: Dict[str, Batch] = None,
+        filter_column_isnull=False,
+    ) -> "pyspark.sql.DataFrame":
+        """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
+        to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
+        or otherwise a Data Frame.
+
+        Args:
+            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
+            batches (dict) - A dictionary specifying batch id and which batches to obtain
+
+        Returns:
+            One of 2 formats, as specified by the domain kwargs. Either a Column (Pandas Series) or otherwise a Pandas
+            Data Frame.
+        """
+        batch_id = domain_kwargs.get("batch_id")
+        if batch_id is None:
+            # We allow no batch id specified if there is only one batch
+            if batches and len(batches) == 1:
+                batch = [batch for batch in batches.values()][0]
+            elif self.loaded_batch:
+                batch = self.loaded_batch
+            else:
+                raise ValidationError(
+                    "No batch is specified, but multiple batches are available."
+                )
+        else:
+            if batches and batch_id in batches:
+                batch = batches[batch_id]
+            elif batch_id == self.loaded_batch_id:
+                batch = self.loaded_batch
+            else:
+                raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
+
+        table = domain_kwargs.get("table", None)
+        if table:
+            raise ValueError(
+                "SparkExecutionEngine does not currently support multiple named tables."
+            )
+
+        row_condition = domain_kwargs.get("row_condition", None)
+        if row_condition:
+            condition_parser = domain_kwargs.get("condition_parser", None)
+            if condition_parser not in ["spark"]:
+                raise ValueError(
+                    "condition_parser is required when setting a row_condition,"
+                    " and must be 'spark'"
+                )
+            else:
+                data = batch.data.filter(row_condition)
+        else:
+            data = batch.data
+
+        column = domain_kwargs.get("column", None)
+        if column:
+            # Rename column so we only have to handle dot notation here
+            eval_column = self._get_eval_column_name(column)
+            data = data.withColumn(eval_column, F.col(column))
+            if filter_column_isnull:
+                data = data.filter(F.col(eval_column).isNotNull())
+        return data
+
+    def _get_eval_column_name(self, column):
+        return "__eval_col_" + column.replace(".", "__").replace("`", "_")
+
+    def _column_map_count(
+        self,
+        metric_name: str,
+        batches: Dict[str, Batch],
+        execution_engine: "SparkDFExecutionEngine",
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[Tuple, Any],
+        **kwargs,
+    ):
+        """Return the count of nonzero values from the map-style metric in the metrics dictionary"""
+        assert metric_name.endswith(".count")
+        metric_key = MetricEdgeKey(
+            metric_name[: -len(".count")], metric_domain_kwargs, metric_value_kwargs,
+        ).id
+        return metrics.get(metric_key).count()
+
+    def _column_map_values(
+        self,
+        metric_name: str,
+        batches: Dict[str, Batch],
+        execution_engine: "SparkDFExecutionEngine",
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[Tuple, Any],
+        **kwargs,
+    ):
+        """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+        assert metric_name.endswith(".unexpected_values")
+        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
+        result_format = metric_value_kwargs["result_format"]
+        base_metric_value_kwargs = {
+            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
+        }
+        metric_key = MetricEdgeKey(
+            metric_name[: -len(".unexpected_values")],
+            metric_domain_kwargs,
+            base_metric_value_kwargs,
+        ).id
+        filtered = metrics.get(metric_key)
+        column = self._get_eval_column_name(metric_domain_kwargs["column"])
+        if result_format["result_format"] == "COMPLETE":
+            return list(filtered.select(F.col(column)))
+        else:
+            return list(
+                filtered.select(F.col(column)).limit(
+                    result_format["partial_unexpected_count"]
+                )
+            )
+
+    def _column_map_value_counts(
+        self,
+        metric_name: str,
+        batches: Dict[str, Batch],
+        execution_engine: "SparkDFExecutionEngine",
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[Tuple, Any],
+        **kwargs,
+    ):
+        assert metric_name.endswith(".unexpected_value_counts")
+        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
+        result_format = metric_value_kwargs["result_format"]
+        base_metric_value_kwargs = {
+            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
+        }
+        metric_key = MetricEdgeKey(
+            metric_name[: -len(".unexpected_value_counts")],
+            metric_domain_kwargs,
+            base_metric_value_kwargs,
+        ).id
+        filtered = metrics.get(metric_key)
+        column = self._get_eval_column_name(metric_domain_kwargs["column"])
+        value_counts = filtered.groupBy(F.col(column)).count()
+        if result_format["result_format"] == "COMPLETE":
+            return value_counts
+        else:
+            return value_counts[result_format["partial_unexpected_count"]]
+
+    def _column_map_rows(
+        self,
+        metric_name: str,
+        batches: Dict[str, Batch],
+        execution_engine: "PandasExecutionEngine",
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[Tuple, Any],
+        **kwargs,
+    ):
+        """Return values from the specified domain (ignoring the column constraint) that match the map-style metric in the metrics dictionary."""
+        row_domain = {k: v for (k, v) in metric_domain_kwargs.items() if k != "column"}
+        data = execution_engine.get_domain_dataframe(row_domain, batches)
+        assert metric_name.endswith(".unexpected_rows")
+        # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
+        result_format = metric_value_kwargs["result_format"]
+        base_metric_value_kwargs = {
+            k: v for k, v in metric_value_kwargs.items() if k != "result_format"
+        }
+        metric_key = MetricEdgeKey(
+            metric_name[: -len(".unexpected_rows")],
+            metric_domain_kwargs,
+            base_metric_value_kwargs,
+        ).id
+        filtered = metrics.get(metric_key)
+        if result_format["result_format"] == "COMPLETE":
+            return filtered.collect()
+        else:
+            return filtered.limit(result_format["partial_unexpected_count"]).collect()
+
+    @classmethod
+    def column_map_metric(
+        cls,
+        metric_name: str,
+        metric_domain_keys: Tuple[str, ...],
+        metric_value_keys: Tuple[str, ...],
+        metric_dependencies: Tuple[str, ...],
+        filter_column_isnull: bool = True,
+    ):
+        """
+        A decorator for declaring a metric provider
+        """
+
+        def outer(metric_fn: Callable):
+            _declared_name = metric_name
+
+            @wraps(metric_fn)
+            def inner_func(
+                self,
+                metric_name: str,
+                batches: Dict[str, Batch],
+                execution_engine: SparkDFExecutionEngine,
+                metric_domain_kwargs: dict,
+                metric_value_kwargs: dict,
+                metrics: Dict[Tuple, Any],
+                **kwargs,
+            ):
+                if _declared_name != metric_name:
+                    logger.warning("using metric provider with an unrecognized metric")
+                data = execution_engine.get_domain_dataframe(
+                    metric_domain_kwargs, batches
+                )
+                column = metric_domain_kwargs["column"]
+                eval_col = self._get_eval_column_name(column)
+                if filter_column_isnull:
+                    data = data.filter(F.col(eval_col).isNotNull())
+                return metric_fn(self, data, eval_col, **metric_value_kwargs, **kwargs)
+
+            register_metric(
+                metric_name=metric_name,
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=metric_value_keys,
+                execution_engine=cls,
+                metric_dependencies=tuple(),
+                metric_provider=inner_func,
+                bundle_computation=False,
+            )
+            register_metric(
+                metric_name=metric_name + ".count",
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=metric_value_keys,
+                execution_engine=cls,
+                metric_dependencies=(metric_name,),
+                metric_provider=cls._column_map_count,
+                bundle_computation=False,
+            )
+            # noinspection PyTypeChecker
+            register_metric(
+                metric_name=metric_name + ".unexpected_values",
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=(*metric_value_keys, "result_format"),
+                execution_engine=cls,
+                metric_dependencies=(metric_name,),
+                metric_provider=cls._column_map_values,
+                bundle_computation=False,
+            )
+            # noinspection PyTypeChecker
+            register_metric(
+                metric_name=metric_name + ".unexpected_value_counts",
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=(*metric_value_keys, "result_format"),
+                execution_engine=cls,
+                metric_dependencies=(metric_name,),
+                metric_provider=cls._column_map_value_counts,
+                bundle_computation=False,
+            )
+            # noinspection PyTypeChecker
+            register_metric(
+                metric_name=metric_name + ".unexpected_rows",
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=(*metric_value_keys, "result_format"),
+                execution_engine=cls,
+                metric_dependencies=(metric_name,),
+                metric_provider=cls._column_map_rows,
+                bundle_computation=False,
+            )
+            return inner_func
+
+        return outer
+
+    def batch_resolve(
+        self,
+        resolve_batch: Iterable[Tuple[MetricEdgeKey, Callable, dict]],
+        metrics: Dict[Tuple, Any] = None,
+    ) -> dict:
+        raise NotImplementedError
 
     def head(self, n=5):
         return self.dataframe.limit(n).toPandas()
@@ -1664,33 +1971,3 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             return column.withColumn(
                 "__success", when(col("diff") <= 0, lit(True)).otherwise(lit(False))
             )
-
-    @DocInherit
-    @MetaSparkDFExecutionEngine.multicolumn_map_expectation
-    def expect_multicolumn_sum_to_equal(
-        self,
-        column_list,
-        sum_total,
-        result_format=None,
-        include_config=True,
-        catch_exceptions=None,
-        meta=None,
-    ):
-        """ Multi-Column Map Expectation
-
-        Expects that sum of all rows for a set of columns is equal to a specific value
-
-        Args:
-            column_list (List[str]): \
-                Set of columns to be checked
-            sum_total (int): \
-                expected sum of columns
-        """
-        expression = "+".join(
-            ["COALESCE({}, 0)".format(col) for col in column_list.columns]
-        )
-        column_list = column_list.withColumn("actual_total", expr(expression))
-        return column_list.withColumn(
-            "__success",
-            when(col("actual_total") == sum_total, lit(True)).otherwise(lit(False)),
-        )

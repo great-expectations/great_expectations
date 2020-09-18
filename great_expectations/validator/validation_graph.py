@@ -1,4 +1,5 @@
-from typing import Optional, Set, Union
+import copy
+from typing import List, Optional, Set, Tuple, Union
 
 from great_expectations.core.id_dict import IDDict
 
@@ -36,7 +37,7 @@ class MetricEdgeKey(object):
         return self._metric_value_kwargs.to_id()
 
     @property
-    def id(self):
+    def id(self) -> Tuple[str, str, str]:
         return (
             self.metric_name,
             self.metric_domain_kwargs_id,
@@ -62,24 +63,41 @@ class MetricEdge(object):
 
     @property
     def id(self):
-        return self.left.id, self.right.id
-
-    # def __hash__(self):
-    #     return self.id
+        if self.right:
+            return self.left.id, self.right.id
+        return self.left.id, None
 
 
 class ValidationGraph(object):
-    def __init__(self, domain: dict, edges: Optional[Set[MetricEdge]] = None):
-        self._domain = IDDict(domain)
+    def __init__(self, edges: Optional[List[MetricEdge]] = None):
         if edges:
-            self.edges = edges
+            self._edges = edges
         else:
-            self.edges = set()
+            self._edges = []
+
+        self._edge_ids = set([edge.id for edge in self._edges])
+
+    def add(self, edge: MetricEdge):
+        if edge.id not in self._edge_ids:
+            self._edges.append(edge)
 
     @property
-    def domain(self):
-        return self._domain
+    def edges(self):
+        return copy.deepcopy(self._edges)
 
-    @property
-    def domain_id(self):
-        return self._domain.to_id()
+
+# class ValidationGraph(object):
+#     def __init__(self, domain: dict, edges: Optional[Set[MetricEdge]] = None):
+#         self._domain = IDDict(domain)
+#         if edges:
+#             self.edges = edges
+#         else:
+#             self.edges = set()
+#
+#     @property
+#     def domain(self):
+#         return self._domain
+#
+#     @property
+#     def domain_id(self):
+#         return self._domain.to_id()

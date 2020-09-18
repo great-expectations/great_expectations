@@ -6,14 +6,14 @@
 
 # An anonymized string *must* be an md5 hash, so must have exactly 32 characters
 anonymized_string_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "https://json-schema.org/draft-04/schema",
     "type": "string",
     "minLength": 32,
     "maxLength": 32,
 }
 
 anonymized_datasource_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "https://json-schema.org/draft-04/schema",
     "title": "anonymized-datasource",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "oneOf": [
@@ -32,7 +32,7 @@ anonymized_datasource_schema = {
 }
 
 anonymized_class_info_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "https://json-schema.org/draft-04/schema",
     "title": "anonymized-class-info",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "oneOf": [
@@ -51,7 +51,7 @@ anonymized_class_info_schema = {
 }
 
 anonymized_store_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "https://json-schema.org/draft-04/schema",
     "title": "anonymized-store",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
@@ -75,7 +75,7 @@ anonymized_store_schema = {
 }
 
 anonymized_action_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "https://json-schema.org/draft-04/schema",
     "title": "anonymized-action",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "oneOf": [
@@ -93,7 +93,7 @@ anonymized_action_schema = {
 }
 
 anonymized_validation_operator_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "https://json-schema.org/draft-04/schema",
     "title": "anonymized-validation-operator",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
@@ -119,14 +119,14 @@ anonymized_validation_operator_schema = {
 }
 
 empty_payload_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "https://json-schema.org/draft-04/schema",
     "type": "object",
     "properties": {},
     "additionalProperties": False,
 }
 
 anonymized_data_docs_site_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "https://json-schema.org/draft-04/schema",
     "title": "anonymized-validation-operator",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
@@ -153,8 +153,8 @@ anonymized_data_docs_site_schema = {
 }
 
 anonymized_expectation_suite_schema = {
-    "$schema": "http://json-schema.org/schema#",
-    "title": "anonymized-expectation_suite_schema",
+    "$schema": "https://json-schema.org/draft-04/schema",
+    "title": "anonymized_expectation_suite_schema",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "oneOf": [
         {
@@ -165,12 +165,33 @@ anonymized_expectation_suite_schema = {
                 "anonymized_expectation_type_counts": {"type": "object"},
             },
             "additionalProperties": False,
-        }
+        },
+        {
+            "type": "object",
+            "properties": {
+                "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+                "expectation_count": {"type": "number"},
+                "anonymized_expectation_counts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "expectation_type": {"type": "string"},
+                            "anonymized_expectation_type": {
+                                "$ref": "#/definitions/anonymized_string"
+                            },
+                            "count": {"type": "number"},
+                        },
+                    },
+                },
+            },
+            "additionalProperties": False,
+        },
     ],
 }
 
 init_payload_schema = {
-    "$schema": "https://json-schema.org/schema#",
+    "$schema": "https://json-schema.org/draft-04/schema",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_class_info": anonymized_class_info_schema,
@@ -226,7 +247,7 @@ init_payload_schema = {
 }
 
 anonymized_batch_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "https://json-schema.org/draft-04/schema",
     "title": "anonymized-batch",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "oneOf": [
@@ -256,7 +277,7 @@ anonymized_batch_schema = {
 }
 
 run_validation_operator_payload_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "https://json-schema.org/draft-04/schema",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_batch": anonymized_batch_schema,
@@ -275,7 +296,7 @@ run_validation_operator_payload_schema = {
 }
 
 save_or_edit_expectation_suite_payload_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "https://json-schema.org/draft-04/schema",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
     "properties": {
@@ -299,7 +320,7 @@ cli_new_ds_choice_payload = {
 }
 
 
-datasource_sqlalchemy_connect_payload = {
+execution_engine_sqlalchemy_connect_payload = {
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
@@ -311,7 +332,7 @@ datasource_sqlalchemy_connect_payload = {
 }
 
 usage_statistics_record_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "https://json-schema.org/draft-04/schema",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_datasource": anonymized_datasource_schema,
@@ -327,7 +348,7 @@ usage_statistics_record_schema = {
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
         "cli_new_ds_choice_payload": cli_new_ds_choice_payload,
-        "datasource_sqlalchemy_connect_payload": datasource_sqlalchemy_connect_payload,
+        "execution_engine_sqlalchemy_connect_payload": execution_engine_sqlalchemy_connect_payload,
     },
     "type": "object",
     "properties": {
@@ -391,9 +412,14 @@ usage_statistics_record_schema = {
         {
             "type": "object",
             "properties": {
-                "event": {"enum": ["datasource.sqlalchemy.connect"]},
+                "event": {
+                    "enum": [
+                        "datasource.sqlalchemy.connect",
+                        "execution_engine.sqlalchemy.connect",
+                    ]
+                },
                 "event_payload": {
-                    "$ref": "#/definitions/datasource_sqlalchemy_connect_payload"
+                    "$ref": "#/definitions/execution_engine_sqlalchemy_connect_payload"
                 },
             },
         },

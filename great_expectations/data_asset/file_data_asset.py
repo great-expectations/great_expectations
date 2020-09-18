@@ -424,7 +424,7 @@ class FileDataAsset(MetaFileDataAsset):
                         hash.update(file_buffer)
                         file_buffer = file.read(BLOCK_SIZE)
                     success = hash.hexdigest() == value
-            except IOError:
+            except OSError:
                 raise
         except ValueError:
             raise
@@ -619,7 +619,7 @@ class FileDataAsset(MetaFileDataAsset):
             with open(self._path) as f:
                 lines = f.readlines()  # Read in file lines
 
-        except IOError:
+        except OSError:
             raise
 
             # Skip k initial lines designated by the user
