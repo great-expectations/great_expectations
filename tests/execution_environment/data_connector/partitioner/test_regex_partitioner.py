@@ -144,6 +144,14 @@ def test_regex_partitioner_regex_configured_and_sorters_defined_and_named():
         'will-20200809-1002',
     ]
 
+    returned_partitions = my_partitioner.get_partitions_for_data_asset(
+        partition_name='james-20200713-1567',
+        data_asset_name=None
+    )
+    assert returned_partitions == [
+        Partition(name='james-20200713-1567', definition={'name': 'james', 'timestamp': '20200713', 'price': '1567'}, source="my_dir/james_20200713_1567.csv"),
+    ]
+
 
 # periodic table first 10 elements
 ref_periodic_table = ["Hydrogen", "Helium", "Lithium", "Beryllium", "Boron", "Carbon", "Nitrogen", "Oxygen", "Flourine", "Neon"]

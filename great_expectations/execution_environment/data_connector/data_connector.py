@@ -90,7 +90,19 @@ class DataConnector(object):
     # TODO: <Alex></Alex>
     def update_partitions_cache(self, partitions: List[Partition], data_asset_name: str = None):
         if data_asset_name is None:
-            self._partitions = partitions
+            if self.get_cached_partitions() is None or isinstance(self.get_cached_partitions(), list):
+                self._partitions = partitions
+            else:
+                logger.warning(
+                    f'''When data_asset_name is not specified, partitions cache in DataConnector "{self.name}' must be a
+list type (existing cache type is "{str(type(self.get_cached_partitions()))}").
+                    '''
+                )
+                raise ValueError(
+                    f'''When data_asset_name is not specified, partitions cache in DataConnector "{self.name}' must be a
+list type (existing cache type is "{str(type(self.get_cached_partitions()))}").
+                    '''
+                )
         else:
             if self.get_cached_partitions() is None:
                 self._partitions = {}

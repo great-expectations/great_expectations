@@ -119,7 +119,10 @@ sorters specified is {len(part_names)}.
 
         return Partition(name=partition_name, definition=partition_definition, source=path)
 
+    # TODO: <Alex>Refactor: Separate finding partitions and retrieving them (retrieving assumes that they were already found).</Alex>
     def get_partitions_for_data_asset(self, partition_name: str, data_asset_name: str = None) -> List[Partition]:
+        if partition_name is None:
+            return self.data_connector.get_cached_partitions(data_asset_name=data_asset_name)
         partitions: List[Partition] = list(
             filter(
                 lambda partition: partition.name == partition_name,
