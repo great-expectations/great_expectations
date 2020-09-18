@@ -213,8 +213,6 @@ class DataConnectorConfigSchema(Schema):
         allow_none=False,
     )
 
-    # TODO: <Alex></Alex>
-    # Allow the specification of "assets" List with custom partitioner configuration for each asset.
     assets = fields.Dict(
         keys=fields.Str(),
         values=fields.Nested(AssetConfigSchema),
