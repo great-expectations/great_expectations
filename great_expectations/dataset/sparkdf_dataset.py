@@ -2,6 +2,7 @@ import copy
 import inspect
 import json
 import logging
+import warnings
 from collections import OrderedDict
 from datetime import datetime
 from functools import reduce, wraps
@@ -1372,11 +1373,40 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             "__success", when(col("set_AB").isNull(), lit(False)).otherwise(lit(True))
         )
 
+    def expect_multicolumn_values_to_be_unique(
+        self,
+        column_list,  # pyspark.sql.DataFrame
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        deprecation_warning = (
+            "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
+            "expect_select_column_values_to_be_unique_within_record instead."
+        )
+        warnings.warn(
+            deprecation_warning, DeprecationWarning,
+        )
+
+        return self.expect_select_column_values_to_be_unique_within_record(
+            column_list=column_list,
+            mostly=mostly,
+            ignore_row_if=ignore_row_if,
+            result_format=result_format,
+            include_config=include_config,
+            catch_exceptions=catch_exceptions,
+            meta=meta,
+        )
+
     @DocInherit
     @MetaSparkDFDataset.multicolumn_map_expectation
     def expect_select_column_values_to_be_unique_within_record(
         self,
         column_list,  # pyspark.sql.DataFrame
+        mostly=None,
         ignore_row_if="all_values_are_missing",
         result_format=None,
         include_config=True,
