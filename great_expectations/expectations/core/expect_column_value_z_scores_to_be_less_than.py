@@ -3,6 +3,8 @@ from typing import Dict, List, Optional, Union
 import pandas as pd
 import numpy as np
 
+from great_expectations.core.batch import Batch
+
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 
@@ -69,8 +71,7 @@ class ExpectColumnValueZScoresToBeLessThan(DatasetExpectation):
                 :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
     """
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    map_metric = "z_scores"
-    metric_dependencies = ("mean", "standard_deviation", "column_values.nonnull.count", "column_values.z_scores")
+    metric_dependencies = ("column.aggregate.mean", "column.aggregate.standard_deviation", "column_values.nonnull.count", "column_values.z_scores.over_threshold", "column.z_scores")
     success_keys = ("threshold", "double_sided", "mostly")
 
     # Default values
@@ -86,19 +87,27 @@ class ExpectColumnValueZScoresToBeLessThan(DatasetExpectation):
     }
 
     @PandasExecutionEngine.metric(
-        metric_name="z_scores",
+        metric_name="column.z_scores",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys= tuple(),
-        metric_dependencies=("mean", "standard_deviation"),
+        metric_dependencies=("column.aggregate.mean", "column.aggregate.standard_deviation"),
     )
     def _pandas_z_scores(
-                self,
-                series: pd.Series,
-                mean,
-                std_dev,
-                runtime_configuration: dict = None,
+            self,
+            batches: Dict[str, Batch],
+            execution_engine: PandasExecutionEngine,
+            metric_domain_kwargs: dict,
+            mean,
+            std_dev,
+            metric_value_kwargs: dict,
+            metrics: dict,
+            runtime_configuration: dict = None,
     ):
         """Z-Score Metric Function"""
+        # Series conversion
+        series = execution_engine.get_domain_dataframe(
+                domain_kwargs=metric_domain_kwargs, batches=batches)
+
         # Currently does not handle columns with some random strings in them: should it?
         try:
             return (series - mean) / std_dev
@@ -108,8 +117,8 @@ class ExpectColumnValueZScoresToBeLessThan(DatasetExpectation):
     @PandasExecutionEngine.column_map_metric(
         metric_name="column_values.z_scores.over_threshold",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("z_scores",),
-        metric_dependencies=("z_scores",),
+        metric_value_keys=("column.z_scores",),
+        metric_dependencies=("column.z_scores",),
     )
     def _pandas_over_threshold(
             self,
@@ -120,7 +129,7 @@ class ExpectColumnValueZScoresToBeLessThan(DatasetExpectation):
         """Z-Score Metric Function"""
         # Currently does not handle columns with some random strings in them: should it?
         try:
-            return np.count_nonzero(series > threshold)
+            return series > threshold
         except TypeError:
             raise (TypeError("Cannot check if a string lies over a numerical threshold"))
 
