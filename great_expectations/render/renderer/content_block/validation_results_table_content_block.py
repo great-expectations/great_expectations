@@ -309,6 +309,29 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         )
 
     @classmethod
+    def _get_cramers_phi_value_crosstab(cls, evr):
+        crosstab = evr.result.get("details", {}).get("crosstab")
+        if crosstab is not None:
+            return RenderedTableContent(
+                **{
+                    "content_block_type": "table",
+                    "header_row": crosstab.columns,
+                    "table": list(crosstab.to_dict("list").values()),
+                    "styling": {
+                        "body": {
+                            "classes": [
+                                "table",
+                                "table-sm",
+                                "table-unbordered",
+                                "col-4",
+                                "mt-2",
+                            ],
+                        }
+                    },
+                }
+            )
+
+    @classmethod
     def _get_quantile_values_observed_value(cls, evr):
         if evr.result is None or evr.result.get("observed_value") is None:
             return "--"
@@ -377,6 +400,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return cls._get_kl_divergence_observed_value(evr)
         elif expectation_type == "expect_column_quantile_values_to_be_between":
             return cls._get_quantile_values_observed_value(evr)
+        elif expectation_type == "expect_column_pair_cramers_phi_value_to_be_less_than":
+            return cls._get_cramers_phi_value_crosstab(evr)
         elif expectation_type == "expect_table_row_count_to_equal_other_table":
             return cls._get_expect_table_row_count_to_equal_other_table_observed_value(
                 evr
