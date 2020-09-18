@@ -11,12 +11,23 @@ The guide demonstrates the recommended path for instantiating a Data Context wit
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - :ref:`Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration<getting_started>`.
+    - :ref:`Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration<tutorials__getting_started>`.
 
 Steps
 -----
 
-The snippet below shows Python code that instantiates and configures a Data Context. Copy this snippet into a cell in your EMR Spark notebook.
+#. **Install Great Expectations on your EMR Spark cluster.**
+
+   Copy this code snippet into a cell in your EMR Spark notebook and run it:
+
+   .. code-block:: python
+
+      sc.install_pypi_package("great_expectations")
+
+
+#. **Configure a Data Context in Memory.**
+
+The snippet below shows Python code that instantiates and configures a Data Context in memory. Copy this snippet into a cell in your EMR Spark notebook.
 
 Follow the steps below to update the configuration with values that are specific for your environment.
 
@@ -104,23 +115,15 @@ Follow the steps below to update the configuration with values that are specific
 
    context = BaseDataContext(project_config=project_config)
 
-#. **Install Great Expectations on your EMR Spark cluster.**
-
-   Copy this code snippet into a cell in your EMR Spark notebook and run it:
-
-   .. code-block:: python
-
-      sc.install_pypi_package("great_expectations")
-
 #. **Configure an Expectation store in Amazon S3.**
 
    Replace the "REPLACE ME" on lines 26-27 of the code snippet. Follow this :ref:`how-to guide<how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_amazon_s3>`.
 
-#. **Configure an Validation Result store in Amazon S3.**
+#. **Configure a Validation Result store in Amazon S3.**
 
    Replace the "REPLACE ME" on lines 34-35 of the code snippet. Follow this :ref:`how-to guide<how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_s3>`.
 
-#. **Configure an Data Docs website in Amazon S3.**
+#. **Configure a Data Docs website in Amazon S3.**
 
    Replace the "REPLACE ME" on line 48 of the code snippet. Follow this :ref:`how-to guide<how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_s3>`.
 

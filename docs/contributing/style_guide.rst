@@ -1,5 +1,4 @@
-.. _contributing_style_guide:
-
+.. _contributing__style_guide:
 
 Style Guide
 ===========
@@ -24,7 +23,7 @@ code
 * **Experimental methods should log an experimental warning when called**: "Warning: some_method is experimental. Methods, APIs, and core behavior may change in the future."
 * **Experimental classes should log an experimental warning when initialized**: "Warning: great_expectations.some_module.SomeClass is experimental. Methods, APIs, and core behavior may change in the future."
 * **Docstrings are highly recommended**. We use the Sphinx's `Napoleon extension <http://www.sphinx-doc.org/en/master/ext/napoleon.html>`__ to build documentation from Google-style docstrings.
-* **Lint your code**. Our CI system will check using ``black``, ``isort`` and ``flake8``.
+* **Lint your code**. Our CI system will check using ``black``, ``isort``, ``flake8`` and ``pyupgrade``.
   - Linting with ``isort`` *MUST* occur from a virtual environment that has all required packages installed, and pre-commit uses the virtual environment from which it was installed, whether or not that environment is active when making the commit. So, **before running ``pre-commit install`` ensure you have activated a virtual environment that has all development requirements installed**.
 
     .. code-block:: bash
@@ -41,6 +40,7 @@ code
         black .
         isort . --check-only --skip docs
         flake8 great_expectations/core
+        pyupgrade --py3-plus
 
 **Expectations**
 
@@ -95,7 +95,7 @@ Within the table of contents, each section has specific role to play. Broadly sp
 * **Core concepts are always capitalized, and always are linked on first reference within each page.** Pretend the docs are a fantasy novel, and core concepts are magic.
 
     * Wrong: “You can create expectation suites as follows...”
-    * Better: “You can create :ref:`Expectation Suites` as follows...”
+    * Better: “You can create :ref:`Expectation Suites <reference__core_concepts__expectations__expectation_suites>` as follows...”
     * Avoid: “You can create suites of Expectations as follows...”
 
 * **Class names are written in upper camel case, and always linked on first reference.** Good: "ValidationOperator." Bad: "validationOperator", "validation operator". If a word is both a core concept and a class name, prefer the core concept unless the text refers specifically to the class.

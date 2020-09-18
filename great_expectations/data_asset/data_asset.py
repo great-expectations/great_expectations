@@ -13,7 +13,6 @@ from functools import wraps
 from typing import List
 
 from dateutil.parser import parse
-from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core import (
@@ -31,12 +30,13 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.marshmallow__shade import ValidationError
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 
-class DataAsset(object):
+class DataAsset:
 
     # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
     # That way, multiple backends can implement the same data_asset_type
@@ -820,7 +820,7 @@ class DataAsset(object):
                         expectation_suite = expectationSuiteSchema.loads(infile.read())
                 except ValidationError:
                     raise
-                except IOError:
+                except OSError:
                     raise GreatExpectationsError(
                         "Unable to load expectation suite: IO error while reading %s"
                         % expectation_suite
@@ -1191,7 +1191,7 @@ class DataAsset(object):
             return return_obj
 
         raise ValueError(
-            "Unknown result_format %s." % (result_format["result_format"],)
+            "Unknown result_format {}.".format(result_format["result_format"])
         )
 
     def _calc_map_expectation_success(self, success_count, nonnull_count, mostly):

@@ -183,7 +183,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
         exc.__dict__.setdefault("traces", []).append(trace)
         if is_root:
             trace = " -> ".join(reversed(exc.traces))
-            exc = AssertionError("%s\nTRACE: %s" % (str(exc), trace))
+            exc = AssertionError("{}\nTRACE: {}".format(str(exc), trace))
         raise exc
 
 
@@ -644,6 +644,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_pair_values_to_be_in_set",
             "expect_select_column_values_to_be_unique_within_record",
             "expect_compound_columns_to_be_unique",
+            "expect_multicolumn_values_to_be_unique",
+            "expect_column_pair_cramers_phi_value_to_be_less_than",
             # "expect_table_row_count_to_equal_other_table",
             "expect_multicolumn_sum_to_equal",
         ]
@@ -695,6 +697,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_pair_values_to_be_in_set",
             # "expect_select_column_values_to_be_unique_within_record",
             "expect_compound_columns_to_be_unique",
+            # "expect_multicolumn_values_to_be_unique",
+            "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_table_row_count_to_equal_other_table",
             # "expect_multicolumn_sum_to_equal",
         ]

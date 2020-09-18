@@ -1,7 +1,7 @@
 import importlib
 import json
 
-from marshmallow import ValidationError
+from great_expectations.marshmallow__shade import ValidationError
 
 
 class GreatExpectationsError(Exception):
@@ -262,9 +262,8 @@ class BatchKwargsError(DataContextError):
 
 class DatasourceInitializationError(GreatExpectationsError):
     def __init__(self, datasource_name, message):
-        self.message = "Cannot initialize datasource %s, error: %s" % (
-            datasource_name,
-            message,
+        self.message = "Cannot initialize datasource {}, error: {}".format(
+            datasource_name, message,
         )
         super().__init__(self.message)
 

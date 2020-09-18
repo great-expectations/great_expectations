@@ -7,7 +7,7 @@ This guide will help you create an Expectation that loads part of its :ref:`Expe
 
 .. admonition:: Prerequisites - This how-to guide assumes you have already:
 
-  - :ref:`Set up a working deployment of Great Expectations <getting_started>`
+  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
   - Obtained credentials for a database to query for dynamic values
   - Identified a SQL query that will return values for your expectation configuration.
 
@@ -63,7 +63,7 @@ Steps
 
 #. **Define an expectation that relies on a dynamic query**
 
-    Great Expectations recognizes several types of :ref:`Evaluation Parameters` that can use advanced features provided by the Data Context. To dynamically load data, we will be using a store-style URN, which starts with "urn:great_expectations:stores". The next component of the URN is the name of the store we configured above (``my_query_store``), and the final component is the name of the query we defined above (``current_genre_ids``):
+    Great Expectations recognizes several types of :ref:`Evaluation Parameters <reference__core_concepts__data_context__evaluation_parameter_stores>` that can use advanced features provided by the Data Context. To dynamically load data, we will be using a store-style URN, which starts with "urn:great_expectations:stores". The next component of the URN is the name of the store we configured above (``my_query_store``), and the final component is the name of the query we defined above (``current_genre_ids``):
 
     .. code-block:: python
 

@@ -50,7 +50,7 @@ datasources paired with one or more Expectation Suites each.
     icon:
     short_description: Run a configured checkpoint from a notebook.
     description: Run a configured checkpoint from a notebook.
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html
     maturity: Experimental
     maturity_details:
         api_stability: Unstable (expect changes to batch definition; "assets to validate" is still totally untyped)
@@ -65,7 +65,7 @@ datasources paired with one or more Expectation Suites each.
     icon:
     short_description: Run a configured checkpoint from a command line.
     description: Run a configured checkpoint from a command line in a Terminal shell.
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
     maturity: Experimental
     maturity_details:
         api_stability: Unstable (expect changes to batch definition; no checkpoint store)
@@ -80,7 +80,7 @@ datasources paired with one or more Expectation Suites each.
     icon:
     short_description: Deploy a configured checkpoint as a scheduled task with cron.
     description: Use the Unix crontab command to edit the cron file and add a line that will run checkpoint as a scheduled task.
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_deploy_a_scheduled_checkpoint_with_cron.html
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_deploy_a_scheduled_checkpoint_with_cron.html
     maturity: Experimental
     maturity_details:
         api_stability: Unstable (expect changes to batch validation; no checkpoint store)
@@ -95,7 +95,7 @@ datasources paired with one or more Expectation Suites each.
     icon:
     short_description: Run a configured checkpoint in Apache Airflow
     description: Running a configured checkpoint in Apache Airflow enables the triggering of data validation using an Expectation Suite directly within an Airflow DAG.
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_run_a_checkpoint_in_airflow.html
+    how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_airflow.html
     maturity: Beta
     maturity_details:
         api_stability: Unstable
@@ -223,7 +223,7 @@ def _load_checkpoint_yml_template() -> dict:
     template_file = file_relative_path(
         __file__, os.path.join("..", "data_context", "checkpoint_template.yml")
     )
-    with open(template_file, "r") as f:
+    with open(template_file) as f:
         template = yaml.load(f)
     return template
 
@@ -282,7 +282,7 @@ def checkpoint_run(checkpoint, directory):
             suite = toolkit.load_expectation_suite(context, suite_name, usage_event)
             try:
                 batch = toolkit.load_batch(context, suite, batch_kwargs)
-            except (FileNotFoundError, SQLAlchemyError, IOError, DataContextError) as e:
+            except (FileNotFoundError, SQLAlchemyError, OSError, DataContextError) as e:
                 toolkit.exit_with_failure_message_and_stats(
                     context,
                     usage_event,

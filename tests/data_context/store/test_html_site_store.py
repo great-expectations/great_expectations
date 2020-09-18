@@ -3,7 +3,6 @@ import datetime
 import boto3
 import pytest
 from freezegun import freeze_time
-from marshmallow import ValidationError
 from moto import mock_s3
 
 from great_expectations.data_context.store import HtmlSiteStore
@@ -13,6 +12,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
     validationResultIdentifierSchema,
 )
+from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.util import gen_directory_tree_str
 
 
@@ -146,14 +146,12 @@ def test_HtmlSiteStore_S3_backend():
 
     # Verify that internals are working as expected, including the default filepath
     # paths below should include the batch_parameters
-    assert set(
-        [
-            s3_object_info["Key"]
-            for s3_object_info in boto3.client("s3").list_objects_v2(
-                Bucket=bucket, Prefix=prefix
-            )["Contents"]
-        ]
-    ) == {
+    assert {
+        s3_object_info["Key"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(
+            Bucket=bucket, Prefix=prefix
+        )["Contents"]
+    } == {
         "test/prefix/index.html",
         "test/prefix/expectations/asset/quarantine.html",
         "test/prefix/validations/asset/quarantine/20191007T151224.1234Z_prod_100/20190926T134241.000000Z/1234.html",

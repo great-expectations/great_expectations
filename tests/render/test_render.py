@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import json
 from collections import OrderedDict
 
@@ -27,7 +25,7 @@ from tests.test_utils import expectationSuiteValidationResultSchema
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs():
     with open(
-        file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_evrs.json"), "r"
+        file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_evrs.json")
     ) as infile:
         return expectationSuiteValidationResultSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)
@@ -40,7 +38,6 @@ def titanic_profiler_evrs_with_exception():
         file_relative_path(
             __file__, "./fixtures/BasicDatasetProfiler_evrs_with_exception.json"
         ),
-        "r",
     ) as infile:
         return expectationSuiteValidationResultSchema.load(json.load(infile))
 
@@ -51,7 +48,6 @@ def titanic_dataset_profiler_expectations():
         file_relative_path(
             __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
         ),
-        "r",
     ) as infile:
         return expectationSuiteSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)
@@ -65,7 +61,6 @@ def titanic_dataset_profiler_expectations_with_distribution():
             __file__,
             "./fixtures/BasicDatasetProfiler_expectations_with_distribution.json",
         ),
-        "r",
     ) as infile:
         return expectationSuiteSchema.load(
             json.load(infile, encoding="utf-8", object_pairs_hook=OrderedDict)
@@ -249,6 +244,7 @@ def test_content_block_list_available_expectations():
         "expect_table_columns_to_match_ordered_list",
         "expect_table_row_count_to_be_between",
         "expect_table_row_count_to_equal",
+        "expect_column_pair_cramers_phi_value_to_be_less_than",
     }
     assert known_validation_results_implemented_expectations <= set(
         available_expectations
@@ -336,7 +332,7 @@ def test_render_validation_results(titanic_profiled_evrs_1):
     assert rendered_page[-7:] == "</html>"
     assert "Table-Level Expectations" in rendered_page
     assert (
-        'Must have more than <span class="badge badge-secondary" >0</span> rows.'
+        'Must have greater than or equal to <span class="badge badge-secondary" >0</span> rows.'
         in rendered_page
     )
     # assert 'This table should have a list of columns in a specific order, but that order is not specified.' \
@@ -397,7 +393,7 @@ def test_render_string_template():
                 "values": ["A", "B", "C"],
             },
             "threshold": 0.1,
-            "sparklines_histogram": u"\u2588\u2584\u2581",
+            "sparklines_histogram": "\u2588\u2584\u2581",
         },
         "styling": {
             "default": {"classes": ["badge", "badge-secondary"]},
@@ -413,7 +409,7 @@ def test_render_string_template():
         .replace("\n", "")
     )
     expected = (
-        u"""<span>
+        """<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >█▄▁</span>
             </span>""".replace(
             " ", ""
@@ -432,7 +428,7 @@ def test_render_string_template():
                 "values": ["A", "B", "C"],
             },
             "threshold": 0.1,
-            "sparklines_histogram": u"▃▆▁█",
+            "sparklines_histogram": "▃▆▁█",
         },
         "styling": {
             "default": {"classes": ["badge", "badge-secondary"]},
@@ -448,7 +444,7 @@ def test_render_string_template():
         .replace("\n", "")
     )
     expected = (
-        u"""<span>
+        """<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >▃▆▁█</span>
             </span>""".replace(
             " ", ""

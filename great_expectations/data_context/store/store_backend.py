@@ -6,7 +6,7 @@ from great_expectations.exceptions import StoreBackendError, StoreError
 logger = logging.getLogger(__name__)
 
 
-class StoreBackend(object, metaclass=ABCMeta):
+class StoreBackend(metaclass=ABCMeta):
     """A store backend acts as a key-value store that can accept tuples as keys, to abstract away
     reading and writing to a persistence layer.
 
@@ -52,7 +52,7 @@ class StoreBackend(object, metaclass=ABCMeta):
 
     def get_url_for_key(self, key, protocol=None):
         raise StoreError(
-            "Store backend of type {0:s} does not have an implementation of get_url_for_key".format(
+            "Store backend of type {:s} does not have an implementation of get_url_for_key".format(
                 type(self).__name__
             )
         )
@@ -62,13 +62,13 @@ class StoreBackend(object, metaclass=ABCMeta):
             for key_element in key:
                 if not isinstance(key_element, str):
                     raise TypeError(
-                        "Elements within tuples passed as keys to {0} must be instances of {1}, not {2}".format(
+                        "Elements within tuples passed as keys to {} must be instances of {}, not {}".format(
                             self.__class__.__name__, str, type(key_element),
                         )
                     )
         else:
             raise TypeError(
-                "Keys in {0} must be instances of {1}, not {2}".format(
+                "Keys in {} must be instances of {}, not {}".format(
                     self.__class__.__name__, tuple, type(key),
                 )
             )
