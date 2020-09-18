@@ -16,6 +16,7 @@ Develop
 * [DOCS] Fixed several broken links and glossary organization (thanks @JavierMonton and @sbrugman)!
 * [DOCS] Deploying Great Expectations with Google Cloud Composer (Hosted Airflow)
 * [ENHANCEMENT] BaseProfiler type mapping expanded to include more pandas and numpy dtypes
+* [ENHANCEMENT] Add expect_compound_columns_to_be_unique expectation
 
 
 0.12.1
@@ -193,7 +194,7 @@ Develop
 -----------------
 * [DOCS] Improved help for CLI `checkpoint` command
 * [BUGFIX] BasicSuiteBuilderProfiler could include extra expectations when only some expectations were selected (#1422)
-* [FEATURE] add support for `expect_select_column_values_to_be_unique_within_record` and `expect_column_pair_values_A_to_be_greater_than_B`
+* [FEATURE] add support for `expect_multicolumn_values_to_be_unique` and `expect_column_pair_values_A_to_be_greater_than_B`
   to `Spark`. Thanks @WilliamWsyHK!
 * [ENHANCEMENT] Allow a dictionary of variables can be passed to the DataContext constructor to allow override
   config variables at runtime. Thanks @balexander!
