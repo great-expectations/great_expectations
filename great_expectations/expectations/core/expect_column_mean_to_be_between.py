@@ -1,3 +1,4 @@
+
 from typing import Dict, List, Optional, Union
 
 import pandas as pd
@@ -17,7 +18,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnValueZScoresToBeLessThan(DatasetExpectation):
+class ExpectColumnMeanToBeBetween(DatasetExpectation):
     """
     Expect the Z-scores of a columns values to be less than a given threshold
 
@@ -69,60 +70,39 @@ class ExpectColumnValueZScoresToBeLessThan(DatasetExpectation):
                 :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
     """
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    map_metric = "z_scores"
-    metric_dependencies = ("mean", "standard_deviation", "column_values.nonnull.count", "column_values.z_scores")
-    success_keys = ("threshold", "double_sided", "mostly")
+    metric_dependencies = tuple("mean",)
+    success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+
 
     # Default values
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
-        "threshold": None,
-        "double_sided": True,
+        "min_value": None,
+        "max_value": None,
+        "strict_min": None,
+        "strict_max": None,
         "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
     }
 
+    """ A Column Map Metric Decorator for the Mean"""
     @PandasExecutionEngine.metric(
-        metric_name="z_scores",
+        metric_name="mean",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys= tuple(),
-        metric_dependencies=("mean", "standard_deviation"),
+        metric_value_keys=(),
+        metric_dependencies=tuple(),
     )
-    def _pandas_z_scores(
-                self,
-                series: pd.Series,
-                mean,
-                std_dev,
-                runtime_configuration: dict = None,
-    ):
-        """Z-Score Metric Function"""
-        # Currently does not handle columns with some random strings in them: should it?
-        try:
-            return (series - mean) / std_dev
-        except TypeError:
-            raise(TypeError("Cannot complete Z-score calculations on a non-numerical column."))
-
-    @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.z_scores.over_threshold",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("z_scores",),
-        metric_dependencies=("z_scores",),
-    )
-    def _pandas_over_threshold(
+    def _pandas_mean(
             self,
             series: pd.Series,
-            threshold,
             runtime_configuration: dict = None,
     ):
-        """Z-Score Metric Function"""
-        # Currently does not handle columns with some random strings in them: should it?
-        try:
-            return np.count_nonzero(series > threshold)
-        except TypeError:
-            raise (TypeError("Cannot check if a string lies over a numerical threshold"))
+        """Mean Metric Function"""
+
+        return series.mean()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -135,17 +115,48 @@ class ExpectColumnValueZScoresToBeLessThan(DatasetExpectation):
         Returns:
             True if the configuration has been validated successfully. Otherwise, raises an exception
         """
+        min_val = None
+        max_val = None
 
         # Setting up a configuration
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
+
+        # Ensuring basic configuration parameters are properly set
         try:
-            # Ensuring Z-score Threshold metric has been properly provided
-            assert "threshold" in configuration.kwargs, "A Z-score threshold must be provided"
-            assert isinstance(configuration.kwargs["threshold"], (float, int)), "Provided threshold must be a number"
+            assert (
+                    "column" in configuration.kwargs
+            ), "'column' parameter is required for column map expectations"
+            if "mostly" in configuration.kwargs:
+                mostly = configuration.kwargs["mostly"]
+                assert isinstance(
+                    mostly, (int, float)
+                ), "'mostly' parameter must be an integer or float"
+                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
+
+        # Validating that Minimum and Maximum values are of the proper format and type
+        if "min_value" in configuration:
+            min_val = configuration.kwargs["min_value"]
+
+        if "max_value" in configuration:
+            max_val = configuration.kwargs["max_value"]
+
+        try:
+            # Ensuring Proper interval has been provided
+            assert "min_value" in configuration or "max_value" in configuration, "min_value and max_value " \
+                                                                                 "cannot both be None"
+            assert min_val is None or isinstance(min_val, (float, int)), "Provided min threshold must be a number"
+            assert max_val is None or isinstance(max_val, (float, int)), "Provided max threshold must be a number"
+
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+
+        if min_val is not None and max_val is not None and min_val > max_val:
+            raise InvalidExpectationConfigurationError("Minimum Threshold cannot be larger than Maximum Threshold")
+
         return True
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
@@ -161,35 +172,32 @@ class ExpectColumnValueZScoresToBeLessThan(DatasetExpectation):
         validation_dependencies = self.get_validation_dependencies(configuration)[
             "metrics"
         ]
-        # Extracting Pre-defined Metrics
         metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
+        column_mean = metric_vals.get("standard_deviation")
 
-        # Obtaining value for "mostly"
-        mostly = configuration.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
+        # Obtaining components needed for validation
+        min_value = self.get_success_kwargs(configuration).get("min_value")
+        strict_min = self.get_success_kwargs(configuration).get("strict_min")
+        max_value = self.get_success_kwargs(configuration).get("max_value")
+        strict_max = self.get_success_kwargs(configuration).get("strict_max")
 
-        # If result_format is changed by the runtime configuration
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
+        # Checking if mean lies between thresholds
+        if min_value is not None:
+            if strict_min:
+                above_min = column_mean > min_value
+            else:
+                above_min = column_mean >= min_value
         else:
-            result_format = self.default_kwarg_values.get("result_format")
+            above_min = True
 
-        # Returning dictionary output with necessary metrics based on the format
-        return _format_map_output(
-            result_format=parse_result_format(result_format),
+        if max_value is not None:
+            if strict_max:
+                below_max = column_mean < max_value
+            else:
+                below_max = column_mean <= max_value
+        else:
+            below_max = True
 
-            # Success = Ratio of successful nonnull values > mostly?
-            success=(metric_vals.get("column_values.z_scores.over_threshold.count") / metric_vals.get(
-                "column_values.nonull.count"))
-                    >= mostly,
-            element_count=metric_vals.get("column_values.count"),
-            nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.z_scores.over_threshold.unexpected_count"),
-            unexpected_list=metric_vals.get("column_values.z_scores.over_threshold.unexpected_values"),
-            unexpected_index_list=metric_vals.get("column_values.z_scores.over_threshold.unexpected_index"),
-        )
+        success = above_min and below_max
 
-
+        return {"success": success, "result": {"observed_value": column_mean}}
