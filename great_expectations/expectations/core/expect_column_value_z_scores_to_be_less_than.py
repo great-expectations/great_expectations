@@ -194,13 +194,14 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     ):
         """Validates the given data against the set Z Score threshold, returning a nested dictionary documenting the
         validation."""
-
+        # Obtaining dependencies used to validate the expectation
         validation_dependencies = self.get_validation_dependencies(configuration)[
             "metrics"
         ]
+        # Extracting Pre-defined Metrics
         metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
 
-        # Obtaining value for "mostly" and "threshold" arguments to evaluate success
+        # Obtaining value for "mostly"
         mostly = configuration.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
@@ -216,13 +217,16 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         # Returning dictionary output with necessary metrics based on the format
         return _format_map_output(
             result_format=parse_result_format(result_format),
-            success=(metric_vals.get("map.z_scores.count_over_threshold") / metric_vals.get("map.nonull_count"))
+
+            # Success = Ratio of successful nonnull values > mostly?
+            success=(len(metric_vals.get("column_values.z_scores.success")) / metric_vals.get(
+                "column_values.nonull_count"))
                     >= mostly,
-            element_count=metric_vals.get("map.count"),
-            nonnull_count=metric_vals.get("map.nonnull.count"),
-            unexpected_count=metric_vals.get("map.nonnull.count")
-                             - "map.z_scores.count_over_threshold",
-            unexpected_list=metric_vals.get("map.z_scores.unexpected_values"),
-            unexpected_index_list=metric_vals.get("map.z_scores.unexpected_index"),
+            element_count=metric_vals.get("column_values.count"),
+            nonnull_count=metric_vals.get("column_values.nonnull.count"),
+            unexpected_count=metric_vals.get("column_values.z_scores.unexpected_count"),
+            unexpected_list=metric_vals.get("column_values.z_scores.unexpected_values"),
+            unexpected_index_list=metric_vals.get("column_values.z_scores.unexpected_index"),
         )
+
 
