@@ -1828,11 +1828,10 @@ Notes:
 
         return pd.Series(results, temp_df.index)
 
-    @DocInherit
-    @MetaPandasDataset.multicolumn_map_expectation
     def expect_multicolumn_values_to_be_unique(
         self,
         column_list,
+        mostly=None,
         ignore_row_if="all_values_are_missing",
         result_format=None,
         row_condition=None,
@@ -1841,19 +1840,17 @@ Notes:
         catch_exceptions=None,
         meta=None,
     ):
-        warnings.warn(
-            (
-                "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
-                "expect_select_column_values_to_be_unique_within_record instead."
-            ),
-            DeprecationWarning,
+        deprecation_warning = (
+            "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
+            "expect_select_column_values_to_be_unique_within_record instead."
         )
-
-        # TODO: remove existing expectations expect_multicolumn_values_to_be_unique
-        #  using the procedure in: expect_column_values_to_be_of_type
+        warnings.warn(
+            deprecation_warning, DeprecationWarning,
+        )
 
         return self.expect_select_column_values_to_be_unique_within_record(
             column_list=column_list,
+            mostly=mostly,
             ignore_row_if=ignore_row_if,
             result_format=result_format,
             row_condition=row_condition,
@@ -1868,6 +1865,7 @@ Notes:
     def expect_select_column_values_to_be_unique_within_record(
         self,
         column_list,
+        mostly=None,
         ignore_row_if="all_values_are_missing",
         result_format=None,
         row_condition=None,
@@ -1908,6 +1906,7 @@ Notes:
     def expect_compound_columns_to_be_unique(
         self,
         column_list,
+        mostly=None,
         ignore_row_if="all_values_are_missing",
         result_format=None,
         row_condition=None,

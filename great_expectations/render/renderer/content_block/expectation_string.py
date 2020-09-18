@@ -483,10 +483,28 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column_list", "ignore_row_if", "row_condition", "condition_parser"],
+            [
+                "column_list",
+                "ignore_row_if",
+                "row_condition",
+                "condition_parser",
+                "mostly",
+            ],
         )
 
-        template_str = "Values for given compound columns must be unique together: "
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+        mostly_str = (
+            ""
+            if params.get("mostly") is None
+            else ", at least $mostly_pct % of the time"
+        )
+
+        template_str = (
+            f"Values for given compound columns must be unique together{mostly_str}: "
+        )
         for idx in range(len(params["column_list"]) - 1):
             template_str += "$column_list_" + str(idx) + ", "
             params["column_list_" + str(idx)] = params["column_list"][idx]
@@ -530,10 +548,26 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column_list", "ignore_row_if", "row_condition", "condition_parser"],
+            [
+                "column_list",
+                "ignore_row_if",
+                "row_condition",
+                "condition_parser",
+                "mostly",
+            ],
         )
 
-        template_str = "Values must always be unique across columns: "
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+        mostly_str = (
+            ""
+            if params.get("mostly") is None
+            else ", at least $mostly_pct % of the time"
+        )
+
+        template_str = f"Values must always be unique across columns{mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
             template_str += "$column_list_" + str(idx) + ", "
             params["column_list_" + str(idx)] = params["column_list"][idx]
@@ -574,10 +608,26 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column_list", "ignore_row_if", "row_condition", "condition_parser"],
+            [
+                "column_list",
+                "ignore_row_if",
+                "row_condition",
+                "condition_parser",
+                "mostly",
+            ],
         )
 
-        template_str = "Values must always be unique across columns: "
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+        mostly_str = (
+            ""
+            if params.get("mostly") is None
+            else ", at least $mostly_pct % of the time"
+        )
+
+        template_str = f"Values must always be unique across columns{mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
             template_str += "$column_list_" + str(idx) + ", "
             params["column_list_" + str(idx)] = params["column_list"][idx]
