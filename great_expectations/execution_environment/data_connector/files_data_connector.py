@@ -13,42 +13,38 @@ from great_expectations.execution_environment.types import PathBatchKwargs
 
 logger = logging.getLogger(__name__)
 
-
 class FilesDataConnector(DataConnector):
     r"""FilesDataConnector processes files in a directory according to glob patterns to produce batches of data.
-
-    A more interesting asset_params might look like the following::
-
-        daily_logs:
-          glob: daily_logs/*.csv
-          partition_regex: daily_logs/((19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01]))_(.*)\.csv
-
-
-    The "glob" key ensures that every csv file in the daily_logs directory is considered a batch for this data asset.
-    The "partition_regex" key ensures that files whose basename begins with a date (with components hyphen, space,
-    forward slash, period, or null separated) will be identified by a partition_id equal to just the date portion of
-    their name.
-
-    A fully configured FilesDataConnector in yml might look like the following::
-        my_datasource:
-          class_name: PandasDatasource
-          batch_kwargs_generators:
-            my_generator:
-              class_name: GlobReaderBatchKwargsGenerator
-              base_directory: /var/log
-              reader_options:
-                sep: %
-                header: 0
-              reader_method: csv
-              asset_params:
-                wifi_logs:
-                  glob: wifi*.log
-                  partition_regex: wifi-((0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])-20\d\d).*\.log
-                  reader_method: csv
+        data_connectors:
+          my_connector:
+          class_name: FilesDataConnector
+          module_name: great_expectations.execution_environment.data_connector.files_data_connector
+          base_directory: mydir/
+          partitioner_name: my_partitioner
+          partitioners:
+            my_partitioner:
+              class_name: RegexPartitioner
+              module_name: great_expectations.execution_environment.data_connector.partitioner.regex_partitioner
+              regex: r'(.*)_(.*)_(.*).csv'
+              sorters:
+                name:
+                  class_name: LexicographicalSorter
+                  module_name: great_expectations.execution_environment.data_connector.partitioner.sorter.lexicographical_sorter
+                  orderby: desc
+                date:
+                  class_name: DateTimeSorter
+                  module_name: great_expectations.execution_environment.data_connector.partitioner.sorter.datetime_sorter
+                  timeformatstring: 'yyyymmdd' # <~~ kick it to the datetime module
+                  orderby: asc
+                price:
+                  class_name: NumericalSorter
+                  module_name: great_expectations.execution_environment.data_connector.partitioner.sorter.numerical_sorter
+                  orderby: asc
     """
     recognized_batch_parameters = {
         "data_asset_name",
-        "partition_id",
+        "partitioner_name",
+        "partitioners",
         "reader_method",
         "reader_options",
         "limit",
@@ -60,7 +56,8 @@ class FilesDataConnector(DataConnector):
         execution_environment=None,
         base_directory="/data",
         reader_options=None,
-        asset_param=None,
+        partitioner_name=None,
+        partitioners=None,
         reader_method=None,
     ):
         logger.debug("Constructing FilesDataConnector {!r}".format(name))
@@ -69,18 +66,10 @@ class FilesDataConnector(DataConnector):
         if reader_options is None:
             reader_options = {}
 
-        if asset_param is None:
-            asset_param = {
-                "default": {
-                    "partition_regex": r"^((19|20)\d\d[- /.]?(0[1-9]|1[012])[- /.]?(0[1-9]|[12][0-9]|3[01])_(.*))\.csv",
-                    "match_group_id": 1,
-                    "reader_method": "read_csv",
-                }
-            }
-
         self._base_directory = base_directory
         self._reader_options = reader_options
-        self._asset_param = asset_param
+        self._partitioner_name = partitioner_name
+        self._partitioners = partitioners
         self._reader_method = reader_method
 
     @property
@@ -88,8 +77,12 @@ class FilesDataConnector(DataConnector):
         return self._reader_options
 
     @property
-    def asset_param(self):
-        return self._asset_param
+    def partitioner_name(self):
+        return self._partitioner_name
+
+    @property
+    def partitioners(self):
+        return self._partitioners
 
     @property
     def reader_method(self):
@@ -128,6 +121,9 @@ class FilesDataConnector(DataConnector):
 
         return available_data_asset_names
 
+
+
+    """
     def get_regex(self, data_asset_name=None):
         files_config = self._get_data_asset_config(data_asset_name=data_asset_name)
         batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
@@ -228,16 +224,14 @@ class FilesDataConnector(DataConnector):
                 partitions["partition_id"] = partition_id
 
         return partitions
-
+    
     def _get_data_asset_paths(self, data_asset_name):
-        """
         Returns a list of filepaths associated with the given data_asset_name
         Args:
             data_asset_name:
 
         Returns:
             paths (list)
-        """
         glob_config = self._get_data_asset_config(data_asset_name)
         globs = sorted(glob.glob(self.base_directory + "/**", recursive=True))
         files = [f for f in globs if os.path.isfile(f)]
@@ -246,9 +240,6 @@ class FilesDataConnector(DataConnector):
             pattern = re.compile(glob_config["partition_regex"])
             files = [file for file in files if pattern.match(file)]
         return files
-
-    """
-    # Maybe we dont need this?
 
     def _get_iterator(
         self, data_asset_name, reader_method=None, reader_options=None, limit=None
@@ -262,8 +253,6 @@ class FilesDataConnector(DataConnector):
             reader_options=reader_options,
             limit=limit,
         )
-
-    """
 
     def _build_batch_kwargs_path_iter(
         self,
@@ -312,3 +301,6 @@ class FilesDataConnector(DataConnector):
             raise BatchKwargsError(
                 "Unknown asset_name %s" % data_asset_name, batch_kwargs
             )
+
+
+    """

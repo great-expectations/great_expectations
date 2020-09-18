@@ -39,7 +39,7 @@ class DataConnector(object):
     _batch_spec_type = BatchSpec
     recognized_batch_definition_keys = {
         "data_asset_name",
-        "partition_id",
+        "partitioners",
         "execution_environment",
         "data_connector",
         "batch_spec_passthrough",
