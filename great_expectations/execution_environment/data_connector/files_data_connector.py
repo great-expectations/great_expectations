@@ -53,7 +53,6 @@ class FilesDataConnector(DataConnector):
 
 
     def get_available_data_asset_names(self):
-        # this returns the full assets dict = {'testing_data': {'partitioner_name': 'my_partitioner'}, 'testing_data_v2': {'partitioner_name': 'my_partitioner'}}
         # should it be a list of just the keys?
         return self._assets.keys()
 

@@ -53,9 +53,6 @@ data_connectors = {
             "testing_data": {
                 "partitioner_name" : "my_partitioner"
             },
-            "testing_data_v2": {
-                "partitioner_name": "my_partitioner"
-            }
         },
         "partitioners": {
             "my_partitioner":{
