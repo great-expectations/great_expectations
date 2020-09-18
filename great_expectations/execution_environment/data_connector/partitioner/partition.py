@@ -2,6 +2,8 @@
 
 import logging
 
+from typing import Any
+
 logger = logging.getLogger(__name__)
 
 
@@ -11,9 +13,10 @@ class Partition(object):
     """
 
     # TODO: <Alex>Should we accept **kwargs and set attributes for most generic partition definition?</Alex>
-    def __init__(self, name: str, definition: dict):
+    def __init__(self, name: str, definition: dict, source: Any):
         self._name = name
         self._definition = definition
+        self._source = source
 
     @property
     def name(self) -> str:
@@ -23,6 +26,10 @@ class Partition(object):
     def definition(self) -> dict:
         return self._definition
 
+    @property
+    def source(self) -> Any:
+        return self._source
+
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(other, Partition):
@@ -30,4 +37,4 @@ class Partition(object):
         return False
 
     def __repr__(self):
-        return f'{self.name}: {self.definition}'
+        return f"{self.name}: {self.definition} ; source: {self.source}"

@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 """
+# TODO: <Alex>Let's use the "f-strings" for logging and exceptions raising, wherever possible.  Thanks!</Alex>
 # <WILL> TODO : this function originally was intended to handle more sophisticated type checking... is it too much? 
 def is_name_in_list(partition_value: str, reference_list: List[str]) -> bool:
     # check type
@@ -49,9 +50,7 @@ class CustomListSorter(Sorter):
         if partition_value in self.reference_list:
             return self.reference_list.index(partition_value)
         else:
-            raise ValueError(
-                'Source {} was not found in Reference list.  Try again...'.format(partition_value)
-            )
+            raise ValueError(f'Source {partition_value} was not found in Reference list.  Try again...')
 
     @property
     def reference_list(self) -> list:

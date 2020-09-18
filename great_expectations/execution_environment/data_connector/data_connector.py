@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from typing import List, Dict, Union
+# TODO: <Alex>Do we need warnings?</Alex>
 import warnings
 from copy import deepcopy
+
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 
 from great_expectations.core.util import nested_update
 from great_expectations.core.id_dict import BatchSpec
@@ -68,14 +72,41 @@ class DataConnector(object):
                 "execution environment must be provided for a DataConnector"
             )
         self._execution_environment = execution_environment
+        self._partitions: Union[List[Partition], Dict[str, Partition], None] = None
 
     @property
-    def batch_definition_defaults(self):
+    def batch_definition_defaults(self) -> dict:
         return self._batch_definition_defaults
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
+
+    def get_cached_partitions(self, data_asset_name: str = None) -> Union[List[Partition], Dict[str, Partition]]:
+        if data_asset_name is None:
+            return self._partitions
+        return self._partitions[data_asset_name]
+
+    # TODO: <Alex></Alex>
+    def update_partitions_cache(self, partitions: List[Partition], data_asset_name: str = None):
+        if data_asset_name is None:
+            if self.get_cached_partitions() is None or isinstance(self.get_cached_partitions(), list):
+                self._partitions = partitions
+            else:
+                logger.warning(
+                    f'''When data_asset_name is not specified, partitions cache in DataConnector "{self.name}' must be a
+list type (existing cache type is "{str(type(self.get_cached_partitions()))}").
+                    '''
+                )
+                raise ValueError(
+                    f'''When data_asset_name is not specified, partitions cache in DataConnector "{self.name}' must be a
+list type (existing cache type is "{str(type(self.get_cached_partitions()))}").
+                    '''
+                )
+        else:
+            if self.get_cached_partitions() is None:
+                self._partitions = {}
+            self._partitions[data_asset_name] = partitions
 
     def _get_iterator(self, data_asset_name, batch_definition, batch_spec):
         raise NotImplementedError
@@ -88,18 +119,27 @@ class DataConnector(object):
         """
         raise NotImplementedError
 
-    def get_available_partition_ids(self, data_asset_name=None):
-        """
-        Applies the current _partitioner to the batches available on data_asset_name and returns a list of valid
-        partition_id strings that can be used to identify batches of data.
-
-        Args:
-            data_asset_name: the data asset whose partitions should be returned.
-
-        Returns:
-            A list of partition_id strings
-        """
+    # TODO: <Alex>Do we need **kwargs here?</Alex>
+    def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
         raise NotImplementedError
+
+    # TODO: <Alex>Do we need **kwargs here?</Alex>
+    def get_available_partition_names(self, data_asset_name: str = None) -> List[str]:
+        raise NotImplementedError
+
+    # TODO: <Alex>Cleanup</Alex>
+    # def get_available_partition_ids(self, data_asset_name=None):
+    #     """
+    #     Applies the current _partitioner to the batches available on data_asset_name and returns a list of valid
+    #     partition_id strings that can be used to identify batches of data.
+    #
+    #     Args:
+    #         data_asset_name: the data asset whose partitions should be returned.
+    #
+    #     Returns:
+    #         A list of partition_id strings
+    #     """
+    #     raise NotImplementedError
 
     def get_config(self):
         return self._data_connector_config
