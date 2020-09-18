@@ -20,7 +20,7 @@ class FilesDataConnector(DataConnector):
           class_name: FilesDataConnector
           module_name: great_expectations.execution_environment.data_connector.files_data_connector
           base_directory: mydir/
-          partitioner: my_partitioner
+          partitioner_name: my_partitioner
           partitioners:
             my_partitioner:
               class_name: RegexPartitioner
@@ -43,6 +43,7 @@ class FilesDataConnector(DataConnector):
     """
     recognized_batch_parameters = {
         "data_asset_name",
+        "partitioner_name",
         "partitioners",
         "reader_method",
         "reader_options",
@@ -55,6 +56,7 @@ class FilesDataConnector(DataConnector):
         execution_environment=None,
         base_directory="/data",
         reader_options=None,
+        partitioner_name=None,
         partitioners=None,
         reader_method=None,
     ):
@@ -66,12 +68,17 @@ class FilesDataConnector(DataConnector):
 
         self._base_directory = base_directory
         self._reader_options = reader_options
+        self._partitioner_name = partitioner_name
         self._partitioners = partitioners
         self._reader_method = reader_method
 
     @property
     def reader_options(self):
         return self._reader_options
+
+    @property
+    def partitioner_name(self):
+        return self._partitioner_name
 
     @property
     def partitioners(self):
