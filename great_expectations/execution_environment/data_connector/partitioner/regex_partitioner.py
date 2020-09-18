@@ -102,6 +102,16 @@ class RegexPartitioner(Partitioner):
         for path in self.paths:
             partitioned_path: Partition = self._find_partitions_for_path(path=path)
             if partitioned_path is not None:
+                # <WILL> This is a place we can add the check if we are getting multiple?
+                if not self.allow_multifile_partitions:
+                    # check if duplicate
+                    if any(x.name == partitioned_path.name for x in partitions):
+                        # TODO <WILL> This is a dupilcate error message from `get_available_partitions()`
+                        raise ValueError(
+                            f'''RegexPartitioner "{self.name}' detected multiple partitions detected for partition name
+                        "{partitioned_path.name}"; however, allow_multifile_partitions is set to False.
+                                        '''
+                        )
                 partitions.append(partitioned_path)
 
         sorters: Iterator[Sorter] = reversed(self.sorters)

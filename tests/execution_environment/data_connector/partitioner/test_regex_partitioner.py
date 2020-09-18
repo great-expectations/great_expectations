@@ -11,6 +11,9 @@ from great_expectations.execution_environment.data_connector.partitioner.date_ti
 from great_expectations.execution_environment.data_connector.partitioner.numeric_sorter import NumericSorter
 from great_expectations.execution_environment.data_connector.partitioner.custom_list_sorter import CustomListSorter
 
+from .reference_list import ReferenceListForTests
+
+
 try:
     from unittest import mock
 except ImportError:
@@ -153,9 +156,9 @@ def test_regex_partitioner_regex_configured_and_sorters_defined_and_named():
     ]
 
 
-# periodic table first 10 elements
-ref_periodic_table = ["Hydrogen", "Helium", "Lithium", "Beryllium", "Boron", "Carbon", "Nitrogen", "Oxygen", "Flourine", "Neon"]
 
+# <WILL> I know there is a better way to do this...
+ref_periodic_table = ReferenceListForTests().ref_list
 
 def test_regex_partitioner_with_periodic_table():
 
@@ -224,3 +227,71 @@ def test_regex_partitioner_with_periodic_table():
     # catch the ValueError
     # with pytest.raises(ValueError):
     #     returned_partitions = my_partitioner.get_available_partitions()
+
+
+def test_regex_partitioner_with_periodic_table_allow_multifile_partitions_flag():
+    batch_paths: list = [
+        "my_dir/Boron_0.csv",
+        "my_dir/Oxygen_0.csv",
+        "my_dir/Hydrogen_1.csv",
+        "my_dir/Titanium_1.csv",
+        "my_dir/Titanium_2.csv",
+    ]
+    regex: str = r".*/(.*)_.*.csv"
+
+    # TODO: <Alex>Will, we do need a data_connector here...</Alex>
+    my_partitioner = RegexPartitioner(
+        # TODO: <Alex>Will: This is temporary -- just to get a crude test going.</Alex>
+        data_connector=DataConnector(name='alex_temp_test', execution_environment={}),
+        name="mine_all_mine",
+        paths=batch_paths,
+        regex=regex,
+        allow_multifile_partitions=False,
+        sorters=[
+            CustomListSorter(name='element', orderby='asc', reference_list=ref_periodic_table)
+        ]
+    )
+    my_partitioner.regex = regex
+
+    with pytest.raises(ValueError):
+        my_partitioner.get_available_partitions()
+
+
+    #with pytest.raises(ValueError):
+    #    my_partitioner.get_available_partitions(partition_name="Titanium")
+
+
+    # now testing the allow_multifile_partitions flag == True
+    # TODO: <Alex>Will, we do need a data_connector here...</Alex>
+    my_new_partitioner = RegexPartitioner(
+        # TODO: <Alex>Will: This is temporary -- just to get a crude test going.</Alex>
+        data_connector=DataConnector(name='alex_temp_test', execution_environment={}),
+        name="mine_all_mine",
+        paths=batch_paths,
+        regex=regex,
+        allow_multifile_partitions=True,
+        sorters=[
+            CustomListSorter(name='element', orderby='asc', reference_list=ref_periodic_table)
+        ]
+    )
+    my_new_partitioner.regex = regex
+
+
+    # getting all
+    returned_partitions = my_new_partitioner.get_available_partitions()
+    # <WILL> I still feel like there should be more of a warning at this step .. "
+    assert returned_partitions == [
+        Partition(name="Hydrogen", definition={'element': 'Hydrogen'}, source="my_dir/Hydrogen_1.csv"),
+        Partition(name="Boron", definition={'element': 'Boron'}, source="my_dir/Boron_0.csv"),
+        Partition(name="Oxygen", definition={'element': 'Oxygen'}, source="my_dir/Oxygen_0.csv"),
+        Partition(name="Titanium", definition={'element': 'Titanium'}, source="my_dir/Titanium_1.csv"),
+        Partition(name="Titanium", definition={'element': 'Titanium'}, source="my_dir/Titanium_2.csv"),
+    ]
+
+    # getting just the ones with repeat
+    returned_partitions = my_new_partitioner.get_available_partitions(partition_name="Titanium")
+    assert returned_partitions == [
+        Partition(name="Titanium", definition={'element': 'Titanium'}, source="my_dir/Titanium_1.csv"),
+        Partition(name="Titanium", definition={'element': 'Titanium'}, source="my_dir/Titanium_2.csv"),
+    ]
+
