@@ -20,7 +20,7 @@ from ..registry import extract_metrics, get_metric_kwargs
 
 class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
     map_metric = "map.increasing"
-    metric_dependencies = ("map.increasing.count", "map.nonnull.count")
+    metric_dependencies = ("map.increasing.count", "column_values.nonnull.count")
     success_keys = ("strictly", "mostly", "parse_strings_as_datetimes")
 
     default_kwarg_values = {
@@ -99,13 +99,17 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
             result_format=parse_result_format(result_format),
             success=(
                 metric_vals.get("map.increasing.count")
-                / metric_vals.get("map.nonnull.count")
+                / metric_vals.get("column_values.nonnull.count")
             )
             >= mostly,
-            element_count=metric_vals.get("map.count"),
-            nonnull_count=metric_vals.get("map.nonnull.count"),
-            unexpected_count=metric_vals.get("map.nonnull.count")
-            - metric_vals.get("map.increasing.count"),
-            unexpected_list=metric_vals.get("map.increasing.unexpected_values"),
-            unexpected_index_list=metric_vals.get("map.is_in.unexpected_index"),
+            element_count=metric_vals.get("column_values.count"),
+            nonnull_count=metric_vals.get("column_values.nonnull.count"),
+            unexpected_count=metric_vals.get("column_values.nonnull.count")
+            - metric_vals.get("column_values.increasing.count"),
+            unexpected_list=metric_vals.get(
+                "column_values.increasing.unexpected_values"
+            ),
+            unexpected_index_list=metric_vals.get(
+                "column_values.increasing.unexpected_index"
+            ),
         )

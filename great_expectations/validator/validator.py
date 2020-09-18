@@ -77,8 +77,13 @@ class Validator(object):
                 category=DeprecationWarning,
             )
         super().__init__(*args, **kwargs)
-        self._data_context = execution_engine.data_context
         self._execution_engine = execution_engine
+        if execution_engine:
+            self._data_context = execution_engine.data_context
+            self._execution_engine._validator = self
+
+        else:
+            self._data_context = None
         self._validator_config = {"interactive_evaluation": interactive_evaluation}
         self._initialize_expectations(
             expectation_suite=expectation_suite,
@@ -94,8 +99,6 @@ class Validator(object):
             self._data_context, "_expectation_explorer_manager"
         ):
             self.set_default_expectation_argument("include_config", True)
-
-        self._execution_engine._validator = self
 
     def __getattr__(self, name):
         if name.startswith("expect_") and hasattr(self.execution_engine, name):
@@ -119,9 +122,9 @@ class Validator(object):
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
 
-    @staticmethod
     def _populate_dependencies(
-        graph_family: Dict[str, ValidationGraph],
+        self,
+        graph: ValidationGraph,
         metric_name: str,
         configuration: ExpectationConfiguration,
         parent_node: Union[MetricEdgeKey, None] = None,
@@ -151,15 +154,15 @@ class Validator(object):
             raise MetricError(
                 f"missing kwarg value while trying to identify dependency graph for metric {metric_name}"
             )
-        domain_id = metric_domain_kwargs.to_id()
-        if domain_id not in graph_family:
-            graph_family[domain_id] = ValidationGraph(metric_domain_kwargs)
+        # domain_id = metric_domain_kwargs.to_id()
+        # if domain_id not in graph_family:
+        #     graph_family[domain_id] = ValidationGraph(metric_domain_kwargs)
 
-        graph = graph_family[domain_id]
+        # graph = graph_family[domain_id]
         metric_dependencies = get_metric_dependencies(metric_name)
 
         if parent_node:
-            graph.edges.add(
+            graph.add(
                 MetricEdge(
                     parent_node,
                     MetricEdgeKey(
@@ -169,7 +172,7 @@ class Validator(object):
             )
 
         if len(metric_dependencies) == 0:
-            graph.edges.add(
+            graph.add(
                 MetricEdge(
                     MetricEdgeKey(
                         metric_name, metric_domain_kwargs, metric_value_kwargs
@@ -180,8 +183,8 @@ class Validator(object):
 
         else:
             for dependent_metric in metric_dependencies:
-                Validator._populate_dependencies(
-                    graph_family,
+                self._populate_dependencies(
+                    graph,
                     dependent_metric,
                     configuration,
                     MetricEdgeKey(
@@ -189,61 +192,46 @@ class Validator(object):
                     ),
                 )
 
-    @staticmethod
-    def _get_validation_graphs(
+    def graph_validate(
+        self,
+        batches: Dict[str, Batch],
         configurations: List[ExpectationConfiguration],
+        execution_engine: "ExecutionEngine" = None,
+        metrics: dict = None,
         runtime_configuration: dict = None,
-    ) -> dict:
-        validation_graphs = dict()
+    ) -> List[ExpectationValidationResult]:
+        if execution_engine is None:
+            if self._execution_engine:
+                execution_engine = self._execution_engine
+            else:
+                raise ValueError("Execution Engine is required for validation")
+        graph = ValidationGraph()
         for configuration in configurations:
             expectation_impl = get_expectation_impl(configuration.expectation_type)
             validation_dependencies = expectation_impl(
                 configuration
             ).get_validation_dependencies()
-            domain_id = IDDict(validation_dependencies["domain"]).to_id()
-            if domain_id not in validation_graphs:
-                validation_graphs[domain_id] = ValidationGraph(
-                    validation_dependencies["domain"]
-                )
 
             for metric_name in validation_dependencies.get("metrics"):
-                Validator._populate_dependencies(
-                    validation_graphs, metric_name, configuration
-                )
+                self._populate_dependencies(graph, metric_name, configuration)
 
-        return validation_graphs
-
-    @staticmethod
-    def _graph_validate(
-        batches: Dict[str, Batch],
-        execution_engine: "ExecutionEngine",
-        configurations: List[ExpectationConfiguration],
-        metrics: dict = None,
-        runtime_configuration: dict = None,
-    ) -> List[ExpectationValidationResult]:
-        validation_graphs = Validator._get_validation_graphs(
-            configurations, runtime_configuration=runtime_configuration
-        )
         if metrics is None:
             metrics = dict()
 
-        for validation_graph in validation_graphs.values():
-            done: bool = False
-            while not done:
-                ready_metrics, needed_metrics = Validator._parse_validation_graph(
-                    validation_graph, metrics
+        done: bool = False
+        while not done:
+            ready_metrics, needed_metrics = self._parse_validation_graph(graph, metrics)
+            metrics.update(
+                self._resolve_metrics(
+                    batches=batches,
+                    execution_engine=execution_engine,
+                    metrics_to_resolve=ready_metrics,
+                    metrics=metrics,
+                    runtime_configuration=runtime_configuration,
                 )
-                metrics.update(
-                    Validator._resolve_metrics(
-                        batches=batches,
-                        execution_engine=execution_engine,
-                        metrics_to_resolve=ready_metrics,
-                        metrics=metrics,
-                        runtime_configuration=runtime_configuration,
-                    )
-                )
-                if len(ready_metrics) + len(needed_metrics) == 0:
-                    done = True
+            )
+            if len(ready_metrics) + len(needed_metrics) == 0:
+                done = True
 
         evrs = list()
         for configuration in configurations:
@@ -254,22 +242,27 @@ class Validator(object):
             )
         return evrs
 
-    @staticmethod
-    def _parse_validation_graph(validation_graph, metrics):
+    def _parse_validation_graph(self, validation_graph, metrics):
+        needed_metric_ids = set()
         needed_metrics = set()
+        ready_metric_ids = set()
         ready_metrics = set()
 
         for edge in validation_graph.edges:
             if edge.left.id not in metrics:
                 if edge.right is None or edge.right.id in metrics:
-                    ready_metrics.add(edge.left)
+                    if edge.left.id not in ready_metric_ids:
+                        ready_metric_ids.add(edge.left.id)
+                        ready_metrics.add(edge.left)
                 else:
-                    needed_metrics.add(edge.left)
+                    if edge.left.id not in needed_metric_ids:
+                        needed_metric_ids.add(edge.left.id)
+                        needed_metrics.add(edge.left)
 
         return ready_metrics, needed_metrics
 
-    @staticmethod
     def _resolve_metrics(
+        self,
         batches: Dict[str, Batch],
         execution_engine: "ExecutionEngine",
         metrics_to_resolve: Iterable[MetricEdgeKey],

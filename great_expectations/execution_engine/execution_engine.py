@@ -24,7 +24,10 @@ from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
 )
-from great_expectations.expectations.registry import get_metric_provider
+from great_expectations.expectations.registry import (
+    get_metric_provider,
+    register_metric,
+)
 from great_expectations.validator.validation_graph import MetricEdgeKey
 from great_expectations.validator.validator import Validator
 
@@ -197,6 +200,7 @@ class ExecutionEngine(MetaExecutionEngine):
     ## TODO: JPC: 20200916 - can we explicitly list these args?
     def __init__(self, *args, **kwargs):
         self._execution_engine_config = {}
+        self.name = kwargs.pop("name", None)
 
         # NOTE: using caching makes the strong assumption that the user will not modify the core data store
         # (e.g. self.spark_df) over the lifetime of the dataset instance
@@ -234,6 +238,60 @@ class ExecutionEngine(MetaExecutionEngine):
             for func in self.hashable_getters:
                 caching_func = lru_cache(maxsize=None)(getattr(self, func))
                 setattr(self, func, caching_func)
+
+    @classmethod
+    def metric(
+        cls,
+        metric_name: str,
+        metric_domain_keys: tuple,
+        metric_value_keys: tuple,
+        metric_dependencies: tuple,
+        batchable: bool = False,
+    ):
+        """
+        A decorator for declaring a metric provider
+        """
+
+        def outer(metric_fn: Callable):
+            _declared_name = metric_name
+
+            @wraps(metric_fn)
+            def inner_func(
+                self,
+                metric_name: str,
+                batches: Dict[str, Batch],
+                execution_engine: "ExecutionEngine",
+                metric_domain_kwargs: dict,
+                metric_value_kwargs: dict,
+                metrics: Dict[Tuple, Any],
+                **kwargs,
+            ):
+                if _declared_name != metric_name:
+                    logger.warning(
+                        "using validator provider with an unrecognized metric"
+                    )
+                return metric_fn(
+                    self,
+                    batches=batches,
+                    execution_engine=execution_engine,
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    metric_value_kwargs=metric_value_kwargs,
+                    metrics=metrics,
+                    **kwargs,
+                )
+
+            register_metric(
+                metric_name=metric_name,
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=metric_value_keys,
+                execution_engine=cls,
+                metric_dependencies=metric_dependencies,
+                metric_provider=inner_func,
+                batchable=batchable,
+            )
+            return inner_func
+
+        return outer
 
     # TODO: <Alex></Alex>
     ###
@@ -556,20 +614,6 @@ class ExecutionEngine(MetaExecutionEngine):
                 )
         metrics.update(self.batch_resolve(resolve_batch, metrics=metrics))
 
-        return metrics
-
-    def batch_resolve(
-        self,
-        resolve_batch: Iterable[Tuple[MetricEdgeKey, Callable, dict]],
-        metrics: Dict[Tuple, Any] = None,
-    ) -> dict:
-        """The dumb implementation simply calls one at a time. Individual Execution Engines can override this intelligently."""
-        if metrics is None:
-            metrics = dict()
-        for metric_to_resolve, metric_provider, metric_provider_kwargs in resolve_batch:
-            metrics[metric_to_resolve.id] = metric_provider(
-                self, **metric_provider_kwargs, metrics=metrics
-            )
         return metrics
 
     def get_row_count(self):

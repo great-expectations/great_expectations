@@ -22,6 +22,7 @@ from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymi
 )
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
+    ExecutionEngineAnonymizer,
 )
 from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
     ExpectationSuiteAnonymizer,
@@ -57,6 +58,7 @@ class UsageStatisticsHandler(object):
         self._worker = threading.Thread(target=self._requests_worker, daemon=True)
         self._worker.start()
         self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
+        self._execution_engine_anonymizer = ExecutionEngineAnonymizer(data_context_id)
         self._store_anonymizer = StoreAnonymizer(data_context_id)
         self._validation_operator_anonymizer = ValidationOperatorAnonymizer(
             data_context_id

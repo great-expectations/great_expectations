@@ -135,7 +135,7 @@ def get_metric_provider(
         return metric_definition["providers"][type(execution_engine).__name__]
     except KeyError:
         raise MetricProviderError(
-            f"No provider found for {metric_name} using {execution_engine.__name__}"
+            f"No provider found for {metric_name} using {type(execution_engine).__name__}"
         )
 
 

@@ -299,7 +299,7 @@ cli_new_ds_choice_payload = {
 }
 
 
-datasource_sqlalchemy_connect_payload = {
+execution_engine_sqlalchemy_connect_payload = {
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
@@ -327,7 +327,7 @@ usage_statistics_record_schema = {
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
         "cli_new_ds_choice_payload": cli_new_ds_choice_payload,
-        "datasource_sqlalchemy_connect_payload": datasource_sqlalchemy_connect_payload,
+        "execution_engine_sqlalchemy_connect_payload": execution_engine_sqlalchemy_connect_payload,
     },
     "type": "object",
     "properties": {
@@ -391,9 +391,14 @@ usage_statistics_record_schema = {
         {
             "type": "object",
             "properties": {
-                "event": {"enum": ["datasource.sqlalchemy.connect"]},
+                "event": {
+                    "enum": [
+                        "datasource.sqlalchemy.connect",
+                        "execution_engine.sqlalchemy.connect",
+                    ]
+                },
                 "event_payload": {
-                    "$ref": "#/definitions/datasource_sqlalchemy_connect_payload"
+                    "$ref": "#/definitions/execution_engine_sqlalchemy_connect_payload"
                 },
             },
         },
