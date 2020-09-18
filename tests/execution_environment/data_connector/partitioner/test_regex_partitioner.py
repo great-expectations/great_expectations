@@ -279,7 +279,6 @@ def test_regex_partitioner_with_periodic_table_allow_multifile_partitions_flag()
 
     # getting all
     returned_partitions = my_new_partitioner.get_available_partitions()
-    # <WILL> I still feel like there should be more of a warning at this step .. "
     assert returned_partitions == [
         Partition(name="Hydrogen", definition={'element': 'Hydrogen'}, source="my_dir/Hydrogen_1.csv"),
         Partition(name="Boron", definition={'element': 'Boron'}, source="my_dir/Boron_0.csv"),
