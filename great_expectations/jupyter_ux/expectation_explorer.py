@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import datetime
 import logging
 from itertools import chain
@@ -10,7 +8,7 @@ from IPython.display import display
 logger = logging.getLogger(__name__)
 
 
-class ExpectationExplorer(object):
+class ExpectationExplorer:
     def __init__(self):
         self.state = {"data_assets": {}}
         self.expectation_kwarg_field_names = {
@@ -997,7 +995,7 @@ class ExpectationExplorer(object):
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
         expectation_type = expectation_state["expectation_type"]
         regex_widget = self.generate_text_area_widget(
-            value=regex, description="regex", placeholder="e.g. ([A-Z])\w+"
+            value=regex, description="regex", placeholder=r"e.g. ([A-Z])\w+"
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
@@ -1727,7 +1725,7 @@ class ExpectationExplorer(object):
         for result_title, result_value in result.items():
             result_detail_widgets.append(
                 widgets.HTML(
-                    value="<span><strong>{0}: </strong>{1:.2f}</span>".format(
+                    value="<span><strong>{}: </strong>{:.2f}</span>".format(
                         result_title, result_value
                     )
                     if type(result_value) is float

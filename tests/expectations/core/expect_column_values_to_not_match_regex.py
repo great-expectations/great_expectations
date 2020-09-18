@@ -18,6 +18,8 @@ def test_expect_column_values_to_not_match_regex_impl():
         kwargs={"column": "a", "regex": ".at", "mostly": 1},
     )
     expectation = ExpectColumnValuesToNotMatchRegex(expectationConfiguration)
+
+
 from great_expectations.expectations.core.expect_column_values_to_match_regex import (
     ExpectColumnValuesToMatchRegex,
 )

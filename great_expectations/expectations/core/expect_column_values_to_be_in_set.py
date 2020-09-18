@@ -4,10 +4,15 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 
 from ...core.batch import Batch
 from ...data_asset.util import parse_result_format
+from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from ..expectation import (
     ColumnMapDatasetExpectation,
     Expectation,
@@ -16,10 +21,15 @@ from ..expectation import (
 )
 from ..registry import extract_metrics, get_metric_kwargs
 
+try:
+    import sqlalchemy as sa
+except ImportError:
+    pass
+
 
 class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
     map_metric = "column_values.in_set"
-    metric_dependencies = ("column_values.in_set.count", "map.nonnull.count")
+    metric_dependencies = ("column_values.in_set.count", "column_values.nonnull.count")
     success_keys = ("value_set", "mostly", "parse_strings_as_datetimes")
 
     default_kwarg_values = {
@@ -50,8 +60,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("value_set",),
         metric_dependencies=tuple(),
-        provide_unexpected_metric_values=False,
-        provide_unexpected_value_counts=False,
+        filter_column_isnull=True,
     )
     def _pandas_column_values_in_set(
         self,
@@ -70,6 +79,45 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
             parsed_value_set = value_set
 
         return pd.DataFrame({"column_values.in_set": series.isin(parsed_value_set)})
+
+    @SqlAlchemyExecutionEngine.column_map_metric(
+        metric_name="column_values.in_set",
+        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+        metric_value_keys=("value_set",),
+        metric_dependencies=tuple(),
+    )
+    def _sqlalchemy_in_set(
+        self,
+        column: sa.column,
+        value_set: Union[list, set],
+        runtime_configuration: dict = None,
+    ):
+        if value_set is None:
+            # vacuously true
+            return True
+
+        return column.in_(tuple(value_set))
+
+    @SparkDFExecutionEngine.column_map_metric(
+        metric_name="column_values.in_set",
+        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+        metric_value_keys=("value_set",),
+        metric_dependencies=tuple(),
+    )
+    def _spark_in_set(
+        self,
+        data: "pyspark.sql.DataFrame",
+        column: str,
+        value_set: Union[list, set],
+        runtime_configuration: dict = None,
+    ):
+        import pyspark.sql.functions as F
+
+        if value_set is None:
+            # vacuously true
+            return data.withColumn(column + "__success", F.lit(True))
+
+        return data.withColumn(column + "__success", F.col(column).isin(value_set))
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
@@ -95,16 +143,16 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
             result_format=parse_result_format(result_format),
             success=(
                 metric_vals.get("column_values.in_set.count")
-                / metric_vals.get("map.nonnull.count")
+                / metric_vals.get("column_values.nonnull.count")
             )
             >= mostly,
-            element_count=metric_vals.get("map.count"),
-            nonnull_count=metric_vals.get("map.nonnull.count"),
-            unexpected_count=metric_vals.get("map.nonnull.count")
+            element_count=metric_vals.get("column_values.count"),
+            nonnull_count=metric_vals.get("column_values.nonnull.count"),
+            unexpected_count=metric_vals.get("column_values.nonnull.count")
             - metric_vals.get("column_values.in_set.count"),
             unexpected_list=metric_vals.get("column_values.in_set.unexpected_values"),
             unexpected_index_list=metric_vals.get(
-                "column_values.in_set.unexpected_index"
+                "column_values.in_set.unexpected_index_list"
             ),
         )
 

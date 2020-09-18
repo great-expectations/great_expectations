@@ -19,7 +19,7 @@ from ..registry import extract_metrics, get_metric_kwargs
 
 class ExpectColumnValuesToNotMatchRegex(ColumnMapDatasetExpectation):
     map_metric = "map.not_match_regex"
-    metric_dependencies = ("map.not_match_regex.count", "map.nonnull.count")
+    metric_dependencies = ("map.not_match_regex.count", "column_values.nonnull.count")
     success_keys = ("regex", "mostly")
 
     default_kwarg_values = {
@@ -50,12 +50,10 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapDatasetExpectation):
         metric_value_keys=("regex",),
         metric_dependencies=tuple(),
     )
-    
     def _pandas_map_not_match_regex(
         self, series: pd.Series, regex: str, runtime_configuration: dict = None,
     ):
         return ~series.astype(str).str.contains(regex)
-
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
@@ -80,15 +78,13 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapDatasetExpectation):
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=(
-
                 metric_vals.get("map.not_match_regex.count")
-                / metric_vals.get("map.nonnull.count")
+                / metric_vals.get("column_values.nonnull.count")
             )
             >= mostly,
-            element_count=metric_vals.get("map.count"),
-            nonnull_count=metric_vals.get("map.nonnull.count"),
-            unexpected_count=metric_vals.get("map.nonnull.count")
-
+            element_count=metric_vals.get("column_values.count"),
+            nonnull_count=metric_vals.get("column_values.nonnull.count"),
+            unexpected_count=metric_vals.get("column_values.nonnull.count")
             - metric_vals.get("map.not_match_regex.count"),
             unexpected_list=metric_vals.get("map.not_match_regex.unexpected_values"),
             unexpected_index_list=metric_vals.get(

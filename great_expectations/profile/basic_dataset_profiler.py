@@ -85,7 +85,7 @@ class BasicDatasetProfilerBase(DatasetProfiler):
             ).result["observed_value"]
         except KeyError:  # if observed_value value is not set
             logger.error(
-                "Failed to get cardinality of column {0:s} - continuing...".format(
+                "Failed to get cardinality of column {:s} - continuing...".format(
                     column
                 )
             )

@@ -58,7 +58,7 @@ class DatabaseStoreBackend(StoreBackend):
         try:
             table = Table(table_name, meta, autoload=True, autoload_with=self.engine)
             # We do a "light" check: if the columns' names match, we will proceed, otherwise, create the table
-            if set([str(col.name).lower() for col in table.columns]) != (
+            if {str(col.name).lower() for col in table.columns} != (
                 set(key_columns) | {"value"}
             ):
                 raise ge_exceptions.StoreBackendError(

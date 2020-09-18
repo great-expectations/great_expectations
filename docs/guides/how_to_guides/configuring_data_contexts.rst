@@ -11,3 +11,4 @@ Configuring Data Contexts
    /guides/how_to_guides/configuring_data_contexts/how_to_populate_credentials_from_a_secrets_store
    /guides/how_to_guides/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file
    /guides/how_to_guides/configuring_data_contexts/how_to_instantiate_a_data_context_on_an_emr_spark_cluster
+   /guides/how_to_guides/configuring_data_contexts/how_to_instantiate_a_data_context_on_a_databricks_spark_cluster

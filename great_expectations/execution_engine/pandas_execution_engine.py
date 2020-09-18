@@ -4,7 +4,7 @@ import json
 import logging
 from functools import partial, wraps
 from io import StringIO
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 import jsonschema
 import numpy as np
@@ -481,6 +481,7 @@ Notes:
                                                                     must still be passed via batch definition.
 
                """
+
         execution_environment_name = batch_definition.get("execution_environment")
         execution_environment = self._data_context.get_execution_environment(
             execution_environment_name
@@ -673,8 +674,11 @@ Notes:
         return batch_spec
 
     def get_domain_dataframe(
-        self, domain_kwargs: dict, batches: Dict[str, Batch] = None
-    ):
+        self,
+        domain_kwargs: dict,
+        batches: Dict[str, Batch] = None,
+        filter_column_isnull=False,
+    ) -> pd.DataFrame:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
         or otherwise a Data Frame.
@@ -729,11 +733,14 @@ Notes:
 
         column = domain_kwargs.get("column", None)
         if column:
-            return data[column]
+            if filter_column_isnull:
+                return data[data[column].notnull()][column]
+            else:
+                return data[column]
         else:
             return data
 
-    def column_map_count(
+    def _column_map_count(
         self,
         metric_name: str,
         batches: Dict[str, Batch],
@@ -750,7 +757,7 @@ Notes:
         ).id
         return np.count_nonzero(metrics.get(metric_key))
 
-    def column_map_values(
+    def _column_map_values(
         self,
         metric_name: str,
         batches: Dict[str, Batch],
@@ -793,7 +800,7 @@ Notes:
                 ][: result_format["partial_unexpected_count"]]
             )
 
-    def column_map_index(
+    def _column_map_index(
         self,
         metric_name: str,
         batches: Dict[str, Batch],
@@ -826,7 +833,7 @@ Notes:
                 ]
             )
 
-    def column_map_value_counts(
+    def _column_map_value_counts(
         self,
         metric_name: str,
         batches: Dict[str, Batch],
@@ -836,9 +843,7 @@ Notes:
         metrics: Dict[Tuple, Any],
         **kwargs,
     ):
-        """Return values from the specified domain (ignoring the column constraint) that match the map-style metric in the metrics dictionary."""
-        row_domain = {k: v for (k, v) in metric_domain_kwargs.items() if k != "column"}
-        data = execution_engine.get_domain_dataframe(row_domain, batches)
+        data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
         assert metric_name.endswith(".unexpected_value_counts")
         # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
         result_format = metric_value_kwargs["result_format"]
@@ -872,7 +877,7 @@ Notes:
         else:
             return value_counts[result_format["partial_unexpected_count"]]
 
-    def column_map_rows(
+    def _column_map_rows(
         self,
         metric_name: str,
         batches: Dict[str, Batch],
@@ -911,8 +916,7 @@ Notes:
         metric_domain_keys: Tuple[str, ...],
         metric_value_keys: Tuple[str, ...],
         metric_dependencies: Tuple[str, ...],
-        provide_unexpected_metric_values: bool,
-        provide_unexpected_value_counts: bool,
+        filter_column_isnull: bool = True,
     ):
         """
         A decorator for declaring a metric provider
@@ -935,7 +939,9 @@ Notes:
                 if _declared_name != metric_name:
                     logger.warning("using metric provider with an unrecognized metric")
                 series = execution_engine.get_domain_dataframe(
-                    batches=batches, domain_kwargs=metric_domain_kwargs
+                    batches=batches,
+                    domain_kwargs=metric_domain_kwargs,
+                    filter_column_isnull=filter_column_isnull,
                 )
                 return metric_fn(self, series=series, **metric_value_kwargs, **kwargs)
 
@@ -954,89 +960,52 @@ Notes:
                 metric_value_keys=metric_value_keys,
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
-                metric_provider=cls.column_map_count,
+                metric_provider=cls._column_map_count,
             )
+            # noinspection PyTypeChecker
             register_metric(
                 metric_name=metric_name + ".unexpected_values",
                 metric_domain_keys=metric_domain_keys,
                 metric_value_keys=(*metric_value_keys, "result_format"),
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
-                metric_provider=cls.column_map_values,
+                metric_provider=cls._column_map_values,
             )
+            # noinspection PyTypeChecker
             register_metric(
                 metric_name=metric_name + ".unexpected_value_counts",
                 metric_domain_keys=metric_domain_keys,
                 metric_value_keys=(*metric_value_keys, "result_format"),
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
-                metric_provider=cls.column_map_value_counts,
+                metric_provider=cls._column_map_value_counts,
             )
+            # noinspection PyTypeChecker
             register_metric(
                 metric_name=metric_name + ".unexpected_rows",
                 metric_domain_keys=metric_domain_keys,
-                metric_value_keys=(metric_value_keys, "result_format"),
+                metric_value_keys=(*metric_value_keys, "result_format"),
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
-                metric_provider=cls.column_map_rows,
+                metric_provider=cls._column_map_rows,
             )
             return inner_func
 
         return outer
 
-    @classmethod
-    def metric(
-        cls,
-        metric_name: str,
-        metric_domain_keys: tuple,
-        metric_value_keys: tuple,
-        metric_dependencies: tuple,
-        bundle_computation: bool,
-    ):
-        """
-        A decorator for declaring a metric provider
-        """
-
-        def outer(metric_fn: Callable):
-            _declared_name = metric_name
-
-            @wraps(metric_fn)
-            def inner_func(
-                self,
-                metric_name: str,
-                batches: Dict[str, Batch],
-                execution_engine: PandasExecutionEngine,
-                metric_domain_kwargs: dict,
-                metric_value_kwargs: dict,
-                metrics: Dict[Tuple, Any],
-                **kwargs,
-            ):
-                if _declared_name != metric_name:
-                    logger.warning(
-                        "using validator provider with an unrecognized metric"
-                    )
-                return metric_fn(
-                    self,
-                    batches=batches,
-                    execution_engine=execution_engine,
-                    metric_domain_kwargs=metric_domain_kwargs,
-                    metric_value_kwargs=metric_value_kwargs,
-                    metrics=metrics,
-                    **kwargs,
-                )
-
-            register_metric(
-                metric_name=metric_name,
-                metric_domain_keys=metric_domain_keys,
-                metric_value_keys=metric_value_keys,
-                execution_engine=cls,
-                metric_dependencies=metric_dependencies,
-                metric_provider=inner_func,
-                bundle_computation=bundle_computation,
+    def batch_resolve(
+        self,
+        resolve_batch: Iterable[Tuple[MetricEdgeKey, Callable, dict]],
+        metrics: Dict[Tuple, Any] = None,
+    ) -> dict:
+        """This engine simply evaluates metrics one at a time."""
+        if metrics is None:
+            metrics = dict()
+        for metric_to_resolve, metric_provider, metric_provider_kwargs in resolve_batch:
+            metrics[metric_to_resolve.id] = metric_provider(
+                self, **metric_provider_kwargs, metrics=metrics
             )
-            return inner_func
-
-        return outer
+        return metrics
 
     def get_row_count(self):
         """Getter for Pandas Data Frame row count"""

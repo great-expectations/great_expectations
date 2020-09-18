@@ -165,6 +165,7 @@ class SuiteEditNotebookRenderer(Renderer):
             "header.py.j2",
             suite_name=suite_name,
             batch_kwargs=batch_kwargs,
+            env=os.environ,
         )
         self.add_code_cell(code, lint=True)
 

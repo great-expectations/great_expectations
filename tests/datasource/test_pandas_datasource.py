@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
-
 import os
 import shutil
+from tempfile import mkstemp
 
+import boto3
 import pandas as pd
 import pytest
+from moto import mock_s3
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchMarkers
@@ -97,7 +98,6 @@ def test_create_pandas_datasource(
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
-        "r",
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
@@ -143,7 +143,6 @@ def test_pandas_datasource_custom_data_asset(
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
-        "r",
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
@@ -272,6 +271,50 @@ def test_pandas_source_read_csv(
         expectation_suite_name="unicode",
     )
     assert "😁" in list(batch["Μ"])
+
+
+@mock_s3
+def test_s3_pandas_source_read_parquet(
+    data_context_parameterized_expectation_suite, tmp_path_factory
+):
+    test_bucket = "test-bucket"
+    # set up dummy bucket
+    s3 = boto3.client("s3")
+    s3.create_bucket(Bucket=test_bucket)
+
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    _, tmp = mkstemp(suffix=".parquet")
+    with open(tmp, "wb") as fp:
+        df1.to_parquet(fp)
+
+    with open(tmp, "rb") as fp:
+        s3.upload_fileobj(fp, test_bucket, "test_data.parquet")
+
+    data_context_parameterized_expectation_suite.add_datasource(
+        "parquet_source",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "s3_reader": {
+                "class_name": "S3GlobReaderBatchKwargsGenerator",
+                "bucket": test_bucket,
+                "assets": {"test_data": {"prefix": "", "regex_filter": r".*parquet",},},
+                "reader_options": {"columns": ["col_1"]},
+            }
+        },
+    )
+
+    data_context_parameterized_expectation_suite.create_expectation_suite(
+        expectation_suite_name="test_parquet"
+    )
+    batch = data_context_parameterized_expectation_suite.get_batch(
+        data_context_parameterized_expectation_suite.build_batch_kwargs(
+            "parquet_source", "s3_reader", "test_data",
+        ),
+        "test_parquet",
+    )
+    assert batch.columns == ["col_1"]
+    assert batch["col_1"][4] == 5
 
 
 def test_invalid_reader_pandas_datasource(tmp_path_factory):

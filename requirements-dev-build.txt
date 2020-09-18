@@ -6,3 +6,4 @@
 flake8==3.8.3  # lint
 isort==5.4.2  # lint
 pre-commit>=2.6.0  # lint
+pyupgrade==2.7.2  # lint

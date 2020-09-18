@@ -383,7 +383,7 @@ def infer_distribution_parameters(data, distribution, params=None):
     #    if 'lambda' in params.keys():
     # Lambda is optional
     #        params['scale'] = 1 / params['lambda']
-    elif distribution is not "norm":
+    elif distribution != "norm":
         raise AttributeError(
             "Unsupported distribution type. Please refer to Great Expectations Documentation"
         )

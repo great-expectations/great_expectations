@@ -33,21 +33,21 @@ def test_expect_column_values_to_be_increasing_impl():
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
-    assert result == ExpectationValidationResult(success=False, )
+    assert result == ExpectationValidationResult(success=False,)
 
-    df = pd.DataFrame({"a": [
-        "12/1/1990",
-        "12/2/1990",
-        "12/2/1990",
-        "12/3/1990"
-    ]})
+    df = pd.DataFrame({"a": ["12/1/1990", "12/2/1990", "12/2/1990", "12/3/1990"]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_increasing",
-        kwargs={"column": "a", "strictly": False, "mostly": 1, "parse_strings_as_datetimes": True},
+        kwargs={
+            "column": "a",
+            "strictly": False,
+            "mostly": 1,
+            "parse_strings_as_datetimes": True,
+        },
     )
     expectation = ExpectColumnValuesToBeIncreasing(expectationConfiguration)
     batch = Batch(data=df)
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
-    assert result == ExpectationValidationResult(success=True, )
+    assert result == ExpectationValidationResult(success=True,)

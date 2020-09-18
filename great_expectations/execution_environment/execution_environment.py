@@ -48,11 +48,6 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         """
         self._data_context = data_context
         self._name = name
-        if isinstance(execution_engine, str):
-            warnings.warn(
-                "String-only configuration for execution_engine is deprecated. Use module_name and class_name instead.",
-                DeprecationWarning,
-            )
         self._execution_engine = instantiate_class_from_config(
             config=execution_engine, runtime_environment={},
         )
