@@ -120,15 +120,11 @@ list type (existing cache type is "{str(type(self.get_cached_partitions()))}").
         raise NotImplementedError
 
     # TODO: <Alex>Do we need **kwargs here?</Alex>
-    def get_available_partitions(self, data_asset_name: str = None) -> List[Partition]:
+    def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
         raise NotImplementedError
 
     # TODO: <Alex>Do we need **kwargs here?</Alex>
     def get_available_partition_names(self, data_asset_name: str = None) -> List[str]:
-        raise NotImplementedError
-
-    # TODO: <Alex>Do we need **kwargs here?</Alex>
-    def get_partitions_for_data_asset(self, partition_name: str, data_asset_name: str = None) -> List[Partition]:
         raise NotImplementedError
 
     # TODO: <Alex>Cleanup</Alex>

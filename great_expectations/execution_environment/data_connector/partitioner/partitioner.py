@@ -33,13 +33,13 @@ class Partitioner(object):
     def data_connector(self) -> DataConnector:
         return self._data_connector
 
-    def get_available_partitions(self, data_asset_name: str = None) -> List[Partition]:
+    def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
         raise NotImplementedError
 
     def get_available_partition_names(self, data_asset_name: str = None) -> List[str]:
-        return [partition.name for partition in self.get_available_partitions(data_asset_name=data_asset_name)]
-
-    def get_partitions_for_data_asset(self, partition_name: str, data_asset_name=None) -> List[Partition]:
-        raise NotImplementedError
-
-
+        return [
+            partition.name for partition in self.get_available_partitions(
+                partition_name=None,
+                data_asset_name=data_asset_name
+            )
+        ]

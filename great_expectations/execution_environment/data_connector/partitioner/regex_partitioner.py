@@ -1,6 +1,6 @@
 import logging
 import regex as re
-from typing import List, Iterator, Union
+from typing import List, Dict, Iterator, Union
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
@@ -67,11 +67,40 @@ class RegexPartitioner(Partitioner):
     def sorters(self) -> List[Sorter]:
         return self._sorters
 
+    def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
+        cached_partitions: Union[List[Partition], Dict[str, Partition]] = self.data_connector.get_cached_partitions(
+            data_asset_name=data_asset_name
+        )
+        if cached_partitions is None:
+            self.find_available_partitions(data_asset_name=data_asset_name)
+            cached_partitions = self.data_connector.get_cached_partitions(
+                data_asset_name=data_asset_name
+            )
+        if partition_name is None:
+            return cached_partitions
+        partitions: List[Partition] = list(
+            filter(
+                lambda partition: partition.name == partition_name, cached_partitions
+            )
+        )
+        if not self.allow_multifile_partitions and len(partitions) > 1:
+            logger.warning(
+                f'''RegexPartitioner "{self.name}' detected multiple partitions detected for partition name
+"{partition_name}"; however, allow_multifile_partitions is set to False.
+                '''
+            )
+            raise ValueError(
+                f'''RegexPartitioner "{self.name}' detected multiple partitions detected for partition name
+"{partition_name}"; however, allow_multifile_partitions is set to False.
+                '''
+            )
+        return partitions
+
     # TODO: <Alex>Implement "UpSert" using Partition name for guidance.  Make this part of DataConnector.  No Caching HERE!</Alex>
-    def get_available_partitions(self, data_asset_name: str = None) -> List[Partition]:
+    def find_available_partitions(self, data_asset_name: str = None) -> List[Partition]:
         partitions: List[Partition] = []
         for path in self.paths:
-            partitioned_path: Partition = self._get_partitions_for_path(path=path)
+            partitioned_path: Partition = self._find_partitions_for_path(path=path)
             if partitioned_path is not None:
                 partitions.append(partitioned_path)
 
@@ -81,7 +110,7 @@ class RegexPartitioner(Partitioner):
         self.data_connector.update_partitions_cache(partitions=partitions, data_asset_name=data_asset_name)
         return self.data_connector.get_cached_partitions(data_asset_name=data_asset_name)
 
-    def _get_partitions_for_path(self, path: str) -> Partition:
+    def _find_partitions_for_path(self, path: str) -> Partition:
         if self.regex is None:
             raise ValueError("Regex is not defined")
 
@@ -119,25 +148,3 @@ sorters specified is {len(part_names)}.
 
         return Partition(name=partition_name, definition=partition_definition, source=path)
 
-    # TODO: <Alex>Refactor: Separate finding partitions and retrieving them (retrieving assumes that they were already found).</Alex>
-    def get_partitions_for_data_asset(self, partition_name: str, data_asset_name: str = None) -> List[Partition]:
-        if partition_name is None:
-            return self.data_connector.get_cached_partitions(data_asset_name=data_asset_name)
-        partitions: List[Partition] = list(
-            filter(
-                lambda partition: partition.name == partition_name,
-                self.data_connector.get_cached_partitions(data_asset_name=data_asset_name)
-            )
-        )
-        if not self.allow_multifile_partitions and len(partitions) > 1:
-            logger.warning(
-                f'''RegexPartitioner "{self.name}' detected multiple partitions detected for partition name
-"{partition_name}"; however, allow_multifile_partitions is set to False.
-                '''
-            )
-            raise ValueError(
-                f'''RegexPartitioner "{self.name}' detected multiple partitions detected for partition name
-"{partition_name}"; however, allow_multifile_partitions is set to False.
-                '''
-            )
-        return partitions

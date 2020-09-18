@@ -144,7 +144,7 @@ def test_regex_partitioner_regex_configured_and_sorters_defined_and_named():
         'will-20200809-1002',
     ]
 
-    returned_partitions = my_partitioner.get_partitions_for_data_asset(
+    returned_partitions = my_partitioner.get_available_partitions(
         partition_name='james-20200713-1567',
         data_asset_name=None
     )
