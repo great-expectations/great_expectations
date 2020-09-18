@@ -4349,6 +4349,57 @@ class Dataset(MetaDataset):
     #
     ###
 
+    def expect_multicolumn_values_to_be_unique(
+        self,
+        column_list,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        """
+        NOTE: This method is deprecated. Please use expect_select_column_values_to_be_unique_within_record instead
+        Expect the values for each record to be unique across the columns listed.
+        Note that records can be duplicated.
+
+        E.g.
+        A B C
+        1 1 2 Fail
+        1 2 3 Pass
+        8 2 7 Pass
+        1 2 3 Pass
+        4 4 4 Fail
+
+        Args:
+            column_list (tuple or list): The column names to evaluate
+
+        Keyword Args:
+            ignore_row_if (str): "all_values_are_missing", "any_value_is_missing", "never"
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
+
+        Returns:
+            An ExpectationSuiteValidationResult
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+        raise NotImplementedError
+
     def expect_select_column_values_to_be_unique_within_record(
         self,
         column_list,

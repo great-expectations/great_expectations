@@ -1,6 +1,7 @@
 import inspect
 import json
 import logging
+import warnings
 from datetime import datetime
 from functools import wraps
 from typing import List
@@ -1769,6 +1770,41 @@ Notes:
             results.append((a, b) in value_pairs_set)
 
         return pd.Series(results, temp_df.index)
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_multicolumn_values_to_be_unique(
+        self,
+        column_list,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        row_condition=None,
+        condition_parser=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        warnings.warn(
+            (
+                "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
+                "expect_select_column_values_to_be_unique_within_record instead."
+            ),
+            DeprecationWarning,
+        )
+
+        # TODO: remove existing expectations expect_multicolumn_values_to_be_unique
+        #  using the procedure in: expect_column_values_to_be_of_type
+
+        return self.expect_select_column_values_to_be_unique_within_record(
+            column_list=column_list,
+            ignore_row_if=ignore_row_if,
+            result_format=result_format,
+            row_condition=row_condition,
+            condition_parser=condition_parser,
+            include_config=include_config,
+            catch_exceptions=catch_exceptions,
+            meta=meta,
+        )
 
     @DocInherit
     @MetaPandasDataset.multicolumn_map_expectation
