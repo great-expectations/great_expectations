@@ -5,6 +5,8 @@ How to create a new Expectation Suite without the CLI
 
 In some environments, you might not be able to use the :ref:`CLI <command_line>` to create a new Expectation Suite. This guide shows how to create a new Expectation Suite and start adding Expectations using Python code, for example in a Jupyter notebook.
 
+**Note: if you want to get started creating Expectations with the fewest possible dependencies, you should check out [How to quickly explore Expectations in a notebook](INSERT REAL LINK HERE).
+
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
     - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
@@ -50,6 +52,11 @@ This block just creates an empty Expectation Suite object. Next up, you want to 
     batch.save_expectation_suite(discard_failed_expectations=False)
 
 This will create a JSON file with your Expectation Suite in the Store you have configured, which you can then load and use for :ref:`how_to_guides__validation`.
+
+Additional notes
+----------------
+
+If you want to get started creating Expectations with the fewest possible dependencies, e.g. without configuring a Data Context, you should check out :ref:`tutorials__explore_expectations_in_a_notebook`.
 
 .. discourse::
     :topic_identifier: 240
