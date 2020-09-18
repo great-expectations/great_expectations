@@ -97,7 +97,7 @@ class RegexPartitioner(Partitioner):
         return partitions
 
     # TODO: <Alex>Implement "UpSert" using Partition name for guidance.  Make this part of DataConnector.  No Caching HERE!</Alex>
-    def find_available_partitions(self, data_asset_name: str = None) -> List[Partition]:
+    def find_available_partitions(self, data_asset_name: str = None):
         partitions: List[Partition] = []
         for path in self.paths:
             partitioned_path: Partition = self._find_partitions_for_path(path=path)
@@ -108,7 +108,6 @@ class RegexPartitioner(Partitioner):
         for sorter in sorters:
             partitions = sorter.get_sorted_partitions(partitions=partitions)
         self.data_connector.update_partitions_cache(partitions=partitions, data_asset_name=data_asset_name)
-        return self.data_connector.get_cached_partitions(data_asset_name=data_asset_name)
 
     def _find_partitions_for_path(self, path: str) -> Partition:
         if self.regex is None:
