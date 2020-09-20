@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import copy
 import logging
 import warnings
@@ -19,7 +17,7 @@ yaml = YAML()
 yaml.default_flow_style = False
 
 
-class Datasource(object):
+class Datasource:
     """
 A Datasource connects to a compute environment and one or more storage environments and produces batches of data
 that Great Expectations can validate in that compute environment.
