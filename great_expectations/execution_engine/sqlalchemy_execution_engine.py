@@ -108,7 +108,7 @@ def _get_dialect_type_module(dialect):
     return dialect
 
 
-class SqlAlchemyBatchData(object):
+class SqlAlchemyBatchData:
     def __init__(self, engine, table_name=None, schema=None, query=None):
         self._engine = engine
         self._table_name = table_name
@@ -512,9 +512,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         batch_id = batch_spec.to_id()
         if not self.batches.get(batch_id):
             batch = Batch(
-                execution_environment_name=batch_definition.get(
-                    "execution_environment"
-                ),
+                execution_engine=self,
                 batch_spec=batch_spec,
                 data=batch_reference,
                 batch_definition=batch_definition,

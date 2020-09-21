@@ -470,7 +470,9 @@ Notes:
             "discard_subset_failing_expectations", False
         )
 
-    def load_batch(self, batch_definition, in_memory_dataset=None):
+    def load_batch(
+        self, batch_definition=None, batch_spec=None, in_memory_dataset=None
+    ):
         """With the help of the execution environment and data connector specified within the batch definition, builds a batch spec
         and utilizes it to load a batch using the appropriate file reader and the given file path.
 
@@ -481,13 +483,33 @@ Notes:
                                                                     must still be passed via batch definition.
 
                """
+        if batch_spec and batch_definition:
+            #### IS THIS OK?
+            assert isinstance(batch_spec, IDDict)
+        elif batch_spec and not batch_definition:
+            logger.info("loading a batch without a batch_definition")
+            batch_definition = {}
+        else:
+            if not self._data_context:
+                raise ValueError("Cannot use a batch definition without a data context")
 
-        execution_environment_name = batch_definition.get("execution_environment")
-        execution_environment = self._data_context.get_execution_environment(
-            execution_environment_name
-        )
+            execution_environment_name = batch_definition.get("execution_environment")
+            execution_environment = self._data_context.get_execution_environment(
+                execution_environment_name
+            )
 
-        # We need to build a batch_markers to be used in the dataframe
+            # We need to build a batch_markers to be used in the dataframe
+
+            data_connector_name = batch_definition.get("data_connector")
+            assert data_connector_name, "Batch definition must specify a data_connector"
+
+            data_connector = execution_environment.get_data_connector(
+                data_connector_name
+            )
+            batch_spec = data_connector.build_batch_spec(
+                batch_definition=batch_definition
+            )
+        batch_id = batch_spec.to_id()
         batch_markers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
@@ -496,16 +518,9 @@ Notes:
             }
         )
 
-        data_connector_name = batch_definition.get("data_connector")
-        assert data_connector_name, "Batch definition must specify a data_connector"
-
-        data_connector = execution_environment.get_data_connector(data_connector_name)
-        batch_spec = data_connector.build_batch_spec(batch_definition=batch_definition)
-        batch_id = batch_spec.to_id()
-
         if in_memory_dataset is not None:
             if batch_definition.get("data_asset_name") and batch_definition.get(
-                "partition_id"
+                "partition_name"
             ):
                 df = in_memory_dataset
             else:
@@ -551,9 +566,7 @@ Notes:
 
         if not self.batches.get(batch_id):
             batch = Batch(
-                execution_environment_name=batch_definition.get(
-                    "execution_environment"
-                ),
+                execution_engine=self,
                 batch_spec=batch_spec,
                 data=df,
                 batch_definition=batch_definition,
@@ -563,6 +576,8 @@ Notes:
             self.batches[batch_id] = batch
 
         self._loaded_batch_id = batch_id
+
+        return batch
 
     @property
     def dataframe(self):

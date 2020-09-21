@@ -1,4 +1,5 @@
 import copy
+import datetime
 import locale
 import os
 import random
@@ -14,18 +15,28 @@ from dateutil.parser import parse
 
 from great_expectations.core import (
     ExpectationConfigurationSchema,
+    ExpectationSuite,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
+    IDDict,
 )
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_environment.types import SqlAlchemyDatasourceBatchSpec
+from great_expectations.execution_environment.types import (
+    SqlAlchemyDatasourceBatchSpec,
+    SqlAlchemyDatasourceTableBatchSpec,
+)
 from great_expectations.profile import ColumnsExistProfiler
+from great_expectations.validator.validator import Validator
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
@@ -598,7 +609,7 @@ def get_test_batch(
     """Utility to create datasets for json-formatted tests.
     """
     df = pd.DataFrame(data)
-    if execution_engine == "PandasExecutionEnginee":
+    if execution_engine == "pandas":
         if schemas and "pandas" in schemas:
             schema = schemas["pandas"]
             pandas_schema = {}
@@ -622,7 +633,23 @@ def get_test_batch(
                 pandas_schema[key] = type_
             # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
-        return PandasDataset(df, profiler=profiler, caching=caching)
+
+        if table_name is None:
+            table_name = "test_data_" + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+
+        return PandasExecutionEngine(caching=caching).load_batch(
+            in_memory_dataset=df,
+            batch_definition={"data_asset_name": "test", "partition_name": table_name},
+            batch_spec=IDDict(
+                {
+                    "ge_load_time": datetime.datetime.now(
+                        datetime.timezone.utc
+                    ).strftime("%Y%m%dT%H%M%S.%fZ")
+                }
+            ),
+        )
 
     elif execution_engine == "sqlite":
         if not create_engine:
@@ -683,8 +710,8 @@ def get_test_batch(
         )
 
         # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+        return SqlAlchemyExecutionEngine(caching=caching, engine=conn).load_batch(
+            batch_spec=SqlAlchemyDatasourceTableBatchSpec(table=table_name)
         )
 
     elif execution_engine == "postgresql":
@@ -772,10 +799,10 @@ def get_test_batch(
                 elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col])
                     min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=True
+                        schema=execution_engine, negative=True
                     )
                     max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=False
+                        schema=execution_engine, negative=False
                     )
                     for api_schema_type in ["api_np", "api_cast"]:
                         min_value_api = get_sql_dialect_floating_point_infinity_value(
@@ -805,11 +832,12 @@ def get_test_batch(
         )
 
         # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+        # TODO: Add profiler to arguments
+        return SqlAlchemyExecutionEngine(caching=caching, engine=conn).load_batch(
+            batch_spec=SqlAlchemyDatasourceBatchSpec(table=table_name)
         )
 
-    elif dataset_type == "mssql":
+    elif execution_engine == "mssql":
         if not create_engine:
             return None
 
@@ -827,10 +855,10 @@ def get_test_batch(
         sql_dtypes = {}
         if (
             schemas
-            and dataset_type in schemas
+            and execution_engine in schemas
             and isinstance(engine.dialect, mssqltypes.dialect)
         ):
-            schema = schemas[dataset_type]
+            schema = schemas[execution_engine]
             sql_dtypes = {col: MSSQL_TYPES[dtype] for (col, dtype) in schema.items()}
             for col in schema:
                 type_ = schema[col]
@@ -839,10 +867,10 @@ def get_test_batch(
                 elif type_ in ["FLOAT"]:
                     df[col] = pd.to_numeric(df[col])
                     min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=True
+                        schema=execution_engine, negative=True
                     )
                     max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=False
+                        schema=execution_engine, negative=False
                     )
                     for api_schema_type in ["api_np", "api_cast"]:
                         min_value_api = get_sql_dialect_floating_point_infinity_value(
@@ -872,11 +900,11 @@ def get_test_batch(
         )
 
         # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+        return SqlAlchemyExecutionEngine(caching=caching, engine=conn).load_batch(
+            batch_spec=SqlAlchemyDatasourceBatchSpec(table=table_name)
         )
 
-    elif dataset_type == "SparkDFDataset":
+    elif execution_engine == "SparkDFDataset":
         import pyspark.sql.types as sparktypes
         from pyspark.sql import SparkSession
 
@@ -976,10 +1004,26 @@ def get_test_batch(
             # if no schema provided, uses Spark's schema inference
             columns = list(data.keys())
             spark_df = spark.createDataFrame(data_reshaped, columns)
-        return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
+
+        if table_name is None:
+            table_name = "test_data_" + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+
+        return SparkDFExecutionEngine(caching=caching).load_batch(
+            in_memory_dataset=spark_df,
+            batch_definition={"data_asset_name": "test", "partition_name": table_name},
+            batch_spec=IDDict(
+                {
+                    "ge_load_time": datetime.datetime.now(
+                        datetime.timezone.utc
+                    ).strftime("%Y%m%dT%H%M%S.%fZ")
+                }
+            ),
+        )
 
     else:
-        raise ValueError("Unknown dataset_type " + str(dataset_type))
+        raise ValueError("Unknown dataset_type " + str(execution_engine))
 
 
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
@@ -1108,6 +1152,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
 def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
     if context in ["sqlite", "postgresql", "mysql", "mssql"]:
         return expectation_type in [
+            "expect_table_column_count_to_be_between",
+            "expect_table_column_count_to_equal",
             "expect_column_to_exist",
             "expect_table_columns_to_match_ordered_list",
             "expect_table_row_count_to_be_between",
@@ -1161,8 +1207,10 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
         ]
-    if context == "SparkDFDataset":
+    if context == "spark":
         return expectation_type in [
+            "expect_table_column_count_to_be_between",
+            "expect_table_column_count_to_equal",
             "expect_column_to_exist",
             "expect_table_columns_to_match_ordered_list",
             "expect_table_row_count_to_be_between",
@@ -1216,8 +1264,10 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
         ]
-    if context == "PandasDataset":
+    if context == "pandas":
         return expectation_type in [
+            "expect_table_column_count_to_be_between",
+            "expect_table_column_count_to_equal",
             "expect_column_to_exist",
             "expect_table_columns_to_match_ordered_list",
             "expect_table_row_count_to_be_between",
@@ -1228,14 +1278,14 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_null",
             "expect_column_values_to_be_of_type",
             "expect_column_values_to_be_in_type_list",
-            "expect_column_values_to_be_in_set",
+            # "expect_column_values_to_be_in_set",
             "expect_column_values_to_not_be_in_set",
             "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
             "expect_column_value_lengths_to_be_between",
             "expect_column_value_lengths_to_equal",
-            "expect_column_values_to_match_regex",
+            # "expect_column_values_to_match_regex",
             "expect_column_values_to_not_match_regex",
             "expect_column_values_to_match_regex_list",
             "expect_column_values_to_not_match_regex_list",
@@ -1323,6 +1373,61 @@ def evaluate_json_test(data_asset, expectation_type, test):
         result = getattr(data_asset, expectation_type)(**test["in"])
 
     check_json_test_result(test=test, result=result, data_asset=data_asset)
+
+
+def evaluate_json_test_cfe(batch, expectation_type, test):
+    """
+    This method will evaluate the result of a test build using the Great Expectations json test format.
+
+    NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
+        of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
+
+    :param data_asset: (DataAsset) A great expectations DataAsset
+    :param expectation_type: (string) the name of the expectation to be run using the test input
+    :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
+        - title: (string) the name of the test
+        - exact_match_out: (boolean) If true, match the 'out' dictionary exactly against the result of the expectation
+        - in: (dict or list) a dictionary of keyword arguments to use to evaluate the expectation or a list of positional arguments
+        - out: (dict) the dictionary keys against which to make assertions. Unless exact_match_out is true, keys must\
+            come from the following list:
+              - success
+              - observed_value
+              - unexpected_index_list
+              - unexpected_list
+              - details
+              - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
+    :return: None. asserts correctness of results.
+    """
+    expectation_suite = ExpectationSuite("json_test_suite")
+    validator = Validator(
+        execution_engine=batch.execution_engine, expectation_suite=expectation_suite
+    )
+
+    validator.set_default_expectation_argument("result_format", "COMPLETE")
+    validator.set_default_expectation_argument("include_config", False)
+
+    if "title" not in test:
+        raise ValueError("Invalid test configuration detected: 'title' is required.")
+
+    if "exact_match_out" not in test:
+        raise ValueError(
+            "Invalid test configuration detected: 'exact_match_out' is required."
+        )
+
+    if "in" not in test:
+        raise ValueError("Invalid test configuration detected: 'in' is required.")
+
+    if "out" not in test:
+        raise ValueError("Invalid test configuration detected: 'out' is required.")
+
+    # Support tests with positional arguments
+    if isinstance(test["in"], list):
+        result = getattr(validator, expectation_type)(*test["in"])
+    # As well as keyword arguments
+    else:
+        result = getattr(validator, expectation_type)(**test["in"])
+
+    check_json_test_result(test=test, result=result, data_asset=batch.data)
 
 
 def check_json_test_result(test, result, data_asset=None):

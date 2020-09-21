@@ -8,7 +8,14 @@ from collections import OrderedDict
 import pandas as pd
 import pytest
 
-from tests.conftest import build_test_backends_list
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyExecutionEngine,
+)
+from tests.conftest import build_test_backends_list, build_test_backends_list_cfe
 from tests.test_definitions.test_expectations import mssqlDialect as mssqlDialect
 from tests.test_definitions.test_expectations import mysqlDialect as mysqlDialect
 from tests.test_definitions.test_expectations import (
@@ -19,11 +26,12 @@ from tests.test_definitions.test_expectations import tmp_dir
 from tests.test_utils import (
     candidate_test_is_on_temporary_notimplemented_list_cfe,
     evaluate_json_test,
-    get_dataset,
+    evaluate_json_test_cfe,
+    get_test_batch,
 )
 
 
-def pytest_generate_tests_cfe(metafunc):
+def pytest_generate_tests(metafunc):
     # Load all the JSON files in the directory
     dir_path = os.path.dirname(os.path.realpath(__file__))
     expectation_dirs = [
@@ -40,7 +48,7 @@ def pytest_generate_tests_cfe(metafunc):
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
-        for c in build_test_backends_list(metafunc):
+        for c in build_test_backends_list_cfe(metafunc):
             for filename in test_configuration_files:
                 file = open(filename)
                 # Use OrderedDict so that python2 will use the correct order of columns in all cases
@@ -52,7 +60,7 @@ def pytest_generate_tests_cfe(metafunc):
                         c, test_configuration["expectation_type"]
                     ):
                         skip_expectation = True
-                        schemas = data_asset = None
+                        schemas = batch = None
                     else:
                         skip_expectation = False
                         if isinstance(d["data"], list):
@@ -73,7 +81,7 @@ def pytest_generate_tests_cfe(metafunc):
                             )
                             for dataset in d["data"]:
                                 datasets.append(
-                                    get_dataset(
+                                    get_test_batch(
                                         c,
                                         dataset["data"],
                                         dataset.get("schemas"),
@@ -81,10 +89,10 @@ def pytest_generate_tests_cfe(metafunc):
                                         sqlite_db_path=sqlite_db_path,
                                     )
                                 )
-                            data_asset = datasets[0]
+                            batch = datasets[0]
                         else:
                             schemas = d["schemas"] if "schemas" in d else None
-                            data_asset = get_test_batch(c, d["data"], schemas=schemas)
+                            batch = get_test_batch(c, d["data"], schemas=schemas)
 
                     for test in d["tests"]:
                         generate_test = True
@@ -95,7 +103,9 @@ def pytest_generate_tests_cfe(metafunc):
                             if not isinstance(test["only_for"], list):
                                 raise ValueError("Invalid test specification.")
 
-                            if isinstance(data_asset, SqlAlchemyDataset):
+                            if batch and isinstance(
+                                batch.execution_engine, SqlAlchemyExecutionEngine
+                            ):
                                 # Call out supported dialects
                                 if "sqlalchemy" in test["only_for"]:
                                     generate_test = True
@@ -103,7 +113,8 @@ def pytest_generate_tests_cfe(metafunc):
                                     "sqlite" in test["only_for"]
                                     and sqliteDialect is not None
                                     and isinstance(
-                                        data_asset.engine.dialect, sqliteDialect
+                                        batch.execution_engine.engine.dialect,
+                                        sqliteDialect,
                                     )
                                 ):
                                     generate_test = True
@@ -111,7 +122,8 @@ def pytest_generate_tests_cfe(metafunc):
                                     "postgresql" in test["only_for"]
                                     and postgresqlDialect is not None
                                     and isinstance(
-                                        data_asset.engine.dialect, postgresqlDialect
+                                        batch.execution_engine.engine.dialect,
+                                        postgresqlDialect,
                                     )
                                 ):
                                     generate_test = True
@@ -119,7 +131,8 @@ def pytest_generate_tests_cfe(metafunc):
                                     "mysql" in test["only_for"]
                                     and mysqlDialect is not None
                                     and isinstance(
-                                        data_asset.engine.dialect, mysqlDialect
+                                        batch.execution_engine.engine.dialect,
+                                        mysqlDialect,
                                     )
                                 ):
                                     generate_test = True
@@ -127,11 +140,14 @@ def pytest_generate_tests_cfe(metafunc):
                                     "mssql" in test["only_for"]
                                     and mssqlDialect is not None
                                     and isinstance(
-                                        data_asset.engine.dialect, mssqlDialect
+                                        batch.execution_engine.engine.dialect,
+                                        mssqlDialect,
                                     )
                                 ):
                                     generate_test = True
-                            elif isinstance(data_asset, PandasDataset):
+                            elif batch and isinstance(
+                                batch.execution_engine, PandasExecutionEngine
+                            ):
                                 if "pandas" in test["only_for"]:
                                     generate_test = True
                                 if (
@@ -143,7 +159,9 @@ def pytest_generate_tests_cfe(metafunc):
                                     pd.__version__.split(".")[1]
                                 ) > 24:
                                     generate_test = True
-                            elif isinstance(data_asset, SparkDFDataset):
+                            elif batch and isinstance(
+                                batch.execution_engine, SparkDFExecutionEngine
+                            ):
                                 if "spark" in test["only_for"]:
                                     generate_test = True
 
@@ -153,47 +171,66 @@ def pytest_generate_tests_cfe(metafunc):
                         if "suppress_test_for" in test and (
                             (
                                 "sqlalchemy" in test["suppress_test_for"]
-                                and isinstance(data_asset, SqlAlchemyDataset)
+                                and batch
+                                and isinstance(
+                                    batch.execution_engine, SqlAlchemyExecutionEngine
+                                )
                             )
                             or (
                                 "sqlite" in test["suppress_test_for"]
                                 and sqliteDialect is not None
-                                and isinstance(data_asset, SqlAlchemyDataset)
-                                and isinstance(data_asset.engine.dialect, sqliteDialect)
+                                and batch
+                                and isinstance(
+                                    batch.execution_engine, SqlAlchemyExecutionEngine
+                                )
                             )
                             or (
                                 "postgresql" in test["suppress_test_for"]
                                 and postgresqlDialect is not None
-                                and isinstance(data_asset, SqlAlchemyDataset)
+                                and batch
                                 and isinstance(
-                                    data_asset.engine.dialect, postgresqlDialect
+                                    batch.execution_engine, SqlAlchemyExecutionEngine
                                 )
                             )
                             or (
                                 "mysql" in test["suppress_test_for"]
                                 and mysqlDialect is not None
-                                and isinstance(data_asset, SqlAlchemyDataset)
-                                and isinstance(data_asset.engine.dialect, mysqlDialect)
+                                and batch
+                                and isinstance(
+                                    batch.execution_engine, SqlAlchemyExecutionEngine
+                                )
                             )
                             or (
                                 "mssql" in test["suppress_test_for"]
                                 and mssqlDialect is not None
-                                and isinstance(data_asset, SqlAlchemyDataset)
-                                and isinstance(data_asset.engine.dialect, mssqlDialect)
+                                and batch
+                                and isinstance(
+                                    batch.execution_engine, SqlAlchemyExecutionEngine
+                                )
                             )
                             or (
                                 "pandas" in test["suppress_test_for"]
-                                and isinstance(data_asset, PandasDataset)
+                                and batch
+                                and isinstance(
+                                    batch.execution_engine, PandasExecutionEngine
+                                )
                             )
                             or (
                                 "spark" in test["suppress_test_for"]
-                                and isinstance(data_asset, SparkDFDataset)
+                                and batch
+                                and isinstance(
+                                    batch.execution_engine, PandasExecutionEngine
+                                )
                             )
                         ):
                             skip_test = True
                         # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
-                        if "allow_cross_type_comparisons" in test["in"] and isinstance(
-                            data_asset, SqlAlchemyDataset
+                        if (
+                            "allow_cross_type_comparisons" in test["in"]
+                            and batch
+                            and isinstance(
+                                batch.execution_engine, SqlAlchemyExecutionEngine
+                            )
                         ):
                             skip_test = True
 
@@ -202,7 +239,7 @@ def pytest_generate_tests_cfe(metafunc):
                                 "expectation_type": test_configuration[
                                     "expectation_type"
                                 ],
-                                "dataset": data_asset,
+                                "batch": batch,
                                 "test": test,
                                 "skip": skip_expectation or skip_test,
                             }
@@ -225,9 +262,9 @@ def test_case_runner_cfe(test_case):
     if test_case["skip"]:
         pytest.skip()
 
-    # Note: this should never be done in practice, but we are wiping expectations to reuse datasets during testing.
-    test_case["dataset"]._initialize_expectations()
+    # Note: this should never be done in practice, but we are wiping expectations to reuse batches during testing.
+    # test_case["batch"]._initialize_expectations()
 
-    evaluate_json_test(
-        test_case["dataset"], test_case["expectation_type"], test_case["test"]
+    evaluate_json_test_cfe(
+        test_case["batch"], test_case["expectation_type"], test_case["test"]
     )
