@@ -53,16 +53,16 @@ def register_metric(
     execution_engine: Type["ExecutionEngine"],
     metric_dependencies: Tuple[str],
     metric_provider: Callable,
-    batchable: bool = False,
+    bundle_computation: bool = False,
 ) -> dict:
     res = dict()
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")
-    metric_provider._is_batchable = batchable
+    metric_provider._can_be_bundled = bundle_computation
     if metric_name in _registered_metrics:
         metric_definition = _registered_metrics[metric_name]
         current_dependencies = metric_definition.get("metric_dependencies", set())
-        if current_dependencies != set(metric_dependencies):
+        if set(current_dependencies) != set(metric_dependencies):
             logger.warning(
                 f"metric {metric_name} is being registered with different dependencies; overwriting dependencies"
             )
@@ -72,7 +72,7 @@ def register_metric(
                 f"metric {metric_name} is being registered with different dependencies; overwriting dependencies",
             )
         current_domain_keys = metric_definition.get("metric_domain_keys", set())
-        if current_domain_keys != set(metric_domain_keys):
+        if set(current_domain_keys) != set(metric_domain_keys):
             logger.warning(
                 f"metric {metric_name} is being registered with different metric_domain_keys; overwriting metric_domain_keys"
             )
@@ -82,7 +82,7 @@ def register_metric(
                 f"metric {metric_name} is being registered with different metric_domain_keys; overwriting metric_domain_keys",
             )
         current_value_keys = metric_definition.get("metric_value_keys", set())
-        if current_value_keys != set(metric_value_keys):
+        if set(current_value_keys) != set(metric_value_keys):
             logger.warning(
                 f"metric {metric_name} is being registered with different metric_value_keys; overwriting metric_value_keys"
             )
@@ -135,7 +135,7 @@ def get_metric_provider(
         return metric_definition["providers"][type(execution_engine).__name__]
     except KeyError:
         raise MetricProviderError(
-            f"No provider found for {metric_name} using {execution_engine.__name__}"
+            f"No provider found for {metric_name} using {type(execution_engine).__name__}"
         )
 
 

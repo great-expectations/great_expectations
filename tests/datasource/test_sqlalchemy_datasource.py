@@ -60,7 +60,6 @@ def test_sqlalchemy_datasource_custom_data_asset(
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
-        "r",
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
@@ -161,7 +160,6 @@ def test_create_sqlalchemy_datasource(data_context_parameterized_expectation_sui
             data_context_parameterized_expectation_suite.root_directory,
             "uncommitted/config_variables.yml",
         ),
-        "r",
     ) as credentials_file:
         substitution_variables = yaml.load(credentials_file)
 

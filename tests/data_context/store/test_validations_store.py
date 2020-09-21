@@ -64,14 +64,12 @@ def test_ValidationsStore_with_TupleS3StoreBackend():
     )
 
     # Verify that internals are working as expected, including the default filepath
-    assert set(
-        [
-            s3_object_info["Key"]
-            for s3_object_info in boto3.client("s3").list_objects_v2(
-                Bucket=bucket, Prefix=prefix
-            )["Contents"]
-        ]
-    ) == {
+    assert {
+        s3_object_info["Key"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(
+            Bucket=bucket, Prefix=prefix
+        )["Contents"]
+    } == {
         "test/prefix/asset/quarantine/20191007T151224.1234Z_prod_100/20190926T134241.000000Z/batch_id.json",
         "test/prefix/asset/quarantine/20191007T151224.1234Z_prod_200/20190926T134241.000000Z/batch_id.json",
     }

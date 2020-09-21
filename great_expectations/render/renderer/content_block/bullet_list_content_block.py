@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
 )

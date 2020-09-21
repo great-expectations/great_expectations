@@ -148,7 +148,7 @@ def test_s3_generator_get_directories(s3_generator):
         kwargs for kwargs in s3_generator.get_iterator(data_asset_name="data_dirs")
     ]
     assert 3 == len(batch_kwargs_list)
-    paths = set([batch_kwargs["s3"] for batch_kwargs in batch_kwargs_list])
+    paths = {batch_kwargs["s3"] for batch_kwargs in batch_kwargs_list}
     assert {
         "s3a://test_bucket/data/for/",
         "s3a://test_bucket/data/to/",

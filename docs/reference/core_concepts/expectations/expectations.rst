@@ -4,7 +4,7 @@
 Expectations
 ############
 
-An Expectation is a statement describing a verifiable property of a data set. Like assertions in traditional python unit tests,
+An Expectation is a statement describing a verifiable property of data. Like assertions in traditional python unit tests,
 Expectations provide a flexible, declarative language for despicting expected behavior. Unlike traditional unit tests,
 Great Expectations applies Expectations to data instead of code.
 
@@ -24,9 +24,22 @@ You can also extend Great Expectations by :ref:`creating your own custom Expecta
 Expectations *enhance communication* about your data and *improve quality* for data applications. Using expectations
 helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."
 
-.. attention::
 
-  Not all Expectations are implemented on all execution engines yet. You can see the grid of supported Expectations :ref:`here <implemented_expectations>`. We welcome :ref:`contributions <contributing>` to fill in the gaps.
+.. _reference__core_concepts__expectations__domain_and_success_keys:
+
+Expectation Concepts: Domain and Success Keys
+**********************************************
+
+A **domain** makes it possible to address a specific set of data, such as *column* in a table or dataframe, or even a metric computed on a previous batch of data.
+
+- A domain is defined by a set of key-value pairs. The **domain keys** are the keys that uniquely define the domain for an Expectation. They vary depending on the Expectatation; for example, many Expectations apply to data in a single ``column``, but others apply to data from multiple columns or to properties that do not apply to a column at all.
+
+An Expectation also defines **success keys** that determine the values of its metrics and when the Expectation will succeed.
+
+For example, the ``expect_column_values_to_be_in_set`` Expectation relies on the ``batch_id``, ``table``, ``column``, and ``row_condition`` **domain keys** to determine what data are described by a particular configuration, and the ``value_set`` and ``mostly`` **success keys** to evaluate whether the Expectation is actually met for that data.
+
+- **Note**: The *batch_id* and *table* domain keys are often omitted when running a validation, because the Expectation is being applied to a single batch and table. However, they must be provided in cases where they could be ambiguous.
+
 
 
 .. _expectation_suites:

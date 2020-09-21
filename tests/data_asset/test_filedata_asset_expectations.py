@@ -237,7 +237,7 @@ def test_expect_file_to_have_valid_table_header():
         file_relative_path(__file__, "../test_sets/same_column_names.csv")
     )
     invalid_header_dat_expectation = invalid_header_dat.expect_file_to_have_valid_table_header(
-        regex="\|", skip=2
+        regex=r"\|", skip=2
     )
     assert not invalid_header_dat_expectation.success
 
