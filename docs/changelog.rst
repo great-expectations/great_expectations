@@ -16,6 +16,7 @@ Develop
 * [DOCS] Fixed several broken links and glossary organization (thanks @JavierMonton and @sbrugman)!
 * [DOCS] Deploying Great Expectations with Google Cloud Composer (Hosted Airflow)
 * [ENHANCEMENT] BaseProfiler type mapping expanded to include more pandas and numpy dtypes
+* [BUGFIX] Building data docs no longer crashes when a data asset name is an integer #1913
 
 
 0.12.1
