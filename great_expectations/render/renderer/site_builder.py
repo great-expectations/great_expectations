@@ -446,6 +446,13 @@ class DefaultSiteSectionBuilder:
                     data_context_id=self.data_context_id,
                     show_how_to_buttons=self.show_how_to_buttons,
                 )
+
+                self.target_store.set(
+                    SiteSectionIdentifier(
+                        site_section_name=self.name, resource_identifier=resource_key,
+                    ),
+                    viewable_content,
+                )
             except Exception as e:
                 exception_message = f"""\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
@@ -458,13 +465,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     f'Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message, e, exc_info=True)
-
-            self.target_store.set(
-                SiteSectionIdentifier(
-                    site_section_name=self.name, resource_identifier=resource_key,
-                ),
-                viewable_content,
-            )
 
 
 class DefaultSiteIndexBuilder:
