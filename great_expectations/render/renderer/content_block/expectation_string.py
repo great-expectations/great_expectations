@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 import copy
 import json
 import re
+from typing import Optional
 
 import altair as alt
 import pandas as pd
@@ -80,6 +80,29 @@ def parse_row_condition_string_pandas_engine(condition_string):
     return template_str, params
 
 
+def handle_strict_min_max(params: dict) -> (str, str):
+    """
+    Utility function for the at least and at most conditions based on strictness.
+
+    Args:
+        params: dictionary containing "strict_min" and "strict_max" booleans.
+
+    Returns:
+        tuple of strings to use for the at least condition and the at most condition
+    """
+
+    at_least_str = (
+        "greater than"
+        if params.get("strict_min") is True
+        else "greater than or equal to"
+    )
+    at_most_str = (
+        "less than" if params.get("strict_max") is True else "less than or equal to"
+    )
+
+    return at_least_str, at_most_str
+
+
 class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def _missing_content_block_fn(
@@ -154,8 +177,12 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "mostly",
                 "row_condition",
                 "condition_parser",
+                "strict_min",
+                "strict_max",
             ],
         )
+
+        at_least_str, at_most_str = handle_strict_min_max(params)
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any number of unique values."
@@ -166,20 +193,18 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if params["min_value"] is None:
-                    template_str = "must have fewer than $max_value unique values, at least $mostly_pct % of the time."
+                    template_str = f"must have {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
                 elif params["max_value"] is None:
-                    template_str = "must have more than $min_value unique values, at least $mostly_pct % of the time."
+                    template_str = f"must have {at_least_str} $min_value unique values, at least $mostly_pct % of the time."
                 else:
-                    template_str = "must have between $min_value and $max_value unique values, at least $mostly_pct % of the time."
+                    template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
             else:
                 if params["min_value"] is None:
-                    template_str = "must have fewer than $max_value unique values."
+                    template_str = f"must have {at_most_str} $max_value unique values."
                 elif params["max_value"] is None:
-                    template_str = "must have more than $min_value unique values."
+                    template_str = f"must have {at_least_str} $min_value unique values."
                 else:
-                    template_str = (
-                        "must have between $min_value and $max_value unique values."
-                    )
+                    template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values."
 
         if include_column_name:
             template_str = "$column " + template_str
@@ -219,6 +244,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "mostly",
                 "row_condition",
                 "condition_parser",
+                "strict_min",
+                "strict_max",
             ],
         )
 
@@ -226,33 +253,24 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str += "may have any numerical value."
         else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            mostly_str = ""
             if params["mostly"] is not None:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str += (
-                        "values must be between $min_value and $max_value, "
-                        "at least $mostly_pct % of the time."
-                    )
+                mostly_str = ", at least $mostly_pct % of the time"
 
-                elif params["min_value"] is None:
-                    template_str += "values must be less than $max_value, at least $mostly_pct % of the time."
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str += f"values must be {at_least_str} $min_value and {at_most_str} $max_value{mostly_str}."
 
-                elif params["max_value"] is None:
-                    template_str += "values must be less than $max_value, at least $mostly_pct % of the time."
-            else:
-                if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str += (
-                        "values must always be between $min_value and $max_value."
-                    )
+            elif params["min_value"] is None:
+                template_str += f"values must be {at_most_str} $max_value{mostly_str}."
 
-                elif params["min_value"] is None:
-                    template_str += "values must always be less than $max_value."
-
-                elif params["max_value"] is None:
-                    template_str += "values must always be more than $min_value."
+            elif params["max_value"] is None:
+                template_str += f"values must be {at_least_str} $min_value{mostly_str}."
 
         if include_column_name:
             template_str = "$column " + template_str
@@ -527,17 +545,18 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         cls, expectation, styling=None, include_column_name=True
     ):
         params = substitute_none_for_missing(
-            expectation.kwargs, ["min_value", "max_value"]
+            expectation.kwargs, ["min_value", "max_value", "strict_min", "strict_max"]
         )
         if params["min_value"] is None and params["max_value"] is None:
             template_str = "May have any number of columns."
         else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = "Must have between $min_value and $max_value columns."
+                template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value columns."
             elif params["min_value"] is None:
-                template_str = "Must have less than than $max_value columns."
+                template_str = f"Must have {at_most_str} $max_value columns."
             elif params["max_value"] is None:
-                template_str = "Must have more than $min_value columns."
+                template_str = f"Must have {at_least_str} $min_value columns."
         return [
             RenderedStringTemplateContent(
                 **{
@@ -557,18 +576,27 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["min_value", "max_value", "row_condition", "condition_parser"],
+            [
+                "min_value",
+                "max_value",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
         )
 
         if params["min_value"] is None and params["max_value"] is None:
             template_str = "May have any number of rows."
         else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = "Must have between $min_value and $max_value rows."
+                template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value rows."
             elif params["min_value"] is None:
-                template_str = "Must have less than than $max_value rows."
+                template_str = f"Must have {at_most_str} $max_value rows."
             elif params["max_value"] is None:
-                template_str = "Must have more than $min_value rows."
+                template_str = f"Must have {at_least_str} $min_value rows."
 
         if params["row_condition"] is not None:
             (
@@ -1047,19 +1075,32 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column", "min_value", "max_value", "row_condition", "condition_parser"],
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
         )
 
         if params["min_value"] is None and params["max_value"] is None:
             template_str = "may have any fraction of unique values."
         else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
             if params["min_value"] is None:
-                template_str = "fraction of unique values must be less than $max_value."
+                template_str = (
+                    f"fraction of unique values must be {at_most_str} $max_value."
+                )
             elif params["max_value"] is None:
-                template_str = "fraction of unique values must be at least $min_value."
+                template_str = (
+                    f"fraction of unique values must be {at_least_str} $min_value."
+                )
             else:
                 if params["min_value"] != params["max_value"]:
-                    template_str = "fraction of unique values must be between $min_value and $max_value."
+                    template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
                 else:
                     template_str = (
                         "fraction of unique values must be exactly $min_value."
@@ -1218,38 +1259,38 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "mostly",
                 "row_condition",
                 "condition_parser",
+                "strict_min",
+                "strict_max",
             ],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "values may have any length."
         else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
             if params["mostly"] is not None:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = "values must be between $min_value and $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
 
                 elif params["min_value"] is None:
-                    template_str = "values must be less than $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
 
                 elif params["max_value"] is None:
-                    template_str = "values must be more than $min_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
             else:
                 if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = "values must always be between $min_value and $max_value characters long."
+                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
 
                 elif params["min_value"] is None:
-                    template_str = (
-                        "values must always be less than $max_value characters long."
-                    )
+                    template_str = f"values must always be {at_most_str} $max_value characters long."
 
                 elif params["max_value"] is None:
-                    template_str = (
-                        "values must always be more than $min_value characters long."
-                    )
+                    template_str = f"values must always be {at_least_str} $min_value characters long."
 
         if include_column_name:
             template_str = "$column " + template_str
@@ -1854,18 +1895,28 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column", "min_value", "max_value", "row_condition", "condition_parser"],
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "mean may have any numerical value."
         else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = "mean must be between $min_value and $max_value."
+                template_str = f"mean must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif params["min_value"] is None:
-                template_str = "mean must be less than $max_value."
+                template_str = f"mean must be {at_most_str} $max_value."
             elif params["max_value"] is None:
-                template_str = "mean must be more than $min_value."
+                template_str = f"mean must be {at_least_str} $min_value."
 
         if include_column_name:
             template_str = "$column " + template_str
@@ -1897,18 +1948,27 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column", "min_value", "max_value", "row_condition", "condition_parser"],
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "median may have any numerical value."
         else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = "median must be between $min_value and $max_value."
+                template_str = f"median must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif params["min_value"] is None:
-                template_str = "median must be less than $max_value."
+                template_str = f"median must be {at_most_str} $max_value."
             elif params["max_value"] is None:
-                template_str = "median must be more than $min_value."
+                template_str = f"median must be {at_least_str} $min_value."
 
         if include_column_name:
             template_str = "$column " + template_str
@@ -1940,20 +2000,28 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column", "min_value", "max_value", "row_condition", "condition_parser"],
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "standard deviation may have any numerical value."
         else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = (
-                    "standard deviation must be between $min_value and $max_value."
-                )
+                template_str = f"standard deviation must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif params["min_value"] is None:
-                template_str = "standard deviation must be less than $max_value."
+                template_str = f"standard deviation must be {at_most_str} $max_value."
             elif params["max_value"] is None:
-                template_str = "standard deviation must be more than $min_value."
+                template_str = f"standard deviation must be {at_least_str} $min_value."
 
         if include_column_name:
             template_str = "$column " + template_str
@@ -1992,20 +2060,22 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "parse_strings_as_datetimes",
                 "row_condition",
                 "condition_parser",
+                "strict_min",
+                "strict_max",
             ],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "maximum value may have any numerical value."
         else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = (
-                    "maximum value must be between $min_value and $max_value."
-                )
+                template_str = f"maximum value must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif params["min_value"] is None:
-                template_str = "maximum value must be less than $max_value."
+                template_str = f"maximum value must be {at_most_str} $max_value."
             elif params["max_value"] is None:
-                template_str = "maximum value must be more than $min_value."
+                template_str = f"maximum value must be {at_least_str} $min_value."
 
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
@@ -2047,20 +2117,22 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "parse_strings_as_datetimes",
                 "row_condition",
                 "condition_parser",
+                "strict_min",
+                "strict_max",
             ],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "minimum value may have any numerical value."
         else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = (
-                    "minimum value must be between $min_value and $max_value."
-                )
+                template_str = f"minimum value must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif params["min_value"] is None:
-                template_str = "minimum value must be less than $max_value."
+                template_str = f"minimum value must be {at_most_str} $max_value."
             elif params["max_value"] is None:
-                template_str = "minimum value must be more than $min_value."
+                template_str = f"minimum value must be {at_least_str} $min_value."
 
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
@@ -2095,18 +2167,28 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     ):
         params = substitute_none_for_missing(
             expectation.kwargs,
-            ["column", "min_value", "max_value", "row_condition", "condition_parser"],
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "sum may have any numerical value."
         else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = "sum must be between $min_value and $max_value."
+                template_str = f"sum must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif params["min_value"] is None:
-                template_str = "sum must be less than $max_value."
+                template_str = f"sum must be {at_most_str} $max_value."
             elif params["max_value"] is None:
-                template_str = "sum must be more than $min_value."
+                template_str = f"sum must be {at_least_str} $min_value."
 
         if include_column_name:
             template_str = "$column " + template_str

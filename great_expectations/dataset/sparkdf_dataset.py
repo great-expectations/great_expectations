@@ -257,7 +257,7 @@ class MetaSparkDFDataset(Dataset):
                     "`__row`",
                     "`{0}` AS `A_{0}`".format(eval_col_A),
                     "`{0}` AS `B_{0}`".format(eval_col_B),
-                    "ISNULL(`{0}`) AND ISNULL(`{1}`) AS `__null_val`".format(
+                    "ISNULL(`{}`) AND ISNULL(`{}`) AS `__null_val`".format(
                         eval_col_A, eval_col_B
                     ),
                 )
@@ -266,7 +266,7 @@ class MetaSparkDFDataset(Dataset):
                     "`__row`",
                     "`{0}` AS `A_{0}`".format(eval_col_A),
                     "`{0}` AS `B_{0}`".format(eval_col_B),
-                    "ISNULL(`{0}`) OR ISNULL(`{1}`) AS `__null_val`".format(
+                    "ISNULL(`{}`) OR ISNULL(`{}`) AS `__null_val`".format(
                         eval_col_A, eval_col_B
                     ),
                 )
@@ -287,8 +287,8 @@ class MetaSparkDFDataset(Dataset):
             nonnull_df = boolean_mapped_null_values.filter("__null_val = False")
             nonnull_count = nonnull_df.count()
 
-            col_A_df = nonnull_df.select("__row", "`A_{0}`".format(eval_col_A))
-            col_B_df = nonnull_df.select("__row", "`B_{0}`".format(eval_col_B))
+            col_A_df = nonnull_df.select("__row", "`A_{}`".format(eval_col_A))
+            col_B_df = nonnull_df.select("__row", "`B_{}`".format(eval_col_B))
 
             success_df = func(self, col_A_df, col_B_df, *args, **kwargs)
             success_count = success_df.filter("__success = True").count()
@@ -304,7 +304,7 @@ class MetaSparkDFDataset(Dataset):
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
-                    (row["A_{0}".format(eval_col_A)], row["B_{0}".format(eval_col_B)],)
+                    (row["A_{}".format(eval_col_A)], row["B_{}".format(eval_col_B)],)
                     for row in unexpected_df.collect()
                 ]
 
@@ -1309,8 +1309,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             _udf = udf(parse, sparktypes.TimestampType())
             # Create new columns for comparison without replacing original values.
             (timestamp_column_A, timestamp_column_B) = (
-                "__ts_{0}".format(column_A_name),
-                "__ts_{0}".format(column_B_name),
+                "__ts_{}".format(column_A_name),
+                "__ts_{}".format(column_B_name),
             )
             temp_column_A = column_A.withColumn(timestamp_column_A, _udf(column_A_name))
             temp_column_B = column_B.withColumn(timestamp_column_B, _udf(column_B_name))

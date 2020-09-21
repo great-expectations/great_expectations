@@ -19,7 +19,7 @@ def test_manual_generator(basic_pandas_datasource):
                     "reader_options": {"header": 0},
                 },
             ],
-            "logs": {"s3": "s3a://my_bucket/my_prefix/data/file.csv.gz"},
+            "logs": {"path": "s3a://my_bucket/my_prefix/data/file.csv.gz"},
         },
     )
 
@@ -39,7 +39,7 @@ def test_manual_generator(basic_pandas_datasource):
         "nrows": 5
     }  # IMPORTANT: Note that *limit* was a batch parameter,
     # and *because we used a PandasDatasource was translated into reader_options
-    assert kwargs["s3"] == "s3a://my_bucket/my_prefix/data/file.csv.gz"
+    assert kwargs["path"] == "s3a://my_bucket/my_prefix/data/file.csv.gz"
 
     kwargs = generator.build_batch_kwargs(data_asset_name="asset1", partition_id=2)
     assert len(kwargs) == 4

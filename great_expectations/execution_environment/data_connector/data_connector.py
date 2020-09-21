@@ -7,9 +7,9 @@ import warnings
 from copy import deepcopy
 
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-
 from great_expectations.core.util import nested_update
 from great_expectations.core.id_dict import BatchSpec
+from great_expectations.core.util import nested_update
 
 logger = logging.getLogger(__name__)
 

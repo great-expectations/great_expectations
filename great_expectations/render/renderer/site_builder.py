@@ -29,7 +29,7 @@ FALSEY_YAML_STRINGS = [
 ]
 
 
-class SiteBuilder(object):
+class SiteBuilder:
     """SiteBuilder builds data documentation for the project defined by a
     DataContext.
 
@@ -312,7 +312,7 @@ class SiteBuilder(object):
         )
 
 
-class DefaultSiteSectionBuilder(object):
+class DefaultSiteSectionBuilder:
     def __init__(
         self,
         name,
@@ -467,7 +467,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
 
 
-class DefaultSiteIndexBuilder(object):
+class DefaultSiteIndexBuilder:
     def __init__(
         self,
         name,
@@ -653,7 +653,7 @@ class DefaultSiteIndexBuilder(object):
         validation_playground = CallToActionButton(
             "How to Validate Data",
             # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/how_to_guides/validation.html",
+            "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation.html",
         )
         customize_data_docs = CallToActionButton(
             "How to Customize Data Docs",
@@ -815,7 +815,7 @@ class DefaultSiteIndexBuilder(object):
                         batch_spec=batch_spec,
                     )
                 except Exception:
-                    error_msg = "Profiling result not found: {0:s} - skipping".format(
+                    error_msg = "Profiling result not found: {:s} - skipping".format(
                         str(profiling_result_key.to_tuple())
                     )
                     logger.warning(error_msg)
@@ -872,7 +872,7 @@ class DefaultSiteIndexBuilder(object):
                         batch_spec=batch_spec,
                     )
                 except Exception:
-                    error_msg = "Validation result not found: {0:s} - skipping".format(
+                    error_msg = "Validation result not found: {:s} - skipping".format(
                         str(validation_result_key.to_tuple())
                     )
                     logger.warning(error_msg)
@@ -899,7 +899,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return (self.target_store.write_index_page(viewable_content), index_links_dict)
 
 
-class CallToActionButton(object):
+class CallToActionButton:
     def __init__(self, title, link):
         self.title = title
         self.link = link

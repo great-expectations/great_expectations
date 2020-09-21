@@ -273,9 +273,8 @@ class BatchSpecError(DataContextError):
 
 class DatasourceInitializationError(GreatExpectationsError):
     def __init__(self, datasource_name, message):
-        self.message = "Cannot initialize datasource %s, error: %s" % (
-            datasource_name,
-            message,
+        self.message = "Cannot initialize datasource {}, error: {}".format(
+            datasource_name, message,
         )
         super().__init__(self.message)
 

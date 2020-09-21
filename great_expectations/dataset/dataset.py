@@ -1034,7 +1034,7 @@ class Dataset(MetaDataset):
         Args:
             column (str): \
                 The column name.
-            type\_ (str): \
+            type\\_ (str): \
                 A string representing the data type that each column should have as entries. Valid types are defined
                 by the current backend implementation and are dynamically loaded. For example, valid types for
                 PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'),
@@ -4255,7 +4255,7 @@ class Dataset(MetaDataset):
         bins_B=None,
         n_bins_A=None,
         n_bins_B=None,
-        threshold=0.05,
+        threshold=0.1,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
