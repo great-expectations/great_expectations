@@ -17,7 +17,7 @@
 from .configurations import ClassConfig  # Config,
 
 
-class DictDot(object):
+class DictDot:
     def __getitem__(self, item):
         if isinstance(item, int):
             return list(self.__dict__.keys())[item]

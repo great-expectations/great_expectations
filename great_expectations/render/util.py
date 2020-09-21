@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Rendering utility"""
 import decimal
 import locale

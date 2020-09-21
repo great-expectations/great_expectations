@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import json
 import os
+from unittest import mock
 
-import mock
 from click.testing import CliRunner
 
 from great_expectations import DataContext
@@ -1087,9 +1086,7 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     result = runner.invoke(
         cli,
         ["suite", "demo", "-d", root_dir],
-        input="{0:s}\nmy_new_suite\n\n".format(
-            os.path.join(filesystem_csv_2, "f1.csv")
-        ),
+        input="{:s}\nmy_new_suite\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -1113,7 +1110,7 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     result = runner.invoke(
         cli,
         ["suite", "edit", "my_new_suite", "-d", root_dir],
-        input="{0:s}\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
+        input="{:s}\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
         catch_exceptions=False,
     )
 

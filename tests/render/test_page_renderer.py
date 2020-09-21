@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import os
 from collections import OrderedDict
@@ -483,7 +482,7 @@ def ValidationResultsPageRenderer_render_with_run_info_at_end():
         __file__,
         "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_end.json",
     )
-    with open(fixture_filename, "r") as infile:
+    with open(fixture_filename) as infile:
         rendered_validation_results = json.load(infile)
         return rendered_validation_results
 
@@ -499,7 +498,7 @@ def ValidationResultsPageRenderer_render_with_run_info_at_start():
         __file__,
         "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_start.json",
     )
-    with open(fixture_filename, "r") as infile:
+    with open(fixture_filename) as infile:
         rendered_validation_results = json.load(infile)
         return rendered_validation_results
 
