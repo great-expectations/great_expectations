@@ -63,9 +63,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
     """Base class for all Expectations."""
 
     version = ge_version
-    domain_kwargs = []
-    success_kwargs = []
-    runtime_kwargs = ["include_config", "catch_exceptions", "result_format"]
+    domain_keys = tuple()
+    success_keys = tuple()
+    runtime_keys = ("include_config", "catch_exceptions", "result_format",)
     default_kwarg_values = {
         "include_config": True,
         "catch_exceptions": True,
@@ -191,9 +191,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
         domain_kwargs = {
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
-            for key in self.domain_kwargs
+            for key in self.domain_keys
         }
-        missing_kwargs = set(self.domain_kwargs) - set(domain_kwargs.keys())
+        missing_kwargs = set(self.domain_keys) - set(domain_kwargs.keys())
         if missing_kwargs:
             raise InvalidExpectationKwargsError(
                 f"Missing domain kwargs: {list(missing_kwargs)}"
@@ -209,7 +209,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         domain_kwargs = self.get_domain_kwargs(configuration)
         success_kwargs = {
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
-            for key in self.success_kwargs
+            for key in self.success_keys
         }
         success_kwargs.update(domain_kwargs)
         return success_kwargs
@@ -222,9 +222,17 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if not configuration:
             configuration = self.configuration
 
-        return configuration.get_runtime_kwargs(
-            runtime_configuration=runtime_configuration
-        )
+        if runtime_configuration:
+            configuration.kwargs.update(runtime_configuration)
+
+        success_kwargs = self.get_success_kwargs(configuration)
+        runtime_kwargs = {
+            key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
+            for key in self.runtime_keys
+        }
+        runtime_kwargs.update(success_kwargs)
+
+        return runtime_kwargs
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         if configuration is None:
@@ -317,7 +325,35 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
 
 class DatasetExpectation(Expectation, ABC):
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser", )
+
+    def get_validation_dependencies(
+        self,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+    ):
+        dependencies = super().get_validation_dependencies(configuration)
+        metric_dependencies = set(self.metric_dependencies)
+
+        dependencies["metrics"] = metric_dependencies
+        # result_format_str = dependencies["result_format"].get("result_format")
+        # if result_format_str == ["BOOLEAN_ONLY"]:
+        #     return dependencies
+        #
+        # metric_dependencies.add("column_values.count")
+        # assert isinstance(
+        #     self.map_metric, str
+        # ), "ColumnMapDatasetExpectation must override get_validation_dependencies or delcare exactly one map_metric"
+        # metric_dependencies.add(self.map_metric + ".unexpected_values")
+        # # TODO:
+        # #
+        # # if ".unexpected_index_list" is a registered metric **for this engine**
+        # if result_format_str in ["BASIC", "SUMMARY"]:
+        #     return dependencies
+        #
+        # metric_dependencies.add(self.map_metric + ".unexpected_rows")
+
+        return dependencies
 
     @staticmethod
     def get_value_set_parser(execution_engine: ExecutionEngine):
