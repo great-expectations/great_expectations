@@ -654,6 +654,7 @@ class BaseDataContext:
 
     @property
     def execution_environments(self):
+        # TODO: <Alex>Should it not say "ExecutionEnvironments (instead of Datasources)?</Alex>
         """A single holder for all Datasources in this context"""
         return {
             execution_environment: self.get_execution_environment(execution_environment)
