@@ -533,6 +533,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
         import boto3
         from botocore.exceptions import ClientError
 
+        if not isinstance(key, tuple):
+            key = key.to_tuple()
+
         s3 = boto3.resource("s3")
         s3_object_key = self._build_s3_object_key(key)
         s3.Object(self.bucket, s3_object_key).delete()

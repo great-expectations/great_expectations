@@ -132,9 +132,6 @@ An Expectations Store provides a way to store Expectation Suites accessible to a
         )
 
     def remove_key(self, key):
-        if not isinstance(key, tuple):
-            key = key.to_tuple()
-
         return self.store_backend.remove_key(key)
 
     def serialize(self, key, value):
