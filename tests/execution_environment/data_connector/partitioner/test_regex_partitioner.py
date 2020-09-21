@@ -225,8 +225,8 @@ def test_regex_partitioner_with_periodic_table():
     )
     my_partitioner.regex = regex
     # catch the ValueError
-    # with pytest.raises(ValueError):
-    #     returned_partitions = my_partitioner.get_available_partitions()
+     with pytest.raises(ValueError):
+         returned_partitions = my_partitioner.get_available_partitions()
 
 
 def test_regex_partitioner_with_periodic_table_allow_multifile_partitions_flag():
