@@ -19,7 +19,7 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnValueZScoresToBeLessThan(DatasetExpectation):
+class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     """
     Expect the Z-scores of a columns values to be less than a given threshold
 
@@ -71,7 +71,8 @@ class ExpectColumnValueZScoresToBeLessThan(DatasetExpectation):
                 :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
     """
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.aggregate.mean", "column.aggregate.standard_deviation", "column_values.nonnull.count", "column_values.z_scores.over_threshold", "column.z_scores")
+    map_metric = "column_values.z_scores.over_threshold"
+    metric_dependencies = ("column.aggregate.mean", "column.aggregate.standard_deviation", "column_values.nonnull.count", "column.z_scores")
     success_keys = ("threshold", "double_sided", "mostly")
 
     # Default values

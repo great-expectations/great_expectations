@@ -63,9 +63,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
     """Base class for all Expectations."""
 
     version = ge_version
-    domain_kwargs = []
-    success_kwargs = []
-    runtime_kwargs = ["include_config", "catch_exceptions", "result_format"]
+    domain_keys = tuple()
+    success_keys = tuple()
+    runtime_kwargs = ("include_config", "catch_exceptions", "result_format",)
     default_kwarg_values = {
         "include_config": True,
         "catch_exceptions": True,
@@ -157,6 +157,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         else:
             return raw_response
 
+
     def get_validation_dependencies(
         self, configuration: Optional[ExpectationConfiguration] = None
     ):
@@ -191,9 +192,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
         domain_kwargs = {
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
-            for key in self.domain_kwargs
+            for key in self.domain_keys
         }
-        missing_kwargs = set(self.domain_kwargs) - set(domain_kwargs.keys())
+        missing_kwargs = set(self.domain_keys) - set(domain_kwargs.keys())
         if missing_kwargs:
             raise InvalidExpectationKwargsError(
                 f"Missing domain kwargs: {list(missing_kwargs)}"
@@ -209,7 +210,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         domain_kwargs = self.get_domain_kwargs(configuration)
         success_kwargs = {
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
-            for key in self.success_kwargs
+            for key in self.success_keys
         }
         success_kwargs.update(domain_kwargs)
         return success_kwargs
@@ -348,6 +349,30 @@ class DatasetExpectation(Expectation, ABC):
             domain_kwargs=metric_domain_kwargs, batches=batches
         )
         return df
+
+
+    def get_validation_dependencies(
+        self,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+    ):
+        dependencies = super().get_validation_dependencies(configuration)
+        metric_dependencies = set(self.metric_dependencies)
+
+        dependencies["metrics"] = metric_dependencies
+        # result_format_str = dependencies["result_format"].get("result_format")
+        # if result_format_str == ["BOOLEAN_ONLY"]:
+        #     return dependencies
+        #
+        # # assert isinstance(
+        # #     self.metric, str
+        # # ), "ColumnMapDatasetExpectation must override get_validation_dependencies or delcare exactly one map_metric"
+        # # metric_dependencies.add(self.map_metric + ".unexpected_values")
+        # # # TODO:
+        # # #
+        # # # if ".unexpected_index_list" is a registered metric **for this engine**
+        # # if result_format_str in ["BASIC", "SUMMARY"]:
+        return dependencies
 
     @staticmethod
     def _pandas_value_set_parser(value_set):

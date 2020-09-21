@@ -4,10 +4,11 @@ from typing import Dict, List, Optional, Union
 import pandas as pd
 import numpy as np
 
+from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 
-from ...data_asset.util import parse_result_format
+
 from ..expectation import (
     ColumnMapDatasetExpectation,
     DatasetExpectation,
@@ -20,7 +21,7 @@ from ..registry import extract_metrics
 
 class ExpectColumnMeanToBeBetween(DatasetExpectation):
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = tuple("column.aggregate.mean",)
+    metric_dependencies = ("column.aggregate.mean",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 
 
@@ -47,10 +48,16 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
     )
     def _pandas_mean(
             self,
-            series: pd.Series,
+            batches: Dict[str, Batch],
+            execution_engine: PandasExecutionEngine,
+            metric_domain_kwargs: dict,
+            metric_value_kwargs: dict,
+            metrics: dict,
             runtime_configuration: dict = None,
     ):
         """Mean Metric Function"""
+        series = execution_engine.get_domain_dataframe(
+            domain_kwargs=metric_domain_kwargs, batches=batches)
 
         return series.mean()
 
@@ -88,16 +95,15 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
         # Validating that Minimum and Maximum values are of the proper format and type
-        if "min_value" in configuration:
+        if "min_value" in configuration.kwargs:
             min_val = configuration.kwargs["min_value"]
 
-        if "max_value" in configuration:
+        if "max_value" in configuration.kwargs:
             max_val = configuration.kwargs["max_value"]
 
         try:
             # Ensuring Proper interval has been provided
-            assert "min_value" in configuration or "max_value" in configuration, "min_value and max_value " \
-                                                                                 "cannot both be None"
+            assert min_val or max_val, "min_value and max_value cannot both be None"
             assert min_val is None or isinstance(min_val, (float, int)), "Provided min threshold must be a number"
             assert max_val is None or isinstance(max_val, (float, int)), "Provided max threshold must be a number"
 
