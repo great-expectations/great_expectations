@@ -629,19 +629,18 @@ class Dataset(MetaDataset):
             if len(missing_list) > 0:
                 mismatched["missing"] = missing_list
 
+            result = {
+                "observed_value": observed_value,
+                "details": {"mismatched": mismatched},
+            }
+
             return_success = {
                 "success": True,
-                "result": {
-                    "observed_value": observed_value,
-                    "details": {"mismatched": mismatched},
-                },
+                "result": result,
             }
             return_failed = {
                 "success": False,
-                "result": {
-                    "observed_value": observed_value,
-                    "details": {"mismatched": mismatched},
-                },
+                "result": result,
             }
 
             if exact_match:
