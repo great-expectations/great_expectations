@@ -146,6 +146,71 @@ def build_test_backends_list(metafunc):
     return test_backends
 
 
+def build_test_backends_list_cfe(metafunc):
+    test_backends = ["pandas"]
+    no_spark = metafunc.config.getoption("--no-spark")
+    if not no_spark:
+        try:
+            from pyspark.sql import SparkSession
+        except ImportError:
+            raise ValueError("spark tests are requested, but pyspark is not installed")
+        test_backends += ["spark"]
+    no_sqlalchemy = metafunc.config.getoption("--no-sqlalchemy")
+    if not no_sqlalchemy:
+        test_backends += ["sqlite"]
+
+        sa: Union[ModuleType, None] = import_library_module(module_name="sqlalchemy")
+
+        no_postgresql = metafunc.config.getoption("--no-postgresql")
+        if not (sa is None or no_postgresql):
+            ###
+            # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
+            # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
+            # round trip compared to NUMERIC, which stays as a python DECIMAL
+
+            # Be sure to ensure that tests (and users!) understand that subtlety,
+            # which can be important for distributional expectations, for example.
+            ###
+            try:
+                engine = sa.create_engine("postgresql://postgres@localhost/test_ci")
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError):
+                raise ImportError(
+                    "postgresql tests are requested, but unable to connect to the postgresql database at "
+                    "'postgresql://postgres@localhost/test_ci'"
+                )
+            test_backends += ["postgresql"]
+        mysql = metafunc.config.getoption("--mysql")
+        if sa and mysql:
+            try:
+                engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError):
+                raise ImportError(
+                    "mysql tests are requested, but unable to connect to the mysql database at "
+                    "'mysql+pymysql://root@localhost/test_ci'"
+                )
+            test_backends += ["mysql"]
+        mssql = metafunc.config.getoption("--mssql")
+        if sa and mssql:
+            try:
+                engine = sa.create_engine(
+                    "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+                    # echo=True,
+                )
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError):
+                raise ImportError(
+                    "mssql tests are requested, but unable to connect to the mssql database at "
+                    "'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
+                )
+            test_backends += ["mssql"]
+    return test_backends
+
+
 def pytest_generate_tests(metafunc):
     test_backends = build_test_backends_list(metafunc)
     if "test_backend" in metafunc.fixturenames:

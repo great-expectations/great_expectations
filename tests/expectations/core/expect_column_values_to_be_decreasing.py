@@ -22,7 +22,7 @@ def test_expect_column_values_to_be_decreasing_impl():
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
-    assert result == ExpectationValidationResult(success=True, )
+    assert result == ExpectationValidationResult(success=True,)
 
     # check for "strictly" kwarg
     expectationConfiguration = ExpectationConfiguration(
@@ -34,13 +34,11 @@ def test_expect_column_values_to_be_decreasing_impl():
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
-    assert result == ExpectationValidationResult(success=False, )
+    assert result == ExpectationValidationResult(success=False,)
 
     df_inc = pd.DataFrame({"a": [1, 2, 3, 3, 4, 5]})
     batch = Batch(data=df_inc)
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
-    assert result == ExpectationValidationResult(success=False, )
-
-
+    assert result == ExpectationValidationResult(success=False,)

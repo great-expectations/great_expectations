@@ -51,7 +51,16 @@ logging.captureWarnings(True)
 
 
 class Validator:
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        interactive_evaluation=True,
+        profiler=None,
+        expectation_suite=None,
+        expectation_suite_name=None,
+        execution_engine=None,
+        batch=None,
+        **kwargs,
+    ):
         """
         Initialize the DataAsset.
 
@@ -65,22 +74,18 @@ class Validator:
         support for the profiler parameter not obvious from the signature.
 
         """
-        interactive_evaluation = kwargs.pop("interactive_evaluation", True)
-        profiler = kwargs.pop("profiler", None)
-        expectation_suite = kwargs.pop("expectation_suite", None)
-        expectation_suite_name = kwargs.pop("expectation_suite_name", None)
-        execution_engine = kwargs.pop("execution_engine", None)
 
-        if "autoinspect_func" in kwargs:
-            warnings.warn(
-                "Autoinspect_func is no longer supported; use a profiler instead (migration is easy!).",
-                category=DeprecationWarning,
-            )
-        super().__init__(*args, **kwargs)
+        self._batch = batch
         self._execution_engine = execution_engine
+
         if execution_engine:
             self._data_context = execution_engine.data_context
             self._execution_engine._validator = self
+
+            if batch:
+                if not execution_engine.batches.get(batch.to_id()):
+                    execution_engine.batches[batch.to_id()] = batch
+                execution_engine._loaded_batch_id = batch.to_id()
 
         else:
             self._data_context = None
@@ -621,7 +626,10 @@ class Validator:
 
     @property
     def batch(self):
-        return self.execution_engine.loaded_batch
+        if self._batch:
+            return self._batch
+        else:
+            return self.execution_engine.loaded_batch
 
     @property
     def batch_spec(self):
