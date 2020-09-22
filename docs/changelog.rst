@@ -7,6 +7,8 @@ Changelog
 Develop
 -----------------
 
+* [ENHANCEMENT] Add expectation expect_table_columns_to_match_set
+
 0.12.2
 -----------------
 

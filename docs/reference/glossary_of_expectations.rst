@@ -22,6 +22,7 @@ Table shape
 
 * :func:`expect_column_to_exist <great_expectations.dataset.dataset.Dataset.expect_column_to_exist>`
 * :func:`expect_table_columns_to_match_ordered_list <great_expectations.dataset.dataset.Dataset.expect_table_columns_to_match_ordered_list>`
+* :func:`expect_table_columns_to_match_set <great_expectations.dataset.dataset.Dataset.expect_table_columns_to_match_set>`
 * :func:`expect_table_row_count_to_be_between <great_expectations.dataset.dataset.Dataset.expect_table_row_count_to_be_between>`
 * :func:`expect_table_row_count_to_equal <great_expectations.dataset.dataset.Dataset.expect_table_row_count_to_equal>`
 * :func:`expect_table_row_count_to_equal_other_table <great_expectations.dataset.sqlalchemy_dataset.SqlAlchemyDataset.expect_table_row_count_to_equal_other_table>`
