@@ -15,8 +15,8 @@ from ..registry import extract_metrics, get_metric_kwargs
 
 
 class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
-    map_metric = "map.increasing"
-    metric_dependencies = ("map.increasing.count", "map.nonnull.count")
+    map_metric = "column_values.increasing"
+    metric_dependencies = ("column_values.increasing.count", "column_values.nonnull.count")
     success_keys = ("strictly", "mostly",)
 
     default_kwarg_values = {
@@ -33,12 +33,12 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         return super().validate_configuration(configuration)
 
     @PandasExecutionEngine.column_map_metric(
-        metric_name="map.increasing",
+        metric_name="column_values.increasing",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("strictly",),
         metric_dependencies=tuple(),
     )
-    def _pandas_map_increasing(
+    def _pandas_column_values_increasing(
             self,
             series: pd.Series,
             strictly: Union[bool, None],
@@ -76,7 +76,7 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=(
-                metric_vals.get("map.increasing.count")
+                metric_vals.get("column_values.increasing.count")
                 / metric_vals.get("column_values.nonnull.count")
             )
             >= mostly,
