@@ -3,7 +3,7 @@ from datetime import datetime
 from functools import lru_cache, wraps
 from itertools import zip_longest
 from numbers import Number
-from typing import Any, List, Union
+from typing import Any, List, Set, Union
 
 import numpy as np
 import pandas as pd
@@ -563,6 +563,96 @@ class Dataset(MetaDataset):
                     "details": {"mismatched": mismatched},
                 },
             }
+
+    @DocInherit
+    @DataAsset.expectation(["column_set", "exact_match"])
+    def expect_table_columns_to_match_set(
+        self,
+        column_set: Union[Set[str], List[str]],
+        exact_match: bool = True,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        """Expect the columns to match a specified set.
+
+        expect_table_columns_to_match_set is a :func:`expectation \
+        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        ``column_map_expectation`` or ``column_aggregate_expectation``.
+
+        Args:
+            column_set (set of str or list of str): \
+                The column names you wish to check. If given a list, it will be converted to \
+                a set before processing. Column names are case sensitive.
+            exact_match (bool): \
+                Whether to make sure there are no extra columns in either the dataset or in \
+                the column_set.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
+
+        Returns:
+            An ExpectationSuiteValidationResult
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+        column_set = set(column_set)
+        columns = set(self.get_table_columns())
+
+        if column_set is None or columns == column_set:
+            return {"success": True, "result": {"observed_value": list(columns)}}
+        else:
+            # unexpected_list contains items from the dataset columns that are not in column_set
+            unexpected_list = list(columns - column_set)
+            # missing_list contains items from column_set that are not in the dataset columns
+            missing_list = list(column_set - columns)
+            # observed_value contains items that are in both column_set and in the dataset columns
+            observed_value = list(column_set.intersection(columns))
+
+            mismatched = {}
+            if len(unexpected_list) > 0:
+                mismatched["unexpected"] = unexpected_list
+            if len(missing_list) > 0:
+                mismatched["missing"] = missing_list
+
+            return_success = {
+                "success": True,
+                "result": {
+                    "observed_value": observed_value,
+                    "details": {"mismatched": mismatched},
+                },
+            }
+            return_failed = {
+                "success": False,
+                "result": {
+                    "observed_value": observed_value,
+                    "details": {"mismatched": mismatched},
+                },
+            }
+
+            if exact_match:
+                return return_failed
+            else:
+                # Failed if there are items in the missing list (but OK to have unexpected_list)
+                if len(missing_list) > 0:
+                    return return_failed
+                # Passed if there are no items in the missing list
+                else:
+                    return return_success
 
     # noinspection PyUnusedLocal
     @DocInherit
