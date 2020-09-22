@@ -6,18 +6,17 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import PandasExecutionEngine
 
 from ...data_asset.util import parse_result_format
-from ..expectation import (
-    ColumnMapDatasetExpectation,
-    Expectation,
-    _format_map_output,
-)
+from ..expectation import ColumnMapDatasetExpectation, Expectation, _format_map_output
 from ..registry import extract_metrics, get_metric_kwargs
 
 
 class ExpectColumnValuesToBeDecreasing(ColumnMapDatasetExpectation):
     map_metric = "map.decreasing"
     metric_dependencies = ("map.decreasing.count", "map.nonnull.count")
-    success_keys = ("strictly", "mostly",)
+    success_keys = (
+        "strictly",
+        "mostly",
+    )
 
     default_kwarg_values = {
         "row_condition": None,
@@ -39,26 +38,26 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapDatasetExpectation):
         metric_dependencies=tuple(),
     )
     def _pandas_map_decreasing(
-            self,
-            series: pd.Series,
-            strictly: Union[bool, None],
-            runtime_configuration: dict = None,
+        self,
+        series: pd.Series,
+        strictly: Union[bool, None],
+        runtime_configuration: dict = None,
     ):
-            series_diff = series.diff()
-            # The first element is null, so it gets a bye and is always treated as True
-            series_diff[series_diff.isnull()] = -1
+        series_diff = series.diff()
+        # The first element is null, so it gets a bye and is always treated as True
+        series_diff[series_diff.isnull()] = -1
 
-            if strictly:
-                return series_diff < 0
-            else:
-                return series_diff <= 0
+        if strictly:
+            return series_diff < 0
+        else:
+            return series_diff <= 0
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
-            self,
-            configuration: ExpectationConfiguration,
-            metrics: dict,
-            runtime_configuration: dict = None,
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: dict,
+        runtime_configuration: dict = None,
     ):
         validation_dependencies = self.get_validation_dependencies(configuration)[
             "metrics"
@@ -76,14 +75,14 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapDatasetExpectation):
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=(
-                            metric_vals.get("map.decreasing.count")
-                            / metric_vals.get("map.nonnull.count")
-                    )
-                    >= mostly,
+                metric_vals.get("map.decreasing.count")
+                / metric_vals.get("map.nonnull.count")
+            )
+            >= mostly,
             element_count=metric_vals.get("map.count"),
             nonnull_count=metric_vals.get("map.nonnull.count"),
             unexpected_count=metric_vals.get("map.nonnull.count")
-                             - metric_vals.get("map.decreasing.count"),
+            - metric_vals.get("map.decreasing.count"),
             unexpected_list=metric_vals.get("map.decreasing.unexpected_values"),
             unexpected_index_list=metric_vals.get("map.is_in.unexpected_index"),
         )

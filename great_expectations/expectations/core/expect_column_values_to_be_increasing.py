@@ -6,18 +6,20 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import PandasExecutionEngine
 
 from ...data_asset.util import parse_result_format
-from ..expectation import (
-    ColumnMapDatasetExpectation,
-    Expectation,
-    _format_map_output,
-)
+from ..expectation import ColumnMapDatasetExpectation, Expectation, _format_map_output
 from ..registry import extract_metrics, get_metric_kwargs
 
 
 class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
     map_metric = "column_values.increasing"
-    metric_dependencies = ("column_values.increasing.count", "column_values.nonnull.count")
-    success_keys = ("strictly", "mostly",)
+    metric_dependencies = (
+        "column_values.increasing.count",
+        "column_values.nonnull.count",
+    )
+    success_keys = (
+        "strictly",
+        "mostly",
+    )
 
     default_kwarg_values = {
         "row_condition": None,
@@ -39,19 +41,19 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         metric_dependencies=tuple(),
     )
     def _pandas_column_values_increasing(
-            self,
-            series: pd.Series,
-            strictly: Union[bool, None],
-            runtime_configuration: dict = None,
+        self,
+        series: pd.Series,
+        strictly: Union[bool, None],
+        runtime_configuration: dict = None,
     ):
-            series_diff = series.diff()
-            # The first element is null, so it gets a bye and is always treated as True
-            series_diff[series_diff.isnull()] = 1
+        series_diff = series.diff()
+        # The first element is null, so it gets a bye and is always treated as True
+        series_diff[series_diff.isnull()] = 1
 
-            if strictly:
-                return series_diff > 0
-            else:
-                return series_diff >= 0
+        if strictly:
+            return series_diff > 0
+        else:
+            return series_diff >= 0
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(

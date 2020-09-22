@@ -35,4 +35,3 @@ def test_expect_column_values_to_be_increasing_impl():
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
     assert result == ExpectationValidationResult(success=False,)
-
