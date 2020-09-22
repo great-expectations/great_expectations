@@ -11,7 +11,7 @@ from great_expectations.expectations.registry import extract_metrics
 
 
 class ExpectColumnStdevToBeBetween(DatasetExpectation):
-    metric_dependencies = ("standard_deviation",)
+    metric_dependencies = ("column.aggregate.standard_deviation", )
     success_keys = ("min_value", "strict_min", "max_value", "strict_max", )
     default_kwarg_values = {
         "min_value": None,

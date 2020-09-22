@@ -327,33 +327,17 @@ class Expectation(ABC, metaclass=MetaExpectation):
 class DatasetExpectation(Expectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser", )
 
-    def get_validation_dependencies(
-        self,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-    ):
-        dependencies = super().get_validation_dependencies(configuration)
-        metric_dependencies = set(self.metric_dependencies)
-
-        dependencies["metrics"] = metric_dependencies
-        # result_format_str = dependencies["result_format"].get("result_format")
-        # if result_format_str == ["BOOLEAN_ONLY"]:
-        #     return dependencies
-        #
-        # metric_dependencies.add("column_values.count")
-        # assert isinstance(
-        #     self.map_metric, str
-        # ), "ColumnMapDatasetExpectation must override get_validation_dependencies or delcare exactly one map_metric"
-        # metric_dependencies.add(self.map_metric + ".unexpected_values")
-        # # TODO:
-        # #
-        # # if ".unexpected_index_list" is a registered metric **for this engine**
-        # if result_format_str in ["BASIC", "SUMMARY"]:
-        #     return dependencies
-        #
-        # metric_dependencies.add(self.map_metric + ".unexpected_rows")
-
-        return dependencies
+    # def get_validation_dependencies(
+    #     self,
+    #     configuration: Optional[ExpectationConfiguration] = None,
+    #     execution_engine: Optional[ExecutionEngine] = None,
+    # ):
+    #     dependencies = super().get_validation_dependencies(configuration)
+    #     metric_dependencies = set(self.metric_dependencies)
+    #
+    #     dependencies["metrics"] = metric_dependencies
+    #
+    #     return dependencies
 
     @staticmethod
     def get_value_set_parser(execution_engine: ExecutionEngine):
