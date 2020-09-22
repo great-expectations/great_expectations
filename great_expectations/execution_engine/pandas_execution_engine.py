@@ -485,9 +485,12 @@ Notes:
                """
         if batch_spec and batch_definition:
             #### IS THIS OK?
+            logger.info(
+                "Both batch_spec and batch_definition were passed in. batch_spec will be used to load the batch"
+            )
             assert isinstance(batch_spec, IDDict)
         elif batch_spec and not batch_definition:
-            logger.info("loading a batch without a batch_definition")
+            logger.info("Loading a batch without a batch_definition")
             batch_definition = {}
         else:
             if not self._data_context:

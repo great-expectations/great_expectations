@@ -75,11 +75,15 @@ class Validator:
 
         """
 
-        self._batch = batch
-        self._execution_engine = execution_engine
         if execution_engine:
+            self._execution_engine = execution_engine
             self._data_context = execution_engine.data_context
             self._execution_engine._validator = self
+
+            if batch:
+                if not execution_engine.batches.get(batch.to_id()):
+                    execution_engine.batches[batch.to_id()] = batch
+                execution_engine._loaded_batch = batch.to_id()
 
         else:
             self._data_context = None
