@@ -657,7 +657,7 @@ class BaseDataContext:
         # TODO: <Alex>Should it not say "ExecutionEnvironments (instead of Datasources)?</Alex>
         """A single holder for all Datasources in this context"""
         return {
-            execution_environment: self.get_execution_environment(execution_environment)
+            execution_environment: self.get_execution_environment(execution_environment_name=execution_environment)
             for execution_environment in self._project_config_with_variables_substituted.execution_environments
         }
 
@@ -1411,25 +1411,6 @@ class BaseDataContext:
             )
         return datasource
 
-    def _build_execution_environment_from_config(self, name, config):
-        # We convert from the type back to a dictionary for purposes of instantiation
-        if isinstance(config, ExecutionEnvironmentConfig):
-            config = executionEnvironmentConfigSchema.dump(config)
-        config.update({"name": name})
-        module_name = "great_expectations.execution_environment"
-        execution_environment = instantiate_class_from_config(
-            config=config,
-            runtime_environment={"data_context": self},
-            config_defaults={"module_name": module_name},
-        )
-        if not execution_environment:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=config["class_name"],
-            )
-        return execution_environment
-
     # TODO: deprecate
     def get_datasource(self, datasource_name: str = "default") -> Datasource:
         """Get the named datasource
@@ -1494,11 +1475,30 @@ class BaseDataContext:
             execution_environment_config
         )
         execution_environment = self._build_execution_environment_from_config(
-            execution_environment_name, execution_environment_config
+            name=execution_environment_name, config=execution_environment_config
         )
         self._cached_execution_environments[
             execution_environment_name
         ] = execution_environment
+        return execution_environment
+
+    def _build_execution_environment_from_config(self, name, config):
+        # We convert from the type back to a dictionary for purposes of instantiation
+        if isinstance(config, ExecutionEnvironmentConfig):
+            config = executionEnvironmentConfigSchema.dump(config)
+        config.update({"name": name})
+        module_name = "great_expectations.execution_environment"
+        execution_environment = instantiate_class_from_config(
+            config=config,
+            runtime_environment={"data_context": self},
+            config_defaults={"module_name": module_name},
+        )
+        if not execution_environment:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=config["class_name"],
+            )
         return execution_environment
 
     def list_expectation_suites(self):
