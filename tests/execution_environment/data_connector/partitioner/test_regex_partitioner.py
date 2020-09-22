@@ -99,7 +99,7 @@ def regex_partitioner_regex_configured_and_sorters_defined_and_named():
         "my_dir/james_20200810_1003.csv",
         "my_dir/alex_20200819_1300.csv",
     ]
-    regex: str = r".*/(.*)_(.*)_(.*).csv"
+    regex: str = r".+\/(.+)_(.+)_(.+)\.csv"
 
     # TODO: <Alex>Will, we do need a data_connector here...</Alex>
     my_partitioner = RegexPartitioner(

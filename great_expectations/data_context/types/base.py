@@ -32,23 +32,23 @@ DEFAULT_USAGE_STATISTICS_URL = (
 class AssetConfig(DictDot):
     def __init__(
         self,
-        partitioner_name,
+        partitioner,
         **kwargs,
     ):
-        self._partitioner_name = partitioner_name
+        self._partitioner = partitioner
         for k, v in kwargs.items():
             setattr(self, k, v)
 
     @property
-    def partitioner_name(self):
-        return self._partitioner_name
+    def partitioner(self):
+        return self._partitioner
 
 
 class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    partitioner_name = fields.String(required=True)
+    partitioner = fields.String(required=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -63,16 +63,25 @@ class AssetConfigSchema(Schema):
 class SorterConfig(DictDot):
     def __init__(
         self,
+        name,
         class_name=None,
         module_name=None,
         orderby="asc",
+        config_params=None,
         **kwargs,
     ):
+        self._name = name
         self._class_name = class_name
         self._module_name = module_name
         self._orderby = orderby
+        if config_params is not None:
+            self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
+
+    @property
+    def name(self):
+        return self._name
 
     @property
     def class_name(self):
@@ -86,14 +95,21 @@ class SorterConfig(DictDot):
     def orderby(self):
         return self._orderby
 
+    @property
+    def config_params(self):
+        return self._config_params
+
 
 class SorterConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
+    name = fields.String(required=True)
     class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.execution_environment.data_connector.partitioner")
+    module_name = fields.String(missing="great_expectations.execution_environment.data_connector.partitioner.sorter")
     orderby = fields.String(missing="asc")
+
+    config_params = fields.Dict(allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -165,7 +181,7 @@ class DataConnectorConfig(DictDot):
     def __init__(
         self,
         class_name,
-        partitioner_name,
+        default_partitioner,
         partitioners,
         assets=None,
         module_name=None,
@@ -174,7 +190,7 @@ class DataConnectorConfig(DictDot):
     ):
         self._class_name = class_name
         self._module_name = module_name
-        self._partitioner_name = partitioner_name
+        self._default_partitioner = default_partitioner
         if partitioners is None:
             partitioners = {}
         self._partitioners = partitioners
@@ -190,8 +206,8 @@ class DataConnectorConfig(DictDot):
         return self._partitioners
 
     @property
-    def partitioner_name(self):
-        return self._partitioner_name
+    def default_partitioner(self):
+        return self._default_partitioner
 
     @property
     def assets(self):
@@ -217,7 +233,7 @@ class DataConnectorConfigSchema(Schema):
     class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.execution_environment.data_connector")
 
-    partitioner_name = fields.String(
+    default_partitioner = fields.String(
         required=True,
         allow_none=False,
     )
@@ -786,5 +802,6 @@ datasourceConfigSchema = DatasourceConfigSchema()
 executionEnvironmentConfigSchema = ExecutionEnvironmentConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
 partitionerConfigSchema = PartitionerConfigSchema()
+sorterConfigSchema = SorterConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()

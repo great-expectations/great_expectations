@@ -57,7 +57,7 @@ class FilesDataConnector(DataConnector):
         return self._assets.keys()
 
     def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
-        partitioner: Partitioner = self.get_partitioner(name=self.partitioner_name)
+        partitioner: Partitioner = self.get_partitioner(name=self.default_partitioner)
         partitioner.paths = self._get_file_paths()
         return partitioner.get_available_partitions(partition_name=partition_name, data_asset_name=data_asset_name)
 

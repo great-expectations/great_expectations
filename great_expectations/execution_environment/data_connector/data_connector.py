@@ -47,7 +47,7 @@ class DataConnector(object):
     recognized_batch_definition_keys = {
         "data_asset_name",
         "partitioners",
-        "partitioner_name",
+        "default_partitioner",
         "execution_environment",
         "data_connector",
         "batch_spec_passthrough",
@@ -93,8 +93,8 @@ class DataConnector(object):
         return self._name
 
     @property
-    def partitioner_name(self) -> str:
-        return self._data_connector_config["partitioner_name"]
+    def default_partitioner(self) -> str:
+        return self._data_connector_config["default_partitioner"]
 
     @property
     def config_params(self) -> dict:
