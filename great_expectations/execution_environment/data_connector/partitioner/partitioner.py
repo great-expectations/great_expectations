@@ -111,12 +111,12 @@ class Partitioner(object):
             config=config,
             runtime_environment={},
             config_defaults={
-                "module_name": "great_expectations.execution_environment.data_connector.partitioer.sorter"
+                "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter"
             },
         )
         if not sorter:
             raise ClassInstantiationError(
-                module_name="great_expectations.execution_environment.data_connector.partitioer.sorter",
+                module_name="great_expectations.execution_environment.data_connector.partitioner.sorter",
                 package_name=None,
                 class_name=config["class_name"],
             )
