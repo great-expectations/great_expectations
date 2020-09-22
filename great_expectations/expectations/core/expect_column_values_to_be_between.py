@@ -45,8 +45,8 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
     @PandasExecutionEngine.column_map_metric(
         metric_name="column_values.is_between",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=(),
-        metric_dependencies=("min_value", "max_value", "strict_min", "strict_max"),
+        metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
+        metric_dependencies=(),
     )
     def _pandas_is_between(
             self,
@@ -58,15 +58,30 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
             allow_cross_type_comparisons = None,
             runtime_configuration: dict = None,
     ):
-        """Checks whether or not column values are between 2 predefined thresholds"""
-        return series.apply(self.is_between, args=(min_value, max_value, strict_min,
-                                                   strict_max, allow_cross_type_comparisons))
+        def is_between(self, val, min_value, max_value, strict_min = None, strict_max = None, allow_cross_type_comparisons = None):
+            """Given minimum and maximum values, checks if a given number is between 2 thresholds"""
+            if min_value is not None and max_value is not None:
+                if allow_cross_type_comparisons:
+                    try:
+                        if strict_min and strict_max:
+                            return (min_value < val) and (val < max_value)
+                        elif strict_min:
+                            return (min_value < val) and (val <= max_value)
+                        elif strict_max:
+                            return (min_value <= val) and (val < max_value)
+                        else:
+                            return (min_value <= val) and (val <= max_value)
+                    except TypeError:
+                        return False
 
-    def is_between(self, val,min_value, max_value, strict_min, strict_max, allow_cross_type_comparisons):
-        """Given minimum and maximum values, checks if a given number is between 2 thresholds"""
-        if min_value is not None and max_value is not None:
-            if allow_cross_type_comparisons:
-                try:
+                else:
+                    if (isinstance(val, str) != isinstance(min_value, str)) or (
+                            isinstance(val, str) != isinstance(max_value, str)
+                    ):
+                        raise TypeError(
+                            "Column values, min_value, and max_value must either be None or of the same type."
+                        )
+
                     if strict_min and strict_max:
                         return (min_value < val) and (val < max_value)
                     elif strict_min:
@@ -75,70 +90,54 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
                         return (min_value <= val) and (val < max_value)
                     else:
                         return (min_value <= val) and (val <= max_value)
-                except TypeError:
-                    return False
 
-            else:
-                if (isinstance(val, str) != isinstance(min_value, str)) or (
-                        isinstance(val, str) != isinstance(max_value, str)
-                ):
-                    raise TypeError(
-                        "Column values, min_value, and max_value must either be None or of the same type."
-                    )
+            elif min_value is None and max_value is not None:
+                if allow_cross_type_comparisons:
+                    try:
+                        if strict_max:
+                            return val < max_value
+                        else:
+                            return val <= max_value
+                    except TypeError:
+                        return False
 
-                if strict_min and strict_max:
-                    return (min_value < val) and (val < max_value)
-                elif strict_min:
-                    return (min_value < val) and (val <= max_value)
-                elif strict_max:
-                    return (min_value <= val) and (val < max_value)
                 else:
-                    return (min_value <= val) and (val <= max_value)
+                    if isinstance(val, str) != isinstance(max_value, str):
+                        raise TypeError(
+                            "Column values, min_value, and max_value must either be None or of the same type."
+                        )
 
-        elif min_value is None and max_value is not None:
-            if allow_cross_type_comparisons:
-                try:
                     if strict_max:
                         return val < max_value
                     else:
                         return val <= max_value
-                except TypeError:
-                    return False
 
-            else:
-                if isinstance(val, str) != isinstance(max_value, str):
-                    raise TypeError(
-                        "Column values, min_value, and max_value must either be None or of the same type."
-                    )
+            elif min_value is not None and max_value is None:
+                if allow_cross_type_comparisons:
+                    try:
+                        if strict_min:
+                            return min_value < val
+                        else:
+                            return min_value <= val
+                    except TypeError:
+                        return False
 
-                if strict_max:
-                    return val < max_value
                 else:
-                    return val <= max_value
+                    if isinstance(val, str) != isinstance(min_value, str):
+                        raise TypeError(
+                            "Column values, min_value, and max_value must either be None or of the same type."
+                        )
 
-        elif min_value is not None and max_value is None:
-            if allow_cross_type_comparisons:
-                try:
                     if strict_min:
                         return min_value < val
                     else:
                         return min_value <= val
-                except TypeError:
-                    return False
 
             else:
-                if isinstance(val, str) != isinstance(min_value, str):
-                    raise TypeError(
-                        "Column values, min_value, and max_value must either be None or of the same type."
-                    )
-
-                if strict_min:
-                    return min_value < val
-                else:
-                    return min_value <= val
-
-        else:
-            return False
+                return False
+        """Checks whether or not column values are between 2 predefined thresholds"""
+        return series.apply(is_between, args=(min_value, max_value, strict_min,
+                                                   strict_max, allow_cross_type_comparisons))
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -161,16 +160,15 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
         max_val = None
 
         # Setting these values if they are available
-        if "min_value" in configuration:
+        if "min_value" in configuration.kwargs:
             min_val = configuration.kwargs["min_value"]
 
-        if "max_value" in configuration:
+        if "max_value" in configuration.kwargs:
             max_val = configuration.kwargs["max_value"]
 
         try:
             # Ensuring Proper interval has been provided
-            assert "min_value" in configuration or "max_value" in configuration, "min_value and max_value " \
-                                                                                 "cannot both be None"
+            assert min_val or max_val, "min_value and max_value cannot both be None"
             assert min_val is None or isinstance(min_val, (float, int)), "Provided min threshold must be a number"
             assert max_val is None or isinstance(max_val, (float, int)), "Provided max threshold must be a number"
 
@@ -189,7 +187,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
             metrics: dict,
             runtime_configuration: dict = None,
     ):
-        """Validates the given data against the set Z Score threshold, returning a nested dictionary documenting the
+        """Validates the given data against a minimum and maximum threshold, returning a nested dictionary documenting the
         validation."""
 
         validation_dependencies = self.get_validation_dependencies(configuration)[
