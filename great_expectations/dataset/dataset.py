@@ -620,8 +620,8 @@ class Dataset(MetaDataset):
             unexpected_list = list(columns - column_set)
             # missing_list contains items from column_set that are not in the dataset columns
             missing_list = list(column_set - columns)
-            # observed_value contains items that are in both column_set and in the dataset columns
-            observed_value = list(column_set.intersection(columns))
+            # observed_value contains items that are in the dataset columns
+            observed_value = list(columns)
 
             mismatched = {}
             if len(unexpected_list) > 0:
