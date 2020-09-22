@@ -3,8 +3,16 @@ from great_expectations.expectations.expectation import ColumnMapDatasetExpectat
 
 class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
     map_metric = "map.value_length_between"
-    metric_dependencies = ("map.value_length_between.count", "map.nonnull.count",)
-    success_keys = ("strictly", "mostly",)
+    metric_dependencies = (
+        "map.value_length_between.count",
+        "map.nonnull.count",
+    )
+    success_keys = (
+        "strictly",
+        "mostly",
+    )
+
+
 #
 #     default_kwarg_values = {
 #         "row_condition": None,

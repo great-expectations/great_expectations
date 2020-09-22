@@ -16,7 +16,9 @@ from great_expectations.execution_environment.types import (
     BatchSpec,
     SqlAlchemyDatasourceTableBatchSpec,
 )
-from great_expectations.expectations.core.expect_column_stdev_to_be_between import ExpectColumnStdevToBeBetween
+from great_expectations.expectations.core.expect_column_stdev_to_be_between import (
+    ExpectColumnStdevToBeBetween,
+)
 
 
 def test_expect_column_stdev_to_be_between_impl():

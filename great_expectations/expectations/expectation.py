@@ -65,7 +65,11 @@ class Expectation(ABC, metaclass=MetaExpectation):
     version = ge_version
     domain_keys = tuple()
     success_keys = tuple()
-    runtime_keys = ("include_config", "catch_exceptions", "result_format",)
+    runtime_keys = (
+        "include_config",
+        "catch_exceptions",
+        "result_format",
+    )
     default_kwarg_values = {
         "include_config": True,
         "catch_exceptions": True,
@@ -325,7 +329,13 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
 
 class DatasetExpectation(Expectation, ABC):
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser", )
+    domain_keys = (
+        "batch_id",
+        "table",
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
 
     # def get_validation_dependencies(
     #     self,
