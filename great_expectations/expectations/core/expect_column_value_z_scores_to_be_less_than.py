@@ -103,7 +103,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             runtime_configuration: dict = None,
     ):
         """Z-Score Metric Function"""
-        # Series conversion
+        # Series conversion - this works
         series = execution_engine.get_domain_dataframe(
                 domain_kwargs=metric_domain_kwargs, batches=batches)
 
@@ -129,9 +129,9 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             runtime_configuration: dict = None,
     ):
         """Checks if values under threshold"""
-        # Currently does not handle columns with some random strings in them: should it?
+        # The series I'm getting does not consist of the z-scores themselves - PROBLEM
         try:
-            under_thresh = series < threshold
+            under_thresh = ((series - series.mean())/series.std()) < threshold
             return pd.DataFrame({"column_values.z_scores.under_threshold": under_thresh})
         except TypeError:
             raise (TypeError("Cannot check if a string lies under a numerical threshold"))
@@ -169,7 +169,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     ):
         """Validates the given data against the set Z Score threshold, returning a nested dictionary documenting the
         validation."""
-        # Obtaining dependencies used to validate the expectation
+        # Obtaining dependencies used to validate the expectation - PROBLEM: MEAN'S METHOD CURRENTLY BEING USED
         validation_dependencies = self.get_validation_dependencies(configuration)[
             "metrics"
         ]
