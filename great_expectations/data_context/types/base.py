@@ -36,7 +36,6 @@ class AssetConfig(DictDot):
         **kwargs,
     ):
         self._partitioner_name = partitioner_name
-
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -72,7 +71,6 @@ class SorterConfig(DictDot):
         self._class_name = class_name
         self._module_name = module_name
         self._orderby = orderby
-
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -110,16 +108,18 @@ class SorterConfigSchema(Schema):
 class PartitionerConfig(DictDot):
     def __init__(
         self,
-        class_name=None,
+        class_name,
         module_name=None,
         sorters=None,
+        config_params=None,
         **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
         if sorters is not None:
             self.sorters = sorters
-
+        if config_params is not None:
+            self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -130,6 +130,10 @@ class PartitionerConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
+
+    @property
+    def config_params(self):
+        return self._config_params
 
 
 class PartitionerConfigSchema(Schema):
@@ -145,6 +149,8 @@ class PartitionerConfigSchema(Schema):
         allow_none=True,
     )
 
+    config_params = fields.Dict(allow_none=True)
+
     @validates_schema
     def validate_schema(self, data, **kwargs):
         pass
@@ -158,11 +164,13 @@ class PartitionerConfigSchema(Schema):
 class DataConnectorConfig(DictDot):
     def __init__(
         self,
-        partitioners,
+        class_name,
         partitioner_name,
+        partitioners,
         assets=None,
-        class_name=None,
         module_name=None,
+        config_params=None,
+        **kwargs
     ):
         self._class_name = class_name
         self._module_name = module_name
@@ -172,6 +180,10 @@ class DataConnectorConfig(DictDot):
         self._partitioners = partitioners
         if assets is not None:
             self._assets = assets
+        if config_params is not None:
+            self._config_params = config_params
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     @property
     def partitioners(self):
@@ -179,7 +191,7 @@ class DataConnectorConfig(DictDot):
 
     @property
     def partitioner_name(self):
-        return self._partitione_name
+        return self._partitioner_name
 
     @property
     def assets(self):
@@ -192,6 +204,10 @@ class DataConnectorConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
+
+    @property
+    def config_params(self):
+        return self._config_params
 
 
 class DataConnectorConfigSchema(Schema):
@@ -219,6 +235,8 @@ class DataConnectorConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
+
+    config_params = fields.Dict(allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -292,8 +310,9 @@ class ExecutionEnvironmentConfig(DictDot):
         self._class_name = class_name
         self._module_name = module_name
         self.execution_engine = execution_engine
-        if data_connectors is not None:
-            self.data_connectors = data_connectors
+        if data_connectors is None:
+            data_connectors = {}
+        self.data_connectors = data_connectors
         if credentials is not None:
             self.credentials = credentials
         if reader_method is not None:
@@ -460,6 +479,7 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
         return data
 
 
+# TODO: <Alex></Alex>
 # TODO: deprecate? keep for backwards compatibility?
 class DatasourceConfigSchema(Schema):
     class Meta:
@@ -764,5 +784,7 @@ class DataContextConfigSchema(Schema):
 dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
 executionEnvironmentConfigSchema = ExecutionEnvironmentConfigSchema()
+dataConnectorConfigSchema = DataConnectorConfigSchema()
+partitionerConfigSchema = PartitionerConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
