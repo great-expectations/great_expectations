@@ -122,43 +122,5 @@ class Partitioner(object):
             )
         return sorter
 
-    # def get_sorter(self, name):
-    #     if name in self._sorters:
-    #         return self._sorters[name]
-    #     elif(
-    #         "sorters" in self._partitioner_config
-    #         and name in self._partitioner_config["sorters"]
-    #     ):
-    #         sorter_config = copy.deepcopy(
-    #             self._partitioner_config["sorters"][name]
-    #         )
-    #     else:
-    #         raise ValueError(
-    #             "Unable to load Sorter %s for Partitioner %s -- no configuration found or invalid configuration."
-    #             % name, self._name
-    #         )
-    #     sorter_config["name"] = name
-    #     sorter = self._build_sorter(**sorter_config)
-    #     self._sorters[name] = sorter
-    #     return sorter
-    #
-    # def _build_sorter(self, **kwargs):
-    #     """Build a Sorter using pattern that uses instate_class_from_config() function"""
-    #     sorter = instantiate_class_from_config(
-    #         config=kwargs,
-    #         runtime_environment={"partitioner": self},
-    #         config_defaults={
-    #             "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter" # <TODO><WILL> confirm if this is the final spot?
-    #         }
-    #     )
-    #
-    #     if not sorter:
-    #         raise ClassInstantiationError(
-    #             module_name="great_expectations.execution_environment.data_connector.partitioner.sorter",
-    #             package_name=None,
-    #             class_name=kwargs["class_name"],
-    #         )
-    #     return sorter
-
     def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
         raise NotImplementedError
