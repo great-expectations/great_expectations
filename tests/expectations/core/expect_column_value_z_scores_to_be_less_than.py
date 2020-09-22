@@ -15,13 +15,13 @@ def test_expect_column_value_z_scores_to_be_less_than_impl():
     df = pd.DataFrame({"a": [1, 2, 3]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "a", "mostly": 1, "threshold": 2, "double_sided": True,}
+        kwargs={"column": "a", "mostly": 1, "threshold": 0, "double_sided": True,}
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     batch = Batch(data=df)
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
-    assert result == ExpectationValidationResult(success=True,)
+    assert result == ExpectationValidationResult(success=False,)
 
 

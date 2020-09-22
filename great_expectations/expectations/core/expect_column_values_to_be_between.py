@@ -45,7 +45,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
     @PandasExecutionEngine.column_map_metric(
         metric_name="column_values.is_between",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
+        metric_value_keys=("min_value", "max_value", "strict_min", "strict_max", "allow_cross_type_comparisons"),
         metric_dependencies=(),
     )
     def _pandas_is_between(
@@ -58,7 +58,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
             allow_cross_type_comparisons = None,
             runtime_configuration: dict = None,
     ):
-        def is_between(self, val, min_value, max_value, strict_min = None, strict_max = None, allow_cross_type_comparisons = None):
+        def is_between(self, val, min_value, max_value, strict_min, strict_max, allow_cross_type_comparisons = None):
             """Given minimum and maximum values, checks if a given number is between 2 thresholds"""
             if min_value is not None and max_value is not None:
                 if allow_cross_type_comparisons:
@@ -136,7 +136,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
             else:
                 return False
         """Checks whether or not column values are between 2 predefined thresholds"""
-        return series.apply(is_between, args=(min_value, max_value, strict_min,
+        return series.apply(is_between, kwargs=(min_value, max_value, strict_min,
                                                    strict_max, allow_cross_type_comparisons))
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
