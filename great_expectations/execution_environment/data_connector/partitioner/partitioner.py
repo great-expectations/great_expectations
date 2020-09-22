@@ -21,9 +21,11 @@ class Partitioner(object):
         "sorters"
     }
 
-    def __init__(self, name: str, data_connector: DataConnector):
+    def __init__(self, name: str, data_connector: DataConnector, **kwargs):
         self._name = name
         self._data_connector = data_connector
+        # TODO: <Alex></Alex>
+        self._partitioner_config = kwargs
 
     @property
     def name(self) -> str:
@@ -33,13 +35,18 @@ class Partitioner(object):
     def data_connector(self) -> DataConnector:
         return self._data_connector
 
+    @property
+    def config_params(self) -> dict:
+        return self._partitioner_config.get("config_params")
+
     def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
         raise NotImplementedError
 
-    def get_available_partition_names(self, data_asset_name: str = None) -> List[str]:
-        return [
-            partition.name for partition in self.get_available_partitions(
-                partition_name=None,
-                data_asset_name=data_asset_name
-            )
-        ]
+    # TODO: <Alex></Alex>
+    # def get_available_partition_names(self, data_asset_name: str = None) -> List[str]:
+    #     return [
+    #         partition.name for partition in self.get_available_partitions(
+    #             partition_name=None,
+    #             data_asset_name=data_asset_name
+    #         )
+    #     ]

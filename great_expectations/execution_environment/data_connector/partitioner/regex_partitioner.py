@@ -24,16 +24,18 @@ class RegexPartitioner(Partitioner):
         self,
         data_connector: DataConnector,
         name: str,
-        paths: List[str],
-        regex: str = None,
+        # paths: List[str] = None,
+        # TODO: <Alex>Need a better default (for some meaningful partitioning, if possible).</Alex>
+        # regex: str = None,
+        # TODO: <Alex>This needs to go into config, if not there already, or be set to False permanently (per Abe): Discuss with Will.</Alex>
         allow_multifile_partitions: bool = False,
-        sorters: List[Sorter] = None
+        sorters: List[Sorter] = None,
+        **kwargs
     ):
         logger.debug("Constructing RegexPartitioner {!r}".format(name))
-        super().__init__(name=name, data_connector=data_connector)
+        super().__init__(name=name, data_connector=data_connector, **kwargs)
 
-        self._paths = paths
-        self._regex = regex
+        self._regex = self.config_params["regex"]
         self._allow_multifile_partitions = allow_multifile_partitions
         if sorters is None:
             sorters = []
@@ -81,7 +83,6 @@ class RegexPartitioner(Partitioner):
             partition_name=partition_name
         )
 
-    # TODO: <Alex>Implement "UpSert" using Partition name for guidance.  Make this part of DataConnector.  No Caching HERE!</Alex>
     def _find_available_partitions(self, data_asset_name: str = None):
         partitions: List[Partition] = []
         for path in self.paths:
@@ -94,24 +95,26 @@ class RegexPartitioner(Partitioner):
             partitions = sorter.get_sorted_partitions(partitions=partitions)
         self.data_connector.update_partitions_cache(partitions=partitions, data_asset_name=data_asset_name)
 
-    def _find_partitions_for_path(self, path: str) -> Partition:
+    def _find_partitions_for_path(self, path: str) -> Union[Partition, None]:
         if self.regex is None:
             raise ValueError("Regex is not defined")
 
         matches: Union[re.Match, None] = re.match(self.regex, path)
         if matches is None:
             logger.warning(f'No match found for path: "{path}".')
-            raise ValueError(f'No match found for path: "{path}".')
+            # TODO: <Alex>Why not just skip with a warning?  Exiting seems too strong...  Discuss with Will.</Alex>
+            # raise ValueError(f'No match found for path: "{path}".')
+            return None
         else:
             partition_definition: dict = {}
             groups: tuple = matches.groups()
-            # TODO: <Alex>TODO: Allow number of sorters to be <= number of groups</Alex>
+            # TODO: <Alex>TODO: Allow number of sorters to be <= number of groups -- this will impact Configuration</Alex>
             if len(self.sorters) == 0:
                 for idx, group in enumerate(groups):
                     part_name = f"{RegexPartitioner.DEFAULT_GROUP_NAME}_{idx}"
                     partition_definition[part_name] = group
             else:
-                # TODO: <Alex>TODO: Allow number of sorters to be <= number of groups</Alex>
+                # TODO: <Alex>TODO: Allow number of sorters to be <= number of groups -- this will impact Configuration</Alex>
                 part_names: list = [sorter.name for sorter in self.sorters]
                 if len(part_names) != len(groups):
                     logger.warning(
