@@ -16,7 +16,7 @@ class Batch(DictDot):
         batch_kwargs=None,
         batch_spec=None,
         datasource_name=None,
-        execution_environment_name=None,
+        execution_engine=None,
     ):
         if not batch_markers:
             batch_markers = BatchMarkers(
@@ -35,15 +35,15 @@ class Batch(DictDot):
         self._batch_parameters = batch_parameters
         self._batch_definition = batch_definition
         self._data_context = data_context
-        self._execution_environment_name = execution_environment_name
+        self._execution_engine = execution_engine
 
     @property
     def datasource_name(self):
         return self._datasource_name
 
     @property
-    def execution_environment_name(self):
-        return self._execution_environment_name
+    def execution_engine(self):
+        return self._execution_engine
 
     @property
     def batch_kwargs(self):
