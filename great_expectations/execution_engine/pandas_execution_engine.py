@@ -28,6 +28,7 @@ from great_expectations.validator.validator import Validator
 
 from ..core import IDDict
 from ..core.batch import Batch, BatchMarkers
+from ..core.id_dict import BatchSpec
 from ..datasource.pandas_datasource import HASH_THRESHOLD
 from ..exceptions import BatchSpecError, ValidationError
 from ..exceptions.metric_exceptions import MetricError
@@ -488,7 +489,7 @@ Notes:
             logger.info(
                 "Both batch_spec and batch_definition were passed in. batch_spec will be used to load the batch"
             )
-            assert isinstance(batch_spec, IDDict)
+            assert isinstance(batch_spec, BatchSpec)
         elif batch_spec and not batch_definition:
             logger.info("Loading a batch without a batch_definition")
             batch_definition = {}

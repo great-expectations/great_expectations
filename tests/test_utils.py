@@ -18,7 +18,6 @@ from great_expectations.core import (
     ExpectationSuite,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
-    IDDict,
 )
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.util import (
@@ -32,6 +31,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_environment.types import (
+    BatchSpec,
     SqlAlchemyDatasourceBatchSpec,
     SqlAlchemyDatasourceTableBatchSpec,
 )
@@ -642,7 +642,7 @@ def get_test_batch(
         return PandasExecutionEngine(caching=caching).load_batch(
             in_memory_dataset=df,
             batch_definition={"data_asset_name": "test", "partition_name": table_name},
-            batch_spec=IDDict(
+            batch_spec=BatchSpec(
                 {
                     "ge_load_time": datetime.datetime.now(
                         datetime.timezone.utc
@@ -1013,7 +1013,7 @@ def get_test_batch(
         return SparkDFExecutionEngine(caching=caching).load_batch(
             in_memory_dataset=spark_df,
             batch_definition={"data_asset_name": "test", "partition_name": table_name},
-            batch_spec=IDDict(
+            batch_spec=BatchSpec(
                 {
                     "ge_load_time": datetime.datetime.now(
                         datetime.timezone.utc
@@ -1285,7 +1285,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_decreasing",
             "expect_column_value_lengths_to_be_between",
             "expect_column_value_lengths_to_equal",
-            # "expect_column_values_to_match_regex",
+            "expect_column_values_to_match_regex",
             "expect_column_values_to_not_match_regex",
             "expect_column_values_to_match_regex_list",
             "expect_column_values_to_not_match_regex_list",
