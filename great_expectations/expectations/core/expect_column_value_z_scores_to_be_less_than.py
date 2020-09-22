@@ -71,8 +71,8 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
                 :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
     """
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    map_metric = "column_values.z_scores.over_threshold"
-    metric_dependencies = ("column.aggregate.mean", "column.aggregate.standard_deviation", "column_values.nonnull.count", "column.z_scores")
+    map_metric = "column_values.z_scores.under_threshold"
+    metric_dependencies = ("column_values.z_scores.under_threshold.count","column.aggregate.mean", "column.aggregate.standard_deviation", "column_values.nonnull.count", "column.z_scores")
     success_keys = ("threshold", "double_sided", "mostly")
 
     # Default values
@@ -117,24 +117,24 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             raise(TypeError("Cannot complete Z-score calculations on a non-numerical column."))
 
     @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.z_scores.over_threshold",
+        metric_name="column_values.z_scores.under_threshold",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("threshold",),
         metric_dependencies=("column.z_scores",),
     )
-    def _pandas_over_threshold(
+    def _pandas_under_threshold(
             self,
             series: pd.Series,
             threshold,
             runtime_configuration: dict = None,
     ):
-        """Z-Score Metric Function"""
+        """Checks if values under threshold"""
         # Currently does not handle columns with some random strings in them: should it?
         try:
-            over_thresh = series > threshold
-            return pd.DataFrame({"column_values.z_scores.over_threshold": over_thresh})
+            under_thresh = series < threshold
+            return pd.DataFrame({"column_values.z_scores.under_threshold": under_thresh})
         except TypeError:
-            raise (TypeError("Cannot check if a string lies over a numerical threshold"))
+            raise (TypeError("Cannot check if a string lies under a numerical threshold"))
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -194,14 +194,14 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             result_format=parse_result_format(result_format),
 
             # Success = Ratio of successful nonnull values > mostly?
-            success=(metric_vals.get("column_values.z_scores.over_threshold.count") / metric_vals.get(
+            success=(metric_vals.get("column_values.z_scores.under_threshold.count") / metric_vals.get(
                 "column_values.nonull.count"))
                     >= mostly,
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.z_scores.over_threshold.unexpected_count"),
-            unexpected_list=metric_vals.get("column_values.z_scores.over_threshold.unexpected_values"),
-            unexpected_index_list=metric_vals.get("column_values.z_scores.over_threshold.unexpected_index"),
+            unexpected_count=metric_vals.get("column_values.z_scores.under_threshold.unexpected_count"),
+            unexpected_list=metric_vals.get("column_values.z_scores.under_threshold.unexpected_values"),
+            unexpected_index_list=metric_vals.get("column_values.z_scores.under_threshold.unexpected_index"),
         )
 
 

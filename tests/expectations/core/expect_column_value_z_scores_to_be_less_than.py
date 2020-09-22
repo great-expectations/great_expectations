@@ -12,10 +12,10 @@ from great_expectations.expectations.core.expect_column_value_z_scores_to_be_les
 
 
 def test_expect_column_value_z_scores_to_be_less_than_impl():
-    df = pd.DataFrame({"a": [1, 2, 3]})
+    df = pd.DataFrame({"a": [1, 5, 22, 3, 5]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "a", "mostly": 1, "threshold": 0, "double_sided": True,}
+        kwargs={"column": "a", "mostly": .9, "threshold": 1, "double_sided": True,}
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     batch = Batch(data=df)
