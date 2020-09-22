@@ -613,7 +613,9 @@ class Dataset(MetaDataset):
         column_set = set(column_set)
         columns = set(self.get_table_columns())
 
-        if column_set is None or columns == column_set:
+        if (
+            (column_set is None) and (exact_match is not True)
+        ) or columns == column_set:
             return {"success": True, "result": {"observed_value": list(columns)}}
         else:
             # unexpected_list contains items from the dataset columns that are not in column_set
