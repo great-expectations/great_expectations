@@ -35,7 +35,7 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
     return None
 
 
-class ExpectationValidationResult(object):
+class ExpectationValidationResult:
     def __init__(
         self,
         success=None,
@@ -372,4 +372,4 @@ class ExpectationSuiteValidationResultSchema(Schema):
 
 
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
-expectationValidationResultSchema = ExpectationSuiteValidationResultSchema()
+expectationValidationResultSchema = ExpectationValidationResultSchema()
