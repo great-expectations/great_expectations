@@ -10,36 +10,30 @@ logger = logging.getLogger(__name__)
 
 
 class RegexPartitioner(Partitioner):
-
+    # TODO: <Alex>What makes sense to have here, or is this even needed?</Alex>
     recognized_batch_parameters = {
         "regex",
         "sorters",
     }
 
     # defaults
-    DEFAULT_DELIMITER = "-"
-    DEFAULT_GROUP_NAME = "group"
+    DEFAULT_DELIMITER: str = "-"
+    DEFAULT_GROUP_NAME: str = "group"
 
     def __init__(
         self,
         data_connector: DataConnector,
         name: str,
-        # paths: List[str] = None,
-        # TODO: <Alex>Need a better default (for some meaningful partitioning, if possible).</Alex>
-        # regex: str = None,
-        # TODO: <Alex>This needs to go into config, if not there already, or be set to False permanently (per Abe): Discuss with Will.</Alex>
-        allow_multifile_partitions: bool = False,
-        sorters: List[Sorter] = None,
         **kwargs
     ):
         logger.debug("Constructing RegexPartitioner {!r}".format(name))
         super().__init__(name=name, data_connector=data_connector, **kwargs)
 
-        self._regex = self.config_params["regex"]
-        self._allow_multifile_partitions = allow_multifile_partitions
-        if sorters is None:
-            sorters = []
-        self._sorters = sorters
+        self._regex = self.config_params.get("regex") \
+            or r"^((19|20)\d\d[- /.]?(0[1-9]|1[012])[- /.]?(0[1-9]|[12][0-9]|3[01])_(.*))\.csv"
+        self._allow_multifile_partitions = self.config_params.get("allow_multifile_partitions")
+
+        self._paths = None
 
     @property
     def paths(self) -> List[str]:
@@ -53,21 +47,9 @@ class RegexPartitioner(Partitioner):
     def regex(self) -> str:
         return self._regex
 
-    @regex.setter
-    def regex(self, regex: str):
-        self._regex = regex
-
     @property
     def allow_multifile_partitions(self) -> bool:
         return self._allow_multifile_partitions
-
-    @allow_multifile_partitions.setter
-    def allow_multifile_partitions(self, allow_multifile_partitions: bool):
-        self._allow_multifile_partitions = allow_multifile_partitions
-
-    @property
-    def sorters(self) -> List[Sorter]:
-        return self._sorters
 
     def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
         cached_partitions: Union[List[Partition], Dict[str, Partition]] = self.data_connector.get_cached_partitions(
@@ -102,8 +84,6 @@ class RegexPartitioner(Partitioner):
         matches: Union[re.Match, None] = re.match(self.regex, path)
         if matches is None:
             logger.warning(f'No match found for path: "{path}".')
-            # TODO: <Alex>Why not just skip with a warning?  Exiting seems too strong...  Discuss with Will.</Alex>
-            # raise ValueError(f'No match found for path: "{path}".')
             return None
         else:
             partition_definition: dict = {}

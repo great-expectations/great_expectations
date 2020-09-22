@@ -14,21 +14,17 @@ class Sorter(object):
     Sorter help
     """
 
-    def __init__(self, name: str, **kwargs):
+    def __init__(self, name: str, orderby: str, **kwargs):
         self._name = name
         # TODO: <Alex>We need to make sure that this is consistent with default "orderby" value from SorterConfig</Alex>
-        orderby: str = kwargs.get("orderby")
-        if orderby == "asc":
+        if orderby is None or orderby == "asc":
             reverse = False
         elif orderby == "desc":
             reverse = True
-        elif orderby is None:
-            reverse = False
         else:
             raise ValueError(f'Illegal sort order "{orderby}" for attribute "{name}".')
-        if orderby:
-            self._orderby = orderby
         self._reverse = reverse
+        self._sorter_config = kwargs
 
     def get_sorted_partitions(self, partitions: List[Partition]) -> List[Partition]:
         return sorted(partitions, key=self._verify_sorting_directives_and_get_partition_key, reverse=self.reverse)
@@ -47,13 +43,17 @@ class Sorter(object):
         return self._name
 
     @property
-    def orderby(self) -> str:
-        return self._orderby
-
-    @property
     def reverse(self) -> bool:
         return self._reverse
 
+    @property
+    def config_params(self) -> dict:
+        return self._sorter_config.get("config_params")
+
     def __repr__(self):
-        repr = {'name': self.name, 'orderby': self.orderby, 'reverse': self.reverse, 'type': type(self).__name__}
-        return str(repr)
+        doc_fields_dict: dict = {
+            "name": {self.name},
+            "reverse": self.reverse,
+            "type": type(self).__name__
+        }
+        return str(doc_fields_dict)

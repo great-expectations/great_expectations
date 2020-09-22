@@ -43,9 +43,9 @@ class DateTimeSorter(Sorter):
     DateTimeSorter help
     """
     def __init__(self, name: str, **kwargs):
-        datetime_format: str = kwargs.get("datetime_format")
-        self._datetime_format = datetime_format
         super().__init__(name=name, **kwargs)
+
+        self._datetime_format = self.config_params.get("datetime_format")
 
     def get_partition_key(self, partition: Partition) -> Any:
         partition_definition: dict = partition.definition

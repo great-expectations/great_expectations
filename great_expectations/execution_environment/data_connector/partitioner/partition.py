@@ -37,4 +37,10 @@ class Partition(object):
         return False
 
     def __repr__(self):
-        return f"{self.name}: {self.definition} ; source: {self.source}"
+        doc_fields_dict: dict = {
+            "name": {self.name},
+            "definition": self.definition,
+            "source": self.source,
+            "type": type(self).__name__
+        }
+        return str(doc_fields_dict)
