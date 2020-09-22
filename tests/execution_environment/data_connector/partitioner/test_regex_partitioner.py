@@ -6,10 +6,10 @@ import pytest
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner.regex_partitioner import RegexPartitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.execution_environment.data_connector.partitioner.lexicographic_sorter import LexicographicSorter
-from great_expectations.execution_environment.data_connector.partitioner.date_time_sorter import DateTimeSorter
-from great_expectations.execution_environment.data_connector.partitioner.numeric_sorter import NumericSorter
-from great_expectations.execution_environment.data_connector.partitioner.custom_list_sorter import CustomListSorter
+from great_expectations.execution_environment.data_connector.partitioner.sorter.lexicographic_sorter import LexicographicSorter
+from great_expectations.execution_environment.data_connector.partitioner.sorter.date_time_sorter import DateTimeSorter
+from great_expectations.execution_environment.data_connector.partitioner.sorter.numeric_sorter import NumericSorter
+from great_expectations.execution_environment.data_connector.partitioner.sorter.custom_list_sorter import CustomListSorter
 
 from .reference_list import ReferenceListForTests
 
@@ -85,7 +85,7 @@ def test_regex_partitioner_only_regex_configured():
     ]
 
 
-def test_regex_partitioner_regex_configured_and_sorters_defined_and_named():
+def regex_partitioner_regex_configured_and_sorters_defined_and_named():
     batch_paths: list = [
         "my_dir/alex_20200809_1000.csv",
         "my_dir/eugene_20200809_1500.csv",
@@ -225,8 +225,8 @@ def test_regex_partitioner_with_periodic_table():
     )
     my_partitioner.regex = regex
     # catch the ValueError
-     with pytest.raises(ValueError):
-         returned_partitions = my_partitioner.get_available_partitions()
+    with pytest.raises(ValueError):
+        returned_partitions = my_partitioner.get_available_partitions()
 
 
 def test_regex_partitioner_with_periodic_table_allow_multifile_partitions_flag():

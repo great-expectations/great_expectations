@@ -4,7 +4,7 @@ from typing import Any
 import logging
 
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.execution_environment.data_connector.partitioner.sorter import Sorter
+from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 
 logger = logging.getLogger(__name__)
 

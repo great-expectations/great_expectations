@@ -53,3 +53,7 @@ class Sorter(object):
     @property
     def reverse(self) -> bool:
         return self._reverse
+
+    def __repr__(self):
+        repr = {'name': self.name, 'orderby': self.orderby, 'reverse': self.reverse, 'type': type(self).__name__}
+        return str(repr)

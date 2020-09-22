@@ -3,12 +3,11 @@
 import logging
 
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.execution_environment.data_connector.partitioner.sorter import Sorter
+from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 
 from great_expectations.util import(
     is_numeric,
-    is_int,
-    is_float
+    is_int
 )
 
 from typing import Any
