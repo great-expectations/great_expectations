@@ -6,7 +6,10 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.execution_engine import PandasExecutionEngine, SparkDFExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.expectations.core.expect_column_values_to_be_increasing import (
     ExpectColumnValuesToBeIncreasing,
 )
@@ -78,12 +81,9 @@ def test_spark_expect_column_values_to_be_increasing_impl():
     expectation = ExpectColumnValuesToBeIncreasing(expectationConfiguration)
     myengine = SparkDFExecutionEngine()
     batch = myengine.load_batch(
-        batch_definition={
-            "data_asset_name": "foo",
-            "partition_name": "bar"
-        },
+        batch_definition={"data_asset_name": "foo", "partition_name": "bar"},
         batch_spec=BatchSpec({"blarg": "bah"}),
-        in_memory_dataset=df
+        in_memory_dataset=df,
     )
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=myengine

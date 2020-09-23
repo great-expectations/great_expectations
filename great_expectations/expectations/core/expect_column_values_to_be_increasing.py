@@ -4,7 +4,10 @@ from typing import Optional, Union
 import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine, SparkDFExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 
 from ...data_asset.util import parse_result_format
 from ..expectation import ColumnMapDatasetExpectation, Expectation, _format_map_output
@@ -43,17 +46,14 @@ except ImportError as e:
         "Unable to load spark context; install optional spark dependency for support."
     )
 
+
 class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
     map_metric = "column_values.increasing"
     metric_dependencies = (
         "column_values.increasing.count",
         "column_values.nonnull.count",
     )
-    success_keys = (
-        "strictly",
-        "mostly",
-        "parse_strings_as_datetimes"
-    )
+    success_keys = ("strictly", "mostly", "parse_strings_as_datetimes")
 
     default_kwarg_values = {
         "row_condition": None,
@@ -63,7 +63,7 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
-        "parse_strings_as_datetimes": None
+        "parse_strings_as_datetimes": None,
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
@@ -74,7 +74,7 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("strictly",),
         metric_dependencies=tuple(),
-        filter_column_isnull=True
+        filter_column_isnull=True,
     )
     def _pandas_column_values_increasing(
         self,
@@ -120,8 +120,8 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
 
         data = (
             data.withColumn("constant", lit("constant"))
-                .withColumn("lag", lag(data[0]).over(Window.orderBy(col("constant"))))
-                .withColumn("diff", data[0] - col("lag"))
+            .withColumn("lag", lag(data[0]).over(Window.orderBy(col("constant"))))
+            .withColumn("diff", data[0] - col("lag"))
         )
 
         # replace lag first row null with 1 so that it is not flagged as fail
