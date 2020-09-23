@@ -3,7 +3,7 @@ from datetime import datetime
 from functools import lru_cache, wraps
 from itertools import zip_longest
 from numbers import Number
-from typing import Any, List, Set, Union
+from typing import Any, List, Optional, Set, Union
 
 import numpy as np
 import pandas as pd
@@ -568,8 +568,8 @@ class Dataset(MetaDataset):
     @DataAsset.expectation(["column_set", "exact_match"])
     def expect_table_columns_to_match_set(
         self,
-        column_set: Union[Set[str], List[str]],
-        exact_match: bool = True,
+        column_set: Optional[Union[Set[str], List[str]]],
+        exact_match: Optional[bool] = True,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -610,7 +610,7 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
-        column_set = set(column_set)
+        column_set = set(column_set) if column_set is not None else set()
         columns = set(self.get_table_columns())
 
         if (
