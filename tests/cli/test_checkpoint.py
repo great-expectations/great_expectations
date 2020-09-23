@@ -606,7 +606,7 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "Validation Succeeded!" in stdout
+    assert "Validation succeeded!" in stdout
 
     assert mock_emit.call_count == 4
     usage_emits = mock_emit.call_args_list
@@ -648,7 +648,7 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     stdout = result.stdout
     print(stdout)
     assert result.exit_code == 1
-    assert "Validation Failed!" in stdout
+    assert "Validation failed!" in stdout
 
     assert mock_emit.call_count == 4
     usage_emits = mock_emit.call_args_list
@@ -837,7 +837,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     status, output = subprocess.getstatusoutput(cmdstring)
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
     assert status == 0
-    assert output == "Validation Succeeded!"
+    assert output == "Validation succeeded!"
 
 
 def test_checkpoint_script_happy_path_executable_failed_validation(
@@ -888,7 +888,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
     status, output = subprocess.getstatusoutput(cmdstring)
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
     assert status == 1
-    assert output == "Validation Failed!"
+    assert output == "Validation failed!"
 
 
 def _write_checkpoint_dict_to_file(bad, checkpoint_file_path):
