@@ -2310,7 +2310,7 @@
     }
   },
   {
-    "expectation_type": "expect_multicolumn_values_to_be_unique",
+    "expectation_type": "expect_select_column_values_to_be_unique_within_record",
     "kwargs": {
       "column_list": [
         "w",
@@ -2319,7 +2319,7 @@
     }
   },
   {
-    "expectation_type": "expect_multicolumn_values_to_be_unique",
+    "expectation_type": "expect_select_column_values_to_be_unique_within_record",
     "kwargs": {
       "column_list": [
         "w",
@@ -2329,7 +2329,7 @@
     }
   },
   {
-    "expectation_type": "expect_multicolumn_values_to_be_unique",
+    "expectation_type": "expect_select_column_values_to_be_unique_within_record",
     "kwargs": {
       "column_list": [
         "a",
@@ -2338,7 +2338,7 @@
     }
   },
   {
-    "expectation_type": "expect_multicolumn_values_to_be_unique",
+    "expectation_type": "expect_select_column_values_to_be_unique_within_record",
     "kwargs": {
       "column_list": [
         "a",

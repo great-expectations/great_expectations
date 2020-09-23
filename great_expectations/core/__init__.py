@@ -1082,12 +1082,26 @@ class ExpectationConfiguration(DictDot):
                 "catch_exceptions": False,
             },
         },
-        "expect_multicolumn_values_to_be_unique": {
+        "expect_select_column_values_to_be_unique_within_record": {
             "domain_kwargs": ["column_list", "row_condition", "condition_parser"],
-            "success_kwargs": ["ignore_row_if"],
+            "success_kwargs": ["ignore_row_if", "mostly"],
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
+                "mostly": None,
+                "ignore_row_if": "all_values_are_missing",
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_compound_columns_to_be_unique": {
+            "domain_kwargs": ["column_list", "row_condition", "condition_parser"],
+            "success_kwargs": ["ignore_row_if", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
                 "ignore_row_if": "all_values_are_missing",
                 "result_format": "BASIC",
                 "include_config": True,
