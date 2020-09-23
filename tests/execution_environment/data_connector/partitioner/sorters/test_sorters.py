@@ -31,12 +31,15 @@ def test_sorter_instantiation_simple():
     assert my_lex.name == "lex"
     assert my_lex.reverse is True
 
+    sorter_params: dict = {'config_params': {
+        'datetime_format': '%Y%m%d',
+    }}
     # DateTimeSorter
-    my_dt = DateTimeSorter(name="dt", orderby="desc", datetime_format='yyyymmdd')
+    my_dt = DateTimeSorter(name="dt", orderby="desc", **sorter_params)
     assert isinstance(my_dt, DateTimeSorter)
     assert my_dt.name == "dt"
     assert my_dt.reverse is True
-    assert my_dt.config_params["datetime_format"] == 'yyyymmdd'
+    assert my_dt.config_params["datetime_format"] == '%Y%m%d'
 
     # NumericSorter
     my_num = NumericSorter(name="num", orderby="asc")
@@ -45,7 +48,10 @@ def test_sorter_instantiation_simple():
     assert my_num.reverse is False
 
     # CustomListSorter
-    my_custom = CustomListSorter(name="custom", orderby="asc", reference_list=['a', 'b', 'c'])
+    sorter_params: dict = {'config_params': {
+        'reference_list': ['a', 'b', 'c'],
+    }}
+    my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
     assert isinstance(my_custom, CustomListSorter)
     assert my_custom.name == "custom"
     assert my_custom.reverse is False
