@@ -17,9 +17,9 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectTableColumnCountToBeBetween(DatasetExpectation):
+class ExpectTableColumnCountToEqual(DatasetExpectation):
     metric_dependencies = ("columns.count",)
-    success_keys = ("min_value", "max_value", "mostly",)
+    success_keys = ("value",)
 
     default_kwarg_values = {
         "row_condition": None,
@@ -50,7 +50,7 @@ class ExpectTableColumnCountToBeBetween(DatasetExpectation):
             metrics: dict,
             runtime_configuration: dict = None,
     ):
-        """Column Count Metric Function"""
+        """Column count metric function"""
         df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches)
 
@@ -59,7 +59,7 @@ class ExpectTableColumnCountToBeBetween(DatasetExpectation):
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        neccessary configuration arguments have been provided for the validation of the expectation.
+        necessary configuration arguments have been provided for the validation of the expectation.
 
         Args:
             configuration (OPTIONAL[ExpectationConfiguration]): \
@@ -73,28 +73,13 @@ class ExpectTableColumnCountToBeBetween(DatasetExpectation):
         if configuration is None:
             configuration = self.configuration
 
-        min_val = None
-        max_val = None
-
-        # Setting these values if they are available
-        if "min_value" in configuration.kwargs:
-            min_val = configuration.kwargs["min_value"]
-
-        if "max_value" in configuration.kwargs:
-            max_val = configuration.kwargs["max_value"]
-
+        # Ensuring that a proper value has been provided
         try:
-            # Ensuring Proper interval has been provided
-            assert min_val or max_val, "min_value and max_value cannot both be None"
-            assert min_val is None or isinstance(min_val, (float, int)), "Provided min threshold must be a number"
-            assert max_val is None or isinstance(max_val, (float, int)), "Provided max threshold must be a number"
+            assert "value" in configuration.kwargs, "An expected column count must be provided"
+            assert isinstance(configuration.kwargs["value"], int), "Provided threshold must be an integer"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-
-        if min_val is not None and max_val is not None and min_val > max_val:
-            raise InvalidExpectationConfigurationError("Minimum Threshold cannot be larger than Maximum Threshold")
-
         return True
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
@@ -104,7 +89,7 @@ class ExpectTableColumnCountToBeBetween(DatasetExpectation):
             metrics: dict,
             runtime_configuration: dict = None,
     ):
-        """Validates the given data against the set minimum and maximum value thresholds for the Column Count"""
+        """Validates given column count against expected value"""
         # Obtaining dependencies used to validate the expectation
         validation_dependencies = self.get_validation_dependencies(configuration)[
             "metrics"
@@ -113,22 +98,10 @@ class ExpectTableColumnCountToBeBetween(DatasetExpectation):
         column_count = metric_vals.get("columns.count")
 
         # Obtaining components needed for validation
-        min_value = self.get_success_kwargs(configuration).get("min_value")
-        max_value = self.get_success_kwargs(configuration).get("max_value")
+        value = self.get_success_kwargs(configuration).get("value")
 
-        # Checking if mean lies between thresholds
-        if min_value is not None:
-            above_min = column_count >= min_value
-        else:
-            above_min = True
-
-        if max_value is not None:
-            below_max = column_count <= max_value
-        else:
-            below_max = True
-
-        success = above_min and below_max
-
+        # Checking if the column count is equivalent to value
+        success = (column_count == value)
         return {"success": success, "result": {"observed_value": column_count}}
 
 
