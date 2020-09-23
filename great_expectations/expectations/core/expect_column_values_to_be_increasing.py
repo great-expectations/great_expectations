@@ -97,20 +97,16 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         metric_value_keys=("strictly",),
         metric_dependencies=tuple(),
     )
-    def _spark_in_set(
+    def _spark_column_values_increasing(
         self,
         data: "pyspark.sql.DataFrame",
         column: str,
         strictly: Union[list, set],
         runtime_configuration: dict = None,
     ):
-        import pyspark.sql.functions as F
-
-        # string column name
-        column_name = column.schema.names[0]
         # check if column is any type that could have na (numeric types)
         na_types = [
-            isinstance(column.schema[column_name].dataType, typ)
+            isinstance(data.schema[column].dataType, typ)
             for typ in [
                 sparktypes.LongType,
                 sparktypes.DoubleType,
@@ -120,26 +116,26 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
 
         # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
         if any(na_types):
-            column = column.filter(~isnan(column[0]))
+            data = data.filter(~isnan(data[0]))
 
-        column = (
-            column.withColumn("constant", lit("constant"))
-                .withColumn("lag", lag(column[0]).over(Window.orderBy(col("constant"))))
-                .withColumn("diff", column[0] - col("lag"))
+        data = (
+            data.withColumn("constant", lit("constant"))
+                .withColumn("lag", lag(data[0]).over(Window.orderBy(col("constant"))))
+                .withColumn("diff", data[0] - col("lag"))
         )
 
         # replace lag first row null with 1 so that it is not flagged as fail
-        column = column.withColumn(
+        data = data.withColumn(
             "diff", when(col("diff").isNull(), 1).otherwise(col("diff"))
         )
 
         if strictly:
-            return column.withColumn(
+            return data.withColumn(
                 "__success", when(col("diff") >= 1, lit(True)).otherwise(lit(False))
             )
 
         else:
-            return column.withColumn(
+            return data.withColumn(
                 "__success", when(col("diff") >= 0, lit(True)).otherwise(lit(False))
             )
 
