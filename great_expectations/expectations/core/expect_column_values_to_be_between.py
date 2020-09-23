@@ -45,7 +45,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
     @PandasExecutionEngine.column_map_metric(
         metric_name="column_values.is_between",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("min_value", "max_value", "strict_min", "strict_max", "allow_cross_type_comparisons"),
+        metric_value_keys=("min_value", "max_value", "strict_min", "strict_max", "allow_cross_type_comparisons", "parse_strings_as_datetimes"),
         metric_dependencies=(),
     )
     def _pandas_is_between(
@@ -56,10 +56,45 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
             strict_min = None,
             strict_max = None,
             allow_cross_type_comparisons = None,
+            parse_strings_as_datetimes = None,
             runtime_configuration: dict = None,
     ):
-        def is_between(self, val, min_value, max_value, strict_min, strict_max, allow_cross_type_comparisons = None):
-            """Given minimum and maximum values, checks if a given number is between 2 thresholds"""
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        # if strict_min and min_value:
+        #     min_value += tolerance
+        #
+        # if strict_max and max_value:
+        #     max_value -= tolerance
+
+        if parse_strings_as_datetimes:
+            # tolerance = timedelta(days=tolerance)
+            if min_value:
+                min_value = self.parse(min_value)
+
+            if max_value:
+                max_value = self.parse(max_value)
+
+            try:
+                temp_column = series.map(self.parse)
+            except TypeError:
+                temp_column = series
+
+        else:
+            temp_column = series
+
+        if min_value is not None and max_value is not None and min_value > max_value:
+            raise ValueError("min_value cannot be greater than max_value")
+
+        def is_between(val):
+            # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
+            # Ensure types can be compared since some types in Python 3 cannot be logically compared.
+            # print type(val), type(min_value), type(max_value), val, min_value, max_value
+
+            if type(val) is None:
+                return False
+
             if min_value is not None and max_value is not None:
                 if allow_cross_type_comparisons:
                     try:
@@ -135,9 +170,8 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
 
             else:
                 return False
-        """Checks whether or not column values are between 2 predefined thresholds"""
-        return series.apply(is_between, kwargs=(min_value, max_value, strict_min,
-                                                   strict_max, allow_cross_type_comparisons))
+
+        return pd.DataFrame({"column_values.is_between": temp_column.map(is_between)})
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -208,14 +242,17 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
         else:
             result_format = self.default_kwarg_values.get("result_format")
 
+        is_between_count = metric_vals.get("column_values.is_between.count")
+        nonnull_count = metric_vals.get("column_values.nonnull.count")
+
         # Returning dictionary output with necessary metrics based on the format
         return _format_map_output(
             result_format=parse_result_format(result_format),
-            success=(metric_vals.get("column_values.is_between.count") / metric_vals.get("column_values.nonull_count"))
-                    > mostly,
+            success=(is_between_count/nonnull_count) >= mostly,
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.is_between.unexpected_count"),
+            unexpected_count = metric_vals.get("column_values.nonnull.count")
+            - metric_vals.get("column_values.is_between.count"),
             unexpected_list=metric_vals.get("column_values.is_between.unexpected_values"),
-            unexpected_index_list=metric_vals.get("column_values.is_between.unexpected_index"),
+            unexpected_index_list=metric_vals.get("column_values.is_between.unexpected_index_list"),
         )

@@ -11,10 +11,10 @@ from great_expectations.expectations.core.expect_column_values_to_be_between imp
 
 
 def test_expect_column_values_to_be_between_impl():
-    df = pd.DataFrame({"a": [2, 2, 2]})
+    df = pd.DataFrame({"a": [2, 2, 4]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_between",
-        kwargs={"column": "a", "min_value":0, "max_value":4},
+        kwargs={"column": "a", "min_value":0, "max_value":3, "mostly":.5},
     )
     expectation = ExpectColumnValuesToBeBetween(expectationConfiguration)
     batch = Batch(data=df)
