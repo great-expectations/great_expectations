@@ -70,9 +70,11 @@ class FilesDataConnector(DataConnector):
             and self.assets[data_asset_name].get("partitioner")
         ):
             partitioner = self.get_partitioner(name=self.default_partitioner)
+            partitioner.auto_discover_assets = True
         else:
             partitioner_name: str = self.assets[data_asset_name]["partitioner"]
             partitioner = self.get_partitioner(name=partitioner_name)
+            partitioner.auto_discover_assets = False
         partitioner.paths = self._get_file_paths(data_asset_name=data_asset_name)
         return partitioner.get_available_partitions(partition_name=partition_name, data_asset_name=data_asset_name)
 
