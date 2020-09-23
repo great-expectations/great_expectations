@@ -611,19 +611,20 @@ class Dataset(MetaDataset):
 
         """
         column_set = set(column_set) if column_set is not None else set()
-        columns = set(self.get_table_columns())
+        dataset_columns_list = self.get_table_columns()
+        dataset_columns_set = set(dataset_columns_list)
 
         if (
             (column_set is None) and (exact_match is not True)
-        ) or columns == column_set:
-            return {"success": True, "result": {"observed_value": list(columns)}}
+        ) or dataset_columns_set == column_set:
+            return {"success": True, "result": {"observed_value": dataset_columns_list}}
         else:
             # unexpected_list contains items from the dataset columns that are not in column_set
-            unexpected_list = list(columns - column_set)
+            unexpected_list = list(dataset_columns_set - column_set)
             # missing_list contains items from column_set that are not in the dataset columns
-            missing_list = list(column_set - columns)
+            missing_list = list(column_set - dataset_columns_set)
             # observed_value contains items that are in the dataset columns
-            observed_value = list(columns)
+            observed_value = dataset_columns_list
 
             mismatched = {}
             if len(unexpected_list) > 0:
