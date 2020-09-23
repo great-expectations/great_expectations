@@ -77,7 +77,7 @@ class RegexPartitioner(Partitioner):
         )
 
     def _get_cached_partitions(self, data_asset_name: str = None) -> List[Partition]:
-        if data_asset_name is None and self.auto_discover_assets:
+        if data_asset_name is None:
             return list(
                 itertools.chain.from_iterable(
                     [
