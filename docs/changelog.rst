@@ -8,6 +8,7 @@ Develop
 -----------------
 
 * [ENHANCEMENT] Add expect_compound_columns_to_be_unique and clarify multicolumn uniqueness
+* [ENHANCEMENT] Checkpoint run command now prints out details on each validation #1437
 
 0.12.2
 -----------------
