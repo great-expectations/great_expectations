@@ -708,9 +708,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         if not self.batches.get(batch_id):
             batch = Batch(
-                execution_environment_name=batch_definition.get(
-                    "execution_environment"
-                ),
+                execution_engine=self,
                 batch_spec=batch_spec,
                 data=df,
                 batch_definition=batch_definition,
