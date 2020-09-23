@@ -6,7 +6,17 @@ import numpy as np
 
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
+from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
+
+try:
+    import sqlalchemy as sa
+except ImportError:
+    pass
 
 
 from ..expectation import (
@@ -39,7 +49,7 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Map Metric Decorator for the Minimum"""
+    """ A Column Map Metric Decorator for the Maximum"""
     @PandasExecutionEngine.metric(
         metric_name="column.aggregate.max",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
