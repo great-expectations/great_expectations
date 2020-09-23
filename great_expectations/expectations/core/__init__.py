@@ -14,3 +14,4 @@ from .expect_column_value_lengths_to_equal import ExpectColumnValueLengthsToEqua
 from .expect_table_column_count_to_be_between import ExpectTableColumnCountToBeBetween
 from .expect_table_column_count_to_equal import ExpectTableColumnCountToEqual
 from .expect_column_values_to_not_be_in_set import ExpectColumnValuesToNotBeInSet
+from .expect_column_to_exist import ExpectColumnToExist
