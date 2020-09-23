@@ -1,4 +1,3 @@
-
 from typing import Dict, List, Optional, Union
 
 import pandas as pd
@@ -8,45 +7,41 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 
-
+from ...data_asset.util import parse_result_format
 from ..expectation import (
     ColumnMapDatasetExpectation,
-    DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
     _format_map_output,
-)
+    DatasetExpectation)
 from ..registry import extract_metrics
 
 
-class ExpectColumnSumToBeBetween(DatasetExpectation):
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.aggregate.sum",)
-    success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+class ExpectTableColumnCountToBeBetween(DatasetExpectation):
+    metric_dependencies = ("columns.count",)
+    success_keys = ("min_value", "max_value", "mostly",)
 
-
-    # Default values
     default_kwarg_values = {
         "row_condition": None,
-        "condition_parser": None,
+        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "mostly": 1,
         "min_value": None,
         "max_value": None,
-        "strict_min": None,
-        "strict_max": None,
-        "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
+        "meta":None,
+
     }
 
-    """ A Column Map Metric Decorator for the Sum"""
+    """ A Column Map Metric Decorator for the Column Count"""
     @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.sum",
+        metric_name="columns.count",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
     )
-    def _pandas_sum(
+    def _pandas_column_count(
             self,
             batches: Dict[str, Batch],
             execution_engine: PandasExecutionEngine,
@@ -55,11 +50,11 @@ class ExpectColumnSumToBeBetween(DatasetExpectation):
             metrics: dict,
             runtime_configuration: dict = None,
     ):
-        """Sum Metric Function"""
-        series = execution_engine.get_domain_dataframe(
+        """Mean Metric Function"""
+        df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches)
 
-        return series.sum()
+        return df.shape[1]
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -72,29 +67,16 @@ class ExpectColumnSumToBeBetween(DatasetExpectation):
         Returns:
             True if the configuration has been validated successfully. Otherwise, raises an exception
         """
-        min_val = None
-        max_val = None
 
         # Setting up a configuration
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
 
-        # Ensuring basic configuration parameters are properly set
-        try:
-            assert (
-                    "column" in configuration.kwargs
-            ), "'column' parameter is required for column map expectations"
-            if "mostly" in configuration.kwargs:
-                mostly = configuration.kwargs["mostly"]
-                assert isinstance(
-                    mostly, (int, float)
-                ), "'mostly' parameter must be an integer or float"
-                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
+        min_val = None
+        max_val = None
 
-        # Validating that Minimum and Maximum values are of the proper format and type
+        # Setting these values if they are available
         if "min_value" in configuration.kwargs:
             min_val = configuration.kwargs["min_value"]
 
@@ -128,31 +110,25 @@ class ExpectColumnSumToBeBetween(DatasetExpectation):
             "metrics"
         ]
         metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
-        column_sum = metric_vals.get("column.aggregate.sum")
+        column_count = metric_vals.get("columns.count")
 
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")
-        strict_min = self.get_success_kwargs(configuration).get("strict_min")
         max_value = self.get_success_kwargs(configuration).get("max_value")
-        strict_max = self.get_success_kwargs(configuration).get("strict_max")
 
         # Checking if mean lies between thresholds
         if min_value is not None:
-            if strict_min:
-                above_min = column_sum > min_value
-            else:
-                above_min = column_sum >= min_value
+            above_min = column_count >= min_value
         else:
             above_min = True
 
         if max_value is not None:
-            if strict_max:
-                below_max = column_sum < max_value
-            else:
-                below_max = column_sum <= max_value
+            below_max = column_count <= max_value
         else:
             below_max = True
 
         success = above_min and below_max
 
-        return {"success": success, "result": {"observed_value": column_sum}}
+        return {"success": success, "result": {"observed_value": column_count}}
+
+

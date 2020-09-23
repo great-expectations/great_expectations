@@ -11,4 +11,4 @@ from .expect_column_median_to_be_between import ExpectColumnMedianToBeBetween
 from .expect_column_max_to_be_between import ExpectColumnMaxToBeBetween
 from .expect_column_min_to_be_between import ExpectColumnMinToBeBetween
 from .expect_column_value_lengths_to_equal import ExpectColumnValueLengthsToEqual
-
+from .expect_table_column_count_to_be_between import ExpectTableColumnCountToBeBetween

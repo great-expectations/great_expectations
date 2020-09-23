@@ -20,8 +20,8 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
 
     map_metric = "column_values.is_between"
     metric_dependencies = ("column_values.is_between.count", "column_values.nonnull.count")
-    success_keys = ("min_value", "max_value", "strict_min", "strict_max", "allow_cross_type_comparisons","mostly",
-                    "parse_strings_as_datetimes", "allow_cross_type_comparisons")
+    success_keys = ("min_value", "max_value", "strict_min", "strict_max", "allow_cross_type_comparisons", "mostly",
+                    "parse_strings_as_datetimes",)
 
     default_kwarg_values = {
         "row_condition": None,
