@@ -38,6 +38,7 @@ class FilesDataConnector(DataConnector):
         known_extensions=None,
         **kwargs
     ):
+        # TODO: <Alex>Does "known_extensions" need to be in Configuration?</Alex>
         logger.debug("Constructing FilesDataConnector {!r}".format(name))
         super().__init__(
             name=name,
@@ -49,7 +50,6 @@ class FilesDataConnector(DataConnector):
             **kwargs
         )
 
-        # TODO: <Alex>Do we need error handling here?</Alex>
         self._base_directory = self.config_params["base_directory"]
 
         if known_extensions is None:
@@ -64,11 +64,10 @@ class FilesDataConnector(DataConnector):
     def known_extensions(self):
         return self._known_extensions
 
-    # TODO: <Alex>Also read files the glob way</Alex>
-    def get_available_data_asset_names(self):
-        # should it be a list of just the keys?
-        # TODO: <Alex>This needs to check for assets to have any files and include only if that is true.</Alex>
-        return self.assets.keys()
+    def get_available_data_asset_names(self) -> list:
+        if self.assets:
+            return list(self.assets.keys())
+        return [Path(path).stem for path in self._get_file_paths_for_data_asset(data_asset_name=None)]
 
     def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
         partitioner_name: str
@@ -99,9 +98,8 @@ class FilesDataConnector(DataConnector):
         Returns:
             paths (list)
         """
-        # TODO: <Alex>Need a better default (all inclusive).  Is this good enough?</Alex>
-        glob_directive: str
         base_directory: str
+        glob_directive: str
 
         data_asset_directives: dict = self._get_data_asset_directives(data_asset_name=data_asset_name)
         base_directory = data_asset_directives["base_directory"]
@@ -118,7 +116,8 @@ class FilesDataConnector(DataConnector):
                     str(posix_path) for posix_path in self._get_valid_file_paths(base_directory=base_directory)
                 ]
             return self._verify_file_paths(path_list=path_list)
-        return []
+        logger.warning(f'Expected a directory, but path "{base_directory}" is not a directory.')
+        raise ValueError(f'Expected a directory, but path "{base_directory}" is not a directory.')
 
     def _get_data_asset_directives(self, data_asset_name: str = None) -> dict:
         glob_directive: str
