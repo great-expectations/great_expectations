@@ -619,12 +619,13 @@ class Dataset(MetaDataset):
         ) or dataset_columns_set == column_set:
             return {"success": True, "result": {"observed_value": dataset_columns_list}}
         else:
+            # Convert to lists and sort to lock order for testing and output rendering
             # unexpected_list contains items from the dataset columns that are not in column_set
-            unexpected_list = list(dataset_columns_set - column_set)
+            unexpected_list = sorted(list(dataset_columns_set - column_set))
             # missing_list contains items from column_set that are not in the dataset columns
-            missing_list = list(column_set - dataset_columns_set)
+            missing_list = sorted(list(column_set - dataset_columns_set))
             # observed_value contains items that are in the dataset columns
-            observed_value = dataset_columns_list
+            observed_value = sorted(dataset_columns_list)
 
             mismatched = {}
             if len(unexpected_list) > 0:
