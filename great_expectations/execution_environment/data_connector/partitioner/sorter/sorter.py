@@ -48,7 +48,7 @@ class Sorter(object):
 
     @property
     def config_params(self) -> dict:
-        return self._sorter_config.get("config_params")
+        return self._sorter_config
 
     def __repr__(self):
         doc_fields_dict: dict = {
