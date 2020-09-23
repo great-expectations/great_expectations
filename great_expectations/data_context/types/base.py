@@ -33,9 +33,11 @@ class AssetConfig(DictDot):
     def __init__(
         self,
         partitioner,
+        config_params=None,
         **kwargs,
     ):
         self._partitioner = partitioner
+        self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -43,12 +45,18 @@ class AssetConfig(DictDot):
     def partitioner(self):
         return self._partitioner
 
+    @property
+    def config_params(self):
+        return self._config_params
+
 
 class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    partitioner = fields.String(required=True)
+    partitioner = fields.String(required=False)
+
+    config_params = fields.Dict(allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -74,8 +82,7 @@ class SorterConfig(DictDot):
         self._class_name = class_name
         self._module_name = module_name
         self._orderby = orderby
-        if config_params is not None:
-            self._config_params = config_params
+        self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -132,10 +139,8 @@ class PartitionerConfig(DictDot):
     ):
         self._class_name = class_name
         self._module_name = module_name
-        if sorters is not None:
-            self.sorters = sorters
-        if config_params is not None:
-            self._config_params = config_params
+        self._sorters = sorters
+        self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -146,6 +151,10 @@ class PartitionerConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
+
+    @property
+    def sorters(self):
+        return self._sorters
 
     @property
     def config_params(self):
@@ -181,8 +190,8 @@ class DataConnectorConfig(DictDot):
     def __init__(
         self,
         class_name,
-        default_partitioner,
         partitioners,
+        default_partitioner,
         assets=None,
         module_name=None,
         config_params=None,
@@ -190,14 +199,10 @@ class DataConnectorConfig(DictDot):
     ):
         self._class_name = class_name
         self._module_name = module_name
-        self._default_partitioner = default_partitioner
-        if partitioners is None:
-            partitioners = {}
         self._partitioners = partitioners
-        if assets is not None:
-            self._assets = assets
-        if config_params is not None:
-            self._config_params = config_params
+        self._default_partitioner = default_partitioner
+        self._assets = assets
+        self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -241,8 +246,8 @@ class DataConnectorConfigSchema(Schema):
     partitioners = fields.Dict(
         keys=fields.Str(),
         values=fields.Nested(PartitionerConfigSchema),
-        required=True,
-        allow_none=False,
+        required=False,
+        allow_none=True,
     )
 
     assets = fields.Dict(

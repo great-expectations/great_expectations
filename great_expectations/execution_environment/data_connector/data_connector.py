@@ -42,6 +42,8 @@ class DataConnector(object):
     external data version control system.
     """
 
+    DEFAULT_DATA_ASSET_NAME: str = "Default"
+
     _batch_spec_type = BatchSpec
     # TODO: <Alex>Check these carefully -- remove the wrong ones.</Alex>
     recognized_batch_definition_keys = {
@@ -55,7 +57,16 @@ class DataConnector(object):
     }
 
     # TODO: <Alex>Add type hints throughout</Alex>
-    def __init__(self, name, execution_environment, batch_definition_defaults=None, **kwargs):
+    def __init__(
+        self,
+        name,
+        execution_environment,
+        partitioners=None,
+        default_partitioner=None,
+        assets=None,
+        batch_definition_defaults=None,
+        **kwargs
+    ):
         self._name = name
 
         # TODO: <Alex></Alex>
@@ -64,6 +75,7 @@ class DataConnector(object):
         # TODO: <Alex>Is this needed?</Alex>
         self._data_asset_iterators = {}
 
+        # TODO: <Alex>Is this needed?</Alex>
         batch_definition_defaults = batch_definition_defaults or {}
         batch_definition_defaults_keys = set(batch_definition_defaults.keys())
         if not batch_definition_defaults_keys <= self.recognized_batch_definition_keys:
@@ -84,17 +96,30 @@ class DataConnector(object):
             raise ValueError(
                 "execution environment must be provided for a DataConnector"
             )
+
         self._execution_environment = execution_environment
-        self._partitioners = {}
-        self._partitions_cache: Union[List[Partition], Dict[str, Partition], None] = None
+        self._partitioners = partitioners or {}
+        self._default_partitioner = default_partitioner
+        self._assets = assets
+
+        self._partitioners_cache: dict = {}
+        self._partitions_cache: dict = {}
 
     @property
     def name(self) -> str:
         return self._name
 
     @property
+    def partitioners(self) -> dict:
+        return self._partitioners
+
+    @property
     def default_partitioner(self) -> str:
-        return self._data_connector_config["default_partitioner"]
+        return self._default_partitioner
+
+    @property
+    def assets(self) -> dict:
+        return self._assets
 
     @property
     def config_params(self) -> dict:
@@ -104,31 +129,19 @@ class DataConnector(object):
     def batch_definition_defaults(self) -> dict:
         return self._batch_definition_defaults
 
-    def get_cached_partitions(self, data_asset_name: str = None) -> Union[List[Partition], Dict[str, Partition]]:
-        if data_asset_name is None:
-            return self._partitions_cache
-        return self._partitions_cache[data_asset_name]
+    @property
+    def partitions_cache(self) -> dict:
+        return self._partitions_cache
 
-    # TODO: <Alex></Alex>
+    def get_cached_partitions(self, data_asset_name: str = None) -> List[Partition]:
+        if data_asset_name is None:
+            data_asset_name = DataConnector.DEFAULT_DATA_ASSET_NAME
+        return self._partitions_cache.get(data_asset_name)
+
     def update_partitions_cache(self, partitions: List[Partition], data_asset_name: str = None):
         if data_asset_name is None:
-            if self.get_cached_partitions() is None or isinstance(self.get_cached_partitions(), list):
-                self._partitions_cache = partitions
-            else:
-                logger.warning(
-                    f'''When data_asset_name is not specified, partitions cache in DataConnector "{self.name}' must be a
-list type (existing cache type is "{str(type(self.get_cached_partitions()))}").
-                    '''
-                )
-                raise ValueError(
-                    f'''When data_asset_name is not specified, partitions cache in DataConnector "{self.name}' must be a
-list type (existing cache type is "{str(type(self.get_cached_partitions()))}").
-                    '''
-                )
-        else:
-            if self.get_cached_partitions() is None:
-                self._partitions_cache = {}
-            self._partitions_cache[data_asset_name] = partitions
+            data_asset_name = DataConnector.DEFAULT_DATA_ASSET_NAME
+        self._partitions_cache[data_asset_name] = partitions
 
     def get_partitioner(self, name):
         """Get the (named) Partitioner from a DataConnector)
@@ -139,14 +152,11 @@ list type (existing cache type is "{str(type(self.get_cached_partitions()))}").
         Returns:
             Partitioner (Partitioner)
         """
-        if name in self._partitioners:
-            return self._partitioners[name]
-        elif (
-                "partitioners" in self._data_connector_config
-                and name in self._data_connector_config["partitioners"]
-        ):
+        if name in self._partitioners_cache:
+            return self._partitioners_cache[name]
+        elif name in self.partitioners:
             partitioner_config = copy.deepcopy(
-                self._data_connector_config["partitioners"][name]
+                self.partitioners[name]
             )
         else:
             raise ValueError(
@@ -159,7 +169,7 @@ list type (existing cache type is "{str(type(self.get_cached_partitions()))}").
         partitioner = self._build_partitioner_from_config(
             name=name, config=partitioner_config
         )
-        self._partitioners[name] = partitioner
+        self._partitioners_cache[name] = partitioner
         return partitioner
 
     # TODO: <Alex>This is a good place to check that all defaults from base.py / Config Schemas are set properly.</Alex>
@@ -195,17 +205,9 @@ list type (existing cache type is "{str(type(self.get_cached_partitions()))}").
         """
         raise NotImplementedError
 
-    # TODO: <Alex>Should we implement this like now in Partitioner and delete from Partitioner or just call the one in Partitioner from every Connector implementation?</Alex>
-    # TODO: <Alex>Do we need **kwargs here?</Alex>
     def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
         raise NotImplementedError
 
-    # # TODO: <Alex>Should we implement this like now in Partitioner and delete from Partitioner or just call the one in Partitioner from every Connector implementation?</Alex>
-    # # TODO: <Alex>Do we need **kwargs here?</Alex>
-    # def get_available_partition_names(self, data_asset_name: str = None) -> List[str]:
-    #     raise NotImplementedError
-
-    # TODO: <Alex></Alex>
     def get_available_partition_names(self, data_asset_name: str = None) -> List[str]:
         return [
             partition.name for partition in self.get_available_partitions(
@@ -228,8 +230,8 @@ list type (existing cache type is "{str(type(self.get_cached_partitions()))}").
     #     """
     #     raise NotImplementedError
 
-    def get_config(self):
-        return self._data_connector_config
+    # def get_config(self):
+    #     return self._data_connector_config
 
     def reset_iterator(self, data_asset_name, batch_definition, batch_spec):
         self._data_asset_iterators[data_asset_name] = (
