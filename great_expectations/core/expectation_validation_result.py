@@ -372,4 +372,4 @@ class ExpectationSuiteValidationResultSchema(Schema):
 
 
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
-expectationValidationResultSchema = ExpectationSuiteValidationResultSchema()
+expectationValidationResultSchema = ExpectationValidationResultSchema()
