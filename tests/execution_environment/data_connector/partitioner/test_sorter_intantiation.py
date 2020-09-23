@@ -10,130 +10,160 @@ logger = logging.getLogger(__name__)
 
 
 from great_expectations.execution_environment import ExecutionEnvironment
-
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
+from great_expectations.execution_environment.data_connector.partitioner.sorter import(
+    DateTimeSorter,
+    LexicographicSorter,
+    CustomListSorter,
+    NumericSorter
+)
 
-execution_engine = {
-    "class_name": "PandasExecutionEngine",
-    "module_name": "great_expectations.execution_engine.pandas_execution_engine",
-}
+from great_expectations.data_context.data_context import (
+    DataContextConfig,
+    BaseDataContext,
+)
 
 
 
-# <WILL> - this is the full data_connector config that is here for reference. the tests only use the small portions
+action_list = [
+            {
+                'name': 'store_validation_result',
+                'action': {
+                    'class_name': 'StoreValidationResultAction'
+                }
+            }]
 
-data_connectors = {
-    "my_data_connector": {
-        "class_name": "FilesDataConnector",
-        "base_directory": "/Users/work/Development/GE_Data/my_dir/",
-        "assets": {
-            "testing_data": {
-                "partitioner_name" : "my_partitioner"
-            },
-        },
-        "partitioners": {
-            "my_partitioner":{
-                "class_name": "RegexPartitioner",
-                "module_name": "great_expectations.execution_environment.data_connector.partitioner.regex_partitioner",
-                "regex": r'(.*)_(.*)_(.*).csv',
-                "sorters": {
-                    "name":{
-                        "class_name": "LexicographicSorter",
-                        "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter.lexicographic_sorter",
-                        "orderby": "desc",
+project_config = DataContextConfig(
+            config_version=2,
+            execution_environments={
+                'my_test_execution_environment': {
+                    'class_name': 'ExecutionEnvironment',
+                    'execution_engine': {
+                        'module_name': 'great_expectations.execution_engine',
+                        'class_name': 'PandasExecutionEngine',
+                        'caching': True,
+                        'batch_spec_defaults': {}
                     },
-                    "date": {
-                        "class_name": "DateTimeSorter",
-                        "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter.date_time_sorter",
-                        "timeformatstring": 'yyyymmdd',
-                        "orderby": "desc",
-                    },
-                    "price": {
-                        "class_name": "NumericSorter",
-                        "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter.numeric_sorter",
-                        "orderby": "asc",
+                    'data_connectors': {
+                        "default_data_connector": {
+                            'partitioner_name': "my_standard_partitioner",
+                            'module_name': 'great_expectations.execution_environment.data_connector',
+                            'class_name': 'FilesDataConnector',
+                            'config_params': {
+                                'base_directory': '/Users/work/Development/GE_data/my_dir',
+                                'glob_directive': '*',
+                            },
+                            'assets': {
+                                'test_asset_0': {
+                                    'config_params': {
+                                        'glob_directive': 'alex*',
+                                    },
+                                    'partitioner': 'my_standard_partitioner',
+                                }
+                            },
+                            'default_partitioner': 'my_standard_partitioner',
+                            'partitioners': {
+                                'my_standard_partitioner': {
+                                    'module_name': 'great_expectations.execution_environment.data_connector.partitioner.regex_partitioner',
+                                    'class_name': 'RegexPartitioner',
+                                    'config_params': {
+                                        'regex': r'.+\/(.+)_(.+)_(.+)\.csv',
+                                        'allow_multifile_partitions': False,
+                                    },
+                                    'sorters': [
+                                        {
+                                            'name': 'name',
+                                            'module_name': 'great_expectations.execution_environment.data_connector.partitioner.sorter.lexicographic_sorter',
+                                            'class_name': 'LexicographicSorter',
+                                            'orderby': 'asc',
+                                        },
+                                        {
+                                            'name': 'timestamp',
+                                            'module_name': 'great_expectations.execution_environment.data_connector.partitioner.sorter.date_time_sorter',
+                                            'class_name': 'DateTimeSorter',
+                                            'orderby': 'desc',
+                                            'config_params': {
+                                                'datetime_format': '%Y%m%d',
+                                            }
+                                        },
+                                        {
+                                            'name': 'price',
+                                            'module_name': 'great_expectations.execution_environment.data_connector.partitioner.sorter.numeric_sorter',
+                                            'class_name': 'NumericSorter',
+                                            'orderby': 'desc',
+                                        },
+                                    ]
+                                }
+                            },
+
+                        }
                     }
-                },
+                }
+            },
+            config_variables_file_path=None,
+            plugins_directory=None,
+            validation_operators={
+                'action_list_operator': {
+                    'class_name': 'ActionListValidationOperator',
+                    'action_list': action_list
+                }
+            },
+    stores={
+        'expectations': {
+            'class_name': 'ExpectationsStore',
+            'store_backend': {
+                'class_name': 'TupleS3StoreBackend',
+                'bucket': "fakebucket",
+                'prefix': 'great_expectations/JSON/EXECUTION_ENVIRONMENT_ENGINE/ExpectationSuites'
+            }
+        },
+        'validations': {
+            'class_name': 'ValidationsStore',
+            'store_backend': {
+                'class_name': 'TupleS3StoreBackend',
+                'bucket': "fakebucket",
+                'prefix': 'great_expectations/JSON/EXECUTION_ENVIRONMENT_ENGINE/Validations'
+            }
+        },
+        'evaluation_parameters': {
+            'class_name': 'EvaluationParameterStore'
+        }
+    },
+    expectations_store_name='expectations',
+    validations_store_name='validations',
+    evaluation_parameter_store_name='evaluation_parameters',
+    data_docs_sites={
+        "fake_site_name": {
+            'class_name': 'SiteBuilder',
+            'store_backend': {
+                'class_name': 'TupleS3StoreBackend',
+                'bucket': "fakebucket",
+                'prefix': 'great_expectations/HTML/EXECUTION_ENVIRONMENT_ENGINE'
+            },
+            'site_index_builder': {
+                'class_name': 'DefaultSiteIndexBuilder',
+                'show_cta_footer': True
             }
         }
     }
-}
+)
 
 
-
-# Necessary paramter 1
-batch_paths: list = [
-        "my_dir/alex_20200809_1000.csv",
-        "my_dir/eugene_20200809_1500.csv",
-        "my_dir/james_20200811_1009.csv",
-        "my_dir/abe_20200809_1040.csv",
-        "my_dir/will_20200809_1002.csv",
-        "my_dir/james_20200713_1567.csv",
-        "my_dir/eugene_20201129_1900.csv",
-        "my_dir/will_20200810_1001.csv",
-        "my_dir/james_20200810_1003.csv",
-        "my_dir/alex_20200819_1300.csv",
-    ]
-
-# necessary parameter 2
-sorter_config = {
-                    "name":{
-                        "class_name": "LexicographicSorter",
-                        "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter.lexicographic_sorter",
-                        "orderby": "desc",
-                    },
-                    "date": {
-                        "class_name": "DateTimeSorter",
-                        "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter.date_time_sorter",
-                        "timeformatstring": 'yyyymmdd',
-                        "orderby": "desc",
-                    },
-                    "price": {
-                        "class_name": "NumericSorter",
-                        "module_name": "great_expectations.execution_environment.data_connector.partitioner.sorter.numeric_sorter",
-                        "orderby": "asc",
-                    }
-                }
-
-
-
-execution_environment = ExecutionEnvironment(
-    name="test_env", execution_engine=execution_engine, data_connectors=data_connectors)
-
-test_batch_definition = {
-    "execution_environment": "test_env",
-    "data_connector": "my_data_connector",
-    "data_asset_name": "testing_data",
- }
-
+ge_context = BaseDataContext(project_config=project_config)
+my_execution_environment = ge_context.get_execution_environment("my_test_execution_environment")
+my_data_connector = my_execution_environment.get_data_connector("default_data_connector")
+my_partitioner = my_data_connector.get_partitioner("my_standard_partitioner")
 
 def test_sorter_instantiation():
-
-    my_data_connector = execution_environment.get_data_connector("my_data_connector")
-    my_partitioner = Partitioner(
-        data_connector=my_data_connector,
-        name="mine_all_mine",
-        paths=batch_paths,
-        regex=r'(.*)_(.*)_(.*).csv',
-        allow_multifile_partitions=False,
-        sorters=sorter_config
-    )
+    my_partitioner = my_data_connector.get_partitioner("my_standard_partitioner")
 
     name_sorter = my_partitioner.get_sorter("name")
-    #assert name_sorter == {'name': 'name', 'orderby': 'desc', 'reverse': True, 'type': 'LexicographicSorter'}
-
-    date_sorter = my_partitioner.get_sorter("date")
-    #assert date_sorter == {'name': 'date', 'orderby': 'desc', 'reverse': True, 'type': 'DateTimeSorter'}
-
+    date_sorter = my_partitioner.get_sorter("timestamp")
     price_sorter = my_partitioner.get_sorter("price")
-    #assert price_sorter == {'name': 'price', 'orderby': 'asc', 'reverse': False, 'type': 'NumericSorter'}
 
-
-    all_sorters = my_partitioner.get_all_sorters()
-    #assert all_sorters ==  [
-    #    {'name': 'name', 'orderby': 'desc', 'reverse': True, 'type': 'LexicographicSorter'},
-    #    {'name': 'date', 'orderby': 'desc', 'reverse': True, 'type': 'DateTimeSorter'},
-    #    {'name': 'price', 'orderby': 'asc', 'reverse': False, 'type': 'NumericSorter'}
-    #]
+    all_sorters = my_partitioner.sorters
+    assert len(all_sorters) == 3
+    assert(all_sorters[0]) == name_sorter
+    assert(all_sorters[1]) == date_sorter
+    assert(all_sorters[2]) == price_sorter
