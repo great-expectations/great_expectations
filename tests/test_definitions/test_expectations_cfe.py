@@ -183,6 +183,9 @@ def pytest_generate_tests(metafunc):
                                 and isinstance(
                                     batch.execution_engine, SqlAlchemyExecutionEngine
                                 )
+                                and isinstance(
+                                    batch.execution_engine.engine.dialect, sqliteDialect
+                                )
                             )
                             or (
                                 "postgresql" in test["suppress_test_for"]
@@ -190,6 +193,10 @@ def pytest_generate_tests(metafunc):
                                 and batch
                                 and isinstance(
                                     batch.execution_engine, SqlAlchemyExecutionEngine
+                                )
+                                and isinstance(
+                                    batch.execution_engine.engine.dialect,
+                                    postgresqlDialect,
                                 )
                             )
                             or (
@@ -199,6 +206,9 @@ def pytest_generate_tests(metafunc):
                                 and isinstance(
                                     batch.execution_engine, SqlAlchemyExecutionEngine
                                 )
+                                and isinstance(
+                                    batch.execution_engine.engine.dialect, mssqlDialect
+                                )
                             )
                             or (
                                 "mssql" in test["suppress_test_for"]
@@ -206,6 +216,9 @@ def pytest_generate_tests(metafunc):
                                 and batch
                                 and isinstance(
                                     batch.execution_engine, SqlAlchemyExecutionEngine
+                                )
+                                and isinstance(
+                                    batch.execution_engine.engine.dialect, mssqlDialect
                                 )
                             )
                             or (
