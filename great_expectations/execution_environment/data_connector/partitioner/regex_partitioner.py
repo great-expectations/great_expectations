@@ -52,7 +52,7 @@ class RegexPartitioner(Partitioner):
         return self._allow_multifile_partitions
 
     def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
-        cached_partitions: Union[List[Partition], Dict[str, Partition]] = self.data_connector.get_cached_partitions(
+        cached_partitions: List[Partition] = self.data_connector.get_cached_partitions(
             data_asset_name=data_asset_name
         )
         if cached_partitions is None:
@@ -68,7 +68,7 @@ class RegexPartitioner(Partitioner):
     def _find_available_partitions(self, data_asset_name: str = None):
         partitions: List[Partition] = []
         for path in self.paths:
-            partitioned_path: Partition = self._find_partitions_for_path(path=path)
+            partitioned_path: Partition = self._find_partitions_for_path(path=path, data_asset_name=data_asset_name)
             if partitioned_path is not None:
                 partitions.append(partitioned_path)
 
@@ -77,7 +77,7 @@ class RegexPartitioner(Partitioner):
             partitions = sorter.get_sorted_partitions(partitions=partitions)
         self.data_connector.update_partitions_cache(partitions=partitions, data_asset_name=data_asset_name)
 
-    def _find_partitions_for_path(self, path: str) -> Union[Partition, None]:
+    def _find_partitions_for_path(self, path: str, data_asset_name: str = None) -> Union[Partition, None]:
         if self.regex is None:
             raise ValueError("Regex is not defined")
 
@@ -114,7 +114,12 @@ sorters specified is {len(part_names)}.
             part_name_list: list = [part_value for part_name, part_value in partition_definition.items()]
             partition_name: str = RegexPartitioner.DEFAULT_DELIMITER.join(part_name_list)
 
-        return Partition(name=partition_name, definition=partition_definition, source=path)
+        return Partition(
+            name=partition_name,
+            definition=partition_definition,
+            source=path,
+            data_asset_name=data_asset_name
+        )
 
     def _apply_allow_multifile_partitions_flag(
         self,
