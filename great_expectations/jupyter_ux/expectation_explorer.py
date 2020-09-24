@@ -111,6 +111,7 @@ class ExpectationExplorer:
                 "max_value",
             ],
             "expect_table_columns_to_match_ordered_list": ["column_list"],
+            "expect_table_columns_to_match_set": ["column_set", "exact_match"],
             ####
             "expect_column_pair_values_to_be_equal": ["ignore_row_if"],
             "expect_column_pair_values_A_to_be_greater_than_B": [

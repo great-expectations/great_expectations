@@ -142,6 +142,7 @@ def test_valid_expectation_types(dataset, pandas_dataset):
         "expect_table_column_count_to_be_between",
         "expect_table_column_count_to_equal",
         "expect_table_columns_to_match_ordered_list",
+        "expect_table_columns_to_match_set",
         "expect_table_row_count_to_be_between",
         "expect_table_row_count_to_equal",
     ]
