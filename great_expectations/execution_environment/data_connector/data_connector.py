@@ -219,13 +219,14 @@ class DataConnector(object):
     def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
         raise NotImplementedError
 
-    def get_available_partition_names(self, data_asset_name: str = None) -> List[str]:
-        return [
-            partition.name for partition in self.get_available_partitions(
-                partition_name=None,
-                data_asset_name=data_asset_name
-            )
-        ]
+    # TODO: <Alex>This method is not useful -- get_available_partitions provides the complete information.</Alex>
+    # def get_available_partition_names(self, data_asset_name: str = None) -> List[str]:
+    #     return [
+    #         partition.name for partition in self.get_available_partitions(
+    #             partition_name=None,
+    #             data_asset_name=data_asset_name
+    #         )
+    #     ]
 
     def get_config(self):
         # TODO: <Alex>Do we want to make ExecutionEnvironment._execution_environment_config["data_connectors"] or some convenience method publicly accessible to avoid PyCharm warnings?</Alex>

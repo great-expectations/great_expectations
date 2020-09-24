@@ -158,8 +158,7 @@ sorters specified is {len(part_names)}.
                 lambda partition: partition.name == partition_name, partitions
             )
         )
-        if not self.allow_multifile_partitions and len(partitions) > 1 \
-                and len(set([partition.data_asset_name for partition in partitions])) == 1:
+        if not self.allow_multifile_partitions and len(partitions) > 1 and len(set(partitions)) == 1:
             raise ValueError(
                 f'''RegexPartitioner "{self.name}" detected multiple partitions for partition name "{partition_name}" of
 data asset "{partitions[0].data_asset_name}"; however, allow_multifile_partitions is set to False.
