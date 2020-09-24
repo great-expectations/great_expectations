@@ -32,7 +32,6 @@ from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemy
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.metric_exceptions import MetricError
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.registry import (
     get_expectation_impl,
     get_metric_dependencies,
