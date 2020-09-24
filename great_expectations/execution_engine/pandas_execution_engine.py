@@ -831,23 +831,23 @@ Notes:
     ):
         """Maps metric values and kwargs to results of success kwargs"""
         data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
-        assert metric_name.endswith(".unexpected_index")
+        assert metric_name.endswith(".unexpected_index_list")
         # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
         result_format = metric_value_kwargs["result_format"]
         base_metric_value_kwargs = {
             k: v for k, v in metric_value_kwargs.items() if k != "result_format"
         }
         metric_key = MetricEdgeKey(
-            metric_name[: -len(".unexpected_index")],
+            metric_name[: -len(".unexpected_index_list")],
             metric_domain_kwargs,
             base_metric_value_kwargs,
         ).id
         boolean_mapped_success_values = metrics.get(metric_key)
         if result_format["result_format"] == "COMPLETE":
-            return list(data[boolean_mapped_success_values == False].index)
+            return list(data[boolean_mapped_success_values[metric_name[: -len(".unexpected_index_list")]] == False].index)
         else:
             return list(
-                data[boolean_mapped_success_values == False].index[
+                data[boolean_mapped_success_values[metric_name[: -len(".unexpected_index_list")]] == False].index[
                     : result_format["partial_unexpected_count"]
                 ]
             )
@@ -1007,6 +1007,15 @@ Notes:
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_rows,
+            )
+            # noinspection PyTypeChecker
+            register_metric(
+                metric_name=metric_name + ".unexpected_index_list",
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=(*metric_value_keys, "result_format"),
+                execution_engine=cls,
+                metric_dependencies=(metric_name,),
+                metric_provider=cls._column_map_index,
             )
             return inner_func
 
