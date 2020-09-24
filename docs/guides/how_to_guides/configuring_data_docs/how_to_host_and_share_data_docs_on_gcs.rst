@@ -143,8 +143,22 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 
 **Additional notes**
 
-- There may be times, you can route the traffic through a DNS, which means your domain will be something other "storage.googleapis.com"
-- In that case, you can set the ``base_public_path`` field in the `great_expectations.yml` file, which will then be used.
+- If you wish to host a Data Docs site through a private DNS, you can configure a ``base_public_path`` for the Data Docs Store.  The following example will configure a GCS site with the ``base_public_path`` set to ``www.mydns.com``.
+
+.. code-block:: yaml
+
+    data_docs_sites:
+
+      ...
+
+      gs_site:  # this is a user-selected name - you may select your own
+        class_name: SiteBuilder
+        store_backend:
+          class_name: TupleGCSStoreBackend
+          base_public_path: 'www.mydns.com'
+        site_index_builder:
+          class_name: DefaultSiteIndexBuilder
+
 
 
 **Additional resources**

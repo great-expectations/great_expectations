@@ -113,7 +113,7 @@ This can be useful for non-interactive environments.
 Additional notes
 ----------------
 
-Optionally, you may wish to update static hosting settings for your bucket to enable AWS to automatically serve your
+- Optionally, you may wish to update static hosting settings for your bucket to enable AWS to automatically serve your
 index.html file or a custom error file:
 
 .. code-block:: bash
@@ -121,7 +121,25 @@ index.html file or a custom error file:
   > aws s3 website s3://data-docs.my_org/ --index-document index.html
 
 
-If you wish to host a Data Docs site in a subfolder of an S3 bucket, add the ``prefix`` property to the configuration snippet in step 4, immediately after the ``bucket`` property.
+- If you wish to host a Data Docs site in a subfolder of an S3 bucket, add the ``prefix`` property to the configuration snippet in step 4, immediately after the ``bucket`` property.
+
+- If you wish to host a Data Docs site through a private DNS, you can configure a ``base_public_path`` for the Data Docs Store.  The following example will configure an S3 site with the ``base_public_path`` set to ``www.mydns.com``.
+
+.. code-block:: yaml
+
+    data_docs_sites:
+
+      ...
+
+      s3_site:  # this is a user-selected name - you may select your own
+        class_name: SiteBuilder
+        store_backend:
+          class_name: TupleS3StoreBackend
+          base_public_path: 'www.mydns.com'
+        site_index_builder:
+          class_name: DefaultSiteIndexBuilder
+          show_cta_footer: true
+
 
 Additional resources
 --------------------
