@@ -19,9 +19,9 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnMeanToBeBetween(DatasetExpectation):
+class ExpectColumnProportionOfUniqueValuesToBeBetween(DatasetExpectation):
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.aggregate.mean",)
+    metric_dependencies = ("column.aggregate.unique_proportion",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 
 
@@ -39,14 +39,14 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Aggregate Metric Decorator for the Mean"""
+    """ A Column Aggregate Metric Decorator for the Unique Proportion"""
     @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.mean",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+        metric_name="column.aggregate.unique_proportion",
+        metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
     )
-    def _pandas_mean(
+    def _pandas_unique_proportion(
             self,
             batches: Dict[str, Batch],
             execution_engine: PandasExecutionEngine,
@@ -55,11 +55,17 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
             metrics: dict,
             runtime_configuration: dict = None,
     ):
-        """Mean Metric Function"""
+        """Unique Proportion Metric"""
         series = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches)
 
-        return series.mean()
+        total_values = series.shape[0]
+        unique_values = series.value_counts().shape[0]
+
+        if total_values > 0:
+            return unique_values/total_values
+        else:
+            return 0
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -116,13 +122,13 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
             metrics: dict,
             runtime_configuration: dict = None,
     ):
-        """Validates the given data against the set boundaries for mean to ensure it lies within proper range"""
+        """Validates the proportion of unique values against a minimum and maximum threshold."""
         # Obtaining dependencies used to validate the expectation
         validation_dependencies = self.get_validation_dependencies(configuration)[
             "metrics"
         ]
         metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
-        column_mean = metric_vals.get("column.aggregate.mean")
+        column_unique_prop = metric_vals.get("column.aggregate.unique_proportion")
 
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")
@@ -133,20 +139,20 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
         # Checking if mean lies between thresholds
         if min_value is not None:
             if strict_min:
-                above_min = column_mean > min_value
+                above_min = column_unique_prop > min_value
             else:
-                above_min = column_mean >= min_value
+                above_min = column_unique_prop >= min_value
         else:
             above_min = True
 
         if max_value is not None:
             if strict_max:
-                below_max = column_mean < max_value
+                below_max = column_unique_prop < max_value
             else:
-                below_max = column_mean <= max_value
+                below_max = column_unique_prop <= max_value
         else:
             below_max = True
 
         success = above_min and below_max
 
-        return {"success": success, "result": {"observed_value": column_mean}}
+        return {"success": success, "result": {"observed_value": column_unique_prop}}

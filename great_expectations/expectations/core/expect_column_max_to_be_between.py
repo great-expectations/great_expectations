@@ -132,7 +132,7 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
             metrics: dict,
             runtime_configuration: dict = None,
     ):
-        """Validates the given data against the set minimum and maximum value thresholds for the column min"""
+        """Validates the given data against the set minimum and maximum value thresholds for the column max"""
         # Obtaining dependencies used to validate the expectation
         validation_dependencies = self.get_validation_dependencies(configuration)[
             "metrics"
