@@ -106,7 +106,9 @@ class Validator:
             self.set_default_expectation_argument("include_config", True)
 
     def __getattr__(self, name):
-        if name.startswith("expect_") and hasattr(self.execution_engine, name):
+        if name.startswith("expect_") and get_expectation_impl(name):
+            return self.validate_expectation(name)
+        elif name.startswith("expect_") and hasattr(self.execution_engine, name):
             return getattr(self.execution_engine, name)
         elif type(
             self.execution_engine
@@ -116,6 +118,25 @@ class Validator:
             raise AttributeError(
                 f"'{type(self).__name__}'  object has no attribute '{name}'"
             )
+
+    def validate_expectation(self, name):
+        def inst_expectation(**kwargs):
+            expectation = get_expectation_impl(name)(
+                ExpectationConfiguration(expectation_type=name, kwargs=kwargs)
+            )
+
+            runtime_configuration = {
+                k: v
+                for k, v in kwargs.items()
+                if k in ("result_format", "include_config", "catch_exceptions")
+            }
+            return expectation.validate(
+                batches={self.batch.batch_spec.to_id(): self.batch},
+                execution_engine=self.execution_engine,
+                runtime_configuration=runtime_configuration,
+            )
+
+        return inst_expectation
 
     @property
     def execution_engine(self):
@@ -133,9 +154,12 @@ class Validator:
         metric_name: str,
         configuration: ExpectationConfiguration,
         parent_node: Union[MetricEdgeKey, None] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> None:
         metric_kwargs = get_metric_kwargs(metric_name)
-        configuration_kwargs = configuration.get_runtime_kwargs()
+        configuration_kwargs = configuration.get_runtime_kwargs(
+            runtime_configuration=runtime_configuration
+        )
         try:
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
@@ -195,6 +219,7 @@ class Validator:
                     MetricEdgeKey(
                         metric_name, metric_domain_kwargs, metric_value_kwargs
                     ),
+                    runtime_configuration=runtime_configuration,
                 )
 
     def graph_validate(
@@ -215,10 +240,17 @@ class Validator:
             expectation_impl = get_expectation_impl(configuration.expectation_type)
             validation_dependencies = expectation_impl(
                 configuration
-            ).get_validation_dependencies()
+            ).get_validation_dependencies(
+                configuration, execution_engine, runtime_configuration
+            )
 
             for metric_name in validation_dependencies.get("metrics"):
-                self._populate_dependencies(graph, metric_name, configuration)
+                self._populate_dependencies(
+                    graph,
+                    metric_name,
+                    configuration,
+                    runtime_configuration=runtime_configuration,
+                )
 
         if metrics is None:
             metrics = dict()
@@ -242,7 +274,9 @@ class Validator:
         for configuration in configurations:
             evrs.append(
                 configuration.metrics_validate(
-                    metrics, runtime_configuration=runtime_configuration
+                    metrics,
+                    runtime_configuration=runtime_configuration,
+                    execution_engine=execution_engine,
                 )
             )
         return evrs

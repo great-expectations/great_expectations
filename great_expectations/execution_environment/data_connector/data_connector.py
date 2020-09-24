@@ -338,7 +338,7 @@ class DataConnector(object):
         )
         if not batch_definition_keys <= recognized_batch_definition_keys:
             logger.warning(
-                "Unrecognized batch_parameter(s): %s"
+                "Unrecognized batch_definition key(s): %s"
                 % str(batch_definition_keys - recognized_batch_definition_keys)
             )
 

@@ -991,12 +991,11 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 if _declared_name != metric_name:
                     logger.warning("using metric provider with an unrecognized metric")
                 data = execution_engine.get_domain_dataframe(
-                    metric_domain_kwargs, batches
+                    metric_domain_kwargs, batches, filter_column_isnull
                 )
                 column = metric_domain_kwargs["column"]
                 eval_col = self._get_eval_column_name(column)
-                if filter_column_isnull:
-                    data = data.filter(F.col(eval_col).isNotNull())
+
                 return metric_fn(self, data, eval_col, **metric_value_kwargs, **kwargs)
 
             register_metric(
