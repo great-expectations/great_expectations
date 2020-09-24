@@ -133,9 +133,10 @@ class Validator:
         metric_name: str,
         configuration: ExpectationConfiguration,
         parent_node: Union[MetricEdgeKey, None] = None,
+        runtime_configuration: Optional[dict] = None
     ) -> None:
         metric_kwargs = get_metric_kwargs(metric_name)
-        configuration_kwargs = configuration.get_runtime_kwargs()
+        configuration_kwargs = configuration.get_runtime_kwargs(runtime_configuration=runtime_configuration)
         try:
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
@@ -195,6 +196,7 @@ class Validator:
                     MetricEdgeKey(
                         metric_name, metric_domain_kwargs, metric_value_kwargs
                     ),
+                    runtime_configuration=runtime_configuration
                 )
 
     def graph_validate(
@@ -215,10 +217,19 @@ class Validator:
             expectation_impl = get_expectation_impl(configuration.expectation_type)
             validation_dependencies = expectation_impl(
                 configuration
-            ).get_validation_dependencies()
+            ).get_validation_dependencies(
+                configuration,
+                execution_engine,
+                runtime_configuration
+            )
 
             for metric_name in validation_dependencies.get("metrics"):
-                self._populate_dependencies(graph, metric_name, configuration)
+                self._populate_dependencies(
+                    graph,
+                    metric_name,
+                    configuration,
+                    runtime_configuration=runtime_configuration
+                )
 
         if metrics is None:
             metrics = dict()
@@ -242,7 +253,7 @@ class Validator:
         for configuration in configurations:
             evrs.append(
                 configuration.metrics_validate(
-                    metrics, runtime_configuration=runtime_configuration
+                    metrics, runtime_configuration=runtime_configuration, execution_engine=execution_engine
                 )
             )
         return evrs
