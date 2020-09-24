@@ -1,11 +1,10 @@
 import logging
 import regex as re
-from typing import List, Iterator, Union
+from typing import List, Union
 from pathlib import Path
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 
 logger = logging.getLogger(__name__)
 
@@ -72,9 +71,7 @@ class RegexPartitioner(Partitioner):
             )
         if cached_partitions is None or len(cached_partitions) == 0:
             return []
-        sorters: Iterator[Sorter] = reversed(self.sorters)
-        for sorter in sorters:
-            cached_partitions = sorter.get_sorted_partitions(partitions=cached_partitions)
+        cached_partitions = self.get_sorted_partitions(partitions=cached_partitions)
         return self._apply_allow_multifile_partitions_flag(
             partitions=cached_partitions,
             partition_name=partition_name
