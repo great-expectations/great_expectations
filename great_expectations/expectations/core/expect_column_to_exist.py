@@ -52,11 +52,12 @@ class ExpectColumnToExist(DatasetExpectation):
             metrics: dict,
             runtime_configuration: dict = None,
     ):
-        """Column count metric function"""
+        metric_domain_kwargs.pop("column")
+        """Metric which returns all columns in a dataframe"""
         df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches)
 
-        return True
+        return df.columns
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
