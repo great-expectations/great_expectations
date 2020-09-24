@@ -153,7 +153,7 @@ class DataConnector(object):
             )
             if cached_partitions is None or len(cached_partitions) == 0:
                 cached_partitions = []
-            if partition.name not in [partition.name for partition in cached_partitions]:
+            if partition not in cached_partitions:
                 cached_partitions.append(partition)
             self._partitions_cache[data_asset_name] = cached_partitions
 

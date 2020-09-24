@@ -664,7 +664,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 df = in_memory_dataset
             else:
                 raise ValueError(
-                    "To pass an in_memory_dataset, you must also pass a data_asset_name and partition_name"
+                    # "To pass an in_memory_dataset, you must also pass a data_asset_name and partition_name"
+                    "To pass an in_memory_dataset, you must also a data_asset_name as well."
                 )
         else:
             # TODO: <Alex>PyCharm says that data_connector may be referenced before assigment.</Alex>
