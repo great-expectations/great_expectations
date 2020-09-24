@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine, ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ...core.batch import Batch
 from ...data_asset.util import parse_result_format
@@ -67,12 +67,14 @@ class ExpectColumnValuesToBeUnique(ColumnMapDatasetExpectation):
         configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None
+        execution_engine: ExecutionEngine = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(configuration, execution_engine, runtime_configuration)[
-            "metrics"
-        ]
-        metric_vals = extract_metrics(validation_dependencies, metrics, configuration, runtime_configuration)
+        validation_dependencies = self.get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )["metrics"]
+        metric_vals = extract_metrics(
+            validation_dependencies, metrics, configuration, runtime_configuration
+        )
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )

@@ -148,8 +148,9 @@ def get_metric_dependencies(metric_name: str) -> Tuple[str]:
 
 
 def get_metric_kwargs(
-    metric_name: str, configuration: Optional["ExpectationConfiguration"] = None, runtime_configuration: Optional[
-            dict] = None
+    metric_name: str,
+    configuration: Optional["ExpectationConfiguration"] = None,
+    runtime_configuration: Optional[dict] = None,
 ) -> dict():
     try:
         metric_definition = _registered_metrics.get(metric_name, dict())
@@ -190,7 +191,7 @@ def extract_metrics(
     metric_names: Iterable[str],
     metrics: Dict[Tuple, Any],
     configuration: "ExpectationConfiguration",
-    runtime_configuration: Optional[dict] = None
+    runtime_configuration: Optional[dict] = None,
 ) -> dict:
     res = dict()
     for metric_name in metric_names:

@@ -1057,16 +1057,16 @@ class ExpectationConfiguration(DictDot):
         )
 
     def metrics_validate(
-            self,
-            metrics: Dict,
-            runtime_configuration: dict = None,
-            execution_engine: "ExecutionEngine" = None
+        self,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: "ExecutionEngine" = None,
     ):
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(self).metrics_validate(
             metrics,
             runtime_configuration=runtime_configuration,
-            execution_engine=execution_engine
+            execution_engine=execution_engine,
         )
 
 

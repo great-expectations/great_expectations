@@ -88,7 +88,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         metrics: dict,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None
+        execution_engine: ExecutionEngine = None,
     ) -> "ExpectationValidationResult":
         if configuration is None:
             configuration = self.configuration
@@ -108,7 +108,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
                     configuration,
                     metrics,
                     runtime_configuration=runtime_configuration,
-                    execution_engine=execution_engine
+                    execution_engine=execution_engine,
                 )
         raise MetricError("No validator found for available metrics")
 
@@ -167,7 +167,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         self,
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[dict] = None
+        runtime_configuration: Optional[dict] = None,
     ):
         """Construct the validation graph for this expectation."""
         if not configuration:
@@ -177,7 +177,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
             "domain": self.get_domain_kwargs(),
             "success_kwargs": self.get_success_kwargs(),
             "result_format": parse_result_format(
-                self.get_runtime_kwargs(runtime_configuration=runtime_configuration).get("result_format")
+                self.get_runtime_kwargs(
+                    runtime_configuration=runtime_configuration
+                ).get("result_format")
             ),
             "metrics": tuple(),
         }
@@ -429,12 +431,10 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         self,
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[dict] = None
+        runtime_configuration: Optional[dict] = None,
     ):
         dependencies = super().get_validation_dependencies(
-            configuration,
-            execution_engine,
-            runtime_configuration
+            configuration, execution_engine, runtime_configuration
         )
         metric_dependencies = set(self.metric_dependencies)
 

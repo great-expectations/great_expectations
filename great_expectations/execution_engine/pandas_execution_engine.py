@@ -844,12 +844,22 @@ Notes:
         ).id
         boolean_mapped_success_values = metrics.get(metric_key)
         if result_format["result_format"] == "COMPLETE":
-            return list(data[boolean_mapped_success_values[metric_name[: -len(".unexpected_index_list")]] == False].index)
+            return list(
+                data[
+                    boolean_mapped_success_values[
+                        metric_name[: -len(".unexpected_index_list")]
+                    ]
+                    == False
+                ].index
+            )
         else:
             return list(
-                data[boolean_mapped_success_values[metric_name[: -len(".unexpected_index_list")]] == False].index[
-                    : result_format["partial_unexpected_count"]
-                ]
+                data[
+                    boolean_mapped_success_values[
+                        metric_name[: -len(".unexpected_index_list")]
+                    ]
+                    == False
+                ].index[: result_format["partial_unexpected_count"]]
             )
 
     def _column_map_value_counts(
