@@ -452,6 +452,45 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         ]
 
     @classmethod
+    def expect_table_columns_to_match_set(
+        cls, expectation, styling=None, include_column_name=True
+    ):
+        params = substitute_none_for_missing(
+            expectation.kwargs, ["column_set", "exact_match"]
+        )
+
+        if params["column_set"] is None:
+            template_str = "Must specify a set or list of columns."
+
+        else:
+            # standardize order of the set for output
+            params["column_list"] = list(params["column_set"])
+
+            column_list_template_str = ", ".join(
+                [f"$column_list_{idx}" for idx in range(len(params["column_list"]))]
+            )
+
+            exact_match_str = "exactly" if params["exact_match"] is True else "at least"
+
+            template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"
+
+            for idx in range(len(params["column_list"])):
+                params["column_list_" + str(idx)] = params["column_list"][idx]
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    @classmethod
     def expect_column_pair_cramers_phi_value_to_be_less_than(
         cls, expectation, styling=None, include_column_name=True
     ):
