@@ -174,10 +174,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
             configuration = self.configuration
 
         return {
-            "domain": configuration.get_domain_kwargs(),
-            "success_kwargs": configuration.get_success_kwargs(),
+            "domain": self.get_domain_kwargs(),
+            "success_kwargs": self.get_success_kwargs(),
             "result_format": parse_result_format(
-                configuration.get_runtime_kwargs().get("result_format")
                 self.get_runtime_kwargs(runtime_configuration=runtime_configuration).get("result_format")
             ),
             "metrics": tuple(),
