@@ -46,7 +46,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         "parse_strings_as_datetimes": None,
         "result_format": "BASIC",
         "include_config": True,
-        "catch_exceptions": False,
+        "catch_exceptions": True,
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
@@ -154,13 +154,17 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
             result_format = configuration.kwargs.get(
                 "result_format", self.default_kwarg_values.get("result_format")
             )
+
+        if metric_vals.get("column_values.nonnull.count") > 0:
+            success = metric_vals.get("column_values.in_set.count") / metric_vals.get(
+                "column_values.nonnull.count"
+            )
+        else:
+            # TODO: Setting this to 1 based on the notion that tests on empty columns should be vacuously true. Confirm.
+            success = 1
         return _format_map_output(
             result_format=parse_result_format(result_format),
-            success=(
-                metric_vals.get("column_values.in_set.count")
-                / metric_vals.get("column_values.nonnull.count")
-            )
-            >= mostly,
+            success=success >= mostly,
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
             unexpected_count=metric_vals.get("column_values.nonnull.count")
