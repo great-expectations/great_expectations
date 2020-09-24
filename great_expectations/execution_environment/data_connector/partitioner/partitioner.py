@@ -2,13 +2,14 @@
 
 import logging
 import copy
-from typing import List
+from typing import List, Iterator
 from great_expectations.data_context.types.base import (
     SorterConfig,
     sorterConfigSchema
 )
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 from great_expectations.core.id_dict import BatchSpec
 
 from great_expectations.exceptions import ClassInstantiationError
@@ -26,6 +27,7 @@ class Partitioner(object):
     """
 
     _batch_spec_type = BatchSpec  #TODO : is this really needed?
+    # TODO: <Alex>Is this needed?</Alex>
     recognized_batch_definition_keys = {
         "regex",
         "sorters"
@@ -121,6 +123,12 @@ class Partitioner(object):
                 class_name=config["class_name"],
             )
         return sorter
+
+    def get_sorted_partitions(self, partitions: List[Partition]) -> List[Partition]:
+        sorters: Iterator[Sorter] = reversed(self.sorters)
+        for sorter in sorters:
+            partitions = sorter.get_sorted_partitions(partitions=partitions)
+        return partitions
 
     def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
         raise NotImplementedError

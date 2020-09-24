@@ -658,15 +658,17 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         batch_id = batch_spec.to_id()
 
         if in_memory_dataset is not None:
-            if batch_definition.get("data_asset_name") and batch_definition.get(
-                "partition_name"
-            ):
+            # TODO: <Alex>There should be no need to specify "partition_name" -- None implies "latest" (first in sorted order).</Alex>
+            # if batch_definition.get("data_asset_name") and batch_definition.get("partition_name"):
+            if batch_definition.get("data_asset_name"):
                 df = in_memory_dataset
             else:
                 raise ValueError(
-                    "To pass an in_memory_dataset, you must also pass a data_asset_name and partition_id"
+                    # "To pass an in_memory_dataset, you must also pass a data_asset_name and partition_name"
+                    "To pass an in_memory_dataset, you must also a data_asset_name as well."
                 )
         else:
+            # TODO: <Alex>PyCharm says that data_connector may be referenced before assigment.</Alex>
             if data_connector.get_config().get("class_name") == "DataConnector":
                 raise ValueError(
                     "No in_memory_dataset found. To use a data_connector with class DataConnector, please ensure that "
@@ -695,8 +697,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 )
             else:
                 raise BatchSpecError(
-                    "Invalid batch_spec: path, s3, or df is required for a PandasDatasource",
-                    batch_spec,
+                    "Invalid batch_spec: path, s3, or df is required for a PandasDatasource"
                 )
 
         limit = batch_definition.get("limit") or batch_spec.get("limit")
@@ -706,11 +707,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         if self._persist:
             df.persist()
 
-        if not self.batches.get(batch_id):
+        if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_definition != batch_definition:
             batch = Batch(
-                execution_environment_name=batch_definition.get(
-                    "execution_environment"
-                ),
+                execution_engine=self,
                 batch_spec=batch_spec,
                 data=df,
                 batch_definition=batch_definition,
@@ -992,12 +991,11 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 if _declared_name != metric_name:
                     logger.warning("using metric provider with an unrecognized metric")
                 data = execution_engine.get_domain_dataframe(
-                    metric_domain_kwargs, batches
+                    metric_domain_kwargs, batches, filter_column_isnull
                 )
                 column = metric_domain_kwargs["column"]
                 eval_col = self._get_eval_column_name(column)
-                if filter_column_isnull:
-                    data = data.filter(F.col(eval_col).isNotNull())
+
                 return metric_fn(self, data, eval_col, **metric_value_kwargs, **kwargs)
 
             register_metric(

@@ -6,9 +6,8 @@ from typing import List
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-# TODO: <Alex>Do we need these two imports?</Alex>
-from great_expectations.exceptions import BatchKwargsError
-from great_expectations.execution_environment.types import PathBatchKwargs
+from great_expectations.execution_environment.types import PathBatchSpec
+from great_expectations.exceptions import BatchSpecError
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +24,6 @@ KNOWN_EXTENSIONS = [
     ".feather",
 ]
 
-
 class FilesDataConnector(DataConnector):
     def __init__(
         self,
@@ -36,6 +34,8 @@ class FilesDataConnector(DataConnector):
         assets=None,
         batch_definition_defaults=None,
         known_extensions=None,
+        reader_options=None,
+        reader_method=None,
         **kwargs
     ):
         # TODO: <Alex>Does "known_extensions" need to be in Configuration?</Alex>
@@ -50,19 +50,33 @@ class FilesDataConnector(DataConnector):
             **kwargs
         )
 
-        self._base_directory = self.config_params["base_directory"]
-
         if known_extensions is None:
             known_extensions = KNOWN_EXTENSIONS
         self._known_extensions = known_extensions
 
+        if reader_options is None:
+            reader_options = self._default_reader_options
+        self._reader_options = reader_options
+
+        self._reader_method = reader_method
+
+        self._base_directory = self.config_params["base_directory"]
+
     @property
-    def base_directory(self):
-        return self._normalize_directory_path(dir_path=self._base_directory)
+    def reader_options(self):
+        return self._reader_options
 
     @property
     def known_extensions(self):
         return self._known_extensions
+
+    @property
+    def reader_method(self):
+        return self._reader_method
+
+    @property
+    def base_directory(self):
+        return self._normalize_directory_path(dir_path=self._base_directory)
 
     def get_available_data_asset_names(self) -> list:
         if self.assets:
@@ -116,7 +130,6 @@ class FilesDataConnector(DataConnector):
                     str(posix_path) for posix_path in self._get_valid_file_paths(base_directory=base_directory)
                 ]
             return self._verify_file_paths(path_list=path_list)
-        logger.warning(f'Expected a directory, but path "{base_directory}" is not a directory.')
         raise ValueError(f'Expected a directory, but path "{base_directory}" is not a directory.')
 
     def _get_data_asset_directives(self, data_asset_name: str = None) -> dict:
@@ -144,7 +157,6 @@ class FilesDataConnector(DataConnector):
         if not all(
             [not Path(path).is_dir() for path in path_list]
         ):
-            logger.warning("All paths for a configured data asset must be files (a directory was detected).")
             raise ValueError("All paths for a configured data asset must be files (a directory was detected).")
         return path_list
 
@@ -161,4 +173,50 @@ class FilesDataConnector(DataConnector):
                     subdir_path_list: list = self._get_valid_file_paths(base_directory=path)
                     if len(subdir_path_list) > 0:
                         path_list.append(subdir_path_list)
-        return list(itertools.chain.from_iterable(element for element in path_list))
+        return list(
+            set(
+                list(
+                    itertools.chain.from_iterable(
+                        [
+                            element for element in path_list
+                        ]
+                    )
+                )
+            )
+        )
+
+    def _build_batch_spec(self, batch_definition: dict, batch_spec: dict = None) -> dict:
+        """
+        Args:
+            batch_definition:
+            batch_spec:
+        Returns:
+            batch_spec
+        """
+        if batch_spec is None:
+            batch_spec = {}
+
+        try:
+            data_asset_name: str = batch_definition.pop("data_asset_name")
+        except KeyError:
+            raise BatchSpecError(
+                message="Unable to build BatchKwargs: no data_asset_name provided in batch_definition."
+            )
+
+        partition_name: str = batch_definition.get("partition_name")
+        # TODO: <Alex>If partition_name is not specified in batch_definition, then assume "latest" (or "most recent" as defined by the first element in the sorted list of partitions).</Alex>
+        partitions: List[Partition] = self.get_available_partitions(
+            partition_name=partition_name, data_asset_name=data_asset_name
+        )
+        if len(partitions) == 0:
+            raise BatchSpecError(message=f'Unable to build batch_spec for data asset "{data_asset_name}".')
+        # TODO: <Alex>If the list has multiple elements, we are using the first one (TBD/TODO multifile config)</Alex>
+        path: str = str(partitions[0].source)
+        return self._build_batch_spec_from_path(path, batch_definition, batch_spec)
+
+    def _build_batch_spec_from_path(self, path: str, batch_definition: dict, batch_spec: dict) -> PathBatchSpec:
+        batch_spec["path"] = path
+        batch_spec = self._execution_environment.execution_engine.process_batch_definition(
+            batch_definition=batch_definition, batch_spec=batch_spec
+        )
+        return PathBatchSpec(batch_spec)

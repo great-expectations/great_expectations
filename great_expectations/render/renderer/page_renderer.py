@@ -233,12 +233,12 @@ class ValidationResultsPageRenderer(Renderer):
         if run_name_as_time != run_time_datetime and run_name_as_time != "__none__":
             include_run_name = True
 
-        page_title = "Validations / " + expectation_suite_name
+        page_title = "Validations / " + str(expectation_suite_name)
         if data_asset_name:
-            page_title += " / " + data_asset_name
+            page_title += " / " + str(data_asset_name)
         if include_run_name:
-            page_title += " / " + run_name
-        page_title += " / " + run_time
+            page_title += " / " + str(run_name)
+        page_title += " / " + str(run_time)
 
         return RenderedDocumentContent(
             **{
@@ -263,7 +263,7 @@ class ValidationResultsPageRenderer(Renderer):
         expectation_suite_path_components = (
             [".." for _ in range(len(expectation_suite_name.split(".")) + 3)]
             + ["expectations"]
-            + expectation_suite_name.split(".")
+            + str(expectation_suite_name).split(".")
         )
         expectation_suite_path = (
             os.path.join(*expectation_suite_path_components) + ".html"
@@ -579,7 +579,7 @@ class ExpectationSuitePageRenderer(Renderer):
         return RenderedDocumentContent(
             **{
                 "renderer_type": "ExpectationSuitePageRenderer",
-                "page_title": "Expectations / " + expectation_suite_name,
+                "page_title": "Expectations / " + str(expectation_suite_name),
                 "expectation_suite_name": expectation_suite_name,
                 "utm_medium": "expectation-suite-page",
                 "sections": sections,
@@ -863,12 +863,12 @@ class ProfilingResultsPageRenderer(Renderer):
         if run_name_as_time != run_time_datetime and run_name_as_time != "__none__":
             include_run_name = True
 
-        page_title = "Profiling Results / " + expectation_suite_name
+        page_title = "Profiling Results / " + str(expectation_suite_name)
         if data_asset_name:
-            page_title += " / " + data_asset_name
+            page_title += " / " + str(data_asset_name)
         if include_run_name:
-            page_title += " / " + run_name
-        page_title += " / " + run_time
+            page_title += " / " + str(run_name)
+        page_title += " / " + str(run_time)
 
         return RenderedDocumentContent(
             **{

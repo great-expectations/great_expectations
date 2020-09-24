@@ -12,20 +12,11 @@ logger = logging.getLogger(__name__)
 
 def parse_string_to_datetime(datetime_string: str, datetime_format_string: str = "%Y%m%d") -> datetime.date:
     if not isinstance(datetime_string, str):
-        logger.warning(
-            f'''Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
-            '''
-        )
         raise ValueError(
             f'''Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
             '''
         )
     if datetime_format_string and not isinstance(datetime_format_string, str):
-        logger.warning(
-            f'''DateTime parsing formatter "datetime_format_string" must have string type (actual type is
-"{str(type(datetime_format_string))}").
-            '''
-        )
         raise ValueError(
             f'''DateTime parsing formatter "datetime_format_string" must have string type (actual type is
 "{str(type(datetime_format_string))}").

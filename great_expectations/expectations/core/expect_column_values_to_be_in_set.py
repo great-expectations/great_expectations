@@ -29,8 +29,15 @@ except ImportError:
 
 class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
     map_metric = "column_values.in_set"
-    metric_dependencies = ("column_values.in_set.count", "column_values.nonnull.count",)
-    success_keys = ("value_set", "mostly", "parse_strings_as_datetimes",)
+    metric_dependencies = (
+        "column_values.in_set.count",
+        "column_values.nonnull.count",
+    )
+    success_keys = (
+        "value_set",
+        "mostly",
+        "parse_strings_as_datetimes",
+    )
 
     default_kwarg_values = {
         "row_condition": None,
@@ -39,7 +46,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         "parse_strings_as_datetimes": None,
         "result_format": "BASIC",
         "include_config": True,
-        "catch_exceptions": False,
+        "catch_exceptions": True,
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
@@ -125,27 +132,39 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(configuration)[
-            "metrics"
-        ]
-        metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
-        mostly = configuration.get_success_kwargs().get(
+        validation_dependencies = self.get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )["metrics"]
+        metric_vals = extract_metrics(
+            validation_dependencies, metrics, configuration, runtime_configuration
+        )
+        mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
         if runtime_configuration:
             result_format = runtime_configuration.get(
-                "result_format", self.default_kwarg_values.get("result_format")
+                "result_format",
+                configuration.kwargs.get(
+                    "result_format", self.default_kwarg_values.get("result_format")
+                ),
             )
         else:
-            result_format = self.default_kwarg_values.get("result_format")
+            result_format = configuration.kwargs.get(
+                "result_format", self.default_kwarg_values.get("result_format")
+            )
+
+        if metric_vals.get("column_values.nonnull.count") > 0:
+            success = metric_vals.get("column_values.in_set.count") / metric_vals.get(
+                "column_values.nonnull.count"
+            )
+        else:
+            # TODO: Setting this to 1 based on the notion that tests on empty columns should be vacuously true. Confirm.
+            success = 1
         return _format_map_output(
             result_format=parse_result_format(result_format),
-            success=(
-                metric_vals.get("column_values.in_set.count")
-                / metric_vals.get("column_values.nonnull.count")
-            )
-            >= mostly,
+            success=success >= mostly,
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
             unexpected_count=metric_vals.get("column_values.nonnull.count")

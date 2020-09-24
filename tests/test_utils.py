@@ -14,11 +14,13 @@ import pytest
 from dateutil.parser import parse
 
 from great_expectations.core import (
+    ExpectationConfiguration,
     ExpectationConfigurationSchema,
     ExpectationSuite,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
 )
+from great_expectations.core.batch import Batch
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.util import (
     get_sql_dialect_floating_point_infinity_value,
@@ -35,6 +37,7 @@ from great_expectations.execution_environment.types import (
     SqlAlchemyDatasourceBatchSpec,
     SqlAlchemyDatasourceTableBatchSpec,
 )
+from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.validator.validator import Validator
 
@@ -491,7 +494,7 @@ def get_dataset(
             table_name, engine=conn, profiler=profiler, caching=caching
         )
 
-    elif dataset_type == "SparkDFDataset":
+    elif dataset_type == "spark":
         import pyspark.sql.types as sparktypes
         from pyspark.sql import SparkSession
 
@@ -774,7 +777,7 @@ def get_test_batch(
         # Build a SqlAlchemyDataset using that database
         # TODO: Add profiler to argument list
         return SqlAlchemyExecutionEngine(caching=caching, engine=conn).load_batch(
-            batch_spec=SqlAlchemyDatasourceBatchSpec(table=table_name)
+            batch_spec=SqlAlchemyDatasourceTableBatchSpec(table=table_name)
         )
 
     elif execution_engine == "mysql":
@@ -904,7 +907,7 @@ def get_test_batch(
             batch_spec=SqlAlchemyDatasourceBatchSpec(table=table_name)
         )
 
-    elif execution_engine == "SparkDFDataset":
+    elif execution_engine == "spark":
         import pyspark.sql.types as sparktypes
         from pyspark.sql import SparkSession
 
@@ -1031,7 +1034,7 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
         return getter in ["get_column_modes", "get_column_stdev"]
     if context in ["postgresql", "mysql", "mssql"]:
         return getter in ["get_column_modes"]
-    if context == "SparkDFDataset":
+    if context == "spark":
         return getter in []
 
 
@@ -1164,7 +1167,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_null",
             "expect_column_values_to_be_of_type",
             "expect_column_values_to_be_in_type_list",
-            "expect_column_values_to_be_in_set",
+            # "expect_column_values_to_be_in_set",
             "expect_column_values_to_not_be_in_set",
             "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
@@ -1402,9 +1405,8 @@ def evaluate_json_test_cfe(batch, expectation_type, test):
     validator = Validator(
         execution_engine=batch.execution_engine, expectation_suite=expectation_suite
     )
-
-    validator.set_default_expectation_argument("result_format", "COMPLETE")
-    validator.set_default_expectation_argument("include_config", False)
+    # validator.set_default_expectation_argument("result_format", "COMPLETE")
+    # validator.set_default_expectation_argument("include_config", False)
 
     if "title" not in test:
         raise ValueError("Invalid test configuration detected: 'title' is required.")
@@ -1420,12 +1422,10 @@ def evaluate_json_test_cfe(batch, expectation_type, test):
     if "out" not in test:
         raise ValueError("Invalid test configuration detected: 'out' is required.")
 
-    # Support tests with positional arguments
-    if isinstance(test["in"], list):
-        result = getattr(validator, expectation_type)(*test["in"])
-    # As well as keyword arguments
-    else:
-        result = getattr(validator, expectation_type)(**test["in"])
+    kwargs = copy.deepcopy(test["in"])
+    kwargs["result_format"] = "COMPLETE"
+    kwargs["include_config"] = False
+    result = getattr(validator, expectation_type)(**kwargs)
 
     check_json_test_result(test=test, result=result, data_asset=batch.data)
 

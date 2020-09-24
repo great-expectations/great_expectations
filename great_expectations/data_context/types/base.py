@@ -283,17 +283,21 @@ class ExecutionEngineConfig(DictDot):
         if caching is not None:
             self.caching = caching
         if batch_spec_defaults is not None:
-            self.batch_spec_defaults = batch_spec_defaults
+            self._batch_spec_defaults = batch_spec_defaults
         for k, v in kwargs.items():
             setattr(self, k, v)
+
+    @property
+    def module_name(self):
+        return self._module_name
 
     @property
     def class_name(self):
         return self._class_name
 
     @property
-    def module_name(self):
-        return self._module_name
+    def batch_spec_defaults(self):
+        return self._batch_spec_defaults
 
 
 class ExecutionEngineConfigSchema(Schema):

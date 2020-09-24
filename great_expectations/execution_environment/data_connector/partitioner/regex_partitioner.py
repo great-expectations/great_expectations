@@ -1,12 +1,10 @@
 import logging
 import regex as re
-from typing import List, Dict, Iterator, Union
+from typing import List, Union
 from pathlib import Path
-import itertools
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
-from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 
 logger = logging.getLogger(__name__)
 
@@ -63,30 +61,20 @@ class RegexPartitioner(Partitioner):
         return self._allow_multifile_partitions
 
     def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
-        cached_partitions: List[Partition] = self._get_cached_partitions(
+        cached_partitions: List[Partition] = self.data_connector.get_cached_partitions(
             data_asset_name=data_asset_name
         )
         if cached_partitions is None or len(cached_partitions) == 0:
             self._find_available_partitions(data_asset_name=data_asset_name)
-            cached_partitions = self._get_cached_partitions(
+            cached_partitions = self.data_connector.get_cached_partitions(
                 data_asset_name=data_asset_name
             )
+        if cached_partitions is None or len(cached_partitions) == 0:
+            return []
+        cached_partitions = self.get_sorted_partitions(partitions=cached_partitions)
         return self._apply_allow_multifile_partitions_flag(
             partitions=cached_partitions,
             partition_name=partition_name
-        )
-
-    def _get_cached_partitions(self, data_asset_name: str = None) -> List[Partition]:
-        if data_asset_name is None:
-            return list(
-                itertools.chain.from_iterable(
-                    [
-                        partitions for name, partitions in self.data_connector.partitions_cache.items()
-                    ]
-                )
-            )
-        return self.data_connector.get_cached_partitions(
-            data_asset_name=data_asset_name
         )
 
     def _find_available_partitions(self, data_asset_name: str = None):
@@ -97,11 +85,7 @@ class RegexPartitioner(Partitioner):
             partitioned_path: Partition = self._find_partitions_for_path(path=path, data_asset_name=data_asset_name)
             if partitioned_path is not None:
                 partitions.append(partitioned_path)
-
-        sorters: Iterator[Sorter] = reversed(self.sorters)
-        for sorter in sorters:
-            partitions = sorter.get_sorted_partitions(partitions=partitions)
-        self.data_connector.update_partitions_cache(partitions=partitions, data_asset_name=data_asset_name)
+        self.data_connector.update_partitions_cache(partitions=partitions)
 
     def _find_partitions_for_path(self, path: str, data_asset_name: str = None) -> Union[Partition, None]:
         if self.regex is None:
@@ -123,11 +107,6 @@ class RegexPartitioner(Partitioner):
                 # TODO: <Alex>TODO: Allow number of sorters to be <= number of groups -- this will impact Configuration</Alex>
                 part_names: list = [sorter.name for sorter in self.sorters]
                 if len(part_names) != len(groups):
-                    logger.warning(
-                        f'''RegexPartitioner "{self.name}" matched {len(groups)} groups in "{path}", but number of
-sorters specified is {len(part_names)}.
-                        '''
-                    )
                     raise ValueError(
                         f'''RegexPartitioner "{self.name}" matched {len(groups)} groups in "{path}", but number of
 sorters specified is {len(part_names)}.
@@ -176,15 +155,10 @@ sorters specified is {len(part_names)}.
                 lambda partition: partition.name == partition_name, partitions
             )
         )
-        if not self.allow_multifile_partitions and len(partitions) > 1:
-            logger.warning(
-                f'''RegexPartitioner "{self.name}' detected multiple partitions for partition name "{partition_name}";
-however, allow_multifile_partitions is set to False.
-                '''
-            )
+        if not self.allow_multifile_partitions and len(partitions) > 1 and len(set(partitions)) == 1:
             raise ValueError(
-                f'''RegexPartitioner "{self.name}' detected multiple partitions for partition name "{partition_name}";
-however, allow_multifile_partitions is set to False.
+                f'''RegexPartitioner "{self.name}" detected multiple partitions for partition name "{partition_name}" of
+data asset "{partitions[0].data_asset_name}"; however, allow_multifile_partitions is set to False.
                 '''
             )
         return partitions

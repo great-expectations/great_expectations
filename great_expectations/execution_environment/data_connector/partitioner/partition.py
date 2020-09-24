@@ -43,12 +43,18 @@ class Partition(object):
                 and self.data_asset_name == other.data_asset_name
         return False
 
+    def __hash__(self):
+        return (
+            hash(self.name) ^
+            hash(zip(self.definition.items())) ^
+            hash(self.data_asset_name)
+        )
+
     def __repr__(self):
         doc_fields_dict: dict = {
-            "name": {self.name},
+            "name": self.name,
             "definition": self.definition,
             "source": self.source,
-            "data_asset_name": self.data_asset_name,
-            "type": type(self).__name__
+            "data_asset_name": self.data_asset_name
         }
         return str(doc_fields_dict)

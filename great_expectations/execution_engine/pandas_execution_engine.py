@@ -485,6 +485,7 @@ Notes:
 
                """
         if batch_spec and batch_definition:
+            # TODO: <Alex>Why is the comment below there?  Is it needed?</Alex>
             #### IS THIS OK?
             logger.info(
                 "Both batch_spec and batch_definition were passed in. batch_spec will be used to load the batch"
@@ -494,6 +495,7 @@ Notes:
             logger.info("Loading a batch without a batch_definition")
             batch_definition = {}
         else:
+            # TODO: <Alex>This if statement allows for both batch_definition and batch_spec to be None -- then the code below will cause an exception.</Alex>
             if not self._data_context:
                 raise ValueError("Cannot use a batch definition without a data context")
 
@@ -523,16 +525,17 @@ Notes:
         )
 
         if in_memory_dataset is not None:
-            if batch_definition.get("data_asset_name") and batch_definition.get(
-                "partition_name"
-            ):
+            # TODO: <Alex>There should be no need to specify "partition_name" -- None implies "latest" (first in sorted order).</Alex>
+            # if batch_definition.get("data_asset_name") and batch_definition.get("partition_name"):
+            if batch_definition.get("data_asset_name"):
                 df = in_memory_dataset
             else:
                 raise ValueError(
-                    "To pass an in_memory_dataset, you must also pass a data_asset_name "
-                    "and partition_id"
+                    # "To pass an in_memory_dataset, you must also pass a data_asset_name and partition_name"
+                    "To pass an in_memory_dataset, you must pass a data_asset_name as well."
                 )
         else:
+            # TODO: <Alex>PyCharm says that data_connector may be referenced before assigment.</Alex>
             if data_connector.get_config().get("class_name") == "DataConnector":
                 raise ValueError(
                     "No in_memory_dataset found. To use a data_connector with class DataConnector, please ensure that "
@@ -561,14 +564,13 @@ Notes:
                 )
             else:
                 raise BatchSpecError(
-                    "Invalid batch_spec: path, s3, or df is required for a PandasDatasource",
-                    batch_spec,
+                    "Invalid batch_spec: path, s3, or df is required for a PandasDatasource"
                 )
 
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
-        if not self.batches.get(batch_id):
+        if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_definition != batch_definition:
             batch = Batch(
                 execution_engine=self,
                 batch_spec=batch_spec,
@@ -578,6 +580,8 @@ Notes:
                 data_context=self._data_context,
             )
             self.batches[batch_id] = batch
+        else:
+            batch = self.batches.get(batch_id)
 
         self._loaded_batch_id = batch_id
 
@@ -609,8 +613,7 @@ Notes:
         """
         if reader_method is None and path is None:
             raise BatchSpecError(
-                "Unable to determine pandas reader function without reader_method or path.",
-                {"reader_method": reader_method},
+                "Unable to determine pandas reader function without reader_method or path."
             )
 
         reader_options = None
@@ -628,8 +631,7 @@ Notes:
             return reader_fn
         except AttributeError:
             raise BatchSpecError(
-                "Unable to find reader_method %s in pandas." % reader_method,
-                {"reader_method": reader_method},
+                f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
     @staticmethod
@@ -662,7 +664,7 @@ Notes:
             }
 
         raise BatchSpecError(
-            "Unable to determine reader method from path: %s" % path, {"path": path}
+            f'Unable to determine reader method from path: "{path}".'
         )
 
     def process_batch_definition(self, batch_definition, batch_spec):
@@ -831,25 +833,35 @@ Notes:
     ):
         """Maps metric values and kwargs to results of success kwargs"""
         data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
-        assert metric_name.endswith(".unexpected_index")
+        assert metric_name.endswith(".unexpected_index_list")
         # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
         result_format = metric_value_kwargs["result_format"]
         base_metric_value_kwargs = {
             k: v for k, v in metric_value_kwargs.items() if k != "result_format"
         }
         metric_key = MetricEdgeKey(
-            metric_name[: -len(".unexpected_index")],
+            metric_name[: -len(".unexpected_index_list")],
             metric_domain_kwargs,
             base_metric_value_kwargs,
         ).id
         boolean_mapped_success_values = metrics.get(metric_key)
         if result_format["result_format"] == "COMPLETE":
-            return list(data[boolean_mapped_success_values == False].index)
+            return list(
+                data[
+                    boolean_mapped_success_values[
+                        metric_name[: -len(".unexpected_index_list")]
+                    ]
+                    == False
+                ].index
+            )
         else:
             return list(
-                data[boolean_mapped_success_values == False].index[
-                    : result_format["partial_unexpected_count"]
-                ]
+                data[
+                    boolean_mapped_success_values[
+                        metric_name[: -len(".unexpected_index_list")]
+                    ]
+                    == False
+                ].index[: result_format["partial_unexpected_count"]]
             )
 
     def _column_map_value_counts(
@@ -1007,6 +1019,15 @@ Notes:
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_rows,
+            )
+            # noinspection PyTypeChecker
+            register_metric(
+                metric_name=metric_name + ".unexpected_index_list",
+                metric_domain_keys=metric_domain_keys,
+                metric_value_keys=(*metric_value_keys, "result_format"),
+                execution_engine=cls,
+                metric_dependencies=(metric_name,),
+                metric_provider=cls._column_map_index,
             )
             return inner_func
 
