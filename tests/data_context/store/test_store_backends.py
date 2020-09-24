@@ -230,21 +230,19 @@ def test_TupleS3StoreBackend_with_prefix():
     assert my_store.get(("BBB",)) == "bbb"
 
     assert set(my_store.list_keys()) == {("AAA",), ("BBB",)}
-    assert set(
-        [
-            s3_object_info["Key"]
-            for s3_object_info in boto3.client("s3").list_objects_v2(
-                Bucket=bucket, Prefix=prefix
-            )["Contents"]
-        ]
-    ) == {"this_is_a_test_prefix/my_file_AAA", "this_is_a_test_prefix/my_file_BBB"}
+    assert {
+        s3_object_info["Key"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(
+            Bucket=bucket, Prefix=prefix
+        )["Contents"]
+    } == {"this_is_a_test_prefix/my_file_AAA", "this_is_a_test_prefix/my_file_BBB"}
 
     assert my_store.get_url_for_key(
         ("AAA",)
-    ) == "https://s3.amazonaws.com/%s/%s/my_file_AAA" % (bucket, prefix)
+    ) == "https://s3.amazonaws.com/{}/{}/my_file_AAA".format(bucket, prefix)
     assert my_store.get_url_for_key(
         ("BBB",)
-    ) == "https://s3.amazonaws.com/%s/%s/my_file_BBB" % (bucket, prefix)
+    ) == "https://s3.amazonaws.com/{}/{}/my_file_BBB".format(bucket, prefix)
 
     my_store.remove_key(("BBB",))
     with pytest.raises(InvalidKeyError):
@@ -476,7 +474,8 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
     my_store.set(("AAA",), "aaa", content_type="text/html; charset=utf-8")
     assert my_store.get(("AAA",)) == "aaa"
 
-    obj = boto3.client("s3").get_object(Bucket=bucket, Key=prefix + "/my_file_AAA")
+    obj = boto3.client("s3").get_object(Bucket=bucket, Key=prefix + "my_file_AAA")
+    assert my_store._build_s3_object_key(("AAA",)) == "my_file_AAA"
     assert obj["ContentType"] == "text/html; charset=utf-8"
     assert obj["ContentEncoding"] == "utf-8"
 
@@ -484,14 +483,12 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
     assert my_store.get(("BBB",)) == "bbb"
 
     assert set(my_store.list_keys()) == {("AAA",), ("BBB",)}
-    assert set(
-        [
-            s3_object_info["Key"]
-            for s3_object_info in boto3.client("s3").list_objects_v2(
-                Bucket=bucket, Prefix=prefix
-            )["Contents"]
-        ]
-    ) == {"my_file_AAA", "my_file_BBB"}
+    assert {
+        s3_object_info["Key"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(
+            Bucket=bucket, Prefix=prefix
+        )["Contents"]
+    } == {"my_file_AAA", "my_file_BBB"}
 
     assert (
         my_store.get_url_for_key(("AAA",))

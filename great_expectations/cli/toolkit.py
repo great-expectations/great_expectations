@@ -167,9 +167,9 @@ def _profile_to_create_a_suite(
 Great Expectations will choose a couple of columns and generate expectations about them
 to demonstrate some examples of assertions you can make about your data.
 
-Great Expectations will store these expectations in a new Expectation Suite '{0:s}' here:
+Great Expectations will store these expectations in a new Expectation Suite '{:s}' here:
 
-  {1:s}
+  {:s}
 """.format(
             expectation_suite_name,
             context.stores[
@@ -211,7 +211,7 @@ def _raise_profiling_errors(profiling_results):
         == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
     ):
         raise ge_exceptions.DataContextError(
-            """Some of the data assets you specified were not found: {0:s}
+            """Some of the data assets you specified were not found: {:s}
             """.format(
                 ",".join(profiling_results["error"]["not_found_data_assets"])
             )
@@ -265,9 +265,9 @@ def create_empty_suite(
 ) -> None:
     cli_message(
         """
-Great Expectations will create a new Expectation Suite '{0:s}' and store it here:
+Great Expectations will create a new Expectation Suite '{:s}' and store it here:
 
-  {1:s}
+  {:s}
 """.format(
             expectation_suite_name,
             context.stores[

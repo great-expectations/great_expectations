@@ -4,7 +4,7 @@
 Welcome to Great Expectations!
 ##############################
 
-Great Expectations is a leading tool for :ref:`validating <expectations>`,
+Great Expectations is the leading tool for :ref:`validating <expectations>`,
 :ref:`documenting <data_docs>`, and :ref:`profiling <profiling>` your data to maintain quality and improve
 communication between teams. Head over to the :ref:`intro` to learn more, or jump straight to our
 :ref:`tutorials__getting_started` guide.

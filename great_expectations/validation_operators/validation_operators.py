@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 logger = logging.getLogger(__name__)
 
 
-class ValidationOperator(object):
+class ValidationOperator:
     """
     The base class of all validation operators.
 

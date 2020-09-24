@@ -316,7 +316,7 @@ class RunIdentifier(DataContextKey):
     """A RunIdentifier identifies a run (collection of validations) by run_name and run_time."""
 
     def __init__(self, run_name=None, run_time=None):
-        super(RunIdentifier, self).__init__()
+        super().__init__()
         assert run_name is None or isinstance(
             run_name, str
         ), "run_name must be an instance of str"
@@ -1082,12 +1082,26 @@ class ExpectationConfiguration(DictDot):
                 "catch_exceptions": False,
             },
         },
-        "expect_multicolumn_values_to_be_unique": {
+        "expect_select_column_values_to_be_unique_within_record": {
             "domain_kwargs": ["column_list", "row_condition", "condition_parser"],
-            "success_kwargs": ["ignore_row_if"],
+            "success_kwargs": ["ignore_row_if", "mostly"],
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
+                "mostly": None,
+                "ignore_row_if": "all_values_are_missing",
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
+        "expect_compound_columns_to_be_unique": {
+            "domain_kwargs": ["column_list", "row_condition", "condition_parser"],
+            "success_kwargs": ["ignore_row_if", "mostly"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "mostly": None,
                 "ignore_row_if": "all_values_are_missing",
                 "result_format": "BASIC",
                 "include_config": True,
@@ -1450,7 +1464,7 @@ class ExpectationConfigurationSchema(Schema):
 #             raise ValidationError("meta information must be json serializable.")
 
 
-class ExpectationSuite(object):
+class ExpectationSuite:
     """
     This ExpectationSuite object has create, read, update, and delete functionality for its expectations:
         -create: self.add_expectation()
@@ -1874,7 +1888,7 @@ class ExpectationSuiteSchema(Schema):
         return ExpectationSuite(**data)
 
 
-class ExpectationValidationResult(object):
+class ExpectationValidationResult:
     def __init__(
         self,
         success=None,

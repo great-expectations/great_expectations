@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
-    """
+    r"""
     If filepath_template is provided, the key to this StoreBackend abstract class must be a tuple with
     fixed length equal to the number of unique components matching the regex r"{\d+}"
 
@@ -69,7 +69,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             for substring in self.forbidden_substrings:
                 if substring in key_element:
                     raise ValueError(
-                        "Keys in {0} must not contain substrings in {1} : {2}".format(
+                        "Keys in {} must not contain substrings in {} : {}".format(
                             self.__class__.__name__, self.forbidden_substrings, key,
                         )
                     )
@@ -77,7 +77,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _validate_value(self, value):
         if not isinstance(value, str) and not isinstance(value, bytes):
             raise TypeError(
-                "Values in {0} must be instances of {1} or {2}, not {3}".format(
+                "Values in {} must be instances of {} or {}, not {}".format(
                     self.__class__.__name__, str, bytes, type(value),
                 )
             )
@@ -140,7 +140,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             # Convert the template to a regex
             indexed_string_substitutions = re.findall(r"{\d+}", filepath_template)
             tuple_index_list = [
-                "(?P<tuple_index_{0}>.*)".format(i,)
+                "(?P<tuple_index_{}>.*)".format(i,)
                 for i in range(len(indexed_string_substitutions))
             ]
             intermediate_filepath_regex = re.sub(
@@ -179,7 +179,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         new_key = self._convert_filepath_to_key(filepath)
         if key != new_key:
             raise ValueError(
-                "filepath template {0} for class {1} is not reversible for a tuple of length {2}. "
+                "filepath template {} for class {} is not reversible for a tuple of length {}. "
                 "Have you included all elements in the key tuple?".format(
                     self.filepath_template, self.__class__.__name__, self.key_length,
                 )
@@ -224,7 +224,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 )
             elif not os.path.isabs(root_directory):
                 raise ValueError(
-                    "root_directory must be an absolute path. Got {0} instead.".format(
+                    "root_directory must be an absolute path. Got {} instead.".format(
                         root_directory
                     )
                 )
@@ -452,7 +452,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 )
             else:
                 result_s3.put(Body=value, ContentType=content_type)
-        except s3.exceptions.ClientError as e:
+        except s3.meta.client.exceptions.ClientError as e:
             logger.debug(str(e))
             raise StoreBackendError("Unable to set object in s3.")
 
@@ -555,6 +555,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def remove_key(self, key):
         import boto3
         from botocore.exceptions import ClientError
+
+        if not isinstance(key, tuple):
+            key = key.to_tuple()
 
         s3 = boto3.resource("s3")
         s3_object_key = self._build_s3_object_key(key)
@@ -733,7 +736,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         try:
-            bucket.delete_blobs(blobs=bucket.list_blobs(prefix=self.prefix))
+            bucket.delete_blobs(blobs=list(bucket.list_blobs(prefix=self.prefix)))
         except NotFound:
             return False
         return True
