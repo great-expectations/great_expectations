@@ -128,9 +128,6 @@ index.html file or a custom error file:
 .. code-block:: yaml
 
     data_docs_sites:
-
-      ...
-
       s3_site:  # this is a user-selected name - you may select your own
         class_name: SiteBuilder
         store_backend:

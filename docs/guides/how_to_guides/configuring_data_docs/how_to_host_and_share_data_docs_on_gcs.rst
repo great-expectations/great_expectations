@@ -148,9 +148,6 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 .. code-block:: yaml
 
     data_docs_sites:
-
-      ...
-
       gs_site:  # this is a user-selected name - you may select your own
         class_name: SiteBuilder
         store_backend:
