@@ -52,7 +52,7 @@ class MetaExpectation(ABCMeta):
     """MetaExpectation registers Expectations as they are defined."""
 
     def __new__(cls, clsname, bases, attrs):
-        newclass = super(MetaExpectation, cls).__new__(cls, clsname, bases, attrs)
+        newclass = super().__new__(cls, clsname, bases, attrs)
         if not isabstract(newclass):
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
@@ -65,12 +65,11 @@ class Expectation(ABC, metaclass=MetaExpectation):
     version = ge_version
     domain_keys = tuple()
     success_keys = tuple()
-    runtime_kwargs = ("include_config", "catch_exceptions", "result_format",)
-    default_kwarg_values = {
-        "include_config": True,
-        "catch_exceptions": True,
-        "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 20,},
-    }
+    runtime_keys = (
+        "include_config",
+        "catch_exceptions",
+        "result_format",
+    )
     _validators = dict()
     _post_validation_hooks = list()
 
@@ -84,11 +83,12 @@ class Expectation(ABC, metaclass=MetaExpectation):
         metrics: dict,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
     ) -> "ExpectationValidationResult":
         if configuration is None:
             configuration = self.configuration
 
-        available_metrics = set([metric[0] for metric in metrics.keys()])
+        available_metrics = {metric[0] for metric in metrics.keys()}
         available_validators = sorted(
             [
                 (set(metric_deps), validator_fn)
@@ -103,6 +103,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
                     configuration,
                     metrics,
                     runtime_configuration=runtime_configuration,
+                    execution_engine=execution_engine,
                 )
         raise MetricError("No validator found for available metrics")
 
@@ -159,17 +160,22 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
 
     def get_validation_dependencies(
-        self, configuration: Optional[ExpectationConfiguration] = None
+        self,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
     ):
         """Construct the validation graph for this expectation."""
         if not configuration:
             configuration = self.configuration
 
         return {
-            "domain": configuration.get_domain_kwargs(),
-            "success_kwargs": configuration.get_success_kwargs(),
+            "domain": self.get_domain_kwargs(),
+            "success_kwargs": self.get_success_kwargs(),
             "result_format": parse_result_format(
-                configuration.get_runtime_kwargs().get("result_format")
+                self.get_runtime_kwargs(
+                    runtime_configuration=runtime_configuration
+                ).get("result_format")
             ),
             "metrics": tuple(),
         }
@@ -223,9 +229,23 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if not configuration:
             configuration = self.configuration
 
-        return configuration.get_runtime_kwargs(
-            runtime_configuration=runtime_configuration
+        configuration = deepcopy(configuration)
+
+        if runtime_configuration:
+            configuration.kwargs.update(runtime_configuration)
+
+        success_kwargs = self.get_success_kwargs(configuration)
+        runtime_kwargs = {
+            key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
+            for key in self.runtime_keys
+        }
+        runtime_kwargs.update(success_kwargs)
+
+        runtime_kwargs["result_format"] = parse_result_format(
+            runtime_kwargs["result_format"]
         )
+
+        return runtime_kwargs
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         if configuration is None:
@@ -318,7 +338,25 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
 
 class DatasetExpectation(Expectation, ABC):
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+    domain_keys = (
+        "batch_id",
+        "table",
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
+
+    # def get_validation_dependencies(
+    #     self,
+    #     configuration: Optional[ExpectationConfiguration] = None,
+    #     execution_engine: Optional[ExecutionEngine] = None,
+    # ):
+    #     dependencies = super().get_validation_dependencies(configuration)
+    #     metric_dependencies = set(self.metric_dependencies)
+    #
+    #     dependencies["metrics"] = metric_dependencies
+    #
+    #     return dependencies
 
     @staticmethod
     def get_value_set_parser(execution_engine: ExecutionEngine):
@@ -413,13 +451,16 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         self,
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
     ):
-        dependencies = super().get_validation_dependencies(configuration)
+        dependencies = super().get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )
         metric_dependencies = set(self.metric_dependencies)
 
         dependencies["metrics"] = metric_dependencies
         result_format_str = dependencies["result_format"].get("result_format")
-        if result_format_str == ["BOOLEAN_ONLY"]:
+        if result_format_str == "BOOLEAN_ONLY":
             return dependencies
 
         metric_dependencies.add("column_values.count")
@@ -434,6 +475,8 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
             return dependencies
 
         metric_dependencies.add(self.map_metric + ".unexpected_rows")
+        if isinstance(execution_engine, PandasExecutionEngine):
+            metric_dependencies.add(self.map_metric + ".unexpected_index_list")
 
         return dependencies
 
@@ -632,4 +675,4 @@ def _format_map_output(
     if result_format["result_format"] == "COMPLETE":
         return return_obj
 
-    raise ValueError("Unknown result_format %s." % (result_format["result_format"],))
+    raise ValueError("Unknown result_format {}.".format(result_format["result_format"]))
