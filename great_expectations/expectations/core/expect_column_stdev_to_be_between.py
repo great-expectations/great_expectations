@@ -18,6 +18,7 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
         "max_value",
         "strict_max",
     )
+    success_keys = ("min_value", "strict_min", "max_value", "strict_max",)
     default_kwarg_values = {
         "min_value": None,
         "strict_min": False,
@@ -45,7 +46,7 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
         return True
 
     @PandasExecutionEngine.metric(
-        metric_name="standard_deviation",
+        metric_name="column.aggregate.standard_deviation",
         metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=tuple(),
         metric_dependencies=tuple(),
@@ -78,7 +79,7 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
         metric_vals = extract_metrics(
             validation_dependencies, metrics, configuration, runtime_configuration
         )
-        column_stdev = metric_vals.get("standard_deviation")
+        column_stdev = metric_vals.get("column.aggregate.standard_deviation")
         min_value = self.get_success_kwargs(configuration).get("min_value")
         strict_min = self.get_success_kwargs(configuration).get("strict_min")
         max_value = self.get_success_kwargs(configuration).get("max_value")
