@@ -20,6 +20,7 @@ from ..registry import extract_metrics
 class ExpectColumnToExist(DatasetExpectation):
     metric_dependencies = ("columns",)
     success_keys = ("column", "column_index",)
+    domain_keys = ("batch_id", "table", "row_condition", "condition_parser",)
 
     default_kwarg_values = {
         "row_condition": None,
@@ -36,12 +37,12 @@ class ExpectColumnToExist(DatasetExpectation):
 
     }
 
-    """ A Column Map Metric Decorator for the Column Count"""
+    """ A Column Metric Decorator for the Column Count"""
     @PandasExecutionEngine.metric(
         metric_name="columns",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+        metric_domain_keys= ("batch_id", "table", "row_condition", "condition_parser"),
         metric_value_keys=(),
-        metric_dependencies=tuple(),
+        metric_dependencies=(),
     )
     def _pandas_columns(
             self,
@@ -52,12 +53,12 @@ class ExpectColumnToExist(DatasetExpectation):
             metrics: dict,
             runtime_configuration: dict = None,
     ):
-        metric_domain_kwargs.pop("column")
         """Metric which returns all columns in a dataframe"""
         df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches)
 
-        return df.columns
+        cols = df.columns
+        return cols.tolist()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
