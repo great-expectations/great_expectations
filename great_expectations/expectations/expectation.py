@@ -165,9 +165,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
         runtime_configuration: Optional[dict] = None,
     ):
         """Construct the validation graph for this expectation."""
-        if not configuration:
-            configuration = self.configuration
-
         return {
             "domain": self.get_domain_kwargs(),
             "success_kwargs": self.get_success_kwargs(),
