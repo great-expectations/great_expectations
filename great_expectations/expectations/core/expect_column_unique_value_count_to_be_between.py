@@ -19,10 +19,10 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnMedianToBeBetween(DatasetExpectation):
+class ExpectColumnUniqueValueCountToBeBetween(DatasetExpectation):
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.aggregate.median",)
-    success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+    metric_dependencies = ("column.aggregate.unique_value_count",)
+    success_keys = ("min_value", "max_value",)
 
 
     # Default values
@@ -31,22 +31,19 @@ class ExpectColumnMedianToBeBetween(DatasetExpectation):
         "condition_parser": None,
         "min_value": None,
         "max_value": None,
-        "strict_min": None,
-        "strict_max": None,
-        "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
     }
 
-    """ A Column Map Metric Decorator for the Minimum"""
+    """ A Column Aggregate Metric Decorator for the Unique Value Count"""
     @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.median",
+        metric_name="column.aggregate.unique_value_count",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
     )
-    def _pandas_median(
+    def _pandas_unique_value_count(
             self,
             batches: Dict[str, Batch],
             execution_engine: PandasExecutionEngine,
@@ -55,11 +52,11 @@ class ExpectColumnMedianToBeBetween(DatasetExpectation):
             metrics: dict,
             runtime_configuration: dict = None,
     ):
-        """Median Metric Function"""
+        """Value counts Metric Function"""
         series = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches)
 
-        return series.median()
+        return series.value_counts().shape[0]
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -84,13 +81,7 @@ class ExpectColumnMedianToBeBetween(DatasetExpectation):
         try:
             assert (
                     "column" in configuration.kwargs
-            ), "'column' parameter is required for column map expectations"
-            if "mostly" in configuration.kwargs:
-                mostly = configuration.kwargs["mostly"]
-                assert isinstance(
-                    mostly, (int, float)
-                ), "'mostly' parameter must be an integer or float"
-                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
+            ), "'column' parameter is required for any column expectation"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -128,31 +119,26 @@ class ExpectColumnMedianToBeBetween(DatasetExpectation):
             "metrics"
         ]
         metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
-        column_median = metric_vals.get("column.aggregate.median")
 
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")
-        strict_min = self.get_success_kwargs(configuration).get("strict_min")
         max_value = self.get_success_kwargs(configuration).get("max_value")
-        strict_max = self.get_success_kwargs(configuration).get("strict_max")
 
-        # Checking if mean lies between thresholds
+        unique_value_count = metric_vals.get("column.aggregate.unique_value_count")
+
+        if unique_value_count is None:
+            return {"success": False, "result": {"observed_value": unique_value_count}}
+
         if min_value is not None:
-            if strict_min:
-                above_min = column_median > min_value
-            else:
-                above_min = column_median >= min_value
+            above_min = unique_value_count >= min_value
         else:
             above_min = True
 
         if max_value is not None:
-            if strict_max:
-                below_max = column_median < max_value
-            else:
-                below_max = column_median <= max_value
+            below_max = unique_value_count <= max_value
         else:
             below_max = True
 
         success = above_min and below_max
 
-        return {"success": success, "result": {"observed_value": column_median}}
+        return {"success": success, "result": {"observed_value": unique_value_count}}
