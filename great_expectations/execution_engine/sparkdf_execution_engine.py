@@ -697,8 +697,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 )
             else:
                 raise BatchSpecError(
-                    "Invalid batch_spec: path, s3, or df is required for a PandasDatasource",
-                    batch_spec,
+                    "Invalid batch_spec: path, s3, or df is required for a PandasDatasource"
                 )
 
         limit = batch_definition.get("limit") or batch_spec.get("limit")
@@ -708,7 +707,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         if self._persist:
             df.persist()
 
-        if not self.batches.get(batch_id):
+        if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_definition != batch_definition:
             batch = Batch(
                 execution_engine=self,
                 batch_spec=batch_spec,

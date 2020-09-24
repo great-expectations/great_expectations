@@ -564,14 +564,13 @@ Notes:
                 )
             else:
                 raise BatchSpecError(
-                    "Invalid batch_spec: path, s3, or df is required for a PandasDatasource",
-                    batch_spec,
+                    "Invalid batch_spec: path, s3, or df is required for a PandasDatasource"
                 )
 
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
-        if not self.batches.get(batch_id):
+        if not self.batches.get(batch_id) or self.batches.get(batch_id).batch_definition != batch_definition:
             batch = Batch(
                 execution_engine=self,
                 batch_spec=batch_spec,
@@ -614,8 +613,7 @@ Notes:
         """
         if reader_method is None and path is None:
             raise BatchSpecError(
-                "Unable to determine pandas reader function without reader_method or path.",
-                {"reader_method": reader_method},
+                "Unable to determine pandas reader function without reader_method or path."
             )
 
         reader_options = None
@@ -633,8 +631,7 @@ Notes:
             return reader_fn
         except AttributeError:
             raise BatchSpecError(
-                "Unable to find reader_method %s in pandas." % reader_method,
-                {"reader_method": reader_method},
+                f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
     @staticmethod
@@ -667,7 +664,7 @@ Notes:
             }
 
         raise BatchSpecError(
-            "Unable to determine reader method from path: %s" % path, {"path": path}
+            f'Unable to determine reader method from path: "{path}".'
         )
 
     def process_batch_definition(self, batch_definition, batch_spec):
