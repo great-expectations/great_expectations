@@ -38,6 +38,8 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
     Since we'd prefer not to use the Airflow container filesystem to host a :ref:`Data Context <reference__core_concepts__data-context>` as a .yml file, another approach is to instantiate it in a Python file either as part of your DAG or imported by your DAG at runtime. :ref:`Follow this guide on How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>` and see the example below.
 
     Note: You may want to reference our :ref:`Configuring metadata stores <how_to_guides__configuring_metadata_stores>` and :ref:`Configuring Data Docs <how_to_guides__configuring_data_docs>` how-to guides. All of the stores in the below example are configured to use GCS, however you can use whichever store is applicable to your infrastructure.
+        
+    Important: If your Composer workflow includes spinning up/tearing down Composer environments and deleting the associated GCS bucket, you need to configure a separate bucket to persist your Great Expectations assets.
 
     .. code-block:: python
 
