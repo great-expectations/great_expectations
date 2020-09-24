@@ -1018,7 +1018,6 @@ Notes:
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_rows,
             )
-
             # noinspection PyTypeChecker
             register_metric(
                 metric_name=metric_name + ".unexpected_index_list",

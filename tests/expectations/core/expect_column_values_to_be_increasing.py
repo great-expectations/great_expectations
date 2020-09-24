@@ -41,32 +41,6 @@ def test_expect_column_values_to_be_increasing_int_impl():
     assert result == ExpectationValidationResult(success=False,)
 
 
-def test_expect_column_values_to_be_increasing_str_impl():
-    df = pd.DataFrame({"a": ["a", "b", "c", "c", "d", "e"]})
-    expectationConfiguration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_increasing",
-        kwargs={"column": "a", "strictly": False, "mostly": 1},
-    )
-    expectation = ExpectColumnValuesToBeIncreasing(expectationConfiguration)
-    batch = Batch(data=df)
-    result = expectation.validate(
-        batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
-    )
-    assert result == ExpectationValidationResult(success=True,)
-
-    # check for "strictly" kwarg
-    expectationConfiguration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_increasing",
-        kwargs={"column": "a", "strictly": True, "mostly": 1},
-    )
-    expectation = ExpectColumnValuesToBeIncreasing(expectationConfiguration)
-    batch = Batch(data=df)
-    result = expectation.validate(
-        batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
-    )
-    assert result == ExpectationValidationResult(success=False,)
-
-
 def test_spark_expect_column_values_to_be_increasing_impl():
     from pyspark.sql import SparkSession
 
@@ -90,13 +64,28 @@ def test_spark_expect_column_values_to_be_increasing_impl():
     )
     assert result == ExpectationValidationResult(success=True,)
 
-    # check for "strictly" kwarg
-    expectationConfiguration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_increasing",
-        kwargs={"column": "a", "strictly": True, "mostly": 1},
+    # # check for "strictly" kwarg
+    # expectationConfiguration = ExpectationConfiguration(
+    #     expectation_type="expect_column_values_to_be_increasing",
+    #     kwargs={"column": "a", "strictly": True, "mostly": 1},
+    # )
+    # expectation = ExpectColumnValuesToBeIncreasing(expectationConfiguration)
+    # batch = Batch(data=df)
+    # result = expectation.validate(
+    #     batches={"batch_id": batch}, execution_engine=myengine
+    # )
+    #
+    # assert result == ExpectationValidationResult(success=False,)
+
+    # check for non-increasing data
+    df = pd.DataFrame({"a": [5, 4, 3, 3, 2, 1]})
+    df = spark.createDataFrame(df)
+    myengine = SparkDFExecutionEngine()
+    batch = myengine.load_batch(
+        batch_definition={"data_asset_name": "foo", "partition_name": "bar"},
+        batch_spec=BatchSpec({"blarg": "bah"}),
+        in_memory_dataset=df,
     )
-    expectation = ExpectColumnValuesToBeIncreasing(expectationConfiguration)
-    batch = Batch(data=df)
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=myengine
     )

@@ -135,18 +135,25 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine
+            configuration, execution_engine, runtime_configuration
         )["metrics"]
-        metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
+        metric_vals = extract_metrics(
+            validation_dependencies, metrics, configuration, runtime_configuration
+        )
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
         if runtime_configuration:
             result_format = runtime_configuration.get(
-                "result_format", self.default_kwarg_values.get("result_format")
+                "result_format",
+                configuration.kwargs.get(
+                    "result_format", self.default_kwarg_values.get("result_format")
+                ),
             )
         else:
-            result_format = self.default_kwarg_values.get("result_format")
+            result_format = configuration.kwargs.get(
+                "result_format", self.default_kwarg_values.get("result_format")
+            )
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=(
