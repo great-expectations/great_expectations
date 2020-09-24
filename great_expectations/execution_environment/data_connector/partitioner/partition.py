@@ -45,7 +45,7 @@ class Partition(object):
 
     def __repr__(self):
         doc_fields_dict: dict = {
-            "name": {self.name},
+            "name": self.name,
             "definition": self.definition,
             "source": self.source,
             "data_asset_name": self.data_asset_name,

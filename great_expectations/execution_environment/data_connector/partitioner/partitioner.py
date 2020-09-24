@@ -26,6 +26,7 @@ class Partitioner(object):
     """
 
     _batch_spec_type = BatchSpec  #TODO : is this really needed?
+    # TODO: <Alex>Is this needed?</Alex>
     recognized_batch_definition_keys = {
         "regex",
         "sorters"

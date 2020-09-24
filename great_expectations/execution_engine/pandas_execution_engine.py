@@ -485,6 +485,7 @@ Notes:
 
                """
         if batch_spec and batch_definition:
+            # TODO: <Alex>Why is the comment below there?  Is it needed?</Alex>
             #### IS THIS OK?
             logger.info(
                 "Both batch_spec and batch_definition were passed in. batch_spec will be used to load the batch"
@@ -494,6 +495,7 @@ Notes:
             logger.info("Loading a batch without a batch_definition")
             batch_definition = {}
         else:
+            # TODO: <Alex>This if statement allows for both batch_definition and batch_spec to be None -- then the code below will cause an exception.</Alex>
             if not self._data_context:
                 raise ValueError("Cannot use a batch definition without a data context")
 
@@ -523,16 +525,16 @@ Notes:
         )
 
         if in_memory_dataset is not None:
-            if batch_definition.get("data_asset_name") and batch_definition.get(
-                "partition_name"
-            ):
+            # TODO: <Alex>There should be no need to specify "partition_name" -- None implies "latest" (first in sorted order).</Alex>
+            # if batch_definition.get("data_asset_name") and batch_definition.get("partition_name"):
+            if batch_definition.get("data_asset_name"):
                 df = in_memory_dataset
             else:
                 raise ValueError(
-                    "To pass an in_memory_dataset, you must also pass a data_asset_name "
-                    "and partition_id"
+                    "To pass an in_memory_dataset, you must also pass a data_asset_name and partition_name"
                 )
         else:
+            # TODO: <Alex>PyCharm says that data_connector may be referenced before assigment.</Alex>
             if data_connector.get_config().get("class_name") == "DataConnector":
                 raise ValueError(
                     "No in_memory_dataset found. To use a data_connector with class DataConnector, please ensure that "
@@ -578,6 +580,8 @@ Notes:
                 data_context=self._data_context,
             )
             self.batches[batch_id] = batch
+        else:
+            batch = self.batches.get(batch_id)
 
         self._loaded_batch_id = batch_id
 

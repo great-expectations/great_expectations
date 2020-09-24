@@ -52,7 +52,7 @@ class Sorter(object):
 
     def __repr__(self):
         doc_fields_dict: dict = {
-            "name": {self.name},
+            "name": self.name,
             "reverse": self.reverse,
             "type": type(self).__name__
         }

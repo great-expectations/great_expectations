@@ -658,15 +658,16 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         batch_id = batch_spec.to_id()
 
         if in_memory_dataset is not None:
-            if batch_definition.get("data_asset_name") and batch_definition.get(
-                "partition_name"
-            ):
+            # TODO: <Alex>There should be no need to specify "partition_name" -- None implies "latest" (first in sorted order).</Alex>
+            # if batch_definition.get("data_asset_name") and batch_definition.get("partition_name"):
+            if batch_definition.get("data_asset_name"):
                 df = in_memory_dataset
             else:
                 raise ValueError(
-                    "To pass an in_memory_dataset, you must also pass a data_asset_name and partition_id"
+                    "To pass an in_memory_dataset, you must also pass a data_asset_name and partition_name"
                 )
         else:
+            # TODO: <Alex>PyCharm says that data_connector may be referenced before assigment.</Alex>
             if data_connector.get_config().get("class_name") == "DataConnector":
                 raise ValueError(
                     "No in_memory_dataset found. To use a data_connector with class DataConnector, please ensure that "
@@ -708,9 +709,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
         if not self.batches.get(batch_id):
             batch = Batch(
-                execution_environment_name=batch_definition.get(
-                    "execution_environment"
-                ),
+                execution_engine=self,
                 batch_spec=batch_spec,
                 data=df,
                 batch_definition=batch_definition,
