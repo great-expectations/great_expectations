@@ -1,5 +1,6 @@
 import json
 import logging
+from copy import deepcopy
 from typing import Any, Dict
 
 import jsonpatch
@@ -904,7 +905,7 @@ class ExpectationConfiguration(DictDot):
         if expectation_kwargs_dict is None:
             expectation_kwargs_dict = self._get_default_custom_kwargs()
         success_kwargs = self.get_success_kwargs()
-        lookup_kwargs = self.kwargs
+        lookup_kwargs = deepcopy(self.kwargs)
         if runtime_configuration:
             lookup_kwargs.update(runtime_configuration)
         runtime_kwargs = {

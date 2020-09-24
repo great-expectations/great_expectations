@@ -232,6 +232,8 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if not configuration:
             configuration = self.configuration
 
+        configuration = deepcopy(configuration)
+
         if runtime_configuration:
             configuration.kwargs.update(runtime_configuration)
 
@@ -241,6 +243,10 @@ class Expectation(ABC, metaclass=MetaExpectation):
             for key in self.runtime_keys
         }
         runtime_kwargs.update(success_kwargs)
+
+        runtime_kwargs["result_format"] = parse_result_format(
+            runtime_kwargs["result_format"]
+        )
 
         return runtime_kwargs
 
