@@ -52,7 +52,7 @@ class MetaExpectation(ABCMeta):
     """MetaExpectation registers Expectations as they are defined."""
 
     def __new__(cls, clsname, bases, attrs):
-        newclass = super(MetaExpectation, cls).__new__(cls, clsname, bases, attrs)
+        newclass = super().__new__(cls, clsname, bases, attrs)
         if not isabstract(newclass):
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
@@ -92,7 +92,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if configuration is None:
             configuration = self.configuration
 
-        available_metrics = set([metric[0] for metric in metrics.keys()])
+        available_metrics = {metric[0] for metric in metrics.keys()}
         available_validators = sorted(
             [
                 (set(metric_deps), validator_fn)
@@ -439,6 +439,8 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
             return dependencies
 
         metric_dependencies.add(self.map_metric + ".unexpected_rows")
+        if isinstance(execution_engine, PandasExecutionEngine):
+            metric_dependencies.add(self.map_metric + ".unexpected_index_list")
 
         return dependencies
 
@@ -637,4 +639,4 @@ def _format_map_output(
     if result_format["result_format"] == "COMPLETE":
         return return_obj
 
-    raise ValueError("Unknown result_format %s." % (result_format["result_format"],))
+    raise ValueError("Unknown result_format {}.".format(result_format["result_format"]))

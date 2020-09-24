@@ -14,11 +14,13 @@ import pytest
 from dateutil.parser import parse
 
 from great_expectations.core import (
+    ExpectationConfiguration,
     ExpectationConfigurationSchema,
     ExpectationSuite,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
 )
+from great_expectations.core.batch import Batch
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.util import (
     get_sql_dialect_floating_point_infinity_value,
@@ -35,6 +37,7 @@ from great_expectations.execution_environment.types import (
     SqlAlchemyDatasourceBatchSpec,
     SqlAlchemyDatasourceTableBatchSpec,
 )
+from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.validator.validator import Validator
 
@@ -774,7 +777,7 @@ def get_test_batch(
         # Build a SqlAlchemyDataset using that database
         # TODO: Add profiler to argument list
         return SqlAlchemyExecutionEngine(caching=caching, engine=conn).load_batch(
-            batch_spec=SqlAlchemyDatasourceBatchSpec(table=table_name)
+            batch_spec=SqlAlchemyDatasourceTableBatchSpec(table=table_name)
         )
 
     elif execution_engine == "mysql":
@@ -1221,7 +1224,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_null",
             "expect_column_values_to_be_of_type",
             "expect_column_values_to_be_in_type_list",
-            # "expect_column_values_to_be_in_set",
+            "expect_column_values_to_be_in_set",
             "expect_column_values_to_not_be_in_set",
             "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
@@ -1402,9 +1405,8 @@ def evaluate_json_test_cfe(batch, expectation_type, test):
     validator = Validator(
         execution_engine=batch.execution_engine, expectation_suite=expectation_suite
     )
-
-    validator.set_default_expectation_argument("result_format", "COMPLETE")
-    validator.set_default_expectation_argument("include_config", False)
+    # validator.set_default_expectation_argument("result_format", "COMPLETE")
+    # validator.set_default_expectation_argument("include_config", False)
 
     if "title" not in test:
         raise ValueError("Invalid test configuration detected: 'title' is required.")
@@ -1420,158 +1422,12 @@ def evaluate_json_test_cfe(batch, expectation_type, test):
     if "out" not in test:
         raise ValueError("Invalid test configuration detected: 'out' is required.")
 
-    # Support tests with positional arguments
-    if isinstance(test["in"], list):
-        result = getattr(validator, expectation_type)(*test["in"])
-    # As well as keyword arguments
-    else:
-        result = getattr(validator, expectation_type)(**test["in"])
+    kwargs = copy.deepcopy(test["in"])
+    kwargs["result_format"] = "COMPLETE"
+    kwargs["include_config"] = False
+    result = getattr(validator, expectation_type)(**kwargs)
 
     check_json_test_result(test=test, result=result, data_asset=batch.data)
-
-
-def check_json_test_result(test, result, data_asset=None):
-    # Check results
-    if test["exact_match_out"] is True:
-        assert expectationValidationResultSchema.load(test["out"]) == result
-    else:
-        # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)
-        # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
-        # representations, serializations, and objects should interact and how much of that is shown to the user.
-        result = result.to_json_dict()
-        for key, value in test["out"].items():
-            # Apply our great expectations-specific test logic
-
-            if key == "success":
-                assert result["success"] == value
-
-            elif key == "observed_value":
-                if "tolerance" in test:
-                    if isinstance(value, dict):
-                        assert set(value.keys()) == set(
-                            result["result"]["observed_value"].keys()
-                        )
-                        for k, v in value.items():
-                            assert np.allclose(
-                                result["result"]["observed_value"][k],
-                                v,
-                                rtol=test["tolerance"],
-                            )
-                    else:
-                        assert np.allclose(
-                            result["result"]["observed_value"],
-                            value,
-                            rtol=test["tolerance"],
-                        )
-                else:
-                    assert value == result["result"]["observed_value"]
-
-            # NOTE: This is a key used ONLY for testing cases where an expectation is legitimately allowed to return
-            # any of multiple possible observed_values. expect_column_values_to_be_of_type is one such expectation.
-            elif key == "observed_value_list":
-                assert result["result"]["observed_value"] in value
-
-            elif key == "unexpected_index_list":
-                if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
-                    pass
-                else:
-                    assert result["result"]["unexpected_index_list"] == value
-
-            elif key == "unexpected_list":
-                # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
-                if (isinstance(value, list)) & (len(value) >= 1):
-                    if type(value[0].__lt__(value[0])) != type(NotImplemented):
-                        value = value.sort()
-                        result["result"]["unexpected_list"] = result["result"][
-                            "unexpected_list"
-                        ].sort()
-
-                assert result["result"]["unexpected_list"] == value, (
-                    "expected "
-                    + str(value)
-                    + " but got "
-                    + str(result["result"]["unexpected_list"])
-                )
-
-            elif key == "details":
-                assert result["result"]["details"] == value
-
-            elif key == "value_counts":
-                for val_count in value:
-                    assert val_count in result["result"]["details"]["value_counts"]
-
-            elif key.startswith("observed_cdf"):
-                if "x_-1" in key:
-                    if key.endswith("gt"):
-                        assert (
-                            result["result"]["details"]["observed_cdf"]["x"][-1] > value
-                        )
-                    else:
-                        assert (
-                            result["result"]["details"]["observed_cdf"]["x"][-1]
-                            == value
-                        )
-                elif "x_0" in key:
-                    if key.endswith("lt"):
-                        assert (
-                            result["result"]["details"]["observed_cdf"]["x"][0] < value
-                        )
-                    else:
-                        assert (
-                            result["result"]["details"]["observed_cdf"]["x"][0] == value
-                        )
-                else:
-                    raise ValueError(
-                        "Invalid test specification: unknown key " + key + " in 'out'"
-                    )
-
-            elif key == "traceback_substring":
-                assert result["exception_info"]["raised_exception"]
-                assert value in result["exception_info"]["exception_traceback"], (
-                    "expected to find "
-                    + value
-                    + " in "
-                    + result["exception_info"]["exception_traceback"]
-                )
-
-            elif key == "expected_partition":
-                assert np.allclose(
-                    result["result"]["details"]["expected_partition"]["bins"],
-                    value["bins"],
-                )
-                assert np.allclose(
-                    result["result"]["details"]["expected_partition"]["weights"],
-                    value["weights"],
-                )
-                if "tail_weights" in result["result"]["details"]["expected_partition"]:
-                    assert np.allclose(
-                        result["result"]["details"]["expected_partition"][
-                            "tail_weights"
-                        ],
-                        value["tail_weights"],
-                    )
-
-            elif key == "observed_partition":
-                assert np.allclose(
-                    result["result"]["details"]["observed_partition"]["bins"],
-                    value["bins"],
-                )
-                assert np.allclose(
-                    result["result"]["details"]["observed_partition"]["weights"],
-                    value["weights"],
-                )
-                if "tail_weights" in result["result"]["details"]["observed_partition"]:
-                    assert np.allclose(
-                        result["result"]["details"]["observed_partition"][
-                            "tail_weights"
-                        ],
-                        value["tail_weights"],
-                    )
-
-            else:
-                raise ValueError(
-                    "Invalid test specification: unknown key " + key + " in 'out'"
-                )
 
 
 def check_json_test_result(test, result, data_asset=None):

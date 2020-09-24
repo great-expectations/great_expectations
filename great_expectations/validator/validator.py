@@ -32,6 +32,7 @@ from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemy
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.metric_exceptions import MetricError
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.registry import (
     get_expectation_impl,
     get_metric_dependencies,
@@ -106,7 +107,9 @@ class Validator:
             self.set_default_expectation_argument("include_config", True)
 
     def __getattr__(self, name):
-        if name.startswith("expect_") and hasattr(self.execution_engine, name):
+        if name.startswith("expect_") and get_expectation_impl(name):
+            return self.validate_expectation(name)
+        elif name.startswith("expect_") and hasattr(self.execution_engine, name):
             return getattr(self.execution_engine, name)
         elif type(
             self.execution_engine
@@ -116,6 +119,25 @@ class Validator:
             raise AttributeError(
                 f"'{type(self).__name__}'  object has no attribute '{name}'"
             )
+
+    def validate_expectation(self, name):
+        def inst_expectation(**kwargs):
+            expectation = get_expectation_impl(name)(
+                ExpectationConfiguration(expectation_type=name, kwargs=kwargs)
+            )
+
+            runtime_configuration = {
+                k: v
+                for k, v in kwargs.items()
+                if k in ("result_format", "include_config", "catch_exceptions")
+            }
+            return expectation.validate(
+                batches={self.batch.batch_spec.to_id(): self.batch},
+                execution_engine=self.execution_engine,
+                runtime_configuration=runtime_configuration,
+            )
+
+        return inst_expectation
 
     @property
     def execution_engine(self):

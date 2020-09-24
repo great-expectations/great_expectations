@@ -132,12 +132,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(configuration)[
-            "metrics"
-        ]
+        validation_dependencies = self.get_validation_dependencies(
+            configuration, execution_engine
+        )["metrics"]
         metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
-        mostly = configuration.get_success_kwargs().get(
+        mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
         if runtime_configuration:
