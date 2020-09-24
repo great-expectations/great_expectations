@@ -10,13 +10,16 @@ from great_expectations.execution_engine import PandasExecutionEngine
 
 
 def test_expect_column_quantile_values_to_be_between_impl():
-    df = pd.DataFrame({"a": [1,2,2,3,3,3,4]})
+    df = pd.DataFrame({"a": [1, 2, 2, 3, 3, 3, 4]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_quantile_values_to_be_between",
-        kwargs={"column": "a", "quantile_ranges": {
-                    "quantiles": [0., 0.333, 0.6667, 1.],
-                    "value_ranges": [[0,1], [2,3], [4,5], [6,7]]
-                }},
+        kwargs={
+            "column": "a",
+            "quantile_ranges": {
+                "quantiles": [0.0, 0.333, 0.6667, 1.0],
+                "value_ranges": [[0, 1], [2, 3], [4, 5], [6, 7]],
+            },
+        },
     )
     expectation = ExpectColumnQuantileValuesToBeBetween(expectationConfiguration)
     batch = Batch(data=df)

@@ -29,7 +29,10 @@ except ImportError:
 
 class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
     map_metric = "column_values.not_in_set"
-    metric_dependencies = ("column_values.not_in_set.count", "column_values.nonnull.count")
+    metric_dependencies = (
+        "column_values.not_in_set.count",
+        "column_values.nonnull.count",
+    )
     success_keys = ("value_set", "mostly", "parse_strings_as_datetimes")
 
     default_kwarg_values = {
@@ -78,8 +81,9 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
         else:
             parsed_value_set = value_set
 
-        return pd.DataFrame({"column_values.not_in_set": ~series.isin(parsed_value_set)})
-
+        return pd.DataFrame(
+            {"column_values.not_in_set": ~series.isin(parsed_value_set)}
+        )
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
@@ -112,7 +116,9 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
             unexpected_count=metric_vals.get("column_values.nonnull.count")
             - metric_vals.get("column_values.not_in_set.count"),
-            unexpected_list=metric_vals.get("column_values.not_in_set.unexpected_values"),
+            unexpected_list=metric_vals.get(
+                "column_values.not_in_set.unexpected_values"
+            ),
             unexpected_index_list=metric_vals.get(
                 "column_values.not_in_set.unexpected_index_list"
             ),
