@@ -148,7 +148,8 @@ def get_metric_dependencies(metric_name: str) -> Tuple[str]:
 
 
 def get_metric_kwargs(
-    metric_name: str, configuration: Optional["ExpectationConfiguration"] = None
+    metric_name: str, configuration: Optional["ExpectationConfiguration"] = None, runtime_configuration: Optional[
+            dict] = None
 ) -> dict():
     try:
         metric_definition = _registered_metrics.get(metric_name, dict())
@@ -157,7 +158,9 @@ def get_metric_kwargs(
             "metric_value_keys": metric_definition["metric_value_keys"],
         }
         if configuration:
-            configuration_kwargs = configuration.get_runtime_kwargs()
+            configuration_kwargs = configuration.get_runtime_kwargs(
+                runtime_configuration=runtime_configuration
+            )
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
                     {
@@ -187,10 +190,11 @@ def extract_metrics(
     metric_names: Iterable[str],
     metrics: Dict[Tuple, Any],
     configuration: "ExpectationConfiguration",
+    runtime_configuration: Optional[dict] = None
 ) -> dict:
     res = dict()
     for metric_name in metric_names:
-        kwargs = get_metric_kwargs(metric_name, configuration)
+        kwargs = get_metric_kwargs(metric_name, configuration, runtime_configuration)
         res[metric_name] = metrics[
             MetricEdgeKey(
                 metric_name,

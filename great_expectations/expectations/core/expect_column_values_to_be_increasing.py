@@ -4,10 +4,7 @@ from typing import Optional, Union
 import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine, SparkDFExecutionEngine, ExecutionEngine
 
 from ...data_asset.util import parse_result_format
 from ..expectation import ColumnMapDatasetExpectation, Expectation, _format_map_output
@@ -104,9 +101,11 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         strictly: Union[list, set],
         runtime_configuration: dict = None,
     ):
+        # string column name
+        column_name = data.schema.names[0]
         # check if column is any type that could have na (numeric types)
         na_types = [
-            isinstance(data.schema[column].dataType, typ)
+            isinstance(data.schema[column_name].dataType, typ)
             for typ in [
                 sparktypes.LongType,
                 sparktypes.DoubleType,
@@ -131,12 +130,12 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
 
         if strictly:
             return data.withColumn(
-                "__success", when(col("diff") >= 1, lit(True)).otherwise(lit(False))
+                column + "__success", when(col("diff") >= 1, lit(True)).otherwise(lit(False))
             )
 
         else:
             return data.withColumn(
-                "__success", when(col("diff") >= 0, lit(True)).otherwise(lit(False))
+                column + "__success", when(col("diff") >= 0, lit(True)).otherwise(lit(False))
             )
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
@@ -145,12 +144,13 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None
     ):
-        validation_dependencies = self.get_validation_dependencies(configuration)[
+        validation_dependencies = self.get_validation_dependencies(configuration, execution_engine, runtime_configuration)[
             "metrics"
         ]
-        metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
-        mostly = configuration.get_success_kwargs().get(
+        metric_vals = extract_metrics(validation_dependencies, metrics, configuration, runtime_configuration)
+        mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
         if runtime_configuration:

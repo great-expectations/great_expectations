@@ -1,5 +1,6 @@
 import json
 import logging
+from copy import deepcopy
 from typing import Any, Dict
 
 import jsonpatch
@@ -904,7 +905,7 @@ class ExpectationConfiguration(DictDot):
         if expectation_kwargs_dict is None:
             expectation_kwargs_dict = self._get_default_custom_kwargs()
         success_kwargs = self.get_success_kwargs()
-        lookup_kwargs = self.kwargs
+        lookup_kwargs = deepcopy(self.kwargs)
         if runtime_configuration:
             lookup_kwargs.update(runtime_configuration)
         runtime_kwargs = {
@@ -1055,10 +1056,17 @@ class ExpectationConfiguration(DictDot):
             runtime_configuration=runtime_configuration,
         )
 
-    def metrics_validate(self, metrics: Dict, runtime_configuration: dict = None):
+    def metrics_validate(
+            self,
+            metrics: Dict,
+            runtime_configuration: dict = None,
+            execution_engine: "ExecutionEngine" = None
+    ):
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(self).metrics_validate(
-            metrics, runtime_configuration=runtime_configuration
+            metrics,
+            runtime_configuration=runtime_configuration,
+            execution_engine=execution_engine
         )
 
 
