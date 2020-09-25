@@ -620,11 +620,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         super().__init__(*args, **kwargs)
 
     def load_batch(
-        self, batch_definition=None, batch_spec=None, in_memory_dataset=None
+        self, batch_definition: dict = None, batch_spec: dict = None, in_memory_dataset=None
     ) -> Batch:
         # We need to build a batch_markers to be used in the dataframe
         if batch_spec and batch_definition:
-            #### IS THIS OK?
             assert isinstance(batch_spec, IDDict)
         elif batch_spec and not batch_definition:
             logger.info("loading a batch without a batch_definition")

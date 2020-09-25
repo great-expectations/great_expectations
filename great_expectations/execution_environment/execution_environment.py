@@ -47,7 +47,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         Args:
             name: the name for the datasource
             data_context: data context to which to connect
-            execution_engine (ClassConfig): the type of DataAsset to produce # TODO: <Alex>Is this description correct?</Alex>
+            execution_engine (ClassConfig): the type of compute engine to produce
             data_connectors: DataConnectors to add to the datasource
         """
         self._name = name
@@ -56,9 +56,8 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
             config=execution_engine, runtime_environment={},
         )
         self._execution_engine._data_context = (
-            data_context  # do this here because data_context not in DataAsset # TODO: <Alex>What does this comment mean?</Alex>
+            data_context
         )
-        # __init__ argspec, so not added when provided in runtime_environment above # TODO: <Alex>What does this comment mean?</Alex>
         self._execution_environment_config = kwargs
 
         self._execution_environment_config["execution_engine"] = execution_engine
@@ -107,7 +106,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         """
         return cls(**kwargs)
 
-    # TODO: <Alex>What is this for, and how is this used?</Alex>
+    # TODO: <Alex>What is this for, and how is this used?  This looks like it is for DataSource -- do we still need it for backward compatibility?</Alex>
     @classmethod
     def build_configuration(
         cls,
@@ -170,26 +169,6 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         """
         for data_connector in self._execution_environment_config["data_connectors"].keys():
             self.get_data_connector(name=data_connector)
-
-    # TODO: <Alex>Is this needed?  If so, how is it used, and why is it commented out?</Alex>
-    # def add_data_connector(self, name, class_name, **kwargs):
-    #     """Add a DataConnector to the ExecutionEnvironment.
-    #
-    #     Args:
-    #         name (str): the name of the new DataConnector to add
-    #         class_name: class of the DataConnector to add
-    #         kwargs: additional keyword arguments will be passed directly to the new DataConnector's constructor
-    #
-    #     Returns:
-    #          DataConnector (DataConnector)
-    #     """
-    #     kwargs["class_name"] = class_name
-    #     data_connector = self._build_data_connector(**kwargs)
-    #     if "data_connectors" not in self._execution_environment_config:
-    #         self._execution_environment_config["data_connectors"] = dict()
-    #     self._execution_environment_config["data_connectors"][name] = kwargs
-    #
-    #     return data_connector
 
     def get_data_connector(self, name: str) -> DataConnector:
         """Get the (named) DataConnector from an ExecutionEnvironment)
@@ -261,6 +240,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         return data_connectors
 
     # TODO: <Alex>This needs to be reviewed...</Alex>
+    # TODO: <Alex>What is this for, and how is this used?  This looks like it is for DataSource -- do we still need it for backward compatibility?</Alex>
     def get_available_data_asset_names(self, data_connector_names: list = None) -> dict:
         """
         Returns a dictionary of data_asset_names that the specified data

@@ -331,8 +331,8 @@ class DataConnector(object):
         if "data_asset_name" not in batch_definition:
             raise ValueError("Batch definition must have a data_asset_name.")
 
-        batch_definition_keys: list = set(batch_definition.keys())
-        recognized_batch_definition_keys: list = (
+        batch_definition_keys: set = set(batch_definition.keys())
+        recognized_batch_definition_keys: set = (
             self.recognized_batch_definition_keys
             | self._execution_environment.execution_engine.recognized_batch_definition_keys
         )

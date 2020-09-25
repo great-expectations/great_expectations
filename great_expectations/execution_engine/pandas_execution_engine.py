@@ -470,8 +470,9 @@ Notes:
             "discard_subset_failing_expectations", False
         )
 
+    # TODO: <Alex></Alex>
     def load_batch(
-        self, batch_definition=None, batch_spec=None, in_memory_dataset=None
+        self, batch_definition: dict = None, batch_spec: dict = None, in_memory_dataset=None
     ):
         """With the help of the execution environment and data connector specified within the batch definition, builds a batch spec
         and utilizes it to load a batch using the appropriate file reader and the given file path.
@@ -485,7 +486,6 @@ Notes:
                """
         if batch_spec and batch_definition:
             # TODO: <Alex>Why is the comment below there?  Is it needed?</Alex>
-            #### IS THIS OK?
             logger.info(
                 "Both batch_spec and batch_definition were passed in. batch_spec will be used to load the batch"
             )
