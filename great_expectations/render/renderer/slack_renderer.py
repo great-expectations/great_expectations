@@ -58,45 +58,29 @@ class SlackRenderer(Renderer):
             query["text"] = "{}: {}".format(expectation_suite_name, status)
 
             if data_docs_pages:
-                for docs_link_key in data_docs_pages.keys():
-                    if docs_link_key == "class":
-                        continue
-
-                    docs_link = data_docs_pages[docs_link_key]
-                    report_element = None
-
-                    if notify_with is None or docs_link_key in notify_with:
-
-                        if "file:///" in docs_link:
-                            # handle special case since Slack does not render these links
-                            report_element = {
-                                "type": "section",
-                                "text": {
-                                    "type": "mrkdwn",
-                                    "text": "*DataDocs* can be found here: `{}` \n (Please copy and paste link into a browser to view)\n".format(
-                                        docs_link
-                                    ),
-                                },
-                            }
+                if notify_with is not None:
+                    for docs_link_key in notify_with:
+                        if docs_link_key in data_docs_pages.keys():
+                            docs_link = data_docs_pages[docs_link_key]
+                            report_element = self._get_report_element(docs_link)
                         else:
                             report_element = {
                                 "type": "section",
                                 "text": {
                                     "type": "mrkdwn",
-                                    "text": "*DataDocs* can be found here: <{}|{}>".format(
-                                        docs_link, docs_link
-                                    ),
+                                    "text": f"*ERROR* Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n",
                                 },
                             }
-
-                    elif notify_with is not None and docs_link_key not in notify_with:
-                        raise InvalidKeyError(
-                            f"Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not in the `notify_with` list: `{str(notify_with)}` as configured in the `great_expectations.yml`\n"
-                            f"Please check your great_expectations.yml configuration and try again"
-                        )
-
-                    if report_element:
-                        query["blocks"].append(report_element)
+                        if report_element:
+                            query["blocks"].append(report_element)
+                else:
+                    for docs_link_key in data_docs_pages.keys():
+                        if docs_link_key == "class":
+                            continue
+                        docs_link = data_docs_pages[docs_link_key]
+                        report_element = self._get_report_element(docs_link)
+                        if report_element:
+                            query["blocks"].append(report_element)
 
             if "result_reference" in validation_result.meta:
                 report_element = {
@@ -146,3 +130,27 @@ class SlackRenderer(Renderer):
 
     def _custom_blocks(self, evr):
         return None
+
+    def _get_report_element(self, docs_link):
+        if "file:///" in docs_link:
+            # handle special case since Slack does not render these links
+            report_element = {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*DataDocs* can be found here: `{}` \n (Please copy and paste link into a browser to view)\n".format(
+                        docs_link
+                    ),
+                },
+            }
+        else:
+            report_element = {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*DataDocs* can be found here: <{}|{}>".format(
+                        docs_link, docs_link
+                    ),
+                },
+            }
+        return report_element
