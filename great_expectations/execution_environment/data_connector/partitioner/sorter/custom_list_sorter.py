@@ -29,6 +29,7 @@ def is_name_in_list(partition_value: str, reference_list: List[str]) -> bool:
         return False
 """
 
+
 class CustomListSorter(Sorter):
     r"""
     CustomListSorter
@@ -38,10 +39,10 @@ class CustomListSorter(Sorter):
             - ReferenceListSorter - eww
             - ...
     """
-    def __init__(self, name: str, **kwargs):
-        reference_list: list = kwargs.get("reference_list")
-        self._reference_list = reference_list
-        super().__init__(name=name, **kwargs)
+    def __init__(self, name: str, orderby: str = "asc", config_params: dict = None, **kwargs):
+        super().__init__(name=name, orderby=orderby, config_params=config_params, **kwargs)
+
+        self._reference_list = self.config_params.get("reference_list")
 
     def get_partition_key(self, partition: Partition) -> Any:
         partition_definition: dict = partition.definition

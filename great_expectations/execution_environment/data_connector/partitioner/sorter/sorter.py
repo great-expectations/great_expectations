@@ -10,17 +10,12 @@ logger = logging.getLogger(__name__)
 
 
 class Sorter(object):
-    r"""
-    Sorter help
-    """
-
-    def __init__(self, name: str, orderby: str, config_params: dict = None, **kwargs):
+    def __init__(self, name: str, orderby: str = "asc", config_params: dict = None, **kwargs):
         self._name = name
-        # TODO: <Alex>We need to make sure that this is consistent with default "orderby" value from SorterConfig</Alex>
         if orderby is None or orderby == "asc":
-            reverse = False
+            reverse: bool = False
         elif orderby == "desc":
-            reverse = True
+            reverse: bool = True
         else:
             raise ValueError(f'Illegal sort order "{orderby}" for attribute "{name}".')
         self._reverse = reverse
@@ -30,7 +25,7 @@ class Sorter(object):
         return sorted(partitions, key=self._verify_sorting_directives_and_get_partition_key, reverse=self.reverse)
 
     def _verify_sorting_directives_and_get_partition_key(self, partition: Partition) -> Any:
-        partition_definition = partition.definition
+        partition_definition: dict = partition.definition
         if partition_definition.get(self.name) is None:
             raise ValueError(f'Unable to sort partition "{partition.name}" by attribute "{self.name}".')
         return self.get_partition_key(partition=partition)
@@ -50,7 +45,7 @@ class Sorter(object):
     def config_params(self) -> dict:
         return self._config_params
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "name": self.name,
             "reverse": self.reverse

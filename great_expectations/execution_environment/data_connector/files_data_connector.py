@@ -212,7 +212,7 @@ class FilesDataConnector(DataConnector):
         )
         if len(partitions) == 0:
             raise BatchSpecError(message=f'Unable to build batch_spec for data asset "{data_asset_name}".')
-        # TODO: <Alex>If the list has multiple elements, we are using the first one (TBD/TODO multifile config)</Alex>
+        # TODO: <Alex>If the list has multiple elements, we are using the first one (TBD/TODO multifile config / multibatch)</Alex>
         path: str = str(partitions[0].source)
         return self._build_batch_spec_from_path(path, batch_definition, batch_spec)
 

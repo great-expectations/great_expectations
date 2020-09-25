@@ -16,9 +16,6 @@ logger = logging.getLogger(__name__)
 
 
 class NumericSorter(Sorter):
-    r"""
-    NumericSorter help
-    """
     def get_partition_key(self, partition: Partition) -> Any:
         partition_definition: dict = partition.definition
         partition_value: Any = partition_definition[self.name]

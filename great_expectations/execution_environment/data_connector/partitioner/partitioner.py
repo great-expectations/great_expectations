@@ -27,9 +27,9 @@ class Partitioner(object):
     Partitioners help
     """
 
-    _batch_spec_type = BatchSpec  #TODO : is this really needed?
+    _batch_spec_type: BatchSpec = BatchSpec  #TODO : is this really needed?
     # TODO: <Alex>What makes sense to have here, or is this even needed?</Alex>
-    recognized_batch_definition_keys = {
+    recognized_batch_definition_keys: set = {
         "sorters"
     }
 
@@ -47,7 +47,6 @@ class Partitioner(object):
         self._sorters = sorters
         self._allow_multipart_partitions = allow_multipart_partitions
         self._config_params = config_params
-        # TODO: <Alex></Alex>
         self._sorters_cache = {}
 
     @property
@@ -58,7 +57,6 @@ class Partitioner(object):
     def data_connector(self) -> DataConnector:
         return self._data_connector
 
-    # TODO: <Alex>Add typehints throughout.</Alex>
     @property
     def sorters(self) -> Union[List[Sorter], None]:
         if self._sorters:
@@ -73,8 +71,7 @@ class Partitioner(object):
     def config_params(self) -> dict:
         return self._config_params
 
-    # TODO: <Alex>Add typehints throughout</Alex>
-    def get_sorter(self, name):
+    def get_sorter(self, name) -> Sorter:
         """Get the (named) Sorter from a DataConnector)
 
         Args:
@@ -83,7 +80,6 @@ class Partitioner(object):
         Returns:
             Sorter (Sorter)
         """
-        # TODO: <Alex>This could be made more efficient, but numbers of sorters is small and this pattern is useful.</Alex>
         if name in self._sorters_cache:
             return self._sorters_cache[name]
         else:
@@ -105,15 +101,14 @@ class Partitioner(object):
         self._sorters_cache[name] = sorter
         return sorter
 
-    # TODO: <Alex>This is a good place to check that all defaults from base.py / Config Schemas are set properly.</Alex>
     @staticmethod
-    def _build_sorter_from_config(name, config):
+    def _build_sorter_from_config(name: str, config: CommentedMap) -> Sorter:
         """Build a Sorter using the provided configuration and return the newly-built Sorter."""
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, SorterConfig):
-            config = sorterConfigSchema.dump(config)
+            config: dict = sorterConfigSchema.dump(config)
         config.update({"name": name})
-        sorter = instantiate_class_from_config(
+        sorter: Sorter = instantiate_class_from_config(
             config=config,
             runtime_environment={},
             config_defaults={

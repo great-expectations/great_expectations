@@ -8,11 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 class Partition(object):
-    r"""
-    Part help
-    """
-
-    # TODO: <Alex>Should we accept **kwargs and set attributes for most generic partition definition?</Alex>
     def __init__(self, name: str, definition: dict, source: Any, data_asset_name: str = None):
         self._name = name
         self._definition = definition
@@ -43,14 +38,14 @@ class Partition(object):
                 and self.data_asset_name == other.data_asset_name
         return False
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return (
             hash(self.name) ^
             hash(zip(self.definition.items())) ^
             hash(self.data_asset_name)
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "name": self.name,
             "definition": self.definition,
