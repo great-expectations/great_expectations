@@ -60,11 +60,11 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapDatasetExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(
+        metric_dependencies = self.get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )["metrics"]
         metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
+            metric_dependencies, metrics, configuration, runtime_configuration
         )
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")

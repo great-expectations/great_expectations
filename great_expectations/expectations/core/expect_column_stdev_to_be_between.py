@@ -78,11 +78,11 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(
+        metric_dependencies = self.get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )["metrics"]
         metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
+            metric_dependencies, metrics, configuration, runtime_configuration
         )
         column_stdev = metric_vals.get("column.aggregate.standard_deviation")
         min_value = self.get_success_kwargs(configuration).get("min_value")
