@@ -206,6 +206,16 @@ def extract_metrics(
     return res
 
 
+def get_domain_metrics_dict_by_name(
+    metrics: Dict[Tuple, Any], metric_domain_kwargs: IDDict
+):
+    return {
+        metric_edge_key_id_tuple[0]: metric_value
+        for metric_edge_key_id_tuple, metric_value in metrics.items()
+        if metric_edge_key_id_tuple[1] == metric_domain_kwargs.to_id()
+    }
+
+
 def get_expectation_impl(expectation_name):
     return _registered_expectations.get(expectation_name)
 

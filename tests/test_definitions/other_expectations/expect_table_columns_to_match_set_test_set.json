@@ -1,0 +1,217 @@
+{
+  "expectation_type" : "expect_table_columns_to_match_set",
+  "datasets" : [
+    {
+      "data": {
+        "c1" : [4,5,6,7],
+        "c2" : ["a","b","c","d"],
+        "c3" : [null,null,null,null]
+      },
+      "schemas": {
+        "spark": {
+          "c1": "IntegerType",
+          "c2": "StringType",
+          "c3": "StringType"
+        }
+      },
+    "tests": [{
+      "title": "Basic positive test, exact_match=True",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c1", "c2", "c3"],
+        "exact_match": true
+      },
+      "out":{
+        "success":true,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {"mismatched": {}}
+        }
+      }
+    },{
+      "title": "Basic positive test, exact_match=False",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c1", "c2", "c3"],
+        "exact_match": false
+      },
+      "out":{
+        "success":true,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {"mismatched": {}}
+        }
+      }
+    },{
+      "title": "Negative test: column is missing, exact_match=True",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c1", "c2"],
+        "exact_match": true
+      },
+      "out":{
+        "success":false,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {
+            "mismatched": {
+              "unexpected": ["c3"]
+            }
+          }
+        }
+      }
+    },{
+      "title": "Positive test: column is missing, exact_match=False",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c1", "c2"],
+        "exact_match": false
+      },
+      "out":{
+        "success":true,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {
+            "mismatched": {
+              "unexpected": ["c3"]
+            }
+          }
+        }
+      }
+    },{
+      "title": "Negative test: column is misnamed, exact_match=True",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["b1", "c2", "c3"],
+        "exact_match": true
+      },
+      "out":{
+        "success":false,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {
+            "mismatched": {
+              "unexpected": ["c1"],
+              "missing": ["b1"]
+            }
+          }
+        }
+      }
+    },{
+      "title": "Negative test: column is misnamed, exact_match=False",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["b1", "c2", "c3"],
+        "exact_match": false
+      },
+      "out":{
+        "success":false,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {
+            "mismatched": {
+              "unexpected": ["c1"],
+              "missing": ["b1"]
+            }
+          }
+        }
+      }
+    },{
+      "title": "Positive test: Columns are right, but ordering wrong, exact_match=True",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c3", "c2", "c1"],
+        "exact_match": true
+      },
+      "out":{
+        "success":true,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {"mismatched": {}}
+        }
+      }
+    },{
+      "title": "Positive test: Columns are right, but ordering wrong, exact_match=False",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c3", "c2", "c1"],
+        "exact_match": false
+      },
+      "out":{
+        "success":true,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {"mismatched": {}}
+        }
+      }
+    },{
+      "title": "Negative test: Extra column, exact_match=True",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c1", "c2", "c3", "c4"],
+        "exact_match": true
+      },
+      "out":{
+        "success": false,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {
+            "mismatched": {
+              "missing": ["c4"]
+            }
+          }
+        }
+      }
+    },{
+      "title": "Negative test: Extra column, exact_match=False",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c1", "c2", "c3", "c4"],
+        "exact_match": false
+      },
+      "out":{
+        "success": false,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {
+            "mismatched": {
+              "missing": ["c4"]
+            }
+          }
+        }
+      }
+    },{
+      "title": "Negative test: Null set, exact_match=True",
+      "exact_match_out": true,
+      "in":{
+        "column_set": null,
+        "exact_match": true
+      },
+      "out":{
+        "success": false,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {
+            "mismatched": {
+              "missing": ["c1", "c2", "c3"]
+            }
+          }
+        }
+      }
+    },{
+      "title": "Positive test (vacuously true): Null set, exact_match=False",
+      "exact_match_out": true,
+      "in":{
+        "column_set": null,
+        "exact_match": false
+      },
+      "out":{
+        "success": true,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"]
+        }
+      }
+    }
+  ]
+  }]
+}

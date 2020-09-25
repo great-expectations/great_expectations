@@ -69,9 +69,15 @@ class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
         filter_column_isnull=True,
     )
     def _pandas_column_values_length_equals(
-        self, series: pd.Series, value, runtime_configuration: dict = None,
+        self,
+        series: pd.Series,
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        runtime_configuration: dict = None,
     ):
         """Tests whether or not value lengths equal threshold"""
+        value = metric_value_kwargs["value"]
         length_equals = series.str.len() == value
         return pd.DataFrame({"column_values.length_equals": length_equals})
 
@@ -107,9 +113,9 @@ class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(configuration, execution_engine, runtime_configuration)[
-            "metrics"
-        ]
+        validation_dependencies = self.get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )["metrics"]
         # Extracting metrics
         metric_vals = extract_metrics(
             validation_dependencies, metrics, configuration, runtime_configuration

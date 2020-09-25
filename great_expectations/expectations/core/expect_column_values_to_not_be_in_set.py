@@ -68,9 +68,13 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
     def _pandas_column_values_not_in_set(
         self,
         series: pd.Series,
-        value_set: Union[list, set],
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         runtime_configuration: dict = None,
     ):
+        value_set = metric_value_kwargs["value_set"]
+
         if value_set is None:
             # Vacuously true
             return np.ones(len(series), dtype=np.bool_)
@@ -93,9 +97,9 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(configuration, execution_engine, runtime_configuration)[
-            "metrics"
-        ]
+        validation_dependencies = self.get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )["metrics"]
         # Extracting metrics
         metric_vals = extract_metrics(
             validation_dependencies, metrics, configuration, runtime_configuration

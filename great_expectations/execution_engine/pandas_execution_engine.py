@@ -26,9 +26,8 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.validator.validator import Validator
 
-from ..core import IDDict
 from ..core.batch import Batch, BatchMarkers
-from ..core.id_dict import BatchSpec
+from ..core.id_dict import BatchSpec, IDDict
 from ..datasource.pandas_datasource import HASH_THRESHOLD
 from ..exceptions import BatchSpecError, ValidationError
 from ..exceptions.metric_exceptions import MetricError
@@ -972,7 +971,14 @@ Notes:
                     domain_kwargs=metric_domain_kwargs,
                     filter_column_isnull=filter_column_isnull,
                 )
-                return metric_fn(self, series=series, **metric_value_kwargs, **kwargs)
+                return metric_fn(
+                    self,
+                    series=series,
+                    metrics=metrics,
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    metric_value_kwargs=metric_value_kwargs,
+                    **kwargs,
+                )
 
             register_metric(
                 metric_name=metric_name,

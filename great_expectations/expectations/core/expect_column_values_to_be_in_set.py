@@ -72,9 +72,12 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
     def _pandas_column_values_in_set(
         self,
         series: pd.Series,
-        value_set: Union[list, set],
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         runtime_configuration: dict = None,
     ):
+        value_set = metric_value_kwargs["value_set"]
         if value_set is None:
             # Vacuously true
             return np.ones(len(series), dtype=np.bool_)
@@ -96,9 +99,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
     def _sqlalchemy_in_set(
         self,
         column: sa.column,
-        value_set: Union[list, set],
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         runtime_configuration: dict = None,
     ):
+        value_set = metric_value_kwargs["value_set"]
+
         if value_set is None:
             # vacuously true
             return True
@@ -115,10 +122,14 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         self,
         data: "pyspark.sql.DataFrame",
         column: str,
-        value_set: Union[list, set],
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         runtime_configuration: dict = None,
     ):
         import pyspark.sql.functions as F
+
+        value_set = metric_value_kwargs["value_set"]
 
         if value_set is None:
             # vacuously true
@@ -134,11 +145,11 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(
+        metric_dependencies = self.get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )["metrics"]
         metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
+            metric_dependencies, metrics, configuration, runtime_configuration
         )
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")

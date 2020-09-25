@@ -5,7 +5,7 @@ import pandas as pd
 
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine, ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ...data_asset.util import parse_result_format
 from ..expectation import (
@@ -15,7 +15,7 @@ from ..expectation import (
     InvalidExpectationConfigurationError,
     _format_map_output,
 )
-from ..registry import extract_metrics
+from ..registry import extract_metrics, get_domain_metrics_dict_by_name
 
 
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
@@ -117,9 +117,12 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             domain_kwargs=metric_domain_kwargs, batches=batches
         )
 
-        # Question: how to extract these metrics?
-        mean = series.mean()
-        std_dev = series.std()
+        # TODO: Necessary to check domain kwargs? Is there a better way to do this? (RL)
+        domain_metrics_lookup = get_domain_metrics_dict_by_name(
+            metrics=metrics, metric_domain_kwargs=metric_domain_kwargs
+        )
+        mean = domain_metrics_lookup["column.aggregate.mean"]
+        std_dev = domain_metrics_lookup["column.aggregate.standard_deviation"]
 
         try:
             return (series - mean) / std_dev
@@ -133,18 +136,34 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     @PandasExecutionEngine.column_map_metric(
         metric_name="column_values.z_scores.under_threshold",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("threshold",),
+        metric_value_keys=("threshold", "double_sided",),
         metric_dependencies=("column.z_scores",),
     )
     def _pandas_under_threshold(
-        self, series: pd.Series, threshold, runtime_configuration: dict = None,
+        self,
+        series: pd.Series,
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        runtime_configuration: dict = None,
     ):
         """Checks if values under threshold"""
+        threshold = metric_value_kwargs["threshold"]
+        double_sided = metric_value_kwargs["double_sided"]
+
         # The series I'm getting does not consist of the z-scores themselves - PROBLEM
+        domain_metrics_lookup = get_domain_metrics_dict_by_name(
+            metrics=metrics, metric_domain_kwargs=metric_domain_kwargs
+        )
+        z_scores = domain_metrics_lookup["column.z_scores"]
+
         try:
-            under_thresh = ((series - series.mean()) / series.std()) < threshold
+            if double_sided:
+                under_threshold = z_scores.abs() < abs(threshold)
+            else:
+                under_threshold = z_scores < threshold
             return pd.DataFrame(
-                {"column_values.z_scores.under_threshold": under_thresh}
+                {"column_values.z_scores.under_threshold": under_threshold}
             )
         except TypeError:
             raise (
@@ -190,9 +209,9 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         """Validates the given data against the set Z Score threshold, returning a nested dictionary documenting the
         validation."""
         # Obtaining dependencies used to validate the expectation - PROBLEM: MEAN'S METHOD CURRENTLY BEING USED
-        validation_dependencies = self.get_validation_dependencies(configuration, execution_engine, runtime_configuration)[
-            "metrics"
-        ]
+        validation_dependencies = self.get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )["metrics"]
         # Extracting Pre-defined Metrics
         # Extracting metrics
         metric_vals = extract_metrics(
@@ -231,14 +250,13 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             # Success = Ratio of successful nonnull values > mostly?
             success=(
                 metric_vals.get("column_values.z_scores.under_threshold.count")
-                / metric_vals.get("column_values.nonull.count")
+                / metric_vals.get("column_values.nonnull.count")
             )
             >= mostly,
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get(
-                "column_values.z_scores.under_threshold.unexpected_count"
-            ),
+            unexpected_count=metric_vals.get("column_values.nonnull.count")
+            - metric_vals.get("column_values.z_scores.under_threshold.count"),
             unexpected_list=metric_vals.get(
                 "column_values.z_scores.under_threshold.unexpected_values"
             ),
