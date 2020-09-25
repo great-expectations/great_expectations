@@ -8,7 +8,6 @@ from great_expectations.data_context.types.base import (
     SorterConfig,
     sorterConfigSchema
 )
-# from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 from great_expectations.core.id_dict import BatchSpec
