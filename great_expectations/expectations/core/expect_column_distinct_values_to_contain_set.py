@@ -78,11 +78,12 @@ class ExpectColumnDistinctValuesToContainSet(DatasetExpectation):
             self,
             configuration: ExpectationConfiguration,
             metrics: dict,
+            execution_engine,
             runtime_configuration: dict = None,
     ):
         """Validates that the Distinct values are a superset of the value set"""
         # Obtaining dependencies used to validate the expectation
-        validation_dependencies = self.get_validation_dependencies(configuration)[
+        validation_dependencies = self.get_validation_dependencies(configuration, execution_engine)[
             "metrics"
         ]
         metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
