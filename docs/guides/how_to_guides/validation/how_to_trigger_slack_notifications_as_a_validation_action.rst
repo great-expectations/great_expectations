@@ -41,7 +41,7 @@ Steps
                 # put the actual webhook URL in the uncommitted/config_variables.yml file
                 slack_webhook: ${validation_notification_slack_webhook}
                 notify_on: all # possible values: "all", "failure", "success"
-                notify_with: ["all"] # list containing the DataDocs sites to include in the notification. Defaults to `all`, meaning links to all configured sites will be included in the notification
+                notify_with: # optional list containing the DataDocs sites to include in the notification. Defaults to including links to all configured sites.
                 renderer:
                   module_name: great_expectations.render.renderer.slack_renderer
                   class_name: SlackRenderer
@@ -61,7 +61,7 @@ Additional notes
 --------------------
 - If your ``great_expectations.yml`` contains multiple configurations for Data Docs sites, all of them will be included in the Slack notification by default. If you would like to be more specific, you can configure the ``data_docs_site_names`` variable.
 
-- You can also configure your Slack notification to include links to specific Data Docs sites by configuring the ``notify_with`` field in the ``great_expectations.yml`` file.  The following example will include the link to ``local_site`` and ``s3_site`` as part of the Slack notification.
+- You can also configure your Slack notification to include links to specific Data Docs sites by configuring the ``notify_with`` field in the ``great_expectations.yml`` file.  The following example will configure the Slack message to include links to ``local_site`` and ``s3_site``.
 
 .. code-block:: yaml
 
@@ -96,7 +96,9 @@ Additional notes
                 #--------------------------------
                 # This is what was configured
                 #--------------------------------
-                notify_with: ["local_site", "s3_site"]
+                notify_with:
+                  - local_site
+                  - gcs_site
                 renderer:
                   module_name: great_expectations.render.renderer.slack_renderer
                   class_name: SlackRenderer

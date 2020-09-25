@@ -1,6 +1,7 @@
 # from freezegun import freeze_time
 
 from great_expectations.core import ExpectationSuiteValidationResult
+from great_expectations.exceptions import InvalidKeyError
 from great_expectations.render.renderer import SlackRenderer
 from tests.test_utils import modify_locale
 
@@ -55,9 +56,9 @@ def test_SlackRenderer_validation_results_with_datadocs():
     assert rendered_output == expected_output
 
     data_docs_pages = {"local_site": "file:///localsite/index.html"}
-    data_docs_site_names = ["local_site"]
+    notify_with = ["local_site"]
     rendered_output = SlackRenderer().render(
-        validation_result_suite, data_docs_pages, data_docs_site_names
+        validation_result_suite, data_docs_pages, notify_with
     )
 
     expected_output = {
@@ -90,3 +91,10 @@ def test_SlackRenderer_validation_results_with_datadocs():
         "text": "default: Success :tada:",
     }
     assert rendered_output == expected_output
+
+    # not configured
+    notify_with = ["fake_site"]
+    with pytest.raises(InvalidKeyError):
+        rendered_output = SlackRenderer().render(
+            validation_result_suite, data_docs_pages, notify_with
+        )

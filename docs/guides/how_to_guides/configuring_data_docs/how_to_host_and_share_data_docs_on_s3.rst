@@ -132,6 +132,7 @@ index.html file or a custom error file:
         class_name: SiteBuilder
         store_backend:
           class_name: TupleS3StoreBackend
+
           base_public_path: 'www.mydns.com'
         site_index_builder:
           class_name: DefaultSiteIndexBuilder

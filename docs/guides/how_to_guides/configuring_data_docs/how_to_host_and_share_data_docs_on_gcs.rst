@@ -113,7 +113,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
         class_name: SiteBuilder
         store_backend:
           class_name: TupleGCSStoreBackend
-          project: my_org_project  # UPDATE the project name with your own
+          project: my_org_project # UPDATE the project name with your own
           bucket: my_org_data_docs  # UPDATE the bucket name here to match the bucket you configured above
         site_index_builder:
           class_name: DefaultSiteIndexBuilder
@@ -144,6 +144,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 **Additional notes**
 
 - If you wish to host a Data Docs site through a private DNS, you can configure a ``base_public_path`` for the Data Docs Store.  The following example will configure a GCS site with the ``base_public_path`` set to ``www.mydns.com``.
+- DataDocs will still be written to ``https://storage.cloud.google.com/my_org_data_docs/index.html``, but you will be able to access the ``index.html`` page from ``http://www.mydns.com/index.html``.
 
 .. code-block:: yaml
 
@@ -152,7 +153,9 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
         class_name: SiteBuilder
         store_backend:
           class_name: TupleGCSStoreBackend
-          base_public_path: 'www.mydns.com'
+          project: my_org_project
+          bucket: my_org_data_docs
+          base_public_path: www.mydns.com
         site_index_builder:
           class_name: DefaultSiteIndexBuilder
 

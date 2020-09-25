@@ -1,4 +1,4 @@
-import datetime
+from great_expectations.exceptions import InvalidKeyError
 
 from ...core.id_dict import BatchKwargs
 from .renderer import Renderer
@@ -9,7 +9,7 @@ class SlackRenderer(Renderer):
         super().__init__()
 
     def render(
-        self, validation_result=None, data_docs_pages=None, data_docs_site_names=None,
+        self, validation_result=None, data_docs_pages=None, notify_with=None,
     ):
 
         default_text = (
@@ -64,10 +64,7 @@ class SlackRenderer(Renderer):
                 docs_link = data_docs_pages[docs_link_key]
                 report_element = None
 
-                if (
-                    data_docs_site_names == None
-                    or docs_link_key in data_docs_site_names
-                ):
+                if notify_with == None or docs_link_key in notify_with:
 
                     if "file:///" in docs_link:
                         # handle special case since Slack does not render these links
@@ -90,6 +87,12 @@ class SlackRenderer(Renderer):
                                 ),
                             },
                         }
+
+                elif notify_with is not None and docs_link_key not in notify_with:
+                    raise InvalidKeyError(
+                        f"Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not in the `notify_with` list: `{str(notify_with)}` as configured in the `great_expectations.yml`\n"
+                        f"Please check your great_expectations.yml configuration and try again"
+                    )
 
                 if report_element:
                     query["blocks"].append(report_element)

@@ -82,7 +82,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
       # put the actual webhook URL in the uncommitted/config_variables.yml file
       slack_webhook: ${validation_notification_slack_webhook}
       notify_on: all # possible values: "all", "failure", "success"
-      data_docs_site_names: # optional list of DataDocs sites to display in Slack message. Defaults to showing all
+      notify_with: # optional list of DataDocs site names to display in Slack message. Defaults to showing all
       renderer:
         # the class that implements the message to be sent
         # this is the default implementation, but you can
@@ -93,12 +93,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
     """
 
     def __init__(
-        self,
-        data_context,
-        renderer,
-        slack_webhook,
-        notify_on="all",
-        data_docs_site_names=None,
+        self, data_context, renderer, slack_webhook, notify_on="all", notify_with=None,
     ):
         """Construct a SlackNotificationAction
 
@@ -127,7 +122,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
         self.slack_webhook = slack_webhook
         assert slack_webhook, "No Slack webhook found in action config."
         self.notify_on = notify_on
-        self.data_docs_site_names = data_docs_site_names
+        self.notify_with = notify_with
 
     def _run(
         self,
@@ -167,7 +162,7 @@ SlackNotificationAction sends a Slack notification to a given webhook.
             and not validation_success
         ):
             query = self.renderer.render(
-                validation_result_suite, data_docs_pages, self.data_docs_site_names
+                validation_result_suite, data_docs_pages, self.notify_with
             )
             # this will actually sent the POST request to the Slack webapp server
             slack_notif_result = send_slack_notification(
