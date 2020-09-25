@@ -22,7 +22,14 @@ class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
         filter_column_isnull=False,
     )
     # TODO: shouldn't this be null count?
-    def _nonnull_count(self, series: pd.Series, runtime_configuration: dict = None):
+    def _nonnull_count(
+        self,
+        series: pd.Series,
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        runtime_configuration: dict = None,
+    ):
         return series.isnull()
 
     @SqlAlchemyExecutionEngine.column_map_metric(
@@ -32,7 +39,14 @@ class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
         metric_dependencies=tuple(),
         filter_column_isnull=False,
     )
-    def _sqlalchemy_null_map_metric(self, column, runtime_configuration: dict = None):
+    def _sqlalchemy_null_map_metric(
+        self,
+        column,
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        runtime_configuration: dict = None,
+    ):
         import sqlalchemy as sa
 
         return column.is_(None)
@@ -47,6 +61,9 @@ class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
         self,
         data: "pyspark.sql.DataFrame",
         column: str,
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         runtime_configuration: dict = None,
     ):
         import pyspark.sql.functions as F

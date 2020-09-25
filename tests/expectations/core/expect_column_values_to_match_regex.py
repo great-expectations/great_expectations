@@ -22,7 +22,7 @@ from great_expectations.expectations.core.expect_column_values_to_match_regex im
 
 
 def test_expect_column_values_to_match_regex_impl():
-    df = pd.DataFrame({"a": ["bat", "rat", "cat"]})
+    df = pd.DataFrame({"a": [None, None, None]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_match_regex",
         kwargs={"column": "a", "regex": ".at", "mostly": 1},

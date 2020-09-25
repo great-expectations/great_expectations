@@ -442,7 +442,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 )
             else:
                 result_s3.put(Body=value, ContentType=content_type)
-        except s3.exceptions.ClientError as e:
+        except s3.meta.client.exceptions.ClientError as e:
             logger.debug(str(e))
             raise StoreBackendError("Unable to set object in s3.")
 

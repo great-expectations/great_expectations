@@ -7,8 +7,8 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
+from ...data_asset.util import parse_result_format
 from ..expectation import (
-    ColumnMapDatasetExpectation,
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
@@ -17,34 +17,35 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnMeanToBeBetween(DatasetExpectation):
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.aggregate.mean",)
-    success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+class ExpectTableRowCountToBeBetween(DatasetExpectation):
+    metric_dependencies = ("rows.count",)
+    success_keys = (
+        "min_value",
+        "max_value",
+        "mostly",
+    )
 
-    # Default values
     default_kwarg_values = {
         "row_condition": None,
-        "condition_parser": None,
+        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "mostly": 1,
         "min_value": None,
         "max_value": None,
-        "strict_min": None,
-        "strict_max": None,
-        "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
+        "meta": None,
     }
 
-    """ A Column Aggregate Metric Decorator for the Mean"""
+    """ A Map Metric Decorator for the Row Count"""
 
     @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.mean",
+        metric_name="rows.count",
         metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
     )
-    def _pandas_mean(
+    def _pandas_row_count(
         self,
         batches: Dict[str, Batch],
         execution_engine: PandasExecutionEngine,
@@ -53,12 +54,12 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
     ):
-        """Mean Metric Function"""
-        series = execution_engine.get_domain_dataframe(
+        """Row Count Metric Function"""
+        df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
         )
 
-        return series.mean()
+        return df.shape[0]
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -71,23 +72,16 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
         Returns:
             True if the configuration has been validated successfully. Otherwise, raises an exception
         """
-        min_val = None
-        max_val = None
 
         # Setting up a configuration
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
 
-        # Ensuring basic configuration parameters are properly set
-        try:
-            assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for column map expectations"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
+        min_val = None
+        max_val = None
 
-        # Validating that Minimum and Maximum values are of the proper format and type
+        # Setting these values if they are available
         if "min_value" in configuration.kwargs:
             min_val = configuration.kwargs["min_value"]
 
@@ -122,7 +116,7 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        """Validates the given data against the set boundaries for mean to ensure it lies within proper range"""
+        """Validates the given data against the set minimum and maximum value thresholds for the row Count"""
         # Obtaining dependencies used to validate the expectation
         validation_dependencies = self.get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
@@ -144,31 +138,24 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
             result_format = configuration.kwargs.get(
                 "result_format", self.default_kwarg_values.get("result_format")
             )
-        column_mean = metric_vals.get("column.aggregate.mean")
+
+        row_count = metric_vals.get("rows.count")
 
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")
-        strict_min = self.get_success_kwargs(configuration).get("strict_min")
         max_value = self.get_success_kwargs(configuration).get("max_value")
-        strict_max = self.get_success_kwargs(configuration).get("strict_max")
 
         # Checking if mean lies between thresholds
         if min_value is not None:
-            if strict_min:
-                above_min = column_mean > min_value
-            else:
-                above_min = column_mean >= min_value
+            above_min = row_count >= min_value
         else:
             above_min = True
 
         if max_value is not None:
-            if strict_max:
-                below_max = column_mean < max_value
-            else:
-                below_max = column_mean <= max_value
+            below_max = row_count <= max_value
         else:
             below_max = True
 
         success = above_min and below_max
 
-        return {"success": success, "result": {"observed_value": column_mean}}
+        return {"success": success, "result": {"observed_value": row_count}}

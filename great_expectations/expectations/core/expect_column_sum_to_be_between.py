@@ -5,7 +5,7 @@ import pandas as pd
 
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine, ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ..expectation import (
     ColumnMapDatasetExpectation,
@@ -122,17 +122,17 @@ class ExpectColumnSumToBeBetween(DatasetExpectation):
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
-            self,
-            configuration: ExpectationConfiguration,
-            metrics: dict,
-            runtime_configuration: dict = None,
-            execution_engine: ExecutionEngine = None,
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
     ):
         """Validates the given data against the set minimum and maximum value thresholds for the column min"""
         # Obtaining dependencies used to validate the expectation
-        validation_dependencies = self.get_validation_dependencies(configuration, execution_engine, runtime_configuration)[
-            "metrics"
-        ]
+        validation_dependencies = self.get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )["metrics"]
         # Extracting metrics
         metric_vals = extract_metrics(
             validation_dependencies, metrics, configuration, runtime_configuration

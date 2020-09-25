@@ -65,11 +65,18 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("regex",),
         metric_dependencies=tuple(),
-        filter_column_isnull=True,
+        filter_column_isnull=False,
     )
     def _pandas_column_values_match_regex(
-        self, series: pd.Series, regex: str, runtime_configuration: dict = None,
+        self,
+        series: pd.Series,
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        runtime_configuration: dict = None,
     ):
+        regex = metric_value_kwargs["regex"]
+
         return pd.DataFrame(
             {"column_values.match_regex": series.astype(str).str.contains(regex)}
         )
@@ -129,11 +136,11 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(
+        metric_dependencies = self.get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )["metrics"]
         metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
+            metric_dependencies, metrics, configuration, runtime_configuration
         )
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")

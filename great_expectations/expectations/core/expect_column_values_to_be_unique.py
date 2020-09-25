@@ -66,10 +66,15 @@ class ExpectColumnValuesToBeUnique(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=tuple(),
         metric_dependencies=tuple(),
-        filter_column_isnull=True,
+        filter_column_isnull=False,
     )
     def _pandas_column_values_are_unique(
-        self, series: pd.Series, runtime_configuration: dict = None,
+        self,
+        series: pd.Series,
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        runtime_configuration: dict = None,
     ):
         return pd.DataFrame(
             {"column_values.are_unique": ~series.duplicated(keep=False)}
@@ -84,9 +89,13 @@ class ExpectColumnValuesToBeUnique(ColumnMapDatasetExpectation):
     # def _sqlalchemy_are_unique(
     #     self,
     #     column: sa.column,
-    #     value_set: Union[list, set],
+    #     metrics: dict,
+    #     metric_domain_kwargs: dict,
+    #     metric_value_kwargs: dict,
     #     runtime_configuration: dict = None,
     # ):
+    #     value_set = metric_value_kwargs["value_set"]
+    #
     #     if value_set is None:
     #         # vacuously true
     #         return True
@@ -103,17 +112,21 @@ class ExpectColumnValuesToBeUnique(ColumnMapDatasetExpectation):
     #     self,
     #     data: "pyspark.sql.DataFrame",
     #     column: str,
-    #     value_set: Union[list, set],
+    #     metrics: dict,
+    #     metric_domain_kwargs: dict,
+    #     metric_value_kwargs: dict,
     #     runtime_configuration: dict = None,
     # ):
     #     import pyspark.sql.functions as F
+    #
+    #     value_set = metric_value_kwargs["value_set"]
     #
     #     if value_set is None:
     #         # vacuously true
     #         return data.withColumn(column + "__success", F.lit(True))
     #
     #     return data.withColumn(column + "__success", F.col(column).isin(value_set))
-    #
+
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
         self,
@@ -122,11 +135,11 @@ class ExpectColumnValuesToBeUnique(ColumnMapDatasetExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(
+        metric_dependencies = self.get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )["metrics"]
         metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
+            metric_dependencies, metrics, configuration, runtime_configuration
         )
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")

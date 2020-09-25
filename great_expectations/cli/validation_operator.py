@@ -313,13 +313,13 @@ Let us help you specify the batch of data your want the validation operator to v
             sys.exit(1)
 
         if not results["success"]:
-            cli_message("Validation Failed!")
+            cli_message("Validation failed!")
             send_usage_message(
                 data_context=context, event="cli.validation_operator.run", success=True
             )
             sys.exit(1)
         else:
-            cli_message("Validation Succeeded!")
+            cli_message("Validation succeeded!")
             send_usage_message(
                 data_context=context, event="cli.validation_operator.run", success=True
             )

@@ -13,6 +13,9 @@ from great_expectations.core.usage_statistics.usage_statistics import send_usage
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import DataContextError
 from great_expectations.util import lint_code
+from great_expectations.validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -305,13 +308,42 @@ def checkpoint_run(checkpoint, directory):
         )
 
     if not results["success"]:
-        cli_message("Validation Failed!")
+        cli_message("Validation failed!")
         send_usage_message(context, event=usage_event, success=True)
+        print_validation_operator_results_details(results)
         sys.exit(1)
 
-    cli_message("Validation Succeeded!")
+    cli_message("Validation succeeded!")
     send_usage_message(context, event=usage_event, success=True)
+    print_validation_operator_results_details(results)
     sys.exit(0)
+
+
+def print_validation_operator_results_details(
+    results: ValidationOperatorResult,
+) -> None:
+    max_suite_display_width = 40
+    toolkit.cli_message(
+        f"""
+{'Suite Name'.ljust(max_suite_display_width)}     Status     Expectations met"""
+    )
+    for id, result in results.run_results.items():
+        vr = result["validation_result"]
+        stats = vr.statistics
+        passed = stats["successful_expectations"]
+        evaluated = stats["evaluated_expectations"]
+        percentage_slug = f"{round(passed / evaluated * 100, 2)} %"
+        stats_slug = f"{passed} of {evaluated} ({percentage_slug})"
+        if vr.success:
+            status_slug = "<green>✔ Passed</green>"
+        else:
+            status_slug = "<red>✖ Failed</red>"
+        suite_name = str(vr.meta["expectation_suite_name"])
+        if len(suite_name) > max_suite_display_width:
+            suite_name = suite_name[0:max_suite_display_width]
+            suite_name = suite_name[:-1] + "…"
+        status_line = f"- {suite_name.ljust(max_suite_display_width)}   {status_slug}   {stats_slug}"
+        toolkit.cli_message(status_line)
 
 
 @checkpoint.command(name="script")

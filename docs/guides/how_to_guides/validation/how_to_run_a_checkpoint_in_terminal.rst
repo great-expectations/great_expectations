@@ -18,7 +18,7 @@ Steps
 .. code-block:: bash
 
     great_expectations checkpoint run my_checkpoint
-    Validation Failed!
+    Validation failed!
 
 2. Next, observe the output which will tell you if all validations passed or failed.
 
@@ -30,9 +30,9 @@ This command will return posix status codes and print messages as follows:
 +-------------------------------+-----------------+-----------------------+
 | **Situation**                 | **Return code** | **Message**           |
 +-------------------------------+-----------------+-----------------------+
-| all validations passed        | 0               | Validation Succeeded! |
+| all validations passed        | 0               | Validation succeeded! |
 +-------------------------------+-----------------+-----------------------+
-| one or more validation failed | 1               | Validation Failed!    |
+| one or more validation failed | 1               | Validation failed!    |
 +-------------------------------+-----------------+-----------------------+
 
 

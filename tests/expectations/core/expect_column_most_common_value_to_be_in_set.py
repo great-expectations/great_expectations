@@ -1,10 +1,11 @@
+import pandas as pd
+
 from great_expectations import ExpectColumnMostCommonValueToBeInSet
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-import pandas as pd
 from great_expectations.execution_engine import PandasExecutionEngine
 
 
@@ -20,4 +21,3 @@ def test_expect_column_most_common_value_to_be_in_set_int_impl():
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
     assert result == ExpectationValidationResult(success=False,)
-

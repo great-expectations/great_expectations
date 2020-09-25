@@ -12,10 +12,10 @@ from great_expectations.expectations.core.expect_column_values_to_be_unique impo
 
 
 def test_expect_column_values_to_be_unique_impl():
-    df = pd.DataFrame({"a": [1, 1, 2, 4]})
+    df = pd.DataFrame({"a": [None, None, None, None]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_unique",
-        kwargs={"column": "a", "mostly": 0.5},
+        kwargs={"column": "a", "mostly": 1},
     )
     expectation = ExpectColumnValuesToBeUnique(expectationConfiguration)
     batch = Batch(data=df)

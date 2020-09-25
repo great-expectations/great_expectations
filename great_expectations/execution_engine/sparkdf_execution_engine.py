@@ -996,7 +996,15 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 column = metric_domain_kwargs["column"]
                 eval_col = self._get_eval_column_name(column)
 
-                return metric_fn(self, data, eval_col, **metric_value_kwargs, **kwargs)
+                return metric_fn(
+                    self,
+                    data=data,
+                    column=eval_col,
+                    metrics=metrics,
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    metric_value_kwargs=metric_value_kwargs,
+                    **kwargs,
+                )
 
             register_metric(
                 metric_name=metric_name,
