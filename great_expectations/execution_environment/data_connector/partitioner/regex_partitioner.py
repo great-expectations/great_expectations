@@ -31,7 +31,7 @@ class RegexPartitioner(Partitioner):
         regex: dict
         regex = self.config_params.get("regex")
         if regex and isinstance(regex, dict):
-            assert "pattern" in regex.keys(), "Regex configuration requires patern to be specified."
+            assert "pattern" in regex.keys(), "Regex configuration requires pattern to be specified."
             if not ("group_names" in regex.keys() and isinstance(regex["group_names"], list)):
                 regex["group_names"] = []
         else:
