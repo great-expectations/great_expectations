@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import datetime
 import json
 import re
@@ -25,12 +23,12 @@ from great_expectations.render.types import (
 )
 
 
-class NoOpTemplate(object):
+class NoOpTemplate:
     def render(self, document):
         return document
 
 
-class PrettyPrintTemplate(object):
+class PrettyPrintTemplate:
     def render(self, document, indent=2):
         print(json.dumps(document, indent=indent))
 
@@ -38,7 +36,7 @@ class PrettyPrintTemplate(object):
 # Abe 2019/06/26: This View should probably actually be called JinjaView or something similar.
 # Down the road, I expect to wind up with class hierarchy along the lines of:
 #   View > JinjaView > GEContentBlockJinjaView
-class DefaultJinjaView(object):
+class DefaultJinjaView:
     """
     Defines a method for converting a document to human-consumable form
 

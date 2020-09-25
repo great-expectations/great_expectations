@@ -1,5 +1,6 @@
+from unittest import mock
+
 import jsonschema
-import mock
 import pytest
 
 from great_expectations.core.usage_statistics.schemas import (

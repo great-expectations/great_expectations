@@ -1,7 +1,7 @@
 from great_expectations.data_context.util import instantiate_class_from_config
 
 
-class FakeConfigurableClass(object):
+class FakeConfigurableClass:
     def __init__(self, a, x, b=None, c=None, y=None, z=None):
         self.a = a
         self.b = b
@@ -12,7 +12,7 @@ class FakeConfigurableClass(object):
         self.z = z
 
 
-class FakeConfigurableWrapperClass(object):
+class FakeConfigurableWrapperClass:
     def __init__(
         self, foo, fake_configurable, x, y=None, z=None,
     ):
