@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine, ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ...data_asset.util import parse_result_format
 from ..expectation import (
@@ -76,8 +76,12 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
         max_value = metric_value_kwargs.get("max_value")
         strict_min = metric_value_kwargs.get("strict_min")
         strict_max = metric_value_kwargs.get("strict_max")
-        allow_cross_type_comparisons = metric_value_kwargs.get("allow_cross_type_comparisons")
-        parse_strings_as_datetimes = metric_value_kwargs.get("parse_strings_as_datetimes")
+        allow_cross_type_comparisons = metric_value_kwargs.get(
+            "allow_cross_type_comparisons"
+        )
+        parse_strings_as_datetimes = metric_value_kwargs.get(
+            "parse_strings_as_datetimes"
+        )
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -251,9 +255,9 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
         """Validates the given data against a minimum and maximum threshold, returning a nested dictionary documenting the
         validation."""
 
-        validation_dependencies = self.get_validation_dependencies(configuration, execution_engine, runtime_configuration)[
-            "metrics"
-        ]
+        validation_dependencies = self.get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )["metrics"]
         # Extracting metrics
         metric_vals = extract_metrics(
             validation_dependencies, metrics, configuration, runtime_configuration

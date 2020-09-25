@@ -1002,7 +1002,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                     metrics=metrics,
                     metric_domain_kwargs=metric_domain_kwargs,
                     metric_value_kwargs=metric_value_kwargs,
-                    **kwargs
+                    **kwargs,
                 )
 
             register_metric(

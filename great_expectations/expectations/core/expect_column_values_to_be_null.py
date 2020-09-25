@@ -23,12 +23,12 @@ class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
     )
     # TODO: shouldn't this be null count?
     def _nonnull_count(
-            self,
-            series: pd.Series,
-            metrics: dict,
-            metric_domain_kwargs: dict,
-            metric_value_kwargs: dict,
-            runtime_configuration: dict = None
+        self,
+        series: pd.Series,
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        runtime_configuration: dict = None,
     ):
         return series.isnull()
 
@@ -40,12 +40,12 @@ class ExpectColumnValuesToBeNull(ColumnMapDatasetExpectation):
         filter_column_isnull=False,
     )
     def _sqlalchemy_null_map_metric(
-            self,
-            column,
-            metrics: dict,
-            metric_domain_kwargs: dict,
-            metric_value_kwargs: dict,
-            runtime_configuration: dict = None
+        self,
+        column,
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        runtime_configuration: dict = None,
     ):
         import sqlalchemy as sa
 

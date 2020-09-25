@@ -349,7 +349,9 @@ class DatasetExpectation(Expectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        dependencies = super().get_validation_dependencies( configuration, execution_engine, runtime_configuration)
+        dependencies = super().get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )
         metric_dependencies = set(self.metric_dependencies)
 
         dependencies["metrics"] = metric_dependencies

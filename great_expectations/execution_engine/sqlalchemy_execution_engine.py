@@ -770,7 +770,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     metrics=metrics,
                     metric_domain_kwargs=metric_domain_kwargs,
                     metric_value_kwargs=metric_value_kwargs,
-                    **kwargs
+                    **kwargs,
                 )
                 if filter_column_isnull:
                     expected_condition = sa.and_(

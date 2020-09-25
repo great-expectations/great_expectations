@@ -5,7 +5,7 @@ import pandas as pd
 
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine, ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ...data_asset.util import parse_result_format
 from ..expectation import (
@@ -118,8 +118,9 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         )
 
         # TODO: Necessary to check domain kwargs? Is there a better way to do this? (RL)
-        domain_metrics_lookup = get_domain_metrics_dict_by_name(metrics=metrics,
-                                                                  metric_domain_kwargs=metric_domain_kwargs)
+        domain_metrics_lookup = get_domain_metrics_dict_by_name(
+            metrics=metrics, metric_domain_kwargs=metric_domain_kwargs
+        )
         mean = domain_metrics_lookup["column.aggregate.mean"]
         std_dev = domain_metrics_lookup["column.aggregate.standard_deviation"]
 
@@ -151,8 +152,9 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         double_sided = metric_value_kwargs["double_sided"]
 
         # The series I'm getting does not consist of the z-scores themselves - PROBLEM
-        domain_metrics_lookup = get_domain_metrics_dict_by_name(metrics=metrics,
-                                                                metric_domain_kwargs=metric_domain_kwargs)
+        domain_metrics_lookup = get_domain_metrics_dict_by_name(
+            metrics=metrics, metric_domain_kwargs=metric_domain_kwargs
+        )
         z_scores = domain_metrics_lookup["column.z_scores"]
 
         try:
@@ -207,9 +209,9 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         """Validates the given data against the set Z Score threshold, returning a nested dictionary documenting the
         validation."""
         # Obtaining dependencies used to validate the expectation - PROBLEM: MEAN'S METHOD CURRENTLY BEING USED
-        validation_dependencies = self.get_validation_dependencies(configuration, execution_engine, runtime_configuration)[
-            "metrics"
-        ]
+        validation_dependencies = self.get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )["metrics"]
         # Extracting Pre-defined Metrics
         # Extracting metrics
         metric_vals = extract_metrics(

@@ -978,7 +978,7 @@ Notes:
                     metrics=metrics,
                     metric_domain_kwargs=metric_domain_kwargs,
                     metric_value_kwargs=metric_value_kwargs,
-                    **kwargs
+                    **kwargs,
                 )
 
             register_metric(

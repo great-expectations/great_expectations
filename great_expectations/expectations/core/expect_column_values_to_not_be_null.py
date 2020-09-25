@@ -30,7 +30,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
         metrics: dict,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        runtime_configuration: dict = None
+        runtime_configuration: dict = None,
     ):
         return ~series.isnull()
 
@@ -47,7 +47,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
         metrics: dict,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        runtime_configuration: dict = None
+        runtime_configuration: dict = None,
     ):
         import sqlalchemy as sa
 

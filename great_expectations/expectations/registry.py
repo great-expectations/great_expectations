@@ -207,11 +207,11 @@ def extract_metrics(
 
 
 def get_domain_metrics_dict_by_name(
-        metrics: Dict[Tuple, Any],
-        metric_domain_kwargs: IDDict
+    metrics: Dict[Tuple, Any], metric_domain_kwargs: IDDict
 ):
     return {
-        metric_edge_key_id_tuple[0]: metric_value for metric_edge_key_id_tuple, metric_value in metrics.items()
+        metric_edge_key_id_tuple[0]: metric_value
+        for metric_edge_key_id_tuple, metric_value in metrics.items()
         if metric_edge_key_id_tuple[1] == metric_domain_kwargs.to_id()
     }
 
