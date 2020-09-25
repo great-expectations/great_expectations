@@ -231,7 +231,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             # Success = Ratio of successful nonnull values > mostly?
             success=(
                 metric_vals.get("column_values.z_scores.under_threshold.count")
-                / metric_vals.get("column_values.nonull.count")
+                / metric_vals.get("column_values.nonnull.count")
             )
             >= mostly,
             element_count=metric_vals.get("column_values.count"),
