@@ -25,9 +25,7 @@ class ExpectTableColumnCountToEqual(DatasetExpectation):
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "min_value": None,
-        "max_value": None,
+        "value": None,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -50,6 +48,7 @@ class ExpectTableColumnCountToEqual(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         """Column count metric function"""
         df = execution_engine.get_domain_dataframe(

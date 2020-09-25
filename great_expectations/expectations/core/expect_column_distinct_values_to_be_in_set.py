@@ -17,12 +17,12 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
+class ExpectColumnDistinctValuesToBeInSet(DatasetExpectation):
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.aggregate.mode",)
+    metric_dependencies = ("column.value_counts",)
     success_keys = (
         "value_set",
-        "ties_okay",
+        "parse_strings_as_datetimes",
     )
 
     # Default values
@@ -30,7 +30,7 @@ class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
         "row_condition": None,
         "condition_parser": None,
         "value_set": None,
-        "ties_okay": None,
+        "parse_strings_as_datetimes": None,
         "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
@@ -40,12 +40,12 @@ class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
     """ A Column Map Metric Decorator for the Mode metric"""
 
     @PandasExecutionEngine.metric(
-        metric_name="column.aggregate.mode",
+        metric_name="column.value_counts",
         metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
     )
-    def _pandas_mode(
+    def _pandas_value_counts(
         self,
         batches: Dict[str, Batch],
         execution_engine: PandasExecutionEngine,
@@ -53,14 +53,13 @@ class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
     ):
-        """Mean Metric Function"""
+        """Distinct value counts metric"""
         series = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
         )
 
-        return series.mode().values
+        return series.value_counts()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """Validating that user has inputted a value set and that configuration has been initialized"""
@@ -84,17 +83,15 @@ class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        """Validates the mode metric against the value set"""
+        """Validates that the Distinct values are a superset of the value set"""
         # Obtaining dependencies used to validate the expectation
         validation_dependencies = self.get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )["metrics"]
-        # Extracting metrics
         metric_vals = extract_metrics(
             validation_dependencies, metrics, configuration, runtime_configuration
         )
 
-        # Runtime configuration has preference
         if runtime_configuration:
             result_format = runtime_configuration.get(
                 "result_format",
@@ -107,15 +104,24 @@ class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
                 "result_format", self.default_kwarg_values.get("result_format")
             )
 
-        mode_list = metric_vals.get("column.aggregate.mode")
+        parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
+            "parse_strings_as_datetimes"
+        )
+        observed_value_counts = metric_vals.get("column.value_counts")
+        observed_value_set = set(observed_value_counts.index)
         value_set = self.get_success_kwargs(configuration).get("value_set")
-        ties_okay = self.get_success_kwargs(configuration).get("ties_okay")
 
-        intersection_count = len(set(value_set).intersection(mode_list))
-
-        if ties_okay:
-            success = intersection_count > 0
+        if parse_strings_as_datetimes:
+            parsed_value_set = PandasExecutionEngine._parse_value_set(value_set)
         else:
-            success = len(mode_list) == 1 and intersection_count == 1
+            parsed_value_set = value_set
 
-        return {"success": success, "result": {"observed_value": mode_list}}
+        expected_value_set = set(parsed_value_set)
+
+        return {
+            "success": observed_value_set.issubset(expected_value_set),
+            "result": {
+                "observed_value": sorted(list(observed_value_set)),
+                "details": {"value_counts": observed_value_counts},
+            },
+        }

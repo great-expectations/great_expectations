@@ -31,6 +31,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         return ~series.isnull()
 
@@ -48,6 +49,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         import sqlalchemy as sa
 
@@ -67,6 +69,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         import pyspark.sql.functions as F
 

@@ -382,6 +382,7 @@ class DatasetExpectation(Expectation, ABC):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
@@ -472,6 +473,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
@@ -493,6 +495,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         import sqlalchemy as sa
 
@@ -516,6 +519,7 @@ class ColumnMapDatasetExpectation(DatasetExpectation, ABC):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
         return data.count()
