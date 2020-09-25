@@ -314,7 +314,7 @@ def test_dataset_attempt_allowing_relative_error_when_redshift_library_not_insta
     assert dataset.attempt_allowing_relative_error() is False
 
 
-def test_expect_multicolumn_values_to_be_unique(sa):
+def test_expect_compound_columns_to_be_unique(sa):
     engine = sa.create_engine("sqlite://")
 
     data = pd.DataFrame(
@@ -329,15 +329,15 @@ def test_expect_multicolumn_values_to_be_unique(sa):
     data.to_sql(name="test_sql_data", con=engine, index=False)
     dataset = SqlAlchemyDataset("test_sql_data", engine=engine)
 
-    assert not dataset.expect_multicolumn_values_to_be_unique(["col1", "col2"]).success
-    assert not dataset.expect_multicolumn_values_to_be_unique(["col2", "col3"]).success
-    assert not dataset.expect_multicolumn_values_to_be_unique(["col1", "col3"]).success
-    assert dataset.expect_multicolumn_values_to_be_unique(
+    assert not dataset.expect_compound_columns_to_be_unique(["col1", "col2"]).success
+    assert not dataset.expect_compound_columns_to_be_unique(["col2", "col3"]).success
+    assert not dataset.expect_compound_columns_to_be_unique(["col1", "col3"]).success
+    assert dataset.expect_compound_columns_to_be_unique(
         ["col1", "col2", "col3"]
     ).success
-    assert not dataset.expect_multicolumn_values_to_be_unique(
+    assert not dataset.expect_compound_columns_to_be_unique(
         ["col1", "col2", "col4"], ignore_row_if="any_value_is_missing",
     ).success
-    assert dataset.expect_multicolumn_values_to_be_unique(
+    assert dataset.expect_compound_columns_to_be_unique(
         ["col1", "col2", "col4"]
     ).success

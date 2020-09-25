@@ -510,7 +510,7 @@ The command will help you specify the batch of data that you want the validation
 
     Enter the path (relative or absolute) of a data file
     : data/npi_small.csv
-    Validation Succeeded!
+    Validation succeeded!
 
 2. Non-interactive (good for production):
 **************************************************************
@@ -564,7 +564,7 @@ Here is an example validation config file:
 .. code-block:: bash
 
     $ great_expectations validation-operator run --validation_config_file my_val_config.json
-    Validation Succeeded!
+    Validation succeeded!
 
 
 great_expectations datasource
@@ -737,9 +737,9 @@ This command will return posix status codes and print messages as follows:
 +-------------------------------+-----------------+-----------------------+
 | **Situation**                 | **Return code** | **Message**           |
 +-------------------------------+-----------------+-----------------------+
-| all validations passed        | 0               | Validation Succeeded! |
+| all validations passed        | 0               | Validation succeeded! |
 +-------------------------------+-----------------+-----------------------+
-| one or more validation failed | 1               | Validation Failed!    |
+| one or more validation failed | 1               | Validation failed!    |
 +-------------------------------+-----------------+-----------------------+
 
 If there is a checkpoint named ``source_tables`` in your project you can run it as follows:
@@ -747,7 +747,7 @@ If there is a checkpoint named ``source_tables`` in your project you can run it 
 .. code-block:: bash
 
     $ great_expectations checkpoint run source_tables
-    Validation Succeeded!
+    Validation succeeded!
 
 ``great_expectations checkpoint script <CHECKPOINT>``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -820,10 +820,10 @@ The generated script looks like this:
 
     # take action based on results
     if not results["success"]:
-        print("Validation Failed!")
+        print("Validation failed!")
         sys.exit(1)
 
-    print("Validation Succeeded!")
+    print("Validation succeeded!")
     sys.exit(0)
 
 This script can be run by invoking it with:
@@ -840,7 +840,7 @@ A failure will look like:
 .. code-block:: bash
 
     $ python great_expectations/uncommitted/run_cost_model_protection.py
-    Validation Failed!
+    Validation failed!
 
 Shell autocompletion for the CLI
 =================================

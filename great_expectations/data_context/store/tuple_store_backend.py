@@ -442,7 +442,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 )
             else:
                 result_s3.put(Body=value, ContentType=content_type)
-        except s3.exceptions.ClientError as e:
+        except s3.meta.client.exceptions.ClientError as e:
             logger.debug(str(e))
             raise StoreBackendError("Unable to set object in s3.")
 
@@ -532,6 +532,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def remove_key(self, key):
         import boto3
         from botocore.exceptions import ClientError
+
+        if not isinstance(key, tuple):
+            key = key.to_tuple()
 
         s3 = boto3.resource("s3")
         s3_object_key = self._build_s3_object_key(key)

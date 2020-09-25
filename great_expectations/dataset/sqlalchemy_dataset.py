@@ -1306,7 +1306,7 @@ WHERE
     ###
     ###
     #
-    # Table Expectation Implementations
+    # Compound Column Expectation Implementations
     #
     ###
     ###
@@ -1314,11 +1314,13 @@ WHERE
 
     @DocInherit
     @MetaSqlAlchemyDataset.expectation(["column_list", "ignore_row_if"])
-    def expect_multicolumn_values_to_be_unique(
+    def expect_compound_columns_to_be_unique(
         self,
         column_list,
         ignore_row_if="all_values_are_missing",
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1327,7 +1329,7 @@ WHERE
             sa.column(col["name"]) for col in self.columns if col["name"] in column_list
         ]
         query = (
-            sa.select(columns)
+            sa.select([sa.func.count()])
             .group_by(*columns)
             .having(sa.func.count() > 1)
             .select_from(self._table)
@@ -1344,7 +1346,12 @@ WHERE
                 "ignore_row_if was set to an unexpected value: %s" % ignore_row_if
             )
 
-        count = self.engine.execute(query.count()).fetchone()[0]
+        count = self.engine.execute(query).fetchone()
+        if count is None:
+            # This can happen when the condition filters out all rows
+            count = 0
+        else:
+            count = count[0]
         return {
             "success": count == 0,
             "result": {"observed_value": {"non_distinct_sets": count}},
