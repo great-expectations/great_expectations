@@ -112,7 +112,7 @@ def test_SlackRenderer_validation_results_with_datadocs():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "**ERROR** Slack is trying to provide a link to the following DataDocs: `fake_site`, but it is not configured in `great_expectations.yml`\nPlease check your `great_expectations.yml` configuration and try again",
+                    "text": "*ERROR*: Slack is trying to provide a link to the following DataDocs: `fake_site`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n",
                 },
             },
             {"type": "divider"},

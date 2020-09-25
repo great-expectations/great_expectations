@@ -69,13 +69,13 @@ class SlackRenderer(Renderer):
                             report_element = self._get_report_element(docs_link)
                         else:
                             logger.critical(
-                                f"*ERROR* Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n"
+                                f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n"
                             )
                             report_element = {
                                 "type": "section",
                                 "text": {
                                     "type": "mrkdwn",
-                                    "text": f"*ERROR* Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n",
+                                    "text": f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n",
                                 },
                             }
                         if report_element:
