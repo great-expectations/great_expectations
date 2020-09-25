@@ -27,23 +27,21 @@ except ImportError:
     pass
 
 
-class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
-    map_metric = "column_values.in_set"
+class ExpectColumnValuesToNotMatchRegexList(ColumnMapDatasetExpectation):
+    map_metric = "column_values.not_match_regex_list"
     metric_dependencies = (
-        "column_values.in_set.count",
+        "column_values.not_match_regex_list.count",
         "column_values.nonnull.count",
     )
     success_keys = (
-        "value_set",
+        "regex_list",
         "mostly",
-        "parse_strings_as_datetimes",
     )
 
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
-        "parse_strings_as_datetimes": None,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
@@ -54,22 +52,25 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         if configuration is None:
             configuration = self.configuration
         try:
-            assert "value_set" in configuration.kwargs, "value_set is required"
+            assert "regex_list" in configuration.kwargs, "regex_list is required"
             assert isinstance(
-                configuration.kwargs["value_set"], (list, set)
-            ), "value_set must be a list or a set"
+                configuration.kwargs["regex_list"], list
+            ), "regex_list must be a list of regexes"
+            if len(configuration.kwargs["regex_list"]) > 0:
+                for i in configuration.kwargs["regex_list"]:
+                    assert isinstance(i, str), "regexes in list must be strings"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
     @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.in_set",
+        metric_name="column_values.not_match_regex_list",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("value_set",),
+        metric_value_keys=("regex_list",),
         metric_dependencies=tuple(),
         filter_column_isnull=False,
     )
-    def _pandas_column_values_in_set(
+    def _pandas_column_values_not_match_regex_list(
         self,
         series: pd.Series,
         metrics: dict,
@@ -77,65 +78,16 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
     ):
-        value_set = metric_value_kwargs["value_set"]
-        if value_set is None:
-            # Vacuously true
-            return np.ones(len(series), dtype=np.bool_)
-        if pd.api.types.is_datetime64_any_dtype(series):
-            parsed_value_set = PandasExecutionEngine.parse_value_set(
-                value_set=value_set
-            )
-        else:
-            parsed_value_set = value_set
+        regex_list = metric_value_kwargs["regex_list"]
 
-        return pd.DataFrame({"column_values.in_set": series.isin(parsed_value_set)})
+        regex_matches = []
+        for regex in regex_list:
+            regex_matches.append(series.astype(str).str.contains(regex))
+        regex_match_df = pd.concat(regex_matches, axis=1, ignore_index=True)
 
-    @SqlAlchemyExecutionEngine.column_map_metric(
-        metric_name="column_values.in_set",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("value_set",),
-        metric_dependencies=tuple(),
-    )
-    def _sqlalchemy_in_set(
-        self,
-        column: sa.column,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-    ):
-        value_set = metric_value_kwargs["value_set"]
-
-        if value_set is None:
-            # vacuously true
-            return True
-
-        return column.in_(tuple(value_set))
-
-    @SparkDFExecutionEngine.column_map_metric(
-        metric_name="column_values.in_set",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("value_set",),
-        metric_dependencies=tuple(),
-    )
-    def _spark_in_set(
-        self,
-        data: "pyspark.sql.DataFrame",
-        column: str,
-        metrics: dict,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        runtime_configuration: dict = None,
-    ):
-        import pyspark.sql.functions as F
-
-        value_set = metric_value_kwargs["value_set"]
-
-        if value_set is None:
-            # vacuously true
-            return data.withColumn(column + "__success", F.lit(True))
-
-        return data.withColumn(column + "__success", F.col(column).isin(value_set))
+        return pd.DataFrame(
+            {"column_values.not_match_regex_list": ~regex_match_df.any(axis="columns")}
+        )
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
@@ -167,9 +119,9 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
             )
 
         if metric_vals.get("column_values.nonnull.count") > 0:
-            success = metric_vals.get("column_values.in_set.count") / metric_vals.get(
-                "column_values.nonnull.count"
-            )
+            success = metric_vals.get(
+                "column_values.not_match_regex_list.count"
+            ) / metric_vals.get("column_values.nonnull.count")
         else:
             # TODO: Setting this to 1 based on the notion that tests on empty columns should be vacuously true. Confirm.
             success = 1
@@ -179,14 +131,11 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
             unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.in_set.count"),
-            unexpected_list=metric_vals.get("column_values.in_set.unexpected_values"),
+            - metric_vals.get("column_values.not_match_regex_list.count"),
+            unexpected_list=metric_vals.get(
+                "column_values.not_match_regex_list.unexpected_values"
+            ),
             unexpected_index_list=metric_vals.get(
-                "column_values.in_set.unexpected_index_list"
+                "column_values.not_match_regex_list.unexpected_index_list"
             ),
         )
-
-    #
-    # @renders(StringTemplate, modes=())
-    # def lkjdsf(self, mode={prescriptive}, {descriptive}, {valiation}):
-    #     return "I'm a thing"

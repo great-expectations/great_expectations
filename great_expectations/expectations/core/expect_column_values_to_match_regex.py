@@ -65,7 +65,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("regex",),
         metric_dependencies=tuple(),
-        filter_column_isnull=True,
+        filter_column_isnull=False,
     )
     def _pandas_column_values_match_regex(
         self,
