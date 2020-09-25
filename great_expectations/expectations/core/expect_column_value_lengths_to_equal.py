@@ -75,6 +75,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         """Tests whether or not value lengths equal threshold"""
         value = metric_value_kwargs["value"]
@@ -97,6 +98,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         """Extracts lengths of individual entries"""
         series = execution_engine.get_domain_dataframe(

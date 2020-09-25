@@ -67,7 +67,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("value_set",),
         metric_dependencies=tuple(),
-        filter_column_isnull=False,
+        filter_column_isnull=True,
     )
     def _pandas_column_values_in_set(
         self,
@@ -76,6 +76,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         value_set = metric_value_kwargs["value_set"]
         if value_set is None:
@@ -103,6 +104,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         value_set = metric_value_kwargs["value_set"]
 
@@ -126,6 +128,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         import pyspark.sql.functions as F
 

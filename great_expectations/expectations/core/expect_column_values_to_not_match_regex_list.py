@@ -68,7 +68,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("regex_list",),
         metric_dependencies=tuple(),
-        filter_column_isnull=False,
+        filter_column_isnull=True,
     )
     def _pandas_column_values_not_match_regex_list(
         self,
@@ -77,6 +77,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         regex_list = metric_value_kwargs["regex_list"]
 

@@ -266,7 +266,7 @@ class MetaSparkDFExecutionEngine(ExecutionEngine):
                     "`__row`",
                     "`{0}` AS `A_{0}`".format(eval_col_A),
                     "`{0}` AS `B_{0}`".format(eval_col_B),
-                    "ISNULL(`{0}`) AND ISNULL(`{1}`) AS `__null_val`".format(
+                    "ISNULL(`{}`) AND ISNULL(`{}`) AS `__null_val`".format(
                         eval_col_A, eval_col_B
                     ),
                 )
@@ -275,7 +275,7 @@ class MetaSparkDFExecutionEngine(ExecutionEngine):
                     "`__row`",
                     "`{0}` AS `A_{0}`".format(eval_col_A),
                     "`{0}` AS `B_{0}`".format(eval_col_B),
-                    "ISNULL(`{0}`) OR ISNULL(`{1}`) AS `__null_val`".format(
+                    "ISNULL(`{}`) OR ISNULL(`{}`) AS `__null_val`".format(
                         eval_col_A, eval_col_B
                     ),
                 )
@@ -296,8 +296,8 @@ class MetaSparkDFExecutionEngine(ExecutionEngine):
             nonnull_df = boolean_mapped_null_values.filter("__null_val = False")
             nonnull_count = nonnull_df.count()
 
-            col_A_df = nonnull_df.select("__row", "`A_{0}`".format(eval_col_A))
-            col_B_df = nonnull_df.select("__row", "`B_{0}`".format(eval_col_B))
+            col_A_df = nonnull_df.select("__row", "`A_{}`".format(eval_col_A))
+            col_B_df = nonnull_df.select("__row", "`B_{}`".format(eval_col_B))
 
             success_df = func(self, col_A_df, col_B_df, *args, **kwargs)
             success_count = success_df.filter("__success = True").count()
@@ -313,7 +313,7 @@ class MetaSparkDFExecutionEngine(ExecutionEngine):
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
-                    (row["A_{0}".format(eval_col_A)], row["B_{0}".format(eval_col_B)],)
+                    (row["A_{}".format(eval_col_A)], row["B_{}".format(eval_col_B)],)
                     for row in unexpected_df.collect()
                 ]
 
@@ -859,12 +859,16 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[Tuple, Any],
+        filter_column_isnull,
         **kwargs,
     ):
         """Return the count of nonzero values from the map-style metric in the metrics dictionary"""
         assert metric_name.endswith(".count")
         metric_key = MetricEdgeKey(
-            metric_name[: -len(".count")], metric_domain_kwargs, metric_value_kwargs,
+            metric_name[: -len(".count")],
+            metric_domain_kwargs,
+            metric_value_kwargs,
+            filter_column_isnull=filter_column_isnull,
         ).id
         return metrics.get(metric_key).count()
 
@@ -876,6 +880,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[Tuple, Any],
+        filter_column_isnull,
         **kwargs,
     ):
         """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -889,6 +894,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             metric_name[: -len(".unexpected_values")],
             metric_domain_kwargs,
             base_metric_value_kwargs,
+            filter_column_isnull=filter_column_isnull,
         ).id
         filtered = metrics.get(metric_key)
         column = self._get_eval_column_name(metric_domain_kwargs["column"])
@@ -909,6 +915,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[Tuple, Any],
+        filter_column_isnull,
         **kwargs,
     ):
         assert metric_name.endswith(".unexpected_value_counts")
@@ -921,6 +928,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             metric_name[: -len(".unexpected_value_counts")],
             metric_domain_kwargs,
             base_metric_value_kwargs,
+            filter_column_isnull=filter_column_isnull,
         ).id
         filtered = metrics.get(metric_key)
         column = self._get_eval_column_name(metric_domain_kwargs["column"])
@@ -938,11 +946,14 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[Tuple, Any],
+        filter_column_isnull,
         **kwargs,
     ):
         """Return values from the specified domain (ignoring the column constraint) that match the map-style metric in the metrics dictionary."""
         row_domain = {k: v for (k, v) in metric_domain_kwargs.items() if k != "column"}
-        data = execution_engine.get_domain_dataframe(row_domain, batches)
+        data = execution_engine.get_domain_dataframe(
+            row_domain, batches, filter_column_isnull=filter_column_isnull
+        )
         assert metric_name.endswith(".unexpected_rows")
         # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
         result_format = metric_value_kwargs["result_format"]
@@ -953,6 +964,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             metric_name[: -len(".unexpected_rows")],
             metric_domain_kwargs,
             base_metric_value_kwargs,
+            filter_column_isnull=filter_column_isnull,
         ).id
         filtered = metrics.get(metric_key)
         if result_format["result_format"] == "COMPLETE":
@@ -1013,6 +1025,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 metric_dependencies=tuple(),
                 metric_provider=inner_func,
                 bundle_computation=False,
+                filter_column_isnull=filter_column_isnull,
             )
             register_metric(
                 metric_name=metric_name + ".count",
@@ -1022,6 +1035,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_count,
                 bundle_computation=False,
+                filter_column_isnull=filter_column_isnull,
             )
             # noinspection PyTypeChecker
             register_metric(
@@ -1032,6 +1046,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_values,
                 bundle_computation=False,
+                filter_column_isnull=filter_column_isnull,
             )
             # noinspection PyTypeChecker
             register_metric(
@@ -1042,6 +1057,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_value_counts,
                 bundle_computation=False,
+                filter_column_isnull=filter_column_isnull,
             )
             # noinspection PyTypeChecker
             register_metric(
@@ -1052,6 +1068,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_rows,
                 bundle_computation=False,
+                filter_column_isnull=filter_column_isnull,
             )
             return inner_func
 
@@ -1766,8 +1783,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             _udf = udf(parse, sparktypes.TimestampType())
             # Create new columns for comparison without replacing original values.
             (timestamp_column_A, timestamp_column_B) = (
-                "__ts_{0}".format(column_A_name),
-                "__ts_{0}".format(column_B_name),
+                "__ts_{}".format(column_A_name),
+                "__ts_{}".format(column_B_name),
             )
             temp_column_A = column_A.withColumn(timestamp_column_A, _udf(column_A_name))
             temp_column_B = column_B.withColumn(timestamp_column_B, _udf(column_B_name))

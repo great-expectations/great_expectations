@@ -216,7 +216,10 @@ class Validator:
                 MetricEdge(
                     parent_node,
                     MetricEdgeKey(
-                        metric_name, metric_domain_kwargs, metric_value_kwargs
+                        metric_name,
+                        metric_domain_kwargs,
+                        metric_value_kwargs,
+                        filter_column_isnull=metric_kwargs["filter_column_isnull"],
                     ),
                 )
             )
@@ -225,7 +228,10 @@ class Validator:
             graph.add(
                 MetricEdge(
                     MetricEdgeKey(
-                        metric_name, metric_domain_kwargs, metric_value_kwargs
+                        metric_name,
+                        metric_domain_kwargs,
+                        metric_value_kwargs,
+                        filter_column_isnull=metric_kwargs["filter_column_isnull"],
                     ),
                     None,
                 )

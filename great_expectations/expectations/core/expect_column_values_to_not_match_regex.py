@@ -74,6 +74,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         regex = metric_value_kwargs["regex"]
 
@@ -119,6 +120,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapDatasetExpectation):
     #     column: str,
     #     regex: str,
     #     runtime_configuration: dict = None,
+    #     filter_column_isnull: bool = True,
     # ):
     #     import pyspark.sql.functions as F
     #

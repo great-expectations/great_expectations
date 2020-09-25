@@ -66,7 +66,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=tuple(),
         metric_dependencies=tuple(),
-        filter_column_isnull=False,
+        filter_column_isnull=True,
     )
     def _pandas_column_values_are_unique(
         self,
@@ -75,6 +75,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         return pd.DataFrame(
             {"column_values.are_unique": ~series.duplicated(keep=False)}
@@ -93,6 +94,8 @@ class ExpectColumnValuesToBeUnique(ColumnMapDatasetExpectation):
     #     metric_domain_kwargs: dict,
     #     metric_value_kwargs: dict,
     #     runtime_configuration: dict = None,
+    #     filter_column_isnull: bool = True,
+
     # ):
     #     value_set = metric_value_kwargs["value_set"]
     #
@@ -116,6 +119,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapDatasetExpectation):
     #     metric_domain_kwargs: dict,
     #     metric_value_kwargs: dict,
     #     runtime_configuration: dict = None,
+    #     filter_column_isnull: bool = True,
     # ):
     #     import pyspark.sql.functions as F
     #

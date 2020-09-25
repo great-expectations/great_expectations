@@ -623,12 +623,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[Tuple, Any],
+        filter_column_isnull,
         **kwargs,
     ):
         """"""
         assert metric_name.endswith(".count")
         metric_key = MetricEdgeKey(
-            metric_name[: -len(".count")], metric_domain_kwargs, metric_value_kwargs,
+            metric_name[: -len(".count")],
+            metric_domain_kwargs,
+            metric_value_kwargs,
+            filter_column_isnull=filter_column_isnull,
         ).id
         expected_condition = metrics.get(metric_key)
         table = execution_engine._get_selectable(
@@ -644,6 +648,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[Tuple, Any],
+        filter_column_isnull,
         **kwargs,
     ):
         """"""
@@ -657,6 +662,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             metric_name[: -len(".unexpected_values")],
             metric_domain_kwargs,
             base_metric_value_kwargs,
+            filter_column_isnull=filter_column_isnull,
         ).id
         unexpected_condition = sa.not_(metrics.get(metric_key))
         table = execution_engine._get_selectable(
@@ -679,6 +685,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[Tuple, Any],
+        filter_column_isnull,
         **kwargs,
     ):
         assert metric_name.endswith(".unexpected_value_counts")
@@ -691,6 +698,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             metric_name[: -len(".unexpected_value_counts")],
             metric_domain_kwargs,
             base_metric_value_kwargs,
+            filter_column_isnull=filter_column_isnull,
         ).id
         unexpected_condition = sa.not_(metrics.get(metric_key))
         table = execution_engine._get_selectable(
@@ -712,6 +720,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[Tuple, Any],
+        filter_column_isnull,
         **kwargs,
     ):
         assert metric_name.endswith(".unexpected_rows")
@@ -724,6 +733,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             metric_name[: -len(".unexpected_rows")],
             metric_domain_kwargs,
             base_metric_value_kwargs,
+            filter_column_isnull=filter_column_isnull,
         ).id
         unexpected_condition = sa.not_(metrics.get(metric_key))
         table = execution_engine._get_selectable(
@@ -788,6 +798,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 metric_dependencies=tuple(),
                 metric_provider=inner_func,
                 bundle_computation=False,
+                filter_column_isnull=filter_column_isnull,
             )
             register_metric(
                 metric_name=metric_name + ".count",
@@ -797,6 +808,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_count,
                 bundle_computation=True,
+                filter_column_isnull=filter_column_isnull,
             )
             # noinspection PyTypeChecker
             register_metric(
@@ -807,6 +819,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_values,
                 bundle_computation=False,
+                filter_column_isnull=filter_column_isnull,
             )
             # noinspection PyTypeChecker
             register_metric(
@@ -817,6 +830,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_value_counts,
                 bundle_computation=False,
+                filter_column_isnull=filter_column_isnull,
             )
             # noinspection PyTypeChecker
             register_metric(
@@ -827,6 +841,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_rows,
                 bundle_computation=False,
+                filter_column_isnull=filter_column_isnull,
             )
             return inner_func
 

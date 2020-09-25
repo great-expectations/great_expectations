@@ -44,6 +44,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         strictly = metric_value_kwargs["strictly"]
 

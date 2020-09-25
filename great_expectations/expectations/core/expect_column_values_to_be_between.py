@@ -71,6 +71,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         min_value = metric_value_kwargs.get("min_value")
         max_value = metric_value_kwargs.get("max_value")
