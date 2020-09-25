@@ -6,7 +6,7 @@ import pandas as pd
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import Batch
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import PandasExecutionEngine, ExecutionEngine
 from great_expectations.expectations.expectation import DatasetExpectation, Expectation
 from great_expectations.expectations.registry import extract_metrics
 
@@ -93,15 +93,32 @@ class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
+            self,
+            configuration: ExpectationConfiguration,
+            metrics: dict,
+            runtime_configuration: dict = None,
+            execution_engine: ExecutionEngine = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(configuration)[
+        validation_dependencies = self.get_validation_dependencies(configuration, execution_engine, runtime_configuration)[
             "metrics"
         ]
-        metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
+        # Extracting metrics
+        metric_vals = extract_metrics(
+            validation_dependencies, metrics, configuration, runtime_configuration
+        )
+
+        # Runtime configuration has preference
+        if runtime_configuration:
+            result_format = runtime_configuration.get(
+                "result_format",
+                configuration.kwargs.get(
+                    "result_format", self.default_kwarg_values.get("result_format")
+                ),
+            )
+        else:
+            result_format = configuration.kwargs.get(
+                "result_format", self.default_kwarg_values.get("result_format")
+            )
 
         quantile_vals = metric_vals.get("column.aggregate.quantiles")
         quantile_ranges = self.get_success_kwargs(configuration).get("quantile_ranges")
