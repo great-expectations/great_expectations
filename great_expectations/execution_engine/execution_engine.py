@@ -288,7 +288,6 @@ class ExecutionEngine(MetaExecutionEngine):
 
         return outer
 
-    # TODO: <Alex></Alex>
     ###
     #
     # Output generation
@@ -403,7 +402,6 @@ class ExecutionEngine(MetaExecutionEngine):
             "Unknown result_format %s." % (result_format["result_format"],)
         )
 
-    # TODO: <Alex></Alex>
     @staticmethod
     def _calc_map_expectation_success(success_count, nonnull_count, mostly):
         """Calculate success and percent_success for column_map_expectations
