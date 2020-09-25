@@ -143,8 +143,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 
 **Additional notes**
 
-- If you wish to host a Data Docs site through a private DNS, you can configure a ``base_public_path`` for the Data Docs Store.  The following example will configure a GCS site with the ``base_public_path`` set to ``www.mydns.com``.
-- DataDocs will still be written to ``https://storage.cloud.google.com/my_org_data_docs/index.html``, but you will be able to access the ``index.html`` page from ``http://www.mydns.com/index.html``.
+- If you wish to host a Data Docs site through a private DNS, you can configure a ``base_public_path`` for the Data Docs Store.  The following example will configure a GCS site with the ``base_public_path`` set to ``www.mydns.com``.  Data Docs will still be written to the configured location on GCS (for example ``https://storage.cloud.google.com/my_org_data_docs/index.html``), but you will be able to access the pages from your DNS (``http://www.mydns.com/index.html`` in our example).
 
 .. code-block:: yaml
 

@@ -59,9 +59,9 @@ Steps
 
 Additional notes
 --------------------
-- If your ``great_expectations.yml`` contains multiple configurations for Data Docs sites, all of them will be included in the Slack notification by default. If you would like to be more specific, you can configure the ``data_docs_site_names`` variable.
 
-- You can also configure your Slack notification to include links to specific Data Docs sites by configuring the ``notify_with`` field in the ``great_expectations.yml`` file.  The following example will configure the Slack message to include links to ``local_site`` and ``s3_site``.
+- If your ``great_expectations.yml`` contains multiple configurations for Data Docs sites, all of them will be included in the Slack notification by default. If you would like to be more specific, you can configure the ``notify_with`` variable in your ``great_expectations.yml``.
+- The following example will configure the Slack message to include links Data Docs at ``local_site`` and ``s3_site``.
 
 .. code-block:: yaml
 

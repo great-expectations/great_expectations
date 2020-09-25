@@ -567,7 +567,10 @@ class TupleS3StoreBackend(TupleStoreBackend):
             )
         s3_key = self._convert_key_to_filepath(key)
         # <WILL> What happens if there is a prefix?
-        public_url = self.base_public_path + s3_key
+        if self.base_public_path[-1] != "/":
+            public_url = self.base_public_path + "/" + s3_key
+        else:
+            public_url = self.base_public_path + s3_key
         return public_url
 
     def remove_key(self, key):

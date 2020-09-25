@@ -56,6 +56,9 @@ class SlackRenderer(Renderer):
             query["blocks"][0]["text"]["text"] = summary_text
             # this abbreviated root level "text" will show up in the notification and not the message
             query["text"] = "{}: {}".format(expectation_suite_name, status)
+
+            print("Hi will")
+            print(data_docs_pages)
             if data_docs_pages:
                 for docs_link_key in data_docs_pages.keys():
                     if docs_link_key == "class":
@@ -64,7 +67,7 @@ class SlackRenderer(Renderer):
                     docs_link = data_docs_pages[docs_link_key]
                     report_element = None
 
-                    if notify_with == None or docs_link_key in notify_with:
+                    if notify_with is None or docs_link_key in notify_with:
 
                         if "file:///" in docs_link:
                             # handle special case since Slack does not render these links
@@ -94,8 +97,8 @@ class SlackRenderer(Renderer):
                             f"Please check your great_expectations.yml configuration and try again"
                         )
 
-                if report_element:
-                    query["blocks"].append(report_element)
+                    if report_element:
+                        query["blocks"].append(report_element)
 
             if "result_reference" in validation_result.meta:
                 report_element = {
