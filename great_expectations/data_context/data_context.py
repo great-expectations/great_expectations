@@ -654,7 +654,7 @@ class BaseDataContext:
         }
 
     @property
-    def execution_environments(self) -> Dict[ExecutionEnvironment]:
+    def execution_environments(self) -> Dict[str, ExecutionEnvironment]:
         """A single holder for all ExecutionEnvironments in this context"""
         return {
             execution_environment: self.get_execution_environment(execution_environment_name=execution_environment)

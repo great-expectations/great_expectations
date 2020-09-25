@@ -8,7 +8,7 @@ from great_expectations.data_context.types.base import (
     SorterConfig,
     sorterConfigSchema
 )
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+# from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 from great_expectations.core.id_dict import BatchSpec
@@ -35,7 +35,7 @@ class Partitioner(object):
     def __init__(
         self,
         name: str,
-        data_connector: DataConnector,
+        data_connector,
         sorters: list = None,
         allow_multipart_partitions: bool = False,
         config_params: dict = None,
@@ -53,7 +53,7 @@ class Partitioner(object):
         return self._name
 
     @property
-    def data_connector(self) -> DataConnector:
+    def data_connector(self):
         return self._data_connector
 
     @property

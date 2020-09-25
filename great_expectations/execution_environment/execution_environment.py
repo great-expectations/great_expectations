@@ -15,9 +15,6 @@ from great_expectations.data_context.util import (
     verify_dynamic_loading_support,
 )
 from ruamel.yaml.comments import CommentedMap
-from great_expectations.data_context.data_context import DataContext
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.types import ClassConfig
 from great_expectations.validator.validator import Validator
@@ -36,9 +33,9 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
     def __init__(
         self,
         name: str,
-        execution_engine: ExecutionEngine = None,
-        data_connectors: List[DataConnector] = None,
-        data_context: DataContext = None,
+        execution_engine=None,
+        data_connectors=None,
+        data_context=None,
         **kwargs
     ):
         """
@@ -170,7 +167,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         for data_connector in self._execution_environment_config["data_connectors"].keys():
             self.get_data_connector(name=data_connector)
 
-    def get_data_connector(self, name: str) -> DataConnector:
+    def get_data_connector(self, name: str):
         """Get the (named) DataConnector from an ExecutionEnvironment)
 
         Args:
@@ -195,7 +192,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         data_connector_config: CommentedMap = dataConnectorConfigSchema.load(
             data_connector_config
         )
-        data_connector: DataConnector = self._build_data_connector_from_config(
+        data_connector = self._build_data_connector_from_config(
             name=name, config=data_connector_config
         )
         self._data_connectors_cache[name] = data_connector
@@ -207,7 +204,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         if isinstance(config, DataConnectorConfig):
             config: dict = dataConnectorConfigSchema.dump(config)
         config.update({"name": name})
-        data_connector: DataConnector = instantiate_class_from_config(
+        data_connector = instantiate_class_from_config(
             config=config,
             runtime_environment={"execution_environment": self},
             config_defaults={
@@ -272,12 +269,12 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
             data_connector_names = [data_connector_names]
 
         for data_connector_name in data_connector_names:
-            data_connector: DataConnector = self.get_data_connector(name=data_connector_name)
+            data_connector = self.get_data_connector(name=data_connector_name)
             available_data_asset_names[
                 data_connector_name
             ] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
 
     def build_batch_spec(self, data_connector_name: str, batch_definition: dict) -> BatchSpec:
-        data_connector_obj: DataConnector = self.get_data_connector(name=data_connector_name)
+        data_connector_obj = self.get_data_connector(name=data_connector_name)
         return data_connector_obj.build_batch_spec(batch_definition=batch_definition)
