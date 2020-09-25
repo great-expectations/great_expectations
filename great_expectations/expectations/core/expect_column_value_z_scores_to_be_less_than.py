@@ -236,9 +236,8 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             >= mostly,
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get(
-                "column_values.z_scores.under_threshold.unexpected_count"
-            ),
+            unexpected_count=metric_vals.get("column_values.nonnull.count")
+            - metric_vals.get("column_values.z_scores.under_threshold.count"),
             unexpected_list=metric_vals.get(
                 "column_values.z_scores.under_threshold.unexpected_values"
             ),
