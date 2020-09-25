@@ -10,7 +10,6 @@ Develop
 * [ENHANCEMENT] Add expect_compound_columns_to_be_unique and clarify multicolumn uniqueness
 * [ENHANCEMENT] Add expectation expect_table_columns_to_match_set
 * [ENHANCEMENT] Checkpoint run command now prints out details on each validation #1437
-* [FEATURE] add support for ``expect_compound_columns_to_be_unique`` to ``SqlAlchemy``
 
 0.12.2
 -----------------
