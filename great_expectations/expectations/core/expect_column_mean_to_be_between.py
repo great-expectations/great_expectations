@@ -36,8 +36,7 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
         "catch_exceptions": False,
     }
 
-    """ A Column Map Metric Decorator for the Mean"""
-
+    """ A Column Aggregate Metric Decorator for the Mean"""
     @PandasExecutionEngine.metric(
         metric_name="column.aggregate.mean",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
@@ -84,12 +83,6 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
             assert (
                 "column" in configuration.kwargs
             ), "'column' parameter is required for column map expectations"
-            if "mostly" in configuration.kwargs:
-                mostly = configuration.kwargs["mostly"]
-                assert isinstance(
-                    mostly, (int, float)
-                ), "'mostly' parameter must be an integer or float"
-                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -127,8 +120,7 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
     ):
-        """Validates the given data against the set Z Score threshold, returning a nested dictionary documenting the
-        validation."""
+        """Validates the given data against the set boundaries for mean to ensure it lies within proper range"""
         # Obtaining dependencies used to validate the expectation
         validation_dependencies = self.get_validation_dependencies(configuration)[
             "metrics"
