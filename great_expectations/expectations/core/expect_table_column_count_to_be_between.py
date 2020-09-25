@@ -54,6 +54,7 @@ class ExpectTableColumnCountToBeBetween(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         """Column Count Metric Function"""
         df = execution_engine.get_domain_dataframe(

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import decimal
 import inspect
 import logging
@@ -36,7 +34,7 @@ yaml = YAML()
 yaml.default_flow_style = False
 
 
-class NoOpDict(object):
+class NoOpDict:
     def __getitem__(self, item):
         return None
 
@@ -46,7 +44,7 @@ class NoOpDict(object):
         ## TODO: JPC: 20200916 - can we remove this class?
 
 
-class MetaExecutionEngine(object):
+class MetaExecutionEngine:
     """
     Holds expectation decorators.
     """
@@ -400,7 +398,7 @@ class ExecutionEngine(MetaExecutionEngine):
             return return_obj
 
         raise ValueError(
-            "Unknown result_format %s." % (result_format["result_format"],)
+            "Unknown result_format {}.".format(result_format["result_format"])
         )
 
     # TODO: <Alex></Alex>
@@ -601,6 +599,7 @@ class ExecutionEngine(MetaExecutionEngine):
                     "metric_domain_kwargs": metric_to_resolve.metric_domain_kwargs,
                     "metric_value_kwargs": metric_to_resolve.metric_value_kwargs,
                     "runtime_configuration": runtime_configuration,
+                    "filter_column_isnull": metric_to_resolve.filter_column_isnull,
                 }
                 if getattr(metric_provider, "_can_be_bundled", False):
                     resolve_batch.append(
@@ -1421,7 +1420,7 @@ class ExecutionEngine(MetaExecutionEngine):
         Args:
             column (str): \
                 The column name.
-            type\_ (str): \
+            type\\_ (str): \
                 A string representing the data type that each column should have as entries. Valid types are defined
                 by the current backend implementation and are dynamically loaded. For example, valid types for
                 PandasExecutionEngine include any numpy dtype values (such as 'int64') or native python types (such as

@@ -77,6 +77,7 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         regex_list = metric_value_kwargs["regex_list"]
         match_on = metric_value_kwargs.get("match_on", "any")

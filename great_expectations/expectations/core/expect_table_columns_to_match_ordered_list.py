@@ -3,26 +3,23 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
+from itertools import zip_longest
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
-from ...data_asset.util import parse_result_format
 from ..expectation import (
-    ColumnMapDatasetExpectation,
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectColumnToExist(DatasetExpectation):
+class ExpectTableColumnsToMatchOrderedList(DatasetExpectation):
     metric_dependencies = ("columns",)
     success_keys = (
-        "column",
-        "column_index",
+        "ordered_list",
     )
     domain_keys = (
         "batch_id",
@@ -34,9 +31,7 @@ class ExpectColumnToExist(DatasetExpectation):
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "min_value": None,
-        "max_value": None,
+        "ordered_list": None,
         "result_format": "BASIC",
         "column": None,
         "column_index": None,
@@ -46,7 +41,6 @@ class ExpectColumnToExist(DatasetExpectation):
     }
 
     """ A Column Metric Decorator for the Column Count"""
-
     @PandasExecutionEngine.metric(
         metric_name="columns",
         metric_domain_keys=("batch_id", "table", "row_condition", "condition_parser"),
@@ -61,9 +55,8 @@ class ExpectColumnToExist(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
     ):
-        """Metric which returns all columns in a dataframe"""
+        """Metric which returns all columns in a DataFrame"""
         df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
         )
@@ -90,10 +83,10 @@ class ExpectColumnToExist(DatasetExpectation):
 
         # Ensuring that a proper value has been provided
         try:
-            assert "column" in configuration.kwargs, "A column name must be provided"
+            assert "ordered_list" in configuration.kwargs, "ordered_list is required"
             assert isinstance(
-                configuration.kwargs["column"], str
-            ), "Column name must be a string"
+                configuration.kwargs["ordered_list"], (list, set)
+            ), "ordered_list must be a list or a set"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -130,19 +123,31 @@ class ExpectColumnToExist(DatasetExpectation):
                 "result_format", self.default_kwarg_values.get("result_format")
             )
 
+        # Obtaining columns and ordered list for sake of comparison
         columns = metric_vals.get("columns")
-        column = configuration.get_success_kwargs().get(
-            "column", self.default_kwarg_values.get("column")
-        )
-        column_index = configuration.get_success_kwargs().get(
-            "column_index", self.default_kwarg_values.get("column_index")
-        )
+        column_list = self.get_success_kwargs(configuration).get("ordered_list")
 
-        if column in columns:
-            return {
-                # FIXME: list.index does not check for duplicate values.
-                "success": (column_index is None)
-                or (columns.index(column) == column_index)
-            }
+        if column_list is None or list(columns) == list(column_list):
+            return {"success": True, "result": {"observed_value": list(columns)}}
         else:
-            return {"success": False}
+            # In the case of differing column lengths between the defined expectation and the observed column set, the
+            # max is determined to generate the column_index.
+            number_of_columns = max(len(column_list), len(columns))
+            column_index = range(number_of_columns)
+
+            # Create a list of the mismatched details
+            compared_lists = list(
+                zip_longest(column_index, list(column_list), list(columns))
+            )
+            mismatched = [
+                {"Expected Column Position": i, "Expected": k, "Found": v}
+                for i, k, v in compared_lists
+                if k != v
+            ]
+            return {
+                "success": False,
+                "result": {
+                    "observed_value": list(columns),
+                    "details": {"mismatched": mismatched},
+                },
+            }

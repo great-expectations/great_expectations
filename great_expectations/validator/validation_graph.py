@@ -4,9 +4,13 @@ from typing import List, Optional, Set, Tuple, Union
 from great_expectations.core.id_dict import IDDict
 
 
-class MetricEdgeKey(object):
+class MetricEdgeKey:
     def __init__(
-        self, metric_name: str, metric_domain_kwargs: dict, metric_value_kwargs: dict
+        self,
+        metric_name: str,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        filter_column_isnull: bool = True,
     ):
         self._metric_name = metric_name
         if not isinstance(metric_domain_kwargs, IDDict):
@@ -15,6 +19,7 @@ class MetricEdgeKey(object):
         if not isinstance(metric_value_kwargs, IDDict):
             metric_value_kwargs = IDDict(metric_value_kwargs)
         self._metric_value_kwargs = metric_value_kwargs
+        self._filter_column_isnull = filter_column_isnull
 
     @property
     def metric_name(self):
@@ -44,11 +49,15 @@ class MetricEdgeKey(object):
             self.metric_value_kwargs_id,
         )
 
+    @property
+    def filter_column_isnull(self) -> bool:
+        return self._filter_column_isnull
+
     # def __hash__(self):
     #     return self.id.__hash__()
 
 
-class MetricEdge(object):
+class MetricEdge:
     def __init__(self, left: MetricEdgeKey, right: Union[MetricEdgeKey, None]):
         self._left = left
         self._right = right
@@ -68,14 +77,14 @@ class MetricEdge(object):
         return self.left.id, None
 
 
-class ValidationGraph(object):
+class ValidationGraph:
     def __init__(self, edges: Optional[List[MetricEdge]] = None):
         if edges:
             self._edges = edges
         else:
             self._edges = []
 
-        self._edge_ids = set([edge.id for edge in self._edges])
+        self._edge_ids = {edge.id for edge in self._edges}
 
     def add(self, edge: MetricEdge):
         if edge.id not in self._edge_ids:
