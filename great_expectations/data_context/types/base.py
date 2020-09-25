@@ -375,18 +375,14 @@ class ExecutionEnvironmentConfigSchema(Schema):
     class_name = fields.String(missing="ExecutionEnvironment")
     module_name = fields.String(missing="great_expectations.execution_environment")
     execution_engine = fields.Nested(ExecutionEngineConfigSchema)
-    # TODO: Update to data_connector-specific
-    # data_connectors = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.DataConnectorSchema))
-    # TODO: <Alex>Review commented code and delete it if not needed.</Alex>
-    # data_connectors = fields.Dict(
-    #     keys=fields.Str(), values=fields.Dict(), allow_none=True
-    # )
+
     data_connectors = fields.Dict(
         keys=fields.Str(),
         values=fields.Nested(DataConnectorConfigSchema),
         required=True,
         allow_none=False,
     )
+
     credentials = fields.Raw(allow_none=True)
     spark_context = fields.Raw(allow_none=True)
 
@@ -516,8 +512,6 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
         return data
 
 
-# TODO: <Alex></Alex>
-# TODO: deprecate? keep for backwards compatibility?
 class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
