@@ -97,7 +97,8 @@ class Expectation(ABC, metaclass=MetaExpectation):
             key=lambda x: len(x[0]),
         )
         for metric_deps, validator_fn in available_validators:
-            if metric_deps <= available_metrics:
+            # if metric_deps <= available_metrics:
+            if validator_fn.__qualname__.split(".")[0] == self.__class__.__name__:
                 return validator_fn(
                     self,
                     configuration,
