@@ -158,7 +158,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
         else:
             return raw_response
 
-
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -166,9 +165,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
         runtime_configuration: Optional[dict] = None,
     ):
         """Construct the validation graph for this expectation."""
-        if not configuration:
-            configuration = self.configuration
-
         return {
             "domain": self.get_domain_kwargs(),
             "success_kwargs": self.get_success_kwargs(),
@@ -346,17 +342,18 @@ class DatasetExpectation(Expectation, ABC):
         "condition_parser",
     )
 
-    # def get_validation_dependencies(
-    #     self,
-    #     configuration: Optional[ExpectationConfiguration] = None,
-    #     execution_engine: Optional[ExecutionEngine] = None,
-    # ):
-    #     dependencies = super().get_validation_dependencies(configuration)
-    #     metric_dependencies = set(self.metric_dependencies)
-    #
-    #     dependencies["metrics"] = metric_dependencies
-    #
-    #     return dependencies
+    def get_validation_dependencies(
+        self,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        dependencies = super().get_validation_dependencies( configuration, execution_engine, runtime_configuration)
+        metric_dependencies = set(self.metric_dependencies)
+
+        dependencies["metrics"] = metric_dependencies
+
+        return dependencies
 
     @staticmethod
     def get_value_set_parser(execution_engine: ExecutionEngine):
@@ -387,30 +384,7 @@ class DatasetExpectation(Expectation, ABC):
             domain_kwargs=metric_domain_kwargs, batches=batches
         )
         return df
-
-
-    def get_validation_dependencies(
-        self,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-    ):
-        dependencies = super().get_validation_dependencies(configuration)
-        metric_dependencies = set(self.metric_dependencies)
-
-        dependencies["metrics"] = metric_dependencies
-        # result_format_str = dependencies["result_format"].get("result_format")
-        # if result_format_str == ["BOOLEAN_ONLY"]:
-        #     return dependencies
-        #
-        # # assert isinstance(
-        # #     self.metric, str
-        # # ), "ColumnMapDatasetExpectation must override get_validation_dependencies or delcare exactly one map_metric"
-        # # metric_dependencies.add(self.map_metric + ".unexpected_values")
-        # # # TODO:
-        # # #
-        # # # if ".unexpected_index_list" is a registered metric **for this engine**
-        # # if result_format_str in ["BASIC", "SUMMARY"]:
-        return dependencies
+        return df
 
     @staticmethod
     def _pandas_value_set_parser(value_set):

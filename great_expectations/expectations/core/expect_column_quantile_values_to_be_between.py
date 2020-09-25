@@ -1,19 +1,22 @@
 from typing import Dict, Optional
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import Batch
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import PandasExecutionEngine, ExecutionEngine
 from great_expectations.expectations.expectation import DatasetExpectation, Expectation
 from great_expectations.expectations.registry import extract_metrics
 
 
 class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
     metric_dependencies = ("column.aggregate.quantiles",)
-    success_keys = ("quantile_ranges","allow_relative_error",)
+    success_keys = (
+        "quantile_ranges",
+        "allow_relative_error",
+    )
     default_kwarg_values = {
         "row_condition": None,
         "allow_relative_eror": None,
@@ -33,8 +36,12 @@ class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
             assert (
                 "column" in configuration.kwargs
             ), "'column' parameter is required for column metric expectations"
-            assert "quantile_ranges" in configuration.kwargs, "quantile ranges must be provided"
-            assert type(configuration.kwargs["quantile_ranges"]) == dict, "quantile_ranges should be a dictionary"
+            assert (
+                "quantile_ranges" in configuration.kwargs
+            ), "quantile ranges must be provided"
+            assert (
+                type(configuration.kwargs["quantile_ranges"]) == dict
+            ), "quantile_ranges should be a dictionary"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -65,32 +72,53 @@ class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
         metric_value_keys=("quantile_ranges",),
         metric_dependencies=tuple(),
     )
-    def _pandas_quantiles(self,
-            batches: Dict[str, Batch],
-            execution_engine: PandasExecutionEngine,
-            metric_domain_kwargs: dict,
-            metric_value_kwargs: dict,
-            metrics: dict,
-            runtime_configuration: dict = None,
-            ):
-
-        """Quantile Function"""
-        series = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches)
-        quantile_ranges = metric_value_kwargs["quantile_ranges"]
-        return series.quantile(tuple(quantile_ranges["quantiles"],), interpolation="nearest").tolist()
-
-    @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
+    def _pandas_quantiles(
         self,
-        configuration: ExpectationConfiguration,
+        batches: Dict[str, Batch],
+        execution_engine: PandasExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(configuration)[
+
+        """Quantile Function"""
+        series = execution_engine.get_domain_dataframe(
+            domain_kwargs=metric_domain_kwargs, batches=batches
+        )
+        quantile_ranges = metric_value_kwargs["quantile_ranges"]
+        return series.quantile(
+            tuple(quantile_ranges["quantiles"],), interpolation="nearest"
+        ).tolist()
+
+    @Expectation.validates(metric_dependencies=metric_dependencies)
+    def _validates(
+            self,
+            configuration: ExpectationConfiguration,
+            metrics: dict,
+            runtime_configuration: dict = None,
+            execution_engine: ExecutionEngine = None,
+    ):
+        validation_dependencies = self.get_validation_dependencies(configuration, execution_engine, runtime_configuration)[
             "metrics"
         ]
-        metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
+        # Extracting metrics
+        metric_vals = extract_metrics(
+            validation_dependencies, metrics, configuration, runtime_configuration
+        )
+
+        # Runtime configuration has preference
+        if runtime_configuration:
+            result_format = runtime_configuration.get(
+                "result_format",
+                configuration.kwargs.get(
+                    "result_format", self.default_kwarg_values.get("result_format")
+                ),
+            )
+        else:
+            result_format = configuration.kwargs.get(
+                "result_format", self.default_kwarg_values.get("result_format")
+            )
 
         quantile_vals = metric_vals.get("column.aggregate.quantiles")
         quantile_ranges = self.get_success_kwargs(configuration).get("quantile_ranges")

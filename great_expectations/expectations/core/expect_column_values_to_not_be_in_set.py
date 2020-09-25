@@ -29,7 +29,10 @@ except ImportError:
 
 class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
     map_metric = "column_values.not_in_set"
-    metric_dependencies = ("column_values.not_in_set.count", "column_values.nonnull.count")
+    metric_dependencies = (
+        "column_values.not_in_set.count",
+        "column_values.nonnull.count",
+    )
     success_keys = ("value_set", "mostly", "parse_strings_as_datetimes")
 
     default_kwarg_values = {
@@ -78,8 +81,9 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
         else:
             parsed_value_set = value_set
 
-        return pd.DataFrame({"column_values.not_in_set": ~series.isin(parsed_value_set)})
-
+        return pd.DataFrame(
+            {"column_values.not_in_set": ~series.isin(parsed_value_set)}
+        )
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
@@ -87,11 +91,16 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
         configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(configuration)[
+        validation_dependencies = self.get_validation_dependencies(configuration, execution_engine, runtime_configuration)[
             "metrics"
         ]
-        metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
+        # Extracting metrics
+        metric_vals = extract_metrics(
+            validation_dependencies, metrics, configuration, runtime_configuration
+        )
+
         mostly = configuration.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
@@ -112,7 +121,9 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
             unexpected_count=metric_vals.get("column_values.nonnull.count")
             - metric_vals.get("column_values.not_in_set.count"),
-            unexpected_list=metric_vals.get("column_values.not_in_set.unexpected_values"),
+            unexpected_list=metric_vals.get(
+                "column_values.not_in_set.unexpected_values"
+            ),
             unexpected_index_list=metric_vals.get(
                 "column_values.not_in_set.unexpected_index_list"
             ),

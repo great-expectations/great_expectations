@@ -24,6 +24,8 @@ KNOWN_EXTENSIONS = [
     ".feather",
 ]
 
+
+# TODO: <Alex>Do "reader_options" and "reader_method" need to be in Configuration?</Alex>
 class FilesDataConnector(DataConnector):
     def __init__(
         self,

@@ -1,8 +1,7 @@
-
 from typing import Dict, List, Optional, Union
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -11,6 +10,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 
 try:
@@ -34,7 +34,6 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
     metric_dependencies = ("column.aggregate.max",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 
-
     # Default values
     default_kwarg_values = {
         "row_condition": None,
@@ -50,6 +49,7 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
     }
 
     """ A Column Map Metric Decorator for the Maximum"""
+
     @PandasExecutionEngine.metric(
         metric_name="column.aggregate.max",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
@@ -57,17 +57,18 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
         metric_dependencies=tuple(),
     )
     def _pandas_max(
-            self,
-            batches: Dict[str, Batch],
-            execution_engine: PandasExecutionEngine,
-            metric_domain_kwargs: dict,
-            metric_value_kwargs: dict,
-            metrics: dict,
-            runtime_configuration: dict = None,
+        self,
+        batches: Dict[str, Batch],
+        execution_engine: PandasExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: dict,
+        runtime_configuration: dict = None,
     ):
         """Mean Metric Function"""
         series = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches)
+            domain_kwargs=metric_domain_kwargs, batches=batches
+        )
 
         return series.max()
 
@@ -93,7 +94,7 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
         # Ensuring basic configuration parameters are properly set
         try:
             assert (
-                    "column" in configuration.kwargs
+                "column" in configuration.kwargs
             ), "'column' parameter is required for column map expectations"
             if "mostly" in configuration.kwargs:
                 mostly = configuration.kwargs["mostly"]
@@ -114,14 +115,20 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
         try:
             # Ensuring Proper interval has been provided
             assert min_val or max_val, "min_value and max_value cannot both be None"
-            assert min_val is None or isinstance(min_val, (float, int)), "Provided min threshold must be a number"
-            assert max_val is None or isinstance(max_val, (float, int)), "Provided max threshold must be a number"
+            assert min_val is None or isinstance(
+                min_val, (float, int)
+            ), "Provided min threshold must be a number"
+            assert max_val is None or isinstance(
+                max_val, (float, int)
+            ), "Provided max threshold must be a number"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
         if min_val is not None and max_val is not None and min_val > max_val:
-            raise InvalidExpectationConfigurationError("Minimum Threshold cannot be larger than Maximum Threshold")
+            raise InvalidExpectationConfigurationError(
+                "Minimum Threshold cannot be larger than Maximum Threshold"
+            )
 
         return True
 
@@ -131,13 +138,32 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
             configuration: ExpectationConfiguration,
             metrics: dict,
             runtime_configuration: dict = None,
+            execution_engine: ExecutionEngine = None,
     ):
-        """Validates the given data against the set minimum and maximum value thresholds for the column min"""
+        """Validates the given data against the set minimum and maximum value thresholds for the column max"""
         # Obtaining dependencies used to validate the expectation
-        validation_dependencies = self.get_validation_dependencies(configuration)[
+        validation_dependencies = self.get_validation_dependencies( configuration, execution_engine, runtime_configuration)[
             "metrics"
         ]
-        metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
+
+        # Extracting metrics
+        metric_vals = extract_metrics(
+            validation_dependencies, metrics, configuration, runtime_configuration
+        )
+
+        # Runtime configuration has preference
+        if runtime_configuration:
+            result_format = runtime_configuration.get(
+                "result_format",
+                configuration.kwargs.get(
+                    "result_format", self.default_kwarg_values.get("result_format")
+                ),
+            )
+        else:
+            result_format = configuration.kwargs.get(
+                "result_format", self.default_kwarg_values.get("result_format")
+            )
+
         column_max = metric_vals.get("column.aggregate.max")
 
         # Obtaining components needed for validation
