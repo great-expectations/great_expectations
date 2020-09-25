@@ -135,7 +135,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     @PandasExecutionEngine.column_map_metric(
         metric_name="column_values.z_scores.under_threshold",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("threshold",),
+        metric_value_keys=("threshold", "double_sided",),
         metric_dependencies=("column.z_scores",),
     )
     def _pandas_under_threshold(
@@ -156,9 +156,12 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         z_scores = domain_metrics_lookup["column.z_scores"]
 
         try:
-            under_thresh = ((series - series.mean()) / series.std()) < threshold
+            if double_sided:
+                under_threshold = z_scores.abs() < abs(threshold)
+            else:
+                under_threshold = z_scores < threshold
             return pd.DataFrame(
-                {"column_values.z_scores.under_threshold": under_thresh}
+                {"column_values.z_scores.under_threshold": under_threshold}
             )
         except TypeError:
             raise (
