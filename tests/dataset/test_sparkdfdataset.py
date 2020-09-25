@@ -55,6 +55,7 @@ def test_dataframe(spark_session):
         ("Alice", 1, ("Street 1", "Alabama", 10), "Alice", "a"),
         ("Bob", 2, ("Street 2", "Brooklyn", 11), "Bob", "b"),
         ("Charlie", 3, ("Street 3", "Alabama", 12), "Charlie", "c"),
+        ("Charlie", 3, ("Street 4", "Alabama", 12), "Dan", "c"),
     ]
 
     rdd = spark_session.sparkContext.parallelize(rows)
@@ -194,6 +195,32 @@ def test_expect_select_column_values_to_be_unique_within_record(
     # Expectation should fail when no `` surround a non-nested column with dot notation
     with pytest.raises(AnalysisException):
         test_dataframe.expect_select_column_values_to_be_unique_within_record(
+            ["address.street", "non.nested"]
+        )
+
+
+@pytest.mark.skipif(
+    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+)
+def test_expect_compound_columns_to_be_unique(spark_session, test_dataframe):
+    """
+    multicolumn_map_expectation
+    """
+    from pyspark.sql.utils import AnalysisException
+
+    assert not test_dataframe.test_expect_compound_columns_to_be_unique(
+        ["name", "age"]
+    ).success
+    assert test_dataframe.test_expect_compound_columns_to_be_unique(
+        ["address.street", "name"]
+    ).success
+    assert test_dataframe.test_expect_compound_columns_to_be_unique(
+        ["address.street", "`non.nested`"]
+    ).success
+
+    # Expectation should fail when no `` surround a non-nested column with dot notation
+    with pytest.raises(AnalysisException):
+        test_dataframe.test_expect_compound_columns_to_be_unique(
             ["address.street", "non.nested"]
         )
 
