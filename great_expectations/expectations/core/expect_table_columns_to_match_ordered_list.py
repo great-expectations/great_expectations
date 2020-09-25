@@ -3,44 +3,51 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
+from itertools import zip_longest
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
-from ...data_asset.util import parse_result_format
 from ..expectation import (
-    ColumnMapDatasetExpectation,
     DatasetExpectation,
     Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output,
 )
 from ..registry import extract_metrics
 
 
-class ExpectTableColumnCountToEqual(DatasetExpectation):
-    metric_dependencies = ("columns.count",)
-    success_keys = ("value",)
+class ExpectTableColumnsToMatchOrderedList(DatasetExpectation):
+    metric_dependencies = ("columns",)
+    success_keys = (
+        "ordered_list",
+    )
+    domain_keys = (
+        "batch_id",
+        "table",
+        "row_condition",
+        "condition_parser",
+    )
 
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "value": None,
+        "ordered_list": None,
         "result_format": "BASIC",
+        "column": None,
+        "column_index": None,
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
     }
 
-    """ A Column Map Metric Decorator for the Column Count"""
-
+    """ A Column Metric Decorator for the Column Count"""
     @PandasExecutionEngine.metric(
-        metric_name="columns.count",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+        metric_name="columns",
+        metric_domain_keys=("batch_id", "table", "row_condition", "condition_parser"),
         metric_value_keys=(),
-        metric_dependencies=tuple(),
+        metric_dependencies=(),
     )
-    def _pandas_column_count(
+    def _pandas_columns(
         self,
         batches: Dict[str, Batch],
         execution_engine: PandasExecutionEngine,
@@ -49,12 +56,13 @@ class ExpectTableColumnCountToEqual(DatasetExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
     ):
-        """Column count metric function"""
+        """Metric which returns all columns in a DataFrame"""
         df = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
         )
 
-        return df.shape[1]
+        cols = df.columns
+        return cols.tolist()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -75,12 +83,10 @@ class ExpectTableColumnCountToEqual(DatasetExpectation):
 
         # Ensuring that a proper value has been provided
         try:
-            assert (
-                "value" in configuration.kwargs
-            ), "An expected column count must be provided"
+            assert "ordered_list" in configuration.kwargs, "ordered_list is required"
             assert isinstance(
-                configuration.kwargs["value"], int
-            ), "Provided threshold must be an integer"
+                configuration.kwargs["ordered_list"], (list, set)
+            ), "ordered_list must be a list or a set"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -116,11 +122,32 @@ class ExpectTableColumnCountToEqual(DatasetExpectation):
             result_format = configuration.kwargs.get(
                 "result_format", self.default_kwarg_values.get("result_format")
             )
-        column_count = metric_vals.get("columns.count")
 
-        # Obtaining components needed for validation
-        value = self.get_success_kwargs(configuration).get("value")
+        # Obtaining columns and ordered list for sake of comparison
+        columns = metric_vals.get("columns")
+        column_list = self.get_success_kwargs(configuration).get("ordered_list")
 
-        # Checking if the column count is equivalent to value
-        success = column_count == value
-        return {"success": success, "result": {"observed_value": column_count}}
+        if column_list is None or list(columns) == list(column_list):
+            return {"success": True, "result": {"observed_value": list(columns)}}
+        else:
+            # In the case of differing column lengths between the defined expectation and the observed column set, the
+            # max is determined to generate the column_index.
+            number_of_columns = max(len(column_list), len(columns))
+            column_index = range(number_of_columns)
+
+            # Create a list of the mismatched details
+            compared_lists = list(
+                zip_longest(column_index, list(column_list), list(columns))
+            )
+            mismatched = [
+                {"Expected Column Position": i, "Expected": k, "Found": v}
+                for i, k, v in compared_lists
+                if k != v
+            ]
+            return {
+                "success": False,
+                "result": {
+                    "observed_value": list(columns),
+                    "details": {"mismatched": mismatched},
+                },
+            }
