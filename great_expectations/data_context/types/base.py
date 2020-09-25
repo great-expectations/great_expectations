@@ -134,12 +134,14 @@ class PartitionerConfig(DictDot):
         class_name,
         module_name=None,
         sorters=None,
+        allow_multipart_partitions=False,
         config_params=None,
         **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
         self._sorters = sorters
+        self._allow_multipart_partitions = allow_multipart_partitions
         self._config_params = config_params
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -157,6 +159,10 @@ class PartitionerConfig(DictDot):
         return self._sorters
 
     @property
+    def allow_multipart_partitions(self):
+        return self._allow_multipart_partitions
+
+    @property
     def config_params(self):
         return self._config_params
 
@@ -172,6 +178,12 @@ class PartitionerConfigSchema(Schema):
         cls_or_instance=fields.Nested(SorterConfigSchema),
         required=False,
         allow_none=True,
+    )
+
+    allow_multipart_partitions = fields.Boolean(
+        required=False,
+        missing=False,
+        allow_none=False
     )
 
     config_params = fields.Dict(allow_none=True)

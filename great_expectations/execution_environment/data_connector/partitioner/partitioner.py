@@ -38,12 +38,14 @@ class Partitioner(object):
         name: str,
         data_connector: DataConnector,
         sorters: list = None,
+        allow_multipart_partitions: bool = False,
         config_params: dict = None,
         **kwargs
     ):
         self._name = name
         self._data_connector = data_connector
         self._sorters = sorters
+        self._allow_multipart_partitions = allow_multipart_partitions
         self._config_params = config_params
         # TODO: <Alex></Alex>
         self._sorters_cache = {}
@@ -56,16 +58,20 @@ class Partitioner(object):
     def data_connector(self) -> DataConnector:
         return self._data_connector
 
-    @property
-    def config_params(self) -> dict:
-        return self._config_params
-
     # TODO: <Alex>Add typehints throughout.</Alex>
     @property
     def sorters(self) -> Union[List[Sorter], None]:
         if self._sorters:
             return [self.get_sorter(name=sorter_config["name"]) for sorter_config in self._sorters]
         return None
+
+    @property
+    def allow_multipart_partitions(self) -> bool:
+        return self._allow_multipart_partitions
+
+    @property
+    def config_params(self) -> dict:
+        return self._config_params
 
     # TODO: <Alex>Add typehints throughout</Alex>
     def get_sorter(self, name):

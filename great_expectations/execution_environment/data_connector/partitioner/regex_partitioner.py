@@ -14,15 +14,24 @@ class RegexPartitioner(Partitioner):
 
     def __init__(
         self,
-        data_connector: DataConnector,
         name: str,
+        data_connector: DataConnector,
+        sorters: list = None,
+        allow_multipart_partitions: bool = False,
+        config_params: dict = None,
         **kwargs
     ):
         logger.debug("Constructing RegexPartitioner {!r}".format(name))
-        super().__init__(name=name, data_connector=data_connector, **kwargs)
+        super().__init__(
+            name=name,
+            data_connector=data_connector,
+            sorters=sorters,
+            allow_multipart_partitions=allow_multipart_partitions,
+            config_params=config_params,
+            **kwargs
+        )
 
         self._regex = self._process_regex_config()
-        self._allow_multifile_partitions = self.config_params.get("allow_multifile_partitions")
 
         self._auto_discover_assets = True
         self._paths = None
@@ -52,10 +61,6 @@ class RegexPartitioner(Partitioner):
         return self._regex
 
     @property
-    def allow_multifile_partitions(self) -> bool:
-        return self._allow_multifile_partitions
-
-    @property
     def auto_discover_assets(self) -> bool:
         return self._auto_discover_assets
 
@@ -83,7 +88,7 @@ class RegexPartitioner(Partitioner):
         if cached_partitions is None or len(cached_partitions) == 0:
             return []
         cached_partitions = self.get_sorted_partitions(partitions=cached_partitions)
-        return self._apply_allow_multifile_partitions_flag(
+        return self._apply_allow_multipart_partitions_flag(
             partitions=cached_partitions,
             partition_name=partition_name
         )
@@ -140,7 +145,7 @@ group names, which is fewer than number of sorters specified is {len(self.sorter
             data_asset_name=data_asset_name
         )
 
-    def _apply_allow_multifile_partitions_flag(
+    def _apply_allow_multipart_partitions_flag(
         self,
         partitions: List[Partition],
         partition_name: str = None
@@ -148,18 +153,18 @@ group names, which is fewer than number of sorters specified is {len(self.sorter
         if partition_name is None:
             for partition in partitions:
                 # noinspection PyUnusedLocal
-                res: List[Partition] = self._apply_allow_multifile_partitions_flag_to_single_partition(
+                res: List[Partition] = self._apply_allow_multipart_partitions_flag_to_single_partition(
                     partitions=partitions,
                     partition_name=partition.name
                 )
             return partitions
         else:
-            return self._apply_allow_multifile_partitions_flag_to_single_partition(
+            return self._apply_allow_multipart_partitions_flag_to_single_partition(
                 partitions=partitions,
                 partition_name=partition_name
             )
 
-    def _apply_allow_multifile_partitions_flag_to_single_partition(
+    def _apply_allow_multipart_partitions_flag_to_single_partition(
         self,
         partitions: List[Partition],
         partition_name: str,
@@ -169,10 +174,13 @@ group names, which is fewer than number of sorters specified is {len(self.sorter
                 lambda partition: partition.name == partition_name, partitions
             )
         )
-        if not self.allow_multifile_partitions and len(partitions) > 1 and len(set(partitions)) == 1:
+        if not self.allow_multipart_partitions and len(partitions) > 1 and len(set(partitions)) == 1:
             raise ValueError(
                 f'''RegexPartitioner "{self.name}" detected multiple partitions for partition name "{partition_name}" of
-data asset "{partitions[0].data_asset_name}"; however, allow_multifile_partitions is set to False.
+data asset "{partitions[0].data_asset_name}"; however, allow_multipart_partitions is set to False.  Please consider
+modifying the regular expression pattern, used to partition your files, or set allow_multipart_partitions to True, but
+be aware that unless you have a specific use case for multipart partitions, there is most likely a mismatch between the
+file name partitioning directives and the actual structure of file names in the directory under consideration.
                 '''
             )
         return partitions
