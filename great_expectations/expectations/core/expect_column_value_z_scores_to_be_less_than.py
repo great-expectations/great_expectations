@@ -1,10 +1,9 @@
 from typing import Dict, List, Optional, Union
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from great_expectations.core.batch import Batch
-
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 
@@ -70,9 +69,16 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
                 Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
                 :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
     """
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     map_metric = "column_values.z_scores.under_threshold"
-    metric_dependencies = ("column_values.z_scores.under_threshold.count","column.aggregate.mean", "column.aggregate.standard_deviation", "column_values.nonnull.count", "column.z_scores")
+    metric_dependencies = (
+        "column_values.z_scores.under_threshold.count",
+        "column.aggregate.mean",
+        "column.aggregate.standard_deviation",
+        "column_values.nonnull.count",
+        "column.z_scores",
+    )
     success_keys = ("threshold", "double_sided", "mostly")
 
     # Default values
@@ -90,22 +96,26 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     @PandasExecutionEngine.metric(
         metric_name="column.z_scores",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys= tuple(),
-        metric_dependencies=("column.aggregate.mean", "column.aggregate.standard_deviation"),
+        metric_value_keys=tuple(),
+        metric_dependencies=(
+            "column.aggregate.mean",
+            "column.aggregate.standard_deviation",
+        ),
     )
     def _pandas_z_scores(
-            self,
-            batches: Dict[str, Batch],
-            execution_engine: PandasExecutionEngine,
-            metric_domain_kwargs: dict,
-            metric_value_kwargs: dict,
-            metrics: dict,
-            runtime_configuration: dict = None,
+        self,
+        batches: Dict[str, Batch],
+        execution_engine: PandasExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: dict,
+        runtime_configuration: dict = None,
     ):
         """Z-Score Metric Function"""
         # Series conversion - this works
         series = execution_engine.get_domain_dataframe(
-                domain_kwargs=metric_domain_kwargs, batches=batches)
+            domain_kwargs=metric_domain_kwargs, batches=batches
+        )
 
         # Question: how to extract these metrics?
         mean = series.mean()
@@ -114,7 +124,11 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         try:
             return (series - mean) / std_dev
         except TypeError:
-            raise(TypeError("Cannot complete Z-score calculations on a non-numerical column."))
+            raise (
+                TypeError(
+                    "Cannot complete Z-score calculations on a non-numerical column."
+                )
+            )
 
     @PandasExecutionEngine.column_map_metric(
         metric_name="column_values.z_scores.under_threshold",
@@ -123,18 +137,19 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         metric_dependencies=("column.z_scores",),
     )
     def _pandas_under_threshold(
-            self,
-            series: pd.Series,
-            threshold,
-            runtime_configuration: dict = None,
+        self, series: pd.Series, threshold, runtime_configuration: dict = None,
     ):
         """Checks if values under threshold"""
         # The series I'm getting does not consist of the z-scores themselves - PROBLEM
         try:
-            under_thresh = ((series - series.mean())/series.std()) < threshold
-            return pd.DataFrame({"column_values.z_scores.under_threshold": under_thresh})
+            under_thresh = ((series - series.mean()) / series.std()) < threshold
+            return pd.DataFrame(
+                {"column_values.z_scores.under_threshold": under_thresh}
+            )
         except TypeError:
-            raise (TypeError("Cannot check if a string lies under a numerical threshold"))
+            raise (
+                TypeError("Cannot check if a string lies under a numerical threshold")
+            )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -154,18 +169,22 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             configuration = self.configuration
         try:
             # Ensuring Z-score Threshold metric has been properly provided
-            assert "threshold" in configuration.kwargs, "A Z-score threshold must be provided"
-            assert isinstance(configuration.kwargs["threshold"], (float, int)), "Provided threshold must be a number"
+            assert (
+                "threshold" in configuration.kwargs
+            ), "A Z-score threshold must be provided"
+            assert isinstance(
+                configuration.kwargs["threshold"], (float, int)
+            ), "Provided threshold must be a number"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
-            self,
-            configuration: ExpectationConfiguration,
-            metrics: dict,
-            runtime_configuration: dict = None,
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: dict,
+        runtime_configuration: dict = None,
     ):
         """Validates the given data against the set Z Score threshold, returning a nested dictionary documenting the
         validation."""
@@ -192,16 +211,21 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         # Returning dictionary output with necessary metrics based on the format
         return _format_map_output(
             result_format=parse_result_format(result_format),
-
             # Success = Ratio of successful nonnull values > mostly?
-            success=(metric_vals.get("column_values.z_scores.under_threshold.count") / metric_vals.get(
-                "column_values.nonull.count"))
-                    >= mostly,
+            success=(
+                metric_vals.get("column_values.z_scores.under_threshold.count")
+                / metric_vals.get("column_values.nonull.count")
+            )
+            >= mostly,
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
-            unexpected_count=metric_vals.get("column_values.z_scores.under_threshold.unexpected_count"),
-            unexpected_list=metric_vals.get("column_values.z_scores.under_threshold.unexpected_values"),
-            unexpected_index_list=metric_vals.get("column_values.z_scores.under_threshold.unexpected_index"),
+            unexpected_count=metric_vals.get(
+                "column_values.z_scores.under_threshold.unexpected_count"
+            ),
+            unexpected_list=metric_vals.get(
+                "column_values.z_scores.under_threshold.unexpected_values"
+            ),
+            unexpected_index_list=metric_vals.get(
+                "column_values.z_scores.under_threshold.unexpected_index"
+            ),
         )
-
-

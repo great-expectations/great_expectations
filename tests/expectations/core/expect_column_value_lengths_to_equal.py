@@ -16,15 +16,16 @@ from great_expectations.execution_environment.types import (
     BatchSpec,
     SqlAlchemyDatasourceTableBatchSpec,
 )
-from great_expectations.expectations.core.expect_column_value_lengths_to_equal import ExpectColumnValueLengthsToEqual
-
+from great_expectations.expectations.core.expect_column_value_lengths_to_equal import (
+    ExpectColumnValueLengthsToEqual,
+)
 
 
 def test_expect_column_value_lengths_to_equal_int_impl():
     df = pd.DataFrame({"a": ["hey", "myn", "jef", 1234]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_lengths_to_equal",
-        kwargs={"column": "a", "value": 3, "mostly": .75},
+        kwargs={"column": "a", "value": 3, "mostly": 0.75},
     )
     expectation = ExpectColumnValueLengthsToEqual(expectationConfiguration)
     batch = Batch(data=df)

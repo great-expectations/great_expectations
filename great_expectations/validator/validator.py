@@ -130,11 +130,32 @@ class Validator:
                 for k, v in kwargs.items()
                 if k in ("result_format", "include_config", "catch_exceptions")
             }
-            return expectation.validate(
-                batches={self.batch.batch_spec.to_id(): self.batch},
-                execution_engine=self.execution_engine,
-                runtime_configuration=runtime_configuration,
-            )
+            try:
+                validation_result = expectation.validate(
+                    batches={self.batch.batch_spec.to_id(): self.batch},
+                    execution_engine=self.execution_engine,
+                    runtime_configuration=runtime_configuration,
+                )
+                if isinstance(validation_result, dict):
+                    validation_result = ExpectationValidationResult(**validation_result)
+
+            except Exception as err:
+                if runtime_configuration.get("catch_exceptions"):
+                    raised_exception = True
+                    exception_traceback = traceback.format_exc()
+                    exception_message = "{}: {}".format(type(err).__name__, str(err))
+
+                    validation_result = ExpectationValidationResult(success=False)
+
+                    validation_result.exception_info = {
+                        "raised_exception": raised_exception,
+                        "exception_message": exception_message,
+                        "exception_traceback": exception_traceback,
+                    }
+
+                else:
+                    raise err
+            return validation_result
 
         return inst_expectation
 
