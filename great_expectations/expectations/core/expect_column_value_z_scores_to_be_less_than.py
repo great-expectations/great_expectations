@@ -139,9 +139,17 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         metric_dependencies=("column.z_scores",),
     )
     def _pandas_under_threshold(
-        self, series: pd.Series, threshold, runtime_configuration: dict = None,
+        self,
+        series: pd.Series,
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        runtime_configuration: dict = None,
     ):
         """Checks if values under threshold"""
+        threshold = metric_value_kwargs["threshold"]
+        double_sided = metric_value_kwargs["double_sided"]
+
         # The series I'm getting does not consist of the z-scores themselves - PROBLEM
         domain_metrics_lookup = get_domain_metrics_dict_by_name(metrics=metrics,
                                                                 metric_domain_kwargs=metric_domain_kwargs)
