@@ -2,7 +2,7 @@
 
 import copy
 import logging
-from typing import Union
+from typing import Union, List
 
 from great_expectations.data_context.types.base import (
     DataConnectorConfig,
@@ -14,9 +14,14 @@ from great_expectations.data_context.util import (
     load_class,
     verify_dynamic_loading_support,
 )
+from ruamel.yaml.comments import CommentedMap
+from great_expectations.data_context.data_context import DataContext
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.types import ClassConfig
 from great_expectations.validator.validator import Validator
+from great_expectations.execution_environment.types import BatchSpec
 
 logger = logging.getLogger(__name__)
 
@@ -26,15 +31,14 @@ class ExecutionEnvironment(object):
 An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnector.
     """
 
-    recognized_batch_parameters = {"limit"}
+    recognized_batch_parameters: set = {"limit"}
 
-    # TODO: <Alex>Is it correct to expect execution_engine and data_connectors as arguments?  Or should they be obtained from **kwargs (config)?</Alex>
     def __init__(
         self,
-        name,
-        execution_engine=None,
-        data_connectors=None,
-        data_context=None,
+        name: str,
+        execution_engine: ExecutionEngine = None,
+        data_connectors: List[DataConnector] = None,
+        data_context: DataContext = None,
         **kwargs
     ):
         """
@@ -58,15 +62,11 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         self._execution_environment_config = kwargs
 
         self._execution_environment_config["execution_engine"] = execution_engine
-        # TODO: <Alex>Check maybe next 2 lines not needed, because config requires data_connectors to be initialized to {} if none.</Alex>
         if data_connectors is None:
             data_connectors = {}
         self._execution_environment_config["data_connectors"] = data_connectors
 
-        self._data_connectors = {}
-        # TODO: <Alex>Delete next two lines if works without them.</Alex>
-        # if data_connectors is not None:
-        #     self._execution_environment_config["data_connectors"] = data_connectors
+        self._data_connectors_cache = {}
         self._build_data_connectors()
 
     def get_batch(
@@ -74,7 +74,6 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         batch_definition: dict,
         in_memory_dataset: any = None,  # TODO: should this be any to accommodate the different engines?
     ):
-        # TODO: <Alex>To delete datasources or keep for backward compatibility?</Alex>
         self.execution_engine.load_batch(
             batch_definition=batch_definition, in_memory_dataset=in_memory_dataset
         )
@@ -192,22 +191,22 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
     #
     #     return data_connector
 
-    def get_data_connector(self, name):
+    def get_data_connector(self, name: str) -> DataConnector:
         """Get the (named) DataConnector from an ExecutionEnvironment)
 
         Args:
-            name (str): name of DataConnector #  TODO: Should there be a default value? TODO: <Alex>No</Alex>
+            name (str): name of DataConnector
 
         Returns:
             DataConnector (DataConnector)
         """
-        if name in self._data_connectors:
-            return self._data_connectors[name]
+        if name in self._data_connectors_cache:
+            return self._data_connectors_cache[name]
         elif (
-                "data_connectors" in self._execution_environment_config
-                and name in self._execution_environment_config["data_connectors"]
+            "data_connectors" in self._execution_environment_config
+            and name in self._execution_environment_config["data_connectors"]
         ):
-            data_connector_config = copy.deepcopy(
+            data_connector_config: dict = copy.deepcopy(
                 self._execution_environment_config["data_connectors"][name]
             )
         else:
@@ -215,25 +214,22 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
                 "Unable to load data connector %s -- no configuration found or invalid configuration."
                 % name
             )
-        data_connector_config = dataConnectorConfigSchema.load(
+        data_connector_config: CommentedMap = dataConnectorConfigSchema.load(
             data_connector_config
         )
-        # TODO: <Alex>Delete next line if everything works</Alex>
-        # data_connector_config.update({"name": name})
-        data_connector = self._build_data_connector_from_config(
+        data_connector: DataConnector = self._build_data_connector_from_config(
             name=name, config=data_connector_config
         )
-        self._data_connectors[name] = data_connector
+        self._data_connectors_cache[name] = data_connector
         return data_connector
 
-    # TODO: <Alex>This is a good place to check that all defaults from base.py / Config Schemas are set properly.</Alex>
-    def _build_data_connector_from_config(self, name, config):
+    def _build_data_connector_from_config(self, name: str, config: CommentedMap):
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, DataConnectorConfig):
-            config = dataConnectorConfigSchema.dump(config)
+            config: dict = dataConnectorConfigSchema.dump(config)
         config.update({"name": name})
-        data_connector = instantiate_class_from_config(
+        data_connector: DataConnector = instantiate_class_from_config(
             config=config,
             runtime_environment={"execution_environment": self},
             config_defaults={
@@ -248,13 +244,13 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
             )
         return data_connector
 
-    def list_data_connectors(self):
+    def list_data_connectors(self) -> List[dict]:
         """List currently-configured DataConnector for this ExecutionEnvironment.
 
         Returns:
             List(dict): each dictionary includes "name" and "type" keys
         """
-        data_connectors = []
+        data_connectors: List[dict] = []
 
         if "data_connectors" in self._execution_environment_config:
             for key, value in self._execution_environment_config[
@@ -265,7 +261,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         return data_connectors
 
     # TODO: <Alex>This needs to be reviewed...</Alex>
-    def get_available_data_asset_names(self, data_connector_names=None):
+    def get_available_data_asset_names(self, data_connector_names: list = None) -> dict:
         """
         Returns a dictionary of data_asset_names that the specified data
         connector can provide. Note that some data_connectors may not be
@@ -288,7 +284,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
                 }
 
         """
-        available_data_asset_names = {}
+        available_data_asset_names: dict = {}
         if data_connector_names is None:
             data_connector_names = [
                 data_connector["name"] for data_connector in self.list_data_connectors()
@@ -297,12 +293,12 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
             data_connector_names = [data_connector_names]
 
         for data_connector_name in data_connector_names:
-            data_connector = self.get_data_connector(name=data_connector_name)
+            data_connector: DataConnector = self.get_data_connector(name=data_connector_name)
             available_data_asset_names[
                 data_connector_name
             ] = data_connector.get_available_data_asset_names()
         return available_data_asset_names
 
-    def build_batch_spec(self, data_connector_name, batch_definition):
-        data_connector_obj = self.get_data_connector(name=data_connector_name)
+    def build_batch_spec(self, data_connector_name: str, batch_definition: dict) -> BatchSpec:
+        data_connector_obj: DataConnector = self.get_data_connector(name=data_connector_name)
         return data_connector_obj.build_batch_spec(batch_definition=batch_definition)
