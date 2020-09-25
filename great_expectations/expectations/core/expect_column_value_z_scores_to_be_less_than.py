@@ -15,7 +15,7 @@ from ..expectation import (
     InvalidExpectationConfigurationError,
     _format_map_output,
 )
-from ..registry import extract_metrics
+from ..registry import extract_metrics, get_domain_metrics_dict_by_name
 
 
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
@@ -117,9 +117,11 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             domain_kwargs=metric_domain_kwargs, batches=batches
         )
 
-        # Question: how to extract these metrics?
-        mean = series.mean()
-        std_dev = series.std()
+        # TODO: Necessary to check domain kwargs? Is there a better way to do this? (RL)
+        domain_metrics_lookup = get_domain_metrics_dict_by_name(metrics=metrics,
+                                                                  metric_domain_kwargs=metric_domain_kwargs)
+        mean = domain_metrics_lookup["column.aggregate.mean"]
+        std_dev = domain_metrics_lookup["column.aggregate.standard_deviation"]
 
         try:
             return (series - mean) / std_dev
@@ -141,6 +143,10 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
     ):
         """Checks if values under threshold"""
         # The series I'm getting does not consist of the z-scores themselves - PROBLEM
+        domain_metrics_lookup = get_domain_metrics_dict_by_name(metrics=metrics,
+                                                                metric_domain_kwargs=metric_domain_kwargs)
+        z_scores = domain_metrics_lookup["column.z_scores"]
+
         try:
             under_thresh = ((series - series.mean()) / series.std()) < threshold
             return pd.DataFrame(
