@@ -154,7 +154,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
           class_name: TupleGCSStoreBackend
           project: my_org_project
           bucket: my_org_data_docs
-          base_public_path: www.mydns.com
+          base_public_path: http://www.mydns.com
         site_index_builder:
           class_name: DefaultSiteIndexBuilder
 

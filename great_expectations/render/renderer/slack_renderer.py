@@ -57,8 +57,6 @@ class SlackRenderer(Renderer):
             # this abbreviated root level "text" will show up in the notification and not the message
             query["text"] = "{}: {}".format(expectation_suite_name, status)
 
-            print("Hi will")
-            print(data_docs_pages)
             if data_docs_pages:
                 for docs_link_key in data_docs_pages.keys():
                     if docs_link_key == "class":
