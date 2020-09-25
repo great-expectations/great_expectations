@@ -6,8 +6,7 @@ import numpy as np
 
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine
-
+from great_expectations.execution_engine import PandasExecutionEngine, ExecutionEngine
 
 from ..expectation import (
     ColumnMapDatasetExpectation,
@@ -79,13 +78,31 @@ class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
             configuration: ExpectationConfiguration,
             metrics: dict,
             runtime_configuration: dict = None,
+            execution_engine: ExecutionEngine = None,
     ):
         """Validates the mode metric against the value set"""
         # Obtaining dependencies used to validate the expectation
-        validation_dependencies = self.get_validation_dependencies(configuration)[
+        validation_dependencies = self.get_validation_dependencies(configuration, execution_engine, runtime_configuration)[
             "metrics"
         ]
-        metric_vals = extract_metrics(validation_dependencies, metrics, configuration)
+        # Extracting metrics
+        metric_vals = extract_metrics(
+            validation_dependencies, metrics, configuration, runtime_configuration
+        )
+
+        # Runtime configuration has preference
+        if runtime_configuration:
+            result_format = runtime_configuration.get(
+                "result_format",
+                configuration.kwargs.get(
+                    "result_format", self.default_kwarg_values.get("result_format")
+                ),
+            )
+        else:
+            result_format = configuration.kwargs.get(
+                "result_format", self.default_kwarg_values.get("result_format")
+            )
+
         mode_list = metric_vals.get("column.aggregate.mode")
         value_set = self.get_success_kwargs(configuration).get("value_set")
         ties_okay = self.get_success_kwargs(configuration).get("ties_okay")
