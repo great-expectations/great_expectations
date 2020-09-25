@@ -211,8 +211,18 @@ def test_expect_compound_columns_to_be_unique(spark_session, test_dataframe):
     assert not test_dataframe.test_expect_compound_columns_to_be_unique(
         ["name", "age"]
     ).success
+    assert not test_dataframe.test_expect_compound_columns_to_be_unique(
+        ["address.city", "address.house_number"]
+    ).success
+
     assert test_dataframe.test_expect_compound_columns_to_be_unique(
         ["address.street", "name"]
+    ).success
+    assert test_dataframe.test_expect_compound_columns_to_be_unique(
+        ["address.street", "address.city"]
+    ).success
+    assert test_dataframe.test_expect_compound_columns_to_be_unique(
+        ["name_duplicate", "age"]
     ).success
     assert test_dataframe.test_expect_compound_columns_to_be_unique(
         ["address.street", "`non.nested`"]
