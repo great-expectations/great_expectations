@@ -23,17 +23,3 @@ def test_expect_column_values_to_not_match_regex_impl():
 from great_expectations.expectations.core.expect_column_values_to_match_regex import (
     ExpectColumnValuesToMatchRegex,
 )
-
-
-def test_expect_column_values_to_match_regex_impl():
-    df = pd.DataFrame({"a": ["bat", "rat", "cat"]})
-    expectationConfiguration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_match_regex",
-        kwargs={"column": "a", "regex": ".at", "mostly": 1},
-    )
-    expectation = ExpectColumnValuesToMatchRegex(expectationConfiguration)
-    batch = Batch(data=df)
-    result = expectation.validate(
-        batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
-    )
-    assert result == ExpectationValidationResult(success=False,)
