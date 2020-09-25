@@ -1,4 +1,8 @@
+import logging
+
 from great_expectations.exceptions import InvalidKeyError
+
+logger = logging.getLogger(__name__)
 
 from ...core.id_dict import BatchKwargs
 from .renderer import Renderer
@@ -64,6 +68,9 @@ class SlackRenderer(Renderer):
                             docs_link = data_docs_pages[docs_link_key]
                             report_element = self._get_report_element(docs_link)
                         else:
+                            logger.critical(
+                                f"*ERROR* Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n"
+                            )
                             report_element = {
                                 "type": "section",
                                 "text": {
