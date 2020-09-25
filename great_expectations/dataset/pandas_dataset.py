@@ -580,7 +580,11 @@ Notes:
                 # Missings get digitized into bin = n_bins+1
                 labels += ["(missing)"]
 
-            return np.array(labels)[np.digitize(series, bins=bins) - 1]
+            return pd.Categorical.from_codes(
+                codes=np.digitize(series, bins=bins) - 1,
+                categories=labels,
+                ordered=True,
+            )
 
         else:
             if bins is None:
@@ -594,7 +598,11 @@ Notes:
                 replace = dict()
                 for x in bins:
                     replace.update({value: ", ".join(x) for value in x})
-            return series.replace(to_replace=replace).fillna("(missing)")
+            return (
+                series.replace(to_replace=replace)
+                .fillna("(missing)")
+                .astype("category")
+            )
 
     ### Expectation methods ###
 
