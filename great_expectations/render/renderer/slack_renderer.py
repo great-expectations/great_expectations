@@ -56,43 +56,43 @@ class SlackRenderer(Renderer):
             query["blocks"][0]["text"]["text"] = summary_text
             # this abbreviated root level "text" will show up in the notification and not the message
             query["text"] = "{}: {}".format(expectation_suite_name, status)
+            if data_docs_pages:
+                for docs_link_key in data_docs_pages.keys():
+                    if docs_link_key == "class":
+                        continue
 
-            for docs_link_key in data_docs_pages.keys():
-                if docs_link_key == "class":
-                    continue
+                    docs_link = data_docs_pages[docs_link_key]
+                    report_element = None
 
-                docs_link = data_docs_pages[docs_link_key]
-                report_element = None
+                    if notify_with == None or docs_link_key in notify_with:
 
-                if notify_with == None or docs_link_key in notify_with:
+                        if "file:///" in docs_link:
+                            # handle special case since Slack does not render these links
+                            report_element = {
+                                "type": "section",
+                                "text": {
+                                    "type": "mrkdwn",
+                                    "text": "*DataDocs* can be found here: `{}` \n (Please copy and paste link into a browser to view)\n".format(
+                                        docs_link
+                                    ),
+                                },
+                            }
+                        else:
+                            report_element = {
+                                "type": "section",
+                                "text": {
+                                    "type": "mrkdwn",
+                                    "text": "*DataDocs* can be found here: <{}|{}>".format(
+                                        docs_link, docs_link
+                                    ),
+                                },
+                            }
 
-                    if "file:///" in docs_link:
-                        # handle special case since Slack does not render these links
-                        report_element = {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "*DataDocs* can be found here: `{}` \n (Please copy and paste link into a browser to view)\n".format(
-                                    docs_link
-                                ),
-                            },
-                        }
-                    else:
-                        report_element = {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "*DataDocs* can be found here: <{}|{}>".format(
-                                    docs_link, docs_link
-                                ),
-                            },
-                        }
-
-                elif notify_with is not None and docs_link_key not in notify_with:
-                    raise InvalidKeyError(
-                        f"Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not in the `notify_with` list: `{str(notify_with)}` as configured in the `great_expectations.yml`\n"
-                        f"Please check your great_expectations.yml configuration and try again"
-                    )
+                    elif notify_with is not None and docs_link_key not in notify_with:
+                        raise InvalidKeyError(
+                            f"Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not in the `notify_with` list: `{str(notify_with)}` as configured in the `great_expectations.yml`\n"
+                            f"Please check your great_expectations.yml configuration and try again"
+                        )
 
                 if report_element:
                     query["blocks"].append(report_element)
