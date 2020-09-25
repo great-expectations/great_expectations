@@ -154,7 +154,7 @@ test_TupleFilesystemStoreBackend__dir0/
         base_public_path=base_public_path,
     )
     my_store_with_base_public_path.set(("CCC",), "ccc")
-    url = my_store_with_base_public_path.get_url_for_key(("CCC",))
+    url = my_store_with_base_public_path.get_public_url_for_key(("CCC",))
     assert url == "http://www.test.com/my_file_CCC"
 
 
@@ -258,7 +258,10 @@ def test_TupleS3StoreBackend_with_prefix():
 
     my_new_store.set(("BBB",), "bbb", content_type="text/html; charset=utf-8")
 
-    assert my_new_store.get_url_for_key(("BBB",)) == "http://www.test.com/my_file_BBB"
+    assert (
+        my_new_store.get_public_url_for_key(("BBB",))
+        == "http://www.test.com/my_file_BBB"
+    )
 
 
 @mock_s3
@@ -539,7 +542,7 @@ def test_TupleGCSStoreBackend_base_public_path():
     )
     run_time_string = run_id.to_tuple()[1]
 
-    url = my_store_with_base_public_path.get_url_for_key(key.to_tuple())
+    url = my_store_with_base_public_path.get_public_url_for_key(key.to_tuple())
     assert (
         url
         == "http://www.test.com/leakybucket"
