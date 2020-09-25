@@ -18,7 +18,7 @@ from ruamel.yaml.comments import CommentedMap
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.exceptions import ClassInstantiationError
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.types import ClassConfig
 from great_expectations.validator.validator import Validator
 from great_expectations.execution_environment.types import BatchSpec
@@ -189,9 +189,8 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
                 self._execution_environment_config["data_connectors"][name]
             )
         else:
-            raise ValueError(
-                "Unable to load data connector %s -- no configuration found or invalid configuration."
-                % name
+            raise ge_exceptions.DataConnectorError(
+                f'Unable to load data connector "{name}" -- no configuration found or invalid configuration.'
             )
         data_connector_config: CommentedMap = dataConnectorConfigSchema.load(
             data_connector_config
@@ -216,7 +215,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
             },
         )
         if not data_connector:
-            raise ClassInstantiationError(
+            raise ge_exceptions.ClassInstantiationError(
                 module_name="great_expectations.execution_environment.data_connector.data_connector",
                 package_name=None,
                 class_name=config["class_name"],

@@ -17,7 +17,7 @@ from great_expectations.execution_environment.data_connector.partitioner.partiti
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import ClassInstantiationError
+import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +93,7 @@ class DataConnector(object):
             if key in self.recognized_batch_definition_keys
         }
         if execution_environment is None:
-            raise ValueError(
+            raise ge_exceptions.DataConnectorError(
                 "execution environment must be provided for a DataConnector"
             )
 
@@ -173,9 +173,8 @@ class DataConnector(object):
                 self.partitioners[name]
             )
         else:
-            raise ValueError(
-                "Unable to load partitioner %s -- no configuration found or invalid configuration."
-                % name
+            raise ge_exceptions.PartitionerError(
+                f'Unable to load partitioner "{name}" -- no configuration found or invalid configuration.'
             )
         partitioner_config: CommentedMap = partitionerConfigSchema.load(
             partitioner_config
@@ -200,7 +199,7 @@ class DataConnector(object):
             },
         )
         if not partitioner:
-            raise ClassInstantiationError(
+            raise ge_exceptions.ClassInstantiationError(
                 module_name="great_expectations.execution_environment.data_connector.partitioner",
                 package_name=None,
                 class_name=config["class_name"],
@@ -329,7 +328,7 @@ class DataConnector(object):
 
     def build_batch_spec(self, batch_definition: dict) -> BatchSpec:
         if "data_asset_name" not in batch_definition:
-            raise ValueError("Batch definition must have a data_asset_name.")
+            raise ge_exceptions.BatchSpecError("Batch definition must have a data_asset_name.")
 
         batch_definition_keys: set = set(batch_definition.keys())
         recognized_batch_definition_keys: set = (
@@ -369,4 +368,3 @@ class DataConnector(object):
     # TODO: will need to handle partition_definition for in-memory df case
     def _build_batch_spec(self, batch_definition: dict, batch_spec: dict) -> BatchSpec:
         return BatchSpec(batch_spec)
-

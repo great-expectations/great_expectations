@@ -7,7 +7,7 @@ from great_expectations.execution_environment.data_connector.partitioner.partiti
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.types import PathBatchSpec
-from great_expectations.exceptions import BatchSpecError
+import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -132,7 +132,7 @@ class FilesDataConnector(DataConnector):
                     str(posix_path) for posix_path in self._get_valid_file_paths(base_directory=base_directory)
                 ]
             return self._verify_file_paths(path_list=path_list)
-        raise ValueError(f'Expected a directory, but path "{base_directory}" is not a directory.')
+        raise ge_exceptions.DataConnectorError(f'Expected a directory, but path "{base_directory}" is not a directory.')
 
     def _get_data_asset_directives(self, data_asset_name: str = None) -> dict:
         glob_directive: str
@@ -159,7 +159,9 @@ class FilesDataConnector(DataConnector):
         if not all(
             [not Path(path).is_dir() for path in path_list]
         ):
-            raise ValueError("All paths for a configured data asset must be files (a directory was detected).")
+            raise ge_exceptions.DataConnectorError(
+                "All paths for a configured data asset must be files (a directory was detected)."
+            )
         return path_list
 
     def _get_valid_file_paths(self, base_directory: str = None) -> list:
@@ -201,7 +203,7 @@ class FilesDataConnector(DataConnector):
         try:
             data_asset_name: str = batch_definition.pop("data_asset_name")
         except KeyError:
-            raise BatchSpecError(
+            raise ge_exceptions.BatchSpecError(
                 message="Unable to build BatchKwargs: no data_asset_name provided in batch_definition."
             )
 
@@ -211,7 +213,9 @@ class FilesDataConnector(DataConnector):
             partition_name=partition_name, data_asset_name=data_asset_name
         )
         if len(partitions) == 0:
-            raise BatchSpecError(message=f'Unable to build batch_spec for data asset "{data_asset_name}".')
+            raise ge_exceptions.BatchSpecError(
+                message=f'Unable to build batch_spec for data asset "{data_asset_name}".'
+            )
         # TODO: <Alex>If the list has multiple elements, we are using the first one (TBD/TODO multifile config / multibatch)</Alex>
         path: str = str(partitions[0].source)
         return self._build_batch_spec_from_path(path, batch_definition, batch_spec)

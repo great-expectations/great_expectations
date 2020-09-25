@@ -12,8 +12,7 @@ from great_expectations.execution_environment.data_connector.data_connector impo
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
 from great_expectations.core.id_dict import BatchSpec
-
-from great_expectations.exceptions import ClassInstantiationError
+import great_expectations.exceptions as ge_exceptions
 
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
@@ -89,7 +88,7 @@ class Partitioner(object):
                     self._sorters[sorter_names.index(name)]
                 )
             else:
-                raise ValueError(
+                raise ge_exceptions.SorterError(
                     f'Unable to load sorter with the name "{name}" -- no configuration found or invalid configuration.'
                 )
         sorter_config: CommentedMap = sorterConfigSchema.load(
@@ -116,7 +115,7 @@ class Partitioner(object):
             },
         )
         if not sorter:
-            raise ClassInstantiationError(
+            raise ge_exceptions.ClassInstantiationError(
                 module_name="great_expectations.execution_environment.data_connector.partitioner.sorter",
                 package_name=None,
                 class_name=config["class_name"],

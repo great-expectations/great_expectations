@@ -5,6 +5,7 @@ from typing import List, Any
 import logging
 
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class Sorter(object):
         elif orderby == "desc":
             reverse: bool = True
         else:
-            raise ValueError(f'Illegal sort order "{orderby}" for attribute "{name}".')
+            raise ge_exceptions.SorterError(f'Illegal sort order "{orderby}" for attribute "{name}".')
         self._reverse = reverse
         self._config_params = config_params
 
@@ -27,7 +28,7 @@ class Sorter(object):
     def _verify_sorting_directives_and_get_partition_key(self, partition: Partition) -> Any:
         partition_definition: dict = partition.definition
         if partition_definition.get(self.name) is None:
-            raise ValueError(f'Unable to sort partition "{partition.name}" by attribute "{self.name}".')
+            raise ge_exceptions.SorterError(f'Unable to sort partition "{partition.name}" by attribute "{self.name}".')
         return self.get_partition_key(partition=partition)
 
     def get_partition_key(self, partition: Partition) -> Any:
