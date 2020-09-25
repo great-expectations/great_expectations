@@ -302,7 +302,7 @@ class SiteBuilder:
 
         :param resource_identifier: ExpectationSuiteIdentifier,
         ValidationResultIdentifier or any other type's identifier. The
-        argument is optional - whennot supplied, the method returns the URL of
+        argument is optional - when not supplied, the method returns the URL of
         the index page.
         :return: URL (string)
         """

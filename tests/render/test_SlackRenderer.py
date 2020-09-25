@@ -1,9 +1,8 @@
-from freezegun import freeze_time
+# from freezegun import freeze_time
 
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.render.renderer import SlackRenderer
-
-from ..test_utils import modify_locale
+from tests.test_utils import modify_locale
 
 
 def test_SlackRenderer_validation_results_with_datadocs():

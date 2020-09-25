@@ -338,17 +338,24 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         return False
 
     def get_url_for_key(self, key, protocol=None):
-
         path = self._convert_key_to_filepath(key)
+        full_path = os.path.join(self.full_base_directory, path)
 
-        if self.base_public_path:
-            url = self.base_public_path + path
-        else:
-            full_path = os.path.join(self.full_base_directory, path)
-            if protocol is None:
-                protocol = "file:"
-            url = protocol + "//" + full_path
+        if protocol is None:
+            protocol = "file:"
+        url = protocol + "//" + full_path
         return url
+
+    def get_public_url_for_key(self, key, protocol=None):
+        if not self.base_public_path:
+            raise StoreBackendError(
+                f"""Error: No base_public_path was configured!
+                    - A public URL was requested base_public_path was not configured for the TupleFilesystemStoreBackend
+                """
+            )
+        path = self._convert_key_to_filepath(key)
+        public_url = self.base_public_path + path
+        return public_url
 
     def _has_key(self, key):
         return os.path.isfile(
@@ -536,21 +543,32 @@ class TupleS3StoreBackend(TupleStoreBackend):
             location = "s3-" + location
         s3_key = self._convert_key_to_filepath(key)
 
-        if self.base_public_path:
-            url = os.path.join(self.base_public_path, s3_key)
+        location = boto3.client("s3").get_bucket_location(Bucket=self.bucket)[
+            "LocationConstraint"
+        ]
+        if location is None:
+            location = "s3"
         else:
-            location = boto3.client("s3").get_bucket_location(Bucket=self.bucket)[
-                "LocationConstraint"
-            ]
-            if location is None:
-                location = "s3"
-            else:
-                location = "s3-" + location
-            if not self.prefix:
-                url = f"https://{location}.amazonaws.com/{self.bucket}/{s3_key}"
-            else:
-                url = f"https://{location}.amazonaws.com/{self.bucket}/{self.prefix}/{s3_key}"
+            location = "s3-" + location
+        if not self.prefix:
+            url = f"https://{location}.amazonaws.com/{self.bucket}/{s3_key}"
+        else:
+            url = (
+                f"https://{location}.amazonaws.com/{self.bucket}/{self.prefix}/{s3_key}"
+            )
         return url
+
+    def get_public_url_for_key(self, key, protocol=None):
+        if not self.base_public_path:
+            raise StoreBackendError(
+                f"""Error: No base_public_path was configured!
+                    - A public URL was requested base_public_path was not configured for the
+                """
+            )
+        s3_key = self._convert_key_to_filepath(key)
+        # <WILL> What happens if there is a prefix?
+        public_url = self.base_public_path + s3_key
+        return public_url
 
     def remove_key(self, key):
         import boto3
@@ -711,23 +729,34 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         else:
             base_url = "https://storage.cloud.google.com/"
 
-        # if user has configured their own base_public_url, then just replace
-        if self.base_public_path:
-            base_url = self.base_public_path
+        path_url = self._get_path_url(path)
 
+        return base_url + path_url
+
+    def get_public_url_for_key(self, key, protocol=None):
+        if not self.base_public_path:
+            raise StoreBackendError(
+                f"""Error: No base_public_path was configured!
+                    - A public URL was requested base_public_path was not configured for the
+                """
+            )
+        path = self._convert_key_to_filepath(key)
+        path_url = self._get_path_url(path)
+        public_url = self.base_public_path + path_url
+        return public_url
+
+    def _get_path_url(self, path):
         if self.prefix:
             path_url = "/".join((self.bucket, self.prefix, path))
         else:
             if self.base_public_path:
-                # if the user has already defined everything, then keep it
                 if self.base_public_path[-1] != "/":
                     path_url = "/" + path
                 else:
                     path_url = path
-
             else:
                 path_url = "/".join((self.bucket, path))
-        return base_url + path_url
+        return path_url
 
     def remove_key(self, key):
         from google.cloud import storage
