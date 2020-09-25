@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Dict, List, Optional, Union
 
 import numpy as np
@@ -27,14 +28,14 @@ except ImportError:
     pass
 
 
-class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
-    map_metric = "column_values.match_regex"
+class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapDatasetExpectation):
+    map_metric = "column_values.match_strftime_format"
     metric_dependencies = (
-        "column_values.match_regex.count",
+        "column_values.match_strftime_format.count",
         "column_values.nonnull.count",
     )
     success_keys = (
-        "regex",
+        "strftime_format",
         "mostly",
     )
 
@@ -51,23 +52,28 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
+
+        assert "strftime_format" in configuration.kwargs, "strftime_format is required"
+
+        strftime_format = configuration.kwargs["strftime_format"]
+
         try:
-            assert "regex" in configuration.kwargs, "regex is required"
-            assert isinstance(
-                configuration.kwargs["regex"], str
-            ), "regex must be a string"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
+            datetime.strptime(
+                datetime.strftime(datetime.now(), strftime_format), strftime_format,
+            )
+        except ValueError as e:
+            raise ValueError("Unable to use provided strftime_format. " + str(e))
+
         return True
 
     @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.match_regex",
+        metric_name="column_values.match_strftime_format",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("regex",),
+        metric_value_keys=("strftime_format",),
         metric_dependencies=tuple(),
         filter_column_isnull=True,
     )
-    def _pandas_column_values_match_regex(
+    def _pandas_column_values_match_strftime_format(
         self,
         series: pd.Series,
         metrics: dict,
@@ -76,19 +82,30 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
         runtime_configuration: dict = None,
         filter_column_isnull: bool = True,
     ):
-        regex = metric_value_kwargs["regex"]
+        def is_parseable_by_format(val):
+            try:
+                datetime.strptime(val, strftime_format)
+                return True
+            except TypeError:
+                raise TypeError(
+                    "Values passed to expect_column_values_to_match_strftime_format must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."
+                )
+            except ValueError:
+                return False
+
+        strftime_format = metric_value_kwargs["strftime_format"]
 
         return pd.DataFrame(
-            {"column_values.match_regex": series.astype(str).str.contains(regex)}
+            {"column_values.match_strftime_format": series.map(is_parseable_by_format)}
         )
 
     # @SqlAlchemyExecutionEngine.column_map_metric(
-    #     metric_name="column_values.match_regex",
+    #     metric_name="column_values.match_strftime_format",
     #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
     #     metric_value_keys=("regex",),
     #     metric_dependencies=tuple(),
     # )
-    # def _sqlalchemy_match_regex(
+    # def _sqlalchemy_match_strftime_format(
     #     self,
     #     column: sa.column,
     #     regex: str,
@@ -110,12 +127,12 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
     #     return column.in_(tuple(regex))
     #
     # @SparkDFExecutionEngine.column_map_metric(
-    #     metric_name="column_values.match_regex",
+    #     metric_name="column_values.match_strftime_format",
     #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
     #     metric_value_keys=("regex",),
     #     metric_dependencies=tuple(),
     # )
-    # def _spark_match_regex(
+    # def _spark_match_strftime_format(
     #     self,
     #     data: "pyspark.sql.DataFrame",
     #     column: str,
@@ -162,7 +179,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
 
         if metric_vals.get("column_values.nonnull.count") > 0:
             success = metric_vals.get(
-                "column_values.match_regex.count"
+                "column_values.match_strftime_format.count"
             ) / metric_vals.get("column_values.nonnull.count")
         else:
             # TODO: Setting this to 1 based on the notion that tests on empty columns should be vacuously true. Confirm.
@@ -173,11 +190,11 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
             unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.match_regex.count"),
+            - metric_vals.get("column_values.match_strftime_format.count"),
             unexpected_list=metric_vals.get(
-                "column_values.match_regex.unexpected_values"
+                "column_values.match_strftime_format.unexpected_values"
             ),
             unexpected_index_list=metric_vals.get(
-                "column_values.match_regex.unexpected_index_list"
+                "column_values.match_strftime_format.unexpected_index_list"
             ),
         )

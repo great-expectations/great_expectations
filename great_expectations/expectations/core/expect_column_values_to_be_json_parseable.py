@@ -1,3 +1,5 @@
+import json
+from datetime import datetime
 from typing import Dict, List, Optional, Union
 
 import numpy as np
@@ -27,16 +29,13 @@ except ImportError:
     pass
 
 
-class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
-    map_metric = "column_values.match_regex"
+class ExpectColumnValuesToBeJsonParseable(ColumnMapDatasetExpectation):
+    map_metric = "column_values.json_parsable"
     metric_dependencies = (
-        "column_values.match_regex.count",
+        "column_values.json_parsable.count",
         "column_values.nonnull.count",
     )
-    success_keys = (
-        "regex",
-        "mostly",
-    )
+    success_keys = ("mostly",)
 
     default_kwarg_values = {
         "row_condition": None,
@@ -51,23 +50,16 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
-        try:
-            assert "regex" in configuration.kwargs, "regex is required"
-            assert isinstance(
-                configuration.kwargs["regex"], str
-            ), "regex must be a string"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
         return True
 
     @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.match_regex",
+        metric_name="column_values.json_parsable",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("regex",),
+        metric_value_keys=tuple(),
         metric_dependencies=tuple(),
         filter_column_isnull=True,
     )
-    def _pandas_column_values_match_regex(
+    def _pandas_column_values_json_parsable(
         self,
         series: pd.Series,
         metrics: dict,
@@ -76,19 +68,22 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
         runtime_configuration: dict = None,
         filter_column_isnull: bool = True,
     ):
-        regex = metric_value_kwargs["regex"]
+        def is_json(val):
+            try:
+                json.loads(val)
+                return True
+            except:
+                return False
 
-        return pd.DataFrame(
-            {"column_values.match_regex": series.astype(str).str.contains(regex)}
-        )
+        return pd.DataFrame({"column_values.json_parsable": series.map(is_json)})
 
     # @SqlAlchemyExecutionEngine.column_map_metric(
-    #     metric_name="column_values.match_regex",
+    #     metric_name="column_values.json_parsable",
     #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
     #     metric_value_keys=("regex",),
     #     metric_dependencies=tuple(),
     # )
-    # def _sqlalchemy_match_regex(
+    # def _sqlalchemy_json_parsable(
     #     self,
     #     column: sa.column,
     #     regex: str,
@@ -110,12 +105,12 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
     #     return column.in_(tuple(regex))
     #
     # @SparkDFExecutionEngine.column_map_metric(
-    #     metric_name="column_values.match_regex",
+    #     metric_name="column_values.json_parsable",
     #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
     #     metric_value_keys=("regex",),
     #     metric_dependencies=tuple(),
     # )
-    # def _spark_match_regex(
+    # def _spark_json_parsable(
     #     self,
     #     data: "pyspark.sql.DataFrame",
     #     column: str,
@@ -162,7 +157,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
 
         if metric_vals.get("column_values.nonnull.count") > 0:
             success = metric_vals.get(
-                "column_values.match_regex.count"
+                "column_values.json_parsable.count"
             ) / metric_vals.get("column_values.nonnull.count")
         else:
             # TODO: Setting this to 1 based on the notion that tests on empty columns should be vacuously true. Confirm.
@@ -173,11 +168,11 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
             unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.match_regex.count"),
+            - metric_vals.get("column_values.json_parsable.count"),
             unexpected_list=metric_vals.get(
-                "column_values.match_regex.unexpected_values"
+                "column_values.json_parsable.unexpected_values"
             ),
             unexpected_index_list=metric_vals.get(
-                "column_values.match_regex.unexpected_index_list"
+                "column_values.json_parsable.unexpected_index_list"
             ),
         )
