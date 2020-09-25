@@ -18,7 +18,12 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
         "max_value",
         "strict_max",
     )
-    success_keys = ("min_value", "strict_min", "max_value", "strict_max",)
+    success_keys = (
+        "min_value",
+        "strict_min",
+        "max_value",
+        "strict_max",
+    )
     default_kwarg_values = {
         "min_value": None,
         "strict_min": False,

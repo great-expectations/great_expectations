@@ -165,9 +165,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
         runtime_configuration: Optional[dict] = None,
     ):
         """Construct the validation graph for this expectation."""
-        if not configuration:
-            configuration = self.configuration
-
         return {
             "domain": self.get_domain_kwargs(),
             "success_kwargs": self.get_success_kwargs(),
@@ -345,17 +342,18 @@ class DatasetExpectation(Expectation, ABC):
         "condition_parser",
     )
 
-    # def get_validation_dependencies(
-    #     self,
-    #     configuration: Optional[ExpectationConfiguration] = None,
-    #     execution_engine: Optional[ExecutionEngine] = None,
-    # ):
-    #     dependencies = super().get_validation_dependencies(configuration)
-    #     metric_dependencies = set(self.metric_dependencies)
-    #
-    #     dependencies["metrics"] = metric_dependencies
-    #
-    #     return dependencies
+    def get_validation_dependencies(
+        self,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        dependencies = super().get_validation_dependencies( configuration, execution_engine, runtime_configuration)
+        metric_dependencies = set(self.metric_dependencies)
+
+        dependencies["metrics"] = metric_dependencies
+
+        return dependencies
 
     @staticmethod
     def get_value_set_parser(execution_engine: ExecutionEngine):
