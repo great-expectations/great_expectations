@@ -7,7 +7,6 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
-from ...data_asset.util import parse_result_format
 from ..expectation import (
     ColumnMapDatasetExpectation,
     DatasetExpectation,
@@ -18,29 +17,35 @@ from ..expectation import (
 from ..registry import extract_metrics
 
 
-class ExpectTableColumnCountToEqual(DatasetExpectation):
-    metric_dependencies = ("columns.count",)
-    success_keys = ("value",)
+class ExpectColumnDistinctValuesToEqualSet(DatasetExpectation):
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    metric_dependencies = ("column.value_counts",)
+    success_keys = (
+        "value_set",
+        "parse_strings_as_datetimes",
+    )
 
+    # Default values
     default_kwarg_values = {
         "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "value": None,
+        "condition_parser": None,
+        "value_set": None,
+        "parse_strings_as_datetimes": None,
+        "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
-        "meta": None,
     }
 
-    """ A Column Map Metric Decorator for the Column Count"""
+    """ A Column Map Metric Decorator for the Mode metric"""
 
     @PandasExecutionEngine.metric(
-        metric_name="columns.count",
-        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+        metric_name="column.value_counts",
+        metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
     )
-    def _pandas_column_count(
+    def _pandas_value_counts(
         self,
         batches: Dict[str, Batch],
         execution_engine: PandasExecutionEngine,
@@ -48,41 +53,24 @@ class ExpectTableColumnCountToEqual(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
     ):
-        """Column count metric function"""
-        df = execution_engine.get_domain_dataframe(
+        """Distinct value counts metric"""
+        series = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
         )
 
-        return df.shape[1]
+        return series.value_counts()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
-        """
-
-        # Setting up a configuration
+        """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
-
-        # Ensuring that a proper value has been provided
         try:
-            assert (
-                "value" in configuration.kwargs
-            ), "An expected column count must be provided"
+            assert "value_set" in configuration.kwargs, "value_set is required"
             assert isinstance(
-                configuration.kwargs["value"], int
-            ), "Provided threshold must be an integer"
-
+                configuration.kwargs["value_set"], (list, set)
+            ), "value_set must be a list or a set"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
@@ -95,17 +83,15 @@ class ExpectTableColumnCountToEqual(DatasetExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        """Validates given column count against expected value"""
+        """Validates that the Distinct values are equal to the given set"""
         # Obtaining dependencies used to validate the expectation
         validation_dependencies = self.get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )["metrics"]
-        # Extracting metrics
         metric_vals = extract_metrics(
             validation_dependencies, metrics, configuration, runtime_configuration
         )
 
-        # Runtime configuration has preference
         if runtime_configuration:
             result_format = runtime_configuration.get(
                 "result_format",
@@ -117,11 +103,25 @@ class ExpectTableColumnCountToEqual(DatasetExpectation):
             result_format = configuration.kwargs.get(
                 "result_format", self.default_kwarg_values.get("result_format")
             )
-        column_count = metric_vals.get("columns.count")
 
-        # Obtaining components needed for validation
-        value = self.get_success_kwargs(configuration).get("value")
+        parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
+            "parse_strings_as_datetimes"
+        )
+        observed_value_counts = metric_vals.get("column.value_counts")
+        observed_value_set = set(observed_value_counts.index)
+        value_set = self.get_success_kwargs(configuration).get("value_set")
 
-        # Checking if the column count is equivalent to value
-        success = column_count == value
-        return {"success": success, "result": {"observed_value": column_count}}
+        if parse_strings_as_datetimes:
+            parsed_value_set = PandasExecutionEngine._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+
+        expected_value_set = set(parsed_value_set)
+
+        return {
+            "success": observed_value_set == expected_value_set,
+            "result": {
+                "observed_value": sorted(list(observed_value_set)),
+                "details": {"value_counts": observed_value_counts},
+            },
+        }
