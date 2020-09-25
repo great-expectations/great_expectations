@@ -138,6 +138,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("threshold", "double_sided",),
         metric_dependencies=("column.z_scores",),
+        filter_column_isnull=True,
     )
     def _pandas_under_threshold(
         self,

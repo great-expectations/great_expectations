@@ -44,6 +44,7 @@ class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
         metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
+        filter_column_isnull=True,
     )
     def _pandas_mode(
         self,
@@ -54,7 +55,7 @@ class ExpectColumnMostCommonValueToBeInSet(DatasetExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
     ):
-        """Mean Metric Function"""
+        """Mode Metric Function"""
         series = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches
         )

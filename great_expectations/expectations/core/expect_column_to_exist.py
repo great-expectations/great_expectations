@@ -52,6 +52,7 @@ class ExpectColumnToExist(DatasetExpectation):
         metric_domain_keys=("batch_id", "table", "row_condition", "condition_parser"),
         metric_value_keys=(),
         metric_dependencies=(),
+        filter_column_isnull=False,
     )
     def _pandas_columns(
         self,

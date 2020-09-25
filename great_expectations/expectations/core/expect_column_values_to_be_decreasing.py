@@ -36,6 +36,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("strictly",),
         metric_dependencies=tuple(),
+        filter_column_isnull=True,
     )
     def _pandas_map_decreasing(
         self,

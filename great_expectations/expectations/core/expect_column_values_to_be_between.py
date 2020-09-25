@@ -49,8 +49,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
         "meta": None,
     }
 
-    """ A Column Map Metric Decorator for the Mean"""
-
+    """ A Column Map Metric Decorator for checking if a value is between given thresholds"""
     @PandasExecutionEngine.column_map_metric(
         metric_name="column_values.is_between",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
@@ -63,6 +62,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
             "parse_strings_as_datetimes",
         ),
         metric_dependencies=(),
+        filter_column_isnull=True,
     )
     def _pandas_is_between(
         self,
