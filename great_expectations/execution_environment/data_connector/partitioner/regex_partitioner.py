@@ -5,6 +5,7 @@ from pathlib import Path
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +38,7 @@ class RegexPartitioner(Partitioner):
         self._paths = None
 
     def _process_regex_config(self) -> dict:
-        regex: dict
-        regex = self.config_params.get("regex")
+        regex: dict = self.config_params.get("regex")
         if regex and isinstance(regex, dict):
             assert "pattern" in regex.keys(), "Regex configuration requires pattern to be specified."
             if not ("group_names" in regex.keys() and isinstance(regex["group_names"], list)):
@@ -105,7 +105,7 @@ class RegexPartitioner(Partitioner):
 
     def _find_partitions_for_path(self, path: str, data_asset_name: str = None) -> Union[Partition, None]:
         if self.regex is None:
-            raise ValueError("Regex configuration is not specified.")
+            raise ge_exceptions.PartitionerError("Regex configuration is not specified.")
 
         matches: Union[re.Match, None] = re.match(self.regex["pattern"], path)
         if matches is None:
@@ -114,20 +114,20 @@ class RegexPartitioner(Partitioner):
         else:
             groups: tuple = matches.groups()
             if len(groups) != len(self.regex["group_names"]):
-                raise ValueError(
+                raise ge_exceptions.PartitionerError(
                     f'''RegexPartitioner "{self.name}" matched {len(groups)} groups in "{path}", but number of match
 group names specified is {len(self.regex["group_names"])}.
                     '''
                 )
             if len(self.sorters) > 0:
                 if any([sorter.name not in self.regex["group_names"] for sorter in self.sorters]):
-                    raise ValueError(
+                    raise ge_exceptions.PartitionerError(
                         f'''RegexPartitioner "{self.name}" specifies one or more sort keys that do not appear among
 configured match group names.
                         '''
                     )
                 if len(self.regex["group_names"]) < len(self.sorters):
-                    raise ValueError(
+                    raise ge_exceptions.PartitionerError(
                         f'''RegexPartitioner "{self.name}" is configured with {len(self.regex["group_names"])} match
 group names, which is fewer than number of sorters specified is {len(self.sorters)}.
                         '''
@@ -175,7 +175,7 @@ group names, which is fewer than number of sorters specified is {len(self.sorter
             )
         )
         if not self.allow_multipart_partitions and len(partitions) > 1 and len(set(partitions)) == 1:
-            raise ValueError(
+            raise ge_exceptions.PartitionerError(
                 f'''RegexPartitioner "{self.name}" detected multiple partitions for partition name "{partition_name}" of
 data asset "{partitions[0].data_asset_name}"; however, allow_multipart_partitions is set to False.  Please consider
 modifying the regular expression pattern, used to partition your files, or set allow_multipart_partitions to True, but

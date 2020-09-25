@@ -3,20 +3,21 @@
 import copy
 import logging
 import itertools
-from typing import List, Iterator
-# TODO: <Alex>Do we need warnings?</Alex>
-import warnings
+from typing import List
 from copy import deepcopy
+from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.data_context.types.base import (
     PartitionerConfig,
     partitionerConfigSchema
 )
+from great_expectations.execution_environment.execution_environment import ExecutionEnvironment
+from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import ClassInstantiationError
+import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +44,11 @@ class DataConnector(object):
     external data version control system.
     """
 
-    _default_reader_options = {}
+    _default_reader_options: dict = {}
     # TODO: <Alex>Is this needed?</Alex>
-    _batch_spec_type = BatchSpec
+    _batch_spec_type: BatchSpec = BatchSpec
     # TODO: <Alex>Check these carefully -- remove the wrong ones.</Alex>
-    recognized_batch_definition_keys = {
+    recognized_batch_definition_keys: set = {
         "execution_environment",
         "data_connector",
         "data_asset_name",
@@ -56,11 +57,10 @@ class DataConnector(object):
         "limit",
     }
 
-    # TODO: <Alex>Add type hints throughout</Alex>
     def __init__(
         self,
         name: str,
-        execution_environment: dict,
+        execution_environment: ExecutionEnvironment,
         partitioners: dict = None,
         default_partitioner: str = None,
         assets: dict = None,
@@ -70,7 +70,6 @@ class DataConnector(object):
     ):
         self._name = name
 
-        # TODO: <Alex></Alex>
         self._data_connector_config = kwargs
 
         # TODO: <Alex>Is this needed?</Alex>
@@ -94,7 +93,7 @@ class DataConnector(object):
             if key in self.recognized_batch_definition_keys
         }
         if execution_environment is None:
-            raise ValueError(
+            raise ge_exceptions.DataConnectorError(
                 "execution environment must be provided for a DataConnector"
             )
 
@@ -158,7 +157,7 @@ class DataConnector(object):
                 cached_partitions.append(partition)
             self._partitions_cache[data_asset_name] = cached_partitions
 
-    def get_partitioner(self, name):
+    def get_partitioner(self, name: str):
         """Get the (named) Partitioner from a DataConnector)
 
         Args:
@@ -170,31 +169,29 @@ class DataConnector(object):
         if name in self._partitioners_cache:
             return self._partitioners_cache[name]
         elif name in self.partitioners:
-            partitioner_config = copy.deepcopy(
+            partitioner_config: dict = copy.deepcopy(
                 self.partitioners[name]
             )
         else:
-            raise ValueError(
-                "Unable to load partitioner %s -- no configuration found or invalid configuration."
-                % name
+            raise ge_exceptions.PartitionerError(
+                f'Unable to load partitioner "{name}" -- no configuration found or invalid configuration.'
             )
-        partitioner_config = partitionerConfigSchema.load(
+        partitioner_config: CommentedMap = partitionerConfigSchema.load(
             partitioner_config
         )
-        partitioner = self._build_partitioner_from_config(
+        partitioner: Partitioner = self._build_partitioner_from_config(
             name=name, config=partitioner_config
         )
         self._partitioners_cache[name] = partitioner
         return partitioner
 
-    # TODO: <Alex>This is a good place to check that all defaults from base.py / Config Schemas are set properly.</Alex>
-    def _build_partitioner_from_config(self, name, config):
+    def _build_partitioner_from_config(self, name: str, config: CommentedMap):
         """Build a Partitioner using the provided configuration and return the newly-built Partitioner."""
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, PartitionerConfig):
-            config = partitionerConfigSchema.dump(config)
+            config: dict = partitionerConfigSchema.dump(config)
         config.update({"name": name})
-        partitioner = instantiate_class_from_config(
+        partitioner: Partitioner = instantiate_class_from_config(
             config=config,
             runtime_environment={"data_connector": self},
             config_defaults={
@@ -202,14 +199,14 @@ class DataConnector(object):
             },
         )
         if not partitioner:
-            raise ClassInstantiationError(
+            raise ge_exceptions.ClassInstantiationError(
                 module_name="great_expectations.execution_environment.data_connector.partitioner",
                 package_name=None,
                 class_name=config["class_name"],
             )
         return partitioner
 
-    def get_available_data_asset_names(self):
+    def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this data connector.
 
         Returns:
@@ -229,7 +226,7 @@ class DataConnector(object):
     #         )
     #     ]
 
-    def get_config(self):
+    def get_config(self) -> dict:
         # TODO: <Alex>Do we want to make ExecutionEnvironment._execution_environment_config["data_connectors"] or some convenience method publicly accessible to avoid PyCharm warnings?</Alex>
         conf: dict = self._execution_environment._execution_environment_config["data_connectors"][self.name]
         conf.update(self._data_connector_config)
@@ -329,12 +326,12 @@ class DataConnector(object):
     # def _get_iterator(self, data_asset_name, batch_definition, batch_spec):
     #     raise NotImplementedError
 
-    def build_batch_spec(self, batch_definition):
+    def build_batch_spec(self, batch_definition: dict) -> BatchSpec:
         if "data_asset_name" not in batch_definition:
-            raise ValueError("Batch definition must have a data_asset_name.")
+            raise ge_exceptions.BatchSpecError("Batch definition must have a data_asset_name.")
 
-        batch_definition_keys = set(batch_definition.keys())
-        recognized_batch_definition_keys = (
+        batch_definition_keys: set = set(batch_definition.keys())
+        recognized_batch_definition_keys: set = (
             self.recognized_batch_definition_keys
             | self._execution_environment.execution_engine.recognized_batch_definition_keys
         )
@@ -344,31 +341,30 @@ class DataConnector(object):
                 % str(batch_definition_keys - recognized_batch_definition_keys)
             )
 
-        batch_definition_defaults = deepcopy(self.batch_definition_defaults)
-        batch_definition = {
+        batch_definition_defaults: dict = deepcopy(self.batch_definition_defaults)
+        batch_definition: dict = {
             key: value
             for key, value in batch_definition.items()
             if key in recognized_batch_definition_keys
         }
-        batch_definition = nested_update(batch_definition_defaults, batch_definition)
+        batch_definition: dict = nested_update(batch_definition_defaults, batch_definition)
 
-        batch_spec_defaults = deepcopy(
+        batch_spec_defaults: dict = deepcopy(
             self._execution_environment.execution_engine.batch_spec_defaults
         )
-        batch_spec_passthrough = batch_definition.get("batch_spec_passthrough", {})
-        batch_spec_scaffold = nested_update(batch_spec_defaults, batch_spec_passthrough)
+        batch_spec_passthrough: dict = batch_definition.get("batch_spec_passthrough", {})
+        batch_spec_scaffold: dict = nested_update(batch_spec_defaults, batch_spec_passthrough)
 
         batch_spec_scaffold["data_asset_name"] = batch_definition.get("data_asset_name")
 
         batch_spec_scaffold["execution_environment"] = self._execution_environment.name
 
-        batch_spec = self._build_batch_spec(
+        batch_spec: BatchSpec = self._build_batch_spec(
             batch_definition=batch_definition, batch_spec=batch_spec_scaffold
         )
 
         return batch_spec
 
     # TODO: will need to handle partition_definition for in-memory df case
-    def _build_batch_spec(self, batch_definition, batch_spec):
+    def _build_batch_spec(self, batch_definition: dict, batch_spec: dict) -> BatchSpec:
         return BatchSpec(batch_spec)
-

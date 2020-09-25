@@ -284,3 +284,21 @@ class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
 
 class InvalidConfigValueTypeError(DataContextError):
     pass
+
+
+class DataConnectorError(DataContextError):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
+class PartitionerError(DataContextError):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
+class SorterError(DataContextError):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)

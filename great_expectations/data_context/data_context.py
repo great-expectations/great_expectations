@@ -69,6 +69,7 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
+from great_expectations.core.id_dict import BatchSpec
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -653,9 +654,8 @@ class BaseDataContext:
         }
 
     @property
-    def execution_environments(self):
-        # TODO: <Alex>Should it not say "ExecutionEnvironments (instead of Datasources)?</Alex>
-        """A single holder for all Datasources in this context"""
+    def execution_environments(self) -> Dict[str, ExecutionEnvironment]:
+        """A single holder for all ExecutionEnvironments in this context"""
         return {
             execution_environment: self.get_execution_environment(execution_environment_name=execution_environment)
             for execution_environment in self._project_config_with_variables_substituted.execution_environments
@@ -1062,7 +1062,7 @@ class BaseDataContext:
         )
         return batch_kwargs
 
-    def build_batch_spec(self, execution_environment, data_connector, batch_definition):
+    def build_batch_spec(self, execution_environment: str, data_connector: str, batch_definition: dict) -> BatchSpec:
         """Builds batch_spec using the provided execution_environment, data_connector, and batch_definition.
 
         Args:
@@ -1074,11 +1074,11 @@ class BaseDataContext:
             BatchSpec
 
         """
-        execution_environment_obj = self.get_execution_environment(
-            execution_environment
+        execution_environment_obj: ExecutionEnvironment = self.get_execution_environment(
+            execution_environment_name=execution_environment
         )
-        batch_spec = execution_environment_obj.build_batch_spec(
-            data_connector=data_connector, batch_definition=batch_definition
+        batch_spec: BatchSpec = execution_environment_obj.build_batch_spec(
+            data_connector_name=data_connector, batch_definition=batch_definition
         )
         return batch_spec
 

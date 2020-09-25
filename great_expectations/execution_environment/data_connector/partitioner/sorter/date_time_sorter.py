@@ -6,18 +6,19 @@ import logging
 
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.sorter.sorter import Sorter
+import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
 
 def parse_string_to_datetime(datetime_string: str, datetime_format_string: str = "%Y%m%d") -> datetime.date:
     if not isinstance(datetime_string, str):
-        raise ValueError(
+        raise ge_exceptions.SorterError(
             f'''Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
             '''
         )
     if datetime_format_string and not isinstance(datetime_format_string, str):
-        raise ValueError(
+        raise ge_exceptions.SorterError(
             f'''DateTime parsing formatter "datetime_format_string" must have string type (actual type is
 "{str(type(datetime_format_string))}").
             '''
@@ -30,11 +31,8 @@ def datetime_to_int(dt: datetime.date) -> int:
 
 
 class DateTimeSorter(Sorter):
-    r"""
-    DateTimeSorter help
-    """
-    def __init__(self, name: str, **kwargs):
-        super().__init__(name=name, **kwargs)
+    def __init__(self, name: str, orderby: str = "asc", config_params: dict = None, **kwargs):
+        super().__init__(name=name, orderby=orderby, config_params=config_params, **kwargs)
 
         self._datetime_format = self.config_params.get("datetime_format")
 

@@ -1,5 +1,7 @@
+import json
 from typing import Dict, List, Optional, Union
 
+import jsonschema
 import numpy as np
 import pandas as pd
 
@@ -27,14 +29,14 @@ except ImportError:
     pass
 
 
-class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
-    map_metric = "column_values.match_regex"
+class ExpectColumnValuesToMatchJsonSchema(ColumnMapDatasetExpectation):
+    map_metric = "column_values.match_json_schema"
     metric_dependencies = (
-        "column_values.match_regex.count",
+        "column_values.match_json_schema.count",
         "column_values.nonnull.count",
     )
     success_keys = (
-        "regex",
+        "json_schema",
         "mostly",
     )
 
@@ -49,25 +51,17 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-        try:
-            assert "regex" in configuration.kwargs, "regex is required"
-            assert isinstance(
-                configuration.kwargs["regex"], str
-            ), "regex must be a string"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
+
         return True
 
     @PandasExecutionEngine.column_map_metric(
-        metric_name="column_values.match_regex",
+        metric_name="column_values.match_json_schema",
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-        metric_value_keys=("regex",),
+        metric_value_keys=("json_schema",),
         metric_dependencies=tuple(),
         filter_column_isnull=True,
     )
-    def _pandas_column_values_match_regex(
+    def _pandas_column_values_match_json_schema(
         self,
         series: pd.Series,
         metrics: dict,
@@ -76,60 +70,74 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
         runtime_configuration: dict = None,
         filter_column_isnull: bool = True,
     ):
-        regex = metric_value_kwargs["regex"]
+        json_schema = metric_value_kwargs["json_schema"]
+
+        def matches_json_schema(val):
+            try:
+                val_json = json.loads(val)
+                jsonschema.validate(val_json, json_schema)
+                # jsonschema.validate raises an error if validation fails.
+                # So if we make it this far, we know that the validation succeeded.
+                return True
+            except jsonschema.ValidationError:
+                return False
+            except jsonschema.SchemaError:
+                raise
+            except:
+                raise
 
         return pd.DataFrame(
-            {"column_values.match_regex": series.astype(str).str.contains(regex)}
+            {"column_values.match_json_schema": series.map(matches_json_schema)}
         )
 
     # @SqlAlchemyExecutionEngine.column_map_metric(
-    #     metric_name="column_values.match_regex",
+    #     metric_name="column_values.match_json_schema",
     #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-    #     metric_value_keys=("regex",),
+    #     metric_value_keys=("json",),
     #     metric_dependencies=tuple(),
     # )
-    # def _sqlalchemy_match_regex(
+    # def _sqlalchemy_match_json_schema(
     #     self,
     #     column: sa.column,
-    #     regex: str,
+    #     json: str,
     #     runtime_configuration: dict = None,
     #     filter_column_isnull: bool = True,
     # ):
-    #     regex_expression = execution_engine._get_dialect_regex_expression(column, regex)
-    #     if regex_expression is None:
+    #     json_expression = execution_engine._get_dialect_json_expression(column, json)
+    #     if json_expression is None:
     #         logger.warning(
-    #             "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
+    #             "json is not supported for dialect %s" % str(self.sql_engine_dialect)
     #         )
     #         raise NotImplementedError
     #
-    #     return regex_expression
-    #     if regex is None:
+    #     return json_expression
+    #     if json is None:
     #         # vacuously true
     #         return True
     #
-    #     return column.in_(tuple(regex))
+    #     return column.in_(tuple(json))
     #
     # @SparkDFExecutionEngine.column_map_metric(
-    #     metric_name="column_values.match_regex",
+    #     metric_name="column_values.match_json_schema",
     #     metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
-    #     metric_value_keys=("regex",),
+    #     metric_value_keys=("json",),
     #     metric_dependencies=tuple(),
     # )
-    # def _spark_match_regex(
+    # def _spark_match_json_schema(
     #     self,
     #     data: "pyspark.sql.DataFrame",
     #     column: str,
-    #     regex: str,
+    #     json: str,
     #     runtime_configuration: dict = None,
     #     filter_column_isnull: bool = True,
     # ):
     #     import pyspark.sql.functions as F
     #
-    #     if regex is None:
+    #     if json is None:
     #         # vacuously true
     #         return data.withColumn(column + "__success", F.lit(True))
     #
-    #     return data.withColumn(column + "__success", F.col(column).isin(regex))
+    #     return data.withColumn(column + "__success", F.col(column).isin(json))
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
@@ -162,7 +170,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
 
         if metric_vals.get("column_values.nonnull.count") > 0:
             success = metric_vals.get(
-                "column_values.match_regex.count"
+                "column_values.match_json_schema.count"
             ) / metric_vals.get("column_values.nonnull.count")
         else:
             # TODO: Setting this to 1 based on the notion that tests on empty columns should be vacuously true. Confirm.
@@ -173,11 +181,11 @@ class ExpectColumnValuesToMatchRegex(ColumnMapDatasetExpectation):
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
             unexpected_count=metric_vals.get("column_values.nonnull.count")
-            - metric_vals.get("column_values.match_regex.count"),
+            - metric_vals.get("column_values.match_json_schema.count"),
             unexpected_list=metric_vals.get(
-                "column_values.match_regex.unexpected_values"
+                "column_values.match_json_schema.unexpected_values"
             ),
             unexpected_index_list=metric_vals.get(
-                "column_values.match_regex.unexpected_index_list"
+                "column_values.match_json_schema.unexpected_index_list"
             ),
         )
