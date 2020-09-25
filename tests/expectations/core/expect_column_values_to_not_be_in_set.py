@@ -26,7 +26,7 @@ def test_expect_column_values_to_not_be_in_set_int_impl():
     df = pd.DataFrame({"a": [1, 2, 3]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_in_set",
-        kwargs={"column": "a", "value_set": [2,3], "mostly": .8},
+        kwargs={"column": "a", "value_set": [2, 3], "mostly": 0.8},
     )
     expectation = ExpectColumnValuesToNotBeInSet(expectationConfiguration)
     batch = Batch(data=df)
