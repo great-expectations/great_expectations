@@ -2,7 +2,8 @@
 
 import logging
 import copy
-from typing import List, Iterator
+from typing import Union, List, Iterator
+from ruamel.yaml.comments import CommentedMap
 from great_expectations.data_context.types.base import (
     SorterConfig,
     sorterConfigSchema
@@ -32,11 +33,19 @@ class Partitioner(object):
         "sorters"
     }
 
-    def __init__(self, name: str, data_connector: DataConnector, **kwargs):
+    def __init__(
+        self,
+        name: str,
+        data_connector: DataConnector,
+        sorters: list = None,
+        config_params: dict = None,
+        **kwargs
+    ):
         self._name = name
         self._data_connector = data_connector
+        self._sorters = sorters
+        self._config_params = config_params
         # TODO: <Alex></Alex>
-        self._partitioner_config = kwargs
         self._sorters_cache = {}
 
     @property
@@ -49,19 +58,13 @@ class Partitioner(object):
 
     @property
     def config_params(self) -> dict:
-        return self._partitioner_config.get("config_params")
+        return self._config_params
 
     # TODO: <Alex>Add typehints throughout.</Alex>
     @property
-    def sorters(self):
-        sorter_config_list = self._partitioner_config.get("sorters")
-        if sorter_config_list:
-            sorters = [
-                self.get_sorter(name=sorter_config["name"])
-                for sorter_config in sorter_config_list
-                if sorter_config is not None
-            ]
-            return sorters
+    def sorters(self) -> Union[List[Sorter], None]:
+        if self._sorters:
+            return [self.get_sorter(name=sorter_config["name"]) for sorter_config in self._sorters]
         return None
 
     # TODO: <Alex>Add typehints throughout</Alex>
@@ -77,24 +80,20 @@ class Partitioner(object):
         # TODO: <Alex>This could be made more efficient, but numbers of sorters is small and this pattern is useful.</Alex>
         if name in self._sorters_cache:
             return self._sorters_cache[name]
-        elif (
-            "sorters" in self._partitioner_config
-            and name in [sorter_config["name"] for sorter_config in self._partitioner_config["sorters"]]
-        ):
-            sorter_config_list = self._partitioner_config["sorters"]
-            sorter_names = [sorter_config["name"] for sorter_config in sorter_config_list]
-            sorter_config = copy.deepcopy(
-                sorter_config_list[sorter_names.index(name)]
-            )
         else:
-            raise ValueError(
-                'Unable to load sorter with the name "%s" -- no configuration found or invalid configuration.'
-                % name
-            )
-        sorter_config = sorterConfigSchema.load(
+            sorter_names: list = [sorter_config["name"] for sorter_config in self._sorters]
+            if name in sorter_names:
+                sorter_config: dict = copy.deepcopy(
+                    self._sorters[sorter_names.index(name)]
+                )
+            else:
+                raise ValueError(
+                    f'Unable to load sorter with the name "{name}" -- no configuration found or invalid configuration.'
+                )
+        sorter_config: CommentedMap = sorterConfigSchema.load(
             sorter_config
         )
-        sorter = self._build_sorter_from_config(
+        sorter: Sorter = self._build_sorter_from_config(
             name=name, config=sorter_config
         )
         self._sorters_cache[name] = sorter

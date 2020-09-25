@@ -14,7 +14,7 @@ class Sorter(object):
     Sorter help
     """
 
-    def __init__(self, name: str, orderby: str, **kwargs):
+    def __init__(self, name: str, orderby: str, config_params: dict = None, **kwargs):
         self._name = name
         # TODO: <Alex>We need to make sure that this is consistent with default "orderby" value from SorterConfig</Alex>
         if orderby is None or orderby == "asc":
@@ -24,7 +24,7 @@ class Sorter(object):
         else:
             raise ValueError(f'Illegal sort order "{orderby}" for attribute "{name}".')
         self._reverse = reverse
-        self._sorter_config = kwargs
+        self._config_params = config_params
 
     def get_sorted_partitions(self, partitions: List[Partition]) -> List[Partition]:
         return sorted(partitions, key=self._verify_sorting_directives_and_get_partition_key, reverse=self.reverse)
@@ -48,7 +48,7 @@ class Sorter(object):
 
     @property
     def config_params(self) -> dict:
-        return self._sorter_config.get("config_params")
+        return self._config_params
 
     def __repr__(self):
         doc_fields_dict: dict = {

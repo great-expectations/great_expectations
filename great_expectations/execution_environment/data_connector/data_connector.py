@@ -59,12 +59,13 @@ class DataConnector(object):
     # TODO: <Alex>Add type hints throughout</Alex>
     def __init__(
         self,
-        name,
-        execution_environment,
-        partitioners=None,
-        default_partitioner=None,
-        assets=None,
-        batch_definition_defaults=None,
+        name: str,
+        execution_environment: dict,
+        partitioners: dict = None,
+        default_partitioner: str = None,
+        assets: dict = None,
+        config_params: dict = None,
+        batch_definition_defaults: dict = None,
         **kwargs
     ):
         self._name = name
@@ -73,7 +74,7 @@ class DataConnector(object):
         self._data_connector_config = kwargs
 
         # TODO: <Alex>Is this needed?</Alex>
-        self._data_asset_iterators = {}
+        # self._data_asset_iterators = {}
 
         # TODO: <Alex>Is this needed?  Where do these batch_definition_come_from and what are the values?</Alex>
         batch_definition_defaults = batch_definition_defaults or {}
@@ -101,6 +102,7 @@ class DataConnector(object):
         self._partitioners = partitioners or {}
         self._default_partitioner = default_partitioner
         self._assets = assets
+        self._config_params = config_params
 
         self._partitioners_cache: dict = {}
         self._partitions_cache: dict = {}
@@ -123,7 +125,7 @@ class DataConnector(object):
 
     @property
     def config_params(self) -> dict:
-        return self._data_connector_config.get("config_params")
+        return self._config_params
 
     @property
     def batch_definition_defaults(self) -> dict:
