@@ -26,9 +26,8 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.validator.validator import Validator
 
-from ..core import IDDict
 from ..core.batch import Batch, BatchMarkers
-from ..core.id_dict import BatchSpec
+from ..core.id_dict import BatchSpec, IDDict
 from ..datasource.pandas_datasource import HASH_THRESHOLD
 from ..exceptions import BatchSpecError, ValidationError
 from ..exceptions.metric_exceptions import MetricError
