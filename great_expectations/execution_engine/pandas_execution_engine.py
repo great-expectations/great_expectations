@@ -972,7 +972,14 @@ Notes:
                     domain_kwargs=metric_domain_kwargs,
                     filter_column_isnull=filter_column_isnull,
                 )
-                return metric_fn(self, series=series, **metric_value_kwargs, **kwargs)
+                return metric_fn(
+                    self,
+                    series=series,
+                    metrics=metrics,
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    metric_value_kwargs=metric_value_kwargs,
+                    **kwargs
+                )
 
             register_metric(
                 metric_name=metric_name,

@@ -67,14 +67,18 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
     def _pandas_is_between(
         self,
         series: pd.Series,
-        min_value=None,
-        max_value=None,
-        strict_min=None,
-        strict_max=None,
-        allow_cross_type_comparisons=None,
-        parse_strings_as_datetimes=None,
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         runtime_configuration: dict = None,
     ):
+        min_value = metric_value_kwargs.get("min_value")
+        max_value = metric_value_kwargs.get("max_value")
+        strict_min = metric_value_kwargs.get("strict_min")
+        strict_max = metric_value_kwargs.get("strict_max")
+        allow_cross_type_comparisons = metric_value_kwargs.get("allow_cross_type_comparisons")
+        parse_strings_as_datetimes = metric_value_kwargs.get("parse_strings_as_datetimes")
+
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 

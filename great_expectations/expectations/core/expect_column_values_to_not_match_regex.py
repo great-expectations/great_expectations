@@ -68,8 +68,15 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapDatasetExpectation):
         filter_column_isnull=True,
     )
     def _pandas_column_values_not_match_regex(
-        self, series: pd.Series, regex: str, runtime_configuration: dict = None,
+        self,
+        series: pd.Series,
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        runtime_configuration: dict = None,
     ):
+        regex = metric_value_kwargs["regex"]
+
         return pd.DataFrame(
             {"column_values.not_match_regex": ~series.astype(str).str.contains(regex)}
         )

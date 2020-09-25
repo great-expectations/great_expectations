@@ -765,7 +765,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     logger.warning("using metric provider with an unrecognized metric")
                 column = sa.column(metric_domain_kwargs.get("column"))
                 metric_condition = metric_fn(
-                    self, column=column, **metric_value_kwargs, **kwargs
+                    self,
+                    column=column,
+                    metrics=metrics,
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    metric_value_kwargs=metric_value_kwargs,
+                    **kwargs
                 )
                 if filter_column_isnull:
                     expected_condition = sa.and_(

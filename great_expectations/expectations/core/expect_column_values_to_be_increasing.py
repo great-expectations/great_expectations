@@ -80,9 +80,13 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
     def _pandas_column_values_increasing(
         self,
         series: pd.Series,
-        strictly: Union[bool, None],
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         runtime_configuration: dict = None,
     ):
+        strictly = metric_value_kwargs["strictly"]
+
         series_diff = series.diff()
         # The first element is null, so it gets a bye and is always treated as True
         series_diff[series_diff.isnull()] = 1
@@ -102,9 +106,13 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapDatasetExpectation):
         self,
         data: "pyspark.sql.DataFrame",
         column: str,
-        strictly: Union[list, set],
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         runtime_configuration: dict = None,
     ):
+        strictly = metric_value_kwargs["strictly"]
+
         # string column name
         column_name = data.schema.names[0]
         # check if column is any type that could have na (numeric types)

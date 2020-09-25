@@ -40,9 +40,13 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapDatasetExpectation):
     def _pandas_map_decreasing(
         self,
         series: pd.Series,
-        strictly: Union[bool, None],
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         runtime_configuration: dict = None,
     ):
+        strictly = metric_value_kwargs["strictly"]
+
         series_diff = series.diff()
         # The first element is null, so it gets a bye and is always treated as True
         series_diff[series_diff.isnull()] = -1
