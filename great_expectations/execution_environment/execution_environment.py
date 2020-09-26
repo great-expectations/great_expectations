@@ -2,7 +2,7 @@
 
 import copy
 import logging
-from typing import Union, List
+from typing import Union, List, Any
 
 from great_expectations.data_context.types.base import (
     DataConnectorConfig,
