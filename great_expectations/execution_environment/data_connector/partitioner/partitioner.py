@@ -121,11 +121,79 @@ class Partitioner(object):
             )
         return sorter
 
+    def get_available_partitions(
+        self,
+        partition_name: str = None,
+        data_asset_name: str = None,
+        *args,
+        **kwargs
+    ) -> List[Partition]:
+        cached_partitions: List[Partition] = self.data_connector.get_cached_partitions(
+            data_asset_name=data_asset_name
+        )
+        if cached_partitions is None or len(cached_partitions) == 0:
+            partitions: List[Partition] = self._find_available_partitions(
+                data_asset_name=data_asset_name,
+                *args,
+                **kwargs
+            )
+            self.data_connector.update_partitions_cache(partitions=partitions)
+            cached_partitions = self.data_connector.get_cached_partitions(
+                data_asset_name=data_asset_name
+            )
+        if cached_partitions is None or len(cached_partitions) == 0:
+            return []
+        cached_partitions = self.get_sorted_partitions(partitions=cached_partitions)
+        return self._apply_allow_multipart_partitions_flag(
+            partitions=cached_partitions,
+            partition_name=partition_name
+        )
+
     def get_sorted_partitions(self, partitions: List[Partition]) -> List[Partition]:
         sorters: Iterator[Sorter] = reversed(self.sorters)
         for sorter in sorters:
             partitions = sorter.get_sorted_partitions(partitions=partitions)
         return partitions
 
-    def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
+    def _apply_allow_multipart_partitions_flag(
+            self,
+            partitions: List[Partition],
+            partition_name: str = None
+    ) -> List[Partition]:
+        if partition_name is None:
+            for partition in partitions:
+                # noinspection PyUnusedLocal
+                res: List[Partition] = self._apply_allow_multipart_partitions_flag_to_single_partition(
+                    partitions=partitions,
+                    partition_name=partition.name
+                )
+            return partitions
+        else:
+            return self._apply_allow_multipart_partitions_flag_to_single_partition(
+                partitions=partitions,
+                partition_name=partition_name
+            )
+
+    def _apply_allow_multipart_partitions_flag_to_single_partition(
+        self,
+        partitions: List[Partition],
+        partition_name: str,
+    ) -> List[Partition]:
+        partitions: List[Partition] = list(
+            filter(
+                lambda partition: partition.name == partition_name, partitions
+            )
+        )
+        if not self.allow_multipart_partitions and len(partitions) > 1 and len(set(partitions)) == 1:
+            raise ge_exceptions.PartitionerError(
+                f'''Partitioner "{self.name}" detected multiple partitions for partition name "{partition_name}" of
+data asset "{partitions[0].data_asset_name}"; however, allow_multipart_partitions is set to False.  Please consider
+modifying the directives, used to partition your dataset, or set allow_multipart_partitions to True, but be aware that
+unless you have a specific use case for multipart partitions, there is most likely a mismatch between the partitioning
+directives and the actual structure of data under consideration.
+                '''
+            )
+        return partitions
+
+    def _find_available_partitions(self, data_asset_name: str = None, *args, **kwargs) -> List[Partition]:
         raise NotImplementedError

@@ -7,6 +7,9 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_PARTITION_NAME: str = "Default"
+
+
 class Partition(object):
     def __init__(self, name: str, definition: dict, source: Any, data_asset_name: str = None):
         self._name = name

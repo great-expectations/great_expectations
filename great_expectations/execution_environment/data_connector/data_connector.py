@@ -206,25 +206,16 @@ class DataConnector(object):
             )
         return partitioner
 
-    def get_available_data_asset_names(self) -> List[str]:
-        """Return the list of asset names known by this data connector.
-
-        Returns:
-            A list of available names
-        """
-        raise NotImplementedError
-
-    def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
-        raise NotImplementedError
-
-    # TODO: <Alex>This method is not useful -- get_available_partitions provides the complete information.</Alex>
-    # def get_available_partition_names(self, data_asset_name: str = None) -> List[str]:
-    #     return [
-    #         partition.name for partition in self.get_available_partitions(
-    #             partition_name=None,
-    #             data_asset_name=data_asset_name
-    #         )
-    #     ]
+    def get_partitioner_for_data_asset(self, data_asset_name: str = None) -> Partitioner:
+        partitioner_name: str
+        data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
+        if data_asset_config_exists and self.assets[data_asset_name].get("partitioner"):
+            partitioner_name = self.assets[data_asset_name]["partitioner"]
+        else:
+            partitioner_name = self.default_partitioner
+        # TODO: <Alex>Handle case of None partioner_name</Alex>
+        partitioner: Partitioner = self.get_partitioner(name=partitioner_name)
+        return partitioner
 
     def get_config(self) -> dict:
         # TODO: <Alex>Do we want to make ExecutionEnvironment._execution_environment_config["data_connectors"] or some convenience method publicly accessible to avoid PyCharm warnings?</Alex>
@@ -355,16 +346,65 @@ class DataConnector(object):
         batch_spec_passthrough: dict = batch_definition.get("batch_spec_passthrough", {})
         batch_spec_scaffold: dict = nested_update(batch_spec_defaults, batch_spec_passthrough)
 
-        batch_spec_scaffold["data_asset_name"] = batch_definition.get("data_asset_name")
+        data_asset_name: str = batch_definition.get("data_asset_name")
+        batch_spec_scaffold["data_asset_name"] = data_asset_name
 
         batch_spec_scaffold["execution_environment"] = self._execution_environment.name
 
-        batch_spec: BatchSpec = self._build_batch_spec(
-            batch_definition=batch_definition, batch_spec=batch_spec_scaffold
+        partition_name: str = batch_definition.get("partition_name")
+        # TODO: <Alex>If partition_name is not specified in batch_definition, then assume "latest" (or "most recent" as defined by the first element in the sorted list of partitions).</Alex>
+        partitions: List[Partition] = self.get_available_partitions(
+            partition_name=partition_name, data_asset_name=data_asset_name
+        )
+        if len(partitions) == 0:
+            raise ge_exceptions.BatchSpecError(
+                message=f'Unable to build batch_spec for data asset "{data_asset_name}".'
+            )
+
+        batch_spec: BatchSpec = self.build_batch_spec_from_partitions(
+            partitions=partitions, batch_definition=batch_definition, batch_spec=batch_spec_scaffold
         )
 
         return batch_spec
 
-    # TODO: will need to handle partition_definition for in-memory df case
-    def _build_batch_spec(self, batch_definition: dict, batch_spec: dict) -> BatchSpec:
-        return BatchSpec(batch_spec)
+    def build_batch_spec_from_partitions(
+        self,
+        partitions: List[Partition],
+        batch_definition: dict,
+        batch_spec: dict
+    ) -> BatchSpec:
+        raise NotImplementedError
+
+    def get_available_data_asset_names(self) -> List[str]:
+        """Return the list of asset names known by this data connector.
+
+        Returns:
+            A list of available names
+        """
+        raise NotImplementedError
+
+    def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
+        partitioner: Partitioner = self.get_partitioner_for_data_asset(data_asset_name=data_asset_name)
+        return self._get_available_partitions(
+            partitioner=partitioner,
+            partition_name=partition_name,
+            data_asset_name=data_asset_name
+        )
+
+    def _get_available_partitions(
+        self,
+        partitioner: Partitioner,
+        partition_name: str = None,
+        data_asset_name: str = None
+    ) -> List[Partition]:
+        raise NotImplementedError
+
+    # TODO: <Alex>This method is not useful -- get_available_partitions provides the complete information.</Alex>
+    # def get_available_partition_names(self, data_asset_name: str = None) -> List[str]:
+    #     return [
+    #         partition.name for partition in self.get_available_partitions(
+    #             partition_name=None,
+    #             data_asset_name=data_asset_name
+    #         )
+    #     ]
+

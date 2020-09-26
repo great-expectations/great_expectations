@@ -34,9 +34,6 @@ class RegexPartitioner(Partitioner):
 
         self._regex = self._process_regex_config()
 
-        self._auto_discover_assets = True
-        self._paths = None
-
     def _process_regex_config(self) -> dict:
         regex: dict = self.config_params.get("regex")
         if regex and isinstance(regex, dict):
@@ -60,48 +57,20 @@ class RegexPartitioner(Partitioner):
     def regex(self) -> dict:
         return self._regex
 
-    @property
-    def auto_discover_assets(self) -> bool:
-        return self._auto_discover_assets
-
-    @auto_discover_assets.setter
-    def auto_discover_assets(self, auto_discover_assets: bool):
-        self._auto_discover_assets = auto_discover_assets
-
-    @property
-    def paths(self) -> List[str]:
-        return self._paths
-
-    @paths.setter
-    def paths(self, paths: List[str]):
-        self._paths = paths
-
-    def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
-        cached_partitions: List[Partition] = self.data_connector.get_cached_partitions(
-            data_asset_name=data_asset_name
-        )
-        if cached_partitions is None or len(cached_partitions) == 0:
-            self._find_available_partitions(data_asset_name=data_asset_name)
-            cached_partitions = self.data_connector.get_cached_partitions(
-                data_asset_name=data_asset_name
-            )
-        if cached_partitions is None or len(cached_partitions) == 0:
-            return []
-        cached_partitions = self.get_sorted_partitions(partitions=cached_partitions)
-        return self._apply_allow_multipart_partitions_flag(
-            partitions=cached_partitions,
-            partition_name=partition_name
-        )
-
-    def _find_available_partitions(self, data_asset_name: str = None):
+    def _find_available_partitions(
+        self,
+        data_asset_name: str = None,
+        paths: list = [],
+        auto_discover_assets: bool = False
+    ) -> List[Partition]:
         partitions: List[Partition] = []
-        for path in self.paths:
-            if self.auto_discover_assets:
+        for path in paths:
+            if auto_discover_assets:
                 data_asset_name = Path(path).stem
             partitioned_path: Partition = self._find_partitions_for_path(path=path, data_asset_name=data_asset_name)
             if partitioned_path is not None:
                 partitions.append(partitioned_path)
-        self.data_connector.update_partitions_cache(partitions=partitions)
+        return partitions
 
     def _find_partitions_for_path(self, path: str, data_asset_name: str = None) -> Union[Partition, None]:
         if self.regex is None:
@@ -144,43 +113,3 @@ group names, which is fewer than number of sorters specified is {len(self.sorter
             source=path,
             data_asset_name=data_asset_name
         )
-
-    def _apply_allow_multipart_partitions_flag(
-        self,
-        partitions: List[Partition],
-        partition_name: str = None
-    ) -> List[Partition]:
-        if partition_name is None:
-            for partition in partitions:
-                # noinspection PyUnusedLocal
-                res: List[Partition] = self._apply_allow_multipart_partitions_flag_to_single_partition(
-                    partitions=partitions,
-                    partition_name=partition.name
-                )
-            return partitions
-        else:
-            return self._apply_allow_multipart_partitions_flag_to_single_partition(
-                partitions=partitions,
-                partition_name=partition_name
-            )
-
-    def _apply_allow_multipart_partitions_flag_to_single_partition(
-        self,
-        partitions: List[Partition],
-        partition_name: str,
-    ) -> List[Partition]:
-        partitions: List[Partition] = list(
-            filter(
-                lambda partition: partition.name == partition_name, partitions
-            )
-        )
-        if not self.allow_multipart_partitions and len(partitions) > 1 and len(set(partitions)) == 1:
-            raise ge_exceptions.PartitionerError(
-                f'''RegexPartitioner "{self.name}" detected multiple partitions for partition name "{partition_name}" of
-data asset "{partitions[0].data_asset_name}"; however, allow_multipart_partitions is set to False.  Please consider
-modifying the regular expression pattern, used to partition your files, or set allow_multipart_partitions to True, but
-be aware that unless you have a specific use case for multipart partitions, there is most likely a mismatch between the
-file name partitioning directives and the actual structure of file names in the directory under consideration.
-                '''
-            )
-        return partitions

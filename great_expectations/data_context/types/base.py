@@ -203,7 +203,7 @@ class DataConnectorConfig(DictDot):
         self,
         class_name,
         partitioners,
-        default_partitioner,
+        default_partitioner=None,
         assets=None,
         module_name=None,
         config_params=None,
@@ -251,8 +251,8 @@ class DataConnectorConfigSchema(Schema):
     module_name = fields.String(missing="great_expectations.execution_environment.data_connector")
 
     default_partitioner = fields.String(
-        required=True,
-        allow_none=False,
+        required=False,
+        allow_none=True,
     )
 
     partitioners = fields.Dict(
