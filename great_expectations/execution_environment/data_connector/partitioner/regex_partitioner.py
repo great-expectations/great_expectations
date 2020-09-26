@@ -22,7 +22,7 @@ class RegexPartitioner(Partitioner):
         config_params: dict = None,
         **kwargs
     ):
-        logger.debug("Constructing RegexPartitioner {!r}".format(name))
+        logger.debug(f'Constructing RegexPartitioner "{name}".')
         super().__init__(
             name=name,
             data_connector=data_connector,
@@ -57,19 +57,27 @@ class RegexPartitioner(Partitioner):
     def regex(self) -> dict:
         return self._regex
 
-    def _find_available_partitions(
+    def _compute_partitions_for_data_asset(
         self,
         data_asset_name: str = None,
+        *,
         paths: list = [],
         auto_discover_assets: bool = False
     ) -> List[Partition]:
+        if not paths or len(paths) == 0:
+            return []
         partitions: List[Partition] = []
-        for path in paths:
-            if auto_discover_assets:
-                data_asset_name = Path(path).stem
-            partitioned_path: Partition = self._find_partitions_for_path(path=path, data_asset_name=data_asset_name)
-            if partitioned_path is not None:
-                partitions.append(partitioned_path)
+        partitioned_path: Partition
+        if auto_discover_assets:
+            for path in paths:
+                partitioned_path = self._find_partitions_for_path(path=path, data_asset_name=Path(path).stem)
+                if partitioned_path is not None:
+                    partitions.append(partitioned_path)
+        else:
+            for path in paths:
+                partitioned_path = self._find_partitions_for_path(path=path, data_asset_name=data_asset_name)
+                if partitioned_path is not None:
+                    partitions.append(partitioned_path)
         return partitions
 
     def _find_partitions_for_path(self, path: str, data_asset_name: str = None) -> Union[Partition, None]:

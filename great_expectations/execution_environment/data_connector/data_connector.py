@@ -13,6 +13,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.execution_environment.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
+from great_expectations.execution_environment.data_connector.partitioner.pipeline_partitioner import PipelinePartitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.util import nested_update
@@ -43,7 +44,6 @@ class DataConnector(object):
     specific batch of data, GE can store snapshots of batches or store metadata from an
     external data version control system.
     """
-
     _default_reader_options: dict = {}
     # TODO: <Alex>Is this needed?</Alex>
     _batch_spec_type: BatchSpec = BatchSpec
@@ -213,8 +213,19 @@ class DataConnector(object):
             partitioner_name = self.assets[data_asset_name]["partitioner"]
         else:
             partitioner_name = self.default_partitioner
-        # TODO: <Alex>Handle case of None partioner_name</Alex>
-        partitioner: Partitioner = self.get_partitioner(name=partitioner_name)
+        partitioner: Partitioner
+        if partitioner_name is None:
+            partitioner = PipelinePartitioner(
+                name="PipelinePartitioner",
+                data_connector=self,
+                sorters=None,
+                allow_multipart_partitions=False,
+                config_params=None,
+                module_name="great_expectations.execution_environment.data_connector.partitioner",
+                class_name="PipelinePartitioner",
+            )
+        else:
+            partitioner = self.get_partitioner(name=partitioner_name)
         return partitioner
 
     def get_config(self) -> dict:

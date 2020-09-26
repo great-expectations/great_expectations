@@ -21,10 +21,6 @@ logger = logging.getLogger(__name__)
 
 
 class Partitioner(object):
-    r"""
-    Partitioners help
-    """
-
     _batch_spec_type: BatchSpec = BatchSpec  #TODO : is this really needed?
     # TODO: <Alex>What makes sense to have here, or is this even needed?</Alex>
     recognized_batch_definition_keys: set = {
@@ -132,9 +128,8 @@ class Partitioner(object):
             data_asset_name=data_asset_name
         )
         if cached_partitions is None or len(cached_partitions) == 0:
-            partitions: List[Partition] = self._find_available_partitions(
+            partitions: List[Partition] = self._compute_partitions_for_data_asset(
                 data_asset_name=data_asset_name,
-                *args,
                 **kwargs
             )
             self.data_connector.update_partitions_cache(partitions=partitions)
@@ -150,9 +145,11 @@ class Partitioner(object):
         )
 
     def get_sorted_partitions(self, partitions: List[Partition]) -> List[Partition]:
-        sorters: Iterator[Sorter] = reversed(self.sorters)
-        for sorter in sorters:
-            partitions = sorter.get_sorted_partitions(partitions=partitions)
+        if self.sorters and len(self.sorters) > 0:
+            sorters: Iterator[Sorter] = reversed(self.sorters)
+            for sorter in sorters:
+                partitions = sorter.get_sorted_partitions(partitions=partitions)
+            return partitions
         return partitions
 
     def _apply_allow_multipart_partitions_flag(
@@ -195,5 +192,5 @@ directives and the actual structure of data under consideration.
             )
         return partitions
 
-    def _find_available_partitions(self, data_asset_name: str = None, *args, **kwargs) -> List[Partition]:
+    def _compute_partitions_for_data_asset(self, data_asset_name: str = None, **kwargs) -> List[Partition]:
         raise NotImplementedError

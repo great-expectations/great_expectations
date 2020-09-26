@@ -3,8 +3,9 @@ import itertools
 import logging
 from typing import List
 
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
+from great_expectations.execution_environment.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.types import PathBatchSpec
 import great_expectations.exceptions as ge_exceptions
@@ -29,15 +30,16 @@ KNOWN_EXTENSIONS = [
 class FilesDataConnector(DataConnector):
     def __init__(
         self,
-        name,
-        execution_environment,
-        partitioners=None,
-        default_partitioner=None,
-        assets=None,
-        batch_definition_defaults=None,
-        known_extensions=None,
-        reader_options=None,
-        reader_method=None,
+        name: str,
+        execution_environment: ExecutionEnvironment,
+        partitioners: dict = None,
+        default_partitioner: str = None,
+        assets: dict = None,
+        config_params: dict = None,
+        batch_definition_defaults: dict = None,
+        known_extensions: list = None,
+        reader_options: dict = None,
+        reader_method: str = None,
         **kwargs
     ):
         # TODO: <Alex>Does "known_extensions" need to be in Configuration?</Alex>
@@ -48,6 +50,7 @@ class FilesDataConnector(DataConnector):
             partitioners=partitioners,
             default_partitioner=default_partitioner,
             assets=assets,
+            config_params=config_params,
             batch_definition_defaults=batch_definition_defaults,
             **kwargs
         )
@@ -87,11 +90,10 @@ class FilesDataConnector(DataConnector):
 
     def _get_available_partitions(
         self,
-        partitioner,
+        partitioner: Partitioner,
         partition_name: str = None,
         data_asset_name: str = None
     ) -> List[Partition]:
-        # TODO: <Alex>Handle case of None partioner_name</Alex>
         paths: list = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
         data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
         auto_discover_assets: bool = not data_asset_config_exists
