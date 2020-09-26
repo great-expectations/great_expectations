@@ -270,11 +270,11 @@ class Dataset(MetaDataset):
         raise NotImplementedError
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_unique_count(self, column):
@@ -282,11 +282,11 @@ class Dataset(MetaDataset):
         raise NotImplementedError
 
     def get_column_modes(self, column):
-        """Returns: List[any], list of modes (ties OK)"""
+        """Returns: List[Any], list of modes (ties OK)"""
         raise NotImplementedError
 
     def get_column_median(self, column):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_quantiles(
@@ -299,7 +299,7 @@ class Dataset(MetaDataset):
             *must* be a tuple to ensure caching is possible
 
         Returns:
-            List[any]: the nearest values in the dataset to those quantiles
+            List[Any]: the nearest values in the dataset to those quantiles
         """
         raise NotImplementedError
 

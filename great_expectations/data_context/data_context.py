@@ -11,7 +11,7 @@ import sys
 import uuid
 import warnings
 import webbrowser
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Any
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
@@ -1086,7 +1086,7 @@ class BaseDataContext:
     def _get_batch(
         self,
         batch_definition: dict,
-        in_memory_dataset: any = None,  # TODO: should this be any to accommodate different engines?
+        in_memory_dataset: Any = None,  # TODO: should this be any to accommodate different engines?
     ) -> ExecutionEngine:
         execution_environment = self.get_execution_environment(
             batch_definition.get("execution_environment")
@@ -1099,7 +1099,7 @@ class BaseDataContext:
         self,
         batch_definition,
         expectation_suite_name: Union[str, ExpectationSuite],
-        in_memory_dataset: any = None,  # TODO: should this be any to accommodate different engines?
+        in_memory_dataset: Any = None,  # TODO: should this be any to accommodate different engines?
     ):
         execution_environment = self.get_execution_environment(
             batch_definition.get("execution_environment")

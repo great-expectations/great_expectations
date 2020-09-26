@@ -657,11 +657,11 @@ class ExecutionEngine(MetaExecutionEngine):
         raise NotImplementedError
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_unique_count(self, column):
@@ -673,7 +673,7 @@ class ExecutionEngine(MetaExecutionEngine):
         raise NotImplementedError
 
     def get_column_median(self, column):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_quantiles(
