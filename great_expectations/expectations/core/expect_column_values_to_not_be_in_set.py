@@ -106,7 +106,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
             validation_dependencies, metrics, configuration, runtime_configuration
         )
 
-        mostly = configuration.get_success_kwargs().get(
+        mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
         if runtime_configuration:
