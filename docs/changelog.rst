@@ -10,6 +10,9 @@ Develop
 * [ENHANCEMENT] Add spark support for expect_compound_columns_to_be_unique(Thanks @tscottcoombes1)!
 * [ENHANCEMENT] Add expectation expect_table_columns_to_match_set
 * [ENHANCEMENT] Checkpoint run command now prints out details on each validation #1437
+* [BUGFIX] Links to Amazon S3 are compatible with virtual host-style access and path-style access
+* [ENHANCEMENT] Slack notifications can now display links to GCS-hosted DataDocs sites
+* [ENHANCEMENT] Public base URL can be configured for Data Docs sites
 
 0.12.2
 -----------------
