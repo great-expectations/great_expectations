@@ -1111,13 +1111,19 @@ class BaseDataContext:
         expectation_suite_name: Union[str, ExpectationSuite],
         in_memory_dataset: Any = None,  # TODO: should this be any to accommodate different engines?
     ):
-        execution_environment = self.get_execution_environment(
-            batch_definition.get("execution_environment")
+        execution_environment_name: str = batch_definition.get("execution_environment")
+        runtime_environment: Union[dict, None] = None
+        if in_memory_dataset is not None:
+            runtime_environment = {
+                "in_memory_dataset": in_memory_dataset,
+            }
+        execution_environment: ExecutionEnvironment = self.get_execution_environment(
+            execution_environment_name=execution_environment_name,
+            runtime_environment=runtime_environment
         )
         return execution_environment.get_validator(
             batch_definition=batch_definition,
-            expectation_suite_name=expectation_suite_name,
-            in_memory_dataset=in_memory_dataset,
+            expectation_suite_name=expectation_suite_name
         )
 
     def get_batch(
