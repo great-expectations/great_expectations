@@ -7,6 +7,7 @@ Changelog
 Develop
 -----------------
 
+
 0.12.3
 -----------------
 * [ENHANCEMENT] Add expect_compound_columns_to_be_unique and clarify multicolumn uniqueness
