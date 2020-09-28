@@ -1,7 +1,6 @@
 import logging
 from typing import List, Any
 
-from great_expectations.execution_environment.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
@@ -14,7 +13,7 @@ class PipelineDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
-        execution_environment: ExecutionEnvironment,
+        execution_environment,
         partitioners: dict = None,
         default_partitioner: str = None,
         assets: dict = None,

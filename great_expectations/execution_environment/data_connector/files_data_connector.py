@@ -3,7 +3,6 @@ import itertools
 import logging
 from typing import List, Dict
 
-from great_expectations.execution_environment.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
@@ -32,7 +31,7 @@ class FilesDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
-        execution_environment: ExecutionEnvironment,
+        execution_environment,
         partitioners: dict = None,
         default_partitioner: str = None,
         assets: dict = None,

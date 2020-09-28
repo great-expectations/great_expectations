@@ -524,12 +524,11 @@ class ExecutionEngine(MetaExecutionEngine):
         """
         raise NotImplementedError
 
-    def load_batch(self, batch_definition, in_memory_dataset=None):
+    def load_batch(self, batch_definition):
         """
         Load a Batch specified by the batch_definition.
 
         :param batch_definition:
-        :param in_memory_dataset:
         :return:
         """
         raise NotImplementedError

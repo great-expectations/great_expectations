@@ -471,19 +471,14 @@ Notes:
         )
 
     # TODO: <Alex></Alex>
-    def load_batch(
-        self, batch_definition: dict = None, in_memory_dataset=None
-    ):
+    def load_batch(self, batch_definition: dict = None):
         """With the help of the execution environment and data connector specified within the batch definition, builds a batch spec
         and utilizes it to load a batch using the appropriate file reader and the given file path.
 
                Args:
                    batch_definition (dict): A dictionary specifying the parameters used to build the batch
-                   in_memory_dataset (A Pandas DataFrame or None): Optional specification of an in memory Dataset used
-                                                                    to load a batch. A Data Asset name and partition ID
-                                                                    must still be passed via batch definition.
-
                """
+        in_memory_dataset = None
         if not batch_definition:
             logger.info("Loading a batch without a batch_definition")
             batch_definition = {}
@@ -508,6 +503,7 @@ Notes:
                 batch_definition=batch_definition
             )
             batch_id = batch_spec.to_id()
+            in_memory_dataset = batch_spec.get("in_memory_dataset")
         batch_markers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(

@@ -19,6 +19,8 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.types import ClassConfig
 from great_expectations.validator.validator import Validator
 from great_expectations.execution_environment.types import BatchSpec
+from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector.pipeline_data_connector import PipelineDataConnector
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +38,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         execution_engine=None,
         data_connectors=None,
         data_context=None,
+        in_memory_dataset: Any = None,
         **kwargs
     ):
         """
@@ -49,6 +52,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         """
         self._name = name
         self._data_context = data_context
+        self._in_memory_dataset = in_memory_dataset
         self._execution_engine = instantiate_class_from_config(
             config=execution_engine, runtime_environment={},
         )
@@ -64,6 +68,14 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
 
         self._data_connectors_cache = {}
         self._build_data_connectors()
+
+    @property
+    def in_memory_dataset(self) -> Any:
+        return self._in_memory_dataset
+
+    @in_memory_dataset.setter
+    def in_memory_dataset(self, in_memory_dataset: Any):
+        self._in_memory_dataset = in_memory_dataset
 
     def get_batch(
         self,
@@ -167,7 +179,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         for data_connector in self._execution_environment_config["data_connectors"].keys():
             self.get_data_connector(name=data_connector)
 
-    def get_data_connector(self, name: str, runtime_environment: Union[dict, None] = None):
+    def get_data_connector(self, name: str) -> DataConnector:
         """Get the (named) DataConnector from an ExecutionEnvironment)
 
         Args:
@@ -193,27 +205,26 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         data_connector_config: CommentedMap = dataConnectorConfigSchema.load(
             data_connector_config
         )
-        if runtime_environment is None:
-            runtime_environment = {}
-        data_connector = self._build_data_connector_from_config(
-            name=name, config=data_connector_config, runtime_environment=runtime_environment
+        data_connector: DataConnector = self._build_data_connector_from_config(
+            name=name, config=data_connector_config
         )
+        if isinstance(data_connector, PipelineDataConnector):
+            data_connector.in_memory_dataset = self.in_memory_dataset
         self._data_connectors_cache[name] = data_connector
         return data_connector
 
-    def _build_data_connector_from_config(self, name: str, config: CommentedMap, runtime_environment: dict = None):
+    def _build_data_connector_from_config(self, name: str, config: CommentedMap) -> DataConnector:
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, DataConnectorConfig):
             config: dict = dataConnectorConfigSchema.dump(config)
         config.update({"name": name})
-        runtime_environment.update({"execution_environment": self})
-        data_connector = instantiate_class_from_config(
+        module_name: str = "great_expectations.execution_environment.data_connector.data_connector"
+        runtime_environment: dict = {"execution_environment": self}
+        data_connector: DataConnector = instantiate_class_from_config(
             config=config,
             runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": "great_expectations.execution_environment.data_connector.data_connector"
-            },
+            config_defaults={"module_name": module_name},
         )
         if not data_connector:
             raise ge_exceptions.ClassInstantiationError(

@@ -619,9 +619,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         self._persist = kwargs.pop("persist", True)
         super().__init__(*args, **kwargs)
 
-    def load_batch(
-        self, batch_definition: dict = None, in_memory_dataset=None
-    ) -> Batch:
+    def load_batch(self, batch_definition: dict = None) -> Batch:
+        in_memory_dataset = None
         # We need to build a batch_markers to be used in the dataframe
         if not batch_definition:
             logger.info("loading a batch without a batch_definition")
@@ -643,6 +642,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 batch_definition=batch_definition
             )
             batch_id = batch_spec.to_id()
+            in_memory_dataset = batch_spec.get("in_memory_dataset")
 
         # We need to build a batch_markers to be used in the dataframe
         batch_markers = BatchMarkers(

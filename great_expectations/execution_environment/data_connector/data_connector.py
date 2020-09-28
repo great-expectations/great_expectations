@@ -11,7 +11,6 @@ from great_expectations.data_context.types.base import (
     PartitionerConfig,
     partitionerConfigSchema
 )
-from great_expectations.execution_environment.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
@@ -60,7 +59,7 @@ class DataConnector(object):
     def __init__(
         self,
         name: str,
-        execution_environment: ExecutionEnvironment,
+        execution_environment,
         partitioners: dict = None,
         default_partitioner: str = None,
         assets: dict = None,
