@@ -1,6 +1,7 @@
 import inspect
 import json
 import logging
+import warnings
 from datetime import datetime
 from functools import wraps
 from typing import List
@@ -1853,15 +1854,42 @@ Notes:
 
         return pd.Series(results, temp_df.index)
 
-    @DocInherit
-    @MetaPandasDataset.multicolumn_map_expectation
     def expect_multicolumn_values_to_be_unique(
         self,
         column_list,
+        mostly=None,
         ignore_row_if="all_values_are_missing",
         result_format=None,
-        row_condition=None,
-        condition_parser=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        deprecation_warning = (
+            "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
+            "expect_select_column_values_to_be_unique_within_record instead."
+        )
+        warnings.warn(
+            deprecation_warning, DeprecationWarning,
+        )
+
+        return self.expect_select_column_values_to_be_unique_within_record(
+            column_list=column_list,
+            mostly=mostly,
+            ignore_row_if=ignore_row_if,
+            result_format=result_format,
+            include_config=include_config,
+            catch_exceptions=catch_exceptions,
+            meta=meta,
+        )
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_select_column_values_to_be_unique_within_record(
+        self,
+        column_list,
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1892,3 +1920,19 @@ Notes:
                 expected sum of columns
         """
         return column_list.sum(axis=1) == sum_total
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_compound_columns_to_be_unique(
+        self,
+        column_list,
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # Do not dropna here, since we have separately dealt with na in decorator
+        # Invert boolean so that duplicates are False and non-duplicates are True
+        return ~column_list.duplicated(keep=False)

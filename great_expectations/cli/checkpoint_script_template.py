@@ -50,8 +50,8 @@ results = context.run_validation_operator(
 
 # take action based on results
 if not results["success"]:
-    print("Validation Failed!")
+    print("Validation failed!")
     sys.exit(1)
 
-print("Validation Succeeded!")
+print("Validation succeeded!")
 sys.exit(0)

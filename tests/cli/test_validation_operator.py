@@ -37,7 +37,7 @@ def test_validation_operator_run_interactive_golden_path(
         catch_exceptions=False,
     )
     stdout = result.stdout
-    assert "Validation Failed" in stdout
+    assert "Validation failed" in stdout
     assert result.exit_code == 1
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -156,7 +156,7 @@ def test_validation_operator_run_noninteractive_golden_path(
         catch_exceptions=False,
     )
     stdout = result.stdout
-    assert "Validation Failed" in stdout
+    assert "Validation failed" in stdout
     assert result.exit_code == 1
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
