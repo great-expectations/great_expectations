@@ -3,7 +3,6 @@ import datetime
 import inspect
 import json
 import logging
-import uuid
 from collections import OrderedDict
 from functools import reduce, wraps
 from io import StringIO
@@ -14,7 +13,6 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
-from great_expectations.core.id_dict import IDDict
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec
@@ -619,13 +617,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         self._persist = kwargs.pop("persist", True)
         super().__init__(*args, **kwargs)
 
-    def load_batch(
-        self, batch_definition: dict = None, batch_spec: dict = None, in_memory_dataset=None
-    ) -> Batch:
+    def load_batch(self, batch_definition: dict = None) -> Batch:
+        in_memory_dataset = None
         # We need to build a batch_markers to be used in the dataframe
-        if batch_spec and batch_definition:
-            assert isinstance(batch_spec, IDDict)
-        elif batch_spec and not batch_definition:
+        if not batch_definition:
             logger.info("loading a batch without a batch_definition")
             batch_definition = {}
         else:
@@ -644,6 +639,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             batch_spec = data_connector.build_batch_spec(
                 batch_definition=batch_definition
             )
+            batch_id = batch_spec.to_id()
+            in_memory_dataset = batch_spec.get("in_memory_dataset")
 
         # We need to build a batch_markers to be used in the dataframe
         batch_markers = BatchMarkers(
@@ -653,8 +650,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 )
             }
         )
-
-        batch_id = batch_spec.to_id()
 
         if in_memory_dataset is not None:
             # TODO: <Alex>There should be no need to specify "partition_name" -- None implies "latest" (first in sorted order).</Alex>

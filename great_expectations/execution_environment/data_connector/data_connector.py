@@ -11,8 +11,8 @@ from great_expectations.data_context.types.base import (
     PartitionerConfig,
     partitionerConfigSchema
 )
-from great_expectations.execution_environment.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
+from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.util import nested_update
@@ -43,7 +43,6 @@ class DataConnector(object):
     specific batch of data, GE can store snapshots of batches or store metadata from an
     external data version control system.
     """
-
     _default_reader_options: dict = {}
     # TODO: <Alex>Is this needed?</Alex>
     _batch_spec_type: BatchSpec = BatchSpec
@@ -60,7 +59,7 @@ class DataConnector(object):
     def __init__(
         self,
         name: str,
-        execution_environment: ExecutionEnvironment,
+        execution_environment,
         partitioners: dict = None,
         default_partitioner: str = None,
         assets: dict = None,
@@ -71,9 +70,6 @@ class DataConnector(object):
         self._name = name
 
         self._data_connector_config = kwargs
-
-        # TODO: <Alex>Is this needed?</Alex>
-        # self._data_asset_iterators = {}
 
         # TODO: <Alex>Is this needed?  Where do these batch_definition_come_from and what are the values?</Alex>
         batch_definition_defaults = batch_definition_defaults or {}
@@ -157,6 +153,13 @@ class DataConnector(object):
                 cached_partitions.append(partition)
             self._partitions_cache[data_asset_name] = cached_partitions
 
+    def reset_partitions_cache(self, data_asset_name: str = None):
+        if data_asset_name is None:
+            self._partitions_cache = {}
+        else:
+            if data_asset_name in self.partitions_cache:
+                self._partitions_cache[data_asset_name] = []
+
     def get_partitioner(self, name: str):
         """Get the (named) Partitioner from a DataConnector)
 
@@ -206,125 +209,33 @@ class DataConnector(object):
             )
         return partitioner
 
-    def get_available_data_asset_names(self) -> List[str]:
-        """Return the list of asset names known by this data connector.
-
-        Returns:
-            A list of available names
-        """
-        raise NotImplementedError
-
-    def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
-        raise NotImplementedError
-
-    # TODO: <Alex>This method is not useful -- get_available_partitions provides the complete information.</Alex>
-    # def get_available_partition_names(self, data_asset_name: str = None) -> List[str]:
-    #     return [
-    #         partition.name for partition in self.get_available_partitions(
-    #             partition_name=None,
-    #             data_asset_name=data_asset_name
-    #         )
-    #     ]
+    def get_partitioner_for_data_asset(self, data_asset_name: str = None) -> Partitioner:
+        partitioner_name: str
+        data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
+        if data_asset_config_exists and self.assets[data_asset_name].get("partitioner"):
+            partitioner_name = self.assets[data_asset_name]["partitioner"]
+        else:
+            partitioner_name = self.default_partitioner
+        partitioner: Partitioner
+        if partitioner_name is None:
+            partitioner = NoOpPartitioner(
+                name="NoOpPartitioner",
+                data_connector=self,
+                sorters=None,
+                allow_multipart_partitions=False,
+                config_params=None,
+                module_name="great_expectations.execution_environment.data_connector.partitioner",
+                class_name="NoOpPartitioner",
+            )
+        else:
+            partitioner = self.get_partitioner(name=partitioner_name)
+        return partitioner
 
     def get_config(self) -> dict:
         # TODO: <Alex>Do we want to make ExecutionEnvironment._execution_environment_config["data_connectors"] or some convenience method publicly accessible to avoid PyCharm warnings?</Alex>
         conf: dict = self._execution_environment._execution_environment_config["data_connectors"][self.name]
         conf.update(self._data_connector_config)
         return conf
-
-    # TODO: <Alex>Without source (e.g., path) specified in batch_spec, ExecutionEngine cannot use batch_spec to load data; hence, should we discontinue the iterator / next batch_spec usecase?</Alex>
-    # def get_iterator(self, data_asset_name=None, **kwargs):
-    #     if not data_asset_name:
-    #         raise ValueError("Please provide data_asset_name.")
-    #
-    #     if data_asset_name in self._data_asset_iterators:
-    #         data_asset_iterator, passed_kwargs = self._data_asset_iterators[
-    #             data_asset_name
-    #         ]
-    #         if passed_kwargs != kwargs:
-    #             logger.warning(
-    #                 "Asked to yield batch_spec using different supplemental kwargs. Please reset iterator to "
-    #                 "use different supplemental kwargs."
-    #             )
-    #         return data_asset_iterator
-    #     else:
-    #         self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
-    #         return self._data_asset_iterators[data_asset_name][0]
-    #
-    # def yield_batch_spec(self, data_asset_name, batch_definition, batch_spec):
-    #     if data_asset_name not in self._data_asset_iterators:
-    #         self.reset_iterator(
-    #             data_asset_name=data_asset_name,
-    #             batch_definition=batch_definition,
-    #             batch_spec=batch_spec,
-    #         )
-    #     data_asset_iterator, passed_batch_definition = self._data_asset_iterators[
-    #         data_asset_name
-    #     ]
-    #     if passed_batch_definition != batch_definition:
-    #         logger.warning(
-    #             "Asked to yield batch_spec using different supplemental batch_definition. Resetting iterator to "
-    #             "use new supplemental batch_definition."
-    #         )
-    #         self.reset_iterator(
-    #             data_asset_name=data_asset_name,
-    #             batch_definition=batch_definition,
-    #             batch_spec=batch_spec,
-    #         )
-    #         data_asset_iterator, passed_batch_definition = self._data_asset_iterators[
-    #             data_asset_name
-    #         ]
-    #     try:
-    #         batch_spec = next(data_asset_iterator)
-    #         return batch_spec
-    #     except StopIteration:
-    #         self.reset_iterator(
-    #             data_asset_name=data_asset_name,
-    #             batch_definition=batch_definition,
-    #             batch_spec=batch_spec,
-    #         )
-    #         data_asset_iterator, passed_batch_definition = self._data_asset_iterators[
-    #             data_asset_name
-    #         ]
-    #         if passed_batch_definition != batch_definition:
-    #             logger.warning(
-    #                 "Asked to yield batch_spec using different batch parameters. Resetting iterator to "
-    #                 "use different batch parameters."
-    #             )
-    #             self.reset_iterator(
-    #                 data_asset_name=data_asset_name,
-    #                 batch_definition=batch_definition,
-    #                 batch_spec=batch_spec,
-    #             )
-    #             data_asset_iterator, passed_batch_definition = self._data_asset_iterators[data_asset_name]
-    #         try:
-    #             batch_spec = next(data_asset_iterator)
-    #             return batch_spec
-    #         except StopIteration:
-    #             # This is a degenerate case in which no batch_definition are actually being generated
-    #             logger.warning(
-    #                 "No batch_spec found for data_asset_name %s" % data_asset_name
-    #             )
-    #             return {}
-    #     except TypeError:
-    #         # If we do not actually have an iterator we can generate, even after resetting, then just return empty dict.
-    #         logger.warning(
-    #             "Unable to generate batch_spec for data_asset_name %s" % data_asset_name
-    #         )
-    #         return {}
-    #
-    # def reset_iterator(self, data_asset_name, batch_definition, batch_spec):
-    #     self._data_asset_iterators[data_asset_name] = (
-    #         self._get_iterator(
-    #             data_asset_name=data_asset_name,
-    #             batch_definition=batch_definition,
-    #             batch_spec=batch_spec,
-    #         ),
-    #         batch_definition,
-    #     )
-    #
-    # def _get_iterator(self, data_asset_name, batch_definition, batch_spec):
-    #     raise NotImplementedError
 
     def build_batch_spec(self, batch_definition: dict) -> BatchSpec:
         if "data_asset_name" not in batch_definition:
@@ -355,16 +266,62 @@ class DataConnector(object):
         batch_spec_passthrough: dict = batch_definition.get("batch_spec_passthrough", {})
         batch_spec_scaffold: dict = nested_update(batch_spec_defaults, batch_spec_passthrough)
 
-        batch_spec_scaffold["data_asset_name"] = batch_definition.get("data_asset_name")
+        data_asset_name: str = batch_definition.get("data_asset_name")
+        batch_spec_scaffold["data_asset_name"] = data_asset_name
 
         batch_spec_scaffold["execution_environment"] = self._execution_environment.name
 
-        batch_spec: BatchSpec = self._build_batch_spec(
-            batch_definition=batch_definition, batch_spec=batch_spec_scaffold
+        partition_name: str = batch_definition.get("partition_name")
+        # TODO: <Alex>If partition_name is not specified in batch_definition, then assume "latest" (or "most recent" as defined by the first element in the sorted list of partitions).</Alex>
+        partitions: List[Partition] = self.get_available_partitions(
+            partition_name=partition_name, data_asset_name=data_asset_name
+        )
+        if len(partitions) == 0:
+            raise ge_exceptions.BatchSpecError(
+                message=f'Unable to build batch_spec for data asset "{data_asset_name}".'
+            )
+
+        batch_spec: BatchSpec = self.build_batch_spec_from_partitions(
+            partitions=partitions, batch_definition=batch_definition, batch_spec=batch_spec_scaffold
         )
 
         return batch_spec
 
-    # TODO: will need to handle partition_definition for in-memory df case
-    def _build_batch_spec(self, batch_definition: dict, batch_spec: dict) -> BatchSpec:
-        return BatchSpec(batch_spec)
+    def build_batch_spec_from_partitions(
+        self,
+        partitions: List[Partition],
+        batch_definition: dict,
+        batch_spec: dict
+    ) -> BatchSpec:
+        raise NotImplementedError
+
+    def get_available_data_asset_names(self) -> List[str]:
+        """Return the list of asset names known by this data connector.
+
+        Returns:
+            A list of available names
+        """
+        raise NotImplementedError
+
+    def get_available_partitions(
+        self,
+        partition_name: str = None,
+        data_asset_name: str = None,
+        repartition: bool = False
+    ) -> List[Partition]:
+        partitioner: Partitioner = self.get_partitioner_for_data_asset(data_asset_name=data_asset_name)
+        return self._get_available_partitions(
+            partitioner=partitioner,
+            partition_name=partition_name,
+            data_asset_name=data_asset_name,
+            repartition=repartition
+        )
+
+    def _get_available_partitions(
+        self,
+        partitioner: Partitioner,
+        partition_name: str = None,
+        data_asset_name: str = None,
+        repartition: bool = False
+    ) -> List[Partition]:
+        raise NotImplementedError

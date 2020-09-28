@@ -11,7 +11,7 @@ import sys
 import uuid
 import warnings
 import webbrowser
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Any
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
@@ -37,6 +37,7 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
+from ruamel.yaml.comments import CommentedMap
 from great_expectations.data_context.types.base import (  # TODO: deprecate
     CURRENT_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
@@ -62,14 +63,16 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource  # TODO: deprecate
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment import ExecutionEnvironment
+from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 from great_expectations.core.id_dict import BatchSpec
+from great_expectations.core.batch import Batch
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -1086,28 +1089,41 @@ class BaseDataContext:
     def _get_batch(
         self,
         batch_definition: dict,
-        in_memory_dataset: any = None,  # TODO: should this be any to accommodate different engines?
-    ) -> ExecutionEngine:
-        execution_environment = self.get_execution_environment(
-            batch_definition.get("execution_environment")
+        in_memory_dataset: Any = None,  # TODO: should this be any to accommodate different engines?
+    ) -> Batch:
+        execution_environment_name: str = batch_definition.get("execution_environment")
+        runtime_environment: Union[dict, None] = None
+        if in_memory_dataset is not None:
+            runtime_environment = {
+                "in_memory_dataset": in_memory_dataset,
+            }
+        execution_environment: ExecutionEnvironment = self.get_execution_environment(
+            execution_environment_name=execution_environment_name,
+            runtime_environment=runtime_environment
         )
         return execution_environment.get_batch(
-            batch_definition=batch_definition, in_memory_dataset=in_memory_dataset
+            batch_definition=batch_definition
         )
 
     def get_validator(
         self,
         batch_definition,
         expectation_suite_name: Union[str, ExpectationSuite],
-        in_memory_dataset: any = None,  # TODO: should this be any to accommodate different engines?
+        in_memory_dataset: Any = None,  # TODO: should this be any to accommodate different engines?
     ):
-        execution_environment = self.get_execution_environment(
-            batch_definition.get("execution_environment")
+        execution_environment_name: str = batch_definition.get("execution_environment")
+        runtime_environment: Union[dict, None] = None
+        if in_memory_dataset is not None:
+            runtime_environment = {
+                "in_memory_dataset": in_memory_dataset,
+            }
+        execution_environment: ExecutionEnvironment = self.get_execution_environment(
+            execution_environment_name=execution_environment_name,
+            runtime_environment=runtime_environment
         )
         return execution_environment.get_validator(
             batch_definition=batch_definition,
-            expectation_suite_name=expectation_suite_name,
-            in_memory_dataset=in_memory_dataset,
+            expectation_suite_name=expectation_suite_name
         )
 
     def get_batch(
@@ -1444,12 +1460,13 @@ class BaseDataContext:
         return datasource
 
     def get_execution_environment(
-        self, execution_environment_name: str = "default"
+        self, execution_environment_name: str = "default", runtime_environment: Union[dict, None] = None
     ) -> ExecutionEnvironment:
         """Get the named execution_environment
 
         Args:
             execution_environment_name (str): the name of the execution_environment from the configuration
+            runtime_environment (dict)
 
         Returns:
             execution_environment (ExecutionEnvironment)
@@ -1460,7 +1477,7 @@ class BaseDataContext:
             execution_environment_name
             in self._project_config_with_variables_substituted.execution_environments
         ):
-            execution_environment_config = copy.deepcopy(
+            execution_environment_config: dict = copy.deepcopy(
                 self._project_config_with_variables_substituted.execution_environments[
                     execution_environment_name
                 ]
@@ -1471,26 +1488,36 @@ class BaseDataContext:
                 f"invalid "
                 f"configuration."
             )
-        execution_environment_config = executionEnvironmentConfigSchema.load(
+        execution_environment_config: CommentedMap = executionEnvironmentConfigSchema.load(
             execution_environment_config
         )
-        execution_environment = self._build_execution_environment_from_config(
-            name=execution_environment_name, config=execution_environment_config
+        if runtime_environment is None:
+            runtime_environment = {}
+        execution_environment: ExecutionEnvironment = self._build_execution_environment_from_config(
+            name=execution_environment_name,
+            config=execution_environment_config,
+            runtime_environment=runtime_environment
         )
         self._cached_execution_environments[
             execution_environment_name
         ] = execution_environment
         return execution_environment
 
-    def _build_execution_environment_from_config(self, name, config):
+    def _build_execution_environment_from_config(
+        self,
+        name: str,
+        config: CommentedMap,
+        runtime_environment: dict = None
+    ) -> ExecutionEnvironment:
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, ExecutionEnvironmentConfig):
-            config = executionEnvironmentConfigSchema.dump(config)
+            config: dict = executionEnvironmentConfigSchema.dump(config)
         config.update({"name": name})
-        module_name = "great_expectations.execution_environment"
-        execution_environment = instantiate_class_from_config(
+        module_name: str = "great_expectations.execution_environment"
+        runtime_environment.update({"data_context": self})
+        execution_environment: ExecutionEnvironment = instantiate_class_from_config(
             config=config,
-            runtime_environment={"data_context": self},
+            runtime_environment=runtime_environment,
             config_defaults={"module_name": module_name},
         )
         if not execution_environment:
@@ -1500,6 +1527,34 @@ class BaseDataContext:
                 class_name=config["class_name"],
             )
         return execution_environment
+
+    def get_available_partitions(
+        self,
+        execution_environment_name: str,
+        data_connector_name: str,
+        partition_name: str = None,
+        data_asset_name: str = None,
+        in_memory_dataset: Any = None,
+        repartition: bool = False
+    ) -> List[Partition]:
+        runtime_environment: Union[dict, None] = None
+        if in_memory_dataset is not None:
+            runtime_environment = {
+                "in_memory_dataset": in_memory_dataset,
+            }
+        execution_environment: ExecutionEnvironment = self.get_execution_environment(
+            execution_environment_name=execution_environment_name,
+            runtime_environment=runtime_environment
+        )
+        data_connector: DataConnector = execution_environment.get_data_connector(
+            name=data_connector_name,
+        )
+        available_partitions: List[Partition] = data_connector.get_available_partitions(
+            partition_name=partition_name,
+            data_asset_name=data_asset_name,
+            repartition=repartition
+        )
+        return available_partitions
 
     def list_expectation_suites(self):
         """Return a list of available expectation suite names."""

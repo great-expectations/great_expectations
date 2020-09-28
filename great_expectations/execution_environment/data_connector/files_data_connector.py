@@ -1,10 +1,11 @@
 from pathlib import Path
 import itertools
 import logging
-from typing import List
+from typing import List, Dict
 
-from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
+from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.types import PathBatchSpec
 import great_expectations.exceptions as ge_exceptions
@@ -29,15 +30,16 @@ KNOWN_EXTENSIONS = [
 class FilesDataConnector(DataConnector):
     def __init__(
         self,
-        name,
+        name: str,
         execution_environment,
-        partitioners=None,
-        default_partitioner=None,
-        assets=None,
-        batch_definition_defaults=None,
-        known_extensions=None,
-        reader_options=None,
-        reader_method=None,
+        partitioners: dict = None,
+        default_partitioner: str = None,
+        assets: dict = None,
+        config_params: dict = None,
+        batch_definition_defaults: dict = None,
+        known_extensions: list = None,
+        reader_options: dict = None,
+        reader_method: str = None,
         **kwargs
     ):
         # TODO: <Alex>Does "known_extensions" need to be in Configuration?</Alex>
@@ -48,6 +50,7 @@ class FilesDataConnector(DataConnector):
             partitioners=partitioners,
             default_partitioner=default_partitioner,
             assets=assets,
+            config_params=config_params,
             batch_definition_defaults=batch_definition_defaults,
             **kwargs
         )
@@ -85,21 +88,38 @@ class FilesDataConnector(DataConnector):
             return list(self.assets.keys())
         return [Path(path).stem for path in self._get_file_paths_for_data_asset(data_asset_name=None)]
 
-    def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
-        partitioner_name: str
-        partitioner: Partitioner
+    def _get_available_partitions(
+        self,
+        partitioner: Partitioner,
+        partition_name: str = None,
+        data_asset_name: str = None,
+        repartition: bool = None
+    ) -> List[Partition]:
+        paths: List[str] = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
+        if isinstance(partitioner, NoOpPartitioner):
+            default_datasets: List[Dict[str, str]] = [
+                {
+                    "partition_name": Path(path).stem,
+                    "data_reference": path
+                }
+                for path in paths
+            ]
+            default_data_asset_name: str = data_asset_name or Partitioner.DEFAULT_DATA_ASSET_NAME
+            return partitioner.get_available_partitions(
+                partition_name=partition_name,
+                data_asset_name=data_asset_name,
+                repartition=repartition,
+                pipeline_data_asset_name=default_data_asset_name,
+                pipeline_datasets=default_datasets
+            )
         data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
-        if data_asset_config_exists and self.assets[data_asset_name].get("partitioner"):
-            partitioner_name = self.assets[data_asset_name]["partitioner"]
-        else:
-            partitioner_name = self.default_partitioner
-        partitioner = self.get_partitioner(name=partitioner_name)
-        if data_asset_config_exists:
-            partitioner.auto_discover_assets = False
-        else:
-            partitioner.auto_discover_assets = True
-        partitioner.paths = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
-        return partitioner.get_available_partitions(partition_name=partition_name, data_asset_name=data_asset_name)
+        auto_discover_assets: bool = not data_asset_config_exists
+        return partitioner.get_available_partitions(
+            partition_name=partition_name,
+            data_asset_name=data_asset_name,
+            paths=paths,
+            auto_discover_assets=auto_discover_assets
+        )
 
     def _normalize_directory_path(self, dir_path: str) -> str:
         # If directory is a relative path, interpret it as relative to the data context's
@@ -137,7 +157,6 @@ class FilesDataConnector(DataConnector):
     def _get_data_asset_directives(self, data_asset_name: str = None) -> dict:
         glob_directive: str
         base_directory: str
-        path_list: list
         if (
             data_asset_name
             and self.assets
@@ -189,36 +208,23 @@ class FilesDataConnector(DataConnector):
             )
         )
 
-    def _build_batch_spec(self, batch_definition: dict, batch_spec: dict = None) -> dict:
+    def build_batch_spec_from_partitions(
+        self,
+        partitions: List[Partition],
+        batch_definition: dict,
+        batch_spec: dict = None
+    ) -> PathBatchSpec:
         """
         Args:
+            partitions:
             batch_definition:
             batch_spec:
         Returns:
             batch_spec
         """
-        if batch_spec is None:
-            batch_spec = {}
-
-        try:
-            data_asset_name: str = batch_definition.pop("data_asset_name")
-        except KeyError:
-            raise ge_exceptions.BatchSpecError(
-                message="Unable to build BatchKwargs: no data_asset_name provided in batch_definition."
-            )
-
-        partition_name: str = batch_definition.get("partition_name")
-        # TODO: <Alex>If partition_name is not specified in batch_definition, then assume "latest" (or "most recent" as defined by the first element in the sorted list of partitions).</Alex>
-        partitions: List[Partition] = self.get_available_partitions(
-            partition_name=partition_name, data_asset_name=data_asset_name
-        )
-        if len(partitions) == 0:
-            raise ge_exceptions.BatchSpecError(
-                message=f'Unable to build batch_spec for data asset "{data_asset_name}".'
-            )
         # TODO: <Alex>If the list has multiple elements, we are using the first one (TBD/TODO multifile config / multibatch)</Alex>
         path: str = str(partitions[0].source)
-        return self._build_batch_spec_from_path(path, batch_definition, batch_spec)
+        return self._build_batch_spec_from_path(path=path, batch_definition=batch_definition, batch_spec=batch_spec)
 
     def _build_batch_spec_from_path(self, path: str, batch_definition: dict, batch_spec: dict) -> PathBatchSpec:
         batch_spec["path"] = path

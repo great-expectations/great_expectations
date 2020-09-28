@@ -524,12 +524,11 @@ class ExecutionEngine(MetaExecutionEngine):
         """
         raise NotImplementedError
 
-    def load_batch(self, batch_definition, in_memory_dataset=None):
+    def load_batch(self, batch_definition):
         """
         Load a Batch specified by the batch_definition.
 
         :param batch_definition:
-        :param in_memory_dataset:
         :return:
         """
         raise NotImplementedError
@@ -657,11 +656,11 @@ class ExecutionEngine(MetaExecutionEngine):
         raise NotImplementedError
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_unique_count(self, column):
@@ -673,7 +672,7 @@ class ExecutionEngine(MetaExecutionEngine):
         raise NotImplementedError
 
     def get_column_median(self, column):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_quantiles(

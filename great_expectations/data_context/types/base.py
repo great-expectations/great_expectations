@@ -32,7 +32,7 @@ DEFAULT_USAGE_STATISTICS_URL = (
 class AssetConfig(DictDot):
     def __init__(
         self,
-        partitioner,
+        partitioner=None,
         config_params=None,
         **kwargs,
     ):
@@ -54,7 +54,7 @@ class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    partitioner = fields.String(required=False)
+    partitioner = fields.String(required=False, allow_none=True)
 
     config_params = fields.Dict(allow_none=True)
 
@@ -202,8 +202,8 @@ class DataConnectorConfig(DictDot):
     def __init__(
         self,
         class_name,
-        partitioners,
-        default_partitioner,
+        partitioners=None,
+        default_partitioner=None,
         assets=None,
         module_name=None,
         config_params=None,
@@ -251,8 +251,8 @@ class DataConnectorConfigSchema(Schema):
     module_name = fields.String(missing="great_expectations.execution_environment.data_connector")
 
     default_partitioner = fields.String(
-        required=True,
-        allow_none=False,
+        required=False,
+        allow_none=True,
     )
 
     partitioners = fields.Dict(
