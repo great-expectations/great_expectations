@@ -13,7 +13,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.execution_environment.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.pipeline_partitioner import PipelinePartitioner
+from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.util import nested_update
@@ -219,14 +219,14 @@ class DataConnector(object):
             partitioner_name = self.default_partitioner
         partitioner: Partitioner
         if partitioner_name is None:
-            partitioner = PipelinePartitioner(
-                name="PipelinePartitioner",
+            partitioner = NoOpPartitioner(
+                name="NoOpPartitioner",
                 data_connector=self,
                 sorters=None,
                 allow_multipart_partitions=False,
                 config_params=None,
                 module_name="great_expectations.execution_environment.data_connector.partitioner",
-                class_name="PipelinePartitioner",
+                class_name="NoOpPartitioner",
             )
         else:
             partitioner = self.get_partitioner(name=partitioner_name)

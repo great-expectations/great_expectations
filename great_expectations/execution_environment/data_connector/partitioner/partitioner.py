@@ -21,6 +21,9 @@ logger = logging.getLogger(__name__)
 
 
 class Partitioner(object):
+    DEFAULT_DATA_ASSET_NAME: str = "IN_MEMORY_DATA_ASSET"
+    DEFAULT_PARTITION_NAME: str = "IN_MEMORY_PARTITION"
+
     _batch_spec_type: BatchSpec = BatchSpec  #TODO : is this really needed?
     # TODO: <Alex>What makes sense to have here, or is this even needed?</Alex>
     recognized_batch_definition_keys: set = {

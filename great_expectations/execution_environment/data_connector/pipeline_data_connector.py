@@ -5,15 +5,12 @@ from great_expectations.execution_environment.execution_environment import Execu
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
-from great_expectations.core.id_dict import BatchSpec
+from great_expectations.execution_environment.types.batch_spec import InMemoryBatchSpec
 
 logger = logging.getLogger(__name__)
 
 
 class PipelineDataConnector(DataConnector):
-    DEFAULT_DATA_ASSET_NAME: str = "IN_MEMORY_DATA_ASSET"
-    DEFAULT_PARTITION_NAME: str = "IN_MEMORY_PARTITION"
-
     def __init__(
         self,
         name: str,
@@ -79,7 +76,7 @@ class PipelineDataConnector(DataConnector):
         )
 
     def _get_data_asset_directives(self, data_asset_name: str, partition_name: str) -> dict:
-        partition_name = partition_name or self.DEFAULT_PARTITION_NAME
+        partition_name = partition_name or Partitioner.DEFAULT_PARTITION_NAME
         if (
             data_asset_name
             and self.assets
@@ -89,7 +86,7 @@ class PipelineDataConnector(DataConnector):
         ):
             partition_name = self.assets[data_asset_name]["config_params"].get("partition_name", partition_name)
         elif not data_asset_name:
-            data_asset_name = self.DEFAULT_DATA_ASSET_NAME
+            data_asset_name = Partitioner.DEFAULT_DATA_ASSET_NAME
         return {"data_asset_name": data_asset_name, "partition_name": partition_name}
 
     def build_batch_spec_from_partitions(
@@ -97,7 +94,7 @@ class PipelineDataConnector(DataConnector):
         partitions: List[Partition],
         batch_definition: dict,
         batch_spec: dict = None
-    ) -> BatchSpec:
+    ) -> InMemoryBatchSpec:
         """
         Args:
             partitions:
@@ -119,9 +116,9 @@ class PipelineDataConnector(DataConnector):
         in_memory_dataset: Any,
         batch_definition: dict,
         batch_spec: dict
-    ) -> BatchSpec:
+    ) -> InMemoryBatchSpec:
         batch_spec["in_memory_dataset"] = in_memory_dataset
         batch_spec = self._execution_environment.execution_engine.process_batch_definition(
             batch_definition=batch_definition, batch_spec=batch_spec
         )
-        return BatchSpec(batch_spec)
+        return InMemoryBatchSpec(batch_spec)

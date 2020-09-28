@@ -4,9 +4,8 @@ import logging
 from typing import List, Dict
 
 from great_expectations.execution_environment.execution_environment import ExecutionEnvironment
-from great_expectations.execution_environment.data_connector.pipeline_data_connector import PipelineDataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
-from great_expectations.execution_environment.data_connector.partitioner.pipeline_partitioner import PipelinePartitioner
+from great_expectations.execution_environment.data_connector.partitioner.no_op_partitioner import NoOpPartitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.types import PathBatchSpec
@@ -98,21 +97,21 @@ class FilesDataConnector(DataConnector):
         repartition: bool = None
     ) -> List[Partition]:
         paths: List[str] = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
-        if isinstance(partitioner, PipelinePartitioner):
-            pipeline_datasets: List[Dict[str, str]] = [
+        if isinstance(partitioner, NoOpPartitioner):
+            default_datasets: List[Dict[str, str]] = [
                 {
                     "partition_name": path,
                     "data_reference": path
                 }
                 for path in paths
             ]
-            pipeline_data_asset_name: str = data_asset_name or PipelineDataConnector.DEFAULT_DATA_ASSET_NAME
+            default_data_asset_name: str = data_asset_name or Partitioner.DEFAULT_DATA_ASSET_NAME
             return partitioner.get_available_partitions(
                 partition_name=partition_name,
                 data_asset_name=data_asset_name,
                 repartition=repartition,
-                pipeline_data_asset_name=pipeline_data_asset_name,
-                pipeline_datasets=pipeline_datasets
+                pipeline_data_asset_name=default_data_asset_name,
+                pipeline_datasets=default_datasets
             )
         data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)
         auto_discover_assets: bool = not data_asset_config_exists
