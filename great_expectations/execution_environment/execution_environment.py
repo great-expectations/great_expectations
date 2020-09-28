@@ -167,7 +167,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         for data_connector in self._execution_environment_config["data_connectors"].keys():
             self.get_data_connector(name=data_connector)
 
-    def get_data_connector(self, name: str, runtime_environment: dict = {}):
+    def get_data_connector(self, name: str, runtime_environment: Union[dict, None] = None):
         """Get the (named) DataConnector from an ExecutionEnvironment)
 
         Args:
@@ -193,6 +193,8 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         data_connector_config: CommentedMap = dataConnectorConfigSchema.load(
             data_connector_config
         )
+        if runtime_environment is None:
+            runtime_environment = {}
         data_connector = self._build_data_connector_from_config(
             name=name, config=data_connector_config, runtime_environment=runtime_environment
         )
