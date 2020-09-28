@@ -80,12 +80,9 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
 
     def get_batch(
         self,
-        batch_definition: dict,
-        in_memory_dataset: Any = None,  # TODO: should this be any to accommodate the different engines?
+        batch_definition: dict
     ) -> Batch:
-        self.execution_engine.load_batch(
-            batch_definition=batch_definition, in_memory_dataset=in_memory_dataset
-        )
+        self.execution_engine.load_batch(batch_definition=batch_definition)
         return self.execution_engine.loaded_batch
 
     def get_validator(

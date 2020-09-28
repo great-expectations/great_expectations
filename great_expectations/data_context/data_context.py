@@ -1102,7 +1102,7 @@ class BaseDataContext:
             runtime_environment=runtime_environment
         )
         return execution_environment.get_batch(
-            batch_definition=batch_definition, in_memory_dataset=in_memory_dataset
+            batch_definition=batch_definition
         )
 
     def get_validator(
