@@ -1515,9 +1515,11 @@ class BaseDataContext:
         execution_environment: ExecutionEnvironment = self.get_execution_environment(
             execution_environment_name=execution_environment_name
         )
-        runtime_environment: dict = {
-            "in_memory_dataset": in_memory_dataset,
-        }
+        runtime_environment: Union[dict, None] = None
+        if in_memory_dataset is not None:
+            runtime_environment = {
+                "in_memory_dataset": in_memory_dataset,
+            }
         data_connector: DataConnector = execution_environment.get_data_connector(
             name=data_connector_name,
             runtime_environment=runtime_environment
