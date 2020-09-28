@@ -1,5 +1,5 @@
 import logging
-from typing import List, Any
+from typing import Union, List, Dict, Any
 from great_expectations.execution_environment.data_connector.partitioner.partitioner import Partitioner
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 
@@ -30,15 +30,15 @@ class PipelinePartitioner(Partitioner):
         self,
         data_asset_name: str = None,
         *,
-        in_memory_dataset: Any = None,
         pipeline_data_asset_name: str = None,
-        pipeline_partition_name: str = None,
+        pipeline_datasets: List[Dict[str, Union[str, Any]]] = None,
     ) -> List[Partition]:
         return [
             Partition(
-                name=pipeline_partition_name,
-                definition={pipeline_partition_name: in_memory_dataset},
-                source=in_memory_dataset,
+                name=pipeline_dataset["partition_name"],
+                definition={pipeline_dataset["partition_name"]: pipeline_dataset["data_reference"]},
+                source=pipeline_dataset["data_reference"],
                 data_asset_name=data_asset_name or pipeline_data_asset_name
             )
+            for pipeline_dataset in pipeline_datasets
         ]
