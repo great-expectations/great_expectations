@@ -18,9 +18,10 @@ from ruamel.yaml.comments import CommentedMap
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.types import ClassConfig
 from great_expectations.validator.validator import Validator
-from great_expectations.execution_environment.types import BatchSpec
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.pipeline_data_connector import PipelineDataConnector
+from great_expectations.execution_environment.types import BatchSpec
+from great_expectations.core.batch import Batch
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +82,7 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         self,
         batch_definition: dict,
         in_memory_dataset: Any = None,  # TODO: should this be any to accommodate the different engines?
-    ):
+    ) -> Batch:
         self.execution_engine.load_batch(
             batch_definition=batch_definition, in_memory_dataset=in_memory_dataset
         )

@@ -63,7 +63,6 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource  # TODO: deprecate
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment import ExecutionEnvironment
 from great_expectations.execution_environment.data_connector.data_connector import DataConnector
 from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
@@ -73,6 +72,7 @@ from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 from great_expectations.core.id_dict import BatchSpec
+from great_expectations.core.batch import Batch
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -1090,9 +1090,16 @@ class BaseDataContext:
         self,
         batch_definition: dict,
         in_memory_dataset: Any = None,  # TODO: should this be any to accommodate different engines?
-    ) -> ExecutionEngine:
-        execution_environment = self.get_execution_environment(
-            execution_environment_name=batch_definition.get("execution_environment")
+    ) -> Batch:
+        execution_environment_name: str = batch_definition.get("execution_environment")
+        runtime_environment: Union[dict, None] = None
+        if in_memory_dataset is not None:
+            runtime_environment = {
+                "in_memory_dataset": in_memory_dataset,
+            }
+        execution_environment: ExecutionEnvironment = self.get_execution_environment(
+            execution_environment_name=execution_environment_name,
+            runtime_environment=runtime_environment
         )
         return execution_environment.get_batch(
             batch_definition=batch_definition, in_memory_dataset=in_memory_dataset

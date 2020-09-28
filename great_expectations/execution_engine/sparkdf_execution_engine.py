@@ -3,7 +3,6 @@ import datetime
 import inspect
 import json
 import logging
-import uuid
 from collections import OrderedDict
 from functools import reduce, wraps
 from io import StringIO
@@ -14,7 +13,6 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
-from great_expectations.core.id_dict import IDDict
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.execution_environment.types import PathBatchSpec, S3BatchSpec

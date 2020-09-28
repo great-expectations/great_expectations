@@ -471,7 +471,7 @@ Notes:
         )
 
     # TODO: <Alex></Alex>
-    def load_batch(self, batch_definition: dict = None):
+    def load_batch(self, batch_definition: dict = None) -> Batch:
         """With the help of the execution environment and data connector specified within the batch definition, builds a batch spec
         and utilizes it to load a batch using the appropriate file reader and the given file path.
 
