@@ -64,6 +64,8 @@ from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource  # TODO: deprecate
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_environment import ExecutionEnvironment
+from great_expectations.execution_environment.data_connector.data_connector import DataConnector
+from great_expectations.execution_environment.data_connector.partitioner.partition import Partition
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -1089,7 +1091,7 @@ class BaseDataContext:
         in_memory_dataset: Any = None,  # TODO: should this be any to accommodate different engines?
     ) -> ExecutionEngine:
         execution_environment = self.get_execution_environment(
-            batch_definition.get("execution_environment")
+            execution_environment_name=batch_definition.get("execution_environment")
         )
         return execution_environment.get_batch(
             batch_definition=batch_definition, in_memory_dataset=in_memory_dataset
@@ -1500,6 +1502,32 @@ class BaseDataContext:
                 class_name=config["class_name"],
             )
         return execution_environment
+
+    def get_available_partitions(
+        self,
+        execution_environment_name: str,
+        data_connector_name: str,
+        partition_name: str = None,
+        data_asset_name: str = None,
+        in_memory_dataset: Any = None,
+        repartition: bool = False
+    ) -> List[Partition]:
+        execution_environment: ExecutionEnvironment = self.get_execution_environment(
+            execution_environment_name=execution_environment_name
+        )
+        runtime_environment: dict = {
+            "in_memory_dataset": in_memory_dataset,
+        }
+        data_connector: DataConnector = execution_environment.get_data_connector(
+            name=data_connector_name,
+            runtime_environment=runtime_environment
+        )
+        available_partitions: List[Partition] = data_connector.get_available_partitions(
+            partition_name=partition_name,
+            data_asset_name=data_asset_name,
+            repartition=repartition
+        )
+        return available_partitions
 
     def list_expectation_suites(self):
         """Return a list of available expectation suite names."""

@@ -167,11 +167,12 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
         for data_connector in self._execution_environment_config["data_connectors"].keys():
             self.get_data_connector(name=data_connector)
 
-    def get_data_connector(self, name: str):
+    def get_data_connector(self, name: str, runtime_environment: dict = {}):
         """Get the (named) DataConnector from an ExecutionEnvironment)
 
         Args:
             name (str): name of DataConnector
+            runtime_environment (dict):
 
         Returns:
             DataConnector (DataConnector)
@@ -193,20 +194,21 @@ An ExecutionEnvironment is the glue between an ExecutionEngine and a DataConnect
             data_connector_config
         )
         data_connector = self._build_data_connector_from_config(
-            name=name, config=data_connector_config
+            name=name, config=data_connector_config, runtime_environment=runtime_environment
         )
         self._data_connectors_cache[name] = data_connector
         return data_connector
 
-    def _build_data_connector_from_config(self, name: str, config: CommentedMap):
+    def _build_data_connector_from_config(self, name: str, config: CommentedMap, runtime_environment: dict = None):
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, DataConnectorConfig):
             config: dict = dataConnectorConfigSchema.dump(config)
         config.update({"name": name})
+        runtime_environment.update({"execution_environment": self})
         data_connector = instantiate_class_from_config(
             config=config,
-            runtime_environment={"execution_environment": self},
+            runtime_environment=runtime_environment,
             config_defaults={
                 "module_name": "great_expectations.execution_environment.data_connector.data_connector"
             },

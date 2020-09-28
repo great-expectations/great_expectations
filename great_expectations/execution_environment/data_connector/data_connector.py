@@ -157,6 +157,13 @@ class DataConnector(object):
                 cached_partitions.append(partition)
             self._partitions_cache[data_asset_name] = cached_partitions
 
+    def reset_partitions_cache(self, data_asset_name: str = None):
+        if data_asset_name is None:
+            self._partitions_cache = {}
+        else:
+            if data_asset_name in self.partitions_cache:
+                self._partitions_cache[data_asset_name] = []
+
     def get_partitioner(self, name: str):
         """Get the (named) Partitioner from a DataConnector)
 
@@ -394,19 +401,26 @@ class DataConnector(object):
         """
         raise NotImplementedError
 
-    def get_available_partitions(self, partition_name: str = None, data_asset_name: str = None) -> List[Partition]:
+    def get_available_partitions(
+        self,
+        partition_name: str = None,
+        data_asset_name: str = None,
+        repartition: bool = False
+    ) -> List[Partition]:
         partitioner: Partitioner = self.get_partitioner_for_data_asset(data_asset_name=data_asset_name)
         return self._get_available_partitions(
             partitioner=partitioner,
             partition_name=partition_name,
-            data_asset_name=data_asset_name
+            data_asset_name=data_asset_name,
+            repartition=repartition
         )
 
     def _get_available_partitions(
         self,
         partitioner: Partitioner,
         partition_name: str = None,
-        data_asset_name: str = None
+        data_asset_name: str = None,
+        repartition: bool = False
     ) -> List[Partition]:
         raise NotImplementedError
 

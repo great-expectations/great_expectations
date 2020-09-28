@@ -57,7 +57,8 @@ class PipelineDataConnector(DataConnector):
         self,
         partitioner: Partitioner,
         partition_name: str = None,
-        data_asset_name: str = None
+        data_asset_name: str = None,
+        repartition: bool = False
     ) -> List[Partition]:
         data_asset_directives: dict = self._get_data_asset_directives(
             data_asset_name=data_asset_name,
@@ -68,9 +69,10 @@ class PipelineDataConnector(DataConnector):
         return partitioner.get_available_partitions(
             partition_name=partition_name,
             data_asset_name=data_asset_name,
+            repartition=repartition,
             in_memory_dataset=self.in_memory_dataset,
             pipeline_data_asset_name=pipeline_data_asset_name,
-            pipeline_partition_name=pipeline_partition_name
+            pipeline_partition_name=pipeline_partition_name,
         )
 
     def _get_data_asset_directives(self, data_asset_name: str, partition_name: str) -> dict:

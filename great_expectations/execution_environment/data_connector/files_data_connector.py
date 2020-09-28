@@ -92,7 +92,8 @@ class FilesDataConnector(DataConnector):
         self,
         partitioner: Partitioner,
         partition_name: str = None,
-        data_asset_name: str = None
+        data_asset_name: str = None,
+        repartition: bool = None
     ) -> List[Partition]:
         paths: list = self._get_file_paths_for_data_asset(data_asset_name=data_asset_name)
         data_asset_config_exists: bool = data_asset_name and self.assets and self.assets.get(data_asset_name)

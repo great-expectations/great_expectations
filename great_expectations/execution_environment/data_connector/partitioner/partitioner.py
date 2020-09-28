@@ -121,9 +121,12 @@ class Partitioner(object):
         self,
         partition_name: str = None,
         data_asset_name: str = None,
-        *args,
+        repartition: bool = False,
         **kwargs
     ) -> List[Partition]:
+        if repartition:
+            self.data_connector.reset_partitions_cache(data_asset_name=data_asset_name)
+
         cached_partitions: List[Partition] = self.data_connector.get_cached_partitions(
             data_asset_name=data_asset_name
         )
