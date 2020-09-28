@@ -278,7 +278,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapDatasetExpectation):
             )
 
         # Obtaining value for "mostly" and "threshold" arguments to evaluate success
-        mostly = configuration.get_success_kwargs().get(
+        mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
 
