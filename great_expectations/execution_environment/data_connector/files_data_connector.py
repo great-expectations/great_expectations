@@ -99,7 +99,7 @@ class FilesDataConnector(DataConnector):
         if isinstance(partitioner, NoOpPartitioner):
             default_datasets: List[Dict[str, str]] = [
                 {
-                    "partition_name": path,
+                    "partition_name": Path(path).stem,
                     "data_reference": path
                 }
                 for path in paths
