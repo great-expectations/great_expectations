@@ -472,7 +472,7 @@ Notes:
 
     # TODO: <Alex></Alex>
     def load_batch(
-        self, batch_definition: dict = None, batch_spec: dict = None, in_memory_dataset=None
+        self, batch_definition: dict = None, in_memory_dataset=None
     ):
         """With the help of the execution environment and data connector specified within the batch definition, builds a batch spec
         and utilizes it to load a batch using the appropriate file reader and the given file path.
@@ -484,17 +484,10 @@ Notes:
                                                                     must still be passed via batch definition.
 
                """
-        if batch_spec and batch_definition:
-            # TODO: <Alex>Why is the comment below there?  Is it needed?</Alex>
-            logger.info(
-                "Both batch_spec and batch_definition were passed in. batch_spec will be used to load the batch"
-            )
-            assert isinstance(batch_spec, BatchSpec)
-        elif batch_spec and not batch_definition:
+        if not batch_definition:
             logger.info("Loading a batch without a batch_definition")
             batch_definition = {}
         else:
-            # TODO: <Alex>This if statement allows for both batch_definition and batch_spec to be None -- then the code below will cause an exception.</Alex>
             if not self._data_context:
                 raise ValueError("Cannot use a batch definition without a data context")
 
@@ -514,7 +507,7 @@ Notes:
             batch_spec = data_connector.build_batch_spec(
                 batch_definition=batch_definition
             )
-        batch_id = batch_spec.to_id()
+            batch_id = batch_spec.to_id()
         batch_markers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(

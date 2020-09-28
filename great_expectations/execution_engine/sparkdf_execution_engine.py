@@ -620,12 +620,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         super().__init__(*args, **kwargs)
 
     def load_batch(
-        self, batch_definition: dict = None, batch_spec: dict = None, in_memory_dataset=None
+        self, batch_definition: dict = None, in_memory_dataset=None
     ) -> Batch:
         # We need to build a batch_markers to be used in the dataframe
-        if batch_spec and batch_definition:
-            assert isinstance(batch_spec, IDDict)
-        elif batch_spec and not batch_definition:
+        if not batch_definition:
             logger.info("loading a batch without a batch_definition")
             batch_definition = {}
         else:
@@ -644,6 +642,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             batch_spec = data_connector.build_batch_spec(
                 batch_definition=batch_definition
             )
+            batch_id = batch_spec.to_id()
 
         # We need to build a batch_markers to be used in the dataframe
         batch_markers = BatchMarkers(
@@ -653,8 +652,6 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 )
             }
         )
-
-        batch_id = batch_spec.to_id()
 
         if in_memory_dataset is not None:
             # TODO: <Alex>There should be no need to specify "partition_name" -- None implies "latest" (first in sorted order).</Alex>
