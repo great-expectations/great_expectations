@@ -7,7 +7,7 @@ Changelog
 Develop
 -----------------
 
-* [ENHANCEMENT] Add expect_compound_columns_to_be_unique and clarify multicolumn uniqueness (Thanks @tscottcoombes1 and @jhweaver)!
+* [ENHANCEMENT] Add spark support for expect_compound_columns_to_be_unique(Thanks @tscottcoombes1)!
 * [ENHANCEMENT] Add expectation expect_table_columns_to_match_set
 * [ENHANCEMENT] Checkpoint run command now prints out details on each validation #1437
 
