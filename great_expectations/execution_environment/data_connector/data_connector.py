@@ -72,9 +72,6 @@ class DataConnector(object):
 
         self._data_connector_config = kwargs
 
-        # TODO: <Alex>Is this needed?</Alex>
-        # self._data_asset_iterators = {}
-
         # TODO: <Alex>Is this needed?  Where do these batch_definition_come_from and what are the values?</Alex>
         batch_definition_defaults = batch_definition_defaults or {}
         batch_definition_defaults_keys = set(batch_definition_defaults.keys())
@@ -241,100 +238,6 @@ class DataConnector(object):
         conf.update(self._data_connector_config)
         return conf
 
-    # TODO: <Alex>Without source (e.g., path) specified in batch_spec, ExecutionEngine cannot use batch_spec to load data; hence, should we discontinue the iterator / next batch_spec usecase?</Alex>
-    # def get_iterator(self, data_asset_name=None, **kwargs):
-    #     if not data_asset_name:
-    #         raise ValueError("Please provide data_asset_name.")
-    #
-    #     if data_asset_name in self._data_asset_iterators:
-    #         data_asset_iterator, passed_kwargs = self._data_asset_iterators[
-    #             data_asset_name
-    #         ]
-    #         if passed_kwargs != kwargs:
-    #             logger.warning(
-    #                 "Asked to yield batch_spec using different supplemental kwargs. Please reset iterator to "
-    #                 "use different supplemental kwargs."
-    #             )
-    #         return data_asset_iterator
-    #     else:
-    #         self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
-    #         return self._data_asset_iterators[data_asset_name][0]
-    #
-    # def yield_batch_spec(self, data_asset_name, batch_definition, batch_spec):
-    #     if data_asset_name not in self._data_asset_iterators:
-    #         self.reset_iterator(
-    #             data_asset_name=data_asset_name,
-    #             batch_definition=batch_definition,
-    #             batch_spec=batch_spec,
-    #         )
-    #     data_asset_iterator, passed_batch_definition = self._data_asset_iterators[
-    #         data_asset_name
-    #     ]
-    #     if passed_batch_definition != batch_definition:
-    #         logger.warning(
-    #             "Asked to yield batch_spec using different supplemental batch_definition. Resetting iterator to "
-    #             "use new supplemental batch_definition."
-    #         )
-    #         self.reset_iterator(
-    #             data_asset_name=data_asset_name,
-    #             batch_definition=batch_definition,
-    #             batch_spec=batch_spec,
-    #         )
-    #         data_asset_iterator, passed_batch_definition = self._data_asset_iterators[
-    #             data_asset_name
-    #         ]
-    #     try:
-    #         batch_spec = next(data_asset_iterator)
-    #         return batch_spec
-    #     except StopIteration:
-    #         self.reset_iterator(
-    #             data_asset_name=data_asset_name,
-    #             batch_definition=batch_definition,
-    #             batch_spec=batch_spec,
-    #         )
-    #         data_asset_iterator, passed_batch_definition = self._data_asset_iterators[
-    #             data_asset_name
-    #         ]
-    #         if passed_batch_definition != batch_definition:
-    #             logger.warning(
-    #                 "Asked to yield batch_spec using different batch parameters. Resetting iterator to "
-    #                 "use different batch parameters."
-    #             )
-    #             self.reset_iterator(
-    #                 data_asset_name=data_asset_name,
-    #                 batch_definition=batch_definition,
-    #                 batch_spec=batch_spec,
-    #             )
-    #             data_asset_iterator, passed_batch_definition = self._data_asset_iterators[data_asset_name]
-    #         try:
-    #             batch_spec = next(data_asset_iterator)
-    #             return batch_spec
-    #         except StopIteration:
-    #             # This is a degenerate case in which no batch_definition are actually being generated
-    #             logger.warning(
-    #                 "No batch_spec found for data_asset_name %s" % data_asset_name
-    #             )
-    #             return {}
-    #     except TypeError:
-    #         # If we do not actually have an iterator we can generate, even after resetting, then just return empty dict.
-    #         logger.warning(
-    #             "Unable to generate batch_spec for data_asset_name %s" % data_asset_name
-    #         )
-    #         return {}
-    #
-    # def reset_iterator(self, data_asset_name, batch_definition, batch_spec):
-    #     self._data_asset_iterators[data_asset_name] = (
-    #         self._get_iterator(
-    #             data_asset_name=data_asset_name,
-    #             batch_definition=batch_definition,
-    #             batch_spec=batch_spec,
-    #         ),
-    #         batch_definition,
-    #     )
-    #
-    # def _get_iterator(self, data_asset_name, batch_definition, batch_spec):
-    #     raise NotImplementedError
-
     def build_batch_spec(self, batch_definition: dict) -> BatchSpec:
         if "data_asset_name" not in batch_definition:
             raise ge_exceptions.BatchSpecError("Batch definition must have a data_asset_name.")
@@ -423,13 +326,3 @@ class DataConnector(object):
         repartition: bool = False
     ) -> List[Partition]:
         raise NotImplementedError
-
-    # TODO: <Alex>This method is not useful -- get_available_partitions provides the complete information.</Alex>
-    # def get_available_partition_names(self, data_asset_name: str = None) -> List[str]:
-    #     return [
-    #         partition.name for partition in self.get_available_partitions(
-    #             partition_name=None,
-    #             data_asset_name=data_asset_name
-    #         )
-    #     ]
-
