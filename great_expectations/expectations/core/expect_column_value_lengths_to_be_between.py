@@ -15,6 +15,7 @@ from ..expectation import (
 )
 from ..registry import extract_metrics
 from ...exceptions import InvalidExpectationConfigurationError
+from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 
 try:
     import sqlalchemy as sa
@@ -72,7 +73,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
         metric_dependencies=tuple(),
         filter_column_isnull=True
     )
-    def _pandas_map_value_length_between(
+    def _pandas_value_length_between(
         self,
         series: pd.Series,
         metrics: dict,
@@ -109,6 +110,59 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
                 metric_series = column_lengths >= min_value
 
         return pd.DataFrame({"column_values.value_length_between": metric_series})
+
+    @SqlAlchemyExecutionEngine.column_map_metric(
+        metric_name="column_values.value_length_between",
+        metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
+        metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
+        metric_dependencies=tuple(),
+        filter_column_isnull=True
+    )
+    def _sqlalchemy_value_length_between(
+        self,
+        column: sa.column,
+        metrics: dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
+    ):
+        min_value = metric_value_kwargs["min_value"]
+        max_value = metric_value_kwargs["max_value"]
+        strict_min = metric_value_kwargs["strict_min"]
+        strict_max = metric_value_kwargs["strict_max"]
+
+        if min_value is not None and max_value is not None:
+            if strict_min and strict_max:
+                return sa.and_(
+                    sa.func.length(column) > min_value,
+                    sa.func.length(column) < max_value,
+                )
+            elif strict_min and not strict_max:
+                return sa.and_(
+                    sa.func.length(column) > min_value,
+                    sa.func.length(column) <= max_value,
+                )
+            elif not strict_min and strict_max:
+                return sa.and_(
+                    sa.func.length(column) >= min_value,
+                    sa.func.length(column) < max_value,
+                )
+            elif not strict_min and not strict_max:
+                return sa.and_(
+                    sa.func.length(column) >= min_value,
+                    sa.func.length(column) <= max_value,
+                )
+        elif min_value is None and max_value is not None:
+            if strict_max:
+                return sa.func.length(column) < max_value
+            else:
+                return sa.func.length(column) <= max_value
+        elif min_value is not None and max_value is None:
+            if strict_min:
+                return sa.func.length(column) > min_value
+            else:
+                return sa.func.length(column) >= min_value
 
     @Expectation.validates(metric_dependencies=metric_dependencies)
     def _validates(
