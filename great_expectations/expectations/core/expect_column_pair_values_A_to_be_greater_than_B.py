@@ -25,7 +25,7 @@ except ImportError:
     pass
 
 
-class ExpectColumnPairValuesToBeEqual(DatasetExpectation):
+class ExpectColumnPairValuesAToBeGreaterThanB(DatasetExpectation):
     metric_dependencies = ("equal_columns",)
     success_keys = ("column_A", "column_B",  "ignore_row_if",)
 
@@ -57,7 +57,6 @@ class ExpectColumnPairValuesToBeEqual(DatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("column_A", "column_B"),
         metric_dependencies=tuple(),
-        filter_column_isnull=False,
     )
     def _pandas_equal_columns(
             self,

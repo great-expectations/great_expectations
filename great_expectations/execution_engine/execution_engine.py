@@ -240,6 +240,7 @@ class ExecutionEngine(MetaExecutionEngine):
         metric_value_keys: tuple,
         metric_dependencies: tuple,
         bundle_computation: bool = False,
+        filter_column_isnull: bool = True,
     ):
         """
         A decorator for declaring a metric provider
@@ -599,7 +600,7 @@ class ExecutionEngine(MetaExecutionEngine):
                     "metric_domain_kwargs": metric_to_resolve.metric_domain_kwargs,
                     "metric_value_kwargs": metric_to_resolve.metric_value_kwargs,
                     "runtime_configuration": runtime_configuration,
-                    #"filter_column_isnull": metric_to_resolve.filter_column_isnull,
+                    "filter_column_isnull": metric_to_resolve.filter_column_isnull,
                 }
                 if getattr(metric_provider, "_can_be_bundled", False):
                     resolve_batch.append(

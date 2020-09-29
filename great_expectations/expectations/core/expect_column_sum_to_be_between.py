@@ -43,6 +43,7 @@ class ExpectColumnSumToBeBetween(DatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
+        filter_column_isnull=True,
     )
     def _pandas_sum(
         self,

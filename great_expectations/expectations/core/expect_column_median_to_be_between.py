@@ -42,6 +42,7 @@ class ExpectColumnMedianToBeBetween(DatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
+        filter_column_isnull=False,
     )
     def _pandas_median(
         self,
