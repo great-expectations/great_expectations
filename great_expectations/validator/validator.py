@@ -180,9 +180,9 @@ class Validator:
         metric_kwargs = get_metric_kwargs(metric_name)
 
         expectation_impl = get_expectation_impl(configuration.expectation_type)
-        configuration_kwargs = expectation_impl(configuration=configuration).get_runtime_kwargs(
-            runtime_configuration=runtime_configuration
-        )
+        configuration_kwargs = expectation_impl(
+            configuration=configuration
+        ).get_runtime_kwargs(runtime_configuration=runtime_configuration)
         try:
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(

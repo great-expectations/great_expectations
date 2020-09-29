@@ -13,7 +13,7 @@ def test_expect_column_distinct_values_to_equal_set_impl():
     df = pd.DataFrame({"a": [1, 2, 2, 3, 4, 5]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_distinct_values_to_equal_set",
-        kwargs={"column": "a", "value_set": [1,2,3,4,5,6]},
+        kwargs={"column": "a", "value_set": [1, 2, 3, 4, 5, 6]},
     )
     expectation = ExpectColumnDistinctValuesToEqualSet(expectationConfiguration)
     batch = Batch(data=df)

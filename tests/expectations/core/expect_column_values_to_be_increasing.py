@@ -45,7 +45,7 @@ def test_expect_column_values_to_be_increasing_int_impl():
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
-    assert result == ExpectationValidationResult(success=False, )
+    assert result == ExpectationValidationResult(success=False,)
 
 
 def test_spark_expect_column_values_to_be_increasing_impl():

@@ -6,8 +6,12 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_environment.types import SqlAlchemyDatasourceTableBatchSpec
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyExecutionEngine,
+)
+from great_expectations.execution_environment.types import (
+    SqlAlchemyDatasourceTableBatchSpec,
+)
 from great_expectations.expectations.core.expect_column_value_lengths_to_be_between import (
     ExpectColumnValueLengthsToBeBetween,
 )
@@ -36,28 +40,42 @@ def test_expect_column_value_lengths_to_be_between_impl():
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
-    assert result == ExpectationValidationResult(success=False, )
+    assert result == ExpectationValidationResult(success=False,)
 
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_lengths_to_be_between",
-        kwargs={"column": "a", "min_value": 1, "max_value": 5, "mostly": 1, "strict_min": True, "strict_max": True},
+        kwargs={
+            "column": "a",
+            "min_value": 1,
+            "max_value": 5,
+            "mostly": 1,
+            "strict_min": True,
+            "strict_max": True,
+        },
     )
     expectation = ExpectColumnValueLengthsToBeBetween(expectationConfiguration)
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
-    assert result == ExpectationValidationResult(success=False, )
+    assert result == ExpectationValidationResult(success=False,)
 
     # expect success due to lower 'mostly'
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_lengths_to_be_between",
-        kwargs={"column": "a", "min_value": 1, "max_value": 5, "mostly": 0.6, "strict_min": True, "strict_max": True},
+        kwargs={
+            "column": "a",
+            "min_value": 1,
+            "max_value": 5,
+            "mostly": 0.6,
+            "strict_min": True,
+            "strict_max": True,
+        },
     )
     expectation = ExpectColumnValueLengthsToBeBetween(expectationConfiguration)
     result = expectation.validate(
         batches={"batch_id": batch}, execution_engine=PandasExecutionEngine()
     )
-    assert result == ExpectationValidationResult(success=True, )
+    assert result == ExpectationValidationResult(success=True,)
 
 
 def test_sa_expect_column_value_lengths_to_be_between_impl():
@@ -91,25 +109,39 @@ def test_sa_expect_column_value_lengths_to_be_between_impl():
     result = expectation.validate(
         batches={batch_spec.to_id(): batch}, execution_engine=myengine
     )
-    assert result == ExpectationValidationResult(success=False, )
+    assert result == ExpectationValidationResult(success=False,)
 
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_lengths_to_be_between",
-        kwargs={"column": "a", "min_value": 1, "max_value": 5, "mostly": 1, "strict_min": True, "strict_max": True},
+        kwargs={
+            "column": "a",
+            "min_value": 1,
+            "max_value": 5,
+            "mostly": 1,
+            "strict_min": True,
+            "strict_max": True,
+        },
     )
     expectation = ExpectColumnValueLengthsToBeBetween(expectationConfiguration)
     result = expectation.validate(
         batches={batch_spec.to_id(): batch}, execution_engine=myengine
     )
-    assert result == ExpectationValidationResult(success=False, )
+    assert result == ExpectationValidationResult(success=False,)
 
     # expect success due to lower 'mostly'
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_lengths_to_be_between",
-        kwargs={"column": "a", "min_value": 1, "max_value": 5, "mostly": 0.6, "strict_min": True, "strict_max": True},
+        kwargs={
+            "column": "a",
+            "min_value": 1,
+            "max_value": 5,
+            "mostly": 0.6,
+            "strict_min": True,
+            "strict_max": True,
+        },
     )
     expectation = ExpectColumnValueLengthsToBeBetween(expectationConfiguration)
     result = expectation.validate(
         batches={batch_spec.to_id(): batch}, execution_engine=myengine
     )
-    assert result == ExpectationValidationResult(success=True, )
+    assert result == ExpectationValidationResult(success=True,)

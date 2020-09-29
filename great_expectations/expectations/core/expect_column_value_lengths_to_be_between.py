@@ -3,19 +3,13 @@ from typing import Optional
 import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    PandasExecutionEngine, ExecutionEngine,
-)
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 
 from ...data_asset.util import parse_result_format
-from ..expectation import (
-    ColumnMapDatasetExpectation,
-    Expectation,
-    _format_map_output,
-)
-from ..registry import extract_metrics
 from ...exceptions import InvalidExpectationConfigurationError
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
+from ..expectation import ColumnMapDatasetExpectation, Expectation, _format_map_output
+from ..registry import extract_metrics
 
 try:
     import sqlalchemy as sa
@@ -57,11 +51,17 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
             configuration = self.configuration
 
         try:
-            assert configuration.kwargs.get("min_value") or configuration.kwargs.get("max_value"), "min_value and max_value cannot both be None"
+            assert configuration.kwargs.get("min_value") or configuration.kwargs.get(
+                "max_value"
+            ), "min_value and max_value cannot both be None"
             if configuration.kwargs.get("min_value"):
-                assert float(configuration.kwargs.get("min_value")).is_integer(), "min_value and max_value must be integers"
+                assert float(
+                    configuration.kwargs.get("min_value")
+                ).is_integer(), "min_value and max_value must be integers"
             if configuration.kwargs.get("max_value"):
-                assert float(configuration.kwargs.get("max_value")).is_integer(), "min_value and max_value must be integers"
+                assert float(
+                    configuration.kwargs.get("max_value")
+                ).is_integer(), "min_value and max_value must be integers"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
@@ -71,7 +71,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
         metric_dependencies=tuple(),
-        filter_column_isnull=True
+        filter_column_isnull=True,
     )
     def _pandas_value_length_between(
         self,
@@ -91,13 +91,21 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
 
         if min_value is not None and max_value is not None:
             if strict_min and strict_max:
-                metric_series = column_lengths.between(min_value, max_value, inclusive=False)
+                metric_series = column_lengths.between(
+                    min_value, max_value, inclusive=False
+                )
             elif strict_min and not strict_max:
-                metric_series = (column_lengths > min_value) & (column_lengths <= max_value)
+                metric_series = (column_lengths > min_value) & (
+                    column_lengths <= max_value
+                )
             elif not strict_min and strict_max:
-                metric_series = (column_lengths >= min_value) & (column_lengths < max_value)
+                metric_series = (column_lengths >= min_value) & (
+                    column_lengths < max_value
+                )
             elif not strict_min and not strict_max:
-                metric_series = column_lengths.between(min_value, max_value, inclusive=True)
+                metric_series = column_lengths.between(
+                    min_value, max_value, inclusive=True
+                )
         elif min_value is None and max_value is not None:
             if strict_max:
                 metric_series = column_lengths < max_value
@@ -116,7 +124,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("min_value", "max_value", "strict_min", "strict_max"),
         metric_dependencies=tuple(),
-        filter_column_isnull=True
+        filter_column_isnull=True,
     )
     def _sqlalchemy_value_length_between(
         self,
@@ -170,14 +178,16 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
         configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None
+        execution_engine: ExecutionEngine = None,
     ):
         metric_dependencies = self.get_validation_dependencies(
             configuration=configuration,
             execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration
+            runtime_configuration=runtime_configuration,
         )["metrics"]
-        metric_vals = extract_metrics(metric_dependencies, metrics, configuration, runtime_configuration)
+        metric_vals = extract_metrics(
+            metric_dependencies, metrics, configuration, runtime_configuration
+        )
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
@@ -197,11 +207,16 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapDatasetExpectation):
             success=(
                 metric_vals.get("column_values.value_length_between.count")
                 / metric_vals.get("column_values.nonnull.count")
-                    ) >= mostly,
+            )
+            >= mostly,
             element_count=metric_vals.get("column_values.count"),
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
             unexpected_count=metric_vals.get("column_values.nonnull.count")
-                             - metric_vals.get("column_values.value_length_between.count"),
-            unexpected_list=metric_vals.get("column_values.value_length_between.unexpected_values"),
-            unexpected_index_list=metric_vals.get("column_values.value_length_between.unexpected_index"),
+            - metric_vals.get("column_values.value_length_between.count"),
+            unexpected_list=metric_vals.get(
+                "column_values.value_length_between.unexpected_values"
+            ),
+            unexpected_index_list=metric_vals.get(
+                "column_values.value_length_between.unexpected_index"
+            ),
         )

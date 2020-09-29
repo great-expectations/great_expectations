@@ -12,12 +12,11 @@ from ..registry import extract_metrics, get_metric_kwargs
 
 class ExpectColumnValuesToBeDecreasing(ColumnMapDatasetExpectation):
     map_metric = "column_values.decreasing"
-    metric_dependencies = ("column_values.decreasing.count", "column_values.nonnull.count",)
-    success_keys = (
-        "strictly",
-        "mostly",
-        "parse_strings_as_datetimes"
+    metric_dependencies = (
+        "column_values.decreasing.count",
+        "column_values.nonnull.count",
     )
+    success_keys = ("strictly", "mostly", "parse_strings_as_datetimes")
 
     default_kwarg_values = {
         "row_condition": None,
@@ -27,7 +26,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapDatasetExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
-        "parse_strings_as_datetimes": False
+        "parse_strings_as_datetimes": False,
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
@@ -38,7 +37,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=("strictly",),
         metric_dependencies=tuple(),
-        filter_column_isnull=True
+        filter_column_isnull=True,
     )
     def _pandas_column_values_decreasing(
         self,
@@ -94,6 +93,10 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapDatasetExpectation):
             nonnull_count=metric_vals.get("column_values.nonnull.count"),
             unexpected_count=metric_vals.get("column_values.nonnull.count")
             - metric_vals.get("column_values.decreasing.count"),
-            unexpected_list=metric_vals.get("column_values.decreasing.unexpected_values"),
-            unexpected_index_list=metric_vals.get("column_values.increasing.unexpected_index_list"),
+            unexpected_list=metric_vals.get(
+                "column_values.decreasing.unexpected_values"
+            ),
+            unexpected_index_list=metric_vals.get(
+                "column_values.increasing.unexpected_index_list"
+            ),
         )
