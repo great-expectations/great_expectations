@@ -1,16 +1,15 @@
-from freezegun import freeze_time
+# from freezegun import freeze_time
+import pytest
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.render.renderer import SlackRenderer
+from tests.test_utils import modify_locale
 
-from ..test_utils import modify_locale
 
+def test_SlackRenderer_validation_results_with_datadocs():
 
-@modify_locale
-@freeze_time("09/24/2019 23:18:36")
-def test_SlackRenderer():
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=True,
@@ -33,9 +32,8 @@ def test_SlackRenderer():
     )
 
     rendered_output = SlackRenderer().render(validation_result_suite)
-    print(rendered_output)
 
-    expected_renderer_output = {
+    expected_output = {
         "blocks": [
             {
                 "type": "section",
@@ -57,19 +55,79 @@ def test_SlackRenderer():
         ],
         "text": "default: Success :tada:",
     }
+    assert rendered_output == expected_output
 
-    # We're okay with system variation in locales (OS X likes 24 hour, but not Travis)
-    expected_renderer_output["blocks"][0]["text"]["text"] = expected_renderer_output[
-        "blocks"
-    ][0]["text"]["text"].replace("09/24/2019 11:18:36 PM", "LOCALEDATE")
-    expected_renderer_output["blocks"][0]["text"]["text"] = expected_renderer_output[
-        "blocks"
-    ][0]["text"]["text"].replace("09/24/2019 23:18:36", "LOCALEDATE")
-    rendered_output["blocks"][0]["text"]["text"] = rendered_output["blocks"][0]["text"][
-        "text"
-    ].replace("09/24/2019 11:18:36 PM UTC", "LOCALEDATE")
-    rendered_output["blocks"][0]["text"]["text"] = rendered_output["blocks"][0]["text"][
-        "text"
-    ].replace("09/24/2019 23:18:36 UTC", "LOCALEDATE")
+    data_docs_pages = {"local_site": "file:///localsite/index.html"}
+    notify_with = ["local_site"]
+    rendered_output = SlackRenderer().render(
+        validation_result_suite, data_docs_pages, notify_with
+    )
 
-    assert rendered_output == expected_renderer_output
+    expected_output = {
+        "blocks": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Summary*: *0* of *0* expectations were met",
+                },
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*DataDocs* can be found here: `file:///localsite/index.html` \n (Please copy and paste link into a browser to view)\n",
+                },
+            },
+            {"type": "divider"},
+            {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": "Learn how to review validation results in Data Docs: https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html",
+                    }
+                ],
+            },
+        ],
+        "text": "default: Success :tada:",
+    }
+    assert rendered_output == expected_output
+
+    # not configured
+    notify_with = ["fake_site"]
+    rendered_output = SlackRenderer().render(
+        validation_result_suite, data_docs_pages, notify_with
+    )
+
+    expected_output = {
+        "blocks": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Summary*: *0* of *0* expectations were met",
+                },
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*ERROR*: Slack is trying to provide a link to the following DataDocs: `fake_site`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n",
+                },
+            },
+            {"type": "divider"},
+            {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": "Learn how to review validation results in Data Docs: https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html",
+                    }
+                ],
+            },
+        ],
+        "text": "default: Success :tada:",
+    }
+
+    assert rendered_output == expected_output

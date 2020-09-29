@@ -244,13 +244,33 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
                 "Cannot get URL for resource {:s}".format(str(resource_identifier))
             )
 
-        if only_if_exists:
-            return (
-                store_backend.get_url_for_key(key)
-                if store_backend.has_key(key)
-                else None
-            )
-        return store_backend.get_url_for_key(key)
+        # <WILL> : this is a hack for Taylor. Change this back. 20200924
+        # if only_if_exists:
+        #    return (
+        #        store_backend.get_url_for_key(key)
+        #        if store_backend.has_key(key)
+        #        else None
+        #    )
+        # return store_backend.get_url_for_key(key)
+
+        if store_backend.base_public_path:
+            if only_if_exists:
+                return (
+                    store_backend.get_public_url_for_key(key)
+                    if store_backend.has_key(key)
+                    else None
+                )
+            else:
+                return store_backend.get_public_url_for_key(key)
+        else:
+            if only_if_exists:
+                return (
+                    store_backend.get_url_for_key(key)
+                    if store_backend.has_key(key)
+                    else None
+                )
+            else:
+                return store_backend.get_url_for_key(key)
 
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):

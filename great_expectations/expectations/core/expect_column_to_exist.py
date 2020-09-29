@@ -131,10 +131,10 @@ class ExpectColumnToExist(DatasetExpectation):
             )
 
         columns = metric_vals.get("columns")
-        column = configuration.get_success_kwargs().get(
+        column = self.get_success_kwargs().get(
             "column", self.default_kwarg_values.get("column")
         )
-        column_index = configuration.get_success_kwargs().get(
+        column_index = self.get_success_kwargs().get(
             "column_index", self.default_kwarg_values.get("column_index")
         )
 
