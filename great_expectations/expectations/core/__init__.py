@@ -1,5 +1,11 @@
+from .expect_column_distinct_values_to_be_in_set import (
+    ExpectColumnDistinctValuesToBeInSet,
+)
 from .expect_column_distinct_values_to_contain_set import (
     ExpectColumnDistinctValuesToContainSet,
+)
+from .expect_column_distinct_values_to_equal_set import (
+    ExpectColumnDistinctValuesToEqualSet,
 )
 from .expect_column_max_to_be_between import ExpectColumnMaxToBeBetween
 from .expect_column_mean_to_be_between import ExpectColumnMeanToBeBetween
@@ -20,6 +26,9 @@ from .expect_column_to_exist import ExpectColumnToExist
 from .expect_column_unique_value_count_to_be_between import (
     ExpectColumnUniqueValueCountToBeBetween,
 )
+from .expect_column_value_lengths_to_be_between import (
+    ExpectColumnValueLengthsToBeBetween,
+)
 from .expect_column_value_lengths_to_equal import ExpectColumnValueLengthsToEqual
 from .expect_column_value_z_scores_to_be_less_than import (
     ExpectColumnValueZScoresToBeLessThan,
@@ -36,6 +45,6 @@ from .expect_column_values_to_not_be_null import ExpectColumnValuesToNotBeNull
 from .expect_column_values_to_not_match_regex import ExpectColumnValuesToNotMatchRegex
 from .expect_table_column_count_to_be_between import ExpectTableColumnCountToBeBetween
 from .expect_table_column_count_to_equal import ExpectTableColumnCountToEqual
-from .expect_column_distinct_values_to_equal_set import ExpectColumnDistinctValuesToEqualSet
-from .expect_column_distinct_values_to_be_in_set import ExpectColumnDistinctValuesToBeInSet
-from .expect_table_columns_to_match_ordered_list import ExpectTableColumnsToMatchOrderedList
+from .expect_table_columns_to_match_ordered_list import (
+    ExpectTableColumnsToMatchOrderedList,
+)

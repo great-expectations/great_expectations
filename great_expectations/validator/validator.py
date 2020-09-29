@@ -178,9 +178,11 @@ class Validator:
         runtime_configuration: Optional[dict] = None,
     ) -> None:
         metric_kwargs = get_metric_kwargs(metric_name)
-        configuration_kwargs = configuration.get_runtime_kwargs(
-            runtime_configuration=runtime_configuration
-        )
+
+        expectation_impl = get_expectation_impl(configuration.expectation_type)
+        configuration_kwargs = expectation_impl(
+            configuration=configuration
+        ).get_runtime_kwargs(runtime_configuration=runtime_configuration)
         try:
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
@@ -216,7 +218,10 @@ class Validator:
                 MetricEdge(
                     parent_node,
                     MetricEdgeKey(
-                        metric_name, metric_domain_kwargs, metric_value_kwargs
+                        metric_name,
+                        metric_domain_kwargs,
+                        metric_value_kwargs,
+                        filter_column_isnull=metric_kwargs["filter_column_isnull"],
                     ),
                 )
             )
@@ -225,7 +230,10 @@ class Validator:
             graph.add(
                 MetricEdge(
                     MetricEdgeKey(
-                        metric_name, metric_domain_kwargs, metric_value_kwargs
+                        metric_name,
+                        metric_domain_kwargs,
+                        metric_value_kwargs,
+                        filter_column_isnull=metric_kwargs["filter_column_isnull"],
                     ),
                     None,
                 )

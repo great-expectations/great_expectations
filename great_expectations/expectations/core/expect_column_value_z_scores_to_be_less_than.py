@@ -110,6 +110,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         """Z-Score Metric Function"""
         # Series conversion - this works
@@ -147,6 +148,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         """Checks if values under threshold"""
         threshold = metric_value_kwargs["threshold"]
@@ -233,7 +235,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapDatasetExpectation):
             )
 
         # Obtaining value for "mostly"
-        mostly = configuration.get_success_kwargs().get(
+        mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
 

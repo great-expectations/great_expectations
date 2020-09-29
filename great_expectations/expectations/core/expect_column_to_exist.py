@@ -62,6 +62,7 @@ class ExpectColumnToExist(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         """Metric which returns all columns in a dataframe"""
         df = execution_engine.get_domain_dataframe(
@@ -131,10 +132,10 @@ class ExpectColumnToExist(DatasetExpectation):
             )
 
         columns = metric_vals.get("columns")
-        column = configuration.get_success_kwargs().get(
+        column = self.get_success_kwargs().get(
             "column", self.default_kwarg_values.get("column")
         )
-        column_index = configuration.get_success_kwargs().get(
+        column_index = self.get_success_kwargs().get(
             "column_index", self.default_kwarg_values.get("column_index")
         )
 

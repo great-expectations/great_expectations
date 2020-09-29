@@ -54,6 +54,7 @@ def register_metric(
     metric_dependencies: Tuple[str],
     metric_provider: Callable,
     bundle_computation: bool = False,
+    filter_column_isnull: bool = True,
 ) -> dict:
     res = dict()
     execution_engine_name = execution_engine.__name__
@@ -121,6 +122,7 @@ def register_metric(
             "metric_value_keys": metric_value_keys,
             "metric_dependencies": metric_dependencies,
             "providers": {execution_engine_name: metric_provider},
+            "filter_column_isnull": filter_column_isnull,
         }
         _registered_metrics[metric_name] = metric_definition
     res["success"] = True
@@ -157,11 +159,13 @@ def get_metric_kwargs(
         metric_kwargs = {
             "metric_domain_keys": metric_definition["metric_domain_keys"],
             "metric_value_keys": metric_definition["metric_value_keys"],
+            "filter_column_isnull": metric_definition["filter_column_isnull"],
         }
         if configuration:
-            configuration_kwargs = configuration.get_runtime_kwargs(
-                runtime_configuration=runtime_configuration
-            )
+            expectation_impl = get_expectation_impl(configuration.expectation_type)
+            configuration_kwargs = expectation_impl(
+                configuration=configuration
+            ).get_runtime_kwargs(runtime_configuration=runtime_configuration)
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
                     {
@@ -201,6 +205,7 @@ def extract_metrics(
                 metric_name,
                 kwargs["metric_domain_kwargs"],
                 kwargs["metric_value_kwargs"],
+                kwargs["filter_column_isnull"],
             ).id
         ]
     return res

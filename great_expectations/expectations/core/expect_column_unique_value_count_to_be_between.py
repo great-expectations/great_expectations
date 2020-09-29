@@ -53,6 +53,7 @@ class ExpectColumnUniqueValueCountToBeBetween(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         """Value counts Metric Function"""
         series = execution_engine.get_domain_dataframe(

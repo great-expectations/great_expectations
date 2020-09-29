@@ -65,6 +65,7 @@ class ExpectColumnMaxToBeBetween(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         """Mean Metric Function"""
         series = execution_engine.get_domain_dataframe(

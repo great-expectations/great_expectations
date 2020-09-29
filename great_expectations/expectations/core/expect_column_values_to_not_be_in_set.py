@@ -72,6 +72,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         runtime_configuration: dict = None,
+        filter_column_isnull: bool = True,
     ):
         value_set = metric_value_kwargs["value_set"]
 
@@ -105,7 +106,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapDatasetExpectation):
             validation_dependencies, metrics, configuration, runtime_configuration
         )
 
-        mostly = configuration.get_success_kwargs().get(
+        mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
         if runtime_configuration:

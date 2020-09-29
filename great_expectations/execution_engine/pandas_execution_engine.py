@@ -695,7 +695,7 @@ Notes:
         self,
         domain_kwargs: dict,
         batches: Dict[str, Batch] = None,
-        filter_column_isnull=False,
+        filter_column_isnull=True,
     ) -> pd.DataFrame:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
@@ -766,12 +766,16 @@ Notes:
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[Tuple, Any],
+        filter_column_isnull: bool,
         **kwargs,
     ):
         """Return the count of nonzero values from the map-style metric in the metrics dictionary"""
         assert metric_name.endswith(".count")
         metric_key = MetricEdgeKey(
-            metric_name[: -len(".count")], metric_domain_kwargs, metric_value_kwargs,
+            metric_name[: -len(".count")],
+            metric_domain_kwargs,
+            metric_value_kwargs,
+            filter_column_isnull=filter_column_isnull,
         ).id
         return np.count_nonzero(metrics.get(metric_key))
 
@@ -783,10 +787,13 @@ Notes:
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[Tuple, Any],
+        filter_column_isnull: bool,
         **kwargs,
     ):
         """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
-        data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
+        data = execution_engine.get_domain_dataframe(
+            metric_domain_kwargs, batches, filter_column_isnull
+        )
         assert metric_name.endswith(".unexpected_values")
         # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
         result_format = metric_value_kwargs["result_format"]
@@ -797,6 +804,7 @@ Notes:
             metric_name[: -len(".unexpected_values")],
             metric_domain_kwargs,
             base_metric_value_kwargs,
+            filter_column_isnull=filter_column_isnull,
         ).id
         boolean_mapped_success_values = metrics.get(metric_key)
         if result_format["result_format"] == "COMPLETE":
@@ -826,10 +834,13 @@ Notes:
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[Tuple, Any],
+        filter_column_isnull,
         **kwargs,
     ):
         """Maps metric values and kwargs to results of success kwargs"""
-        data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
+        data = execution_engine.get_domain_dataframe(
+            metric_domain_kwargs, batches, filter_column_isnull=filter_column_isnull
+        )
         assert metric_name.endswith(".unexpected_index_list")
         # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
         result_format = metric_value_kwargs["result_format"]
@@ -840,6 +851,7 @@ Notes:
             metric_name[: -len(".unexpected_index_list")],
             metric_domain_kwargs,
             base_metric_value_kwargs,
+            filter_column_isnull=filter_column_isnull,
         ).id
         boolean_mapped_success_values = metrics.get(metric_key)
         if result_format["result_format"] == "COMPLETE":
@@ -869,9 +881,12 @@ Notes:
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[Tuple, Any],
+        filter_column_isnull,
         **kwargs,
     ):
-        data = execution_engine.get_domain_dataframe(metric_domain_kwargs, batches)
+        data = execution_engine.get_domain_dataframe(
+            metric_domain_kwargs, batches, filter_column_isnull=filter_column_isnull
+        )
         assert metric_name.endswith(".unexpected_value_counts")
         # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
         result_format = metric_value_kwargs["result_format"]
@@ -882,6 +897,7 @@ Notes:
             metric_name[: -len(".unexpected_value_counts")],
             metric_domain_kwargs,
             base_metric_value_kwargs,
+            filter_column_isnull=filter_column_isnull,
         ).id
         boolean_mapped_success_values = metrics.get(metric_key)
         value_counts = None
@@ -913,11 +929,14 @@ Notes:
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[Tuple, Any],
+        filter_column_isnull,
         **kwargs,
     ):
         """Return values from the specified domain (ignoring the column constraint) that match the map-style metric in the metrics dictionary."""
         row_domain = {k: v for (k, v) in metric_domain_kwargs.items() if k != "column"}
-        data = execution_engine.get_domain_dataframe(row_domain, batches)
+        data = execution_engine.get_domain_dataframe(
+            row_domain, batches, filter_column_isnull=filter_column_isnull
+        )
         assert metric_name.endswith(".unexpected_rows")
         # column_map_values adds "result_format" as a value_kwarg to its underlying metric; get and remove it
         result_format = metric_value_kwargs["result_format"]
@@ -928,6 +947,7 @@ Notes:
             metric_name[: -len(".unexpected_rows")],
             metric_domain_kwargs,
             base_metric_value_kwargs,
+            filter_column_isnull=filter_column_isnull,
         ).id
         boolean_mapped_success_values = metrics.get(metric_key)
         if result_format["result_format"] == "COMPLETE":
@@ -988,6 +1008,7 @@ Notes:
                 metric_dependencies=metric_dependencies,
                 metric_provider=inner_func,
                 bundle_computation=True,
+                filter_column_isnull=filter_column_isnull,
             )
             register_metric(
                 metric_name=metric_name + ".count",
@@ -996,6 +1017,7 @@ Notes:
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_count,
+                filter_column_isnull=filter_column_isnull,
             )
             # noinspection PyTypeChecker
             register_metric(
@@ -1005,6 +1027,7 @@ Notes:
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_values,
+                filter_column_isnull=filter_column_isnull,
             )
             # noinspection PyTypeChecker
             register_metric(
@@ -1014,6 +1037,7 @@ Notes:
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_value_counts,
+                filter_column_isnull=filter_column_isnull,
             )
             # noinspection PyTypeChecker
             register_metric(
@@ -1023,6 +1047,7 @@ Notes:
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_rows,
+                filter_column_isnull=filter_column_isnull,
             )
             # noinspection PyTypeChecker
             register_metric(
@@ -1032,6 +1057,7 @@ Notes:
                 execution_engine=cls,
                 metric_dependencies=(metric_name,),
                 metric_provider=cls._column_map_index,
+                filter_column_isnull=filter_column_isnull,
             )
             return inner_func
 
