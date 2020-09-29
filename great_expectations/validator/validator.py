@@ -178,7 +178,9 @@ class Validator:
         runtime_configuration: Optional[dict] = None,
     ) -> None:
         metric_kwargs = get_metric_kwargs(metric_name)
-        configuration_kwargs = configuration.get_runtime_kwargs(
+
+        expectation_impl = get_expectation_impl(configuration.expectation_type)
+        configuration_kwargs = expectation_impl(configuration=configuration).get_runtime_kwargs(
             runtime_configuration=runtime_configuration
         )
         try:
