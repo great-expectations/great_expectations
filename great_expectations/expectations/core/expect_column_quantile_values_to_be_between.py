@@ -71,7 +71,6 @@ class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
         metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=("quantile_ranges",),
         metric_dependencies=tuple(),
-        filter_column_isnull=True,
     )
     def _pandas_quantiles(
         self,
@@ -81,7 +80,6 @@ class ExpectColumnQuantileValuesToBeBetween(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
     ):
 
         """Quantile Function"""

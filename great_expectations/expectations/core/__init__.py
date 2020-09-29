@@ -48,3 +48,4 @@ from .expect_table_column_count_to_equal import ExpectTableColumnCountToEqual
 from .expect_table_columns_to_match_ordered_list import (
     ExpectTableColumnsToMatchOrderedList,
 )
+from .expect_column_pair_values_to_be_equal import ExpectColumnPairValuesToBeEqual

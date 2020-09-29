@@ -89,7 +89,6 @@ class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
         metric_domain_keys=ColumnMapDatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
-        filter_column_isnull=True,
     )
     def _pandas_value_lengths(
         self,
@@ -99,7 +98,6 @@ class ExpectColumnValueLengthsToEqual(ColumnMapDatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
     ):
         """Extracts lengths of individual entries"""
         series = execution_engine.get_domain_dataframe(

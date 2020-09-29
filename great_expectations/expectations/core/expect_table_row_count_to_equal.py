@@ -40,7 +40,6 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
         metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
-        filter_column_isnull=False,
     )
     def _pandas_row_count(
         self,
@@ -50,7 +49,6 @@ class ExpectTableRowCountToEqual(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
     ):
         """Column count metric function"""
         df = execution_engine.get_domain_dataframe(

@@ -55,7 +55,6 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
         metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=tuple(),
         metric_dependencies=tuple(),
-        filter_column_isnull=True,
     )
     def _standard_deviation(
         self,
@@ -65,7 +64,6 @@ class ExpectColumnStdevToBeBetween(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
     ):
         series = execution_engine.get_domain_dataframe(
             domain_kwargs=metric_domain_kwargs, batches=batches

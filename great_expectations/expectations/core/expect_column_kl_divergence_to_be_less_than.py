@@ -258,7 +258,7 @@ class ExpectColumnKLDivergenceToBeLessThan(DatasetExpectation):
 
         # Setting variables for use in tests
         if "threshold" in configuration.kwargs:
-            threshold = configuration.kwargs["min_value"]
+            threshold = configuration.kwargs["threshold"]
 
         if "partition_object" in configuration.kwargs:
             partition_object = configuration.kwargs["partition_object"]
