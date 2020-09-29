@@ -15,7 +15,7 @@ def test_expect_column_value_lengths_to_be_between_impl():
     df = pd.DataFrame({"a": ["1", "22", "333", "4444", "55555"]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_lengths_to_be_between",
-        kwargs={"column": "a", "min_value": 1, "max_value": 5, "mostly": 1},
+        kwargs={"column": "a", "min_value": 1, "max_value": 5, "mostly": 1, "strict_min": True},
     )
     expectation = ExpectColumnValueLengthsToBeBetween(expectationConfiguration)
     batch = Batch(data=df)
