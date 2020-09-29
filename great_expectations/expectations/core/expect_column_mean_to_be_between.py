@@ -37,12 +37,12 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
     }
 
     """ A Column Aggregate Metric Decorator for the Mean"""
-
     @PandasExecutionEngine.metric(
         metric_name="column.aggregate.mean",
         metric_domain_keys=DatasetExpectation.domain_keys,
         metric_value_keys=(),
         metric_dependencies=tuple(),
+        filter_column_isnull=False,
     )
     def _pandas_mean(
         self,
@@ -52,7 +52,6 @@ class ExpectColumnMeanToBeBetween(DatasetExpectation):
         metric_value_kwargs: dict,
         metrics: dict,
         runtime_configuration: dict = None,
-        filter_column_isnull: bool = True,
     ):
         """Mean Metric Function"""
         series = execution_engine.get_domain_dataframe(
